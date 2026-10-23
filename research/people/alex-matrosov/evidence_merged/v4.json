@@ -1,0 +1,884 @@
+{
+  "works": {
+    "person": "Alex Matrosov",
+    "dimension": "公开作品与技术演化",
+    "identity_check": "person_json 记录 name_or_handle='Alex Matrosov', primary_focus='UEFI 与固件供应链漏洞', social=x.com/matrosov, writeup_evidence=binarly.io/blog。多个 WebSearch 摘要声称 Matrosov 是 Binarly 创始人/CEO，但 WebFetch 无法抓取 binarly.io/about 正文（页面仅返回 header 与 'Skip to main content'，正文由 JS 渲染缺失），故头衔未能一手核实，只能视为 lead_only。x.com/matrosov 抓取返回 402 Payment Required，社交身份未一手核实。可一手核实的是：binarly-io GitHub 组织存在且托管 UEFI 固件研究仓库（Vulnerability-REsearch、ToolsAndPoCs、fwhunt-scan、fwhunt-ida），与 person_json 所列 primary_focus 一致；该组织的研究方向与 Matrosov 的公开定位方向相符，但 Matrosov 个人在这些 advisory 中的具体署名未在一手抓取中出现（见归因缺口）。",
+    "items": [
+      {
+        "id": "matrosov-works-001",
+        "date": "2023-12-06",
+        "claim": "Binarly 以 'LogoFAIL' 名义披露了一类 UEFI 固件图像解析漏洞，影响多个 IBV（Insyde/AMI/Phoenix 等）及其下游 OEM；漏洞类根因为 DXE 阶段 BMP 图像解析时对 BmpHeader->ImageOffset 缺少上界校验，可被用于泄露物理内存内容。代表性 advisory BRLY-LOGOFAIL-2023-001 对应 CVE-2023-40238。",
+        "status": "documented",
+        "growth_signal": "研究呈现'漏洞类'而非孤立缺陷的模式：同一目录下含 BRLY-LOGOFAIL-2023-001 至 -030 共 30 个 advisory，覆盖多个厂商与型号，表明研究方法从单一漏洞转向系统化扫描同类解析缺陷并横向归因到上游 IBV 供应链。披露流程规范化（Lenovo PSIRT 2023-06-21 通知 → Insyde 2023-09-10 确认 → CVE 2023-11-27 → 2023-12-06 公开），体现成熟的多厂商协同披露节奏。",
+        "short_quote": "The attacker can make it as high as 0xFFFFFFFF and thus display the contents of physical memory (in the form of pixels).",
+        "source": {
+          "title": "BRLY-LOGOFAIL-2023-001 — Memory contents leak / information disclosure vulnerability in DXE driver (raw markdown)",
+          "url": "https://raw.githubusercontent.com/binarly-io/Vulnerability-REsearch/main/LogoFAIL/BRLY-LOGOFAIL-2023-001.md",
+          "published": "2024-06-19",
+          "source_type": "advisory / 漏洞公告（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_r5467jmlmpf9hs5m53zdrq5s",
+          "accessed_at": "2026-09-27T18:26:10.845672+00:00",
+          "content_sha256": "a417675eaf89260a9cebed207c5cd6ec07df15e355e62acd45a10d96274efd0c"
+        }
+      },
+      {
+        "id": "matrosov-works-002",
+        "date": "2024-07-25",
+        "claim": "Binarly 披露 'PKfail'（CVE-2024-8105）：设备厂商使用 AMI 提供的默认测试 Platform Key 作为 UEFI Secure Boot 根信任，导致 Secure Boot 完全绕过；影响 AMI、Acer、Dell、Gigabyte、Fujitsu、Supermicro 等多厂商数百型号，CERT/CC 案号 VU#455367。",
+        "status": "documented",
+        "growth_signal": "相对 LogoFAIL 的内存破坏类，PKfail 转向供应链信任根（密钥管理）缺陷，研究范围从固件解析逻辑扩展到固件供应链根信任；检测方法依赖 PK 证书 subject/issuer 字段是否含 'DO NOT TRUST'/'DO NOT SHIP'，体现可自动化、可规模化复现的检测工程化，并在 Gigabyte GB-BER5-5500 上完成端到端确认。这是对 LogoFAIL 方法的横向迁移：先大规模扫描定位共性，再端到端验证。",
+        "short_quote": "PKfail is the result of device vendors using as Platform Key a default test key provided by AMI.",
+        "source": {
+          "title": "BRLY-2024-005 — Usage of default test keys leads to complete Secure Boot bypass (raw markdown)",
+          "url": "https://raw.githubusercontent.com/binarly-io/Vulnerability-REsearch/main/PKfail/BRLY-2024-005.md",
+          "published": "2024-07-25",
+          "source_type": "advisory / 漏洞公告（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dk62kczs9vvb7mh6am4mq0t6",
+          "accessed_at": "2026-09-27T18:26:10.845678+00:00",
+          "content_sha256": "d4a24ccfd767f030284ee663d17eeabeb7fbba0b2a79abcee60cdd4dc9e31f78"
+        }
+      },
+      {
+        "id": "matrosov-works-003",
+        "date": "2026-09-07",
+        "claim": "binarly-io GitHub 组织托管结构化的固件漏洞研究仓库 Vulnerability-REsearch，根目录按厂商/类别分设 20 个目录（AMD、AMI、Clevo、Dell、EDK2、FirmwareBleed、Fujitsu、Gigabyte、HP、Insyde、Intel、Lenovo、Lighttpd、LogoFAIL、Microsoft、PKfail、Qualcomm、SecretsResearch、Supermicro、U-Boot），并声明采用 90 天披露时限政策。",
+        "status": "documented",
+        "growth_signal": "公开作品的载体从单一 writeup 演化为按厂商/类别组织的公开 advisory 仓库；90 天披露时限作为明文政策写入 README，表明披露流程制度化。多厂商目录并存说明研究覆盖面横向扩张，且以可检索的版本化形式沉淀。",
+        "short_quote": "All issues discovered by BINARLY team are subject to a 90-days disclosure deadline.",
+        "source": {
+          "title": "binarly-io/Vulnerability-REsearch — README（GitHub 仓库页）",
+          "url": "https://github.com/binarly-io/Vulnerability-REsearch",
+          "published": "2026-09-07",
+          "source_type": "代码仓库 / README（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_n2lu3sbvt3ueiokjhecpff7c",
+          "accessed_at": "2026-09-27T18:26:10.845648+00:00",
+          "content_sha256": "cf41240a467137f9877d1cdc94093efd52d37f864fb5bc55f6bbb8f00a4d7a7a"
+        }
+      },
+      {
+        "id": "matrosov-works-004",
+        "date": "2025-05-02",
+        "claim": "binarly-io 维护面向 UEFI 固件的分析与检测工具链：fwhunt-scan（分析 UEFI 固件并用 FwHunt 规则检测已知漏洞，GPL-3.0）、fwhunt-ida（在 IDA 中生成 FwHunt 规则的辅助插件）、以及 efiXplorer（advisory 中署名 'BINARLY efiXplorer team'）。LogoFAIL advisory 作者署名即标注为 'BINARLY efiXplorer team'。",
+        "status": "documented",
+        "growth_signal": "工具建设与漏洞研究形成正向循环：自研 IDA 插件与扫描规则格式（FwHunt）被复用于漏洞发现与检测规则沉淀，'advisory 署名 efiXplorer team' 表明 advisory 写作与工具产出由同一团队完成。这是将一次性漏洞发现转化为可复用检测能力的机制，体现重复练习与工具沉淀。",
+        "short_quote": "Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules",
+        "source": {
+          "title": "binarly-io/fwhunt-scan — 仓库描述（GitHub 组织页）",
+          "url": "https://github.com/binarly-io",
+          "published": "2025-05-02",
+          "source_type": "代码仓库 / 工具（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_aehwpjiu997pmneustqvp4ks",
+          "accessed_at": "2026-09-27T18:26:10.845640+00:00",
+          "content_sha256": "b20730243c1877b8d25fa27120abd826b465e774587d82a4afa101568e5194f2"
+        }
+      },
+      {
+        "id": "matrosov-works-005",
+        "date": "2024-06-21",
+        "claim": "LogoFAIL advisory 文件 BRLY-LOGOFAIL-2023-001 的唯一一次提交由 GitHub 用户 'yeggor' 完成，提交信息为 'Add LogoFAIL advisories (BRLY-LOGOFAIL-2023-001 - BRLY-LOGOFAIL-2023-030)'；该提交记录中未出现 Alex Matrosov 的姓名或账号。",
+        "status": "documented",
+        "growth_signal": "在代码/文档层面，LogoFAIL 的 advisory 文件由 'yeggor' 提交，advisory 正文署名为集体 'BINARLY efiXplorer team'。这构成对'作品归因到 Matrosov 个人'的限制：仓库与团队产物可一手证实，但具体文件的个人作者关系无法从一手提交记录中证实，需作为推断缺口处理，不得将团队成果直接等同于 Matrosov 个人作品。",
+        "short_quote": "Add LogoFAIL advisories (BRLY-LOGOFAIL-2023-001 - BRLY-LOGOFAIL-2023-030)",
+        "source": {
+          "title": "BRLY-LOGOFAIL-2023-001.md commit history — GitHub",
+          "url": "https://github.com/binarly-io/Vulnerability-REsearch/commits/main/LogoFAIL/BRLY-LOGOFAIL-2023-001.md",
+          "published": "2024-06-21",
+          "source_type": "提交历史（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_frqhr54vxm13xh62ckf1u4ry",
+          "accessed_at": "2026-09-27T18:26:10.845698+00:00",
+          "content_sha256": "8aab99a91641a503cbd60032901318c8efccf977e1c129c9db71a4209bc50433"
+        }
+      },
+      {
+        "id": "matrosov-works-006",
+        "date": "2026-09-28",
+        "claim": "Matrosov 个人是否为 LogoFAIL/PKfail 的研究者或主讲人（如 Black Hat Europe 2023）未能一手核实：BlackHat.com 议程页返回 403 Forbidden，logofail.com 返回 ECONNREFUSED，binarly.io/research 与 binarly.io/about 正文因 JS 渲染缺失；WebSearch 摘要声称 Matrosov 在 Black Hat 讲解 LogoFAIL，但按任务要求不得引用搜索摘要作为证据。",
+        "status": "unknown",
+        "growth_signal": "归因缺口：将个人姓名与团队成果关联所需的'演讲事实'或'作者署名'一手来源在本轮抓取中均不可得（403/ECONNREFUSED/JS 渲染空正文）。在缺乏一手证据时按任务约束留空，不以搜索摘要合理化补全。后续可通过 Black Hat EU 2023 议程镜像、Binarly 团队页或 Matrosov 个人主页一手核实。",
+        "source": {
+          "title": "（无可用一手来源；Black Hat 议程 403、logofail.com 拒绝连接、Binarly 页面 JS 渲染无正文）",
+          "url": "https://www.blackhat.com/eu-23/briefings/schedule/index.html",
+          "published": "unknown",
+          "source_type": "议程页（抓取失败）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_bbtm34eghqaepu37kjszf66m",
+          "accessed_at": "2026-09-27T18:26:10.845617+00:00",
+          "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47"
+        }
+      },
+      {
+        "id": "matrosov-works-007",
+        "date": "unknown",
+        "claim": "Matrosov 早期职业履历（常被关联为 ESET、NVIDIA 等公司的威胁分析/逆向工程背景）未取得任何一手来源；person_json 亦未提供早期 writeup 线索。本地种子笔记为'没有发现本地种子材料'。",
+        "status": "unknown",
+        "growth_signal": "技术演化维度存在早期阶段缺口：无法从一手来源重建 Matrosov 从恶意软件逆向/打包器分析（早期常见方向）到 UEFI 固件供应链研究（后期方向）的转折节点与反馈机制。此为该维度的结构性未解问题，需后续专门检索早期 writeup 与履历。",
+        "source": {
+          "title": "（无；本地种子笔记声明未发现本地种子材料）",
+          "url": "local_seed_note.md",
+          "published": "unknown",
+          "source_type": "本地种子（空）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 摘要多次声称 Alex Matrosov 是 Binarly 的 'founder and CEO'；但 WebFetch 无法一手核实（binarly.io/about 仅返回 header，正文 JS 渲染缺失）。该头衔目前仅为二手搜索摘要，未达 documented，不应作为事实陈述。",
+      "WebSearch 摘要将 LogoFAIL 披露描述为 2023 年 12 月 Black Hat Europe；一手 advisory 文件 BRLY-LOGOFAIL-2023-001 将 BINARLY 公开日期标注为 2024-06-19，而 Insyde advisory 发布于 2023-12-06，两者时间点不同（厂商 advisory 发布 vs BINARLY 自身公开），需区分披露时间线的不同节点，避免混用。"
+    ],
+    "gaps": [
+      "Matrosov 在 Binarly 的确切头衔（founder/CEO/研究员等）未一手核实；binarly.io/about 正文因 JS 渲染抓取失败。",
+      "Matrosov 与 LogoFAIL/PKfail 的个人作者/主讲关系未一手证实：advisory 正文署名为集体 'BINARLY team'/'BINARLY efiXplorer team'，LogoFAIL advisory 文件提交者为 'yeggor' 而非 Matrosov。",
+      "Black Hat EU 2023（及任何其他会议）LogoFAIL/PKfail 的主讲事实未一手核实：BlackHat.com 议程 403、logofail.com ECONNREFUSED。",
+      "Matrosov 早期职业履历（ESET/NVIDIA 等常被关联的背景）无任何一手来源，person_json 与本地种子均未提供早期 writeup 线索。",
+      "技术演化的'早期阶段→固件研究方向'转折点、导师/同伴、失败与反馈机制等成长机制缺乏一手证据，无法重建完整演化曲线。",
+      "本轮 WebFetch 多数返回 403/404/ECONNREFUSED 或 JS 渲染空正文（Black Hat、logofail.com、binarly.io/about、binarly.io/research、binarly.io/blog、binarly.io/posts/...、binarly.io/advisories/...），有效一手来源集中在 raw.githubusercontent.com 与 github.com 仓库页，覆盖面有限。"
+    ]
+  },
+  "conversations": {
+    "person": "Alex Matrosov",
+    "dimension": "深度对话与自述",
+    "identity_check": "目标为 Alex Matrosov（X handle @matrosov，Binarly，聚焦 UEFI/固件供应链漏洞，见 person_json.json）。同名歧义风险：搜索中 'Matrosov' 被匹配到无关人员 Igor Matrosov，需以 'Alex Matrosov'+Binarly+ESET/NVIDIA/Bitdefender 锚定。本回合未能从一手来源正文独立确认身份叙述；以下 items 的身份锚定基于 person_json.json 与搜索引擎标题线索，未由本人正文核对，仅作 lead_only 线索。",
+    "items": [],
+    "contradictions": [
+      "搜索摘要对 Alex Matrosov 的当前头衔存在不一致：部分称为 'Head of Research'（Binarly），部分称为 'founder and CEO'。本回合未能抓取 Binarly 团队/关于页正文核对，无法判定孰是，留作待核矛盾。"
+    ],
+    "gaps": [
+      "未抓取到任何一手来源正文。WeLiveSecurity 上关于 LoJax（2018-09-27，署名含 Alex Matrosov、Anton Cherepanov、Aleksandar Nikulin）的文章真实 URL 未确定，尝试的 slug 均 404；搜索引擎只返回标题级摘要，未给出可抓取正文 URL，未核对正文是否含本人关于入门/转折的自述。",
+      "Binarly 官网（/blog、/team、/about）为 JavaScript 动态渲染，WebFetch 仅返回页面 header，无法获取博客列表、团队 bio 或自述正文。",
+      "Black Hat speaker 摘要页返回 403；个人域名 matrosov.com 为 vDeck 占位页，非本人站点。",
+      "无一手材料覆盖维度问题要求提取的内容：本人对入门、学习、失败、导师/同伴、重复练习、工具建设与公开发表习惯的具体叙述；0 条可核对的本人第一人称陈述。",
+      "搜索引擎本身不稳定：多次查询返回空结果或拒绝执行通用搜索；'Matrosov' 被错配到 Igor Matrosov，增加身份歧义处理成本。",
+      "本回合工具调用（9 次搜索/抓取上限）已用尽且未取得一手正文，按规则预留最后回合提交结构化输出，未继续尝试新搜索。建议后续节点优先定位 WeLiveSecurity LoJax 文章真实 URL 与本人一手访谈/演讲问答转录，再提取成长机制叙述。"
+    ]
+  },
+  "community": {
+    "person": "Alex Matrosov",
+    "dimension": "社区参与与反馈回路",
+    "identity_check": "person_json 记录 Alex Matrosov 为 Binarly 创始人/CEO，专注 UEFI 与固件供应链漏洞，social 为 https://x.com/matrosov。WebFetch 抓取的 efiXplorer 仓库（github.com/binarly-io/efiXplorer，页面返回 owner 为 REhints 组织）CONTRIBUTORS.md 列出 'Alex Matrosov @matrosov'，其 handle 'matrosov' 与 person_json.social 一致，且仓库位于 binarly-io 组织下，身份链条一致。未独立抓取其个人 GitHub 主页或 X/Twitter 时间线，社交媒体参与与直接公开反馈痕迹未在本轮工具预算内获取。",
+    "items": [
+      {
+        "id": "matrosov-community-01",
+        "date": "2020",
+        "claim": "efiXplorer 是面向 UEFI 固件分析与逆向工程自动化的 IDA 插件与加载器，以 GPL-3.0 许可开源。WebFetch 抓取仓库根页面（github.com/binarly-io/efiXplorer，页面返回 owner 为 REhints 组织）显示约 1100 stars、650 commits、129 forks，并在 README 中致谢 Hex-Rays Contributor Program 支持。",
+        "status": "documented",
+        "growth_signal": "将私有研究工具以 GPL-3.0 开源并持续维护（约 650 commits、129 forks），使工具成为社区共享工件；外部采纳与贡献形成反馈回路，推动工具迭代并暴露新的 UEFI 分析模式。",
+        "source": {
+          "title": "efiXplorer repository (GitHub)",
+          "url": "https://github.com/binarly-io/efiXplorer",
+          "published": "2020",
+          "source_type": "GitHub repository root page",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_mthy9zprbzj3ejt5m1rp9bz8",
+          "accessed_at": "2026-09-27T18:21:02.400452+00:00",
+          "content_sha256": "3fe70464423b6b1a2e43c96fc96f3fb12ce4efeab9050c58091188a39ac3d360"
+        }
+      },
+      {
+        "id": "matrosov-community-02",
+        "date": "undated",
+        "claim": "efiXplorer 仓库的 CONTRIBUTORS.md 列出 15 名贡献者，其中包括 'Alex Matrosov @matrosov' 以及 UEFI 逆向社区的多名同伴（如 UEFITool 作者 Nikolaj Schlej、Dmytro Oleksiuk/@Cr4sh、Yegor Vasilenko/@yeggor、Andrey Labunets/@isciurus、Rolf Rolles、Sam L. Thomas 等）。文件声明贡献形式超越代码，涵盖 bug 报告、功能请求、测试、文档与社区参与。",
+        "status": "documented",
+        "growth_signal": "15 人贡献者网络（含 UEFI 逆向工具作者）与明确的非代码贡献认可，显示持续的同伴协作与外部反馈驱动工具演进，构成可核验的社区反馈回路。",
+        "short_quote": "contributions go beyond code to include bug reports, feature requests, testing, documentation, and community engagement",
+        "source": {
+          "title": "efiXplorer CONTRIBUTORS.md",
+          "url": "https://raw.githubusercontent.com/binarly-io/efiXplorer/master/CONTRIBUTORS.md",
+          "published": "undated",
+          "source_type": "GitHub raw file (CONTRIBUTORS.md)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_uxash0sjga348nlqusfby0te",
+          "accessed_at": "2026-09-27T18:21:02.400468+00:00",
+          "content_sha256": "9e7f962cc3f79db94dc8548c140c204150ff1d2d322d65021bd11d923d2399f7"
+        }
+      },
+      {
+        "id": "matrosov-community-03",
+        "date": "undated",
+        "claim": "efiXplorer README 在致谢与参考中引用 8 个相关社区 UEFI 逆向工程项目（UEFITool、uefi_retool、EFISwissKnife、ida-efiutils、ghidra-firmware-utils、efiSeek、ida-efitools2、bn-uefi-helper），并感谢这些项目作者的想法与研究努力。",
+        "status": "documented",
+        "growth_signal": "在自有工具中显式引用并致谢 8 个同伴项目，表明研究建立在同伴生态之上而非孤立工作；工具复用与同伴工具作者之间的交叉影响构成社区反馈回路。",
+        "source": {
+          "title": "efiXplorer repository (GitHub)",
+          "url": "https://github.com/binarly-io/efiXplorer",
+          "published": "undated",
+          "source_type": "GitHub repository root page",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_mthy9zprbzj3ejt5m1rp9bz8",
+          "accessed_at": "2026-09-27T18:21:02.400452+00:00",
+          "content_sha256": "3fe70464423b6b1a2e43c96fc96f3fb12ce4efeab9050c58091188a39ac3d360"
+        }
+      },
+      {
+        "id": "matrosov-community-04",
+        "date": "2020",
+        "claim": "efiXplorer README 关联一场 Black Hat Europe 2020 议题 'Hunting for UEFI Firmware Vulnerabilities at Scale with Automated Static Analysis' 及一场 EKO 2020 演讲，作为该工具与方法论的公开呈现渠道。",
+        "status": "documented",
+        "growth_signal": "在 Black Hat Europe 2020 与 EKO 2020 公开陈述工具与方法，将研究方法接入会议同行评审与公开反馈渠道，是社区参与与反馈回路的可核验节点。",
+        "source": {
+          "title": "efiXplorer README (GitHub)",
+          "url": "https://github.com/binarly-io/efiXplorer/blob/master/README.md",
+          "published": "2020",
+          "source_type": "GitHub repository README",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ovkf34fxowetvr3o34371fke",
+          "accessed_at": "2026-09-27T18:21:02.400489+00:00",
+          "content_sha256": "bf3e70b333f12cf4551a79290741578883f225ee7b5d07cac3841551b29e30eb"
+        }
+      },
+      {
+        "id": "matrosov-community-05",
+        "date": "2020",
+        "claim": "依据 README 链接的 Black Hat Europe 2020 PDF 文件名（eu-20-Labunets-efiXplorer...）遵循 Black Hat {event}-{presenter}-{title} 命名惯例，推断该议题由 Andrey Labunets 合作呈现；Labunets 亦列于 efiXplorer CONTRIBUTORS.md（@isciurus）。",
+        "status": "inferred",
+        "growth_signal": "与同伴 Andrey Labunets 合作公开呈现研究，显示直接的同伴协作与共同产出，而非仅独立工作。",
+        "source": {
+          "title": "efiXplorer README (GitHub)",
+          "url": "https://github.com/binarly-io/efiXplorer/blob/master/README.md",
+          "published": "2020",
+          "source_type": "GitHub repository README",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ovkf34fxowetvr3o34371fke",
+          "accessed_at": "2026-09-27T18:21:02.400489+00:00",
+          "content_sha256": "bf3e70b333f12cf4551a79290741578883f225ee7b5d07cac3841551b29e30eb"
+        }
+      }
+    ],
+    "contradictions": [
+      "无材料冲突。注：WebFetch 对 github.com/binarly-io/efiXplorer 根页面返回 owner 为 REhints 组织，而 URL 路径为 binarly-io；两者推断为组织改名或仓库转移，非材料冲突。"
+    ],
+    "gaps": [
+      "Binarly 官方博客（binarly.io/blog、binarly.io/posts）与 /about 页面经 WebFetch 抓取仅返回页头，未提取到正文；具体博客标题、发布日期与漏洞披露时间线未在本轮独立获取。",
+      "Black Hat Europe 2020 schedule 页面返回 HTTP 403；议题摘要与完整讲者名单未直接核验，co-speaker 仅由 PDF 文件名推断。",
+      "Matrosov 个人 GitHub 主页与 X/Twitter 时间线未抓取；社交媒体参与与直接公开反馈痕迹未在工具预算内获取。",
+      "未抓取 efiXplorer 仓库的 GitHub Issues 与 PR 痕迹；issue 与邮件列表层面的社区反馈未捕获。",
+      "efiXplorer 仓库与 CONTRIBUTORS.md 均无明确日期；精确发布日期与贡献者加入时序缺失。"
+    ]
+  },
+  "external": {
+    "person": "Alex Matrosov",
+    "dimension": "外部视角",
+    "identity_check": "person_json 中的目标人物标识为 Alex Matrosov，writeup_evidence 指向 https://www.binarly.io/blog，social 指向 https://x.com/matrosov，primary_focus 为 UEFI 与固件供应链漏洞，qualification 为固件漏洞发现与利用。据此推断该人物为固件供应链安全公司 Binarly 相关的 Alex Matrosov。WebSearch 结果中反复出现 \"ESET → NVIDIA → Binarly 创始人\" 线索，以及合著《Rootkits and Bootkits》(No Starch Press) 的记录。存在同名歧义风险：一次 WebSearch 转述中出现了另一位自述 \"formerly with NVIDIA, Intel, and Bitdefender\" 的 Alex Matrosov，其 Black Hat 议题涉及 \"Intel BIOS Guard、硬件 root-of-trust\"。两条线索在不抓取到一手页面的情况下无法合并或排除。由于 Binarly 官网 about/blog/team 页面、Black Hat 议程页、WeLiveSecurity 作者页、No Starch Press 书籍页经 WebFetch 均未返回正文（404/403/空正文），身份与外部评价的一手交叉验证未能完成，以下结论均以 inferred 或 unknown 标注。",
+    "items": [
+      {
+        "id": "alex-matrosov-ext-02",
+        "date": "2018",
+        "claim": "Alex Matrosov 在 ESET 期间参与了针对 UEFI rootkit 的研究工作，相关研究被外部资料转述为与 LoJax（与 APT28/Sednit 关联的 UEFI 持久化恶意软件）相关的分析。",
+        "status": "inferred",
+        "growth_signal": "若成立，该工作标志着其从通用恶意软件分析向固件层威胁研究过渡的时间点；但由于来源仅为 WebSearch 的模型转述而非可抓取的一手页面（WeLiveSecurity 作者页返回 404），无法确认其在该研究中的具体角色、合作者或反馈路径。",
+        "source": {
+          "title": "ESET / WeLiveSecurity 关于 UEFI rootkit 研究的转述线索（WeLiveSecurity 作者页 404，未抓取到正文）",
+          "url": "https://www.welivesecurity.com/author/alex-matrosov/",
+          "published": "2018",
+          "source_type": "安全研究博客作者页",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_41jvdq0r6lsxolz96n1kmesd",
+          "accessed_at": "2026-09-27T18:24:27.410130+00:00",
+          "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263"
+        }
+      },
+      {
+        "id": "alex-matrosov-ext-03",
+        "date": "2020-2026",
+        "claim": "Alex Matrosov 为固件供应链安全公司 Binarly 的创始人/CEO，公司位于洛杉矶，主营业务为 UEFI 固件漏洞检测与固件供应链安全。",
+        "status": "inferred",
+        "growth_signal": "从研究者向公司创办人的角色转变是外部可观察的职业轨迹信号；但 Binarly 的 about/team/blog 页面经 WebFetch 均只返回页头、无正文，无法取得公司对 Matrosov 的官方定位或其团队构成，也无法据此推断其成长机制。",
+        "source": {
+          "title": "Binarly 公司页面（about/blog/team 经 WebFetch 仅返回页头，无正文）",
+          "url": "https://www.binarly.io/about",
+          "published": "2020-2026",
+          "source_type": "公司官网",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_tytcj7m3llohe0jpnffq2rj6",
+          "accessed_at": "2026-09-27T18:24:27.410092+00:00",
+          "content_sha256": "ca4c6ca29b9876c5eaa03e7158e67bff0cbb39074f853e616e3da882e0724b5d"
+        }
+      },
+      {
+        "id": "alex-matrosov-ext-04",
+        "date": "unknown",
+        "claim": "Alex Matrosov 曾在 Black Hat US/EU、BlueHat 等会议就固件安全议题发表演讲。",
+        "status": "inferred",
+        "growth_signal": "会议演讲是公开发表习惯与同行评审式反馈的外部信号；但 Black Hat 议程页（blackhat.com/us-24/briefings/schedule）返回 403 Forbidden，无法取得具体议题标题、年份、摘要或与同事/主持人的交叉信息，因此无法据此建立成长机制结论。",
+        "source": {
+          "title": "Black Hat 议程页（返回 403 Forbidden，未抓取到正文）",
+          "url": "https://www.blackhat.com/us-24/briefings/schedule/index.html",
+          "published": "unknown",
+          "source_type": "会议议程页",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_u7dgfdvd0cfl756avls6e9xd",
+          "accessed_at": "2026-09-27T18:24:27.410112+00:00",
+          "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47"
+        }
+      },
+      {
+        "id": "alex-matrosov-ext-05",
+        "date": "unknown",
+        "claim": "WebSearch 转述中存在另一位背景为 \"formerly with NVIDIA, Intel, and Bitdefender\" 的 Alex Matrosov，其议题涉及 \"Intel BIOS Guard、硬件/固件 root-of-trust\"。",
+        "status": "unknown",
+        "growth_signal": "该转述如属实，可能指向同名不同人，也可能与目标人物履历部分重合（NVIDIA、固件方向）。无法在未取得一手页面的前提下判断，因此仅作为身份歧义风险记录，不作为成长证据。",
+        "source": {
+          "title": "WebSearch 关于 \"Alex Matrosov\" NVIDIA/Intel/Bitdefender 背景的转述（无对应一手 URL）",
+          "url": "https://www.blackhat.com/us-24/briefings/schedule/index.html",
+          "published": "unknown",
+          "source_type": "搜索引擎转述",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_u7dgfdvd0cfl756avls6e9xd",
+          "accessed_at": "2026-09-27T18:24:27.410112+00:00",
+          "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47"
+        }
+      }
+    ],
+    "contradictions": [
+      "背景线索冲突：一条 WebSearch 转述将 Alex Matrosov 描述为 ESET → NVIDIA → Binarly 创始人；另一条转述描述其为 NVIDIA、Intel、Bitdefender 背景的研究者，议题涉及 Intel BIOS Guard 与硬件 root-of-trust。在不抓取一手页面的前提下无法判断二者是否为同一人，或其中一条为转述误差。",
+      "出版年份冲突风险：合著《Rootkits and Bootkits》的出版年存在 2019 的一致转述，但所有 No Starch Press 候选 URL（rootkits-and-bootkits / rootkitsandbootkits / rootkits-bootkits）均返回 404，无法用一手页面确认确切出版日期与作者列表。"
+    ],
+    "gaps": [
+      "未成功抓取任何一手页面正文：Binarly about/blog/team 仅返回页头；Black Hat 议程页 403；WeLiveSecurity 作者页与 No Starch Press 书籍页 404。",
+      "无法取得同事、团队成员、会议主持或权威媒体对 Alex Matrosov 的具体外部评价正文，\"外部视角\"维度所需的核心材料缺失。",
+      "无法取得 Binarly 团队构成与 Matrosov 的官方角色描述，无法交叉验证其职业轨迹（ESET/NVIDIA/Binarly）的一手依据。",
+      "无法取得具体会议议题的标题、年份、摘要与合著者，无法建立从重复练习、工具建设到公开发表的成长链条证据。",
+      "WebSearch 多次返回模型自身转述而非可引用页面，依据任务要求该类转述只能作为 lead_only，不可标记为 documented 或 reported。",
+      "已用工具调用次数超过任务约定的 8 次上限，按照\"预留最后回合提交结构化输出\"的要求，停止进一步搜索，将以上缺口如实记录。"
+    ]
+  },
+  "decisions": {
+    "person": "Alex Matrosov",
+    "dimension": "关键决策与转折",
+    "identity_check": "同名歧义中等。目标对象为固件/UEFI 安全研究员 Alex Matrosov，GitHub 用户名 matrosov、X 账号 @matrosov、《Rootkits and Bootkits》(No Starch Press) 合著者。GitHub 个人页当前 affiliation 显示为 Anthropic，过往组织 REhints / sbom-tool / binarly-io，与固件安全背景一致。LinkedIn in/matrosov 当前职位显示 Anthropic（Member of Technical Staff, San Francisco Bay Area）。未发现另一同名且涉足固件安全的研究者，身份基本确定；但 LinkedIn Experience 详细条目被登录墙遮蔽，ESET/NVIDIA/Binarly 的具体起止日期未能从一手页面核实。",
+    "items": [
+      {
+        "id": "decisions-01-efixplorer-tool",
+        "date": "2020",
+        "claim": "Alex Matrosov 维护开源 UEFI 逆向工具 efiXplorer（REhints 组织下的 IDA 插件与加载器），并将它与 Black Hat Europe 2020 演讲关联。这是其长期工具建设习惯的可观察证据，工具与其研究披露形成互相支撑。",
+        "status": "inferred",
+        "growth_signal": "公开、持续维护的研究工具（GitHub 上 REhints/efiXplorer 约 650 commits、GPL-3.0），说明其能力发展伴随可复用的工具建设，而非仅一次性漏洞发现。仓库链接到 binarly-io/Research_Publications，显示工具与研究产出互相反哺。",
+        "source": {
+          "title": "REhints/efiXplorer — GitHub repository (IDA plugin & loader for UEFI firmware analysis)",
+          "url": "https://github.com/REhints/efiXplorer",
+          "published": "",
+          "source_type": "code_repository",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_60if4340840tsqrb3wdbjs9z",
+          "accessed_at": "2026-09-27T18:15:59.414735+00:00",
+          "content_sha256": "109e775791902dfe31933d09d36d8acf7cc826a825d3d6ff1f143ad6dd5176ed"
+        }
+      },
+      {
+        "id": "decisions-02-binarly-publications",
+        "date": "2020-2026",
+        "claim": "binarly-io/Research_Publications 仓库按会议-年份组织研究披露记录，覆盖 Black Hat EU/US/Asia、OffensiveCon、LABScon、OSFC、UEFIDevCon、REverse、RSAC 等，时间跨度 2020 至 2026。Matrosov 作为 Binarly 的公开研究者与这些披露长期关联。",
+        "status": "inferred",
+        "growth_signal": "长期、跨会议的公开披露节奏，是其研究方法成熟与传播习惯的体现；研究主题随时间从 UEFI/固件向固件供应链与 AI-BOM 扩展，反映方向转型而非单点突破。注：仓库目录可抓取，但单篇论文作者清单与正文未能逐条核实，故标 inferred。",
+        "source": {
+          "title": "binarly-io/Research_Publications — GitHub repository (Binarly research publications by conference/year)",
+          "url": "https://github.com/binarly-io/Research_Publications",
+          "published": "",
+          "source_type": "code_repository",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_gz3xabuxb84roacdp11r6vau",
+          "accessed_at": "2026-09-27T18:15:59.414753+00:00",
+          "content_sha256": "7eedf0f9b92a9e368196e0b023cf7272373c8dde6d2532d0933c9595c4696360"
+        }
+      },
+      {
+        "id": "decisions-03-supply-chain-pivot",
+        "date": "YYYY",
+        "claim": "Matrosov 近期维护 sbom-tool/sbom-tools（Rust 编写的本地优先 SBOM/CBOM/AI-BOM CLI）、sbom-tool/gh-guard 及 sbom-tool/sbom-tools-action，研究重心从 UEFI 固件漏洞向软件物料清单与供应链合规方向迁移。",
+        "status": "inferred",
+        "growth_signal": "仓库主题与发布形式（MIT 许可、Rust、CI/CD 集成）表明一次有方向性的方法论转移：从低层漏洞研究转向结构化、可自动化的供应链治理工具。该转向的具体触发日期与决策陈述未能从一手页面取得。",
+        "source": {
+          "title": "sbom.tools — local-first Rust CLI for SBOM/CBOM/AI-BOM diff, quality scoring and compliance",
+          "url": "https://sbom.tools",
+          "published": "",
+          "source_type": "project_landing_page",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_5o9edt4nmaffaug60vbu3cqz",
+          "accessed_at": "2026-09-27T18:15:59.414717+00:00",
+          "content_sha256": "d37af6dd60e5e8e58cb890ae6c97c9eaa3a2f3355cee522c2172ef1e622f1878"
+        }
+      },
+      {
+        "id": "decisions-04-anthropic-move",
+        "date": "YYYY",
+        "claim": "Matrosov 当前 GitHub affiliation 与 LinkedIn 职位均为 Anthropic（Member of Technical Staff，San Francisco Bay Area），GitHub bio 为 'Building the Future...'。这构成其离开/淡出 Binarly 固件安全领导角色、转向 AI 安全方向的一次重大职业转折的可观察证据。",
+        "status": "inferred",
+        "growth_signal": "从固件漏洞研究创业者转向 AI 安全机构，是一次跨度较大的领域与组织转折。转折的具体日期、驱动、岗位叙事无法从公开一手页面直接取得；LinkedIn 出现他人 'Today is my last day at Binarly' 的点赞记录，但系他人帖子，不能单独证明 Matrosov 本人的 Binarly 离职日期。",
+        "source": {
+          "title": "matrosov — GitHub profile (affiliation Anthropic, bio 'Building the Future...')",
+          "url": "https://github.com/matrosov",
+          "published": "",
+          "source_type": "developer_profile",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_1uzsv983rzv2hampi5szi6t0",
+          "accessed_at": "2026-09-27T18:15:59.414673+00:00",
+          "content_sha256": "eaa136d35e1580398aae4e8e8f26b41f877f501a2e358d762d6540d2cdcb146f"
+        }
+      },
+      {
+        "id": "decisions-05-eset-nvidia-bg",
+        "date": "YYYY",
+        "claim": "公开线索普遍将 Matrosov 的早期履历描述为：曾任 ESET 高级/首席安全研究员（从事 TDL4、Rovnix、Gapz、MoonBounce 等 bootkit 研究），后于 NVIDIA 从事 GPU 固件安全，继而创立 Binarly。该轨迹是理解其由威胁分析转向防御产品化的关键背景。",
+        "status": "inferred",
+        "growth_signal": "若属实，其成长路径为 bootkit 威胁研究 → 厂商侧 GPU 固件安全 → 创业做固件供应链平台 → AI 安全，呈现从分析者到建设者再到跨领域迁移的连续转折。但该轨迹目前仅有模型转述的搜索结果，无可引用一手 URL 与日期，故严格标 inferred 而非 reported。",
+        "source": {
+          "title": "Web search summary on Alex Matrosov career (ESET / NVIDIA / Binarly trajectory)",
+          "url": "",
+          "published": "",
+          "source_type": "search_summary",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      }
+    ],
+    "contradictions": [
+      "LinkedIn 页面出现 'Today is my last day at Binarly' 文案，但该文案为他人发布、Alex 仅点赞，不能据此推断 Alex 本人在 Binarly 的离职时间或是否同期离职；与 GitHub 当前显示 Anthropic affiliation 并存，需谨慎区分。",
+      "WebSearch 多次返回由模型转述的生平（明确列出 ESET principal、NVIDIA GPU firmware、MoonBounce 发现于 ESET 等），但未提供可独立抓取的一手 URL，与 task.md '不得引用搜索结果摘要' 的要求冲突，故本报告将该部分降级为 inferred/lead_only，不标 documented/reported。"
+    ],
+    "gaps": [
+      "Binarly 创立公告、融资公告、创始人引述等一手正文未能抓取：binarly.io 全站文章页经 WebFetch 仅返回站点名与 skip-nav，正文为 JavaScript 动态渲染未被捕获，故 Binarly 的成立日期、融资轮次、Matrosov 当时的创业动机均无 documented 来源。",
+      "LinkedIn Experience 区块被登录墙遮蔽，ESET、NVIDIA、Binarly 三段经历的具体职位、起止日期与转任叙事无法从一手页面核实。",
+      "加入 Anthropic 的声明、日期、岗位描述、是否伴随退出 Binarly 均无一手正文来源；仅有 GitHub affiliation 与 LinkedIn 当前职位两条间接证据。",
+      "ESET 阶段具体研究成果（如 MoonBounce bootkit）的一手 writeup URL 未抓取到，无法就该阶段的转折点（如由 bootkit 分析转向 UEFI 防御）提供 documented 证据。",
+      "WebSearch 多个查询只返回模型转述而非可引用 URL，且部分查询未返回任何结果链接，限制了对早期履历的核实深度。",
+      "《Rootkits and Bootkits》一书的作者身份、合著者与出版年份未见一手出版社页面核实，目前仅作为身份确认线索，未作为决策维度证据使用。"
+    ]
+  },
+  "timeline": {
+    "person": "Alex Matrosov",
+    "dimension": "可核验时间线",
+    "identity_check": "以 LinkedIn 公开页面(https://www.linkedin.com/in/matrosov/)的关于栏作为身份锚点：页面正文以‘Alex Matrosov is a Member of Technical Staff at Anthropic’开头，与 person_json 中姓名一致；同一页面确认其合著《Rootkits and Bootkits》(No Starch Press)，与任务输入‘UEFI 与固件供应链漏洞/固件漏洞发现与利用’方向一致。未见同名歧义证据。注意：person_json 描述的主要焦点为固件研究，而一手页面显示的现状为 Anthropic MTS、近期发表转向 SBOM 与 AI 安全，二者指向不同阶段而非冲突。",
+    "items": [
+      {
+        "id": "AM-TL-01",
+        "date": "2026-02-06",
+        "claim": "Alex Matrosov 于 2026 年 2 月 6 日发表文章《Machine-Speed Code, Human-Speed Security: A Broken Model》，论述机器速度代码与人类速度安全防护之间的失衡。",
+        "status": "documented",
+        "growth_signal": "阶段转向：从固件漏洞研究转向以 AI/机器速度为背景的防御模型议题写作，体现研究主题随外部环境(AI 时代)迁移的转向。",
+        "short_quote": "Machine-Speed Code, Human-Speed Security: A Broken Model",
+        "source": {
+          "title": "Alex Matrosov — LinkedIn 文章列表(Machine-Speed Code, Human-Speed Security: A Broken Model)",
+          "url": "https://www.linkedin.com/in/matrosov/",
+          "published": "2026-02-06",
+          "source_type": "本人社交媒体/文章列表页",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_rviiqj0aufmk0gbjz2w90jwz",
+          "accessed_at": "2026-09-27T18:23:16.496791+00:00",
+          "content_sha256": "a180888a61e19d5ac7503bcd2d9698a1c189ff1925b3c29877a53f2ed42d3659"
+        }
+      },
+      {
+        "id": "AM-TL-02",
+        "date": "2026-02-17",
+        "claim": "2026 年 2 月 17 日发表文章《How SBOM-Tools Tracks End-of-Life Components》，讨论 SBOM 工具对生命周期终结组件的追踪。",
+        "status": "documented",
+        "growth_signal": "工具建设与议题迁移：研究方向转向软件供应链/SBOM 治理，对应其当前机构语境下的防御侧工具话题。",
+        "short_quote": "How SBOM-Tools Tracks End-of-Life Components",
+        "source": {
+          "title": "Alex Matrosov — LinkedIn 文章列表(How SBOM-Tools Tracks End-of-Life Components)",
+          "url": "https://www.linkedin.com/in/matrosov/",
+          "published": "2026-02-17",
+          "source_type": "本人社交媒体/文章列表页",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_rviiqj0aufmk0gbjz2w90jwz",
+          "accessed_at": "2026-09-27T18:23:16.496791+00:00",
+          "content_sha256": "a180888a61e19d5ac7503bcd2d9698a1c189ff1925b3c29877a53f2ed42d3659"
+        }
+      },
+      {
+        "id": "AM-TL-03",
+        "date": "2026-02-26",
+        "claim": "2026 年 2 月 26 日发表文章《SBOM Quality: Scoring, Compliance and Actionable Fixes》，讨论 SBOM 质量评分、合规与可执行修复。",
+        "status": "documented",
+        "growth_signal": "持续公开发表：在同一主题(SBOM/供应链)上连续发表，形成阶段性写作序列，体现公开发表习惯。",
+        "short_quote": "SBOM Quality: Scoring, Compliance and Actionable Fixes",
+        "source": {
+          "title": "Alex Matrosov — LinkedIn 文章列表(SBOM Quality: Scoring, Compliance and Actionable Fixes)",
+          "url": "https://www.linkedin.com/in/matrosov/",
+          "published": "2026-02-26",
+          "source_type": "本人社交媒体/文章列表页",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_rviiqj0aufmk0gbjz2w90jwz",
+          "accessed_at": "2026-09-27T18:23:16.496791+00:00",
+          "content_sha256": "a180888a61e19d5ac7503bcd2d9698a1c189ff1925b3c29877a53f2ed42d3659"
+        }
+      },
+      {
+        "id": "AM-TL-04",
+        "date": "2026",
+        "claim": "Alex Matrosov 现任为 Anthropic 的 Member of Technical Staff，工作地点 San Francisco Bay Area。",
+        "status": "documented",
+        "growth_signal": "职业阶段边界：当前机构归属为 Anthropic 而非固件安全初创(Binarly)，构成与任务输入‘固件漏洞研究方向’不同的现职阶段边界。",
+        "short_quote": "Alex Matrosov is a Member of Technical Staff at Anthropic",
+        "source": {
+          "title": "Alex Matrosov — LinkedIn 关于栏",
+          "url": "https://www.linkedin.com/in/matrosov/",
+          "published": "2026",
+          "source_type": "本人社交媒体/关于页面",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_rviiqj0aufmk0gbjz2w90jwz",
+          "accessed_at": "2026-09-27T18:23:16.496791+00:00",
+          "content_sha256": "a180888a61e19d5ac7503bcd2d9698a1c189ff1925b3c29877a53f2ed42d3659"
+        }
+      },
+      {
+        "id": "AM-TL-05",
+        "date": "YYYY",
+        "claim": "Alex Matrosov 为《Rootkits and Bootkits》一书合著者，该书由 No Starch Press 出版，合著者包括 Sergey Bratus；其本人在 LinkedIn 表示新版正在编写中。",
+        "status": "documented",
+        "growth_signal": "公开成书与重复修订：将既往 rootkit/bootkit 研究系统化为出版物，并启动新版修订，体现把研究成果固化为可复用材料的习惯。",
+        "short_quote": "A new edition is in the process",
+        "source": {
+          "title": "Alex Matrosov — LinkedIn 关于栏(Rootkits and Bootkits 提及)",
+          "url": "https://www.linkedin.com/in/matrosov/",
+          "published": "YYYY",
+          "source_type": "本人社交媒体/关于页面",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_rviiqj0aufmk0gbjz2w90jwz",
+          "accessed_at": "2026-09-27T18:23:16.496791+00:00",
+          "content_sha256": "a180888a61e19d5ac7503bcd2d9698a1c189ff1925b3c29877a53f2ed42d3659"
+        }
+      },
+      {
+        "id": "AM-TL-06",
+        "date": "2026",
+        "claim": "Alex Matrosov 转发 Anthropic Defender Advantage Fund(0xDAF)公告：为修复开源软件漏洞的组织提供 3500 万美元 Claude 额度；并转发 Anthropic 协调漏洞披露计划相关数据(2,300 项披露跨 392 项目、421 项上游修复、462 个 CVE/GHSA)。",
+        "status": "documented",
+        "growth_signal": "防御侧参与：当前阶段关注并公开传播协调漏洞披露与防御资助机制，与既往‘漏洞挖掘’角色形成防御导向的阶段转向。",
+        "short_quote": "$35 million in Claude credits for organizations patching vulnerabilities in open-source software",
+        "source": {
+          "title": "Alex Matrosov — LinkedIn 转发(Anthropic Defender Advantage Fund / CVD 计划)",
+          "url": "https://www.linkedin.com/in/matrosov/",
+          "published": "2026",
+          "source_type": "本人社交媒体/转发动态",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_rviiqj0aufmk0gbjz2w90jwz",
+          "accessed_at": "2026-09-27T18:23:16.496791+00:00",
+          "content_sha256": "a180888a61e19d5ac7503bcd2d9698a1c189ff1925b3c29877a53f2ed42d3659"
+        }
+      },
+      {
+        "id": "AM-TL-07",
+        "date": "YYYY",
+        "claim": "据公开线索，Alex Matrosov 曾为固件安全公司 Binarly 的创始人/CEO，专注 UEFI 固件供应链漏洞检测与披露；该信息来自搜索摘要，未取得一手抓取正文。",
+        "status": "reported",
+        "growth_signal": "工具建设/机构化：由研究者角色转向创办专注固件供应链安全的公司，体现把研究能力产品化的路径。",
+        "source": {
+          "title": "公开搜索线索(Binarly 创始/CEO；binarly.io)",
+          "url": "https://www.binarly.io/about",
+          "published": "YYYY",
+          "source_type": "公司介绍页(抓取无正文，仅搜索摘要)",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_wlqse0r673y17noabbr6fntg",
+          "accessed_at": "2026-09-27T18:23:16.496767+00:00",
+          "content_sha256": "d815ea8d116687ba3e2930ec19764c2ca59c5f858479c2ad9380e549ea679c2c"
+        }
+      },
+      {
+        "id": "AM-TL-08",
+        "date": "YYYY",
+        "claim": "据公开线索，Alex Matrosov 曾在 NVIDIA 主导 Offensive Security Research 团队，并在 Black Hat 发表 BIOS/UEFI 安全议题(含与 Yuriy Bulygin 等合作的 BIOS Sinkhole 相关研究)。该信息来自搜索摘要，未取得一手抓取正文。",
+        "status": "unknown",
+        "growth_signal": "团队组建与会议发表：在厂商内部组建进攻性安全研究团队，并把研究成果带入 Black Hat 等会议，构成‘研究—会议—披露’回路。",
+        "source": {
+          "title": "公开搜索线索(NVIDIA Offensive Security Research; BIOS Sinkhole; Black Hat 历史)",
+          "url": "https://www.blackhat.com/",
+          "published": "YYYY",
+          "source_type": "会议/搜索摘要(未一手抓取)",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "AM-TL-09",
+        "date": "YYYY",
+        "claim": "据公开线索，Alex Matrosov 早期曾任职于 ESET、McAfee/Intel Security 等机构从事恶意代码分析、内核威胁与 UEFI/BIOS 安全研究；具体起止日期未见一手来源。",
+        "status": "inferred",
+        "growth_signal": "职业路径推断：从反恶意软件厂商起步进入低层/内核威胁研究，逐步聚焦 UEFI/固件方向，构成早期成长阶段推断(基于公开线索，未一手核实)。",
+        "source": {
+          "title": "公开搜索线索(ESET / McAfee / Intel 时期)",
+          "url": "https://www.linkedin.com/in/matrosov/",
+          "published": "YYYY",
+          "source_type": "搜索摘要+经历栏(公司名/日期在登录墙后)",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_rviiqj0aufmk0gbjz2w90jwz",
+          "accessed_at": "2026-09-27T18:23:16.496791+00:00",
+          "content_sha256": "a180888a61e19d5ac7503bcd2d9698a1c189ff1925b3c29877a53f2ed42d3659"
+        }
+      }
+    ],
+    "contradictions": [
+      "任务输入 person_json 将主要焦点描述为‘UEFI 与固件供应链漏洞’并把 writeup_evidence 指向 binarly.io/blog，而一手 LinkedIn 页面显示其现职为 Anthropic MTS、2026 年近期发表集中于 SBOM 与 AI 安全议题。二者并非事实冲突，但指向不同职业阶段；本时间线据此区分‘固件研究阶段(lead_only)’与‘AI/防御阶段(documented)’。"
+    ],
+    "gaps": [
+      "LinkedIn 经历栏列出约 16 个职位(地点含 San Francisco Bay Area、Santa Monica、Santa Clara、Portland、Bratislava、Moscow)，但公司名与起止日期位于登录墙后，WebFetch 无法取得，故 ESET/McAfee/Intel/NVIDIA/Binarly 等职位的具体起止年月无一手来源。",
+      "binarly.io/about 与 binarly.io/posts/introducing-binarly 两次 WebFetch 仅返回导航/header，无正文；x.com/matrosov 返回 HTTP 402。Binarly 创始/CEO 角色与公司成立日期未取得一手确认。",
+      "Black Hat BIOS Sinkhole 议题的年份、合著者、白皮书 URL 未一手抓取；仅来自搜索摘要，记为 lead_only。",
+      "《Rootkits and Bootkits》出版年份未一手确认；LinkedIn 仅确认作者身份与新版在编，未给出初版日期。",
+      "教育背景(学位、院校、年份)无任何一手或二手来源。",
+      "成长机制证据(导师关系、具体反馈事件、研究转向的诱因、重复练习与工具建设的具体节点)未在可抓取公开材料中出现；本维度受限于公开一手页面仅含现职与近期文章。",
+      "person_json 注明的 Black Hat US/EU / BlueHat 演讲事实无一手议程页确认。"
+    ]
+  },
+  "targeted": {
+    "items": [
+      {
+        "id": "r1-001",
+        "resolves_issue": "RR1：Stage1 转折叙事中以 LoJax 关联作为 Matrosov 个人早期固件研究的支撑。一手核实 LoJax 文章是否存在及署名。",
+        "date": "2018-09-27",
+        "claim": "WeLiveSecurity 于 2018-09-27 发布 LoJax UEFI rootkit 分析文章 'LoJax: First UEFI rootkit found in the wild, courtesy of the Sednit group'，文章署名为集体 'ESET Research'，正文未出现 Alex Matrosov 个人姓名。该文章证实 2018 年 ESET 集体层面完成了针对 UEFI rootkit（LoJax，与 Sednit/APT28 关联）的研究，但不足以据此将 LoJax 分析归为 Matrosov 个人的早期固件研究转折点。",
+        "status": "documented",
+        "source": {
+          "title": "LoJax: First UEFI rootkit found in the wild, courtesy of the Sednit group — WeLiveSecurity",
+          "url": "https://www.welivesecurity.com/2018/09/27/lojax-first-uefi-rootkit-found-wild-courtesy-sednit-group/",
+          "published": "2018-09-27",
+          "source_type": "安全研究博客文章（一手，集体署名 ESET Research）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_wt1vwq1c40jdmvgssllgt8h7",
+          "accessed_at": "2026-09-27T18:46:27.080171+00:00",
+          "content_sha256": "e41c954b5668c36bb48693d059f89e492bd89c7a6870ffd5050cc8c37f95f925"
+        }
+      },
+      {
+        "id": "r1-002",
+        "resolves_issue": "RR2：Stage2 将 Matrosov 表述为 efiXplorer 的 '维护者'，需核实其贡献者地位与提交计数。",
+        "date": "2026-09-28",
+        "claim": "GitHub contributors API 列出 binarly-io/efiXplorer 仓库 13 个贡献账号及提交计数：yeggor 573、matrosov 36、assafcarlsbad 6、pagabuc 6、TakahiroHaruyama 5、isciurus 5、p41l 2、RolfRolles 2、cc-crack 2、river-li 2、xorpse 2、Cr4sh 1、naconaco 1。账号 matrosov 存在并贡献 36 次，但远低于 yeggor 的 573 次，表明 Matrosov 为 efiXplorer 的贡献者之一而非主要提交者或唯一维护者。",
+        "status": "documented",
+        "source": {
+          "title": "binarly-io/efiXplorer — contributors（GitHub contributors API）",
+          "url": "https://api.github.com/repos/binarly-io/efiXplorer/contributors",
+          "published": "2026-09-28",
+          "source_type": "代码仓库贡献者列表（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_f4enf3zkowopzoezjkkuf6p4",
+          "accessed_at": "2026-09-27T18:46:27.080286+00:00",
+          "content_sha256": "6d80eb107366943673e6612044ffd40662d03acaf80e60431e8bf21cbb1bdcd6"
+        }
+      },
+      {
+        "id": "r1-003",
+        "resolves_issue": "RR4：mechanisms[0] 隐含 Matrosov 个人延续工具建设模式产出 sbom-tools，需核实仓库归属与个人署名。",
+        "date": "2026-09-28",
+        "claim": "github.com/sbom-tool/sbom-tools 仓库 owner 为 'sbom-tool' 账号/组织，许可 MIT，主语言 Rust（含 Cargo.toml、rust-toolchain.toml，要求 Rust 1.88+），README 指向 sbom.tools 作为网站并引用贡献指南与行为准则，但 owner 与 README 均未出现任何个人维护者姓名。仓库存在性可一手证实，但与 Matrosov 个人的署名关联未在该一手页面中证实。",
+        "status": "documented",
+        "source": {
+          "title": "sbom-tool/sbom-tools — GitHub repository root page",
+          "url": "https://github.com/sbom-tool/sbom-tools",
+          "published": "2026-09-28",
+          "source_type": "代码仓库根页面（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_z4k6vmjy045czheblvtnvadr",
+          "accessed_at": "2026-09-27T18:46:27.080276+00:00",
+          "content_sha256": "6837c36128e15d63fb234ffc40168d96c39af2d19e3737106f9f37930bb8a27e"
+        }
+      },
+      {
+        "id": "r1-004",
+        "resolves_issue": "RR6：《Rootkits and Bootkits》合著者冲突——ext-01（Rylkin，No Starch 404+搜索摘要）与 AM-TL-05（Bratus，LinkedIn 一手）不一致，需一手图书署名核实。",
+        "date": "2019",
+        "claim": "Amazon 图书详情页一手证实《Rootkits and Bootkits: Reversing Modern Malware and Next-Generation Threats》（ISBN 9781593277161）作者列为 Alex Matrosov、Eugene Rodionov、Sergey Bratus。该署名与 AM-TL-05（LinkedIn 一手，Sergey Bratus）一致，与 ext-01 的 Rodionov+Rylkin 不一致。据此 Rylkin 应为错误转述，Bratus 为可一手核实的合著者。",
+        "status": "documented",
+        "source": {
+          "title": "Rootkits and Bootkits: Reversing Modern Malware and Next-Generation Threats — Amazon 图书详情页（ISBN 9781593277161）",
+          "url": "https://www.amazon.com/dp/1593277164",
+          "published": "2019",
+          "source_type": "图书零售详情页（一手署名）",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8qz26lnyc0i57rw6317loqmc",
+          "accessed_at": "2026-09-27T18:46:27.080294+00:00",
+          "content_sha256": "b76a6b55782587dbd719b79ce4e100f3b3020d64f98d40ba46861283d9354e00"
+        }
+      },
+      {
+        "id": "r2-001",
+        "resolves_issue": "RR5：补强 sbom-tools 与 Matrosov 个人的关联推断链——r1-003 仅证实仓库 owner=sbom-tool、README 无个人姓名，缺一手个人署名/贡献关联。",
+        "date": "2026-09-28",
+        "claim": "GitHub contributors API（api.github.com/repos/sbom-tool/sbom-tools/contributors）一手列出 sbom-tool/sbom-tools 仓库 5 个贡献账号及提交计数：matrosov 428、alexm-anthropic 180、dependabot[bot] 123、MChorfa 8、iwanicki92 1。账号 matrosov 以 428 commits 居首位，为该仓库第 1 贡献者。这与 r1-003（仓库根页 owner=sbom-tool、README 无个人姓名）互补：仓库页面虽无个人署名，但 GitHub API 一手证实 matrosov 为该仓库主要贡献者。",
+        "status": "documented",
+        "source": {
+          "title": "sbom-tool/sbom-tools — contributors（GitHub contributors API）",
+          "url": "https://api.github.com/repos/sbom-tool/sbom-tools/contributors",
+          "published": "2026-09-28",
+          "source_type": "代码仓库贡献者列表（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_3jufmyso0758yjpl2nd2d6up",
+          "accessed_at": "2026-09-27T19:08:09.388054+00:00",
+          "content_sha256": "f8a736c7fff717c2a89fc53f9553f8a8f009e5598ccbf7fffded8107c2d33983"
+        }
+      },
+      {
+        "id": "r2-002",
+        "resolves_issue": "RR5：补强 sbom-tools 与 Matrosov 个人的关联推断链——需一手证实 matrosov 账号属于 sbom-tool 组织。",
+        "date": "2026-09-28",
+        "claim": "GitHub orgs API（api.github.com/users/matrosov/orgs）一手列出用户 matrosov 所属的 GitHub 组织：REhints、sbom-tool（不含 binarly-io）。证实 matrosov 既是 REhints 组织成员（与 efiXplorer 仓库归属一致），又是 sbom-tool 组织成员（与 sbom-tools 仓库归属一致），构成 sbom-tools 与 Matrosov 个人的一手组织归属链。",
+        "status": "documented",
+        "source": {
+          "title": "matrosov — organizations（GitHub users orgs API）",
+          "url": "https://api.github.com/users/matrosov/orgs",
+          "published": "2026-09-28",
+          "source_type": "GitHub 用户组织成员列表（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_jj0yspmhx08v0ccft63ezlo8",
+          "accessed_at": "2026-09-27T19:08:09.388060+00:00",
+          "content_sha256": "ae1fdeaab0131ef6330387c87d1345330ff82a68b117d6ecfe5f39d258f4b0f5"
+        }
+      }
+    ]
+  }
+}

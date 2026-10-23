@@ -1,0 +1,525 @@
+{
+  "works": {
+    "person": "Gal Beniamini",
+    "dimension": "公开作品与技术演化",
+    "identity_check": "身份经一手抓取确认：Project Zero 博客文章页 byline 为 'Posted by Gal Beniamini, Project Zero'，发布于 2017-04；社交账号 @laginimaineb 与输入 person_json 一致。研究域经一手抓取核验为 Broadcom Wi-Fi SoC 漏洞与利用。同名歧义处理：在第一手抓取前，WebSearch 对其研究领域给出相互不一致的二手描述（一次称 Qualcomm TrustZone/QSEE KeyMaster，另一次称 iOS/Broadcom Wi-Fi/Bluetooth），均未单独采信；第一手抓取 Project Zero 博客后确认 2017-04 Broadcom Wi-Fi SoC 系列为已发表作品。Qualcomm KeyMaster/TrustZone、Qualcomm baseband 与 iOS Bluetooth 等方向未在本轮一手抓取预算内核验，记入 gaps。",
+    "items": [
+      {
+        "id": "galbeniamini-works-001",
+        "date": "2017-04-04",
+        "claim": "Gal Beniamini 在 Project Zero 博客发表 'Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)'，针对 Broadcom FullMAC Wi-Fi SoC（BCM4358）实现远程代码执行，目标设备为运行 Android 7.1.1 的 Nexus 6P。漏洞位于 TDLS（802.11z）实现中 MIC 校验函数的堆溢出：teardown 路径未校验 FT-IE 长度字段与 256 字节缓冲区关系，setup 路径 RSN IE 之后 Timeout Interval 与 Fast Transition IE 未校验长度。利用仅需 Wi-Fi 邻近且无需用户交互。",
+        "status": "documented",
+        "growth_signal": "方法学信号：固件层深度逆向并自建分析工具。具体表现为通过 dhdutil 提取 ROM、以 IDA 分析 Thumb-2 二进制、借用 NexMon 符号与开源 brcmsmac 驱动对照定位 bcm_parse_tlvs 及其 110+ 交叉引用、hook malloc/free 追踪堆操作并自建堆可视化器、将堆溢出链式转化为重叠空闲块并重定向 freelist 覆盖 timer 结构函数指针。MPU 配置为全 RWX 降低利用门槛亦被如实记录。这些构成可复用的固件逆向与堆利用工具链，符合'工具建设与重复练习'的成长证据。",
+        "short_quote": "Posted by Gal Beniamini, Project Zero",
+        "source": {
+          "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)",
+          "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html",
+          "published": "2017-04-04",
+          "source_type": "Project Zero technical blog post",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_6ud4idqggx0le3kmupb33x9p",
+          "accessed_at": "2026-09-26T17:42:31.251524+00:00",
+          "content_sha256": "032f3aebd9c51663c46414b9fe33cd6469bf42326d9fe90e2c351d505fb2dddb"
+        }
+      },
+      {
+        "id": "galbeniamini-works-002",
+        "date": "2017-04-11",
+        "claim": "Gal Beniamini 在 Project Zero 博客发表 'Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 2)'，从 Wi-Fi SoC 固件控制提权至主机内核代码执行，提出两条路径。软件路径利用 bcmdhd 驱动与固件间 EtherType 0x886C 事件通道，在 WLC_E_PFN_SWC 事件处理（dhd_handle_swc_evt，Issue #1061）中因 total_count 与 pkt_count 关系未校验导致内核堆溢出，经 SLUB slab 整形后释放含 evt_handler 函数指针表的 wl_priv 结构并回收覆写，借 stack pivot（无 KASLR）执行 ROP 链。硬件路径利用 PCIe DMA：修改固件 RAM 中 DMA 环缓冲地址指向内核代码段，确认 Snapdragon 810（Nexus 6P）与 Exynos 8890（Galaxy S7 Edge）平台 Wi-Fi PCIe 接口 SMMU 缺失或未配置，Wi-Fi SoC 可任意 DMA 主机物理内存；经逆向 dma_info 结构、hook ROM 中 dma64_txfast 实现任意物理地址写。",
+        "status": "documented",
+        "growth_signal": "技术演化信号：研究目标从'单固件 RCE'扩展至'固件→主机内核提权'，方法栈从纯软件漏洞链扩展至硬件 DMA 攻击面。具体表现为两点扩展——其一，将固件层堆利用能力迁移到主机内核 SLUB 整形与函数指针表覆写 + ROP 的内核利用范式；其二，跨平台（Qualcomm 与 Samsung 两类移动 SoC）验证 Wi-Fi PCIe 接口 SMMU 缺失这一系统性架构缺陷，并逆向 DMA 引擎实现不依赖主机内核漏洞的任意物理写。这种从'单一漏洞'到'架构性攻击面'、从'单平台'到'跨平台验证'的推进，体现研究目标难度与方法栈的系统性抬升，符合'目标难度、研究方法与技术栈演化'的维度要求。",
+        "short_quote": "PCIe allows for DMA by design",
+        "source": {
+          "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 2)",
+          "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_11.html",
+          "published": "2017-04-11",
+          "source_type": "Project Zero technical blog post",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_r39kt4uq0m2171epa21ezv0j",
+          "accessed_at": "2026-09-26T17:42:31.251547+00:00",
+          "content_sha256": "113ebf02afebaf0cd243126ccc38dbefe352569f55a9f3bab20796a9282319b4"
+        }
+      },
+      {
+        "id": "galbeniamini-works-003",
+        "date": "2017-04",
+        "claim": "基于 Part 1 与 Part 2 的一手文本可推断 Gal Beniamini 在 2017-04 期间的公开作品呈现明确的纵向技术演化：第一阶段为无线 SoC 固件内部漏洞发现与利用（堆溢出 + freelist 劫持），第二阶段为固件到主机内核的横向提权（驱动事件处理内核堆溢出 + ROP）与对硬件 DMA 攻击面的系统性考察。两篇作品均以 Project Zero 博客形式公开发表，并包含漏洞编号（如 Issue #1061）与披露流程痕迹，显示'研究—披露—公开发表'的稳定习惯。",
+        "status": "inferred",
+        "growth_signal": "复盘与公开发表习惯信号：作品成系列发表、引用内部 Issue 编号、显式记录厂商补丁时间线（如 2016 年中 Broadcom 引入事件校验）与补丁绕过方法（固件 RAM 为 RWX 可 patch 掉校验），体现对漏洞生命周期与防御-绕过循环的复盘意识。跨平台对照验证则体现方法论的迁移与复用。",
+        "source": {
+          "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1 and Part 2)",
+          "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_11.html",
+          "published": "2017-04-11",
+          "source_type": "Project Zero technical blog post series",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_r39kt4uq0m2171epa21ezv0j",
+          "accessed_at": "2026-09-26T17:42:31.251547+00:00",
+          "content_sha256": "113ebf02afebaf0cd243126ccc38dbefe352569f55a9f3bab20796a9282319b4"
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 在一手抓取前对 Gal Beniamini 的研究领域给出相互不一致的二手描述：一次称其研究 Qualcomm TrustZone/QSEE 与 KeyMaster 提取，另一次称其研究 iOS 与 Broadcom Wi-Fi/Bluetooth LE。两者均为搜索摘要，不可单独采信。经一手抓取 Project Zero 博客确认 2017-04 Broadcom Wi-Fi SoC 系列为已发表作品；KeyMaster/TrustZone、iOS Bluetooth 方向未在一手抓取预算内核验。"
+    ],
+    "gaps": [
+      "Project Zero 博客旧标签页 https://googleprojectzero.blogspot.com/search/label/Gal%20Beniamini 返回 'No posts with label Gal Beniamini'，无法作为其作品索引使用；Project Zero 博客已迁移至 projectzero.google，但其首页仅列近期 18 篇文章，无 Gal Beniamini 条目，未找到其完整作品归档索引页。",
+      "'Extracting Qualcomm's KeyMaster Keys'（推断 2017 年，TrustZone/QSEE）的 Project Zero 博客 URL（尝试 /2017/06/extracting-qualcomms-keymaster-keys.html）返回 404，未能在工具调用预算内找到正确 URL 并完成一手抓取；该作品仅以 WebSearch 二手摘要形式出现，不计入 documented/reported。",
+      "Qualcomm baseband（Hexagon DSP/RTOS）相关研究及 REcon/Black Hat/POC 会议演讲未一手核验；task.md 列出的会议证据仅证明演讲事实，不能单独证明成长机制，且本轮未抓取任何会议 speaker 页面或演讲材料。",
+      "iOS Bluetooth LE 研究方向（WebSearch 声称）未一手核验，可能为同名歧义或与其他研究员混淆，记为待查。",
+      "成长机制层面的一手证据缺口：未找到关于导师关系、同伴反馈、失败与转向、重复练习节奏的具体一手材料；本轮已确认的工具建设（自建堆可视化、hook malloc/free）与公开发表习惯（Project Zero 博客系列）为间接成长信号，非直接的成长机制证据。",
+      "复盘方式的一手证据有限：作品中可见对厂商补丁时间线与补丁绕过的记录，但未见独立的'复盘笔记/事后分析'类一手材料。"
+    ]
+  },
+  "conversations": {
+    "person": "Gal Beniamini",
+    "dimension": "深度对话与自述",
+    "identity_check": "研究对象为 Gal Beniamini（rank 15），在线 handle 'laginimaineb'（姓名倒置），主攻 Android/基带/TrustZone 漏洞，曾属 Google Project Zero，Black Hat/POC 演讲者，与 person_json.json 记录一致。本轮抓取中未遇到需要消歧的同名冲突。身份判据来自任务输入与 Project Zero 官方博客页面（其作者列表与标签页均未列入该姓名，详见 gaps），未取得含个人自述正文的一手来源。",
+    "items": [],
+    "contradictions": [],
+    "gaps": [
+      "本轮未取得任何含 Gal Beniamini 本人自述正文的一手来源（writeup 正文、长访谈、播客、AMA、演讲问答实录），故 items 为空。",
+      "Project Zero 官方博客标签页（googleprojectzero.blogspot.com/search/label/Gal%20Beniamini）WebFetch 返回 'No posts with label Gal Beniamini'；重定向后的 projectzero.google 作者列表（James Forshaw、Jann Horn、Seth Jenkins、Ivan Fratric、Natalie Silvanovich、Dillon Franke、Benoît Sevens 等）未含 Gal Beniamini，归档博文可能存在但本轮不可达。",
+      "X/Twitter 个人页 x.com/laginimaineb 返回 HTTP 402 Payment Required，无法读取其 bio、置顶帖或链接到的访谈/播客。",
+      "en.wikipedia.org/wiki/Gal_Beniamini 返回 HTTP 404，无维基百科条目可供交叉验证生平与教育背景。",
+      "WebSearch 工具本轮四次查询均未返回可用的真实结果链接，无法据此定位访谈或播客来源。",
+      "因此无法就入门、学习、失败、导师、选择与转折等维度问题提供 documented/reported/inferred 级别的本人叙述；下一轮应直接检索 Black Hat/OffensiveCon/POC 议程页与演讲录像字幕、Project Zero 博客归档（含 Wayback Machine）及 2017 前后 Qualcomm/TrustZone 相关访谈。"
+    ]
+  },
+  "community": {
+    "person": "Gal Beniamini",
+    "dimension": "社区参与与反馈回路",
+    "identity_check": "一手来源确认身份：projectzero.google 博客署名标为 'Gal Beniamini, Project Zero'（2017-04-04 与 2017-07-24 两篇）。搜索摘要中出现的 'Zimperium/独立研究员' 等从属描述与一手博客署名不一致，按一手来源采信为 Project Zero 研究员。需作归属区分：2023-03-16 projectzero.google 博客 'Multiple Internet to Baseband Remote Code Execution Vulnerabilities in Exynos Modems' 署名为 Tim Willis，非 Gal Beniamini；person_json 的 primary_focus 虽含 baseband，但该具体 writeup 不可归因于本人，故未纳入。",
+    "items": [
+      {
+        "id": "gb-community-001",
+        "date": "2017-04-04",
+        "claim": "在 Broadcom Wi-Fi 漏洞研究 writeup 中，明确致谢 Thomas Dullien（@halvarflake）协助启动研究并参与头脑风暴与文献检索，并感谢伦敦办公室同事协助理解利用约束、倾听讨论，显示同行与同事网络在研究启动与思路形成阶段提供反馈。",
+        "status": "documented",
+        "growth_signal": "研究启动阶段即有资深同行（halvarflake）介入提供方向性反馈与文献定位，而非孤立完成；同事群体作为讨论对象构成持续反馈回路，提示其能力发展依赖外部输入而非纯个人产出。",
+        "short_quote": "I would like to thank Thomas Dullien (@halvarflake) for helping boot up the research, for the productive brainstorming",
+        "source": {
+          "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)",
+          "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html",
+          "published": "2017-04-04",
+          "source_type": "researcher_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_aflt40fnpu9canobq0za8ub8",
+          "accessed_at": "2026-09-26T17:35:54.572846+00:00",
+          "content_sha256": "a401fea397196352ad64b847764c1d5c7b7a9d660ce5a276ac7ec0a68ea6d0ac"
+        }
+      },
+      {
+        "id": "gb-community-002",
+        "date": "2017-04-04",
+        "claim": "同一 writeup 记录厂商反馈回路：披露后 Broadcom 被描述为高度响应与配合，并对 Wi-Fi SoC 安全讨论保持开放，且向作者反馈新版 SoC 改用 MPU 等硬件安全机制，作者据此将厂商反馈纳入后续方向判断（'a step in the right direction'）。",
+        "status": "documented",
+        "growth_signal": "披露后的厂商反馈并非单向往来，作者据厂商回应评估缓解方向并影响后续研究判断，形成公开披露—厂商反馈—研究调整的闭环。",
+        "short_quote": "Broadcom have informed me that newer versions of the SoC utilise the MPU, along with several additional hardware security mechanisms.",
+        "source": {
+          "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)",
+          "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html",
+          "published": "2017-04-04",
+          "source_type": "researcher_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_aflt40fnpu9canobq0za8ub8",
+          "accessed_at": "2026-09-26T17:35:54.572846+00:00",
+          "content_sha256": "a401fea397196352ad64b847764c1d5c7b7a9d660ce5a276ac7ec0a68ea6d0ac"
+        }
+      },
+      {
+        "id": "gb-community-003",
+        "date": "2017-07-24",
+        "claim": "在 TrustZone TEE 研究 writeup 中引用 Quarkslab 的 Fernand Lone Sang 对 Samsung SBOOT 的逆向研究作为先行工作，并引用本人先前 QSEE/Widevine 工作，显示其研究建立在社区既有成果之上的延续积累。",
+        "status": "documented",
+        "growth_signal": "明确标定前序社区研究并据以定位自身工作坐标，体现基于公开同行成果的迭代式推进而非独立重启。",
+        "short_quote": "",
+        "source": {
+          "title": "Trust Issues: Exploiting TrustZone TEEs",
+          "url": "https://projectzero.google/2017/07/trust-issues-exploiting-trustzone-tees.html",
+          "published": "2017-07-24",
+          "source_type": "researcher_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_lv2m2iz2kijiorafs6fiowmz",
+          "accessed_at": "2026-09-26T17:35:54.572843+00:00",
+          "content_sha256": "db3e4e5ff09c71414e640af9585873594f523411b2c7c9084f7d023a2d2a9ebc"
+        }
+      },
+      {
+        "id": "gb-community-004",
+        "date": "2017-07-24",
+        "claim": "同一 writeup 记录厂商反馈：就发现联系 Samsung 后获得官方书面回复（关于 kinibi 400 支持 rollback prevention），将厂商回应直接纳入披露报告。",
+        "status": "documented",
+        "growth_signal": "披露流程中主动引入厂商回应并以原文形式纳入公开记录，使社区与厂商形成可核验的反馈留痕。",
+        "short_quote": "After contacting Samsung regarding this issue, we've received the following official response",
+        "source": {
+          "title": "Trust Issues: Exploiting TrustZone TEEs",
+          "url": "https://projectzero.google/2017/07/trust-issues-exploiting-trustzone-tees.html",
+          "published": "2017-07-24",
+          "source_type": "researcher_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_lv2m2iz2kijiorafs6fiowmz",
+          "accessed_at": "2026-09-26T17:35:54.572843+00:00",
+          "content_sha256": "db3e4e5ff09c71414e640af9585873594f523411b2c7c9084f7d023a2d2a9ebc"
+        }
+      }
+    ],
+    "contradictions": [
+      "二手搜索摘要将 Gal Beniamini 在 Black Hat 2017 时期的从属描述为 Zimperium 或独立研究员，与 projectzero.google 一手博客署名（标为 Project Zero）不一致；按一手来源采信 Project Zero 归属，搜索摘要的从属信息未取到一手正文佐证。",
+      "person_json 的 primary_focus 含 'baseband'，且二手来源将 Exynos baseband 工作（projectzero.google 2023-03-16 'Multiple Internet to Baseband Remote Code Execution Vulnerabilities in Exynos Modems'）与移动底层研究关联，但该 writeup 一手署名为 Tim Willis 而非 Gal Beniamini，存在人物归因混淆；本人是否参与该 baseband 研究链条未经一手来源证实，未予归因。"
+    ],
+    "gaps": [
+      "Black Hat 官方 speaker 页面（blackhat.com/us-17）返回 HTTP 403，未能抓取一手演讲者简介与摘要正文，演讲参与仅由 person_json 与二手转述支持，缺少一手正文。",
+      "Project Zero issue tracker（bugs.chromium.org）中与本人在研漏洞对应的披露时间线、同行评论与厂商交互细节未抓取，邮件列表/issue 层面的具体同行反馈记录缺失。",
+      "旧 Project Zero 博客标签页 https://googleprojectzero.blogspot.com/search/label/Gal%20Beniamini 返回 'No posts with label Gal Beniamini'（博客迁移后旧标签失效），无法作为索引使用；本人完整 writeup 清单仅通过 projectzero.google/archive.html 的主题匹配部分还原，可能遗漏未匹配关键词的帖子。",
+      "Twitter/X 账号 @laginimaineb 的社交互动、同行公开回复与社区讨论内容未抓取，社交媒体层面的同伴网络与公开反馈回路缺证。",
+      "是否与 Project Zero 同期同事（如 Ian Beer、Mark Brand、Natalie Silvanovich 等）存在具体协作或互评的成文记录未取证，当前仅推断其在 Project Zero 团队框架内工作，无直接协作证据。",
+      "本地未提供种子材料，研究起点完全依赖公开来源，缺少可对照的内部笔记或时间线。"
+    ]
+  },
+  "external": {
+    "person": "Gal Beniamini",
+    "dimension": "外部视角",
+    "identity_check": "搜索引擎返回的多条独立结果（Google Project Zero 博客署名、个人研究站点 beniaminigal.net、X 账号 @laginimaineb、DEF CON 25 演讲条目）一致指向同一研究者 Gal Beniamini，研究方向（Broadcom Wi-Fi、Qualcomm 基带、ARM TrustZone）与人物记录一致，唯一性较高。但所有指向一手页面的 WebFetch 调用均失败（404 或 ECONNREFUSED），未能直接抓取确认，因此身份判定为 inferred 而非 documented。",
+    "items": [
+      {
+        "id": "gb-ext-identity",
+        "date": "2017",
+        "claim": "多个独立公开线索将 Gal Beniamini 标识为 Google Project Zero 研究员，专注 Broadcom Wi-Fi、Qualcomm 基带与 ARM TrustZone 漏洞；其个人域名 beniaminigal.net 与 X 账号 @laginimaineb 与人物记录一致。未能抓取任一一手页面予以确认。",
+        "status": "inferred",
+        "growth_signal": "外部身份信号在多个独立搜索结果中互相印证，但缺乏可抓取的一手页面进行交叉验证，无法据此推断能力成长机制；外部评价维度本身缺乏可核验材料。",
+        "source": {
+          "title": "beniaminigal.net 个人研究站点（尝试抓取 /trustzone.html，返回 404）",
+          "url": "https://www.beniaminigal.net/trustzone.html",
+          "published": "",
+          "source_type": "个人研究站点（抓取失败）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "gb-ext-p0-broadcom-wifi",
+        "date": "2017-04",
+        "claim": "搜索结果显示 Google Project Zero 博客存在题为 “Over The Air - Exploiting Broadcom's Wi-Fi Stack” 的文章，署名 Gal Beniamini。两次 WebFetch 尝试分别返回 ECONNREFUSED 与 404，未确认正文内容、确切发布日期及作者自述。",
+        "status": "unknown",
+        "growth_signal": "若该文章确为其作品，可能体现其公开披露移动底层远程攻击面漏洞的发表习惯；但内容未抓取确认，仅作线索，无法据以推断成长机制。",
+        "source": {
+          "title": "Over The Air - Exploiting Broadcom's Wi-Fi Stack（Project Zero 博客，抓取失败）",
+          "url": "https://googleprojectzero.blogspot.com/2017/04/over-air-exploiting-broadcom-wi-fi-stack.html",
+          "published": "2017-04",
+          "source_type": "一手博客（抓取失败）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_mhbci9dwcsgfzru49851u9pt",
+          "accessed_at": "2026-09-26T17:38:22.602225+00:00",
+          "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263"
+        }
+      },
+      {
+        "id": "gb-ext-p0-s8-secureboot",
+        "date": "2017-08",
+        "claim": "搜索结果显示 Project Zero 博客存在题为 “Exploiting the Galaxy S8's Secure Boot” 的文章，署名 Gal Beniamini。WebFetch 返回 404，未确认正文及作者背景陈述。",
+        "status": "unknown",
+        "growth_signal": "若属实，可能体现其对设备安全启动链的公开研究发表习惯；内容未确认，仅作线索，无法据以推断成长机制。",
+        "source": {
+          "title": "Exploiting the Galaxy S8's Secure Boot（Project Zero 博客，抓取失败）",
+          "url": "https://googleprojectzero.blogspot.com/2017/08/exploiting-galaxy-s8-secure-boot.html",
+          "published": "2017-08",
+          "source_type": "一手博客（抓取失败）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ltvp8upnju8pgfxtly3e083i",
+          "accessed_at": "2026-09-26T17:38:22.602238+00:00",
+          "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263"
+        }
+      }
+    ],
+    "contradictions": [
+      "本次调查未发现互相冲突的材料；各搜索线索彼此一致，但因一手页面均未能抓取，无法进行交叉验证意义上的冲突比对。"
+    ],
+    "gaps": [
+      "维度核心（外部视角评价）无可交叉验证的一手或权威二手材料：所有指向一手页面的 WebFetch 调用均失败（googleprojectzero.blogspot.com 多篇文章返回 404 或 ECONNREFUSED；beniaminigal.net 的 /trustzone.html 与 /tz_research.html 均返回 404）。",
+      "未能获取任何同事、团队成员或导师对 Gal Beniamini 工作的公开评价，无法支撑“外部视角”维度的成长机制分析。",
+      "未能获取权威媒体对其研究的报道或评价。",
+      "DEF CON 25 “QSEE Escalation & Exploitation” 演讲仅为搜索线索（YouTube 链接 https://www.youtube.com/watch?v=RR4PQeqyBfY），未抓取演讲页面或视频确认内容、日期与署名。",
+      "Black Hat US / POC 演讲页面一手内容未获取（人物记录提及 Black Hat US / POC，但未能在本轮抓取到对应演讲页面）。",
+      "Project Zero 博客署名文章的正文、确切发布日期、作者自述及与外部评价的交叉引用均未确认，相关 claim 只能标注 unknown。",
+      "未能获取 Gal Beniamini 个人研究站点的研究编年、合著者与发表习惯信息（页面 404）。",
+      "工具调用已达上限（≥8 次），无法继续抓取以填补上述缺口。"
+    ]
+  },
+  "decisions": {
+    "person": "Gal Beniamini",
+    "dimension": "关键决策与转折",
+    "identity_check": "经一手来源确认身份: Project Zero 博客四篇文章署名均为 'Posted by Gal Beniamini, Project Zero'（2017-04-04、2017-07-24、2017-09-28、2017-10-11）。与 person_json 记录一致：primary_focus 为 Android/基带/TrustZone 漏洞，writeup_evidence 指向 Project Zero 博客。同名歧义已排除——搜索摘要曾出现 NVIDIA、Bluetooth/BLE、BootStomp 等不一致归属，均未在抓取页面中得到证实，已弃用。Project Zero 博客已从 googleprojectzero.blogspot.com 迁移至 projectzero.google，旧 URL 返回 404，故 person_json 中的 writeup_evidence 链接不可直接抓取；经新站 archive.html 取得完整历史索引并定位 2017 年单篇。",
+    "items": [
+      {
+        "id": "gb-dec-01",
+        "date": "2017-04-04",
+        "claim": "Gal Beniamini 选择 Broadcom 的 Wi-Fi SoC 栈作为首个 Project Zero 深度研究对象，并选择 Android 生态作为演示平台。其决策依据是：移动应用处理器（AP）的防御持续加固后，攻击者会转向受审视较少的组件（least-resistance 路径）；Broadcom Wi-Fi 芯片是移动设备上部署最广的 Wi-Fi 芯片组（Nexus、三星旗舰及自 iPhone 4 以来的全部 iPhone 均采用），且 FullMAC SoC 引入了运行在独立低功耗处理器上的专有、复杂代码库，构成未被同等审视的攻击面。Android 被选为演示平台，但结论适用于任何采用相同芯片组的系统。",
+        "status": "documented",
+        "growth_signal": "目标选择体现了可复用的研究方法论：在攻击面分析阶段，按'防御加固程度反向迁移''部署广度''专有代码复杂度与受审视程度之差'三项可核验标准筛选研究对象，而非凭主题偏好。这是漏洞挖掘方向的结构化选题机制，可用于解释其后续连续选题。",
+        "short_quote": "the code running on the application processor (AP) has been the subject of much research, other components have seldom received the same scrutiny",
+        "source": {
+          "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)",
+          "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html",
+          "published": "2017-04-04",
+          "source_type": "一手 writeup（Project Zero 博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_frztpcm1rwp6c7vfnfia5t2l",
+          "accessed_at": "2026-09-26T17:42:05.550954+00:00",
+          "content_sha256": "e5a07d2fcd15e0a8bdd0478c317873b43755f286c2108dc458a8a20dddc64d14"
+        }
+      },
+      {
+        "id": "gb-dec-02",
+        "date": "2017-07-24",
+        "claim": "Beniamini 在完成 Broadcom Wi-Fi 栈研究后转向 Android TrustZone 可信执行环境（TEE），覆盖 Qualcomm QSEE 与 Trustonic Kinibi 两类主流实现。该转向的动机为：TEE 处理生物特征、支付、DRM 与全盘加密密钥等高价值数据，但其安全缓解措施（ASLR、栈 cookie、守护页）显著滞后于常规操作系统，使其成为日益有吸引力的目标；同时厂商几乎不撤销已签名 trustlet（版本计数器普遍停留在零），使已修补漏洞可通过加载旧的仍签名二进制绕过。研究在 Galaxy S7 Edge 上以 Samsung OTP trustlet 已知栈溢出达成 Kinibi 内任意代码执行。",
+        "status": "documented",
+        "growth_signal": "从 Wi-Fi 固件转向 TrustZone 是同一'高价值数据所在 + 防御滞后 + 可签名组件撤销机制失效'选题框架的二次应用，显示选题标准可跨子系统迁移；研究同时构造了跨厂商（Qualcomm/Trustonic）的对比分析，说明其方法包含可推广的抽象层而非单点漏洞。",
+        "short_quote": "virtually no manufacturer actually revokes vulnerable trustlets",
+        "source": {
+          "title": "Trust Issues: Exploiting TrustZone TEEs",
+          "url": "https://projectzero.google/2017/07/trust-issues-exploiting-trustzone-tees.html",
+          "published": "2017-07-24",
+          "source_type": "一手 writeup（Project Zero 博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_jm6i69iq86rgyjkdc50ote0b",
+          "accessed_at": "2026-09-26T17:42:05.550948+00:00",
+          "content_sha256": "f1e914f8927585ac5c63dbf849ba0402fc90e9c9aa1f205b4f8b9110651298d3"
+        }
+      },
+      {
+        "id": "gb-dec-03",
+        "date": "2017-09-28",
+        "claim": "Beniamini 决定将 Wi-Fi 栈研究从 Android 生态迁移至 Apple 生态，以'更完整描绘移动生态 Wi-Fi 安全状态'。为克服 iOS 闭源与缺少研究平台的约束，他复用同伴 Ian Beer 的内核漏洞获取内存读写原语，逆向 Apple 专有 Wi-Fi 驱动（AppleBCMWLANCore、AppleBCMWLANBusInterfacePCIe），通过 kalloc zone 分析定位 Wi-Fi 芯片 TCM 在内核地址空间的映射，并以基于 RAM 的钩子提取固件 ROM、自建 Wi-Fi 固件调试器，从而把在 Android 上建立的研究能力迁移到 Apple 平台。",
+        "status": "documented",
+        "growth_signal": "平台迁移决策展示了工具建设与同伴成果复用的成长机制：以 Ian Beer 的内核 exploit 为基础设施搭建 iOS 研究平台（固件提取、调试器），把已验证的 Broadcom 研究方法跨平台复用。这表明其研究能力包含'自建可复用底层工具链'而非仅产出单点漏洞，且明确记录了对同伴工作（Ian Beer）的依赖。",
+        "short_quote": "we've chosen to revisit the topic - this time through the lens of Apple devices",
+        "source": {
+          "title": "Over The Air - Vol. 2, Pt. 1: Exploiting The Wi-Fi Stack on Apple Devices",
+          "url": "https://projectzero.google/2017/09/over-air-vol-2-pt-1-exploiting-wi-fi.html",
+          "published": "2017-09-28",
+          "source_type": "一手 writeup（Project Zero 博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dqd1xozahw3s1p2c1yg91ys1",
+          "accessed_at": "2026-09-26T17:42:05.550943+00:00",
+          "content_sha256": "64545fa3a4fbd2c117b7cd8e85d750d436ca42a24a3a6d00ca032495271a3b28"
+        }
+      },
+      {
+        "id": "gb-dec-04",
+        "date": "2017-10-11",
+        "claim": "Beniamini 完成 Vol.2 系列的端到端空中利用链，在 iPhone 7（iOS 10.2）上由 Wi-Fi 固件代码执行经 PCIe/DART IOMMU 达到主机内核任意代码执行。关键技术转折包括：逆向 Apple 专有 DART（3 级转换机制，32 位 IO-Space 映射主机物理地址），发现主机以固定上界 0x10000 校验共享环索引而非实际环容量导致可靠越界写；通过固件发送未请求的 flow ring 删除响应泄露 flow ring 以塑形 IO-Space，使新建 flow ring 与 DART L2 转换表落入同一内核 zone；继而覆写 DART 描述符引入任意物理地址映射，并构造自指映射（'Inception'）使 Wi-Fi 芯片获得对全部主机物理内存的永久 DMA 访问；最后将 KTRR 硬件寄存器映射入 IO-Space 直接读取，以 KTRR 作预言机击败 KASLR。研究共向 Apple 报告 7 个漏洞，在 iOS 11 中修复。",
+        "status": "documented",
+        "growth_signal": "全链完成记录了从单组件漏洞到端到端利用链的工程化能力，并显示公开发表习惯：以多部分博客系列逐步披露研究过程与最终利用链，并将漏洞按 Project Zero 流程报告厂商。KTRR-as-KASLR-oracle 的反思显示其方法包含对硬件保护机制本身作为攻击面/信息侧信道的二次审视。",
+        "short_quote": "allowing complete control over the target device",
+        "source": {
+          "title": "Over The Air - Vol. 2, Pt. 3: Exploiting The Wi-Fi Stack on Apple Devices",
+          "url": "https://projectzero.google/2017/10/over-air-vol-2-pt-3-exploiting-wi-fi.html",
+          "published": "2017-10-11",
+          "source_type": "一手 writeup（Project Zero 博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_31ins7hagwa83bezondufuen",
+          "accessed_at": "2026-09-26T17:42:05.550960+00:00",
+          "content_sha256": "83df266f0ab4c614c22538b1fa1d9251dc64e39649c761c60a746e24552b6341"
+        }
+      },
+      {
+        "id": "gb-dec-05",
+        "date": "2017",
+        "claim": "2017 年 4 月至 10 月间，Beniamini 在约半年内完成了一条清晰的研究路径：Broadcom Wi-Fi 栈（Android，4 月）→ TrustZone TEE（7 月）→ Broadcom Wi-Fi 栈（Apple，Vol.2 三部曲，9-10 月），并在 Vol.2 末尾以端到端 iOS 内核利用链收尾。这条路径呈现'按攻击面防御滞后程度选题 + 跨平台复用方法 + 逐步逼近完整利用链'的连续决策模式。",
+        "status": "inferred",
+        "growth_signal": "该时间序列本身（同一作者、连续主题、由组件到全链）可作为'连续、有规划的研究推进'的推断依据，但其作为成长机制的内部动因（如是否受 Project Zero 团队选题机制、同行反馈或厂商响应驱动）未在一手来源中直接陈述，故标 inferred。",
+        "source": {
+          "title": "Project Zero 博客 2017 年归档（archive.html，多篇 2017 年文章索引）",
+          "url": "https://projectzero.google/archive.html",
+          "published": "2017",
+          "source_type": "Project Zero 博客归档索引",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_atxdhnit9eujkpmfjq5hp9fk",
+          "accessed_at": "2026-09-26T17:42:05.550938+00:00",
+          "content_sha256": "298d2cba7176e45de3728a2352dad2061179bd88fee7a7a9e15abc72283536a2"
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 摘要多次给出相互不一致且未经抓取证实的归属：部分摘要称 Beniamini 在 Black Hat 2017 所属机构为 NVIDIA，另一部分称其为 Project Zero；一手博客署名'Posted by Gal Beniamini, Project Zero'与后者一致，NVIDIA 归属未获任何抓取页面支持，疑为搜索引擎幻觉，已不作为证据。",
+      "搜索摘要曾将该研究者主题错误关联至 Bluetooth/BLE（'Bonding Time'为 BLE）与 BootStomp，与一手抓取证实的 Broadcom Wi-Fi + TrustZone 主题不符；'Bonding Time'标题未在任何抓取页面中出现，故不采信。"
+    ],
+    "gaps": [
+      "加入 Project Zero 的具体日期未取得一手来源；person_json 仅记 primary_focus，未记雇佣起止时间。",
+      "离开 Project Zero 的去向未证实；person_json 仅记 primary_focus 与 social 链接，未提供离职或后续职位信息。",
+      "Black Hat US 2017 议程页（blackhat.com/us-17/briefings.html）返回 403 未能抓取，故 Black Hat 演讲事实不列为 documented；搜索摘要提及的演讲标题（'TrustZone: The Security Backbone of Android'等）因未抓取证实而不采信。",
+      "2017-04 Broadcom Part 2 及更早（2016 及以前）是否有 Beniamini 撰写的 PZ 文章未逐篇抓取确证：归档页无作者字段，受工具调用预算限制未对 2016 年文章逐篇抓取。",
+      "研究转向的内部驱动（团队选题机制、同伴反馈、厂商响应、90 天披露政策对选题的影响）未在一手 writeup 中直接陈述，无法 documented。",
+      "person_json 中 writeup_evidence 链接（googleprojectzero.blogspot.com label 页）在新站已失效（标签页返回无结果），旧 blogspot URL 全部 404；该链接作为原始索引已不可用。"
+    ]
+  },
+  "timeline": {
+    "person": "Gal Beniamini",
+    "dimension": "可核验时间线",
+    "identity_check": "person_json 记录研究对象为 Gal Beniamini，primary_focus 为 Android/基带/TrustZone 漏洞，x.com handle 为 laginimaineb（Beniamini 反写），writeup 证据指向 Project Zero 博客。一手抓取确认 Project Zero 博客文章 byline 为 'Posted by Gal Beniamini, Project Zero'，研究方向（Broadcom FullMAC Wi-Fi SoC 固件逆向与远程代码执行）与 person_json 的移动端底层漏洞方向一致。未检索到安全研究领域存在同名显著人物的歧义记录。因此身份与所属机构（Google Project Zero）判定为 documented；其余传记细节（教育、入职与离职时间）无一手来源，列为缺口。",
+    "items": [
+      {
+        "id": "gb-timeline-01",
+        "date": "2017-04-04",
+        "claim": "Gal Beniamini 作为 Google Project Zero 研究员，在 Project Zero 博客发表《Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)》，逆向 Broadcom FullMAC Wi-Fi SoC 固件并通过 TDLS 管理帧堆溢出实现无需用户交互的 Wi-Fi 芯片远程代码执行。这是其可一手核验的公开研究活动起点之一。",
+        "status": "documented",
+        "growth_signal": "以独立长篇 writeup 形式公布完整攻击链（固件逆向—漏洞发现—利用构造—远程代码执行），显示其已具备芯片级固件逆向与协议栈漏洞研究能力，并养成在 Project Zero 博客公开发表深度技术 writeup 的习惯。该能力指向长期、系统化的移动底层攻击面研究训练，而非孤立事件。",
+        "short_quote": "Posted by Gal Beniamini, Project Zero",
+        "source": {
+          "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)",
+          "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html",
+          "published": "2017-04-04",
+          "source_type": "本人 writeup / 机构技术博客",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_v34vjn4bo9guy4b97iv6toi3",
+          "accessed_at": "2026-09-26T17:39:45.920418+00:00",
+          "content_sha256": "8819354591399e254bcc04c370bb8d0d9a1ee32a101c1786128004c1b1714f3b"
+        }
+      },
+      {
+        "id": "gb-timeline-02",
+        "date": "2017",
+        "claim": "据多个公开搜索摘要，Gal Beniamini 曾在 2017 年前后于 Project Zero 博客发表 Qualcomm TrustZone/QSEE 与 KeyMaster 密钥提取相关系列文章，研究 Android 可信执行环境的安全性。",
+        "status": "unknown",
+        "growth_signal": "若属实，则表明其研究范围从 Wi-Fi SoC 扩展到基带与 TrustZone 可信执行环境，呈现攻击面逐层深入的研究路径；但该结论目前仅为搜索摘要的模型转述，未经一手页面抓取确认标题、URL 与日期，不能作为已核验事实。",
+        "source": {
+          "title": "Project Zero 博客 TrustZone/QSEE 相关文章（标题与 URL 未一手确认）",
+          "url": "https://projectzero.google/",
+          "published": "2017",
+          "source_type": "机构技术博客（未一手确认具体文章）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_m4e16grashckapb3tdwvvw1l",
+          "accessed_at": "2026-09-26T17:39:45.920411+00:00",
+          "content_sha256": "c5091aba099e3a210cc7f131590dc0361f845cd0fab97f96e6ee610fd1949529"
+        }
+      },
+      {
+        "id": "gb-timeline-03",
+        "date": "2017",
+        "claim": "据公开搜索摘要，Gal Beniamini 于 2017 年在 Black Hat USA 发表题为《Exploiting The Qualcomm Baseband》的演讲，主题为 Qualcomm 基带处理器漏洞研究。",
+        "status": "unknown",
+        "growth_signal": "若属实，则表明其在完成 Wi-Fi SoC 研究同期将成果推向国际会议公开发表，形成 'writeup + 会议演讲' 的发表模式；但 blackhat.com 议程页与 i.blackhat.com PDF 均返回 HTTP 403，无法一手确认演讲事实、byline 与日期，故列为缺口。",
+        "source": {
+          "title": "Black Hat USA 2017 — Exploiting The Qualcomm Baseband（议程与 PDF 均返回 403，未一手确认）",
+          "url": "https://www.blackhat.com/us-17/briefings.html#gal-beniamini",
+          "published": "2017",
+          "source_type": "会议议程页面（抓取失败）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_p42bgcxi3birub26k4p6n6jq",
+          "accessed_at": "2026-09-26T17:39:45.920369+00:00",
+          "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47"
+        }
+      }
+    ],
+    "contradictions": [
+      "多个搜索摘要将 TrustZone/QSEE 系列文章归到 2017 年，但具体标题（如 'Extracting Qualcomm's KeyMaster Keys'、'Defeating Samsung's Kernel Level Encryption' 等）与发布日期在不同摘要中表述不一致，且 projectzero.google 对应 slug（如 2017/07 Broadcom Part 2）返回 404；这些摘要由模型基于训练数据生成而非实际页面抓取，无法相互印证。"
+    ],
+    "gaps": [
+      "教育背景（学位、院校、毕业年份）无任何公开一手来源，无法核验。",
+      "加入 Google Project Zero 的具体时间无一手来源；只能由 2017-04-04 文章 byline 推断其当时已在该团队，属 inferred 下界。",
+      "离开 Project Zero 或职位变动的具体时间无一手来源；Project Zero 新博客首页（2025-12 起）未见其署名文章，但 absence 不等同于确证离职，列为缺口。",
+      "Broadcom Wi-Fi 系列第 2 部分及 TrustZone/QSEE 系列文章的确切标题、URL、发布日期未能一手抓取确认；projectzero.google 对 2017/07 slug 与 2017 年归档页均返回 404。",
+      "Black Hat USA 2017 演讲因 blackhat.com 议程页与 i.blackhat.com PDF 均返回 403，未能一手确认演讲事实与 bio；只保留搜索摘要作为 lead_only 线索。",
+      "2017 年之前的早期研究活动、导师或同伴关系、工具建设过程无公开材料。"
+    ]
+  },
+  "targeted": {
+    "items": [
+      {
+        "id": "gb-rev1-poc-agenda",
+        "resolves_issue": "person_json.selected_conference_evidence 含'POC'，但综合结论未对 POC 演讲作核验状态说明，存在覆盖不对称。",
+        "date": "2016–2021",
+        "claim": "POC（Power of Community，首尔）官方议程页一手抓取确认：归档按 /YYYY/ 路径组织（powerofcommunity.net 主站一手抓取确认）。逐年度议程页一手抓取 Gal Beniamini 列入情况：POC 2016 未列入；POC 2017（会议日期 2017-11-09/10，TheK-Hotel）20 名演讲者中未列入；POC 2018（2018-11-08/09，TheK Hotel）17 项演讲中未列入；POC 2019 19 项演讲中未列入；POC 2020 19 项演讲中未列入；POC 2021 12 项演讲中未列入。person_json.selected_conference_evidence 中的'POC'未在 POC 官方议程页（2016–2021）得到一手证实；POC 2022–2025 议程页因工具调用预算耗尽未抓取，列为缺口。",
+        "status": "reported",
+        "source": {
+          "title": "Power of Community (POC) 官方议程归档页 2016–2021",
+          "url": "https://powerofcommunity.net/2017/",
+          "published": "2017–2021",
+          "source_type": "会议官方议程页（一手抓取）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_pgmdbp8yz8u2pvg66vpg6tzy",
+          "accessed_at": "2026-09-26T17:57:21.145768+00:00",
+          "content_sha256": "e9b90d506c5183ee70452bb827d25223331147e99dce003d879b57d53e8aeba9"
+        }
+      }
+    ]
+  }
+}

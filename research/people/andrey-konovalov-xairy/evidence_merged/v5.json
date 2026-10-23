@@ -1,0 +1,1649 @@
+{
+  "works": {
+    "person": "Andrey Konovalov (xairy)",
+    "dimension": "公开作品与技术演化",
+    "identity_check": "handle 'xairy' 与个人站点 xairy.io、GitHub 仓库 xairy/raw-gadget 及 xairy/kernel-exploits 一致；person_json 记录 social=https://x.com/andreyknvl、writeup_evidence=https://xairy.io/。抓取 xairy.io 主页与文章索引确认作者自述为 'security engineer focusing on fuzzers, exploits, and mitigations for Linux and Android kernels'。Project Zero 2017-05-10 CVE-2017-7308 文章署名 Andrey Konovalov，与 Google 背景一致。未见同名歧义。",
+    "items": [
+      {
+        "id": "xairy-works-001",
+        "date": "2014-08-01",
+        "claim": "MIPT 学士论文以 KASAN（Linux 内核动态内存错误检测器）为题，论文题为《Автоматический поиск ошибок работы с динамической памятью в ядре ОС Linux》（俄文）。技术演化的起点：在学术框架内为内核构建动态分析工具。",
+        "status": "documented",
+        "growth_signal": "以学位论文形式完成首个内核动态检测工具相关工作，建立 KASAN/KTSAN 类内核工具链的早期经验。",
+        "source": {
+          "title": "Bachelor thesis: KASAN (xairy.io PDF index)",
+          "url": "https://xairy.io/articles",
+          "published": "2014-08-01",
+          "source_type": "个人站点文章索引（含 PDF 链接）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ndzjkpiepf92daawgamqx1k7",
+          "accessed_at": "2026-09-28T11:00:01.086420+00:00",
+          "content_sha256": "5e03c7e365ea8bca3aac8b4b183fa3ab8ac5a8ab8a00ba90456a55df14aa8001"
+        }
+      },
+      {
+        "id": "xairy-works-002",
+        "date": "2016-02-22",
+        "claim": "CVE-2016-2384：Linux 内核 USB MIDI 驱动 double-free，通过 vUSBf USB fuzzer 发现，并用 Facedancer21 硬件板复现，附内核代码执行 PoC。文章指出该漏洞在外部攻击面下'需要找到合适的原语'才可利用。",
+        "status": "documented",
+        "growth_signal": "从使用现成 fuzzer（vUSBf）+ 硬件复现起步的 USB 漏洞研究；外部可达 USB 攻击面进入视野。",
+        "source": {
+          "title": "CVE-2016-2384: Exploiting a double-free in the Linux kernel USB MIDI driver (xairy.io/articles index)",
+          "url": "https://xairy.io/articles",
+          "published": "2016-02-22",
+          "source_type": "个人站点文章索引",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ndzjkpiepf92daawgamqx1k7",
+          "accessed_at": "2026-09-28T11:00:01.086420+00:00",
+          "content_sha256": "5e03c7e365ea8bca3aac8b4b183fa3ab8ac5a8ab8a00ba90456a55df14aa8001"
+        }
+      },
+      {
+        "id": "xairy-works-003",
+        "date": "2016-08-01",
+        "claim": "MIPT 硕士论文以 KTSAN（Linux 内核动态竞态检测器）为题，论文题为《Автоматический поиск состояний гонок в ядре ОС Linux》（俄文）。延续学位论文-内核工具链模式，主题从内存错误检测转向竞态检测。",
+        "status": "documented",
+        "growth_signal": "重复'为内核构建动态检测工具'的练习，研究对象扩展到数据竞争。",
+        "source": {
+          "title": "Master thesis: KTSAN (xairy.io PDF index)",
+          "url": "https://xairy.io/articles",
+          "published": "2016-08-01",
+          "source_type": "个人站点文章索引（含 PDF 链接）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ndzjkpiepf92daawgamqx1k7",
+          "accessed_at": "2026-09-28T11:00:01.086420+00:00",
+          "content_sha256": "5e03c7e365ea8bca3aac8b4b183fa3ab8ac5a8ab8a00ba90456a55df14aa8001"
+        }
+      },
+      {
+        "id": "xairy-works-004",
+        "date": "2017-05-10",
+        "claim": "CVE-2017-7308：Linux 内核 packet sockets 越界写，使用 syzkaller（KCOV 覆盖引导）+ KASAN 发现。方法为自写 AF_PACKET 相关 syscall 的 syzlang 模板描述并配置 fuzzer，'After a few minutes of running syzkaller with these descriptions I started getting kernel crashes.'。漏洞为 packet_set_ring() 的符号检查绕过，导致约 64k 字节、受控偏移的堆越界写。利用链覆盖堆整形、覆盖 retire_blk_timer 改写 CR4 关闭 SMEP/SMAP、覆盖 xmit 指针跳转用户态 commit_creds(prepare_kernel_cred(0))，并通过 dmesg 的 'Freeing SMP' 绕过 KASLR；目标 x86-64 Ubuntu 16.04.2。",
+        "status": "documented",
+        "growth_signal": "从使用现成 fuzzer 转向自写 fuzzer syscall 描述并完成端到端 exploit + mitigation 绕过链；记录了具体的反馈机制（数分钟内收到崩溃）。",
+        "short_quote": "After a few minutes of running syzkaller with these descriptions I started getting kernel crashes.",
+        "source": {
+          "title": "Exploiting the Linux kernel via packet sockets (Project Zero blog)",
+          "url": "https://projectzero.google/2017/05/exploiting-linux-kernel-via-packet.html",
+          "published": "2017-05-10",
+          "source_type": "Project Zero 博客长文 writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_xq4ls8dyodvdptna5uoty7td",
+          "accessed_at": "2026-09-28T11:00:01.086444+00:00",
+          "content_sha256": "642432159493812464427a09e1f35eb4501f187871e8fe016af2093dbb315ef3"
+        }
+      },
+      {
+        "id": "xairy-works-005",
+        "date": "2020-11-04",
+        "claim": "与 Alexander Popov 共同运营 'Linux Kernel Security' 频道（linkersec，镜像于 Telegram/X/Mastodon/Bluesky/LinkedIn/Reddit），持续发布漏洞、exploit、fuzzer、mitigation 相关内容。",
+        "status": "documented",
+        "growth_signal": "长期社区策展构成持续的反馈/复盘机制：定期跟踪他人工作并内化到自身研究视野。",
+        "source": {
+          "title": "Linux Kernel Security channel (xairy.io homepage)",
+          "url": "https://xairy.io/",
+          "published": "2020-11-04",
+          "source_type": "个人站点主页",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_v518j2kshejxjywcbmd76lue",
+          "accessed_at": "2026-09-28T11:00:01.086384+00:00",
+          "content_sha256": "f726487a9d2d356b9e7b2d729ef78c5058979bf5d70b1e2042f1433f7bd817d9"
+        }
+      },
+      {
+        "id": "xairy-works-006",
+        "date": "2021-11-22",
+        "claim": "HackMag 文章《Ruffling the penguin! How to fuzz the Linux kernel》，基于 PHDays 2021 同名演讲，为 Linux 内核 fuzzing 方法的综述，另有俄文版。",
+        "status": "documented",
+        "growth_signal": "从做研究转向方法综述/教学，标志着对 fuzzing 方法的系统化总结阶段。",
+        "source": {
+          "title": "Ruffling the penguin! How to fuzz the Linux kernel (HackMag, based on PHDays 2021)",
+          "url": "https://xairy.io/articles",
+          "published": "2021-11-22",
+          "source_type": "个人站点文章索引（外部链接）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ndzjkpiepf92daawgamqx1k7",
+          "accessed_at": "2026-09-28T11:00:01.086420+00:00",
+          "content_sha256": "5e03c7e365ea8bca3aac8b4b183fa3ab8ac5a8ab8a00ba90456a55df14aa8001"
+        }
+      },
+      {
+        "id": "xairy-works-007",
+        "date": "2022-05-02",
+        "claim": "文章《Looking for Remote Code Execution bugs in the Linux kernel》：将 syzkaller 扩展到外部网络 fuzzing。三步为 TUN/TAP 注入包、修补 TUN/TAP 使 netif_receive_skb 立即处理以修复 KCOV 覆盖追踪（补丁最终合入主线）、编写 syzlang 网络包描述并迭代检视覆盖报告。引入伪系统调用 syz_emit_ethernet 与 syz_extract_tcp_res。产出跨 SCTP/DCCP/TCP/IPv6/XFRM 的多类 bug 及多个 CVE。作者明确记录失败与转向：'Sadly, to find that one bug to take over the Internet — I failed. But I did manage to find a one-shot RCE in a non-public kernel flavor.' 并自述此前'had never implemented a fuzzer myself'、对 syzkaller 与网络子系统内部'had no knowledge'。",
+        "status": "documented",
+        "growth_signal": "首次自实现 fuzzer，明确记录失败（未找到'接管互联网'的 bug）与转向（非公开 kernel flavor 的 one-shot RCE）；公开承认知识缺口是技术演化的关键反馈。",
+        "short_quote": "Sadly, to find that one bug to take over the Internet — I failed. But I did manage to find a one-shot RCE in a non-public kernel flavor.",
+        "source": {
+          "title": "Looking for Remote Code Execution bugs in the Linux kernel (xairy.io)",
+          "url": "https://xairy.io/articles/syzkaller-external-network",
+          "published": "2022-05-02",
+          "source_type": "个人站点长文 writeup（rev 2026-01-28）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_f181kyd8xn4xq50c5bpht6sz",
+          "accessed_at": "2026-09-28T11:00:01.086456+00:00",
+          "content_sha256": "5e7ee8423507768c23fb15837f590959499121d2f973e8585332d21ec747aa2d"
+        }
+      },
+      {
+        "id": "xairy-works-008",
+        "date": "2024-02-22",
+        "claim": "文章《Unlocking secret ThinkPad functionality for emulating USB devices》：在 ThinkPad X1 Carbon 上启用 xDCI 控制器以仿真 USB 设备，通过 Raw Gadget 与 syzkaller 对 USB 主机侧 fuzz，并可运行 Facedancer，'without any external hardware'。",
+        "status": "documented",
+        "growth_signal": "USB fuzzing 的工具/硬件栈去硬件化演进：从 Facedancer21 物理板到软件化 Raw Gadget 再到内置 xDCI 复用，降低研究门槛。",
+        "source": {
+          "title": "Unlocking secret ThinkPad functionality for emulating USB devices (xairy.io)",
+          "url": "https://xairy.io/articles",
+          "published": "2024-02-22",
+          "source_type": "个人站点文章索引",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ndzjkpiepf92daawgamqx1k7",
+          "accessed_at": "2026-09-28T11:00:01.086420+00:00",
+          "content_sha256": "5e03c7e365ea8bca3aac8b4b183fa3ab8ac5a8ab8a00ba90456a55df14aa8001"
+        }
+      },
+      {
+        "id": "xairy-works-009",
+        "date": "2024-09-16",
+        "claim": "Linux Security Summit Europe（维也纳）演讲《SLUB Internals for Exploit Developers》，讲解 SLUB 分配器内部机制及 Slab 整形技术在 Slab 内存破坏 exploit 中的应用。",
+        "status": "documented",
+        "growth_signal": "从 fuzzing/漏洞发现侧转向 exploit 侧的分配器内部研究；研究对象从子系统漏洞转向分配器原语。",
+        "source": {
+          "title": "SLUB Internals for Exploit Developers (Linux Security Summit Europe 2024)",
+          "url": "https://xairy.io/",
+          "published": "2024-09-16",
+          "source_type": "个人站点主页（演讲项，含 Google Slides 链接）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_v518j2kshejxjywcbmd76lue",
+          "accessed_at": "2026-09-28T11:00:01.086384+00:00",
+          "content_sha256": "f726487a9d2d356b9e7b2d729ef78c5058979bf5d70b1e2042f1433f7bd817d9"
+        }
+      },
+      {
+        "id": "xairy-works-010",
+        "date": "2025-07-28",
+        "claim": "文章《Debugging the Pixel 8 kernel via KGDB》：构建并刷入自定义 Pixel 8 内核，通过 ADB 或串口 SysRq-G 触发 KGDB 并附加 GDB，并指出方法可适配其他 Pixel 机型。",
+        "status": "documented",
+        "growth_signal": "研究平台扩展到 ARM/Android 内核；进入实际设备调试工作流。",
+        "source": {
+          "title": "Debugging the Pixel 8 kernel via KGDB (xairy.io)",
+          "url": "https://xairy.io/articles",
+          "published": "2025-07-28",
+          "source_type": "个人站点文章索引",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ndzjkpiepf92daawgamqx1k7",
+          "accessed_at": "2026-09-28T11:00:01.086420+00:00",
+          "content_sha256": "5e03c7e365ea8bca3aac8b4b183fa3ab8ac5a8ab8a00ba90456a55df14aa8001"
+        }
+      },
+      {
+        "id": "xairy-works-011",
+        "date": "2026-09-28",
+        "claim": "RomHack（罗马）4 日培训《Exploiting the Linux Kernel [4 days]》，覆盖提权、x86-64 mitigation 绕过、高级 Slab/堆 exploit 及分配器内部深入分析。",
+        "status": "documented",
+        "growth_signal": "将多年研究链（fuzzing→漏洞发现→分配器内部→exploit→mitigation 绕过）系统化为多日课程，标志教学输出阶段。",
+        "source": {
+          "title": "Exploiting the Linux Kernel [4 days] — RomHack 2026 (xairy.io homepage)",
+          "url": "https://xairy.io/",
+          "published": "2026-09-28",
+          "source_type": "个人站点主页（培训项）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_v518j2kshejxjywcbmd76lue",
+          "accessed_at": "2026-09-28T11:00:01.086384+00:00",
+          "content_sha256": "f726487a9d2d356b9e7b2d729ef78c5058979bf5d70b1e2042f1433f7bd817d9"
+        }
+      },
+      {
+        "id": "xairy-works-012",
+        "date": "2018",
+        "claim": "在 Black Hat USA 发表《syzkaller: USB fuzzing of the Linux kernel》，扩展 syzkaller 对 Linux USB 子系统进行覆盖引导 fuzzing，使用 dummy_hcd/raw-gadget 仿真 USB 设备，发现大量 USB 栈内存破坏/UAF/空指针/信息泄露类 bug。该演讲被广泛引用为 xairy USB fuzzing 研究的代表作品。",
+        "status": "inferred",
+        "growth_signal": "USB fuzzing 方法论的公开标志性输出；但本节点未能抓取 Black Hat 原始页面核验标题、年份与 whitepaper。",
+        "source": {
+          "title": "syzkaller: USB fuzzing of the Linux kernel (Black Hat, WebSearch 多源提及)",
+          "url": "https://www.blackhat.com/html/archives.html",
+          "published": "2018",
+          "source_type": "会议档案（WebSearch 摘要，未抓取正文）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_62l0h0t0ltvolkwbhx98g4om",
+          "accessed_at": "2026-09-28T11:00:01.086438+00:00",
+          "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47"
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 摘要提及 Black Hat USB 演讲存在 2017 与 2018 两个年份，且标题在不同摘要中分别写作 'USB Fuzzing: Bypassing Frontend Firewalls' 与 'syzkaller: USB fuzzing of the Linux kernel'；Black Hat 原始档案页 blackhat.com/html/archives.html 返回 HTTP 403，未能抓取正文核对确切年份、标题与 whitepaper 链接，存在来源冲突且无法以一级来源裁决。",
+      "xairy.io 主页未将 USB fuzzing / Black Hat 演讲列为独立条目，而 person_json 的 selected_conference_evidence 标注为 Black Hat US/EU；主页与 person_json 之间的覆盖范围不一致（主页侧重 2020 年后内容）。"
+    ],
+    "gaps": [
+      "Black Hat USB fuzzing 演讲的原始页面（blackhat.com 档案）未能抓取（403），确切年份、标题、whitepaper 链接未以一级来源确认；相关内容仅以 WebSearch 摘要存在，标记为 lead_only/inferred。",
+      "CVE-2016-2384、CVE-2017-6074、CVE-2017-1000112、CVE-2017-18344 的 writeup 正文未抓取（仅 xairy.io 文章索引列出标题/日期/简述），其方法论与 exploit 细节未逐篇核验。",
+      "raw-gadget 项目（GitHub xairy/raw-gadget）的提交时间线、与 syzkaller 上游集成节点未抓取，无法刻画 USB fuzzing 工具建设的时间演进。",
+      "Project Zero 在职时间段、入职/离职时间，以及除与 Alexander Popov 合办频道外的导师/同伴关系缺材料，无法支撑'导师或同伴'维度。",
+      "2016-2020 年间从 USB fuzzing 转向网络 fuzzing 的具体动机、反馈来源与项目驱动方（Google 内部目标 vs 个人研究）缺一级来源。",
+      "2024-09 SLUB Internals 与 2024-02 ThinkPad xDCI 之后向 Android/ARM 内核调试（2025）与 exploit 培训（2026）转向的衔接动机缺材料。",
+      "本地种子材料缺失，研究完全依赖公开网络来源；未能检索任何非公开/内部记录。"
+    ]
+  },
+  "conversations": {
+    "person": "Andrey Konovalov (xairy)",
+    "dimension": "深度对话与自述",
+    "identity_check": "研究对象身份经多源交叉核对一致：xairy.io 主页自述 'Security engineer focusing on fuzzers, exploits, and mitigations for Linux and Android kernels.'；GitHub 账号 github.com/xairy、X 账号 x.com/andreyknvl、YouTube 频道 UCHTqZf61TFAELLrrtOrjr7w 均指向同一人；文章署名 Andrey Konovalov，与 person_json 记录的 handle xairy 及 primary_focus（Linux 内核与 USB 漏洞）吻合。未发现同名歧义冲突，未发现指向其他同名人物（如运动员、其他学者）的混淆性证据。抓取的来源均通过同一站点（xairy.io / xairy.github.io）或本人执笔的 Project Zero / HackMag 投稿确认归属。",
+    "items": [
+      {
+        "id": "conv-01-start-timeline",
+        "date": "2021-11-22",
+        "claim": "Konovalov 自述至 2021 年已用 fuzzing 寻找 Linux 内核漏洞约五年，据此回溯其内核 fuzzing 工作起始时间约为 2016 年；他描述自己的工作按三个阶段推进：通过系统调用 fuzz 网络子系统、对内核做外部网络 fuzz、从设备侧 fuzz USB 子系统，并在过程中为所发现漏洞编写利用。",
+        "status": "reported",
+        "growth_signal": "入门时间锚点与分阶段推进路径。三阶段分别对应不同的工具建设需求（system call fuzzing → 外部网络 fuzzing → USB 设备侧 fuzzing），显示其能力随目标子系统变化而逐步扩展，而非一次性掌握；'For the last five years I've been using fuzzing to find vulnerabilities in the Linux kernel' 的自述提供了可回溯的起始时间。",
+        "short_quote": "For the last five years I've been using fuzzing to find vulnerabilities in the Linux kernel. I implemented three major projects...",
+        "source": {
+          "title": "Ruffling the penguin! How to fuzz the Linux kernel",
+          "url": "https://hackmag.com/security/linux-fuzzing",
+          "published": "2021-11-22",
+          "source_type": "long-form article (transcribed from PhDays 2021 talk, first-person with author's permission)",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8ajnq358c8sda8qpwein08ip",
+          "accessed_at": "2026-09-28T10:55:33.615583+00:00",
+          "content_sha256": "d3d03252f89cbc4215458bb663d1e684a625272c3541698fc0e46bf665ecca75"
+        }
+      },
+      {
+        "id": "conv-02-tool-building",
+        "date": "2021-11-22",
+        "claim": "Konovalov 自述为推进 USB fuzzing 亲手搭建若干工具：编写自己的 USB 设备仿真内核驱动（后即 raw-gadget 接口）、在 syzkaller 之上实现额外的 USB 专用模块、在 KCOV 中加入从后台线程与 softirq 收集覆盖的能力以处理 USB 报文在内核全局线程中处理的场景，并改造 KMSAN 以检测经由网络与 USB 等外部接口的泄漏。",
+        "status": "reported",
+        "growth_signal": "工具建设习惯。当现成工具不足以覆盖新目标子系统时，他主动向内核上游新增基础设施（raw-gadget、KCOV 远程覆盖、syzkaller USB 模块、KMSAN 扩展），而非仅运行现成 fuzzer；'I had to write my own driver' 反映出对现有能力边界的识别与主动扩展。",
+        "short_quote": "I had to write my own driver",
+        "source": {
+          "title": "Ruffling the penguin! How to fuzz the Linux kernel",
+          "url": "https://hackmag.com/security/linux-fuzzing",
+          "published": "2021-11-22",
+          "source_type": "long-form article (transcribed from PhDays 2021 talk, first-person with author's permission)",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8ajnq358c8sda8qpwein08ip",
+          "accessed_at": "2026-09-28T10:55:33.615583+00:00",
+          "content_sha256": "d3d03252f89cbc4215458bb663d1e684a625272c3541698fc0e46bf665ecca75"
+        }
+      },
+      {
+        "id": "conv-03-code-over-docs",
+        "date": "2021-11-22",
+        "claim": "Konovalov 自述在 USB fuzzer 工作中注意到内核实际支持的协议子集与文档描述不同，由此形成方法论经验：以内核代码而非文档为依据编写 fuzzer。",
+        "status": "reported",
+        "growth_signal": "从具体观察中提炼方法论。单一具体工作中的发现（文档与代码不一致）被提炼为通用指导原则，并被反复强调；反映出经验从具体实例上升为可复用方法的过程。",
+        "short_quote": "write the fuzzer based on the code, not documentation",
+        "source": {
+          "title": "Ruffling the penguin! How to fuzz the Linux kernel",
+          "url": "https://hackmag.com/security/linux-fuzzing",
+          "published": "2021-11-22",
+          "source_type": "long-form article (transcribed from PhDays 2021 talk, first-person with author's permission)",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8ajnq358c8sda8qpwein08ip",
+          "accessed_at": "2026-09-28T10:55:33.615583+00:00",
+          "content_sha256": "d3d03252f89cbc4215458bb663d1e684a625272c3541698fc0e46bf665ecca75"
+        }
+      },
+      {
+        "id": "conv-04-collection-habit",
+        "date": "2021-11-22",
+        "claim": "Konovalov 自述长期阅读并收集 fuzzing 相关文献，随后将其整理为一场演讲。",
+        "status": "reported",
+        "growth_signal": "重复练习与公开发表习惯。持续积累文献（输入侧重复练习）并转化为公开输出（演讲/文章），构成 '收集—整理—发表' 的可观察循环，而非偶发性写作。",
+        "short_quote": "I've been reading and collecting fuzzing-related publications. So, I organized them and turned into a talk.",
+        "source": {
+          "title": "Ruffling the penguin! How to fuzz the Linux kernel",
+          "url": "https://hackmag.com/security/linux-fuzzing",
+          "published": "2021-11-22",
+          "source_type": "long-form article (transcribed from PhDays 2021 talk, first-person with author's permission)",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8ajnq358c8sda8qpwein08ip",
+          "accessed_at": "2026-09-28T10:55:33.615583+00:00",
+          "content_sha256": "d3d03252f89cbc4215458bb663d1e684a625272c3541698fc0e46bf665ecca75"
+        }
+      },
+      {
+        "id": "conv-05-iteration-deadends",
+        "date": "2024-02-22",
+        "claim": "Konovalov 自述在使 ThinkPad X1 Carbon 内置 xDCI USB 设备控制器可用的工作中，依次尝试多条路径并在多条路径上失败：EC3380-AB ExpressCard 配 net2280 驱动时驱动偶尔故障，转而探查内置 xDCI；首次 BIOS 改动不完整导致 Boot Guard 失败、笔记本拒绝启动；尝试经 PMC 寄存器复位功能禁用位时寄存器自锁；转向 PSF 路径时遭遇 EPMASK5 与 MASKLOCK 锁定无法解锁；尝试经 efivarfs 与 chipsec 修改 EFI 变量时获得 EFI_WRITE_PROTECTED。最终在直接对 SPI 镜像打补丁后 reflashing 成功。",
+        "status": "documented",
+        "growth_signal": "迭代与转向的可观察序列。同一目标上记录到多次明确的失败—转向—再尝试循环（net2280→xHCI role switch→PMC→PSF→efivarfs/chipsec→SPI patch），显示对每条路径的局限识别后系统化切换，而非单点放弃；失败被具体记录为可复述的技术节点。",
+        "short_quote": "I had sunk enough time into this rabbit hole",
+        "source": {
+          "title": "Unlocking secret ThinkPad functionality for emulating USB devices",
+          "url": "https://xairy.io/articles/thinkpad-xdci",
+          "published": "2024-02-22",
+          "source_type": "personal technical writeup (first-person narrative)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_blorsbyukj9kl27t57wyeteh",
+          "accessed_at": "2026-09-28T10:55:33.615593+00:00",
+          "content_sha256": "98b11bd0ad76d472a0316931afb8908a3e9834ef7c36b0436db5ffa65470e217"
+        }
+      },
+      {
+        "id": "conv-06-mentors-peers",
+        "date": "2024-02-22",
+        "claim": "Konovalov 在 xDCI 工作中向具特定专长的人求助：向 Maxim Goryachy（其自述为 low-level platform security 领域专家）征求从操作系统侧使能 xDCI 的思路；请 Sergey Korablin（其自述曾以设计组装主板为业）协助焊接 SPI 插座；从 Dmytro Oleksiuk 多年前的文章学习 FT2232H 用法；并参考 Tyler Nguyen 的 x1c6-hackintosh 项目解锁隐藏 BIOS 页面。",
+        "status": "documented",
+        "growth_signal": "导师/同伴求助网络。在自身专长边界外（平台底层安全、硬件焊接）按所需能力类型向对应专家求助，并明确说明每位求助对象的专长依据；显示对自身能力边界与外部资源调配的识别，而非孤立工作。",
+        "short_quote": "an expert in the low-level platform security area",
+        "source": {
+          "title": "Unlocking secret ThinkPad functionality for emulating USB devices",
+          "url": "https://xairy.io/articles/thinkpad-xdci",
+          "published": "2024-02-22",
+          "source_type": "personal technical writeup (first-person narrative)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_blorsbyukj9kl27t57wyeteh",
+          "accessed_at": "2026-09-28T10:55:33.615593+00:00",
+          "content_sha256": "98b11bd0ad76d472a0316931afb8908a3e9834ef7c36b0436db5ffa65470e217"
+        }
+      },
+      {
+        "id": "conv-07-prior-failure-avoidance",
+        "date": "2024-02-22",
+        "claim": "Konovalov 自述数年前在另一台笔记本上用 SPI 夹 reflashing BIOS 时烧毁主板，因此在此次工作中改用焊接 SPI 插座以规避同类失败。",
+        "status": "documented",
+        "growth_signal": "失败教训的复用。过往硬件事故被显式引用为当前方法选择的原因，构成 '失败—归因—改变后续做法' 的可观察反馈链；方法调整基于具体历史失败而非泛化原则。",
+        "short_quote": "A few years ago, I successfully fried the motherboard on another laptop when I tried reflashing BIOS with an SPI clip.",
+        "source": {
+          "title": "Unlocking secret ThinkPad functionality for emulating USB devices",
+          "url": "https://xairy.io/articles/thinkpad-xdci",
+          "published": "2024-02-22",
+          "source_type": "personal technical writeup (first-person narrative)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_blorsbyukj9kl27t57wyeteh",
+          "accessed_at": "2026-09-28T10:55:33.615593+00:00",
+          "content_sha256": "98b11bd0ad76d472a0316931afb8908a3e9834ef7c36b0436db5ffa65470e217"
+        }
+      },
+      {
+        "id": "conv-08-learning-value",
+        "date": "2024-02-22",
+        "claim": "Konovalov 自述在 PSF 路径失败并决定放弃该路径后，仍表示从中学到了关于 PCH、PMC、PSF 的知识。",
+        "status": "documented",
+        "growth_signal": "对失败路径的价值重估。在明确放弃某条技术路径时，仍记录其所带来的学习收益；反映出对失败路径的正向归因，而非单纯损失评估。",
+        "short_quote": "I nevertheless enjoyed learning about PCH, PMC, and PSF",
+        "source": {
+          "title": "Unlocking secret ThinkPad functionality for emulating USB devices",
+          "url": "https://xairy.io/articles/thinkpad-xdci",
+          "published": "2024-02-22",
+          "source_type": "personal technical writeup (first-person narrative)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_blorsbyukj9kl27t57wyeteh",
+          "accessed_at": "2026-09-28T10:55:33.615593+00:00",
+          "content_sha256": "98b11bd0ad76d472a0316931afb8908a3e9834ef7c36b0436db5ffa65470e217"
+        }
+      },
+      {
+        "id": "conv-09-p0-writeup",
+        "date": "2017-05-10",
+        "claim": "Konovalov 在 Project Zero 博客以第一人称叙述其发现并利用 Linux 内核 packet socket 漏洞（CVE-2017-7308）的过程，对应其自述三阶段工作中的系统调用/网络 fuzzing 阶段。",
+        "status": "unknown",
+        "growth_signal": "阶段叙事的独立交叉验证。Project Zero 博客由本人执笔，构成对其三阶段自述（conv-01）中第一阶段成果的独立一手佐证；显示其工作被外部权威安全团队接纳并以本人名义发表。",
+        "source": {
+          "title": "CVE-2017-7308: Exploiting the Linux kernel via packet sockets",
+          "url": "https://googleprojectzero.blogspot.com/2017/05/exploiting-linux-kernel-via-packet.html",
+          "published": "2017-05-10",
+          "source_type": "Project Zero blog writeup (first-person, authored by subject)",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      }
+    ],
+    "contradictions": [
+      "未在抓取的来源中发现互相冲突的叙述。conv-01 自述起始时间约 2016 年与 conv-09（2017 年 Project Zero packet socket 漏洞）存在时间上的一致性而非冲突；需注意 conv-01 由 HackMag 编辑基于 PhDays 2021 演讲转写并以第一人称发表、经本人授权，非本人逐字执笔，其措辞应视为转述而非逐字自述。"
+    ],
+    "gaps": [
+      "未抓取到本人明确的长视频播客或 AMA 逐字稿；xairy.io 列出的 YouTube 频道（英文 UCHTqZf61TFAELLrrtOrjr7w、俄文 UCuCF2EVLLTWx_GOmvKg5FnQ）与 Telegram 博客 t.me/xairylog 因工具预算耗尽未抓取，无法确认其中是否含本人对入门、导师或职业转折的口述自述。",
+      "未确认最早接触内核安全或 fuzzing 的具体起点与最初学习路径。conv-01 仅给出约 2016 年的起始时间锚点，未描述此前如何入门、是否经正式课程或自学。",
+      "未确认教育背景与学位论文导师。articles 清单列出 2014 年 KASAN 学士论文（Автоматический поиск ошибок работы с динамической памятью в ядре ОС Linux）与 2016 年 KTSAN 硕士论文（Автоматический поиск состояний гонок в ядре ОС Linux）PDF，但因预算耗尽未读取正文，无法确认所属机构、导师姓名及论文中可能的自述学习路径。",
+      "xairy.io/about 仅给出 'I spent 5 years at Google' 与 Xairy Labs 创始人身份，未给出 Google 起止日期，亦未述及在 Google 期间的合作者关系或导师；Dmitry Vyukov 仅以演讲链接被引用，未作为个人导师被本人明确陈述。",
+      "conv-01 中工具归属需谨慎：syzkaller 为 Google 项目、vUSBf 由 schumilo 创建，文章提及这些工具时为使用或扩展，非从零创建；本人自述的原创贡献限于 raw-gadget、syzkaller USB 模块、KCOV 远程覆盖与 KMSAN 外部接口扩展。"
+    ]
+  },
+  "community": {
+    "person": "Andrey Konovalov (xairy)",
+    "dimension": "社区参与与反馈回路",
+    "identity_check": "研究对象 GitHub handle 为 xairy（github.com/xairy），X 为 @andreyknvl，Linux 内核提交 author=andreyknvl。xairy.io/projects 页将其 GitHub handle、git.kernel.org author 查询串（andreyknvl）与本人项目互相对齐，身份一致。需注意同名歧义：存在体育界及其他领域的 Andrey Konovalov，本主题仅指内核/USB 漏洞研究方向的安全研究员。",
+    "items": [
+      {
+        "id": "xairy-comm-01",
+        "date": "2015-07-18",
+        "claim": "在 LinuxCon North America（西雅图）首次公开演讲 KernelAddressSanitizer (KASAN)，这是关于该内核内存错误检测器的首次公开报告；随后自 2015-08-03 起向 Linux 内核主线提交 KASAN/KCOV 相关补丁。",
+        "status": "documented",
+        "growth_signal": "公开演讲与内核主线补丁贡献同步推进，构成“做研究—公开发表—接受社区评审—继续贡献”的早期反馈回路起点：演讲促使技术对外可见，补丁进入主线接受 maintainer 评审，形成持续输出习惯。",
+        "short_quote": "KASAN — a fast memory error detector for the Linux kernel",
+        "source": {
+          "title": "xairy.io — Talks（KernelAddressSanitizer (KASAN)，LinuxCon North America, Seattle）",
+          "url": "https://xairy.io/talks",
+          "published": "2015-07-18",
+          "source_type": "本人项目页（演讲索引）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8l72oks794yp3c84nnrwo31g",
+          "accessed_at": "2026-09-28T10:48:46.264579+00:00",
+          "content_sha256": "3f90f6bae85510e50234dc5463432a8b46c71686c650d868b7f93f8a35aaf9eb"
+        }
+      },
+      {
+        "id": "xairy-comm-02",
+        "date": "2015-08-03",
+        "claim": "自该日起持续向 Linux 内核主线贡献补丁，覆盖 KASAN、KCOV、USB Raw Gadget 等子系统；贡献记录可通过 git.kernel.org 按 author=andreyknvl 检索。",
+        "status": "documented",
+        "growth_signal": "长达十年以上的内核主线持续贡献，显示重复练习与长期工具建设习惯；补丁经 maintainer 评审合入即外部反馈的直接形式，补丁被接收/修改/拒绝的循环驱动能力迭代。",
+        "source": {
+          "title": "xairy.io — Projects：Contributions to the Linux Kernel",
+          "url": "https://xairy.io/projects",
+          "published": "2015-08-03",
+          "source_type": "本人项目页（贡献索引，指向 git.kernel.org author 查询）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_nqbrv4ks03759kj903zbidj9",
+          "accessed_at": "2026-09-28T10:48:46.264567+00:00",
+          "content_sha256": "5aec1203ef1d9689e1d70170cbc28f499e60a541d5a1e0d48f9c7046bfd0023f"
+        }
+      },
+      {
+        "id": "xairy-comm-03",
+        "date": "2015-10-13",
+        "claim": "自该日起持续向 syzkaller（Google 维护的覆盖引导内核 fuzzer）贡献代码，包括 external network、USB fuzzing 扩展，以及大量 syzlang 描述与功能。",
+        "status": "documented",
+        "growth_signal": "对单一开源工具长达十年的持续贡献，体现“工具建设—反复打磨—社区共用”的回路：扩展能力即研究能力的物化，syzlang 描述的持续扩充是结构化的重复练习。",
+        "source": {
+          "title": "xairy.io — Projects：Contributions to syzkaller",
+          "url": "https://xairy.io/projects",
+          "published": "2015-10-13",
+          "source_type": "本人项目页（贡献索引，指向 github.com/google/syzkaller commits?author=xairy）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_nqbrv4ks03759kj903zbidj9",
+          "accessed_at": "2026-09-28T10:48:46.264567+00:00",
+          "content_sha256": "5aec1203ef1d9689e1d70170cbc28f499e60a541d5a1e0d48f9c7046bfd0023f"
+        }
+      },
+      {
+        "id": "xairy-comm-04",
+        "date": "2019-02-15",
+        "claim": "在 OffensiveCon（柏林）演讲“Coverage-guided USB fuzzing with syzkaller”，介绍创建 syzkaller 扩展以发现 Linux 内核 USB 漏洞的方法；此后持续在 BSides Munich 2022、SAFACon 2025、OFFZONE 2025、BalcCon2k25 等场合反复报告 USB/Raw Gadget 相关工作。",
+        "status": "documented",
+        "growth_signal": "同一主题在多年多个会议反复报告与更新，显示“研究—演讲—反馈—改进—再演讲”的迭代回路；会议既是成果出口也是同行反馈入口。",
+        "short_quote": "Creating a syzkaller extension for finding externally exploitable Linux kernel USB vulnerabilities",
+        "source": {
+          "title": "xairy.io — Talks：Coverage-guided USB fuzzing with syzkaller, OffensiveCon, Berlin",
+          "url": "https://xairy.io/talks",
+          "published": "2019-02-15",
+          "source_type": "本人项目页（演讲索引）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8l72oks794yp3c84nnrwo31g",
+          "accessed_at": "2026-09-28T10:48:46.264579+00:00",
+          "content_sha256": "3f90f6bae85510e50234dc5463432a8b46c71686c650d868b7f93f8a35aaf9eb"
+        }
+      },
+      {
+        "id": "xairy-comm-06",
+        "date": "2020-11-04",
+        "claim": "与 Alexander Popov 共同创办并持续运营“Linux Kernel Security”信息渠道，定期发布漏洞、利用、fuzzer、缓解措施等安全相关材料，并镜像到 Telegram、X、Mastodon、Bluesky、LinkedIn、Reddit 等平台。",
+        "status": "documented",
+        "growth_signal": "与同伴（Alexander Popov）协作建立长期信息输出渠道，构成稳定的外部反馈与同行网络；多平台镜像与持续更新是社区参与中“持续输出”机制的直接证据，同伴协作提供互补性反馈。",
+        "source": {
+          "title": "xairy.io — Projects：Linux Kernel Security channel（与 Alexander Popov 合办）",
+          "url": "https://xairy.io/projects",
+          "published": "2020-11-04",
+          "source_type": "本人项目页",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_nqbrv4ks03759kj903zbidj9",
+          "accessed_at": "2026-09-28T10:48:46.264567+00:00",
+          "content_sha256": "5aec1203ef1d9689e1d70170cbc28f499e60a541d5a1e0d48f9c7046bfd0023f"
+        }
+      },
+      {
+        "id": "xairy-comm-07",
+        "date": "2015-11-23",
+        "claim": "在 ISP RAS（莫斯科）报告 KernelThreadSanitizer (KTSAN) 内核数据竞争检测器原型；此前已在 LinuxCon 2015 报告 KASAN，此后在 Linux Security Summit（2021/2022/2024 多届）持续报告 KASAN、MTE、SLUB 等内核安全主题。",
+        "status": "documented",
+        "growth_signal": "从 KASAN→KTSAN→MTE/Tag-Based KASAN→SLUB 的主题序列，显示其社区参与随内核子系统演进持续迁移；多届 Linux Security Summit 反复出场表明其与内核安全社区的稳定连接与被邀请的反馈回路。",
+        "source": {
+          "title": "xairy.io — Talks（KTSAN @ ISP RAS 2015-11-23；多届 Linux Security Summit）",
+          "url": "https://xairy.io/talks",
+          "published": "2015-11-23",
+          "source_type": "本人项目页（演讲索引）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8l72oks794yp3c84nnrwo31g",
+          "accessed_at": "2026-09-28T10:48:46.264579+00:00",
+          "content_sha256": "3f90f6bae85510e50234dc5463432a8b46c71686c650d868b7f93f8a35aaf9eb"
+        }
+      },
+      {
+        "id": "xairy-comm-08",
+        "date": "2025-05-03",
+        "claim": "在 SAFACon（贝尔格莱德）演讲“External fuzzing of USB drivers with syzkaller”，演示通过 syzkaller 复现 CVE-2024-53104；该演讲亦在 OFFZONE 2025 以扩展版呈现。",
+        "status": "documented",
+        "growth_signal": "将历史工具投入（syzkaller USB 扩展）用于复现真实 CVE，并向社区公开展示，体现工具建设—漏洞发现—公开可核验复现的闭环；同一内容多会议迭代是演讲反馈回路的延续。",
+        "source": {
+          "title": "xairy.io — Talks：External fuzzing of USB drivers with syzkaller, SAFACon, Belgrade",
+          "url": "https://xairy.io/talks",
+          "published": "2025-05-03",
+          "source_type": "本人项目页（演讲索引）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8l72oks794yp3c84nnrwo31g",
+          "accessed_at": "2026-09-28T10:48:46.264579+00:00",
+          "content_sha256": "3f90f6bae85510e50234dc5463432a8b46c71686c650d868b7f93f8a35aaf9eb"
+        }
+      }
+    ],
+    "contradictions": [
+      "在评估“持续输出渠道”时，本人项目页将 Linux Kernel Security channel 标为 2020-11-04 起运营；其多平台镜像列表与渠道主页的具体发布历史未单独抓取核实，渠道内容本身作为 lead_only 未逐条验证。"
+    ],
+    "gaps": [
+      "lore.kernel.org（Linux USB 邮件列表）与 git.kernel.org cgit 在抓取时返回 Anubis bot 防护（403/error 9e4edb5b6b850c41），无法直接核实 Raw Gadget 合入主线时的 Reviewed-by/Acked-by 等社区评审反馈标签与具体评审者；仅依据本人项目页与 syzkaller 文档间接确认其已进入主线。",
+      "未抓取 syzkaller GitHub 上 author=xairy 的具体 commit 列表与协作者 PR 评论，无法逐条还原社区评审互动与同伴反馈细节；syzkaller USB 文档提及的 mailing list 讨论（spinics.net/linux-usb）与 PR #6283 未逐条抓取核实。",
+      "Linux Security Summit 等会议的 speaker 页面只能证明演讲事实，按任务要求不足以单独证明成长机制；其与内核 maintainer 之间具体的反馈往来（补丁修改、被拒、返工）缺乏一手邮件记录佐证。",
+      "本地种子为空（local_seed_note.md 标注无本地种子），无内部材料可补充早期（2014–2015 MIPT CTF 阶段）的同伴网络与导师关系细节。"
+    ]
+  },
+  "external": {
+    "person": "Andrey Konovalov (xairy)",
+    "dimension": "外部视角",
+    "identity_check": "身份与 person_json 一致：xairy.io 自述作者为 Andrey Konovalov，handle 为 xairy (GitHub/Mastodon) 与 andreyknvl (email/X)，关注 Linux 与 Android 内核的 fuzzers、exploits、mitigations。Project Zero blog 2017-05-10 投稿署名同为 Andrey Konovalov，与 person_json.social (x.com/andreyknvl) 与 writeup_evidence (xairy.io) 交叉一致。需要澄清的常见歧义：外部 WebSearch 模型产出曾将 Konovalov 描述为 Google Project Zero 成员，但 Project Zero blog 一手页面明确将其标注为 guest blog post，未将其列为团队成员；xairy.io 也未声明 Project Zero 或 Google 雇主归属。据此，'Project Zero 成员' 的归属视为 inferred 而非 documented。",
+    "items": [
+      {
+        "id": "external-01",
+        "date": "2017-05-10",
+        "claim": "Google Project Zero blog 以 guest blog post 形式发布 Andrey Konovalov 撰写的 CVE-2017-7308 packet sockets 利用分析，署名 Andrey Konovalov，页面将其定位为外部投稿者而非 Project Zero 团队成员。",
+        "status": "documented",
+        "growth_signal": "外部组织采纳与发布其漏洞利用 writeup，是其技术产出被国际安全研究平台采纳的早期外部印证；但 guest 框架本身同时表明当时其尚未被纳入 Project Zero 组织归属，机构认可程度需按 guest 投稿级别而非团队员工级别记录。",
+        "short_quote": "Guest blog post, posted by Andrey Konovalov.",
+        "source": {
+          "title": "Exploiting the Linux kernel via packet sockets (Project Zero blog)",
+          "url": "https://projectzero.google/2017/05/exploiting-linux-kernel-via-packet.html",
+          "published": "2017-05-10",
+          "source_type": "vulnerability writeup on organizational research blog",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_50duaptlex96zgqx2hewrbl6",
+          "accessed_at": "2026-09-28T10:53:19.520676+00:00",
+          "content_sha256": "d38868a1d8d31728dcd594801ead5bf408bd28b4f61ebe49f728543b819c850d"
+        }
+      },
+      {
+        "id": "external-02",
+        "date": "2017-05-10",
+        "claim": "Konovalov 在该 Project Zero guest post 中给出 CVE-2017-7308 的根因定位，将其判定为 signedness issue 导致的 heap-out-of-bounds write，并说明触发路径为 AF_PACKET socket 的 PACKET_RX_RING。",
+        "status": "documented",
+        "growth_signal": "外部 host 不修改技术判定的原文发布，可与其作品交叉验证其漏洞归因与利用链描述能力，构成对其分析能力的外部印证。",
+        "short_quote": "The bug itself (CVE-2017-7308) is a signedness issue, which leads to an exploitable heap-out-of-bounds write.",
+        "source": {
+          "title": "Exploiting the Linux kernel via packet sockets (Project Zero blog)",
+          "url": "https://projectzero.google/2017/05/exploiting-linux-kernel-via-packet.html",
+          "published": "2017-05-10",
+          "source_type": "vulnerability writeup on organizational research blog",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_50duaptlex96zgqx2hewrbl6",
+          "accessed_at": "2026-09-28T10:53:19.520676+00:00",
+          "content_sha256": "d38868a1d8d31728dcd594801ead5bf408bd28b4f61ebe49f728543b819c850d"
+        }
+      },
+      {
+        "id": "external-03",
+        "date": "2015-07-18",
+        "claim": "据 xairy.io 自述演讲记录，Konovalov 于 2015-07-18 在 LinuxCon North America (Seattle) 发表 'KernelAddressSanitizer (KASAN) — a fast memory error detector for the Linux kernel'，记录称其为关于 KASAN 的首次公开演讲，与作者 MIPT 学士论文 (2014) 以 KASAN 为题的工作衔接。",
+        "status": "reported",
+        "growth_signal": "LinuxCon 作为 Linux Foundation 主办会议接受其演讲，是会议主办机构对其内核检测器工作的外部认可载体；speaker 页仅证明演讲事实，KASAN 与其学位论文的衔接为作者自述，不能单独作为成长机制解释。",
+        "source": {
+          "title": "xairy.io talks list",
+          "url": "https://xairy.io/talks",
+          "published": "2026-09-28 (page accessed)",
+          "source_type": "self-maintained talks index",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_cvwzswf6hy72yjj0m7dw6k5w",
+          "accessed_at": "2026-09-28T10:53:19.520638+00:00",
+          "content_sha256": "14e0c0b7e95fa34eea85964e7677ab7a6a5153f2362f5098942d4c37b9484f6a"
+        }
+      },
+      {
+        "id": "external-04",
+        "date": "2022-09-16",
+        "claim": "据 xairy.io 自述，其 Linux Security Summit Europe 2022 (Dublin) 演讲 'Sanitizing the Linux kernel' 被 LWN.net 撰写为报道文章并链接于其个人 talks 页。",
+        "status": "reported",
+        "growth_signal": "LWN 作为内核社区权威二手媒体撰写其演讲报道，可视为外部媒体认可；但本次仅核实到作者自述的'被 LWN 报道'陈述及其外链，未能直接抓取 LWN 原文，LWN 评价文字本身未核验，故标记为 reported 而非 documented。",
+        "short_quote": "Sanitizers — the go-to tools for detecting bugs in the Linux kernel",
+        "source": {
+          "title": "xairy.io talks list (references LWN writeup)",
+          "url": "https://xairy.io/talks",
+          "published": "2022-09-16",
+          "source_type": "self-maintained talks index citing authoritative secondary media",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_cvwzswf6hy72yjj0m7dw6k5w",
+          "accessed_at": "2026-09-28T10:53:19.520638+00:00",
+          "content_sha256": "14e0c0b7e95fa34eea85964e7677ab7a6a5153f2362f5098942d4c37b9484f6a"
+        }
+      },
+      {
+        "id": "external-05",
+        "date": "2016-02-22",
+        "claim": "据 xairy.io 自述，Konovalov 在 2016 年发现并利用 CVE-2016-2384 (Linux kernel USB MIDI driver double-free)，使用 vUSBf 内核 fuzzer 触发，并以 Facedancer21 板复现，写作公开 exploit。该工作构成其 USB 漏洞挖掘方向的早期公开作品，与 person_json.primary_focus (USB 漏洞) 一致。",
+        "status": "reported",
+        "growth_signal": "USB 子系统漏洞的发现与公开 exploit 公开，构成其 USB 漏洞挖掘专长的可核验作品起点；所用工具 (vUSBf、Facedancer21) 为外部已有工具，体现其重复练习的工具选用路径，但作品本身为作者自述，未经第三方公告页面二次核验。",
+        "source": {
+          "title": "xairy.io articles list (CVE-2016-2384 writeup)",
+          "url": "https://xairy.io/articles",
+          "published": "2016-02-22",
+          "source_type": "self-maintained articles index",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_4wld2dxdrohhpme4vod033xn",
+          "accessed_at": "2026-09-28T10:53:19.520630+00:00",
+          "content_sha256": "1df884c1628a365f5f152af454f31c08c02461b39355e3d21c2d874b69a252d7"
+        }
+      },
+      {
+        "id": "external-06",
+        "date": "2024-09-16",
+        "claim": "据 xairy.io 自述，Konovalov 于 2024-09-16 在 Linux Security Summit Europe (Vienna) 发表 'SLUB Internals for Exploit Developers'，议题覆盖 SLUB 分配器内部结构与 Slab shaping 利用方法，与其 2026-09 RomHack 'Exploiting the Linux Kernel' 四日训练同源。",
+        "status": "reported",
+        "growth_signal": "Linux Security Summit Europe 连续多年 (2020/2021/2022/2024) 接受其内核安全议题，体现会议组织侧对其议题的重复接受模式，可作外部认可载体；议题内容为其自述摘要，未单独抓取会议官方页确认。",
+        "short_quote": "covers the SLUB allocator internals and explains how common Slab shaping approaches work",
+        "source": {
+          "title": "xairy.io talks list",
+          "url": "https://xairy.io/talks",
+          "published": "2024-09-16",
+          "source_type": "self-maintained talks index",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_cvwzswf6hy72yjj0m7dw6k5w",
+          "accessed_at": "2026-09-28T10:53:19.520638+00:00",
+          "content_sha256": "14e0c0b7e95fa34eea85964e7677ab7a6a5153f2362f5098942d4c37b9484f6a"
+        }
+      },
+      {
+        "id": "external-07",
+        "date": "2021-11-22",
+        "claim": "据 xairy.io 自述，其 Linux 内核 fuzzing 概述文章与 HackMag Editorial Board 合写发布于 hackmag.com，是作者明确的协作出版记录。",
+        "status": "reported",
+        "growth_signal": "与媒体编辑团队合作出版公开技术文章，是可核验的外部协作与发表习惯证据；合作事实来自作者自述文章索引，未独立抓取 hackmag.com 原文核验。",
+        "source": {
+          "title": "xairy.io articles list (HackMag collaboration)",
+          "url": "https://xairy.io/articles",
+          "published": "2021-11-22",
+          "source_type": "self-maintained articles index",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_4wld2dxdrohhpme4vod033xn",
+          "accessed_at": "2026-09-28T10:53:19.520630+00:00",
+          "content_sha256": "1df884c1628a365f5f152af454f31c08c02461b39355e3d21c2d874b69a252d7"
+        }
+      },
+      {
+        "id": "external-08",
+        "date": "2014-08-01",
+        "claim": "据 xairy.io 自述，Konovalov 于 2014-08-01 完成 MIPT 学士论文 (基于 KASAN 的 Linux 内核动态内存错误检测)，2016-08-01 完成 MIPT 硕士论文 (基于 KTSAN 的 Linux 内核数据竞争检测)。",
+        "status": "reported",
+        "growth_signal": "MIPT 作为学位授予机构接受其以 KASAN/KTSAN 为题的论文，是机构对早期工作的认可载体；学位完成情况为作者自述，未核验学位授予记录，亦不可据机构品牌直接推导能力来源。",
+        "source": {
+          "title": "xairy.io articles list (theses entries)",
+          "url": "https://xairy.io/articles",
+          "published": "2016-08-01",
+          "source_type": "self-maintained articles index",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_4wld2dxdrohhpme4vod033xn",
+          "accessed_at": "2026-09-28T10:53:19.520630+00:00",
+          "content_sha256": "1df884c1628a365f5f152af454f31c08c02461b39355e3d21c2d874b69a252d7"
+        }
+      }
+    ],
+    "contradictions": [
+      "外部 WebSearch 模型产出曾将 Konovalov 描述为 Google Project Zero 成员；Project Zero blog 一手页面 (2017-05-10) 明确以 'guest blog post' 框架发布其文章，未标注其为团队成员，xairy.io 亦未声明雇主归属。'Project Zero 成员' 归属与一手来源冲突，按 guest 投稿处理，标记为 inferred 而非 documented。"
+    ],
+    "gaps": [
+      "未抓取到权威第三方媒体对 Konovalov 的直接评价文字。Black Hat briefings 页 (blackhat.com) 返回 HTTP 403；lore.kernel.org 被 Anubis bot 防护拦截，无法核验 raw-gadget 补丁系列的 reviewer 评论 (如 Greg Kroah-Hartman、Alan Stern、Felipe Balbi 的反馈)。",
+      "LWN.net 对其 2022 'Sanitizing the Linux kernel' 演讲的报道文章未成功抓取 (多次尝试的 article ID 命中无关页面)，仅有作者自述的'被 LWN 报道'陈述与外链，LWN 评价文字本身未经核验，按 lead_only 处理。",
+      "WebSearch 工具在本节点未返回真实搜索结果 (仅返回模型拒答文本)，无法以搜索发现新线索或第三方引述。",
+      "未找到第三方对其导师、同事或同伴对其成长过程的具体评价文字；MIPT 学位背景仅证明学位完成，不含对其成长机制的外部评价。",
+      "person_json 仅列 Black Hat US/EU 与 '内核漏洞发现与 fuzzing' qualification，未提供具体奖项或组织授予记录可核验；相应外部奖项认可缺口留空，不纳入 documented。"
+    ]
+  },
+  "decisions": {
+    "person": "Andrey Konovalov (xairy)",
+    "dimension": "关键决策与转折",
+    "identity_check": "身份通过一手来源确认：xairy.io 主页自我介绍为 'Security engineer focusing on fuzzers, exploits, and mitigations for Linux and Android kernels.'；/about 页自述在 Google 工作 5 年并创立 Xairy Labs，贡献 KASAN、syzkaller、Arm MTE；GitHub handle 与 kernel 邮箱均为 andreyknvl/xairy。同名歧义低：该 xairy 与 Linux 内核 syzkaller/KASAN 工作唯一对应。教育机构（ITMO/MSU）未取得可抓取确认 URL，仅搜索摘要提及，列为 unknown。",
+    "items": [
+      {
+        "id": "xairy-dec-01",
+        "date": "2014-08-01",
+        "claim": "本科毕业论文题为《Автоматический поиск ошибок работы с динамической памятью в ядре ОС Linux》（Linux 内核动态内存错误自动检测），主题为 KASAN 动态内存错误检测器。此为可观察到的研究起点，方向是内核内存安全检测基础设施而非漏洞利用。",
+        "status": "documented",
+        "growth_signal": "研究起点选择落在内核内存安全检测基础设施上，构成后续漏洞利用与 fuzzing 工作的技术基础；选题决定了他早期与 KASAN/syzkaller 生态绑定。",
+        "source": {
+          "title": "Автоматический поиск ошибок работы с динамической памятью в ядре ОС Linux (bachelor's thesis)",
+          "url": "https://xairy.io/pdfs/2014-bachelor-thesis-kasan.pdf",
+          "published": "2014-08-01",
+          "source_type": "academic_thesis",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ey9bst8x3kjd4o2wdw9vm8g9",
+          "accessed_at": "2026-09-28T10:53:45.254781+00:00",
+          "content_sha256": "a082352535646ae0062a1da3f208d297692a7903a854e7e879ecb527d1c44952"
+        }
+      },
+      {
+        "id": "xairy-dec-02",
+        "date": "2016-08-01",
+        "claim": "硕士毕业论文题为《Автоматический поиск состояний гонок в ядре ОС Linux》（Linux 内核竞态条件自动检测），主题为 KTSAN 竞态检测器。相对本科论文的 KASAN（内存错误检测），这是在同一检测基础设施方向上的横向扩展，从内存错误检测转向并发竞态检测。",
+        "status": "unknown",
+        "growth_signal": "在同一内核安全检测方向上纵深推进，从内存破坏检测扩展到并发竞态检测；显示其方法学能力从单一检测器向系统化内核检测工具链迁移。",
+        "source": {
+          "title": "Автоматический поиск состояний гонок в ядре ОС Linux (master's thesis)",
+          "url": "https://xairy.io/pdfs/2016-master-thesis-ktsan.pdf",
+          "published": "2016-08-01",
+          "source_type": "academic_thesis",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "xairy-dec-03",
+        "date": "2016-02-22",
+        "claim": "发表首个 Linux 内核漏洞利用 CVE-2016-2384（USB MIDI 驱动双重释放）。文章自述使用 vUSBf 模糊测试器发现漏洞，用 KASAN 报告，用 Facedancer21 硬件板复现并构建利用，并明确写道 'This is the first Linux kernel exploit that I've ever written.'。这是从检测基础设施建设转向实际漏洞挖掘与利用写作的明确转折。",
+        "status": "documented",
+        "growth_signal": "从构建检测工具转向使用工具发现并利用真实漏洞；首个利用标志着漏洞利用能力建立的起点；USB 作为首个攻击面选择，奠定了后续 USB 安全研究方向。",
+        "short_quote": "This is the first Linux kernel exploit that I've ever written.",
+        "source": {
+          "title": "CVE-2016-2384: Exploiting a double-free in the Linux kernel USB MIDI driver",
+          "url": "https://xairy.io/articles/cve-2016-2384",
+          "published": "2016-02-22",
+          "source_type": "personal_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_cwm73rir9yqp6kilfrdnbsdx",
+          "accessed_at": "2026-09-28T10:53:45.254712+00:00",
+          "content_sha256": "d7a40454b61b3e4afab534a0a631c808101d5c1703593bda5beee5d64557e5a7"
+        }
+      },
+      {
+        "id": "xairy-dec-04",
+        "date": "2017-02-26",
+        "claim": "发表 CVE-2017-6074（DCCP 套接字双重释放）利用文章，自述 'While fuzzing the Linux kernel with syzkaller, I found a double-free bug in the DCCP sockets.'。攻击面从 USB 扩展到网络协议栈；模糊测试器从 vUSBf 切换到 syzkaller；并复用 CVE-2016-2384 的双重释放利用技术，参考 Philip Pettersson 的 CVE-2016-8655 技巧绕过 SMEP/SMAP。显示其方法学开始系统化复用与跨攻击面迁移。",
+        "status": "documented",
+        "growth_signal": "攻击面从 USB 扩展到网络协议栈；工具从 vUSBf 转向 syzkaller；利用技术开始跨 CVE 复用并借鉴他人公开技巧，表明方法学从单点探索转向可迁移的漏洞利用范式。",
+        "short_quote": "While fuzzing the Linux kernel with syzkaller, I found a double-free bug in the DCCP sockets.",
+        "source": {
+          "title": "CVE-2017-6074: Exploiting a double-free in the Linux kernel DCCP sockets",
+          "url": "https://xairy.io/articles/cve-2017-6074",
+          "published": "2017-02-26",
+          "source_type": "personal_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_u7mspk13guy2bvdymkmrxk5o",
+          "accessed_at": "2026-09-28T10:53:45.254765+00:00",
+          "content_sha256": "c19ae7c8973fdb7843219c4330d2d7c185bc449e6653dd0151dc46cea58828dd"
+        }
+      },
+      {
+        "id": "xairy-dec-05",
+        "date": "2017-05-10",
+        "claim": "以客座博客作者身份在 Google Project Zero 博客发表 CVE-2017-7308（包套接字越界写）利用文章，发布日期 2017-05-10。文章自述 'Lately I've been spending some time fuzzing network-related Linux kernel interfaces with syzkaller.'，并指出 'Right now the Linux kernel has a huge number of poorly tested (from a security standpoint) interfaces'。这是发表平台从个人站点扩展到行业高曝光博客的转折，标志着其成果进入主流漏洞研究社区视野。",
+        "status": "documented",
+        "growth_signal": "发表渠道从个人博客扩展到 Project Zero 行业级平台；模糊测试范围明确锁定网络接口；并开始公开呼吁社区参与 syscall 描述与内核测试，显示从个人研究向推动社区基础设施建设的姿态转变。",
+        "short_quote": "Lately I've been spending some time fuzzing network-related Linux kernel interfaces with syzkaller.",
+        "source": {
+          "title": "Exploiting the Linux kernel via packet sockets (CVE-2017-7308)",
+          "url": "https://projectzero.google/2017/05/exploiting-linux-kernel-via-packet.html",
+          "published": "2017-05-10",
+          "source_type": "vendor_research_blog",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_etliamjh7ssp1v95halj8em0",
+          "accessed_at": "2026-09-28T10:53:45.254730+00:00",
+          "content_sha256": "2894bf328bd2c7eeb2f11350e1047551d7ed3a332ff3c02ac2ede2fff15072d4"
+        }
+      },
+      {
+        "id": "xairy-dec-06",
+        "date": "2022-05-02",
+        "claim": "发表《Looking for Remote Code Execution bugs in the Linux kernel》，将 syzkaller 扩展到外部网络模糊测试。文章明确将研究目标设定为寻找可远程利用的内核漏洞，并在结尾承认 'Sadly, to find that one bug to take over the Internet — I failed. But I did manage to find a one-shot RCE in a non-public kernel flavor.'。这是从 USB 攻击面转向远程网络攻击面的明确决策，并以公开承认失败告终。",
+        "status": "documented",
+        "growth_signal": "明确将目标从本地攻击面升级到远程可利用漏洞；面对校验和、覆盖收集等技术障碍采用迭代排查（检查覆盖率报告、移除卡点）；并公开发表失败结论，显示其对负向结果的公开记录习惯。决策后果是该方法被沉淀为可复用的 syzkaller 外部网络 fuzzing 方案。",
+        "short_quote": "Sadly, to find that one bug to take over the Internet — I failed. But I did manage to find a one-shot RCE in a non-public kernel flavor.",
+        "source": {
+          "title": "Looking for Remote Code Execution bugs in the Linux kernel",
+          "url": "https://xairy.io/articles/syzkaller-external-network",
+          "published": "2022-05-02",
+          "source_type": "personal_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_r2nihqryuacxp6gxxovnwks6",
+          "accessed_at": "2026-09-28T10:53:45.254743+00:00",
+          "content_sha256": "62e5c4c204fa505d553134ecd008eadcb01187752d631a12046de68c2b68b76f"
+        }
+      },
+      {
+        "id": "xairy-dec-07",
+        "date": "2024-02-22",
+        "claim": "发表《Unlocking secret ThinkPad functionality for emulating USB devices》，回到 USB 攻击面但转向 USB 主机端模糊测试。文章记录了硬件方案的迭代决策：从 Raspberry Pi（'dealing with a Raspberry Pi is a hassle'）到 EC3380-AB ExpressCard（net2280 驱动 'would sometimes glitch out'），再到发现 xDCI 控制器，最终实现无需外部硬件、直接在笔记本上用 Raw Gadget 与 syzkaller 模糊测试 USB 主机。",
+        "status": "documented",
+        "growth_signal": "回到早期 USB 攻击面但攻击方向从 USB 设备端转向 USB 主机端；硬件方案经历三轮迭代淘汰，显示其工程化排除障碍的方法；工具建设（Raw Gadget 后端）与 syzkaller 集成结合，体现工具建设与漏洞挖掘并重的模式。",
+        "short_quote": "dealing with a Raspberry Pi is a hassle: plugging in the wires, booting the board, accessing the shell, etc.",
+        "source": {
+          "title": "Unlocking secret ThinkPad functionality for emulating USB devices",
+          "url": "https://xairy.io/articles/thinkpad-xdci",
+          "published": "2024-02-22",
+          "source_type": "personal_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_b2mkeo632utia3d3w2j898hl",
+          "accessed_at": "2026-09-28T10:53:45.254788+00:00",
+          "content_sha256": "6074599f2c059276522e1dc3eeb620e54b1c40eabac7fe672ba96eb50465ccd1"
+        }
+      },
+      {
+        "id": "xairy-dec-08",
+        "date": "2020-11-04",
+        "claim": "与 Alexander Popov 共同创建 Linux Kernel Security 频道（最初 Telegram，后扩展到 X、Mastodon、Bluesky、LinkedIn、Reddit），持续发布内核漏洞、利用、模糊测试、缓解机制相关链接。/about 页自述在 Google 工作 5 年后创立 Xairy Labs，提供 Linux 与 Android 内核安全咨询与培训。这构成从雇佣研究岗位向独立咨询/培训与社区信息分发并行模式的结构性转变。",
+        "status": "documented",
+        "growth_signal": "从个人研究扩展到与同伴协作建立持续性的社区信息分发渠道；从雇佣身份向创立独立公司（Xairy Labs）转型，研究方向从纯漏洞研究扩展到培训与咨询；显示其职业模式从研究者向研究者+教育者+经营者多元化转变。",
+        "source": {
+          "title": "Andrey Konovalov — About / Projects (Linux Kernel Security channel, Xairy Labs)",
+          "url": "https://xairy.io/about",
+          "published": "2020-11-04",
+          "source_type": "personal_profile",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_nemq1hspmlvtdkduoem2vzk0",
+          "accessed_at": "2026-09-28T10:53:45.254688+00:00",
+          "content_sha256": "5c3c4b3df29b382d95bdaf6fb279982be0de306b6d4c815f09131a9edab5b064"
+        }
+      }
+    ],
+    "contradictions": [
+      "搜索摘要提及 Andrey Konovalov 的教育背景为 ITMO University（圣彼得堡），另一份搜索摘要提及 Moscow State University；两者均为搜索结果摘要而非可抓取确认页面，且两份本科/硕士论文 PDF 因 FlateDecode 压缩无法解析出机构信息，因此教育机构存在冲突且均无法证实，列为 unknown。"
+    ],
+    "gaps": [
+      "本科与硕士论文 PDF（KASAN/KTSAN）为二进制 FlateDecode 压缩，无法解析出大学名称、导师姓名与摘要正文，因此 2014 与 2016 两条转折点的机构归属与导师关系无法证实。",
+      "/about 页仅自述 'spent 5 years at Google'，未给出 Google 入职与离职的具体年份，因此 Google 雇佣期的起止时间缺失，无法精确锚定其雇佣期内各 CVE 的工作时间归属。",
+      "Arm Memory Tagging Extension 参与工作仅在 /about 列出，无独立文章或日期，无法确认其参与时间线与在 Android 缓解机制方向上的具体角色。",
+      "未发现关于导师或同伴反馈机制的系统性一手证据；唯一可观察的同行技术借鉴是 CVE-2017-6074 文章引用 Philip Pettersson 的 CVE-2016-8655 SMEP/SMAP 绕过技巧，但不足以重建导师/同伴反馈机制。",
+      "从 CVE-2017-7308（2017-05）到 syzkaller 工具建设系列（2021 起）之间存在约四年的公开材料间隔，期间的研究活动与决策缺少公开一手来源，无法重建该时段的转向过程。"
+    ]
+  },
+  "timeline": {
+    "person": "Andrey Konovalov (xairy)",
+    "dimension": "可核验时间线",
+    "identity_check": "身份核验通过：xairy.io 主页、GitHub(github.com/xairy)、X(@andreyknvl)、Bluesky/Telegram 等多处一致指向同一人。无显著同名歧义干扰；LinkedIn 与本人站点均使用 'Andrey Konovalov' / 'xairy'。person_json 记 selected_conference_evidence=Black Hat US/EU，但本人 /talks 页未列 Black Hat，记入 contradictions/gaps。",
+    "items": [
+      {
+        "id": "ak-timeline-01",
+        "date": "2014-08-01",
+        "claim": "在 MIPT 完成本科毕业设计，题目为《Автоматический поиск ошибок работы с динамической памятью в ядре ОС Linux》（Linux 内核动态内存错误自动检测），基于 KASAN。",
+        "status": "documented",
+        "growth_signal": "毕业选题即对准内核内存安全工具建设，而非纯漏洞利用；KASAN 主题与其后续在 Google 主导 KASAN 的职业路径直接衔接，显示研究主线在求学阶段已成形。",
+        "short_quote": "Bachelor's thesis at MIPT based on KASAN",
+        "source": {
+          "title": "xairy.io — Articles: Автоматический поиск ошибок работы с динамической памятью в ядре ОС Linux",
+          "url": "https://xairy.io/articles",
+          "published": "2014-08-01",
+          "source_type": "personal site / thesis listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_pag08edbi7dr22nmp1vvrhvr",
+          "accessed_at": "2026-09-28T10:57:09.208430+00:00",
+          "content_sha256": "25aafe67232fd99180f239bcae6bc84fde865faff4c92fe913dde13fd56fe5be"
+        }
+      },
+      {
+        "id": "ak-timeline-02",
+        "date": "2014-09-01",
+        "claim": "在 MIPT 教授 CTF 入门课程（MIPT CTF）。",
+        "status": "documented",
+        "growth_signal": "在毕业同年即承担教学，CTF 教学内容为后续 exploit 开发提供重复练习与体系化表达机会；教学-研究双向输出习惯在此阶段已建立。",
+        "source": {
+          "title": "xairy.io — Projects: MIPT CTF",
+          "url": "https://xairy.io/projects",
+          "published": "2014-09-01",
+          "source_type": "personal site / project listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_d8diyvzi4xl1g8h0gm9aj4wq",
+          "accessed_at": "2026-09-28T10:57:09.208435+00:00",
+          "content_sha256": "39049de3a51af0c263cc13f512436fbd84ad45448ca64dc58ec6f09d458b451d"
+        }
+      },
+      {
+        "id": "ak-timeline-03",
+        "date": "2015-07-18",
+        "claim": "在 LinuxCon North America（Seattle）作报告《KernelAddressSanitizer (KASAN) — a fast memory error detector for the Linux kernel》。",
+        "status": "documented",
+        "growth_signal": "本科毕业次年即在顶级内核会议就 KASAN 发声，标志其从论文作者向内核社区公开演讲者的转变；KASAN 主题延续毕业论文。",
+        "source": {
+          "title": "xairy.io — Talks: KernelAddressSanitizer (KASAN), LinuxCon North America, Seattle",
+          "url": "https://xairy.io/talks",
+          "published": "2015-07-18",
+          "source_type": "personal site / talk listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtrcgsurds8son0zvgdu895x",
+          "accessed_at": "2026-09-28T10:57:09.208442+00:00",
+          "content_sha256": "19affe21410b33e3f56ef7263b507f5cecae9b0467b96940cdc73172fc66c9ba"
+        }
+      },
+      {
+        "id": "ak-timeline-04",
+        "date": "2015-08-03",
+        "claim": "开始向 Linux 内核主线提交补丁，覆盖 KASAN、KCOV、USB Raw Gadget 等子系统。",
+        "status": "documented",
+        "growth_signal": "在公开演讲同期进入内核上游贡献阶段，确立'工具进主线'的工作模式而非仅 PoC；USB Raw Gadget 此时已被纳入其贡献范围，预告后期 USB 模糊测试工具链方向。",
+        "source": {
+          "title": "xairy.io — Projects: Contributions to the Linux kernel",
+          "url": "https://xairy.io/projects",
+          "published": "2015-08-03",
+          "source_type": "personal site / project listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_d8diyvzi4xl1g8h0gm9aj4wq",
+          "accessed_at": "2026-09-28T10:57:09.208435+00:00",
+          "content_sha256": "39049de3a51af0c263cc13f512436fbd84ad45448ca64dc58ec6f09d458b451d"
+        }
+      },
+      {
+        "id": "ak-timeline-05",
+        "date": "2015-10-13",
+        "claim": "开始向 syzkaller 贡献，覆盖外部网络与 USB 模糊测试扩展、syzlang 描述与功能。",
+        "status": "documented",
+        "growth_signal": "在内核补丁两个月后即介入 fuzzer 工具本身，工具建设与模糊测试能力同步推进；外部网络/USB 扩展方向已成型，为其 USB 研究主线奠定基础设施。",
+        "source": {
+          "title": "xairy.io — Projects: Contributions to syzkaller",
+          "url": "https://xairy.io/projects",
+          "published": "2015-10-13",
+          "source_type": "personal site / project listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_d8diyvzi4xl1g8h0gm9aj4wq",
+          "accessed_at": "2026-09-28T10:57:09.208435+00:00",
+          "content_sha256": "39049de3a51af0c263cc13f512436fbd84ad45448ca64dc58ec6f09d458b451d"
+        }
+      },
+      {
+        "id": "ak-timeline-06",
+        "date": "2015-11-23",
+        "claim": "在 ISP RAS（Moscow）作报告《KernelThreadSanitizer (KTSAN) — a data race detector for the Linux kernel》。",
+        "status": "documented",
+        "growth_signal": "KASAN 之后转向 KTSAN 数据竞争检测，体现从内存安全到并发安全的工具谱系扩展；与同年稍晚的硕士论文主题对应。",
+        "source": {
+          "title": "xairy.io — Talks: KernelThreadSanitizer (KTSAN), ISP RAS, Moscow",
+          "url": "https://xairy.io/talks",
+          "published": "2015-11-23",
+          "source_type": "personal site / talk listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtrcgsurds8son0zvgdu895x",
+          "accessed_at": "2026-09-28T10:57:09.208442+00:00",
+          "content_sha256": "19affe21410b33e3f56ef7263b507f5cecae9b0467b96940cdc73172fc66c9ba"
+        }
+      },
+      {
+        "id": "ak-timeline-07",
+        "date": "2016-02-22",
+        "claim": "发布 CVE-2016-2384 分析与 exploit：《CVE-2016-2384: Exploiting a double-free in the Linux kernel USB MIDI driver》，漏洞经 vUSBf 模糊测试发现、用 Facedancer21 复现。",
+        "status": "documented",
+        "growth_signal": "这是其首个公开的 USB 子系统漏洞利用，方法学上串联 fuzzer 发现→硬件复现→代码执行，确立 USB 方向的完整研究闭环；可视为其 USB 研究主线的起点。",
+        "short_quote": "double-free in the Linux kernel USB MIDI driver found via the vUSBf fuzzer",
+        "source": {
+          "title": "xairy.io — Articles: CVE-2016-2384: Exploiting a double-free in the Linux kernel USB MIDI driver",
+          "url": "https://xairy.io/articles",
+          "published": "2016-02-22",
+          "source_type": "personal site / writeup listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_pag08edbi7dr22nmp1vvrhvr",
+          "accessed_at": "2026-09-28T10:57:09.208430+00:00",
+          "content_sha256": "25aafe67232fd99180f239bcae6bc84fde865faff4c92fe913dde13fd56fe5be"
+        }
+      },
+      {
+        "id": "ak-timeline-08",
+        "date": "2016-08-01",
+        "claim": "在 MIPT 完成硕士毕业设计，题目为《Автоматический поиск состояний гонок в ядре ОС Linux》（Linux 内核竞争条件自动检测），基于 KTSAN。",
+        "status": "documented",
+        "growth_signal": "硕士论文与 KTSAN 报告同主题，显示工具研发与学位研究一体化；从 KASAN（本科）到 KTSAN（硕士）的工具谱系沿内核 sanitizers 主线推进，而非随机选题。",
+        "source": {
+          "title": "xairy.io — Articles: Автоматический поиск состояний гонок в ядре ОС Linux",
+          "url": "https://xairy.io/articles",
+          "published": "2016-08-01",
+          "source_type": "personal site / thesis listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_pag08edbi7dr22nmp1vvrhvr",
+          "accessed_at": "2026-09-28T10:57:09.208430+00:00",
+          "content_sha256": "25aafe67232fd99180f239bcae6bc84fde865faff4c92fe913dde13fd56fe5be"
+        }
+      },
+      {
+        "id": "ak-timeline-09",
+        "date": "2017-05-10",
+        "claim": "作为 guest 作者在 Project Zero 博客发表《CVE-2017-7308: Exploiting the Linux kernel via packet sockets》，分析 packet sockets 越界写并提供本地提权 exploit。",
+        "status": "documented",
+        "growth_signal": "被 Project Zero 邀请发表 guest post，表明其在 syzkaller 网络模糊测试方向的成果获顶级团队认可；同时确认此时为外部贡献者而非 PZ 成员，体现社区可见度的跃升而非雇佣关系。",
+        "short_quote": "Guest blog post, posted by Andrey Konovalov",
+        "source": {
+          "title": "Project Zero — Exploiting the Linux kernel via packet sockets (CVE-2017-7308)",
+          "url": "https://projectzero.google/2017/05/exploiting-linux-kernel-via-packet.html",
+          "published": "2017-05-10",
+          "source_type": "vendor research blog (guest post)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_bzxb5nizfptoia9y51p0nv9h",
+          "accessed_at": "2026-09-28T10:57:09.208465+00:00",
+          "content_sha256": "79fc18a68564e1b67fc2dd69ae8922f71716e55bb43ca5495ef375119315f316"
+        }
+      },
+      {
+        "id": "ak-timeline-10",
+        "date": "2017-05-23",
+        "claim": "在 PHDays（Moscow）作报告《How to find zero-days in the Linux kernel》。",
+        "status": "documented",
+        "growth_signal": "在 PZ guest post 两周内于行业大会演讲，形成 writeup→会议演讲的固定输出节奏；标题方法学化（'如何发现 0day'）显示其开始抽象方法论而非仅报告单点漏洞。",
+        "source": {
+          "title": "xairy.io — Talks: How to find zero-days in the Linux kernel, PHDays, Moscow",
+          "url": "https://xairy.io/talks",
+          "published": "2017-05-23",
+          "source_type": "personal site / talk listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtrcgsurds8son0zvgdu895x",
+          "accessed_at": "2026-09-28T10:57:09.208442+00:00",
+          "content_sha256": "19affe21410b33e3f56ef7263b507f5cecae9b0467b96940cdc73172fc66c9ba"
+        }
+      },
+      {
+        "id": "ak-timeline-11",
+        "date": "2017-08-13",
+        "claim": "发布《CVE-2017-1000112: Exploiting an out-of-bounds bug in the Linux kernel UFO packets》，含本地提权 exploit。",
+        "status": "documented",
+        "growth_signal": "延续网络子系统漏洞利用输出，2017 年内连续公开 CVE-2017-7308/1000112/18344 三个 exploit，体现公开披露的稳定节奏与重复练习。",
+        "source": {
+          "title": "xairy.io — Articles: CVE-2017-1000112: Exploiting an out-of-bounds bug in the Linux kernel UFO packets",
+          "url": "https://xairy.io/articles",
+          "published": "2017-08-13",
+          "source_type": "personal site / writeup listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_pag08edbi7dr22nmp1vvrhvr",
+          "accessed_at": "2026-09-28T10:57:09.208430+00:00",
+          "content_sha256": "25aafe67232fd99180f239bcae6bc84fde865faff4c92fe913dde13fd56fe5be"
+        }
+      },
+      {
+        "id": "ak-timeline-12",
+        "date": "2018-06-23",
+        "claim": "在 DC4822 Meetup（Warsaw）作报告《syzkaller: a coverage-guided fuzzer for the Linux kernel》。",
+        "status": "documented",
+        "growth_signal": "2017 年密集漏洞利用后转向工具本身的方法论演讲，体现利用→工具研究的输出交替节奏；跨地区（华沙）输出扩大社区覆盖。",
+        "source": {
+          "title": "xairy.io — Talks: syzkaller: a coverage-guided fuzzer for the Linux kernel, DC4822 Meetup, Warsaw",
+          "url": "https://xairy.io/talks",
+          "published": "2018-06-23",
+          "source_type": "personal site / talk listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtrcgsurds8son0zvgdu895x",
+          "accessed_at": "2026-09-28T10:57:09.208442+00:00",
+          "content_sha256": "19affe21410b33e3f56ef7263b507f5cecae9b0467b96940cdc73172fc66c9ba"
+        }
+      },
+      {
+        "id": "ak-timeline-13",
+        "date": "2019-02-15",
+        "claim": "在 OffensiveCon（Berlin）作报告《Coverage-guided USB fuzzing with syzkaller》。",
+        "status": "documented",
+        "growth_signal": "USB 模糊测试方法学在此会议正式成型并对外输出；与 2016 USB MIDI 双释放的起点形成 USB 方向的纵深闭环，标志 USB 成为其可标识的擅长领域。",
+        "source": {
+          "title": "xairy.io — Talks: Coverage-guided USB fuzzing with syzkaller, OffensiveCon, Berlin",
+          "url": "https://xairy.io/talks",
+          "published": "2019-02-15",
+          "source_type": "personal site / talk listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtrcgsurds8son0zvgdu895x",
+          "accessed_at": "2026-09-28T10:57:09.208442+00:00",
+          "content_sha256": "19affe21410b33e3f56ef7263b507f5cecae9b0467b96940cdc73172fc66c9ba"
+        }
+      },
+      {
+        "id": "ak-timeline-14",
+        "date": "2020-02-06",
+        "claim": "启动 Raw Gadget 项目：提供 USB Gadget 子系统低层接口的 Linux 内核模块，附说明、示例与测试。",
+        "status": "documented",
+        "growth_signal": "从'用现有 fuzzer 模糊 USB'升级为'自建内核模块以软件模拟 USB 设备'，工具建设向基础设施层下沉；Raw Gadget 成为其后续 USB 研究的核心自有工具。",
+        "source": {
+          "title": "xairy.io — Projects: Raw Gadget",
+          "url": "https://xairy.io/projects",
+          "published": "2020-02-06",
+          "source_type": "personal site / project listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_d8diyvzi4xl1g8h0gm9aj4wq",
+          "accessed_at": "2026-09-28T10:57:09.208435+00:00",
+          "content_sha256": "39049de3a51af0c263cc13f512436fbd84ad45448ca64dc58ec6f09d458b451d"
+        }
+      },
+      {
+        "id": "ak-timeline-15",
+        "date": "2020-07-07",
+        "claim": "在 Android Security Symposium（Online）作报告《Memory Tagging for the kernel: Tag-Based KASAN》。",
+        "status": "documented",
+        "growth_signal": "从内存错误检测工具转向硬件辅助缓解（Arm MTE），研究主题随硬件能力扩展；与后续向 Android 交付 Arm MTE 的方向衔接。",
+        "source": {
+          "title": "xairy.io — Talks: Memory Tagging for the kernel: Tag-Based KASAN, Android Security Symposium, Online",
+          "url": "https://xairy.io/talks",
+          "published": "2020-07-07",
+          "source_type": "personal site / talk listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtrcgsurds8son0zvgdu895x",
+          "accessed_at": "2026-09-28T10:57:09.208442+00:00",
+          "content_sha256": "19affe21410b33e3f56ef7263b507f5cecae9b0467b96940cdc73172fc66c9ba"
+        }
+      },
+      {
+        "id": "ak-timeline-16",
+        "date": "2021-10-01",
+        "claim": "在 Linux Security Summit（Online）作报告《Mitigating Linux kernel memory corruptions with Arm Memory Tagging》。",
+        "status": "documented",
+        "growth_signal": "一年后在 LSS 演讲同一主题的演进版，体现重复打磨同一研究主线的方法；Arm MTE 从 Android Security Symposium 到 LSS 的升级路线反映向 Linux 内核主线社区输出缓解能力的路径。",
+        "source": {
+          "title": "xairy.io — Talks: Mitigating Linux kernel memory corruptions with Arm Memory Tagging, Linux Security Summit, Online",
+          "url": "https://xairy.io/talks",
+          "published": "2021-10-01",
+          "source_type": "personal site / talk listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtrcgsurds8son0zvgdu895x",
+          "accessed_at": "2026-09-28T10:57:09.208442+00:00",
+          "content_sha256": "19affe21410b33e3f56ef7263b507f5cecae9b0467b96940cdc73172fc66c9ba"
+        }
+      },
+      {
+        "id": "ak-timeline-17",
+        "date": "2022-05-16",
+        "claim": "在 BSides（Munich）作报告《Fuzzing USB with Raw Gadget》。",
+        "status": "documented",
+        "growth_signal": "Raw Gadget 发布两年后进入对外演讲阶段，工具从发布到推广形成完整生命周期；USB 模糊测试主题在多年后再次成为会议输出主线。",
+        "source": {
+          "title": "xairy.io — Talks: Fuzzing USB with Raw Gadget, BSides, Munich",
+          "url": "https://xairy.io/talks",
+          "published": "2022-05-16",
+          "source_type": "personal site / talk listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtrcgsurds8son0zvgdu895x",
+          "accessed_at": "2026-09-28T10:57:09.208442+00:00",
+          "content_sha256": "19affe21410b33e3f56ef7263b507f5cecae9b0467b96940cdc73172fc66c9ba"
+        }
+      },
+      {
+        "id": "ak-timeline-18",
+        "date": "2024-09-16",
+        "claim": "在 Linux Security Summit Europe（Vienna）作报告《SLUB Internals for Exploit Developers》，覆盖 SLUB 分配器内部与 slab shaping 方法。",
+        "status": "documented",
+        "growth_signal": "研究主题从漏洞发现/缓解扩展到利用底层（分配器内部），标志其能力栈向利用开发者社区下沉；面向 exploit 开发者的内部讲解体现从研究者向方法学布道者的角色扩展。",
+        "source": {
+          "title": "xairy.io — Talks: SLUB Internals for Exploit Developers, Linux Security Summit Europe, Vienna",
+          "url": "https://xairy.io/talks",
+          "published": "2024-09-16",
+          "source_type": "personal site / talk listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtrcgsurds8son0zvgdu895x",
+          "accessed_at": "2026-09-28T10:57:09.208442+00:00",
+          "content_sha256": "19affe21410b33e3f56ef7263b507f5cecae9b0467b96940cdc73172fc66c9ba"
+        }
+      },
+      {
+        "id": "ak-timeline-19",
+        "date": "2025-07-28",
+        "claim": "发布 writeup《Debugging the Pixel 8 kernel via KGDB》，覆盖构建并刷入自定义 Pixel 8 内核以经串口用 GDB 调试。",
+        "status": "documented",
+        "growth_signal": "继续向 Android 内核调试基础设施方向输出 writeup；保持本人 writeup 的稳定发布习惯，且内容服务于其培训/研究领域。",
+        "source": {
+          "title": "xairy.io — Articles: Debugging the Pixel 8 kernel via KGDB",
+          "url": "https://xairy.io/articles",
+          "published": "2025-07-28",
+          "source_type": "personal site / writeup listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_pag08edbi7dr22nmp1vvrhvr",
+          "accessed_at": "2026-09-28T10:57:09.208430+00:00",
+          "content_sha256": "25aafe67232fd99180f239bcae6bc84fde865faff4c92fe913dde13fd56fe5be"
+        }
+      },
+      {
+        "id": "ak-timeline-20",
+        "date": "2025-09-19",
+        "claim": "在 BalcCon2k25（Novi Sad）举办 workshop《Attacking USB with Raw Gadget》。",
+        "status": "documented",
+        "growth_signal": "Raw Gadget 主题从 25 分钟演讲（2022 BSides）升级为多日 workshop，体现工具方法学输出的深化与教学化；USB 攻击方向在多年后仍是其持续打磨主线。",
+        "source": {
+          "title": "xairy.io — Talks: Attacking USB with Raw Gadget [workshop], BalcCon2k25, Novi Sad",
+          "url": "https://xairy.io/talks",
+          "published": "2025-09-19",
+          "source_type": "personal site / talk listing",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtrcgsurds8son0zvgdu895x",
+          "accessed_at": "2026-09-28T10:57:09.208442+00:00",
+          "content_sha256": "19affe21410b33e3f56ef7263b507f5cecae9b0467b96940cdc73172fc66c9ba"
+        }
+      },
+      {
+        "id": "ak-timeline-21-google",
+        "date": "YYYY",
+        "claim": "曾在 Google 工作约 5 年，从事 KASAN、syzkaller、内核利用等安全相关 Linux 内核子系统与工具；后创立 Xairy Labs，Xairy Labs 曾支持 Google 向 Android 交付 Arm Memory Tagging Extension。",
+        "status": "inferred",
+        "growth_signal": "Google 5 年任期与其前期 KASAN/syzkaller 主题及后续 Arm MTE 交付一脉相承，构成内核内存安全工具的主线雇主锚点；离职后以 Xairy Labs 形式继续承接相关方向，体现从大厂雇员到独立咨询/培训的平滑转向。",
+        "source": {
+          "title": "xairy.io — About (Google 5 years; Xairy Labs supports Google delivery of Arm MTE to Android)",
+          "url": "https://xairy.io/about",
+          "published": "",
+          "source_type": "personal site / bio",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_aq7jfhzg7j0dnm4rguiuk2v3",
+          "accessed_at": "2026-09-28T10:57:09.208420+00:00",
+          "content_sha256": "6c68d7fbef07711d3f13b6d42c597f6a918678759a98b4d388cdd493ac8bd9ee"
+        }
+      }
+    ],
+    "contradictions": [
+      "person_json 记 selected_conference_evidence='Black Hat US/EU'，但本人 /talks 页未列出任何 Black Hat 演讲；二者存在冲突。可能的解释为 person_json 配置沿用旧资料或指其作为听众/培训讲师未在 /talks 页登记，但无证据支持任一解释，保留为待解决冲突。",
+      "/about 仅说在 Google 'spent 5 years'，未给起止年份；与 2015-07 起的 LinuxCon/syzkaller 公开活动时间无直接冲突，但无法据其判定 Google 任期与 2015 年公开活动是否重叠或先后，时间边界未定。"
+    ],
+    "gaps": [
+      "Google 任期的具体起止年份缺失，/about 仅给出 '5 years' 时长，无月份；无法据其确定 KASAN/syzkaller 早期贡献（2015）是在 Google 任内、兼职还是 Google 前完成。",
+      "MIPT 本科与硕士的具体院系/专业名称、导师信息未展开，仅见学位论文标题。",
+      "Black Hat US/EU 出席/演讲情况缺失：person_json 标注但本人 /talks 页未列；未能抓取到任何 Black Hat 相关本人演讲证据。",
+      "syzbot 是否由其主导或参与运维未在 /projects 单列；/projects 仅列 'Contributions to syzkaller'，syzbot 归属待补。",
+      "Xairy Labs 的具体创立时间未给（/about 仅称其为当前身份），与其离开 Google 的时间节点均缺失。",
+      "Raw Gadget 何时并入 Linux 内核主线（合入版本/commit）未在 /projects 页给出。",
+      "受 8 次搜索/抓取上限约束，未进一步抓取 LinkedIn、GitHub 仓库时间线或 LWN 内核合入记录以填补上述 Google/Xairy Labs 时间缺口。"
+    ]
+  },
+  "targeted": {
+    "items": [
+      {
+        "id": "r1-syzkaller-external-network-verbatim",
+        "resolves_issue": "RR2（'对相关子系统无认知'指涉范围与张力未澄清）与 RR5（'to take over the Internet' 修辞性表达作为事实叙述）。",
+        "date": "2022-05-02",
+        "claim": "xairy.io/articles/syzkaller-external-network（2022-05-02 发表，2026-01-28 修订）原文逐字自述：(a) 'I already had experience with making bug-finding tools and running a ready-made USB fuzzer.'、'I had never implemented a fuzzer myself.'、'I also had no knowledge about syzkaller nor the inners of the Linux kernel network subsystem.' —— 该自述明确指涉 syzkaller 整体与 Linux 内核网络子系统内部结构，非仅外部网络子系统；与 ak-timeline-05 / xairy-comm-03（2015-10-13 起持续向 syzkaller 贡献）存在时序张力，须在 tensions 中标注并按原义保留，不应缩小范围为'外部网络子系统'。(b) 'Sadly, to find that one bug to take over the Internet — I failed.' 紧接 'But I did manage to find a one-shot RCE in a non-public kernel flavor.' —— 'to take over the Internet' 为作者修辞性自述，应作引文或中性转述，不作可核验事实叙述。",
+        "status": "documented",
+        "source": {
+          "title": "Looking for Remote Code Execution bugs in the Linux kernel",
+          "url": "https://xairy.io/articles/syzkaller-external-network",
+          "published": "2022-05-02 (rev 2026-01-28)",
+          "source_type": "个人站点长文 writeup（作者第一人称）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_jfcm6ebrn1g1ihae5op5uy4a",
+          "accessed_at": "2026-09-28T11:50:14.689277+00:00",
+          "content_sha256": "3a082498f9951738d5b0a05975a158f4d6564b63e1bfa22bbb606aba85d86f29"
+        }
+      },
+      {
+        "id": "r1-hackmag-three-stages-verbatim",
+        "resolves_issue": "RR3（conv-01 三阶段可能被读作发表时序）。",
+        "date": "2021-11-22",
+        "claim": "hackmag.com/security/linux-fuzzing（2021-11-22，基于 PhDays 2021 演讲转写、作者授权）原文逐字自述：'fuzzed the network subsystem through system calls (and wrote several exploits for the identified bugs), then fuzzed the network externally, and, finally, fuzzed the USB subsystem from the device side.'；并自述 'For the last five years, I've been using fuzzing to find vulnerabilities in the Linux kernel.'。三阶段以 then/finally 表时序，但文章将其框架为作者研究轨迹与外部可达性扩展（系统调用→外部网络→USB 设备侧）；该框架与已发表漏洞时间线（USB MIDI CVE-2016-2384 于 2016-02-22 发布，早于网络子系统 2017 与外部网络 2022）存在差异，应注明其为方法学/可达性概念框架而非严格发表时间顺序。",
+        "status": "documented",
+        "source": {
+          "title": "Ruffling the penguin! How to fuzz the Linux kernel",
+          "url": "https://hackmag.com/security/linux-fuzzing",
+          "published": "2021-11-22",
+          "source_type": "long-form article (transcribed from PhDays 2021 talk, first-person with author's permission)",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_p9zpbu4rjvp6gqax7dgsh4vu",
+          "accessed_at": "2026-09-28T11:50:14.689287+00:00",
+          "content_sha256": "15c07309f48433a35313398a28614eec0812fd5a0e1937baf855ad5845eb0ca1"
+        }
+      },
+      {
+        "id": "r1-about-xairylabs-founding",
+        "resolves_issue": "RR4（Xairy Labs 创立时间被锚定至 2020-11-04）。",
+        "date": "2026-09-28",
+        "claim": "xairy.io/about 原文自述 'I spent 5 years at Google working on several security-related Linux kernel Subsystems and tools, including' KASAN 与 syzkaller，并 'supported Google's work on delivering Arm Memory Tagging Extension ... to Android'；关于 Xairy Labs 仅称 'I am also the founder and the managing director of Xairy Labs'（提供 Linux 与 Android 内核安全咨询与培训）。页面全文未给出 Xairy Labs 的创立日期或年份，亦未给出 Google 任期的起止年份（仅 '5 years' 时长）。据此，将 Xairy Labs 创立时间锚定至 2020-11-04 缺一级来源支持；2020-11-04 为 Linux Kernel Security 频道起算日期（xairy-works-005 / xairy-comm-06 / xairy-dec-08）。",
+        "status": "documented",
+        "source": {
+          "title": "Andrey Konovalov — About",
+          "url": "https://xairy.io/about",
+          "published": "",
+          "source_type": "personal site / bio",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_z248z984szgkrq3e5s5tz00a",
+          "accessed_at": "2026-09-28T11:50:14.689300+00:00",
+          "content_sha256": "2040f823ce8ac1f5dab53561392e30b66dd7fc52a61ac48f0a04c99bab940c3e"
+        }
+      },
+      {
+        "id": "r2-bsides-munich-2022-duration",
+        "resolves_issue": "RR-3（Mechanism 4 / Stage 5 '25 分钟演讲（2022 BSides）' 时长未由一级来源核实）。",
+        "date": "2022-05-16",
+        "claim": "BSides Munich 2022 议程页（2022.bsidesmunich.org/agenda/）显示 Andrey Konovalov 的 'Fuzzing USB with Raw Gadget' 演讲时间槽为 12:00-12:30，即 30 分钟，日期 2022-05-16，地点 Hilton Ballroom。该一手议程时长与综合自撰 growth_signal 中的 '25 分钟' 不符。",
+        "status": "documented",
+        "source": {
+          "title": "BSides Munich 2022 Agenda — Fuzzing USB with Raw Gadget (12:00-12:30)",
+          "url": "https://2022.bsidesmunich.org/agenda/",
+          "published": "2022-05-16",
+          "source_type": "会议官方议程页",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_gz5jdfvgoi09dnoa5rwr8ayj",
+          "accessed_at": "2026-09-29T19:44:13.906305+00:00",
+          "content_sha256": "e9310402aa6cb4a37e6107c6dcb0a1c5e1266b005e96010cb457ca364324c213"
+        }
+      },
+      {
+        "id": "r2-balccon2k25-2025-duration",
+        "resolves_issue": "RR-3（Mechanism 4 / Stage 5 '多日 workshop（2025 BalcCon2k25）' 时长未由一级来源核实）。",
+        "date": "2025-09-19",
+        "claim": "BalcCon2k25 CFP schedule 导出 JSON（cfp.balccon.org/balccon2k25-2025/schedule/export/schedule.json）显示 Andrey Konovalov 的 'Attacking USB with Raw Gadget' workshop 时间槽为 17:00-19:00（2 小时），日期 2025-09-19，房间 Pupin，类型 Workshop120。该一手议程时长与综合自撰 growth_signal 中的 '多日 workshop' 不符；实际为单日 2 小时 workshop。",
+        "status": "documented",
+        "source": {
+          "title": "BalcCon2k25 CFP Schedule (export JSON) — Attacking USB with Raw Gadget (17:00-19:00, Workshop120)",
+          "url": "https://cfp.balccon.org/balccon2k25-2025/schedule/export/schedule.json",
+          "published": "2025-09-19",
+          "source_type": "会议 CFP 议程导出数据",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_c8jn7dvjq89w2jd4gtr75ygu",
+          "accessed_at": "2026-09-29T19:44:13.906333+00:00",
+          "content_sha256": "a92f8943e2a97f0082549e6855f08b8294bba0a03375be2940c3cc047cdb5c3f"
+        }
+      },
+      {
+        "id": "r4-raw-gadget-mainline-and-syzkaller-doc",
+        "resolves_issue": "RR2/Mechanism 1 observed_outcomes 第三条『Raw Gadget 合入 Linux 内核主线』与『被 syzkaller 官方文档引用为外部 USB fuzzing 关键依赖』两项事实此前唯一来源 xairy-comm-05 verified_in_run=false 且未列入 Mechanism 1 evidence_ids。",
+        "date": "2020-02-06",
+        "claim": "xairy/raw-gadget GitHub 仓库 README 明确『This requires using a kernel version 5.7+, as Raw Gadget was merged into the mainline in 5.7』，确认 Raw Gadget 已合入 Linux 内核主线（5.7 版本）；syzkaller 官方文档 docs/linux/external_fuzzing_usb.md 明确『Raw Gadget — a kernel module that implements a low-level interface for the Linux USB Gadget subsystem (now in the mainline kernel)』与『Raw Gadget powers the syzkaller's ability to fuzz the Linux kernel USB stack』，确认 syzkaller 官方文档引用 Raw Gadget 为外部 USB fuzzing 关键依赖。两项事实现由 verified 一级来源支撑，替代旧未核实来源 xairy-comm-05。",
+        "status": "documented",
+        "source": {
+          "title": "xairy/raw-gadget GitHub README（Raw Gadget merged into mainline in 5.7）+ syzkaller docs/linux/external_fuzzing_usb.md（Raw Gadget powers syzkaller USB fuzzing）",
+          "url": "https://github.com/xairy/raw-gadget",
+          "published": "2020-02-06",
+          "source_type": "项目仓库 README + syzkaller 官方文档（双一级来源互证）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_4p7ckd2oexu8v8yhhqgntipi",
+          "accessed_at": "2026-09-29T20:30:45.845741+00:00",
+          "content_sha256": "891fe67fee4f61430795a7c684a787a8229d8aa776a88e74206bf2916b017569"
+        }
+      },
+      {
+        "id": "r4-cve-2017-18344-timer-subsystem-2018",
+        "resolves_issue": "RR3/Mechanism 2 observed_outcomes 第四条『2017 年内连续公开三个网络子系统 exploit』含 CVE-2017-18344，但 evidence_json 无 CVE-2017-18344 独立证据条目。",
+        "date": "2018-08-09",
+        "claim": "xairy.io/articles 一级来源列出『Aug 9, 2018 — CVE-2017-18344: Exploiting an arbitrary-read vulnerability in the Linux kernel timer subsystem』。核验结果：(1) CVE-2017-18344 确为 Konovalov 所作，有独立证据；(2) 发表日期为 2018-08-09，非『2017 年内』；(3) 漏洞所在子系统为 timer subsystem（定时器子系统），非网络子系统。原 Mechanism 2 observed_outcomes 第四条『2017 年内连续公开三个网络子系统 exploit』在数量、时间与子系统范围三点均与一级来源不符。",
+        "status": "documented",
+        "source": {
+          "title": "xairy.io — Articles: CVE-2017-18344: Exploiting an arbitrary-read vulnerability in the Linux kernel timer subsystem",
+          "url": "https://xairy.io/articles",
+          "published": "2018-08-09",
+          "source_type": "个人站点文章索引（一级来源）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_t1eq42984lmo7bsret22qclx",
+          "accessed_at": "2026-09-29T20:30:45.845755+00:00",
+          "content_sha256": "085889305f33ecab667f530723a985aa2396f895581063b05fd4374ce52eae5f"
+        }
+      }
+    ]
+  }
+}

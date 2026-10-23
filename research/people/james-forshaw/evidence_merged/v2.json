@@ -1,0 +1,625 @@
+{
+  "works": {
+    "person": "James Forshaw",
+    "dimension": "公开作品与技术演化",
+    "identity_check": "已确认身份一致：人物记录给出 name=James Forshaw、primary_focus=Windows 与沙箱漏洞、handle tiraniddo、PZ blog label 与 social x.com/tiraniddo。Project Zero 现行博客首页 https://projectzero.google/ 列出 James Forshaw 为多篇 Windows 方向 writeup 的作者（dangling COM、GetProcessHandleFromHwnd、UI Access、path-lookup race condition），与 Windows/沙箱方向吻合。tiraniddo 在人物记录中既被作为 social 又与 GitHub Tiraniddo 生态一致，未见同名歧义冲突。身份核对基于 Project Zero 官方博客抓取，未发现需要消歧的第二人。",
+    "items": [
+      {
+        "id": "jf-works-001",
+        "date": "2026-09-21",
+        "claim": "James Forshaw 于 2026-09-21 发表《Windows Exploitation Techniques: Dangling COM Object Registrations》，分析 CVE-2026-66804——这是对 CVE-2026-50343（代号 Dark Elevator）不完整修复的二次利用。根因是 CrossDevice COM 对象（CLSID E9F83CF2-E0C0-4CA7-AF01-E90C70BEF496）存在系统级悬挂注册，而其 DLL 路径 %PROGRAMDATA%\\CrossDevice\\CrossDevice.Streaming.Source.dll 不存在，且 ProgramData 全用户可写，可植入恶意 DLL。原利用经注册表弱权限经 InstallService 触发，被修复后作者转用 custom COM marshaling（IMarshal 返回悬挂 CLSID），并通过 \\Microsoft\\Windows\\Shell\\CreateObjectTask 计划任务+全局命名事件启动 SYSTEM 级 dllhost（CustomMarshalAllowed=true），完成提权加载。研究方法上全程使用自建 OleViewDotNet 与 NtObjectManager PowerShell 模块枚举 COM 接口、检查进程能力、最终经 ICreateObject 传入伪造 marshaled 对象。这体现其晚期研究特征：目标难度上移到 COM runtime/特权服务编排链，方法上把工具作为 writeup 的执行介质，并把单点 bug 上升为可枚举的 bug 类——文末附 Get-ComDatabase/Import-Win32Module 脚本扫描 machine hive 中 DLL 路径无法 LoadLibrary 解析的 in-process COM 类。",
+        "status": "documented",
+        "growth_signal": "对不完整修复的追踪式二次研究（CVE-2026-50343 → CVE-2026-66804）+ 工具与 writeup 强耦合（OleViewDotNet/NtObjectManager 即执行介质）+ 把单点 bug 通用化为可批量枚举的 bug 类并随文发布扫描脚本，体现从‘找单点漏洞’向‘建枚举框架’的输出习惯演化。",
+        "short_quote": "just the act of loading a DLL into a process can cause a crash",
+        "source": {
+          "title": "Windows Exploitation Techniques: Dangling COM Object Registrations",
+          "url": "https://projectzero.google/2026/09/windows-dangling-com.html",
+          "published": "2026-09-21",
+          "source_type": "本人一手 writeup（Project Zero 博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dvy6b59z56uoliceafo9ox0c",
+          "accessed_at": "2026-09-26T13:54:44.502636+00:00",
+          "content_sha256": "87848e0fdb0af44cf7391a96a47a0928efd00e985ea5611a5131abdef697b86b"
+        }
+      },
+      {
+        "id": "jf-works-002",
+        "date": "2025-12-16",
+        "claim": "2025-12-16 发布的《Windows Exploitation Techniques: Winning Race Conditions with Path Lookups》原文写于 2016 年、曾刊于 PoC||GTFO issue #13，此次在 Windows 11 24H2（Surface Pro 11 / Snapdragon X Elite）上重新复测发布。技术目标是 Windows NT Object Manager Namespace（OMNS）路径查找，通过三种叠加手段人为放大单次查找耗时：深嵌套对象目录（约 1.6 万层）、符号链接强制 reparse 循环（最多 64 次）、目录哈希桶（37 桶）有意哈希碰撞（NUL 前缀名）。方法上用自写 C++ + NT syscall（如 NtOpenEvent）配合 QueryPerformanceCounter 做微秒级经验基准；用 WinDBG（dt nt!_OBJECT_DIRECTORY）核对内核结构；逆向 ObpLookupObjectName/ObpLookupDirectoryEntry 哈希算法。叠加后单次查找约 4.5ms，约为基线 ~2μs 的 2,250 倍。文章显式引用作者本人 2021 年关于 file Opportunistic Lock 与虚拟内存访问捕获的竞速放大先期工作作为对比。这构成了同一技术跨 9 年（2016→2025）的回访式复盘：在更新版系统上验证旧技巧是否仍成立、量级是否变化。",
+        "status": "documented",
+        "growth_signal": "跨版本回访式复盘（2016 原文 → 2025 在 Win11 24H2 上重测、引用 2021 自身先期工作），体现‘同一技术在新系统上复测量化变化’的复盘习惯；经验基准（QueryPerformanceCounter 微秒级）+ 内核结构/算法逆向，显示其研究方法始终以‘建立可测量的底层模型’为前提，而非凭手感。",
+        "short_quote": "originally written in 2016",
+        "source": {
+          "title": "Windows Exploitation Techniques: Winning Race Conditions with Path Lookups",
+          "url": "https://projectzero.google/2025/12/windows-exploitation-techniques.html",
+          "published": "2025-12-16",
+          "source_type": "本人一手 writeup（Project Zero 博客，再版旧作 + 新测）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_p9sre91re1i2uge43y4xwz20",
+          "accessed_at": "2026-09-26T13:54:44.502834+00:00",
+          "content_sha256": "7f8ce04c1aaf7b4c3a9b1077ad4c5308af8ee6a2c2163e1aa13515d8fed08d13"
+        }
+      },
+      {
+        "id": "jf-works-003",
+        "date": "2015",
+        "claim": "Google Project Zero 维护的 sandbox-attacksurface-analysis-tools 仓库由 James Forshaw 开发、版权归 Google LLC（2015–2024），描述为‘a small suite of PowerShell tools to test various properties of sandboxes on Windows’，Apache-2.0。包含 EditSection、TokenViewer、NtCoreLib、NtCoreLib.Forms、NtObjectManager、ViewSecurityDescriptor 等工具，普遍接受 -ProcessId 参数以冒充沙箱进程 token 判定可访问资源，建议以管理员/LocalSystem 运行枚举。仓库有 v2.0.0 的 major refactor，3572+ commits、2.3k stars/451 forks。NtObjectManager（基于 NtCoreLib/NtApiDotNet 暴露 NT 对象管理器）是其贯穿性研究基础设施，多次在其 writeup 中作为执行介质出现。这构成‘工具建设与输出习惯’维度的稳定基底：研究过程产出可复用工具，工具反过来成为后续 writeup 的执行与验证手段。",
+        "status": "documented",
+        "growth_signal": "把研究产物沉淀为长期可复用工具链（NtObjectManager/NtCoreLib/OleViewDotNet 生态），并以 major refactor（v2.0.0）持续维护，体现‘工具即研究记忆’的输出习惯；writeup 与工具双向反哺（工具支撑 writeup 验证，writeup 扩充工具用例）。",
+        "source": {
+          "title": "sandbox-attacksurface-analysis-tools (Google Project Zero GitHub repo)",
+          "url": "https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools",
+          "published": "2015",
+          "source_type": "本人一手代码仓库（Project Zero 官方组织下）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ln9jd49ythjtx73o7isznbnv",
+          "accessed_at": "2026-09-26T13:54:44.502629+00:00",
+          "content_sha256": "fec7bdf577453961660927cf58ff68749d93e6a00d110d34abd46e583b475447"
+        }
+      }
+    ],
+    "contradictions": [
+      "人物记录给出的 PZ writeup 入口 URL 为旧域 https://googleprojectzero.blogspot.com/search/label/James%20Forshaw，但抓取该标签页返回 ‘No posts with label James Forshaw’，其 Atom feed（/feeds/posts/default/-/James%20Forshaw）也返回 totalResults=0，作者归档页 /p/james-forshaw.html 返回 404。根因是 Project Zero 博客已 301 迁移至 https://projectzero.google/，旧 Blogger 标签体系失效；现行站点按文章正文呈现作者，因此以现行站点抓取结果为准。这不影响身份与作品事实，但说明人物记录的入口链接已过时，后续应改用 projectzero.google。",
+      "WebSearch 返回了一批疑似早期 PZ 文章 URL（如 2024/07 a-tale-of-two-sandboxes、2024/09 breaking-out-of-chrome-sandbox、2023/08 analyzing-windows-sandbox-attack-surface 等），但该次 WebSearch 明确提示其结果可能为‘illustrative examples rather than verified live pages’，本次未对它们逐条 WebFetch 抓取核验，故不予采信、不写入 items，避免用搜索摘要冒充一手来源。"
+    ],
+    "gaps": [
+      "早期（2014-2020，Project Zero 入职初期及更早的 Black Hat 2012/2014 Token Kidnapping）writeup 全部仅来自 WebSearch 摘要，未对原页 WebFetch 抓取，按规则只能视为 lead_only，未在本输出标 documented；早期时间线因此缺少抓取级一手证据。",
+      "中期（2018-2022）技术演化缺少中间节点；本输出只能用 2016 原作（2025 复测）与 2026 两个端点近似锚定趋势，无法证明中间年份方法/目标的逐阶变化。",
+      "论文、Black Hat/BlueHat 议程页等可证明‘演讲事实’的来源本次未抓取；按任务要求 speaker 页面只能证明演讲事实、不能单独证明成长机制，故未单独列为证据。",
+      "反映‘失败/转向/导师同伴/重复练习’等成长机制的访谈或自述一手来源本次未发现；现有证据偏向作品产出本身，对成长机制只能由工具链稳定与回访式复盘间接推断。",
+      "工具演化只抓取了 sandbox-attacksurface-analysis-tools 主仓库；同生态的 NtObjectManager、OleViewDotNet 独立仓库及其版本/提交史未单独抓取，仓库间关系为推断而非文档级证据。"
+    ]
+  },
+  "conversations": {
+    "person": "James Forshaw",
+    "dimension": "深度对话与自述",
+    "identity_check": "person_json 记录 James Forshaw，handle tiraniddo（https://x.com/tiraniddo），主要方向为 Windows 与沙箱漏洞，writeup_evidence 指向 Project Zero 博客标签页，资格为直接漏洞发现与利用研究。本维度要求研究长访谈、播客、AMA、演讲问答以提取其本人对入门、学习、失败、导师、选择与转折的叙述。身份确认依据来自 person_json.json，未在抓取中独立复核其 X 账号本人身份。WebSearch 返回的综述段落一致指向同一身份（Google Project Zero、前 Context Information Security、Pwn2Own、2013 微软 Mitigation Bypass Challenge），但这些为搜索结果综述而非一手抓取，仅作身份线索（lead_only），不作 documented 证据。无同名歧义反证。",
+    "items": [
+      {
+        "id": "jf-conv-01",
+        "date": "2025-12-16",
+        "claim": "Forshaw 在 Project Zero 博客持续输出深度的 Windows 漏洞利用技术 writeup，并以较长篇幅拆解单一技术原语；其中一篇路径查找竞争条件的技术文章原写于 2016 年，并在 Project Zero 迁移后重新发布，附针对现代 Windows 11 系统的更新分析，反映出其会反复回头验证旧技术是否仍然成立、并据此更新工具与写作。",
+        "status": "inferred",
+        "growth_signal": "重复练习与输出习惯：将旧技术 writeup 在多年后重新检验并更新，体现持续的工具/方法迭代与可复现性验证倾向，而非一次性披露。但该条仅证明输出习惯，未能提取本人对入门、失败、导师或转折的自述。",
+        "source": {
+          "title": "Project Zero 博客 — James Forshaw 名下文章列表（含 'Windows Exploitation Techniques: Winning Race Conditions with Path Lookups'，原写于 2016，重新发布于 2025-12-16）",
+          "url": "https://projectzero.google/",
+          "published": "2025-12-16",
+          "source_type": "技术博客 writeup（非访谈/自述）",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_byyajbfx63gsk3znfjoyq975",
+          "accessed_at": "2026-09-26T13:58:11.951345+00:00",
+          "content_sha256": "18b15c7d60cd2353a7951cc216c99e3169296baee3c6a456f05f88d25bf27482"
+        }
+      }
+    ],
+    "contradictions": [
+      "无互相冲突的一手材料被实际抓取到；WebSearch 综述段落（非一手抓取，不计为证据）对身份与前雇主（Context Information Security → Google Project Zero）叙述一致，未出现矛盾。"
+    ],
+    "gaps": [
+      "本维度的核心——Forshaw 本人关于入门、学习路径、失败、导师、关键选择与转折的长访谈、播客、AMA 或演讲问答正文——均未被实际抓取到。WebSearch 在本环境返回的多为模型生成的综述段落而非真实可引用 URL；DuckDuckGo 命中 CAPTCHA，Google 搜索返回日文不可用页，Bing 重定向至 cn.bing 后返回与目标无关的同名歧义结果。",
+      "Project Zero 博客成功抓取，但其内容为技术 writeup，非自述/对话维度材料；抓取页未独立显示作者署名，Forshaw 署名未在抓取正文中独立验证。",
+      "person_json 指定的 writeup_evidence（googleprojectzero.blogspot.com/search/label/James%20Forshaw）抓取返回 'No posts with label James Forshaw'，旧 Blogger 标签页无内容，未能作为本维度证据源。",
+      "未抓取到其参加 Black Hat US/EU、BlueHat 的演讲问答正文或长访谈；会议 speaker 页面即便存在也只能证明演讲事实，按任务规则不能单独证明成长机制。",
+      "未抓取到其 X（tiraniddo）账号本人自述或公开 AMA 原文；身份与社交媒体账号的本人归属未在抓取中独立复核。"
+    ]
+  },
+  "community": {
+    "person": "James Forshaw",
+    "dimension": "社区参与与反馈回路",
+    "identity_check": "身份通过 person_json.json 的 social 字段 (https://x.com/tiraniddo) 与 googleprojectzero/sandbox-attacksurface-analysis-tools 仓库 README 共同确认：README 注明该工具套件由 James Forshaw 开发、Copyright Google LLC 2015–2024，与 Project Zero 研究员身份一致。GitHub 个人 profile 页 (github.com/tiraniddo) WebFetch 返回 404，未能直接核验；Project Zero About 页 (projectzero.google/about-pz.html) 未列出成员名单，故团队归属只能 inferred。同名歧义低：tiraniddo 与 Windows 沙箱研究组合指向单一对象。",
+    "items": [
+      {
+        "id": "jf-comm-01",
+        "date": "2015",
+        "claim": "James Forshaw 长期维护公开的 Windows 沙箱攻击面分析工具套件 sandbox-attacksurface-analysis-tools（含 NtCoreLib/NtApiDotNet、NtObjectManager、TokenViewer 等），作为可被社区复用的研究基础设施。",
+        "status": "documented",
+        "growth_signal": "工具建设作为持续输出习惯：把自己的研究方法（NT API/对象管理器枚举、token 模拟、沙箱可达性测试）固化成他人可加载使用的 PowerShell/.NET 模块，而非一次性 PoC；3,572 commits 与 2,300 stars/451 forks 表明长期迭代与外部采用，构成作者↔使用者的反馈通道。",
+        "short_quote": "a small suite of PowerShell tools to test various properties of sandboxes on Windows",
+        "source": {
+          "title": "github.com/googleprojectzero/sandbox-attacksurface-analysis-tools (README)",
+          "url": "https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools",
+          "published": "2015-2024",
+          "source_type": "code_repository_readme",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dkcqtgbnd93ci8jawcrad97i",
+          "accessed_at": "2026-09-26T13:46:33.121253+00:00",
+          "content_sha256": "5095b5d6c6b97521beb835beb57536d91ea98576ec480e9042cda095b2540c92"
+        }
+      },
+      {
+        "id": "jf-comm-02",
+        "date": "2021-10",
+        "claim": "该工具仓库的 GitHub issue 区自 2021 年 10 月至 2026 年 2 月持续有外部使用者提交 bug 与功能请求（如 #86 Get-AccessibleDsObject、#83 RpcEndpointMapper 数组越界、#55 Windows Server 2022 AccessViolation），形成使用者→作者的社区反馈回路。",
+        "status": "documented",
+        "growth_signal": "外部使用者的真实问题反馈驱动 Forshaw 修复与扩展工具，issue 既是 bug 报告也是对新 Windows 版本（Server 2022、25H2）兼容性的早期信号；issue 创建受限表明这是被治理的协作通道而非随手灌水。",
+        "source": {
+          "title": "sandbox-attacksurface-analysis-tools — Issues (open: 12)",
+          "url": "https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools/issues",
+          "published": "2021-10",
+          "source_type": "issue_tracker_list",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8yt4ef19eh3h865ql8p07p7p",
+          "accessed_at": "2026-09-26T13:46:33.121258+00:00",
+          "content_sha256": "86da2c480d893846822eb544fa166a53a54441f3261d5023193657cc47c1676a"
+        }
+      }
+    ],
+    "contradictions": [],
+    "gaps": [
+      "Project Zero About 页 (projectzero.google/about-pz.html) 不列成员名单，无法从一手页面文档化 Forshaw 的 Project Zero 团队身份与入职时间，目前只能据博客与工具仓库 inferred。",
+      "GitHub 个人 profile 页 https://github.com/tiraniddo WebFetch 返回 HTTP 404，无法直接核验其个人账号下的全部仓库列表与 bio；本维度引用的仓库均经组织账号 googleprojectzero 核验。",
+      "Black Hat / BlueHat 演讲仅由 WebSearch 返回摘要提及（如 Black Hat USA 2013 'Abusing Windows' Logical Permissions for Fun and Profit'），未用 WebFetch 抓取演讲页面正文，按规则不计为 documented；演讲作为社区参与渠道的具体日期与议题待补。",
+      "googleprojectzero.blogspot.com/search/label/James%20Forshaw（person_json 提供的 writeup_evidence URL）WebFetch 返回 'No posts with label James Forshaw'，Blogger 标签过滤未匹配；改用 projectzero.google 首页成功核验帖子，但原 URL 的失效原因未进一步排查。",
+      "未抓取 bugs.chromium.org/p/project-zero issue tracker，无法量化 Forshaw 的外部 bug 报告数与外部研究者在其报告下的评论互动；协作披露的 '14 others' 具体身份未识别。"
+    ]
+  },
+  "external": {
+    "person": "James Forshaw",
+    "dimension": "外部视角",
+    "identity_check": "人物为 James Forshaw，主攻 Windows 与沙箱漏洞，rank 6。person_json 给出其社交账号 @tiraniddo 与 Project Zero 博客作者页链接。本次对该博客作者标签页实际抓取返回 'No posts with label James Forshaw.'，故本人作品一手正文未在本轮抓取中获得；@tiraniddo 与'Project Zero 成员'身份仅作为 lead_only 线索保留，未经正文核验。",
+    "items": [
+      {
+        "id": "ext-001",
+        "date": "2026-09",
+        "claim": "Project Zero 团队于 2014 年成立，使命是研究零日漏洞；该 About 页面不点名任何具体团队成员，因此无法从团队官方介绍页面直接支撑 Forshaw 的个人能力或成长机制。",
+        "status": "documented",
+        "growth_signal": "团队组织品牌(2014 成立、零日研究使命)本身不等于个人能力来源；按维度要求避免把组织品牌直接解释为能力，故此项用于排除而非归因。",
+        "source": {
+          "title": "About Project Zero",
+          "url": "https://projectzero.google/about-pz.html",
+          "published": "2026-09",
+          "source_type": "团队官方介绍页",
+          "level": "authoritative_secondary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_3czz51opvoafniclkxif6i2c",
+          "accessed_at": "2026-09-26T13:45:57.460766+00:00",
+          "content_sha256": "dff7c2ebf42ea2275dfb70037cd3fb0716096d72ed5e34a968cf7b5bb19d4851"
+        }
+      },
+      {
+        "id": "ext-002",
+        "date": "2026-09",
+        "claim": "person_json 提供的本人作品一手链接(googleprojectzero.blogspot.com/search/label/James%20Forshaw)经实际抓取，正文显示 'No posts with label James Forshaw.'，即该作者标签页当前无可见作品，无法用于交叉验证其作品产出。",
+        "status": "documented",
+        "growth_signal": "一手作品入口在本轮抓取中失效，导致无法用本人 writeup 交叉验证外部评价；记为资料缺口而非成长机制。",
+        "source": {
+          "title": "Project Zero Blog — label: James Forshaw",
+          "url": "https://googleprojectzero.blogspot.com/search/label/James%20Forshaw",
+          "published": "2026-09",
+          "source_type": "作者标签归档页",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_4boav212c8cxa9z7459d1nyg",
+          "accessed_at": "2026-09-26T13:45:57.460759+00:00",
+          "content_sha256": "48ba14f9c87e031a5756a4871f44e0cb0b05e148ed69537fbf7c9169a13ad7c5"
+        }
+      },
+      {
+        "id": "ext-003",
+        "date": "2026-09",
+        "claim": "Pwnie Awards 官方 winners 页面本轮抓取仅可见 2023 年度名单，其中未见 James Forshaw；因此无法以 Pwnie 官方页面直接佐证其获奖/提名，相关说法仅作为 lead_only 保留。",
+        "status": "documented",
+        "growth_signal": "奖项需官方页面佐证；本年度页面不覆盖历史年份，按维度要求不把奖项品牌直接解释为能力来源。",
+        "source": {
+          "title": "Pwnie Awards — Winners",
+          "url": "https://pwnies.com/winners/",
+          "published": "2026-09",
+          "source_type": "奖项官方页面",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_i1qbuz9dn8q9vsplurumfngx",
+          "accessed_at": "2026-09-26T13:45:57.460890+00:00",
+          "content_sha256": "6af438215a949130b258ba60f836d26522a519edb6d664eb6fe3e260dbcf2411"
+        }
+      }
+    ],
+    "contradictions": [
+      "person_json 将 googleprojectzero.blogspot.com/search/label/James%20Forshaw 列为 writeup_evidence，但本轮实际抓取该页正文为 'No posts with label James Forshaw.'，即一手作品入口当前不可用，与输入描述冲突。",
+      "多项关于 Forshaw 身份与履历(@tiraniddo、曾任职 Context Information Security、著《Attacking Network Protocols》、Pwnie 获奖/提名、Risky Business/Wired/The Register 报道)仅出现在 WebSearch 返回的模型自述摘要中，WebSearch 工具本身在本轮多次声明无实际搜索能力，因此这些线索无正文 URL 支撑，按规则不得标记为 documented/reported，仅作 lead_only 保留。"
+    ],
+    "gaps": [
+      "未抓取到任何同事、团队负责人、会议主持或权威媒体对 Forshaw 的具体评价正文；外部评价维度所需的交叉验证材料整体缺失。",
+      "Project Zero 官方 About 页不点名团队成员，无法用于个人能力佐证；PZ 博客作者标签页当前无可见作品，无法交叉验证作品产出。",
+      "Pwnie Awards 官方页面本轮仅可见 2023 年度；历年(Forshaw 可能涉及的)获奖/提名未核实，相关说法未获正文支撑。",
+      "未核验 @tiraniddo 与 James Forshaw 的实名对应关系(无正文支撑)；'此前任职 Context Information Security'、'著《Attacking Network Protocols》(No Starch Press)'、'sandbox-attacksurface-analysis-tools 工具'等线索均无抓取到的正文 URL 支撑。",
+      "成长机制(失败、转向、反馈回路、导师/同伴、重复练习、工具建设习惯)所需的一手正文材料本轮全部缺失；工具预算用尽(8/8)前未取得可引用正文。"
+    ]
+  },
+  "decisions": {
+    "person": "James Forshaw",
+    "dimension": "关键决策与转折",
+    "identity_check": "人物记录 person_json 指明 James Forshaw, 社交账号 @tiraniddo, writeup_evidence 指向 googleprojectzero label。本人独立博客 'Tyranid's Lair' 域名 tiraniddo.dev(由 tyranidslair.blogspot.com 301 跳转而来)作者署名 tiraniddo, 与 person_json.social (@tiraniddo) 完全一致, 且博文主题(Windows ACL/Kerberos/RPC/符号解析)与 person_json.primary_focus(Windows 与沙箱漏洞)吻合。身份确认: 抓取到的 tiraniddo.dev 一手博客即为 James Forshaw 本人所写。同名歧义: 未发现另一位公开活跃的 'James Forshaw' 安全研究者占据该 handle。注意: Project Zero 官方 'about' 页与 author-label 页在本轮抓取中分别返回 404/'No posts', 故 P0 团队成员身份在本次仅经 person_json 与社区共识间接支撑, 未经一手页面二次确认。",
+    "items": [
+      {
+        "id": "jf-decisions-01",
+        "date": "2022-2024",
+        "claim": "James Forshaw 在 2022 至 2024 年间持续在其个人博客 Tyranid's Lair 发布深度的 Windows 安全研究(ACL、Kerberos 中继、DCOM OXID、Windows 11 on ARM64 符号解析、Windows sudo、Active Directory 访问检查), 并在文中直接引用其自建工具 NtObjectManager 来发现 RPC 服务器信息——这体现了一种长期、可重复的研究与工具建设输出习惯, 而非偶发性漏洞披露。",
+        "status": "documented",
+        "growth_signal": "重复练习 + 工具建设作为研究方法: 把同一套自建工具(NtObjectManager)反复用于不同 Windows 子系统(ACL/Kerberos/RPC/AD), 每次产出独立 writeup。这种'工具-研究-输出'的闭环是可观察的成长机制, 而非'天赋'式叙事。连续多年的发布节奏(2022-06-26、2022-07-16、2024-02-09、2024-04-25、2024-04-29、2024-06-03)显示其在加入 Google 后仍维持独立的个人研究输出渠道, 未因团队归属而停止个人写作。",
+        "short_quote": "Finding Running RPC Server Information with NtObjectManager",
+        "source": {
+          "title": "Tyranid's Lair — recent posts (tiraniddo.dev)",
+          "url": "https://www.tiraniddo.dev/",
+          "published": "2022-06-26 至 2024-06-03 (多篇)",
+          "source_type": "personal blog post list",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_qkvuff4h209yi9d5m6fwvwl9",
+          "accessed_at": "2026-09-26T13:41:29.060238+00:00",
+          "content_sha256": "df434fb5073338565f3bce1392f85dbccbc314e6fe7d7702cf74593613c3ab07"
+        }
+      },
+      {
+        "id": "jf-decisions-02",
+        "date": "2015",
+        "claim": "据社区转述(本节点未能抓取到一手源), James Forshaw 约在 2015 年从英国安全公司 Context Information Security 加入 Google Project Zero。这是其职业路径上最常被引用的'关键转折', 但本次抓取中 Project Zero 'about' 页返回 404、author-label 页返回 'No posts with label James Forshaw'、blogspot 首页 301 跳转至 projectzero.goog 而本轮未跟进, 故未能从一手页面核实加入日期、动机与当时的约束/可选项。",
+        "status": "inferred",
+        "growth_signal": "换团队(Context IS → Google Project Zero)是典型的'关键决策'候选事件。但'决策当时'的约束、备选项与后果在本轮资料中缺失: 没有本人自述说明为何离开咨询背景进入全职漏洞研究团队、彼时 Project Zero 的招募条件或个人取舍。因此只能记录事件存在, 不能合理化其动机。此条应待一手源(早期 Project Zero 博文或本人访谈)补全后再升级为 documented。",
+        "source": {
+          "title": "WebSearch 转述(无可用 URL, 搜索返回非结果性回退)",
+          "url": "",
+          "published": "",
+          "source_type": "search result summary (non-citable)",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "jf-decisions-03",
+        "date": "2013",
+        "claim": "据社区转述(本节点未能抓取到一手源), James Forshaw 在 2013 年 Pwn2Own(CanSecWest)上以 Internet Explorer 10 / Windows 8 为目标完成利用, 时属 Context Information Security。该事件常被视为其后续被 Project Zero 招募的背景之一。本轮抓取未能获得 ZDI/CanSecWest 官方结果页或本人一手叙述, 故不标 documented。",
+        "status": "inferred",
+        "growth_signal": "Pwn2Own 这类竞赛若属实, 是可重复的对抗式练习与公开成果展示, 常作为职业转折的前置信号。但'为何参赛、备赛投入、赛果如何影响后续决策'均无一手材料, 不应据此推断天赋或动机。仅作为时间线上的候选锚点, 待一手源核实。",
+        "source": {
+          "title": "WebSearch 转述(无可用 URL, 搜索返回非结果性回退)",
+          "url": "",
+          "published": "",
+          "source_type": "search result summary (non-citable)",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "jf-decisions-04",
+        "date": "2017",
+        "claim": "据社区转述(本节点未能抓取到一手源), James Forshaw 于 2017 年出版 O'Reilly《Attacking Network Protocols》, 将其在网络协议 fuzzing/逆向方面的经验系统化为书籍。这是其研究从'单点漏洞披露'向'方法论与教学输出'扩展的候选转折。本轮未能抓取出版社或书籍页面以核实出版年与作者署名。",
+        "status": "inferred",
+        "growth_signal": "从 writeup 到成书是输出形态的转型, 反映其将反复练习得到的方法抽象为可传授体系的能力。但该书与同期漏洞研究、加入 P0 之间的因果链无一手材料支撑, 不宜推断为单一'决策'的结果。留待一手源(出版社页/本人自述)核实。",
+        "source": {
+          "title": "WebSearch 转述(无可用 URL, 搜索返回非结果性回退)",
+          "url": "",
+          "published": "",
+          "source_type": "search result summary (non-citable)",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "jf-decisions-05",
+        "date": "unknown",
+        "claim": "本轮抓取未能从一手源确认 James Forshaw 是否以及如何建设其标志性工具(sandbox-attacksurface-analysis / NtObjectManager 等)作为公开仓库。GitHub 仓库 googleprojectzero/sandbox-attackscape-analysis 与 sandbox-attacksurface-analysis 两种拼写在本轮均返回 404; NtObjectManager 仅在本人博客标题中被提及, 未能抓取到其仓库页面以确认归属、规模与维护节奏。",
+        "status": "unknown",
+        "growth_signal": "工具建设是漏洞研究者可重复输出方法的关键机制, 但在本维度(关键决策与转折)下, 工具仓库的存在与否、开源时机、是否伴随某次披露事件而发布, 均需一手源才能作为'决策'记录。当前仅博客引用可证其使用, 不足以构成决策级证据。",
+        "source": {
+          "title": "tiraniddo.dev 博客引用(工具名出现在博文标题中)",
+          "url": "https://www.tiraniddo.dev/",
+          "published": "2022-06-26",
+          "source_type": "personal blog post list",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_qkvuff4h209yi9d5m6fwvwl9",
+          "accessed_at": "2026-09-26T13:41:29.060238+00:00",
+          "content_sha256": "df434fb5073338565f3bce1392f85dbccbc314e6fe7d7702cf74593613c3ab07"
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 在本批两次调用中均返回 'I don't have access to a web search tool' 的断言性回退, 而非真实搜索结果列表; 其回退文本中却包含关于 James Forshaw 的具体转述(Pwn2Own 2013、Context IS、2015 加入 P0、2017 出版书籍)。这些转述无 URL 支撑且来源声明自相矛盾, 故本轮将其降级为 inferred 而非 documented, 与社区广泛共识不构成事实冲突, 只构成证据等级冲突。"
+    ],
+    "gaps": [
+      "Project Zero 官方 'about' 页(googleprojectzero.blogspot.com/p/about.html)返回 404, 无法一手核实团队成员名单、Forshaw 加入日期与团队定位。",
+      "Project Zero 博客 author-label 页(/search/label/James%20Forshaw)返回 'No posts with label James Forshaw', blogspot 首页 301 跳转至 projectzero.goog 但本轮未跟进抓取, 故未能拿到 Forshaw 的 Project Zero 一手博文及其可能的自我介绍。",
+      "Pwn2Own 2013(CanSecWest)的 ZDI/官方结果页未抓取, 无法一手确认 Forshaw 的目标、所属机构与赛果。",
+      "《Attacking Network Protocols》(O'Reilly)的出版社或书籍详情页未抓取, 出版年与作者署名未经一手核实。",
+      "sandbox-attacksurface-analysis 仓库在本轮以两种拼写访问均 404; NtObjectManager 仓库页未抓取; 工具建设的开源时机与规模缺失一手锚点。",
+      "缺少体现'决策当时约束/可选项/后果'的本人叙述(深度访谈、自述、回忆), 仅有'事件存在'的转述, 无法重建决策机制。",
+      "本轮搜索工具返回非结果性回退, 导致本应在 8 次调用内完成的一手锚定未能完成; 建议后续节点优先抓取 projectzero.goog、ZDI 博客与 O'Reilly 书籍页。"
+    ]
+  },
+  "timeline": {
+    "person": "James Forshaw",
+    "dimension": "可核验时间线",
+    "identity_check": "经 Project Zero 官方博客首页（https://projectzero.google/ ，由 googleprojectzero.blogspot.com/ 301 重定向而来）一手抓取确认：博客首页索引列出多篇署名 'James Forshaw' 的 Windows 漏洞利用研究帖子（主题覆盖 COM 对象注册、Windows 管理员保护绕过、GetProcessHandleFromHwnd API 等），与种子档案中「Windows 与沙箱漏洞、Project Zero」方向一致，身份确认。但 GitHub 账号 tiraniddo、X 账号 @tiraniddo 以及加入 Project Zero 前（Context Information Security）背景本轮均未独立抓取核验；2015 年以前的完整时间线无一手来源。",
+    "items": [
+      {
+        "id": "jf-timeline-01",
+        "date": "2025-12-16",
+        "claim": "James Forshaw 在 Project Zero 官方博客发布《Windows Exploitation Techniques: Winning Race Conditions with Path Lookups》，延续其 Windows 利用技术写作系列；该帖出现在博客迁移后的首页索引中。",
+        "status": "documented",
+        "growth_signal": "延续 'Windows Exploitation Techniques' 系列命名，显示持续的写作格式与命名习惯；博客迁移后作为首批重发内容之一，体现对既有研究的归档与再发布。",
+        "source": {
+          "title": "Windows Exploitation Techniques: Winning Race Conditions with Path Lookups",
+          "url": "https://projectzero.google/",
+          "published": "2025-12-16",
+          "source_type": "blog post (Project Zero official blog, homepage index)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_c74b50bcnojri8qp3nsm6bpy",
+          "accessed_at": "2026-09-26T13:51:45.941735+00:00",
+          "content_sha256": "0110eb5a02aca6d01b7437633b273e3989545c85bdeff2e55cb9fe9a936bd800"
+        }
+      },
+      {
+        "id": "jf-timeline-02",
+        "date": "2026-01-26",
+        "claim": "James Forshaw 在 Project Zero 官方博客发布《Bypassing Windows Administrator Protection》，针对 Windows 11 管理员保护机制发起绕过研究。",
+        "status": "documented",
+        "growth_signal": "针对 Windows 11 最新引入的管理员保护这一新攻击面快速跟进，显示对 Windows 权限边界新特性的持续追踪。",
+        "source": {
+          "title": "Bypassing Windows Administrator Protection",
+          "url": "https://projectzero.google/",
+          "published": "2026-01-26",
+          "source_type": "blog post (Project Zero official blog, homepage index)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_c74b50bcnojri8qp3nsm6bpy",
+          "accessed_at": "2026-09-26T13:51:45.941735+00:00",
+          "content_sha256": "0110eb5a02aca6d01b7437633b273e3989545c85bdeff2e55cb9fe9a936bd800"
+        }
+      },
+      {
+        "id": "jf-timeline-03",
+        "date": "2026-02-12",
+        "claim": "James Forshaw 在 Project Zero 官方博客发布《Bypassing Administrator Protection by Abusing UI Access》，作为同一管理员保护主题的后续研究。",
+        "status": "documented",
+        "growth_signal": "距上一篇约两周即发布同主题后续，体现短周期迭代与反馈回路：针对同一防御机制换用 UIAccess 路径继续突破。",
+        "source": {
+          "title": "Bypassing Administrator Protection by Abusing UI Access",
+          "url": "https://projectzero.google/",
+          "published": "2026-02-12",
+          "source_type": "blog post (Project Zero official blog, homepage index)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_c74b50bcnojri8qp3nsm6bpy",
+          "accessed_at": "2026-09-26T13:51:45.941735+00:00",
+          "content_sha256": "0110eb5a02aca6d01b7437633b273e3989545c85bdeff2e55cb9fe9a936bd800"
+        }
+      },
+      {
+        "id": "jf-timeline-04",
+        "date": "2026-02-26",
+        "claim": "James Forshaw 在 Project Zero 官方博客发布《A Deep Dive into the GetProcessHandleFromHwnd API》，对单个 Windows API 做深度拆解。",
+        "status": "documented",
+        "growth_signal": "对单个 API 做深度拆解的写作习惯；与同期 UIAccess/辅助功能主题连续，体现按 API 逐个系统化分析的方法论。",
+        "source": {
+          "title": "A Deep Dive into the GetProcessHandleFromHwnd API",
+          "url": "https://projectzero.google/",
+          "published": "2026-02-26",
+          "source_type": "blog post (Project Zero official blog, homepage index)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_c74b50bcnojri8qp3nsm6bpy",
+          "accessed_at": "2026-09-26T13:51:45.941735+00:00",
+          "content_sha256": "0110eb5a02aca6d01b7437633b273e3989545c85bdeff2e55cb9fe9a936bd800"
+        }
+      },
+      {
+        "id": "jf-timeline-05",
+        "date": "2026-09-21",
+        "claim": "James Forshaw 在 Project Zero 官方博客发布《Windows Exploitation Techniques: Dangling COM Object Registrations》，回归其 Windows 利用技术系列命名。",
+        "status": "documented",
+        "growth_signal": "回归 'Windows Exploitation Techniques' 系列命名；COM 对象注册研究主题延续其长期的沙箱/COM 攻击面方向，显示研究主线的连续性。",
+        "source": {
+          "title": "Windows Exploitation Techniques: Dangling COM Object Registrations",
+          "url": "https://projectzero.google/",
+          "published": "2026-09-21",
+          "source_type": "blog post (Project Zero official blog, homepage index)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_c74b50bcnojri8qp3nsm6bpy",
+          "accessed_at": "2026-09-26T13:51:45.941735+00:00",
+          "content_sha256": "0110eb5a02aca6d01b7437633b273e3989545c85bdeff2e55cb9fe9a936bd800"
+        }
+      }
+    ],
+    "contradictions": [
+      "Project Zero 博客首页索引中，2026-01-26 帖子的 URL 相对路径显示为 '/2026/26/windows-administrator-protection.html'，与同月其它帖子 '/2026/02/' 的路径格式不一致，疑为索引转录异常；实际帖子 URL 本轮未单独抓取核验。",
+      "首页抓取的模型摘要把 2025-12-16 帖子描述为「2016 年旧草稿重新发布」，但该描述为抓取模型的转述、非原文逐字确认，是否确为 2016 年旧作重发本轮未核实。",
+      "种子档案提供的 writeup_evidence URL（googleprojectzero.blogspot.com/search/label/James%20Forshaw）抓取返回 'No posts with label James Forshaw'，与该 URL 作为 writeup 证据的预期不符；推断为博客迁移所致，但未证实。"
+    ],
+    "gaps": [
+      "加入 Project Zero 的确切年份未核验（WebSearch 摘要称 2013 创始成员，但未提供可引用的一手 URL）。",
+      "加入 Project Zero 前在 Context Information Security 的任职时段未核验，无一手来源。",
+      "GitHub 账号 tiraniddo 及其工具（NtObjectTools、OleView DotNet 等）的创建时间与演进未抓取——github.com/tiraniddo 经 WebFetch 返回 404。",
+      "X 账号 @tiraniddo 的归属本轮未独立抓取核验。",
+      "Black Hat / BlueHat / PacSec / Infiltrate 等演讲的具体年份与议题未核验，无一手来源。",
+      "著作《Attacking Network Protocols》(No Starch Press) 的出版年份未核验。",
+      "早期漏洞公告（win32k、AppContainer、DCOM/COM 沙箱逃逸等）的具体 CVE 编号与披露日期未核验。",
+      "2015 年以前的完整教育与职业时间线无一手来源，全部留空。",
+      "本轮 WebSearch 工具多次返回 LLM 风格自述而非真实可引用的搜索结果页，导致早期时间线无法补证；此为本轮工具可用性缺口，建议后续节点重试一手抓取。",
+      "Project Zero 旧博客的 /p/about.html 与 /p/team.html 均返回 404，未能获取团队页上关于 Forshaw 加入时间、背景的一手介绍。"
+    ]
+  },
+  "targeted": {
+    "items": [
+      {
+        "id": "jf-rr1-001",
+        "resolves_issue": "review required_revision #4（source 标注首页摘要 vs 正文页）：为 jf-works-001/jf-timeline-05 补抓 Dangling COM 正文页；同时复核 required_revision #1 的 9-bypass 配对（该文含 'I and 14 others reported'，不含 9 bypass）。",
+        "date": "2026-09-21",
+        "claim": "James Forshaw 于 2026-09-21 在 Project Zero 官方博客正文页（https://projectzero.google/2026/09/windows-dangling-com.html，标题 'Windows Exploitation Techniques: Dangling COM Object Registrations'，作者署名 James Forshaw）发表 Dangling COM 对象注册研究。正文逐字确认：CVE-2026-66804（'a privilege escalation bug that Microsoft recently fixed in Windows, CVE-2026-66804, that I and 14 others reported'）、CVE-2026-50343（'This issue is an incomplete fix for CVE-2026-50343, a bug dubbed \"Dark Elevator\"'）、CLSID E9F83CF2-E0C0-4CA7-AF01-E90C70BEF496、%PROGRAMDATA%\\CrossDevice\\CrossDevice.Streaming.Source.dll、\\Microsoft\\Windows\\Shell\\CreateObjectTask 计划任务、CustomMarshalAllowed（SYSTEM dllhost 进程 Select User, CustomMarshalAllowed 显示 True）、Get-ComDatabase（'$db = Get-ComDatabase -LoadMode MachineOnly'）、Import-Win32Module（'$lib = Import-Win32Module -Path $Server -Flags AsDataFile'）。该文含 'I and 14 others reported'，不含 '9 bypass'。此条作为 jf-works-001/jf-timeline-05 的正文页 source 替代首页 source。",
+        "status": "documented",
+        "source": {
+          "title": "Windows Exploitation Techniques: Dangling COM Object Registrations (Project Zero blog article body)",
+          "url": "https://projectzero.google/2026/09/windows-dangling-com.html",
+          "published": "2026-09-21",
+          "source_type": "researcher_blog_post_article_body",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dtkf7d2lpavb8umxil1ycrmu",
+          "accessed_at": "2026-09-26T14:17:36.346295+00:00",
+          "content_sha256": "97e67f9b8ae94fcd3b5748933e57c8377afa581e8094fa79625b559db9efe6f4"
+        }
+      },
+      {
+        "id": "jf-rr1-002",
+        "resolves_issue": "review required_revision #5（2250x 推导标注）：逐字核对 Path Lookups 正文页原文数字，确认 '2250' 不在原文中，2250x 为 synthesis 自行计算；同时解决 required_revision #4（source 正文页）。",
+        "date": "2025-12-16",
+        "claim": "James Forshaw 于 2025-12-16 在 Project Zero 官方博客正文页（https://projectzero.google/2025/12/windows-exploitation-techniques.html，标题 'Windows Exploitation Techniques: Winning Race Conditions with Path Lookups'，作者署名 James Forshaw）发布路径查找竞态研究。正文逐字确认关键数字与表述：(1) 'This post was originally written in 2016 for the Project Zero blog.'；(2) 'The system used is a new Surface Pro 11th Edition CoPilot+ PC with a Snapdragon X Elite running at 3.40GHz.' 与 'This system has Windows 11 24H2 installed'；(3) 时间数字——基线 'the lookup process for a simple named event is approximately 2μs'；长名 32000 字符 'For a 32000 character long string this seems to top out at approximately 35μs'；放大后 'the average lookup time is around 1300μs or approximately 40 times larger'；最终 'it takes approximately 4.5ms to lookup the event'——'2250' 不在原文中，2250x 为 synthesis 自行计算（2μs→4.5ms），原文实际表述为'放大后约 1300μs，约为长名查找结果的 40 倍'；(4) 链接到 'the journal PoC||GTFO [issue #13]' 与对应 PDF；(5) 'Over the years I've come up with various techniques to expand the race window, including file Opportunistic Locks and trapping virtual memory access.' 并链接到 2021 年 PZ 先期博文。此条作为 jf-works-002/jf-timeline-01 的正文页 source 替代首页 source。",
+        "status": "documented",
+        "source": {
+          "title": "Windows Exploitation Techniques: Winning Race Conditions with Path Lookups (Project Zero blog article body)",
+          "url": "https://projectzero.google/2025/12/windows-exploitation-techniques.html",
+          "published": "2025-12-16",
+          "source_type": "researcher_blog_post_article_body",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_20eqb920qezt6ky5r7cn2r8y",
+          "accessed_at": "2026-09-26T14:17:36.346300+00:00",
+          "content_sha256": "21502fa715a4351cd5741d8d9d1f2a4b3da80361c5ea452e101fb179646a0f3f"
+        }
+      },
+      {
+        "id": "jf-rr1-003",
+        "resolves_issue": "review required_revision #1（9-bypass 配对）：Admin Protection 正文页确认该文同时含 '9 separate means to bypass' 与 'All the issues ... have been fixed'，纠正复核'把 9 bypass 整体移到 UIAccess 一篇'的归因方向；同时解决 required_revision #4（source 正文页）。",
+        "date": "2026-01-26",
+        "claim": "James Forshaw 于 2026-01-26 在 Project Zero 官方博客正文页（https://projectzero.google/2026/26/windows-administrator-protection.html，标题 'Bypassing Windows Administrator Protection'，作者署名 James Forshaw）发布 Windows 11 25H2 Administrator Protection 绕过研究。正文逐字确认关键句：(1) 'A headline feature introduced in the latest release of Windows 11, 25H2 is Administrator Protection.'；(2) 'I found 9 separate means to bypass the feature and silently gain administrator privileges.'；(3) 'Finally I'll detail one of the nine separate vulnerabilities that I found to bypass the feature'；(4) 'All the issues that I reported to Microsoft have been fixed, either prior to the feature being officially released (in optional update KB5067036) or as subsequent security bulletins.'——即该文同时含'9 separate means to bypass'与'All the issues ... have been fixed'两句。此条纠正复核 required_revision #1 的归因：'9 bypass'并非 UIAccess 一篇独有，Admin Protection 文章本身即报告 9 个 bypass（措辞'9 separate means'）。此条作为 jf-comm-03 的替代（正文页 source + 正确归因）。",
+        "status": "documented",
+        "source": {
+          "title": "Bypassing Windows Administrator Protection (Project Zero blog article body)",
+          "url": "https://projectzero.google/2026/26/windows-administrator-protection.html",
+          "published": "2026-01-26",
+          "source_type": "researcher_blog_post_article_body",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_6mh5dkucftqsmw59xvt7ve5b",
+          "accessed_at": "2026-09-26T14:17:36.346312+00:00",
+          "content_sha256": "6016c49463e3be671b98ac8d178445348cb767a58bc8618e9b942ccd44603576"
+        }
+      },
+      {
+        "id": "jf-rr1-004",
+        "resolves_issue": "review required_revision #1（9-bypass 配对）：UIAccess 正文页确认该文含 'In total I found 9 bypasses ... now all been fixed'，且不含 'All the issues ... have been fixed'；明确两篇文章各自独立报告 9 个 bypass（措辞不同），纠正复核'9 bypass 仅属 UIAccess'的归因方向；同时解决 required_revision #4（source 正文页）。",
+        "date": "2026-02-12",
+        "claim": "James Forshaw 于 2026-02-12 在 Project Zero 官方博客正文页（https://projectzero.google/2026/02/windows-administrator-protection.html，标题 'Bypassing Administrator Protection by Abusing UI Access'，作者署名 James Forshaw）发布 Administrator Protection 的 UIAccess 路径绕过研究。正文逐字确认关键句：(1) 'In my last blog post I introduced the new Windows feature, Administrator Protection and how it aimed to create a secure boundary for UAC where one didn't exist.'（引用前一篇 Admin Protection 文章作为先期工作）；(2) 'In total I found 9 bypasses during my research that have now all been fixed.'；(3) UI Access / uiAccess manifest 属性（'It must have an embedded manifest with the uiAccess attribute set to true'）确认；(4) 'All the issues that I reported to Microsoft have been fixed' 不出现于该文。此条纠正复核 required_revision #1 的归因方向：两篇文章各自独立报告约 9 个 bypass，Admin Protection 为'9 separate means'（首批，功能引入时即报告），UIAccess 为'9 bypasses ... now all been fixed'（UIAccess 这条路径的 9 个），不应把'9 bypass'整体归到 UIAccess 一篇而漏掉 Admin Protection 文章自己的 9 means。此条作为 jf-comm-04 之外新增的 UIAccess 正文页 evidence。",
+        "status": "documented",
+        "source": {
+          "title": "Bypassing Administrator Protection by Abusing UI Access (Project Zero blog article body)",
+          "url": "https://projectzero.google/2026/02/windows-administrator-protection.html",
+          "published": "2026-02-12",
+          "source_type": "researcher_blog_post_article_body",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_y3mgjlpv21rsygw6s44o7te0",
+          "accessed_at": "2026-09-26T14:17:36.346315+00:00",
+          "content_sha256": "880b6aa7eb977ef32ddeca41d828ef02904212286a698eab85f9abbe7cefd22c"
+        }
+      },
+      {
+        "id": "jf-rr1-005",
+        "resolves_issue": "review required_revision #4（source 正文页）：为 jf-comm-05/jf-timeline-04 补抓 GetProcessHandleFromHwnd 正文页；确认 'I found a publicly disclosed UAC bypass' 与 'Quick Assist' 均出自该文。",
+        "date": "2026-02-26",
+        "claim": "James Forshaw 于 2026-02-26 在 Project Zero 官方博客正文页（https://projectzero.google/2026/02/gphfh-deep-dive.html，标题 'A Deep Dive into the GetProcessHandleFromHwnd API'，作者署名 James Forshaw）发布 GetProcessHandleFromHwnd API 深度拆解。正文逐字确认关键句：(1) 'This was an API I didn't know existed until I found a publicly disclosed UAC bypass using the Quick Assist UI Access application.'；(2) 'This API looked interesting so I thought I should take a closer look.'——即研究由一个已公开披露的 UAC bypass（Quick Assist UIAccess 应用）触发；(3) 'Quick Assist' 多次出现；(4) GetProcessHandleFromHwnd 在标题与正文多次出现。此条作为 jf-comm-05/jf-timeline-04 的正文页 source 替代首页 source，确认 'I found a publicly disclosed UAC bypass' 短句出自该文。",
+        "status": "documented",
+        "source": {
+          "title": "A Deep Dive into the GetProcessHandleFromHwnd API (Project Zero blog article body)",
+          "url": "https://projectzero.google/2026/02/gphfh-deep-dive.html",
+          "published": "2026-02-26",
+          "source_type": "researcher_blog_post_article_body",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_d5btpbu2i0h6fnhen6cnxszw",
+          "accessed_at": "2026-09-26T14:17:36.346324+00:00",
+          "content_sha256": "35af11f46815548dffc4b67c64972fe46005066e0ac632e7785bb14615160f46"
+        }
+      }
+    ]
+  }
+}

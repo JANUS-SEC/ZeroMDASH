@@ -1,0 +1,640 @@
+{
+  "works": {
+    "person": "Vignesh Rao",
+    "dimension": "公开作品与技术演化",
+    "identity_check": "person_json 列名 Vignesh Rao, 主域 Exodus Intelligence blog (blog.exodusintel.com), 浏览器/系统漏洞, 并标注 OffByOne 2024 / Black Hat。WebFetch 抓取 Exodus blog 返回四篇署名 Vignesh Rao 的 writeup, byline 出现于 Exodus 官方博客, 与 person_json 的 writeup_evidence 一致, 可确认该 blog 为其公开作品主渠道。姓名异名问题: 2020-02-24 byline 为 'Vignesh S Rao', 2023-2024 为 'Vignesh Rao'; 二者均挂 Exodus Intelligence 且主题连续 (Chrome V8), 推断同一人, 但未由独立生平材料证实 (见 contradictions/gaps)。X 账号 https://x.com/vigneshr4o 返回 HTTP 402 需登录, 未能作为核验来源。OffByOne 2024 议程页 offbyone.ca 连接被拒, 演讲事实未直接抓取证实, 仅以 person_json lead_only 记录, 不纳入 items。",
+    "items": [
+      {
+        "id": "VR-WORKS-01",
+        "date": "2020-02-24",
+        "claim": "Vignesh (S) Rao 与 István Kurucsai 合著 Exodus Intelligence 博客文章《A EULOGY FOR PATCH-GAPPING CHROME》, 针对 Chromium V8 TurboFan 的 InferReceiverMapsUnsafe 在 Proxy 拦截 JSCreate 原型访问时副作用建模缺陷, 构建完整利用链 (DOUBLE-to-SMI 类型混淆 → addrof/fakeobj → TypedArray backing store 任意读写 → WASM RWX 写 shellcode)。文章系统阐述 patch-gapping 方法论: 监控公开 chromium-review CL 与回归测试, 选择 'simple but powerful-looking regression test, incorrect modeling of side-effects, easy to understand one-line change' 的候选, 因 'security fixes public before they are released to end-users' 而回归测试 'reducing exploit development time significantly'。",
+        "status": "documented",
+        "growth_signal": "早期即掌握完整 V8 利用链构建与 1day 方法论, 标志其将公开补丁作为研究输入的工作流; 通过合著复用同伴 (István Kurucsai) 经验; 方法论显式记录于 writeup, 形成可复用的候选筛选准则, 体现工具/流程建设而非偶然发现。",
+        "short_quote": "all the characteristics of a promising 1day candidate: simple but powerful-looking regression test, incorrect modeling of side-effects, easy to understand one-line change",
+        "source": {
+          "title": "A EULOGY FOR PATCH-GAPPING CHROME",
+          "url": "https://blog.exodusintel.com/2020/02/24/a-eulogy-for-patch-gapping-chrome/",
+          "published": "2020-02-24",
+          "source_type": "blog writeup (technical, with full exploit chain)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_o20fgvituc0edlw1dplvmeus",
+          "accessed_at": "2026-09-28T02:52:55.930139+00:00",
+          "content_sha256": "46db4fbea10f4dadd40167ab04decdac209f68c324e43105c8bb0351b31420aa"
+        }
+      },
+      {
+        "id": "VR-WORKS-02",
+        "date": "2023-07-20",
+        "claim": "Vignesh Rao 独立署名 (研究于 2020 与 Martin Saar 合作) 的 Exodus 文章《Shifting boundaries: Exploiting an Integer Overflow in Apple Safari》, 针对 Apple WebKit JavaScriptCore FTL JIT B3 强缩减阶段 IntRange::shl() 的整数溢出: 左移上界 0x7ffffffe 溢出变负并小于下界, 致 computed range [0,INT_MAX] 与实际 [-4,INT_MAX] 不符, CheckAdd 误判 CheckSub 不溢出并删除检查, DFG Integer Range Optimization 据此移除数组边界检查, 产生 JSC 堆上可控越界读写, 进而经 ArrayWithDouble/ArrayWithContiguous 类型混淆得到 addrof/fakeobj。",
+        "status": "documented",
+        "growth_signal": "研究目标由 V8 转向 JSC 的 FTL/B3 编译器, 由 patch-gapping (复用公开补丁) 转为直接审计 JIT 范围分析源码 (B3ReduceStrength.cpp 的 rangeFor/shl) 以发现 0day 类整数溢出; 主题难度与技术栈显著升级; 显式以 '研究于 2020 与 Martin Saar 合作' 标注时间线, 表明长周期研究而非即写即发。",
+        "short_quote": "when the left shift is performed on the upper bound (0x7ffffffe) of the input range, it may overflow, become negative, and more importantly become smaller than the lower bound",
+        "source": {
+          "title": "Shifting boundaries: Exploiting an Integer Overflow in Apple Safari",
+          "url": "https://blog.exodusintel.com/2023/07/20/shifting-boundaries-exploiting-an-integer-overflow-in-apple-safari/",
+          "published": "2023-07-20",
+          "source_type": "blog writeup (technical, root-cause + exploitation)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_raxgo140jtcuhklylub99mlt",
+          "accessed_at": "2026-09-28T02:52:55.930123+00:00",
+          "content_sha256": "1f35840056d6f1b00592718a74b0ef057f76cfd1c0b8a4c6ffb1d45c52a48b06"
+        }
+      },
+      {
+        "id": "VR-WORKS-03",
+        "date": "2023-12-11",
+        "claim": "Vignesh Rao 与 Javier Jimenez 合著《Safari, Hold Still for NaN Minutes!》, 针对 JSC boxDouble() NaN-boxing 整数溢出: boxDouble 假定入参为合法 double 或纯 NaN, 未校验结果是否溢出; 通过 Float64Array + BigUint64Array 视图写入 'impure NaN' (如 0xfffe000012345678), 减去 JSValue::NumberTag 溢出得高位清零的全控值, JSC 解释为原始对象指针, 即 fakeobj; 进而用 JIT 编译的 CompareStrictEq (x86 cmp) 对比伪指针与有效指针不崩溃以暴力 ASLR, 利用 macOS/iOS JSC 堆地址恒为 5 字节(40 位)且页对齐取得 4096x 加速, 得 addrof/fakeobj 实现任意读写。作者称 2023-10 会议以 'browser research is a dynamic area' 与 'finding and exploiting three vulnerabilities' 为叙事发表。",
+        "status": "documented",
+        "growth_signal": "在同一 JSC 引擎内切换到更底层的 NaN-boxing 编码语义缺陷, 表明对目标内部表示的深入掌握; 引入基于 JIT 比较指令的 ASLR 暴力原语并对地址空间结构做量化优化 (4096x), 属工具/原语建设的迭代而非重复; 同伴合著 (Javier Jimenez) 与会议叙事表明其公开输出已具连贯主题线。",
+        "short_quote": "we presented a story of finding and exploiting three vulnerabilities",
+        "source": {
+          "title": "Safari, Hold Still for NaN Minutes!",
+          "url": "https://blog.exodusintel.com/2023/12/11/safari-hold-still-for-nan-minutes/",
+          "published": "2023-12-11",
+          "source_type": "blog writeup (technical, root-cause + exploitation + conference narrative)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_vtp464sl1hitvj87n2wz8x7g",
+          "accessed_at": "2026-09-28T02:52:55.930132+00:00",
+          "content_sha256": "fec1eac8b5ae3dcc7745708b403b128b93b2af4eeb60098175904a53dab9c0e2"
+        }
+      },
+      {
+        "id": "VR-WORKS-04",
+        "date": "2024-01-19",
+        "claim": "Javier Jimenez 与 Vignesh Rao 合著《Google Chrome V8 CVE-2024-0517 Out-of-Bounds Write Code Execution》, 针对 V8 Maglev 编译器的二阶逻辑缺陷: TryBuildFindNonConstructorOrConstruct() 调用 BuildAllocateFastObject() 后未清 current_raw_allocation_, 使后续分配可与之折叠, GC 移动对象致折叠分配越界写, 转 type confusion 得 addrof/read/write; 通过含 'raw 64 bit pointer ... store the starting address of the jump table' 的 WebAssembly 实例对象指向 RWX 内存绕过 Ubercage, 并借 WebAssembly 浮点常量 'interpreted as assembly code by jumping in the middle of some compiled wasm code' 走入 shellcode。目标 Chrome 120.0.6099.71 on Linux, 补丁 2024-01-16。",
+        "status": "documented",
+        "growth_signal": "回到 V8 但切换到 Maglev (较 TurboFan 更新的编译管线) 并处理 current_raw_allocation_ 状态管理这类二阶逻辑缺陷, 而非直接副作用建模; 显式绕过 Ubercage 沙箱并复用 WASM-RWX 原语, 显示其利用栈随 V8 防御 (pointer compression→Ubercage) 演进而升级; 与 Javier Jimenez 持续合著表明稳定协作。",
+        "short_quote": "never clears the current_raw_allocation_ variable after calling BuildAllocateFastObject()",
+        "source": {
+          "title": "Google Chrome V8 CVE-2024-0517 Out-of-Bounds Write Code Execution",
+          "url": "https://blog.exodusintel.com/2024/01/19/google-chrome-v8-cve-2024-0517-out-of-bounds-write-code-execution/",
+          "published": "2024-01-19",
+          "source_type": "blog writeup (technical, CVE + full exploit chain)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_az0j7u7d9r9vw3b4dvd7v3cm",
+          "accessed_at": "2026-09-28T02:52:55.930126+00:00",
+          "content_sha256": "63169a41b659ddd2c24cfff4644723d17986890a68d1216110f2b1f04166d350"
+        }
+      }
+    ],
+    "contradictions": [
+      "2020-02-24 byline 署名 'Vignesh S Rao', 2023-2024 署名 'Vignesh Rao'; 二者均挂 Exodus Intelligence 且主题连续于 Chrome/JSC 浏览器利用, 推断同一人, 但缺独立生平材料直接证实中间名差异是否为同一人。",
+      "2023-07-20 文章称研究于 2020 与 Martin Saar 合作, 但 2023-07-20 与 2020-02-24 patch-gapping 文章之间约三年未见抓取到的署名 writeup, 该段产出与是否转做非公开研究无来源证实。"
+    ],
+    "gaps": [
+      "2021-2022 期间无抓取到的 Vignesh Rao 署名公开 writeup, 其间产出、目标或转向不明。",
+      "OffByOne 2024 议程页 https://www.offbyone.ca/ 连接被拒 (ECONNREFUSED), 演讲事实未能直接抓取证实; person_json 标注的 Black Hat 参与亦未抓取证实。",
+      "X 账号 https://x.com/vigneshr4o 返回 HTTP 402 需登录, 未能作为核验来源; 无法据其确认 OffByOne/Black Hat 或身份同一性。",
+      "本人 GitHub 或代码仓库未检索 (调用预算接近上限), 是否有公开工具/代码产出不明。",
+      "'Vignesh S Rao' 与 'Vignesh Rao' 同一性仅由同机构+主题连续推断, 未由独立生平材料证实。"
+    ]
+  },
+  "conversations": {
+    "person": "Vignesh Rao",
+    "dimension": "深度对话与自述",
+    "identity_check": "身份确认：Exodus Intelligence 博客多篇 byline 出现 'By Vignesh Rao' 与 'Vignesh S Rao'，研究方向为浏览器与系统漏洞（Chrome V8 CVE-2024-0517、Apple Safari/WebKit 整数溢出、Safari NaN-minutes、patch gapping Chrome），与 person_json 的 primary_focus（浏览器与系统漏洞）与 writeup_evidence（Exodus Intelligence blog）一致；本人主笔或合著 4 篇 writeup，可作 primary 来源确认身份。同名歧义：Vignesh Rao 为常见姓名，但抓取到的安全研究记录集中在 Exodus Intel 浏览器漏洞方向，未见其他安全方向同名者与本案相关。局限：person_json 标注的 x.com/vigneshr4o 与 'OffByOne 2024 / Black Hat' 未能通过可抓取来源独立确认（x.com 返回 HTTP 402；演讲类来源未检索到），身份与 handle 的对应关系缺乏独立一手佐证，故记为 inferred。",
+    "items": [
+      {
+        "id": "vr-conv-1",
+        "date": "2020-02-24",
+        "claim": "Vignesh Rao（署名 Vignesh S Rao）与 István Kurucsai 合著 patch gapping Chrome 研究，自述团队在 2019 年曾两次研究 patch gapping Chrome，本次以 TurboFan 漏洞检验利用 1day 是否仍可行，并给出在发现补丁后约 3 天完成利用的时间记录，显示其重复练习同一研究主题并在补丁差异分析上投入持续时间。",
+        "status": "documented",
+        "growth_signal": "重复练习与时间投入：自述对 patch gapping 这一主题进行至少三次（2019 年两次、本次一次）系统研究，并量化利用开发耗时，体现对补丁差异分析方法的反复打磨。",
+        "short_quote": "In 2019 we looked at patch gapping Chrome on two separate occasions. ... It took us around 3 days to exploit the vulnerability after discovering the fix.",
+        "source": {
+          "title": "A Eulogy for Patch Gapping Chrome",
+          "url": "https://blog.exodusintel.com/2020/02/24/a-eulogy-for-patch-gapping-chrome/",
+          "published": "2020-02-24",
+          "source_type": "本人技术 writeup（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_iig9e8avzt0hkobwtotprsow",
+          "accessed_at": "2026-09-28T02:46:28.042263+00:00",
+          "content_sha256": "e3abeaec5bae1f6be0aa00177a655ba3dbf70176c95206447774d6096e5ba584"
+        }
+      },
+      {
+        "id": "vr-conv-2",
+        "date": "2023-07-20",
+        "claim": "Vignesh Rao 单独署名 Safari 整数溢出利用 writeup，注明该研究于 2020 年与 Martin Saar 协作完成；显示其早期在浏览器利用方向与同伴 Martin Saar 共同研究，writeup 延后发表。",
+        "status": "documented",
+        "growth_signal": "同伴协作与延迟发表：与同伴 Martin Saar 在 2020 年共同完成研究，2023 年才以本人署名发表 writeup，反映其习惯将协作研究沉淀为公开技术记录。",
+        "short_quote": "This research was conducted along with Martin Saar in 2020.",
+        "source": {
+          "title": "Shifting Boundaries: Exploiting an Integer Overflow in Apple Safari",
+          "url": "https://blog.exodusintel.com/2023/07/20/shifting-boundaries-exploiting-an-integer-overflow-in-apple-safari/",
+          "published": "2023-07-20",
+          "source_type": "本人技术 writeup（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_sic3m7026di74y4hst1om6gu",
+          "accessed_at": "2026-09-28T02:46:28.042256+00:00",
+          "content_sha256": "5fecc18466c8d75f54644b9fac8fddfaf14a3eea1c8b764becb95b34513784ab"
+        }
+      },
+      {
+        "id": "vr-conv-3",
+        "date": "2023-12-11",
+        "claim": "Vignesh Rao 与 Javier Jimenez 合著 Safari JavaScriptCore 利用 writeup，自述在研究另一个 JSC 案例时发现有意思的 DFG IR 而转向本漏洞，并记录初始指针 brute-force 方法在 M1 上对 32 位需超过一小时的低效，随后迭代改进速度，体现从案例间迁移与对低效方法的迭代修正。",
+        "status": "documented",
+        "growth_signal": "方法迭代与跨案例迁移：自述因研究另一案例时注意到 DFG IR 而发现本漏洞，并从耗时逾小时的初始 brute-force 方法迭代优化，显示对失败/低效路径的识别与改进。",
+        "short_quote": "Initially we were brute forcing the pointer ... it is also extremely slow taking more than an hour to brute force 32-bits on an M1 mac.",
+        "source": {
+          "title": "Safari, Hold Still for NaN Minutes!",
+          "url": "https://blog.exodusintel.com/2023/12/11/safari-hold-still-for-nan-minutes/",
+          "published": "2023-12-11",
+          "source_type": "本人技术 writeup（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_vhj99cf767m3jvmmw7ti2ci7",
+          "accessed_at": "2026-09-28T02:46:28.042253+00:00",
+          "content_sha256": "c492259e508fff30aabb498377c1d6c67fd3f1e7057dcf350f91f6f7891bea42"
+        }
+      },
+      {
+        "id": "vr-conv-4",
+        "date": "2024-01-19",
+        "claim": "Vignesh Rao 与 Javier Jimenez 合著 Chrome V8 CVE-2024-0517 利用 writeup，自述为数月前自主发现的 V8 引擎漏洞，利用垃圾回收器获得 V8 堆读写并绕过 Ubercage，显示其从 patch gapping 的 1day 研究转向自主 0day 发现与利用的方向变化。",
+        "status": "documented",
+        "growth_signal": "研究方向的转向：从 2020 年以 1day/patch gapping 为主的复现分析，转为自主发现并利用 Chrome V8 0day（CVE-2024-0517），体现研究方向从补丁差异复现向原创漏洞挖掘的推进。",
+        "short_quote": "a vulnerability that we found in Google Chrome's V8 JavaScript engine a few months ago.",
+        "source": {
+          "title": "Google Chrome V8 CVE-2024-0517 Out-of-Bounds Write Code Execution",
+          "url": "https://blog.exodusintel.com/2024/01/19/google-chrome-v8-cve-2024-0517-out-of-bounds-write-code-execution/",
+          "published": "2024-01-19",
+          "source_type": "本人技术 writeup（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_x9j1oh6gb591r2ykk8ob1h0r",
+          "accessed_at": "2026-09-28T02:46:28.042249+00:00",
+          "content_sha256": "8df3a3fb3612c051be831206ee70bb90f842d85d1c9bcf9894879eaf43fb9b82"
+        }
+      }
+    ],
+    "contradictions": [
+      "未发现相互冲突的材料。但需注意四篇 writeup 的时间分布（发表于 2020、2023x2、2024）与 item-2 自述研究完成于 2020 年、2023 年才发表之间存在研究时间与发表时间的滞后，解读成长时间线时不应以发表日期为准。"
+    ],
+    "gaps": [
+      "未找到任何长访谈、播客、AMA 或演讲问答类来源；本维度（深度对话与自述）所要求的'本人对入门、学习、失败、导师、选择和转折的具体叙述'缺失，现有证据仅来自技术 writeup 中嵌入的简短 first-person 句。",
+      "未找到关于入门经历、教育背景、进入安全行业路径的直接自述；'浏览器与系统漏洞'方向的专精如何形成缺乏可核验叙述。",
+      "未找到明确的导师关系证据；与 István Kurucsai、Martin Saar、Javier Jimenez 的关系仅能从合著推断为研究同伴，是否构成指导关系未知。",
+      "person_json 标注的 'OffByOne 2024 / Black Hat' 未能通过可抓取来源独立确认具体演讲事实与问答内容；未检索到对应的演讲记录或问答材料。",
+      "x.com/vigneshr4o 的个人简介因 HTTP 402 未抓取，无法从社交媒体自述补充本维度信息。",
+      "本维度所需的'转折点'叙述（例如从 1day 复现转向 0day 发现的具体动机、时间与外部反馈）只能从 writeup 主题变化推断（item-1→item-4），缺乏本人对转折的直接叙述。"
+    ]
+  },
+  "community": {
+    "person": "Vignesh Rao",
+    "dimension": "社区参与与反馈回路",
+    "identity_check": "人物记录给出 name_or_handle='Vignesh Rao'、social=https://x.com/vigneshr4o、writeup_evidence=https://blog.exodusintel.com/、primary_focus='浏览器与系统漏洞'。X 资料页因付费墙（HTTP 402）未能抓取，无法直接比对。身份依据 Exodus Intelligence 博客上多篇文章署名确认：2020-02-24 文章署名 'Vignesh S Rao'，2023-07、2023-12、2024-01 文章署名 'Vignesh Rao'，作者指向同一博客，且选题集中于 Chrome V8、Apple Safari 等 JavaScript 引擎与浏览器漏洞，与人物记录 primary_focus 一致。'Vignesh S Rao' 与 'Vignesh Rao' 视为同一人的中间名缩写变体（inferred）。未发现同名歧义人员的混淆证据。",
+    "items": [
+      {
+        "id": "vr-community-001",
+        "date": "2020-02-24",
+        "claim": "Vignesh Rao（署名 Vignesh S Rao）与 István Kurucsai 在 Exodus Intelligence 博客合著《A EULOGY FOR PATCH-GAPPING CHROME》，分析 Chrome TurboFan JIT 的 JSCreate 节点 side-effect 导致的 type confusion，并给出完整 1-day/patch-gap 利用链。这是其在该博客可追溯的最早公开输出，且以合著形式发布，表明其进入公开写作时即处于同伴协作结构中。",
+        "status": "documented",
+        "growth_signal": "首次可追溯的公开技术写作以合著形式出现，说明能力构建与同伴（István Kurucsai）协作耦合，而非孤立产出。利用链完整、技术细节深入，表明在写作时已具备端到端利用工程化能力。",
+        "short_quote": "Authors: István Kurucsai and Vignesh S Rao",
+        "source": {
+          "title": "A EULOGY FOR PATCH-GAPPING CHROME — Exodus Intelligence Blog",
+          "url": "https://blog.exodusintel.com/2020/02/24/a-eulogy-for-patch-gapping-chrome/",
+          "published": "2020-02-24",
+          "source_type": "公司研究博客一手 writeup（合著）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_f05m9yq53v35p68exbv9yk1j",
+          "accessed_at": "2026-09-28T02:45:52.344815+00:00",
+          "content_sha256": "8caadeead9f378f1b8c042b2d9101413d4ba50b5bba0e128bcdd4f880550c805"
+        }
+      },
+      {
+        "id": "vr-community-002",
+        "date": "2023-07-20",
+        "claim": "Vignesh Rao 以单作者身份在 Exodus Intelligence 博客发表《Shifting boundaries: Exploiting an Integer Overflow in Apple Safari》。正文自述 'this research was conducted along with Martin Saar in 2020'，即研究本身于 2020 年与 Martin Saar 共同开展，但三年后才以单作者文章形式公开。文章还把 Samuel Groß 的 Phrack 文章与 LiveOverflow 的 WebKit 博客列为读者应参考的材料。",
+        "status": "documented",
+        "growth_signal": "研究在同伴协作（Martin Saar）中完成、独自整理成文公开发表，呈现『协作研究—独立公开输出』的反馈回路。引用 Samuel Groß（Phrack）与 LiveOverflow 公开材料，表明其学习路径依托公开社区一手资料与知名研究者公开产出，而非仅依赖公司内部。",
+        "short_quote": "this research was conducted along with Martin Saar in 2020",
+        "source": {
+          "title": "Shifting boundaries: Exploiting an Integer Overflow in Apple Safari — Exodus Intelligence Blog",
+          "url": "https://blog.exodusintel.com/2023/07/20/shifting-boundaries-exploiting-an-integer-overflow-in-apple-safari/",
+          "published": "2023-07-20",
+          "source_type": "公司研究博客一手 writeup（单作者，正文致谢合研者）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_04ygcjtlo7ffbazxwm64r8x9",
+          "accessed_at": "2026-09-28T02:45:52.344825+00:00",
+          "content_sha256": "9d1e124f2ccd40c5524f0d8f84b4fda0f8db27224ba046736fdb538c74379ce4"
+        }
+      },
+      {
+        "id": "vr-community-003",
+        "date": "2023-12-11",
+        "claim": "Vignesh Rao 与 Javier Jimenez 合著《Safari, Hold Still for NaN Minutes!》。正文提及 'Vignesh and Javier presented the discovery of a few bugs'，即二人此前已就若干 bug 的发现进行过联合演讲，构成可观察的重复协作与公开演讲行为，但正文未指明会议名称，也未感谢审阅者。",
+        "status": "documented",
+        "growth_signal": "与同一同伴（Javier Jimenez）的合著与联合演讲反复出现，显示稳定的同伴配对与公开传播习惯。重复协作关系是社区反馈回路中区别于孤立研究的关键信号；文中提及联合演讲但未指明会议，属可核验但细节缺口。",
+        "short_quote": "Vignesh and Javier presented the discovery of a few bugs",
+        "source": {
+          "title": "Safari, Hold Still for NaN Minutes! — Exodus Intelligence Blog",
+          "url": "https://blog.exodusintel.com/2023/12/11/safari-hold-still-for-nan-minutes/",
+          "published": "2023-12-11",
+          "source_type": "公司研究博客一手 writeup（合著）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_jzcve2m4dl98bd3umevqcru2",
+          "accessed_at": "2026-09-28T02:45:52.344829+00:00",
+          "content_sha256": "93a95bdf44cfcf0fafa81f836d0c1cf665f6c82f5d0454f8e2792a77b03d211b"
+        }
+      },
+      {
+        "id": "vr-community-004",
+        "date": "2024-01-19",
+        "claim": "Javier Jimenez 与 Vignesh Rao 合著《Google Chrome V8 CVE-2024-0517 Out-of-Bounds Write Code Execution》，分析 V8 Maglev JIT 在 GC 边界处分配折叠导致的越界写，并将其转化为 type confusion，最终绕过 V8 Ubercage 沙箱取得代码执行。这是其 4 年公开写作时间线的最近一篇，且延续与 Javier Jimenez 的合著模式。",
+        "status": "documented",
+        "growth_signal": "2020-02 至 2024-01 约 4 年的持续公开输出，且近期作品仍以同伴合著（Javier Jimenez）形式发布，技术目标从 Chrome 1-day 演进到最新 V8 沙箱绕过，显示能力随时间推进且始终嵌在协作结构中。未在文中致谢审阅者，公开 peer-review 流程缺直接证据。",
+        "short_quote": "By Javier Jimenez and Vignesh Rao",
+        "source": {
+          "title": "Google Chrome V8 CVE-2024-0517 Out-of-Bounds Write Code Execution — Exodus Intelligence Blog",
+          "url": "https://blog.exodusintel.com/2024/01/19/google-chrome-v8-cve-2024-0517-out-of-bounds-write-code-execution/",
+          "published": "2024-01-19",
+          "source_type": "公司研究博客一手 writeup（合著）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_hechc9uj8dz4454ymwza38ml",
+          "accessed_at": "2026-09-28T02:45:52.344810+00:00",
+          "content_sha256": "e7af64b77917620b7edd8b35c3fc200c33814dd5ed2a322186e2ae5ed76b6c96"
+        }
+      },
+      {
+        "id": "vr-community-005",
+        "date": "2023",
+        "claim": "在 2023-12-11 合著文章正文中，作者自述 Vignesh 与 Javier 此前已就若干 bug 的发现进行过联合演讲（'presented the discovery of a few bugs'），表明其社区参与除博客写作外还包含公开会议演讲渠道，但文中未给出会议名称、时间或链接。",
+        "status": "inferred",
+        "growth_signal": "公开演讲是区别于纯写作的另一条反馈回路；自述的联合演讲行为表明其将研究发现向社区传播，但缺乏可核验的会议事实，只能作为推断性的参与信号，具体会议与时间待补证。",
+        "short_quote": "Vignesh and Javier presented the discovery of a few bugs",
+        "source": {
+          "title": "Safari, Hold Still for NaN Minutes! — Exodus Intelligence Blog（正文自述）",
+          "url": "https://blog.exodusintel.com/2023/12/11/safari-hold-still-for-nan-minutes/",
+          "published": "2023-12-11",
+          "source_type": "公司研究博客正文自述（指代此前联合演讲，未指明会议）",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_jzcve2m4dl98bd3umevqcru2",
+          "accessed_at": "2026-09-28T02:45:52.344829+00:00",
+          "content_sha256": "93a95bdf44cfcf0fafa81f836d0c1cf665f6c82f5d0454f8e2792a77b03d211b"
+        }
+      },
+      {
+        "id": "vr-community-006",
+        "date": "2023-07-20",
+        "claim": "在 2023-07-20 单作者文章中，Vignesh Rao 将 Samuel Groß 的 Phrack 文章（攻击 JavaScript 引擎）与 LiveOverflow 的 WebKit 系列博客列为读者应参考的材料，表明其学习与写作依托公开社区一手与二手材料。Samuel Groß 与 LiveOverflow 在 WebKit/JSC 研究社区具有公开影响力。",
+        "status": "inferred",
+        "growth_signal": "显式引用社区知名研究者的公开产出作为学习参考，构成『阅读公开社区材料—产出研究—回馈公开博客』的输入侧反馈回路；但被引材料本身作为其成长来源属推断，文章未描述其与被引者的直接互动。",
+        "short_quote": "this research was conducted along with Martin Saar in 2020",
+        "source": {
+          "title": "Shifting boundaries: Exploiting an Integer Overflow in Apple Safari — Exodus Intelligence Blog（引用参考材料）",
+          "url": "https://blog.exodusintel.com/2023/07/20/shifting-boundaries-exploiting-an-integer-overflow-in-apple-safari/",
+          "published": "2023-07-20",
+          "source_type": "公司研究博客正文（引用第三方公开材料）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_04ygcjtlo7ffbazxwm64r8x9",
+          "accessed_at": "2026-09-28T02:45:52.344825+00:00",
+          "content_sha256": "9d1e124f2ccd40c5524f0d8f84b4fda0f8db27224ba046736fdb538c74379ce4"
+        }
+      }
+    ],
+    "contradictions": [
+      "署名形式不一致：2020-02-24 文章署名 'Vignesh S Rao'，其余三篇署名 'Vignesh Rao'。两处均出自同一 Exodus Intelligence 博客且选题一致，推断为同一人的中间名缩写变体，但未见作者本人明确声明同一性，故标记为推断而非直接证明。",
+      "单作者与合著并存：2023-07-20 文章署名单作者 'Vignesh Rao'，但正文又自述研究是 2020 年与 Martin Saar 合研完成。署名作者与实际合研者并不完全一致，说明 Exodus 博客的署名与实际研究协作结构存在差异，引用时应以正文自述为准。"
+    ],
+    "gaps": [
+      "会议演讲未取得一手证据：人物记录给出 selected_conference_evidence='OffByOne 2024 / Black Hat'，但 offbyone.info 抓取 ECONNREFUSED、blackhat.com 抓取 HTTP 403，均未取得 speaker 页面；2023-12 文中仅自述二人曾联合演讲但未指明会议与时间。OffByOne 2024 / Black Hat 演讲事实未核实，仅作 lead_only。",
+      "X/Twitter 社交资料未取得：https://x.com/vigneshr4o 抓取返回 HTTP 402 付费墙，无法核对其 bio、关注/粉丝网络或社交互动，社交媒体侧的同伴网络与公开反馈缺一手证据。",
+      "CVE 上游致谢未核实：2024-01-19 文章涉及 CVE-2024-0517，但未抓取 Google Chrome bug tracker 或 Google 官方致谢页，无法判断 Vignesh Rao 是否为首报者或被厂商致谢，该反馈回路缺证据。",
+      "审阅与 peer review 流程缺证据：四篇博客正文均未感谢任何审阅者或第三方 reviewer，Exodus 内部是否有技术评审流程无从核验。",
+      "同伴网络的深度与持续性缺一手材料：可观察的合著者（István Kurucsai、Martin Saar、Javier Jimenez）已记录，但这些同伴与 Vignesh 的关系（同事/导师/外部协作者）、协作时长与互动方式均无一手材料说明。",
+      "2020-02 至 2023-07 之间存在约 3 年公开输出空白：此期间未见 Exodus 博客署名文章，无法判断是未公开产出、内部研究还是发表在其他渠道；该时段社区参与状态缺证据。"
+    ]
+  },
+  "external": {
+    "person": "Vignesh Rao",
+    "dimension": "外部视角",
+    "identity_check": "种子将研究对象标注为 Exodus Intelligence 的浏览器与系统漏洞研究员，社交账号 x.com/vigneshr4o，会议线索 OffByOne 2024 / Black Hat。抓取 Exodus Intelligence 博客首页（blog.exodusintel.com，2026-09-28 成功）可见作者署名为 Siddh Shah、David Barksdale、Endri Domi、Chanh Pham、Luca Ginex、Oliver Sieber、Michele Campa，未出现 Vignesh Rao；x.com/vigneshr4o 抓取返回 HTTP 402，github.com/vigneshr4o 返回 HTTP 404，Exodus 主站 /team/、/about/ 因证书不匹配或 403/404 未能取得。WebSearch 反复返回模型综述而非真实结果链接，依任务契约不得引用搜索摘要。综上，身份未能在本次抓取范围内与一手署名页面对齐，外部评价来源未能取得，存在身份歧义未消解。",
+    "items": [
+      {
+        "id": "vigneshr4o-exodus-blog-authorship-absent",
+        "date": "2026-09-28",
+        "claim": "抓取 Exodus Intelligence 博客首页（blog.exodusintel.com）时，可见作者署名列表为 Siddh Shah、David Barksdale、Endri Domi、Chanh Pham、Luca Ginex、Oliver Sieber、Michele Campa，未出现 Vignesh Rao。该页为负向身份核验证据，不构成对研究对象的同行或媒体评价。",
+        "status": "inferred",
+        "growth_signal": "无成长信号；用于身份核验，记录种子所述归属与当前可抓取署名页面的不一致，作为待进一步核实的矛盾点。",
+        "source": {
+          "title": "Exodus Intelligence Research Blog（首页，作者署名列表）",
+          "url": "https://blog.exodusintel.com/",
+          "published": "抓取于 2026-09-28",
+          "source_type": "机构研究博客首页（署名列表）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ryyalt3mn4sr2k48qzlkxyeg",
+          "accessed_at": "2026-09-28T03:03:04.792194+00:00",
+          "content_sha256": "9303e543bfa7d7d673b556f5d2c6c2ee66e8d54c5ba5eab73f08e7a36b9d91a8"
+        }
+      }
+    ],
+    "contradictions": [
+      "种子将 Vignesh Rao 归属为 Exodus Intelligence 浏览器与系统漏洞研究员，但 2026-09-28 抓取的 Exodus Intelligence 博客首页可见作者署名中未出现该姓名；两者存在待核验的不一致。",
+      "WebSearch 返回的（不可引用）模型摘要将 vigneshr4o 描述为偏向 Web 应用安全与漏洞赏金，与种子所述浏览器与系统漏洞方向不一致；因摘要不可作为证据，仅记录为待核验的线索分歧。"
+    ],
+    "gaps": [
+      "未取得任何同事、团队成员、会议主持或权威媒体对 Vignesh Rao 的具体评价文本；维度核心问题无证据支撑。",
+      "未取得 Exodus Intelligence 可访问的团队/研究人员页面（/team/ 证书不匹配，/about/ 403，博客 /about/、/research/、/team/ 均 404），无法核实其是否为该机构在职研究员。",
+      "未取得本人 writeup 或作者署名页，无法将作品与外部评价交叉验证。",
+      "未取得 OffByOne 2024 或 Black Hat 议程页面，无法核实会议演讲事实与主持/主办方记录。",
+      "x.com/vigneshr4o 抓取返回 HTTP 402，未取得个人简介或对外链接；github.com/vigneshr4o 返回 HTTP 404，无法确认账号存在性。",
+      "身份歧义（Exodus 浏览器/系统方向 vs Web 应用/漏洞赏金方向）未在本次工具预算内消解。"
+    ]
+  },
+  "decisions": {
+    "person": "Vignesh Rao",
+    "dimension": "关键决策与转折",
+    "identity_check": "研究对象为 Exodus Intelligence 浏览器漏洞研究员 Vignesh Rao（person_json 给定 social=https://x.com/vigneshr4o）。通过直接抓取 Exodus Intelligence 博客，确认至少 4 篇署名文章（2020–2024，作者署名为 \"Vignesh Rao\" 或 \"Vignesh S Rao\"），主题为 Chrome V8 与 Apple Safari/WebKit JavaScriptCore 的 JIT 漏洞利用，与 person_json 的 primary_focus、qualification 一致。存在同名歧义需说明：GitHub 用户 vigneshsrao（X handle @sherl0ck__，bio 标注 \"Pwning and forensics @ Team bi0s\"，仓库为 Firefox CVE-2019-11707、IonMonkey IR 解析、JS 引擎 fuzzer zebra）的 handle 与 person_json 给定的 @vigneshr4o 不一致，且其 bio 未提及 Exodus Intelligence 或 WebKit，二者是否同一人未在抓取范围内得到确认；搜索结果中提到的 Igalia 团队页（igalia.com/team/vignesh-rao）抓取返回 HTTP 404，片段不可信，无法据其确认身份。X 账号 https://x.com/vigneshr4o 抓取返回 HTTP 402 需鉴权，未能读取个人自述。本节点的 4 条证据均来自 Exodus Intelligence 官方博客上经署名的本人 writeup，作为一手来源。",
+    "items": [
+      {
+        "id": "vr-decisions-01",
+        "date": "2020-02-24",
+        "claim": "Vignesh S Rao（与 István Kurucsai 合著）公开发表判断：在 Google 将 Chrome 改为双周乃至每周发布节奏后，针对 Chrome 的 1day patch-gapping 利用已变得不实际，并以此作为该研究方向的收尾（文章标题以 'eulogy' 表明立场）。文章基于 2019 年两次 patch-gapping 的既有经验，约用 3 天完成对一个 TurboFan JIT (InferReceiverMapsUnsafe) 缺陷的利用，并讨论指针压缩对利用策略的影响。",
+        "status": "documented",
+        "growth_signal": "方法学转向的公开记录：研究员主动评估既有研究路线（1day patch-gapping Chrome）的可行性与收益，依据发布节奏这一外部约束判定其不再可行，并以书面形式宣告放弃该路线；同时把此前经验（2019 年两次 patch-gapping）作为后续判断的基线，体现对研究路线而非单点漏洞的成本收益评估能力。",
+        "short_quote": "approximately three days to develop a working exploit after discovering the fix, based on prior experience with two patch-gapping efforts from 2019",
+        "source": {
+          "title": "A Eulogy for Patch-Gapping Chrome",
+          "url": "https://blog.exodusintel.com/2020/02/24/a-eulogy-for-patch-gapping-chrome/",
+          "published": "2020-02-24",
+          "source_type": "本人 writeup（公司博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_507stz9b6q7kd97xfhwfi20m",
+          "accessed_at": "2026-09-28T02:51:34.056610+00:00",
+          "content_sha256": "939c0f3e445221a16212082dc2ff4ba66e575d96be260d64bd370f6f88809be1"
+        }
+      },
+      {
+        "id": "vr-decisions-02",
+        "date": "2023-07-20",
+        "claim": "Vignesh Rao 以独著形式发表对 Apple Safari/WebKit JavaScriptCore 的 FTL JIT B3 strength reduction 整数溢出漏洞的利用分析，并注明该研究于 2020 年与 Martin Saar (@typeconfuser) 协作完成。研究目标由 Chrome/V8 转向 Apple WebKit/JSC。",
+        "status": "documented",
+        "growth_signal": "研究目标转向的记录：将此前在 Chrome/V8 上积累的 JIT 漏洞利用方法迁移到 Apple Safari/WebKit 的 JavaScriptCore，且以独著形式完成公开 writeup。研究跨度显示其同时与不同合作者（Kurucsai 2020、Saar 2020）分别推进浏览器引擎方向，体现通过协作而非单一导师积累能力。",
+        "source": {
+          "title": "Shifting boundaries: Exploiting an Integer Overflow in Apple Safari",
+          "url": "https://blog.exodusintel.com/2023/07/20/shifting-boundaries-exploiting-an-integer-overflow-in-apple-safari/",
+          "published": "2023-07-20",
+          "source_type": "本人 writeup（公司博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ogypgxch72rhas7qh5zir44t",
+          "accessed_at": "2026-09-28T02:51:34.056580+00:00",
+          "content_sha256": "79d94943444a9c0413a90c9bad796586b1481c2f325d642b2498b4b4c1183979"
+        }
+      },
+      {
+        "id": "vr-decisions-03",
+        "date": "2023-12-11",
+        "claim": "Vignesh Rao 与 Javier Jimenez 合著发表 JavaScriptCore NaN-boxing boxDouble 溢出导致 fakeobj 的利用分析，并提到两人曾在 2023 年 10 月的一次会议上公开发表针对 JavaScriptCore 的若干漏洞发现，本文是对其中第二个漏洞的展开。",
+        "status": "documented",
+        "growth_signal": "公开发表习惯与稳定协作的记录：通过会议演讲先行披露、随后博客 writeup 公开技术细节的发表节奏；与 Javier Jimenez 形成跨文章的稳定协作（2023-12 与 2024-01 连续两篇）。技术决策可核验——例如以 DFG 编译的严格相等指令实现 ASLR 绕过，并以 0x1000 步进将暴力破解时间从一小时以上降到秒级。",
+        "source": {
+          "title": "Safari, Hold Still for NaN Minutes!",
+          "url": "https://blog.exodusintel.com/2023/12/11/safari-hold-still-for-nan-minutes/",
+          "published": "2023-12-11",
+          "source_type": "本人 writeup（公司博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_4qebnl5co84ixom0s3zkhq4w",
+          "accessed_at": "2026-09-28T02:51:34.056598+00:00",
+          "content_sha256": "49f7182d180ba552d1b9a6b1b7c7346243fcb23f96ce94153fafd826d4815be4"
+        }
+      },
+      {
+        "id": "vr-decisions-04",
+        "date": "2024-01-19",
+        "claim": "Vignesh Rao 与 Javier Jimenez 合著发表 CVE-2024-0517（V8 Maglev JIT 的 current_raw_allocation_ 未清零导致 OOB write）的利用代码执行分析。研究目标由 Apple Safari/JSC 回到 Chrome/V8。",
+        "status": "documented",
+        "growth_signal": "跨引擎目标切换与已建立技术再应用的记录：在 V8 上对 Ubercage 防护采用覆盖 WebAssembly instance 的 jump_table_start 重定向至 RWX 页、并以 \"shellcode smuggling\" 将 x86-64 指令作为浮点常量嵌入 WebAssembly 的方法绕过缓解；与 2023 年 Safari/JSC 上的多阶段原语（fakeobj→addrof→相对/绝对读写→代码执行）同属一类技术，作者据此在不同引擎间复用方法。该复用为基于两篇 writeup 技术内容的推断。",
+        "source": {
+          "title": "Google Chrome V8 CVE-2024-0517 Out-of-Bounds Write Code Execution",
+          "url": "https://blog.exodusintel.com/2024/01/19/google-chrome-v8-cve-2024-0517-out-of-bounds-write-code-execution/",
+          "published": "2024-01-19",
+          "source_type": "本人 writeup（公司博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_d8xhpkdvgyn5q7ea0jtiagdu",
+          "accessed_at": "2026-09-28T02:51:34.056588+00:00",
+          "content_sha256": "d03f4b5c8cfd8dc2fb955b7947afdb106a2588d8eff7a12d53fd3519f150ab9c"
+        }
+      }
+    ],
+    "contradictions": [
+      "person_json 的 selected_conference_evidence 字段标注 \"OffByOne 2024 / Black Hat\"，但本节点的直接抓取未能从任何来源确认该演讲事实；Exodus Intelligence 博客未列出此类演讲；搜索结果亦无可核验条目。该字段为 person_json 自身记录，未经一手来源验证。",
+      "搜索结果片段提到 Igalia 团队页存在名为 Vignesh Rao 的 JavaScriptCore 编译工程师，但直接抓取 https://www.igalia.com/team/vignesh-rao 返回 HTTP 404；页面不存在，片段不可信，无法据此判断 Igalia 的 Vignesh Rao 与 Exodus 的 Vignesh Rao 是否同一人。",
+      "GitHub 用户 vigneshsrao（X handle @sherl0ck__，bio 标注 Team bi0s，仓库以 Firefox CVE-2019-11707/JS 引擎 fuzzer 为主）与 Exodus Vignesh Rao 的同一性未确认：GitHub handle 与 person_json 给定的 @vigneshr4o 不一致，且 bio 未提及 Exodus Intelligence 或 WebKit。"
+    ],
+    "gaps": [
+      "https://x.com/vigneshr4o 抓取返回 HTTP 402 需鉴权，无法读取个人自述、bio、职位变更或发表习惯，所有人物背景均只能从博客文章间接推断。",
+      "2023 年 10 月会议名称与具体日期未确认：NaN 文仅称 'a conference in October 2023'；WebKit Contributors Meeting 2023 实际于 2023-09-13/14 举办，与文中 October 2023 表述不一致，未从一手来源确认。",
+      "person_json 列出的 \"OffByOne 2024 / Black Hat\" 未获任何抓取确认；未找到该演讲的题目、页面或议程条目。",
+      "Exodus Intelligence 博客文章未附作者个人 bio，仅有公司描述；因此研究员的职业路径、前置雇主、教育背景、团队角色在抓取范围内不可核验。",
+      "与 István Kurucsai、Martin Saar、Javier Jimenez 的协作起止与机制（例如内部 review、分工）仅在文章署名与正文提及层面可证，缺乏对该协作如何驱动能力成长的直接一手叙述。",
+      "2020 年与 2023 年间的能力积累与决策（例如是否正式加入 Exodus Intelligence、由 Chrome 转向 Safari/JSC 的触发事件、工具建设如 fuzzer 的作者归属）在抓取范围内无一手来源。"
+    ]
+  },
+  "timeline": {
+    "person": "Vignesh Rao",
+    "dimension": "可核验时间线",
+    "identity_check": "person_json 提供同名人物线索，social 为 https://x.com/vigneshr4o，writeup_evidence 指向 https://blog.exodusintel.com/，conference_evidence 指向 OffByOne 2024 / Black Hat。对 x.com/vigneshr4o 的抓取返回 unknown certificate verification error，无法验证账号归属。对 Exodus 博客作者归档 https://blog.exodusintel.com/author/vignesh-rao/ 返回 HTTP 404；Exodus 博客首页抓取列出的署名作者为 Siddh Shah、David Barksdale、Endri Domi、Chanh Pham、Luca Ginex、Oliver Sieber、Michele Campa，未见 Vignesh Rao。OffByOne 议程页与 Black Hat US-24 议程页分别因证书错误与 403 未能抓取。综合判断：同名歧义未排除，一手来源未能确认该人物为 Exodus Intelligence 研究员或 OffByOne 2024 / Black Hat 演讲者，身份核查未通过。",
+    "items": [
+      {
+        "id": "vr-tl-001",
+        "date": "YYYY",
+        "claim": "Exodus Intelligence 博客首页所列署名作者中未包含 Vignesh Rao；该博客作者归档页 /author/vignesh-rao/ 返回 HTTP 404。",
+        "status": "documented",
+        "growth_signal": "一手抓取结果与 person_json 中 writeup_evidence 指向 Exodus 博客的线索不一致，构成身份与发文归属的反证；无可据此建立发文时间线。",
+        "source": {
+          "title": "Exodus Intelligence — Blog (homepage)",
+          "url": "https://blog.exodusintel.com/",
+          "published": "YYYY",
+          "source_type": "blog_index",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_9v677bbossbkvvhtu6g6w39j",
+          "accessed_at": "2026-09-28T02:48:44.254993+00:00",
+          "content_sha256": "5041ede53dd8c8a522a8a2430adbf63715674b27345100029e26b63ce3079fac"
+        }
+      },
+      {
+        "id": "vr-tl-002",
+        "date": "2024",
+        "claim": "person_json 记录此人 selected_conference_evidence 为 OffByOne 2024 / Black Hat，并标记 primary_focus 为浏览器与系统漏洞、qualification 为直接漏洞发现与利用。",
+        "status": "unknown",
+        "growth_signal": "二手记录指向演讲活动，但 OffByOne 议程页与 Black Hat US-24 议程页均未能抓取，演讲标题、日期与所属无法核验；不能据以建立演讲时间线。",
+        "source": {
+          "title": "person_json (节点输入记录)",
+          "url": "file://inputs/person_json.json",
+          "published": "2024",
+          "source_type": "input_record",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "vr-tl-003",
+        "date": "YYYY",
+        "claim": "person_json 记录此人 social 为 https://x.com/vigneshr4o、rank 为 81、primary_focus 为浏览器与系统漏洞。",
+        "status": "unknown",
+        "growth_signal": "社交账号归属未能核验（证书错误），无法据以建立教育、工作或项目时间线。",
+        "source": {
+          "title": "person_json (节点输入记录)",
+          "url": "file://inputs/person_json.json",
+          "published": "YYYY",
+          "source_type": "input_record",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      }
+    ],
+    "contradictions": [
+      "person_json 的 writeup_evidence 指向 blog.exodusintel.com，暗示此人为 Exodus 博客作者；但 Exodus 博客首页一手抓取所列署名作者不含 Vignesh Rao，作者归档页 /author/vignesh-rao/ 返回 404。两者在发文归属上不一致，需以更高粒度抓取（如 2024 年索引第 2–4 页或具体文章页）判定，但本次调用预算内未能完成。"
+    ],
+    "gaps": [
+      "教育背景、学位、就读机构：无任何可核验来源。",
+      "工作履历与雇主：未确认是否就职于 Exodus Intelligence 或其他机构；Exodus 博客一手抓取未列出此人署名。",
+      "具体漏洞发现与对应 CVE/公告：无可核验条目。",
+      "自有工具或公开项目（如 GitHub 仓库）：未检索（工具调用预算耗尽）。",
+      "OffByOne 2024 演讲标题、日期、所属：议程页证书错误，未抓取成功。",
+      "Black Hat 演讲标题、日期、场次：议程页返回 403，未抓取成功。",
+      "Exodus 博客 Safari 相关文章（“Oops Safari, I think You Spilled Something!”）作者署名：首页摘录未署名，文章页 URL 猜测返回 404；2024 年索引第 2–4 页未抓取。",
+      "社交账号 https://x.com/vigneshr4o 的归属与自述履历：证书错误，未核验。",
+      "同名歧义未排除：无法确认输入记录中的 Vignesh Rao 与其他公开同名人员是否为同一人。"
+    ]
+  },
+  "targeted": {
+    "items": [
+      {
+        "id": "VR-NEW-R1-OBTS",
+        "resolves_issue": "解决 tensions[5]/open_questions[7] 的 \"WebKit Contributors Meeting 2023-09-13/14 举办\" 无来源断言：定向 WebFetch 已核验 Exodus 2023-12-11 文章正文内嵌 YouTube 链接，确认 2023-10 会议为 OBTS v6.0（Objective by the Sea v6.0）。",
+        "date": "2023-10-12",
+        "claim": "Exodus Intelligence 2023-12-11 文章《Safari, Hold Still for NaN Minutes!》正文自述 \"In October 2023 Vignesh and Javier presented the discovery of a few bugs affecting JavaScriptCore\"，并内嵌 YouTube 链接 https://www.youtube.com/watch?v=k1wEJFqirT8；该 YouTube 视频标题为 \"#OBTS v6.0: 'Safari, Hold Still for NaN Minutes!' - Javier Jimenez & Vignesh Rao\"，即 2023 年 10 月会议为 OBTS v6.0（Objective by the Sea v6.0）。此与 person_json selected_conference_evidence 字段 \"OffByOne 2024\" 对应：\"OffByOne\" 为 \"OBTS\"（Objective by the Sea）的转写/讹写，OBTS 为 Apple 生态安全会议，议题与 Safari/JavaScriptCore 一致。",
+        "status": "documented",
+        "source": {
+          "title": "#OBTS v6.0: 'Safari, Hold Still for NaN Minutes!' - Javier Jimenez & Vignesh Rao (YouTube, 嵌入于 Exodus Intelligence 2023-12-11 博客文章)",
+          "url": "https://www.youtube.com/watch?v=k1wEJFqirT8",
+          "published": "2023-10-12",
+          "source_type": "会议演讲录像标题（一手，嵌入于已核验 Exodus 博客文章正文）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ic9v3k9szvesk21is9w1h3m0",
+          "accessed_at": "2026-09-28T03:32:19.924769+00:00",
+          "content_sha256": "dbb0bfef08e1a711093af11ce984b2c5e718d1b965584e5a50217bc7a4a4ff44"
+        }
+      },
+      {
+        "id": "VR-NEW-R1-CONF",
+        "resolves_issue": "为 OBTS v6.0 会议日期/地点提供一手确认（解决 \"October 2023 会议\" 的日期未核验问题）；同时复核其作为身份同一性独立来源的有效性。",
+        "date": "2023-10-09",
+        "claim": "OBTS v6.0（Objective by the Sea v6.0）于 2023-10-09/11 举行 training、2023-10-12/13 举行 talks，地点 Spain（来源页 https://objectivebythesea.org/v6/）。议程页仅列出 8 位 featured speakers（Cat Self、Ian Beer、Mickey Jin、Laurie Kirk、Jaron Bradley、Christine Fossaceca、Kinga Kieczkowska、Patrick Wardle），不含 Vignesh Rao 或 Javier Jimenez；该 talks.html 完整议程经模板渲染未能由 WebFetch 取得完整内容。故 OBTS 议程页可作为会议日期/地点一手来源，但不能单独作为 Vignesh Rao 身份同一性独立一手来源。",
+        "status": "documented",
+        "source": {
+          "title": "Objective by the Sea v6.0 (OBTS v6.0) — 会议议程页",
+          "url": "https://objectivebythesea.org/v6/",
+          "published": "2023",
+          "source_type": "会议官方议程页（一手，featured speakers 列表）",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_2xm3xpmsdjtcfznx63bbyyts",
+          "accessed_at": "2026-09-28T03:32:19.924794+00:00",
+          "content_sha256": "b70a345f92d2c53d4ac271974bc030c042d6d6d64506aceb06785dd3f0a298ec"
+        }
+      }
+    ]
+  }
+}

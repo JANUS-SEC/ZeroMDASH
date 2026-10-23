@@ -1,0 +1,939 @@
+{
+  "works": {
+    "person": "HeeChan Kim",
+    "dimension": "公开作品与技术演化",
+    "identity_check": "GitHub 用户 heegong 的 profile 页面显示显示名为 '김희찬 (heegong)'，bio 为 '0-day Researcher'，所属 'TeamH4C'，所在地 Seoul，并链接个人站点 https://heegong.github.io 与 X 账号 @heegong123；博客页脚署名为 'HeeChan Kim'。该 handle 与 person_json 中的 name_or_handle、social、writeup_evidence 三项一致，身份对应得到一手来源确认。未发现同名歧义证据，但未核验真实姓名拼写以外的身份背景（学历、雇主等）。",
+    "items": [
+      {
+        "id": "hc-publication-2022-4956",
+        "date": "2022-06-12",
+        "claim": "HeeChan Kim 公开发布 CVE-2022-4956，针对 Advanced Installer（<=19.7）及使用该框架的 Proton VPN 安装器的 DLL 劫持本地提权漏洞。root cause 为安装器从相邻 .Local 目录加载 WinSxS 的 GdiPlus.dll，而该目录普通用户可写。PoC 以 SeDebugPrivilege 打开 winlogon.exe、复制其 token 并经 CreateProcessWithTokenW 提升至 SYSTEM。研究者描述发现路径为在审查 Proton VPN 安装器时偶然发现，Proton 将报告转交 Advanced Installer，后者在 v19.7.1 修复并赠送 license key。",
+        "status": "documented",
+        "growth_signal": "早期（2022 年中）作品以 WinSxS/.Local 目录 DLL 劫持为方法，依赖 Process Monitor 观察安装器文件搜索顺序；披露渠道为厂商直接沟通，附带完整 timeline；首次显示其通过供应链依赖（安装器框架）从下游产品回溯到上游根因的研究习惯。",
+        "short_quote": "I found this vulnerability through Proton VPN.",
+        "source": {
+          "title": "CVE-2022-4956: Advaned Installer Local Privilege Escalation Vulnerability (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/Advaned-Installer-Local-Privilege-Escalation-Vulnerability/",
+          "published": "2022-06-12",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_m1oilyzmelge6rjr6wgvg1np",
+          "accessed_at": "2026-09-28T07:04:17.608067+00:00",
+          "content_sha256": "3a11017d78b28174d813d0f3c0f51ceeeb35a8c52b73fc94b23cad8c046c684b"
+        }
+      },
+      {
+        "id": "hc-publication-2022-39846",
+        "date": "2022-09-11",
+        "claim": "HeeChan Kim 发布 CVE-2022-4956 之后的 Samsung Smart Switch PC DLL 劫持漏洞（CVE-2022-39846，vendor id SVE-2022-1841）。root cause 为管理员权限安装器将日志写入用户可写 temp 目录，其中记录了包含随机 GUID 的子目录路径，随后从该目录加载 MSSetupAddinDllLOC.dll。PoC 用 Python 脚本轮询日志、解析 GUID 目录、在安装器加载前植入恶意 DLL，再以 winlogon token 复制提权到 SYSTEM。厂商 Samsung Mobile Security 在约 5 周内完成分级与修复。",
+        "status": "documented",
+        "growth_signal": "方法从静态 DLL 搜索顺序劫持进化到 race condition：引入 Python 监控脚本解析安装器日志以预测随机路径，体现重复练习中的工具建设（自动化 PoC）。同一厂商（Samsung）被系统性追踪，显示目标选择的延续性。",
+        "source": {
+          "title": "CVE-2022-39846: DLL hijacking vulnerability in Smart Switch PC (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/CVE-2022-39846-DLL-hijacking-vulnerability-in-Smart-Switch-PC/",
+          "published": "2022-09-11",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_qe6myhhksuakqiwbc2b9xpwr",
+          "accessed_at": "2026-09-28T07:04:17.608081+00:00",
+          "content_sha256": "b1b4ac8d4b6ed96df4b1225e423d35014ad7e41e845949008a94ef89ec5945ce"
+        }
+      },
+      {
+        "id": "hc-publication-2022-44898-kernel",
+        "date": "2022-11-01",
+        "claim": "HeeChan Kim 发布 CVE-2022-44898，针对 ASUS AuraSync 捆绑的内核驱动 MsIo64.sys（<=1.07.79_V2.2）的栈缓冲区溢出本地提权。IOCTL 分发例程（0x80102040）调用 memmove 将用户输入 lpInBuffer 拷入 16 字节栈缓冲 Src 而 Options（源自 nInBufferSize）控制拷贝长度，未校验。PoC 构造 136 字节缓冲（72 字节 NOP + ROP 链），先 pop 精心构造的 CR4 值（0x250ef8）经 mov cr4,rcx;ret 关闭 SMEP，wbinvd;ret 后跳转到用户态 shellcode，通过遍历 ActiveProcessLinks 找 PID 4 的 EPROCESS、复制 +70h 偏移的 token 实现行窃，再恢复 SMEP 与栈。ASUS 于 2022-08-09 提供补丁并授予 Hall of Fame；MITRE 于 2023-02-07 分配 CVE。",
+        "status": "documented",
+        "growth_signal": "技术栈从 user-mode installer DLL 劫持跃迁到内核态 exploit：首次（也是所抓取作品中唯一一次）使用 ROP、SMEP bypass 与 EPROCESS token stealing。这是公开作品中难度最高的单点，显示其能力从逻辑漏洞扩展到内核内存破坏类漏洞。披露后获得厂商致谢（ASUS Hall of Fame）。",
+        "short_quote": "Since lpInBuffer is moved to Src, and the length is not checked, a rop attack is possible by changing the dispatch function return address.",
+        "source": {
+          "title": "CVE-2022-44898: ASUS AuraSync Kernel Stack Based Buffer Overflow Local Privilege Escalation (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/ASUS-AuraSync-Kernel-Stack-Based-Buffer-Overflow-Local-Privilege-Escalation/",
+          "published": "2022-11-01",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_28yuewjmdt8z3ynqpzpff8je",
+          "accessed_at": "2026-09-28T07:04:17.608062+00:00",
+          "content_sha256": "d06d6234905fffef360ace18846c2e4ea84c11b52c3d7ef1a746043c90dd69ba"
+        }
+      },
+      {
+        "id": "hc-publication-2022-45422",
+        "date": "2022-11-24",
+        "claim": "HeeChan Kim 发布 CVE-2022-45422，针对 LG Smart Share（<=2.3.1712.1201）的 DLL 劫持 LPE。安装器加载名为 '!.DLL' 的 DLL，其路径取自用户/系统环境变量目录（普通用户可写，如 %USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps）。PoC 经 Process Monitor 发现加载顺序，植入 DLL 后以 winlogon token 复制提权。",
+        "status": "documented",
+        "growth_signal": "回到 user-mode DLL 劫持但变化加载源（环境变量目录、特殊文件名 '!.DLL'）；明确以 Process Monitor 为发现工具并复用同一 token impersonation 模板（OpenProcessToken/DuplicateTokenEx/CreateProcessWithTokenW），显示工具链与代码模板的跨漏洞复用。",
+        "short_quote": "I discovered this vulnerability through Process Monitor.",
+        "source": {
+          "title": "CVE-2022-45422: LG Smart Share Local Privilege Escalation Vulnerability (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/CVE-2022-45422-LG-Smart-Share-Local-Privilege-Escalation-Vulnerability/",
+          "published": "2022-11-24",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_4re8ies84wiywwsffmkk7h8g",
+          "accessed_at": "2026-09-28T07:04:17.608107+00:00",
+          "content_sha256": "7859c34b92f16a02231a568b1a32568ab91e5a30e69cb737aa37c5dd64f458c6"
+        }
+      },
+      {
+        "id": "hc-publication-2022-39909-junction",
+        "date": "2022-12-06",
+        "claim": "HeeChan Kim 发布 CVE-2022-39909，针对 Samsung Gear IconX PC Manager（<2.1.221019.51）的逻辑漏洞。管理员权限安装器在用户可写 Quick Launch 目录创建 'Gear IconX.lnk'。PoC 删除 Quick Launch 目录、建立到 \\RPC Control 的 junction、再用 native symbolic link 将 'Gear IconX.lnk' 映射到 C:\\Windows\\System32\\cng.sys，使安装器经 reparse 点链写入覆盖 cng.sys，造成永久 DoS。使用 NtCreateFile/NtCreateSymbolicLinkObject 等 NT API。",
+        "status": "documented",
+        "growth_signal": "方法转向点：从 DLL 劫持切换到 junction + native symbolic link（NT API）的逻辑漏洞，目标效果从提权扩展到任意文件创建/永久 DoS。该手法在其后多份 Samsung 系列 writeup 中重复出现，成为可识别的个人技术特征。",
+        "source": {
+          "title": "CVE-2022-39909: Insufficient verification of data authenticity vulnerability in Samsung Gear IconX PC Manager (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/CVE-2022-39909-Insufficient-verification-of-data-authenticity-vulnerability-in-Samsung-Gear-IconX-PC-Manager/",
+          "published": "2022-12-06",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_y4h1sugp1zd61sz3fjbtu767",
+          "accessed_at": "2026-09-28T07:04:17.608113+00:00",
+          "content_sha256": "615a05d17441741f8e44df28cf9579873f65203f883421c145c05f91b0766e97"
+        }
+      },
+      {
+        "id": "hc-publication-2023-37849",
+        "date": "2023-07-09",
+        "claim": "HeeChan Kim 发布 CVE-2023-37849（CVSS 6.5），针对 Panda Dome VPN 安装器（PANDAVPN.exe <15.14.8）的 DLL 劫持 LPE。安装器从自身目录加载多个 DLL，未找到时回落到 C:\\Windows\\SysWOW64；关键 DLL 为 TextShaping.dll。普通用户在安装器目录放置恶意 TextShaping.dll 即可在管理员上下文执行，PoC 经 winlogon token 复制提权到 SYSTEM。首次联系 2022-08-01，9 天后收到补丁文件，但公开披露延至约一年后（2023-07-05），随后才向 MITRE 请求 CVE。",
+        "status": "documented",
+        "growth_signal": "披露时间管理出现延迟模式：补丁早已就绪但延后约一年公开，CVE 在披露后才申请，显示其公开作品发布节奏与厂商修复节奏脱钩。技术方法继续沿用 DLL 搜索顺序劫持 + 同一 token impersonation 模板。",
+        "source": {
+          "title": "CVE-2023-37849: Local privilege escalation in Panda Dome VPN for Windows Installer (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/Local-privilege-escalation-in-Panda-Dome-VPN-for-Windows-Installer/",
+          "published": "2023-07-09",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_xjx3je7pgpymxbrbsw0s7tbe",
+          "accessed_at": "2026-09-28T07:04:17.608119+00:00",
+          "content_sha256": "af138fda9569f1beceb2c8902f0050c2a91072cca04769105aa16d8a10a90be8"
+        }
+      },
+      {
+        "id": "hc-publication-2023-30672",
+        "date": "2023-07-27",
+        "claim": "HeeChan Kim 发布 CVE-2023-30672（vendor id SVE-2023-0310），针对 Samsung Smart Switch for Windows Installer（<4.3.23043_3）。管理员权限安装器在用户可写 Quick Launch 目录创建 'Smart Switch.lnk'。PoC 建立 Quick Launch 到 \\RPC Control 的 junction 并以 native symbolic link 将 'Smart Switch.lnk' 指向 C:\\Windows\\System32\\cng.sys，安装器经 reparse 点链覆盖 cng.sys 造成永久 DoS。Samsung 于 2023-03-17 评级 high，2023-07-06 出补丁与 CVE。",
+        "status": "documented",
+        "growth_signal": "junction+symlink 手法在同一厂商（Samsung Smart Switch）上重复应用，与 CVE-2022-39909、CVE-2023-30673 形成同一产品的逻辑漏洞系列，显示对单一目标产品线系统性扫描的重复练习。",
+        "source": {
+          "title": "CVE-2023-30672: Improper privilege management vulnerability in Samsung Smart Switch for Windows Installer (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/CVE-2023-30672-Improper-privilege-management-vulnerability-in-Samsung-Smart-Switch-for-Windows-Installer/",
+          "published": "2023-07-27",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_hb2za2oecnupyy7nlgeruof0",
+          "accessed_at": "2026-09-28T07:04:17.608130+00:00",
+          "content_sha256": "124b2a9c84ce78b9cf04ef76ebe6c52f74fd4b65b44a4be5ca5034e6425ff3ef"
+        }
+      },
+      {
+        "id": "hc-publication-2023-30673",
+        "date": "2023-07-28",
+        "claim": "HeeChan Kim 发布 CVE-2023-30673（vendor id SVE-2023-0312），针对 Samsung Smart Switch PC（<4.3.23052_1）。管理员权限安装器删除位于用户可写路径的特定文件。PoC 建立 C:\\Users\\%Username%\\AppData\\Roaming\\Samsung\\Smart Switch PC 到 \\RPC Control 的 junction，并以 native symbolic link 将 CRMData.db 指向任意目标（如 C:\\Windows\\system.ini），安装器删除 CRMData.db 时经 reparse 点链删除目标文件，实现任意目录/文件删除。补丁为在安装过程使用的目录中阻止 directory junction。首次联系 2023-02-23，2023-07-06 出补丁与 CVE。",
+        "status": "documented",
+        "growth_signal": "同一 junction+symlink 原语被改造为不同效果（从任意文件创建/DoS 扩展到任意删除），显示对单一技术原语的多用途探索。披露 timeline 规范记录。",
+        "source": {
+          "title": "CVE-2023-30673: Possible to delete arbitrary directory vulnerability in Smart Switch PC (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/CVE-2023-30673-Possible-to-delete-arbitrary-directory-vulnerability-in-Smart-Switch-PC/",
+          "published": "2023-07-28",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_13weq7on73jwu298ggpz1zpw",
+          "accessed_at": "2026-09-28T07:04:17.608098+00:00",
+          "content_sha256": "90c1572bd644152c3aed6c3bb1e86bc87a9f397893b023772c4ba1cf7da2fac3"
+        }
+      },
+      {
+        "id": "hc-publication-2022-4894",
+        "date": "2023-09-24",
+        "claim": "HeeChan Kim 发布 CVE-2022-4894（vendor id PSR-2022-0147，CVSS 8.2），覆盖四款 Samsung/HP 打印机软件（Samsung Printer Diagnostics v1.0.4.29、Samsung Printer Setup Program v1.0.0.32、Samsung Universal Print Driver3 v3.00.13.00、Samsung Scan To PC Lite v1.2.14.0）的 DLL 劫持 LPE。前三款以日志记录的随机 temp 目录路径加载 cscapi.dll/DPAPI.DLL/TextShaping.dll，PoC 用 Python 轮询日志、解析路径并竞态植入 DLL；第四款从环境变量目录加载 ${MUI_HELPER}.DLL。首次联系 2022-09-01，Samsung 称由 HP 管理，2022-09-18 报告 HP，约一年后（2023-08-02）出补丁与 CVE。",
+        "status": "documented",
+        "growth_signal": "单篇 writeup 覆盖多款同厂商产品，将同一 DLL 劫持+race 方法批量化应用，显示从单漏洞到产品线扫描的方法演化；vendor 转交（Samsung→HP）处理体现跨厂商协调经验。",
+        "source": {
+          "title": "CVE-2022-4894: Certain HP and Samsung printer software - Potential elevation of privileges (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/CVE-2022-4894-Certain-HP-and-Samsung-printer-software-Potential-elevation-of-privileges/",
+          "published": "2023-09-24",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_fz6je3stgycefe9u5w2yth9j",
+          "accessed_at": "2026-09-28T07:04:17.608124+00:00",
+          "content_sha256": "f1c1e3ae112f495c096fdfde03c197e9f878815370f11cd8941c3a9d17a679c5"
+        }
+      },
+      {
+        "id": "hc-publication-2023-41929",
+        "date": "2023-09-24",
+        "claim": "HeeChan Kim 发布 CVE-2023-41929（CVSS 7.3），针对 Samsung Memory Card & UFD Authentication Utility PC Software（<1.0.2）。管理员权限安装器从所在目录加载 DLL；直接在安装器目录植入 SspiCli.DLL 会触发安装器完整性检查并报错中止。PoC 转用 junction + native symbolic link：建立 %USERPROFILE%\\AppData\\Roaming\\Samsung\\Smart Switch PC 到 \\RPC Control 的 junction，以 native symbolic link 将 CRMData.db 指向 C:\\Windows\\system.ini，安装器经 reparse 点链读取/写入目标文件，绕过 DLL 完整性检查。",
+        "status": "documented",
+        "growth_signal": "在厂商已部署 DLL 完整性检查的情况下，方法从直接 DLL 劫持切换到 junction+symlink 绕过，显示对防御机制的反馈式适应；技术原语（junction+native symlink）再次复用，证实其已将该手法固化为常用工具。",
+        "source": {
+          "title": "CVE-2023-41929: Samsung Card-UFD Authentication Utility for Windows Installer Local Privilege Escalation (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/CVE-2023-41929-Samsung-Card-UFD-Authentication-Utility-for-Windows-Installer-Local-Privilege-Escalation/",
+          "published": "2023-09-24",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_idyvjbfwdzudl8gae50itkj4",
+          "accessed_at": "2026-09-28T07:04:17.608086+00:00",
+          "content_sha256": "c117491ca0f35b1b7ef1bd5149739c557974d17ad78ab511a9d496c632a14bad"
+        }
+      },
+      {
+        "id": "hc-publication-2022-24924-android",
+        "date": "2021-11-30",
+        "claim": "HeeChan Kim 最早的公开 CVE writeup 为 CVE-2022-24924，针对 Android LiveWallpaperService（<3.0.9.9）的不当访问控制，允许无权限创建特定命名系统目录，而非 Windows 内核/LPE 漏洞。GitHub 上对应仓库 heegong/CVE 仅含此一个 CVE 条目。",
+        "status": "unknown",
+        "growth_signal": "作品起点为 Android 应用层访问控制漏洞，与后续 Windows installer LPE 方向不同；显示其研究方向在 2021-2022 间发生转向，转向后集中在 Windows 第三方软件提权。该条目用于界定其公开作品的最早时间与初始技术栈。",
+        "source": {
+          "title": "CVE-2022-24924: Improper access control vulnerability in LiveWallpaperService (heegong.github.io)",
+          "url": "https://heegong.github.io/posts/CVE-2022-24924-Improper-access-control-vulnerability-in-LiveWallpaperService/",
+          "published": "2021-11-30",
+          "source_type": "personal_blog_writeup",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "hc-identity-github",
+        "date": "2020-06-17",
+        "claim": "GitHub 用户 heegong 共有 23 个公开仓库，最早 auto_mouse_python（2020-06-17）与 socket_python_backdoor（2020-07-12）为 Python 学习/工具类项目；2020-09 起出现 universal_shell_code（C）、reversing-problems（C）、study_note_heegong 等与逆向/安全学习相关仓库；安全相关仓库仅 CVE-2022-24924（Android）与 CVE 索引仓库 heegong/CVE。未发现任何 Windows 内核 LPE 代码仓库。profile 显示名为 '김희찬 (heegong)'，bio '0-day Researcher'，TeamH4C，Seoul。",
+        "status": "documented",
+        "growth_signal": "GitHub 仓库时间线显示其从 2020 年中 Python/通用编程起步，2020 年底转向 C 与逆向/安全学习，2022 年起公开 CVE 仓库；代码侧的学习曲线（Python→C→exploit 材料）与博客 writeup 的技术演化一致。但仓库中缺乏内核 exploit 代码，与 person_json 标注的 'Windows 内核' primary_focus 仅在博客 writeup 层面有单一第三方驱动案例（CVE-2022-44898）支撑。",
+        "source": {
+          "title": "heegong - GitHub profile and repositories",
+          "url": "https://github.com/heegong?tab=repositories",
+          "published": "2020-06-17",
+          "source_type": "developer_profile_and_repos",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_rszmhcd8e5rgctu13jax8qbg",
+          "accessed_at": "2026-09-28T07:04:17.607943+00:00",
+          "content_sha256": "9e66c905659693938b8df33ca7670910897e414e129327f1078f5a4c4e5a02bc"
+        }
+      },
+      {
+        "id": "hc-conference-offbyone-poc",
+        "date": "2026",
+        "claim": "人物记录（person_json）的 selected_conference_evidence 字段标注为 'OffByOne 2026 / POC'，提示该研究者 2026 年在 OffByOne 或 POC（Power of Community）会议有演讲事实。未能抓取到任何会议 speaker 页面、议程或演讲材料以独立确认该事实。",
+        "status": "unknown",
+        "growth_signal": "本地种子提及 2026 会议演讲，若成立则代表其从 writeup 发布向公开演讲输出的转化；但在未抓取到一手/权威会议页面之前不能据以判定成长机制。",
+        "source": {
+          "title": "person_json.selected_conference_evidence (本地种子，未抓取验证)",
+          "url": "local-seed://person_json/selected_conference_evidence",
+          "published": "2026",
+          "source_type": "local_seed_note",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      }
+    ],
+    "contradictions": [
+      "person_json 将 primary_focus 标注为 'Windows 内核与 LPE 漏洞'，但其抓取到的公开作品集中为第三方软件安装器/驱动的 user-mode LPE 与逻辑漏洞；唯一内核态 exploit 为第三方驱动 ASUS MsIo64.sys 的栈溢出（CVE-2022-44898），未发现 Windows 内核本身（ntoskrnl/win32k 等）的 LPE writeup，GitHub 仓库亦无内核 LPE 代码。该标注与公开作品证据存在范围上的张力。"
+    ],
+    "gaps": [
+      "OffByOne 2026 / POC 会议演讲未能抓取验证：X 个人资料返回 402 不可抓取，针对 OffByOne/POC 2026 speaker 的 WebSearch 多次返回工具不可用说明而非结果，会议官方网站未抓取。该事实仅以本地种子形式存在，不能标记为 documented/reported。",
+      "2024-2026 年的公开作品缺失：博客 archives 止于 2023-09-24，GitHub 仓库最新更新为 2025-11（ssu_p5js_pages，非安全研究），无法判断 2023 年后其研究方向是否仍为 Windows LPE 或已转向内核/其他方向。",
+      "导师、团队协作与同行反馈机制未见证据：TeamH4C 仅以 affiliation 形式出现在 profile 与 writeup 署名，未见团队内部协作、code review 或 mentorship 的一手材料。",
+      "重复练习/训练的内部记录缺失：可见的是工具建设产物（Python 监控脚本、C++ PoC DLL 模板）与方法在多漏洞上的复用，但无学习笔记内容（study_note_heegong 仓库无描述细节未抓取）可佐证其刻意练习过程。",
+      "未抓取 study_note_heegong 仓库内容，无法判断其中是否含研究方法论/复盘记录。"
+    ]
+  },
+  "conversations": {
+    "person": "HeeChan Kim",
+    "dimension": "深度对话与自述",
+    "identity_check": "GitHub 仓库 github.com/heegong 显示名称为 김희찬 / HeeChan Kim，bio 自述 0-day Researcher、TeamH4C 成员，并链接至个人站 heegong.github.io 与 X 账号 @heegong123，与 person_json 中 social(https://x.com/heegong123) 和 writeup_evidence(https://github.com/heegong) 一致。个人站 About 页进一步自述为 Semyeong Computer High School 三年级学生、TeamSCA 与 TeamH4C 成员、KITRI Best of the Best 第 10 期 漏洞分析。身份一致，确认为同一人。该维度的目标材料（长访谈、播客、AMA、演讲问答）在可访问来源中未发现，下述条目取自最接近的自述来源：About 页自述与 writeup 内嵌的方法论片段。",
+    "items": [
+      {
+        "id": "hc-deep-01",
+        "date": "2023",
+        "claim": "HeeChan Kim 在个人站 About 页自述为韩国 Semyeong Computer High School 三年级学生，同时加入校内 TeamSCA 与 TeamH4C，参加 KITRI Best of the Best 第 10 期 漏洞分析项目，并以 TeamH4C、Zero Day Researcher 自称。",
+        "status": "documented",
+        "growth_signal": "自述呈现一条可核验的成长路径：高中计算机科班 → 校内 CTF 战队(TeamSCA/TeamH4C) → KITRI BoB 漏洞分析训练 → 0-day/CVE 披露。这构成由竞赛训练向真实漏洞研究过渡的结构性入口，而非泛化的兴趣描述。",
+        "source": {
+          "title": "About — heegong (HeeChan Kim)",
+          "url": "https://heegong.github.io/about/",
+          "published": "2023",
+          "source_type": "personal_blog_about",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_pjjj9og1jyrbgreirgmqrel5",
+          "accessed_at": "2026-09-28T06:46:27.792615+00:00",
+          "content_sha256": "5592ee68072897966e290315b09c3ad770565dce01cbe1da3c901db36106e870"
+        }
+      },
+      {
+        "id": "hc-deep-02",
+        "date": "2021-2023",
+        "claim": "About 页列出的 CTF 履历跨 2021–2023 年，包括 2021 YISF 第二名、2022 ELECONN 第一名、2022 Gifted Learning Institute Contest 个人第一名，以及 Codegate/Wacon/White Hat Contest/CCE 等赛事的 Junior 决赛入围。",
+        "status": "documented",
+        "growth_signal": "持续两年跨多项韩国青少年 CTF 赛事的重复参赛与名次，构成可观测的刻意练习机制；这是其转向漏洞披露前的能力积累证据。",
+        "source": {
+          "title": "About — heegong (HeeChan Kim)",
+          "url": "https://heegong.github.io/about/",
+          "published": "2023",
+          "source_type": "personal_blog_about",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_pjjj9og1jyrbgreirgmqrel5",
+          "accessed_at": "2026-09-28T06:46:27.792615+00:00",
+          "content_sha256": "5592ee68072897966e290315b09c3ad770565dce01cbe1da3c901db36106e870"
+        }
+      },
+      {
+        "id": "hc-deep-03",
+        "date": "2022-06-12",
+        "claim": "在 CVE-2022-4956（Advanced Installer 本地提权）writeup 中，作者自述使用 Sysinternals 的 Process Monitor 发现该漏洞，并沿 DLL 搜索顺序与可被普通用户写入的目录定位到 DLL 劫持链。",
+        "status": "documented",
+        "growth_signal": "这是少数可见的方法论自述：以行为监控工具(Process Monitor)作为发现手段，而非纯静态审阅；揭示了其 Windows LPE 研究的发现路径依赖动态行为观察。",
+        "short_quote": "I discovered this vulnerability through Process Monitor.",
+        "source": {
+          "title": "CVE-2022-4956: Advanced Installer Local Privilege Escalation Vulnerability",
+          "url": "https://heegong.github.io/posts/Advaned-Installer-Local-Privilege-Escalation-Vulnerability/",
+          "published": "2022-06-12",
+          "source_type": "vulnerability_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_h0934a7rd711k5f27cxnutfv",
+          "accessed_at": "2026-09-28T06:46:27.792702+00:00",
+          "content_sha256": "64d47e59ea947677935f4dfb99a85c3e9252575cff45b6c45351784833159ec0"
+        }
+      },
+      {
+        "id": "hc-deep-04",
+        "date": "2022-11-01",
+        "claim": "CVE-2022-44898（ASUS AuraSync 内核栈溢出 LPE）writeup 的披露时间线记录了与厂商的具体交互：2022/07/28 首次邮件联系 ASUS 安全渠道，2022/08/01 接到 ASUS 安全团队电话要求分析，2022/08/09 收到补丁版本，2022/09/18 名字进入 ASUS Hall of Fame。",
+        "status": "documented",
+        "growth_signal": "时间线展示了完整的协同披露流程与外部回馈机制；ASUS Hall of Fame 入选是对其披露行为的正向反馈信号，可解释其持续披露的强化路径。",
+        "source": {
+          "title": "CVE-2022-44898: ASUS AuraSync Kernel Stack Based Buffer Overflow Local Privilege Escalation",
+          "url": "https://heegong.github.io/posts/ASUS-AuraSync-Kernel-Stack-Based-Buffer-Overflow-Local-Privilege-Escalation/",
+          "published": "2022-11-01",
+          "source_type": "vulnerability_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_4suycgs4vk6zzmd0xn78a22l",
+          "accessed_at": "2026-09-28T06:46:27.792707+00:00",
+          "content_sha256": "0c517be4cab9cf02c61124546367d73a939340f56a0d3d5408ef53f7e51b8e8f"
+        }
+      },
+      {
+        "id": "hc-deep-05",
+        "date": "2022-06-12",
+        "claim": "CVE-2022-4956 writeup 记录，Advanced Installer 在漏洞处理后向作者赠送 Advanced Installer Architect 许可证密钥作为致谢。",
+        "status": "documented",
+        "growth_signal": "厂商赠送的许可证是可核验的实物回馈，构成对披露行为的即时正向强化；与 ASUS Hall of Fame 一同解释其持续进行多厂商披露的反馈回路。",
+        "short_quote": "Advanced Installer gave me the Advanced Installer Architect license key as a token of appreciation.",
+        "source": {
+          "title": "CVE-2022-4956: Advanced Installer Local Privilege Escalation Vulnerability",
+          "url": "https://heegong.github.io/posts/Advaned-Installer-Local-Privilege-Escalation-Vulnerability/",
+          "published": "2022-06-12",
+          "source_type": "vulnerability_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_h0934a7rd711k5f27cxnutfv",
+          "accessed_at": "2026-09-28T06:46:27.792702+00:00",
+          "content_sha256": "64d47e59ea947677935f4dfb99a85c3e9252575cff45b6c45351784833159ec0"
+        }
+      },
+      {
+        "id": "hc-deep-06",
+        "date": "2021-2023",
+        "claim": "个人站归档页显示 11 篇 CVE writeup，时间从 2021-11-30（CVE-2022-24924 LiveWallpaperService）到 2023-09-24（CVE-2023-41929 Samsung Card-UFD），覆盖 Samsung、LG、ASUS、HP、Panda Security 等厂商，类型涵盖 DLL 劫持、本地提权、内核栈溢出、访问控制不当与权限管理不当。",
+        "status": "documented",
+        "growth_signal": "约 22 个月、跨多厂商、多漏洞类别的持续披露节奏，构成可观测的自主研究产出曲线；显示其由 CTF 向真实厂商 0-day 披露的实质性转型，而非单点成果。",
+        "source": {
+          "title": "Archives — heegong (HeeChan Kim)",
+          "url": "https://heegong.github.io/archives/",
+          "published": "2023-09-24",
+          "source_type": "personal_blog_archive",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_nyfazt926lvhg4qnm7t8b13d",
+          "accessed_at": "2026-09-28T06:46:27.792677+00:00",
+          "content_sha256": "cdc2810d2ed25fcde26393d4b93ec7596d609198f2d1dafead4c90c3d85cba72"
+        }
+      }
+    ],
+    "contradictions": [
+      "person_json 将 selected_conference_evidence 记为 'OffByOne 2026 / POC'，但公开搜索未能证实该作者在名为 OffByOne 的会议上有演讲条目；OffByOne 在公开信息中更接近一本杂志/博客(offbyone.ca)而非已知安全会议，POC 通常指韩国 Power of Community 会议。该记录与可检索的公开来源之间尚未对齐，需作为待核验项保留，而非既定事实。"
+    ],
+    "gaps": [
+      "该维度的核心目标材料——长访谈、播客、AMA、演讲问答——在可访问来源中未发现；本输出条目均取自 About 页自述与 writeup 内嵌的方法论/时间线片段，并非深度对话。",
+      "未找到作者对'如何进入安全研究、具体导师、失败案例、关键转折'的自述叙事；writeup 普遍为技术披露 + PoC，缺少反思性叙述。",
+      "CVE-2022-44898（ASUS AuraSync）writeup 未说明其如何定位到 vulnerable memmove 调用、使用何种逆向工具或获得何种洞见，方法论细节缺失。",
+      "X/Twitter 账号 @heegong123 的内容未抓取，是否存在 AMA 式自述材料未确认。",
+      "KITRI Best of the Best 第 10 期 的具体完成情况、项目产出与同期同伴/导师未在自述中展开。"
+    ]
+  },
+  "community": {
+    "person": "HeeChan Kim",
+    "dimension": "社区参与与反馈回路",
+    "identity_check": "handle heegong / @heegong123 = HeeChan Kim（김희찬）。GitHub profile github.com/heegong 显示真名「김희찬 (heegong)」、Bio「0-day Researcher」、Team「TeamH4C」、首尔；Twitter @heegong123 与 person_json.social 一致。博客 heegong.github.io footer「© 2023 HeeChan Kim」、header「TeamH4C, Zero Day Researcher」、about 页署名 heegong。身份一致，无同名歧义冲突。",
+    "items": [
+      {
+        "id": "hc-community-01",
+        "date": "2021-11-30/2023-09-24",
+        "claim": "在个人博客 heegong.github.io 持续公开发布 11 篇 Windows 安装程序/驱动 LPE 类 0-day 漏洞 writeup，覆盖 Samsung、HP、LG、ASUS、Panda Security、Advanced Installer 等厂商产品，时间跨度 2021-11 至 2023-09；每篇以 CVE 编号命名并附技术分析与披露时间线。",
+        "status": "documented",
+        "growth_signal": "持续公开输出习惯：将漏洞发现转化为可核验的 writeup，形成可检索的研究轨迹，既是反馈回路的输出端，也使后续 CVE 报告渠道可被追溯。题目集中于同一漏洞类别（安装程序/驱动 LPE、DLL 劫持、权限管理不当），显示围绕固定漏洞模式的重复练习与可复用方法论。",
+        "short_quote": "© 2023 HeeChan Kim ... TeamH4C, Zero Day Researcher",
+        "source": {
+          "title": "heegong blog — Archives（11 篇 CVE writeup 列表）",
+          "url": "https://heegong.github.io/archives/",
+          "published": "2021-11-30/2023-09-24",
+          "source_type": "个人研究博客归档页",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_okjz0sdleiv6brnvt5t19b39",
+          "accessed_at": "2026-09-28T06:45:31.154108+00:00",
+          "content_sha256": "a5126fb4925e353490702af00f46abe709b49077a8b77c1c49356ee7d63c445a"
+        }
+      },
+      {
+        "id": "hc-community-02",
+        "date": "2023-06-29/2023-09-22",
+        "claim": "CVE-2023-41929（Samsung Memory Card & UFD Authentication Utility PC Software <1.0.2，DLL 劫持致 LPE）披露时间线完整闭环：2023-06-29 经 Samsung Mobile Security 首次联系 → 2023-07-03 转交 Samsung Device Solution Product Security Team → 2023-07-26 通知漏洞等级 High、CVSS 7.3 并将修补 → 2023-09-22 修补完成、CVE-2023-41929 发布。writeup 署名「HeeChan Kim (@heegong123) of TeamH4C」。",
+        "status": "documented",
+        "growth_signal": "反馈回路闭合：漏洞发现 → 厂商协调 → 等级/修补反馈 → CVE 编号发布 → 公开 writeup。研究者通过厂商安全团队的反馈获知漏洞分级与 CVSS 评分，并据此修正/确认研究方向；公开署名同时将成果归入团队身份，强化社区可见度。",
+        "short_quote": "2023/07/26 : The vulnerability is High, CVSS is 7.3, and I have been notified that the vulnerability will be patched.",
+        "source": {
+          "title": "CVE-2023-41929: Samsung Card-UFD Authentication Utility for Windows Installer Local Privilege Escalation（writeup）",
+          "url": "https://heegong.github.io/posts/CVE-2023-41929-Samsung-Card-UFD-Authentication-Utility-for-Windows-Installer-Local-Privilege-Escalation/",
+          "published": "2023-09-24",
+          "source_type": "个人研究博客 writeup（含披露时间线）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_fmidhrlho5a2f2bvr7e6i7ro",
+          "accessed_at": "2026-09-28T06:45:31.154114+00:00",
+          "content_sha256": "bb74ad7d8a6ca749ebe124023ed52b23a7855ca9c69cb7af0414576310203886"
+        }
+      },
+      {
+        "id": "hc-community-03",
+        "date": "2021/2023",
+        "claim": "GitHub profile（github.com/heegong）显示其「Team」「TeamH4C」、位置首尔、Bio「0-day Researcher」、23 个公开仓库；公开仓库含 CVE-2022-24924（LiveWallpaperService 不当访问控制）的 PoC 代码，将 writeup 中的技术结论以可执行代码形式公开。",
+        "status": "documented",
+        "growth_signal": "以团队身份出现在公开档案中，并辅以代码仓库公开 PoC，形成「博客 writeup + GitHub PoC」的复合输出渠道；团队标签在 GitHub 与博客两处一致，构成可核验的身份锚点。",
+        "short_quote": "Team: TeamH4C ... Bio: 0-day Researcher",
+        "source": {
+          "title": "GitHub profile — heegong",
+          "url": "https://github.com/heegong",
+          "published": "2023",
+          "source_type": "代码托管平台个人档案",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_lj29l3ugs2brwaw2zsiyl9do",
+          "accessed_at": "2026-09-28T06:45:31.154019+00:00",
+          "content_sha256": "697832d6eb0c85305b33d4b88bb8ad4b455948c60104d3e431df46922dfd5c52"
+        }
+      },
+      {
+        "id": "hc-community-04",
+        "date": "2021/2023",
+        "claim": "About 页自述：参与 KITRI Best of the Best 第 10 期「Vulnerability Analysis」方向；以 TeamH4C 队名参加 CTF（2021 ShaktiCTF 第 6、2022 Dice CTF 第 19），以 TeamSCA（Semyeong Computer High School 社团）参加 2021 Cyberguardians 第 3；并多次进入韩国青少年 CTF 决赛（Codegate Junior / Wacon Junior / CCE Junior / White Hat Contest Junior，2021-2023）。",
+        "status": "reported",
+        "growth_signal": "训练与同伴机制：KITRI BoB（韩国国家级安全人才培养项目，含课程与导师）提供系统化漏洞分析训练；CTF 队伍（TeamH4C/TeamSCA）构成同伴网络，以队名重复参赛形成协作—反馈循环。青少年 CTF 决赛经历显示其在制度化竞赛体系中持续练习。注：上述为本人自述，未获第三方赛事档案逐条印证。",
+        "short_quote": "KITRI Best of the Best 10th (Vulnerability Analysis) ... 2021 ShaktiCTF 6th (TeamH4C)",
+        "source": {
+          "title": "heegong blog — About（自述 CTF/训练经历）",
+          "url": "https://heegong.github.io/about/",
+          "published": "2023",
+          "source_type": "个人研究博客自述页",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ftno9q6gx1jm9c92iagruxei",
+          "accessed_at": "2026-09-28T06:45:31.154120+00:00",
+          "content_sha256": "8cb3c9f186e0f75492db24841feeddbafaf1797ff48cff21b1f7c3d083f77c95"
+        }
+      },
+      {
+        "id": "hc-community-05",
+        "date": "2021/2023",
+        "claim": "writeup 与 CVE 报告渠道集中于厂商安全团队（Samsung Mobile Security / Samsung Device Solution Product Security Team 等），未观察到邮件列表、issue、社区论坛等开放讨论渠道的协作痕迹；公开反馈主要通过「厂商协调 + CVE 发布 + 博客 writeup」三点闭环呈现。",
+        "status": "inferred",
+        "growth_signal": "反馈回路以厂商协调式（私密披露→公开 writeup）为主，而非开源社区式的公开 review；这与其研究对象（闭源厂商安装程序/驱动）一致，但意味着同伴/同行技术反馈的可核验痕迹有限，多数发生在私信或团队内部。",
+        "source": {
+          "title": "heegong blog — Archives 与 CVE-2023-41929 writeup 披露时间线综合推断",
+          "url": "https://heegong.github.io/archives/",
+          "published": "2021/2023",
+          "source_type": "个人研究博客（综合多页推断）",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_okjz0sdleiv6brnvt5t19b39",
+          "accessed_at": "2026-09-28T06:45:31.154108+00:00",
+          "content_sha256": "a5126fb4925e353490702af00f46abe709b49077a8b77c1c49356ee7d63c445a"
+        }
+      }
+    ],
+    "contradictions": [
+      "未发现互相冲突的材料。person_json 记载的「OffByOne 2026 / POC」会议参与证据在本次维度调查中未抓取到可核验来源；该记录与博客 about 页自述的 CTF/BoB 成绩不冲突，但会议参与未获独立页面印证，留作缺口而非矛盾。"
+    ],
+    "gaps": [
+      "NVD/MITRE 对 CVE-2023-41929 的独立页面因动态渲染抓取返回空，该 CVE 的「已正式发布」环节仅由本人 writeup 时间线与署名支持，未获 NVD/MITRE 独立印证。",
+      "TeamH4C、TeamSCA 在 CTFtime 等第三方赛事档案未取得可访问页面（CTFtime 页面 404、搜索无果），同伴网络成员构成与具体队友仅由本人 about 页自述支撑，未获第三方印证。",
+      "无邮件列表、GitHub issue/PR、社区论坛等开放协作痕迹的证据；无法核验同行技术反馈的具体内容与频次。",
+      "未取得导师或训练项目（KITRI BoB 第 10 期）的具体指导人、课程产出或同伴名单等一手材料。",
+      "person_json 所记「OffByOne 2026 / POC」会议参与未在本次调查中抓取到可核验来源，未纳入 items 主张。"
+    ]
+  },
+  "external": {
+    "person": "HeeChan Kim",
+    "dimension": "外部视角",
+    "identity_check": "通过三方交叉确认身份，排除同名歧义。GitHub 账号 heegong（https://github.com/heegong）profile 自述 '0-day Researcher'、团队 TeamH4C、位于首尔，并在 profile 中列出 Twitter @heegong123 与个人站 heegong.github.io；个人站 heegong.github.io 页脚署名 '© 2023 HeeChan Kim'，About 页作者署名 heegong / HeeChan Kim、头衔 'TeamH4C, Zero Day Researcher'。GitHub、个人站、About 页三者的署名、团队名与外链相互一致，可认定 heegong / @heegong123 / heegong.github.io 均指向同一人 HeeChan Kim。X/Twitter 页面（https://x.com/heegong123）抓取返回 HTTP 402，未能取得内容，仅以 GitHub profile 中列出的链接作为身份关联证据。",
+    "items": [
+      {
+        "id": "heegong-ext-kitri-bob-v10",
+        "date": "2023",
+        "claim": "作者个人站 About 页记载其参加 KITRI Best of the Best 第10期（v10）漏洞分析项目，并记载其为韩国世明计算机高中三年级学生。",
+        "status": "documented",
+        "growth_signal": "KITRI Best of the Best 是韩国官方安全人才培养项目，其参与可核验地介入作者的成长路径，属于外部机构对作者能力培养的直接介入而非奖项本身。外部视角问题所要求的'同事/导师具体评价'未在该页面出现，此条仅记录项目参与事实。",
+        "source": {
+          "title": "heegong — About",
+          "url": "https://heegong.github.io/about/",
+          "published": "2023",
+          "source_type": "作者个人站 About 页（一手自述）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ts3v0fovijq8qej3ixtkpw72",
+          "accessed_at": "2026-09-28T06:50:48.952136+00:00",
+          "content_sha256": "0d0943021f1e77008dfda6d91e70e0942ee5bd12ec43b2ebe9b9f741af17ea97"
+        }
+      },
+      {
+        "id": "heegong-ext-team-affiliation",
+        "date": "2023",
+        "claim": "About 页记载作者所属团队为世明计算机高中的 TeamSCA 与 TeamH4C。",
+        "status": "documented",
+        "growth_signal": "团队归属为作者自述的一手信息，可核验作者处于同伴协作结构中；但该页面未提供 TeamSCA 或 TeamH4C 成员、导师对其的具体评价语，外部视角维度所要求的团队评价内容缺失。",
+        "source": {
+          "title": "heegong — About",
+          "url": "https://heegong.github.io/about/",
+          "published": "2023",
+          "source_type": "作者个人站 About 页（一手自述）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ts3v0fovijq8qej3ixtkpw72",
+          "accessed_at": "2026-09-28T06:50:48.952136+00:00",
+          "content_sha256": "0d0943021f1e77008dfda6d91e70e0942ee5bd12ec43b2ebe9b9f741af17ea97"
+        }
+      },
+      {
+        "id": "heegong-ext-ctf-2021-2023",
+        "date": "2021–2023",
+        "claim": "About 页记载作者在 2021 至 2023 年间参加多项 CTF 赛事，包括 2021 ShaktiCTF 第6名（TeamH4C）、2021 YISF 第2名、2022 ELECONN 第1名、2022 Gifted Learning Institute Contest 个人与团体第1名，并多次进入 Codegate Junior、Wacon Junior、White Hat Contest Junior 决赛。",
+        "status": "documented",
+        "growth_signal": "作者自述在三年间持续参加韩国青少年 CTF 赛事并以团队名义参赛，反映'重复参赛 + 团队协作'的行为模式；这些为作者自报成绩，未以赛事官网或排行榜独立核验，按外部视角要求不将奖项本身解释为能力来源。",
+        "source": {
+          "title": "heegong — About",
+          "url": "https://heegong.github.io/about/",
+          "published": "2023",
+          "source_type": "作者个人站 About 页（一手自述）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ts3v0fovijq8qej3ixtkpw72",
+          "accessed_at": "2026-09-28T06:50:48.952136+00:00",
+          "content_sha256": "0d0943021f1e77008dfda6d91e70e0942ee5bd12ec43b2ebe9b9f741af17ea97"
+        }
+      },
+      {
+        "id": "heegong-ext-cve-writeup-series",
+        "date": "2021–2023",
+        "claim": "个人站首页列出作者发表于 2021-11-30 至 2023-09-24 的共 10 篇 CVE writeup，目标涵盖 Samsung Smart Switch、LG Smart Share、ASUS AuraSync、Panda Dome VPN、Samsung Card-UFD 认证工具、Advanced Installer 等 Windows 桌面软件，类型涵盖 LPE、DLL 劫持、认证不当、缓冲区溢出。",
+        "status": "documented",
+        "growth_signal": "作者在约两年内持续公开发表 CVE writeup，形成可核验的漏洞披露与公开发表习惯，与人物记录中'Windows LPE'研究方向交叉一致；外部视角下这是作者自身的公开产出，而非第三方评价。",
+        "source": {
+          "title": "heegong — 个人站首页（文章列表）",
+          "url": "https://heegong.github.io",
+          "published": "2023",
+          "source_type": "作者个人站首页（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_sla0v1q0ic6jjl305huvahkw",
+          "accessed_at": "2026-09-28T06:50:48.952119+00:00",
+          "content_sha256": "1452875d39d8e2f9c5454ec9d38ffc933f89777ca3505bd02f93d0ad31f091c3"
+        }
+      },
+      {
+        "id": "heegong-ext-cve-2022-44898",
+        "date": "2022-11-01",
+        "claim": "个人站首页列表记载 2022-11-01 发表的 CVE-2022-44898：ASUS AuraSync 内核栈缓冲区溢出本地提权（Kernel Stack Based Buffer Overflow LPE）writeup。",
+        "status": "documented",
+        "growth_signal": "该条目是与人物记录'Windows 内核与 LPE'方向直接对应的可核验作品；但仅依据首页列表的标题、日期与分类标签，单篇正文 permalink 抓取返回 404，漏洞发现方法、报告流程与致谢名单均未取得。",
+        "source": {
+          "title": "heegong — 个人站首页（文章列表）",
+          "url": "https://heegong.github.io",
+          "published": "2023",
+          "source_type": "作者个人站首页（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_sla0v1q0ic6jjl305huvahkw",
+          "accessed_at": "2026-09-28T06:50:48.952119+00:00",
+          "content_sha256": "1452875d39d8e2f9c5454ec9d38ffc933f89777ca3505bd02f93d0ad31f091c3"
+        }
+      }
+    ],
+    "contradictions": [],
+    "gaps": [
+      "外部视角维度的核心问题——同事、团队、会议主持或权威媒体对 HeeChan Kim 的具体评价——在已抓取的一手来源中完全缺失；GitHub profile 与个人站均为作者自述，未发现任何第三方评价语。",
+      "单篇 CVE writeup 正文（CVE-2022-44898、CVE-2023-41929 等）的 permalink 抓取均返回 404，未取得漏洞发现方法、厂商/CERT/CVE 报告流程、披露时间线与致谢名单。",
+      "人物记录注明 'selected_conference_evidence: OffByOne 2026 / POC'，但多次 WebSearch 与 WebFetch 未取得任何含 HeeChan Kim 名字的 POC 或 OffByOne 官方议程页面；该演讲事实未获证实。",
+      "X/Twitter 账号 https://x.com/heegong123 抓取返回 HTTP 402，未取得社交平台公开内容，无法作为评价来源。",
+      "About 页未含学习方法或成长经历的自述文字，仅以成绩与成果列表呈现成长轨迹；关于失败、转向、导师反馈等成长机制的一手证据缺失。"
+    ]
+  },
+  "decisions": {
+    "person": "HeeChan Kim",
+    "dimension": "关键决策与转折",
+    "identity_check": "GitHub 资料（github.com/heegong）显示 bio 为 0-day Researcher、Team 为 TeamH4C、Location 为 Seoul，链接 heegong.github.io 与 X @heegong123，邮箱 zaqw13440@gmail.com。博客 heegong.github.io 页眉标注 TeamH4C, Zero Day Researcher，页脚署名 HeeChan Kim。本地 inputs/person_json.json 的 name_or_handle（HeeChan Kim）、social（@heegong123）、writeup_evidence（github.com/heegong）三处与上述一手来源一致，身份交叉印证成立。",
+    "items": [
+      {
+        "id": "hck-dec-01",
+        "date": "2020",
+        "claim": "GitHub 公开仓库列表显示，2020 年前后存在 reversing-problems（2020-12 最后更新）、universal_shell_code（2020-09）、socket_python_backdoor（2020-07）等项目，时间早于博客最早的 CVE 帖子（2021-11-30）逾一年；同一时期还存在学校午餐应用、自动鼠标、网页编程等非安全类练习项目。",
+        "status": "documented",
+        "growth_signal": "进入漏洞披露前存在逆向题目、shellcode、socket 后端等可重复练习与工具建设，构成向安全研究过渡前的技能积累。",
+        "source": {
+          "title": "heegong — GitHub repositories (public listing)",
+          "url": "https://github.com/heegong?tab=repositories",
+          "published": "2020",
+          "source_type": "github_repository_list",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_mwftk1fho0ym9wlv02y35d08",
+          "accessed_at": "2026-09-28T06:55:04.735142+00:00",
+          "content_sha256": "93e356c300c9d07d7ab40eabf905c970f6730ac557eaec92cb3578c8fe4e0a6e"
+        }
+      },
+      {
+        "id": "hck-dec-02",
+        "date": "2021-11-30",
+        "claim": "博客第二页显示 CVE-2022-24924（LiveWallpaperService improper access control）标注日期为 2021-11-30，为可确认的最早公开 CVE 帖子，标志着由通用编程项目向公开漏洞披露的转变节点。",
+        "status": "documented",
+        "growth_signal": "首次公开披露并采用 CVE 编号与厂商公告链接的写作惯例，形成可追溯的公开发表习惯。",
+        "source": {
+          "title": "heegong.github.io — page 2 (blog archive)",
+          "url": "https://heegong.github.io/page2",
+          "published": "2021-11-30",
+          "source_type": "personal_blog_archive",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_zikvuo9oyyfvibivcoi20iue",
+          "accessed_at": "2026-09-28T06:55:04.735153+00:00",
+          "content_sha256": "542861ba31206cb337f44233b0a7849eca1fd467ebb55dff9360a15c3b72517f"
+        }
+      },
+      {
+        "id": "hck-dec-03",
+        "date": "2022-06-12",
+        "claim": "博客首页可见 10 篇 CVE 帖子，日期跨度 2022-06-12（CVE-2022-4956 Advanced Installer LPE）至 2023-09-24（CVE-2023-41929 Samsung Card-UFD LPE），覆盖 Samsung、HP、LG、ASUS、Panda Security、Advanced Installer 等厂商，类别集中于 Windows 安装程序/驱动的本地提权、DLL 劫持与权限管理。",
+        "status": "documented",
+        "growth_signal": "在约 15 个月内对同一漏洞类别（Windows 安装程序/驱动 LPE）进行重复披露，形成稳定的厂商安装程序 LPE 研究方向。",
+        "source": {
+          "title": "heegong.github.io — blog index (front page)",
+          "url": "https://heegong.github.io/",
+          "published": "2023-09-24",
+          "source_type": "personal_blog_index",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_2s4sosqf1js800oekm5ky0pc",
+          "accessed_at": "2026-09-28T06:55:04.735190+00:00",
+          "content_sha256": "651be4efb63d08339a02f87d6f4ae1b629a4a4e7e7ccdf2ca4cfef60f774a210"
+        }
+      },
+      {
+        "id": "hck-dec-04",
+        "date": "2022-11-01",
+        "claim": "在以用户态安装程序 LPE 为主的帖子中，CVE-2022-44898（ASUS AuraSync Kernel Stack Based Buffer Overflow Local Privilege Escalation，2022-11-01）是唯一在标题中明确内核态缺陷的条目，显示研究方向向 Windows 内核态利用的扩展。",
+        "status": "documented",
+        "growth_signal": "由用户态安装程序 LPE 扩展至内核态栈缓冲区溢出利用，研究范围向 Windows 内核推进。",
+        "source": {
+          "title": "heegong.github.io — blog index (CVE-2022-44898 entry)",
+          "url": "https://heegong.github.io/",
+          "published": "2022-11-01",
+          "source_type": "personal_blog_index",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_2s4sosqf1js800oekm5ky0pc",
+          "accessed_at": "2026-09-28T06:55:04.735190+00:00",
+          "content_sha256": "651be4efb63d08339a02f87d6f4ae1b629a4a4e7e7ccdf2ca4cfef60f774a210"
+        }
+      },
+      {
+        "id": "hck-dec-05",
+        "date": "2026",
+        "claim": "GitHub 资料 bio 标注 Team 为 TeamH4C，博客页眉标注 TeamH4C, Zero Day Researcher，两处一致地将研究者归入 TeamH4C；但任一来源均未给出加入时间、团队性质或团队成员构成，团队作为研究环境的作用属推断。",
+        "status": "inferred",
+        "growth_signal": "在标注的团队归属下开展研究，提示存在同伴或团队环境，但团队对研究方法与决策的具体影响缺乏文本证据。",
+        "source": {
+          "title": "heegong — GitHub profile",
+          "url": "https://github.com/heegong",
+          "published": "2026",
+          "source_type": "github_profile",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_wzxqhuf5jn78mkemsbtt9f17",
+          "accessed_at": "2026-09-28T06:55:04.735113+00:00",
+          "content_sha256": "61d1feb2d0532f8ee6a9d39586af0c95aba2f59794e3d78c5fc597f6b9f65990"
+        }
+      },
+      {
+        "id": "hck-dec-06",
+        "date": "2026",
+        "claim": "本地输入 inputs/local_seed_note.md 记载无本地种子；inputs/person_json.json 的 selected_conference_evidence 字段为 OffByOne 2026 / POC。在 6 次 WebSearch 与 8 次 WebFetch 内未定位到对应议程或演讲者页面。",
+        "status": "unknown",
+        "growth_signal": "若成立则属于公开发表（会议演讲）习惯的延续，但缺乏可抓取的一手议程或演讲页面，无法确证。",
+        "source": {
+          "title": "inputs/local_seed_note.md 与 inputs/person_json.json（本地种子/记录）",
+          "url": "inputs/local_seed_note.md",
+          "published": "2026",
+          "source_type": "local_seed",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      }
+    ],
+    "contradictions": [
+      "本地记录 primary_focus 为 Windows 内核与 LPE 漏洞，但已抓取的博客帖子以 Windows 用户态安装程序/驱动 LPE 为主，仅 CVE-2022-44898 一篇在标题中明确内核态缺陷；用户态与内核态的侧重存在张力。"
+    ],
+    "gaps": [
+      "未找到 OffByOne 2026 / POC 的公开议程或演讲者页面，会议演讲事实无法一手确认，仅余本地记录线索。",
+      "博客在 2023-09-24 后无可见新帖，2024 至 2026 年的研究活动无公开一手来源。",
+      "所有已抓取来源均无文本说明由通用编程项目（2020）转向漏洞披露（2021–2023）的动机或触发事件，转变原因不明。",
+      "TeamH4C 仅以名称出现，加入时间、团队性质、团队成员与对研究者决策的影响均无文本证据。",
+      "本地记录 qualification 标注 Windows 零日与逻辑漏洞研究，但已抓取一手来源以厂商安装程序 CVE 为主，Windows 内核 0-day 专门化的深度未被一手来源印证。",
+      "WebSearch 合成结果提及 HEVD 内核利用练习，但未通过一手抓取确认，仅作线索，不计入证据。"
+    ]
+  },
+  "timeline": {
+    "person": "HeeChan Kim",
+    "dimension": "可核验时间线",
+    "identity_check": "研究对象身份仅来自输入 person_json.json：name_or_handle 为 HeeChan Kim，handle 与 GitHub 账号为 heegong，X 账号为 @heegong123，primary_focus 标注为 Windows 内核与 LPE 漏洞，qualification 标注为 Windows 零日与逻辑漏洞研究，selected_conference_evidence 标注为 OffByOne 2026 / POC，rank 88。以上字段未经一手来源抓取证实。GitHub 主页（https://github.com/heegong）与 NVD 查询页的 WebFetch 因域名安全验证被拦截或返回 403/402 失败；X 账号返回 HTTP 402；MSRC 致谢页抓取到标题但未取得研究人员名单正文；DuckDuckGo 检索返回 CAPTCHA 页。WebSearch 工具在本次会话中自述无法执行实时搜索，多次查询均未返回真实结果链接。因此无法通过抓取确认 GitHub heegong 账号是否确实属于本研究对象，亦无法排除同名歧义。",
+    "items": [
+      {
+        "id": "hc-timeline-lead-github-handle",
+        "date": "",
+        "claim": "输入记录称研究对象使用 GitHub 账号 heegong 作为 writeup_evidence，发布 Windows 内核与 LPE 相关材料；该账号的存在、仓库列表、创建与更新日期均未抓取证实。",
+        "status": "unknown",
+        "growth_signal": "若账号属实，公开仓库与 writeup 可作为可核验的产出与公开发表习惯证据；当前仅有输入字段作为线索，无法据其排列时间线或判断阶段。",
+        "source": {
+          "title": "输入 person_json.json 字段 writeup_evidence: https://github.com/heegong（未抓取证实）",
+          "url": "https://github.com/heegong",
+          "published": "",
+          "source_type": "输入记录字段（未抓取证实）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "hc-timeline-lead-x-handle",
+        "date": "",
+        "claim": "输入记录称研究对象使用 X 账号 @heegong123 作为 social 字段；账号简介、加入日期与历史推文均未抓取证实，无法据其建立时间线节点。",
+        "status": "unknown",
+        "growth_signal": "若账号属实，长期推文可能体现公开习惯与同伴互动；当前仅作为线索存在，无内容可供分析。",
+        "source": {
+          "title": "输入 person_json.json 字段 social: https://x.com/heegong123（未抓取证实）",
+          "url": "https://x.com/heegong123",
+          "published": "",
+          "source_type": "输入记录字段（未抓取证实）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_f16kyed5xujsmage73e7o0ng",
+          "accessed_at": "2026-09-28T06:55:56.371654+00:00",
+          "content_sha256": "8ced59a07c6da6e7c0c0269f5d6b660bb374bf9f396f7c48c4ea1b37bdbb0191"
+        }
+      },
+      {
+        "id": "hc-timeline-lead-conference-evidence",
+        "date": "2026",
+        "claim": "输入记录的 selected_conference_evidence 字段写为 OffByOne 2026 / POC，提示研究对象在 2026 年前后与 OffByOne 及 POC 两场会议存在关联；该字段未提供议题、合作者、确切场次日期，亦未经议程页抓取证实。",
+        "status": "unknown",
+        "growth_signal": "若属实，会议演讲可作为公开产出与阶段证据；当前年份来自输入字段，场次与议题缺失，无法据其划分阶段边界。",
+        "source": {
+          "title": "输入 person_json.json 字段 selected_conference_evidence: OffByOne 2026 / POC（未抓取证实）",
+          "url": "",
+          "published": "2026",
+          "source_type": "输入记录字段（未抓取证实）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "hc-timeline-fetch-msrc-acknowledgement",
+        "date": "",
+        "claim": "尝试抓取 MSRC 在线服务研究员致谢页以核实 HeeChan Kim 是否被收录；页面经 301 重定向至 https://msrc.microsoft.com/update-guide/acknowledgement/online，抓取成功但正文仅含页面标题 Security Update Guide，未取得研究人员名单，无法判定是否被致谢或对应致谢周期。",
+        "status": "unknown",
+        "growth_signal": "MSRC 致谢可反映其与厂商的漏洞报告协作与产出节点；本次抓取未取得名单正文，该证据缺口待恢复节点用可渲染接口复核。",
+        "source": {
+          "title": "Microsoft Security Response Center — Security Update Guide Acknowledgement (Online)",
+          "url": "https://msrc.microsoft.com/update-guide/acknowledgement/online",
+          "published": "",
+          "source_type": "厂商致谢页（抓取到标题，名单正文未取得）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_wpdeugwsk3yag5aw6szpds89",
+          "accessed_at": "2026-09-28T06:55:56.371696+00:00",
+          "content_sha256": "8db16fac7d67ff826fe87d2f5f251cb84b53d3a860452c9a478718f5afbe4a04"
+        }
+      }
+    ],
+    "contradictions": [
+      "本次未取得两条以上可对照来源，故未发现互相冲突的日期或材料。输入 person_json.json 内字段之间未出现直接矛盾，但 OffByOne 2026 与 POC 的并存关系（同年两场、还是择一标注）未经议程页证实，属待核而非已证冲突。"
+    ],
+    "gaps": [
+      "GitHub heegong 账号的仓库列表、名称、描述、创建与更新日期：未抓取，因 github.com 域名在本次环境被安全验证拦截。",
+      "X 账号 @heegong123 的简介、加入日期与历史推文：未抓取，返回 HTTP 402 Payment Required。",
+      "NVD 中以 heegong 为记名的 CVE 条目：未抓取，nvd.nist.gov 域名被安全验证拦截。",
+      "cvedetails.com 以 HeeChan Kim 为记名的 CVE 条目：未抓取，返回 HTTP 403 Forbidden。",
+      "MSRC 致谢页是否收录 HeeChan Kim 及对应致谢周期：抓取到标题页但未取得名单正文，无法判定。",
+      "OffByOne 2026、POC 的议题、合作者、确切场次日期：无议程页抓取，仅有输入字段提示。",
+      "教育、工作履历、雇主、导师与同伴：无任何来源。",
+      "重复练习、工具建设、转向与反馈机制的证据：无任何来源。",
+      "WebSearch 工具在本次会话中自述无实时搜索能力，多次查询均未返回真实结果链接；本维度的时间线节点无法借搜索补全。",
+      "GitHub heegong 账号是否确实属于本研究对象、是否与其他 heegong 同名账号混淆：未通过抓取证实，身份歧义未消除。"
+    ]
+  },
+  "targeted": {
+    "items": []
+  }
+}

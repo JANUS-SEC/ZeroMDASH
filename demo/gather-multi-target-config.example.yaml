@@ -1,0 +1,20 @@
+schema_version: "1.0"
+name: example-service-stack
+scenario: >
+  The public API authenticates a tenant request and forwards a normalized job
+  to the worker service. The worker materializes tenant-controlled artifacts
+  and reports execution state back to the API.
+
+# Optional fallback when --agent-config is not supplied on the command line.
+gather_agent_config: ./gather-agent-config.example.yaml
+
+targets:
+  - name: public-api
+    agent_config: ./zeromdash.oss.demo.yaml
+    workspace: ./.zeromdash/workspace_for_public-api
+    role: tenant authentication and job normalization
+
+  - name: worker-service
+    agent_config: ./zeromdash.oss.demo.yaml
+    workspace: ./.zeromdash/workspace_for_worker-service
+    role: privileged artifact materialization and execution

@@ -1,0 +1,145 @@
+# ZeroMDASH-owned DSH headless overlay.
+#
+# The complete task is loaded from an invocation-local file so prompts never
+# enter argv. DSH starts at the task workspace base for workspace-write
+# confinement; the prompt identifies the logical invocation sub-workspace.
+
+- id: settings
+  config:
+    path: !!js process.env.ZEROMDASH_DSH_SETTINGS_FILE
+
+- id: session-persistence-jsonl
+  config:
+    root: !!js process.env.ZEROMDASH_DSH_SESSION_ROOT
+
+- id: session-title-llm
+  disabled: true
+
+- id: agent-default-model
+  config:
+    provider: !!js process.env.ZEROMDASH_DSH_DEFAULT_PROVIDER || 'deepseek-official'
+    model: !!js process.env.ZEROMDASH_DSH_DEFAULT_MODEL || 'deepseek-v4-flash'
+    reasoningEffort: !!js process.env.ZEROMDASH_DSH_DEFAULT_REASONING_EFFORT || void 0
+
+- id: approval
+  config:
+    policy: never
+
+- id: permission
+  config:
+    defaultPreset: zeromdash-workspace-write
+    presets:
+      zeromdash-workspace-write:
+        sandbox: workspace-write
+        approval: never
+      danger-full-access:
+        sandbox: danger-full-access
+        approval: never
+
+- id: plan-mode
+  disabled: true
+
+- id: agent-instructions
+  disabled: true
+
+- id: system-prompt
+  config:
+    persona: >-
+      You are a focused ZeroMDASH software-security agent. Follow the
+      invocation instructions and task exactly. Use only the minimal tools
+      needed, ground claims in evidence, and return the requested final
+      artifact or output without unrelated commentary.
+
+# Default minimal-plus-search mode: keep persistent bash for batched inspection,
+# expose direct read/write/edit for deterministic artifacts, and add bounded
+# glob/grep discovery. Keep web, subagent control/fork, workflow, and planning
+# tools disabled; allow one bounded read-only subagent for independent checks.
+- id: tool-bash
+  disabled: true
+- id: tool-jobs
+  disabled: true
+- id: tool-fs
+  disabled: false
+- id: tool-fs-search
+  disabled: true
+- id: tool-skill
+  disabled: true
+- id: tool-todo
+  disabled: true
+- id: tool-goal
+  disabled: true
+- id: tool-ralph
+  disabled: true
+- id: tool-web
+  disabled: true
+- id: tool-subagent-control
+  disabled: true
+- id: tool-subagent-list-agents
+  disabled: true
+- id: tool-subagent
+  disabled: false
+  config:
+    provider: spawn
+    toolName: subagent
+    backgroundMode: one-shot
+    enableRunInBackground: false
+    maxDepth: 1
+    agentOptions:
+      maxTokens: 262144
+    toolFilter:
+      allow:
+        - read
+        - glob
+        - grep
+    persona: >-
+      You are an independent read-only security verifier. Perform only the
+      bounded verification task delegated by the parent. Inspect the supplied
+      clean source checkout and return concise evidence, counterevidence,
+      sibling-path checks requested by the task, and unresolved gaps. Do not
+      modify files, access prior reports, start descendants, or use the network.
+- id: tool-subagent-fork
+  disabled: true
+- id: tool-workflow
+  disabled: true
+
+- insert:
+    - id: zeromdash-minimal-shell
+      name: cordis:group
+      group: true
+      isolate:
+        terminals: true
+      config:
+        - id: pty
+          name: '@deepseek-ai/dsh-terminal'
+        - id: terminal-bash
+          name: '@deepseek-ai/dsh-terminal-bash'
+          config:
+            timeoutMs: 300000
+        - id: persistent-bash
+          name: '@deepseek-ai/dsh-tool-bash-persistent'
+          config:
+            timeoutMs: 300000
+            description: >-
+              Run commands in a persistent bash shell rooted at the ZeroMDASH
+              task workspace. Use the logical invocation directory named in
+              the task for relative scratch and output paths. Prefer batched
+              commands and compact labeled output over many small reads. When
+              investigating a claim, gather related definitions, references,
+              callers, configuration, and tests together before deciding.
+    - id: zeromdash-search-tools
+      name: '@deepseek-ai/dsh-tool-fs-search'
+      config:
+        sampleOverCapGlobResults: true
+        globMaxResults: 200
+        grepMaxMatches: 500
+        grepMaxLineBytes: 2000
+        timeoutMs: 60000
+
+- id: headless-runner
+  inject: [headlessStartup]
+  config:
+    task: !!js >-
+      process.getBuiltinModule('node:fs').readFileSync(
+        process.env.ZEROMDASH_DSH_PROMPT_FILE,
+        'utf8'
+      )

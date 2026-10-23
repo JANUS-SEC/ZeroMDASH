@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "zeromdash://contracts/review.schema.json",
+  "title": "Review",
+  "description": "Legacy review or Agent-Native per-hypothesis review with package coverage closure.",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/definitions/legacyReview" },
+    { "$ref": "#/definitions/batchReview" }
+  ],
+  "definitions": {
+    "feedback": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "gaps": { "type": "array", "items": { "type": "string" } },
+        "requested_evidence": { "type": "array", "items": { "type": "string" } },
+        "next_focus": { "type": "string" }
+      }
+    },
+    "reviewCore": {
+      "type": "object",
+      "required": ["verdict", "reasoning"],
+      "additionalProperties": true,
+      "properties": {
+        "verdict": { "type": "string", "enum": ["confirm", "reject", "revise"] },
+        "outcome_type": { "type": "string", "enum": ["standalone_finding", "confirmed_primitive", "observation", "rejected", "inconclusive", ""] },
+        "reasoning": { "type": "string", "minLength": 1 },
+        "disposition": { "type": "string" },
+        "confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "scope_verdict": { "type": "string", "enum": ["introduced", "enabled", "regressed", "pre_existing", "unrelated", "unknown"] },
+        "patch_status": { "type": "string", "enum": ["not_applied", "bypass", "incomplete", "applied", ""] },
+        "gate_decision": { "type": "string", "enum": ["block", "warn", "ignore"] },
+        "documented_expected_behavior": { "type": "boolean" },
+        "security_contract_violation": { "type": "boolean" },
+        "violated_security_property": { "type": "string" },
+        "standalone_security_impact": { "type": "boolean" },
+        "direct_security_impact": { "type": "object", "additionalProperties": true },
+        "required_external_primitives": { "type": "array", "items": { "type": "string" } },
+        "cvss_applicable": { "type": "boolean" },
+        "cvss4_vector": { "type": "string" },
+        "primitive": { "type": "object", "additionalProperties": true },
+        "capability_view": { "type": "object", "additionalProperties": true },
+        "domain_refs": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
+        "feedback": { "$ref": "#/definitions/feedback" }
+      }
+    },
+    "legacyReview": {
+      "allOf": [
+        { "$ref": "#/definitions/reviewCore" },
+        {
+          "type": "object",
+          "required": ["selected_skills"],
+          "properties": {
+            "selected_skills": { "type": "array", "items": { "type": "string" } },
+            "skill_perspectives": { "type": "object", "additionalProperties": { "type": "string" } }
+          }
+        }
+      ],
+      "not": { "required": ["package_id"] }
+    },
+    "hypothesisDefinition": {
+      "type": "object",
+      "required": ["hypothesis_id", "statement", "obligation_ids"],
+      "additionalProperties": true,
+      "properties": {
+        "hypothesis_id": { "type": "string", "minLength": 1 },
+        "statement": { "type": "string", "minLength": 1 },
+        "obligation_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "domain_refs": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
+        "candidate_code_locations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "counterexampleAttempt": {
+      "type": "object",
+      "required": ["dimension", "cases", "result", "evidence"],
+      "additionalProperties": true,
+      "properties": {
+        "dimension": { "type": "string", "minLength": 1 },
+        "cases": { "type": "array", "minItems": 2, "items": { "type": "string", "minLength": 1 } },
+        "result": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "batchReview": {
+      "type": "object",
+      "required": ["package_id", "package_decision", "reasoning", "selected_skills", "hypothesis_verdicts", "new_hypothesis_decisions", "coverage_verdict", "required_hypotheses"],
+      "additionalProperties": true,
+      "properties": {
+        "package_id": { "type": "string", "minLength": 1 },
+        "package_decision": { "type": "string", "enum": ["close", "revise"] },
+        "reasoning": { "type": "string", "minLength": 1 },
+        "selected_skills": { "type": "array", "items": { "type": "string" } },
+        "skill_perspectives": { "type": "object", "additionalProperties": { "type": "string" } },
+        "hypothesis_verdicts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "allOf": [
+              { "$ref": "#/definitions/reviewCore" },
+              { "type": "object", "required": ["hypothesis_id"], "properties": { "hypothesis_id": { "type": "string", "minLength": 1 } } }
+            ]
+          }
+        },
+        "new_hypothesis_decisions": {
+          "description": "Accept, merge, or reject only hypotheses listed in this investigation pass's newly_discovered_hypotheses. Do not repeat decisions for manifest hypotheses.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["hypothesis_id", "decision", "reasoning"],
+            "additionalProperties": true,
+            "properties": {
+              "hypothesis_id": { "type": "string", "minLength": 1 },
+              "decision": { "type": "string", "enum": ["accept", "merge", "reject"] },
+              "merge_target_id": { "type": "string" },
+              "reasoning": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "coverage_verdict": {
+          "type": "object",
+          "required": ["status", "reasoning", "obligation_assessments", "counterexample_attempts", "unresolved_cases"],
+          "additionalProperties": true,
+          "properties": {
+            "status": { "type": "string", "enum": ["closed", "open"] },
+            "reasoning": { "type": "string", "minLength": 1 },
+            "counterexample_attempts": { "type": "array", "items": { "$ref": "#/definitions/counterexampleAttempt" } },
+            "unresolved_cases": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "obligation_assessments": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["obligation_id", "status", "hypothesis_ids", "reasoning"],
+                "additionalProperties": true,
+                "properties": {
+                  "obligation_id": { "type": "string", "minLength": 1 },
+                  "status": { "type": "string", "enum": ["satisfied", "open"] },
+                  "hypothesis_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+                  "reasoning": { "type": "string", "minLength": 1 }
+                }
+              }
+            }
+          }
+        },
+        "required_hypotheses": { "type": "array", "items": { "$ref": "#/definitions/hypothesisDefinition" } },
+        "feedback": { "$ref": "#/definitions/feedback" }
+      }
+    }
+  }
+}

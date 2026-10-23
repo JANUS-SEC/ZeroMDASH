@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "zeromdash://contracts/investigation.schema.json",
+  "title": "Investigation or Hypothesis Batch Investigation",
+  "description": "Legacy single-outcome investigation or a complete revision of an Agent-Native hypothesis ledger.",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/definitions/investigationResult" },
+    { "$ref": "#/definitions/hypothesisBatch" }
+  ],
+  "definitions": {
+    "evidence": {
+      "type": "object",
+      "required": ["code_locations", "call_path"],
+      "minProperties": 2,
+      "additionalProperties": true,
+      "properties": {
+        "code_locations": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "call_path": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "writeup_refs": { "type": "array", "items": { "type": "string" } },
+        "patch_refs": { "type": "array", "items": { "type": "string" } },
+        "diff_evidence": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "investigationResult": {
+      "type": "object",
+      "required": ["title", "detail", "evidence"],
+      "additionalProperties": true,
+      "properties": {
+        "hypothesis_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "detail": { "type": "string", "minLength": 1 },
+        "evidence": { "$ref": "#/definitions/evidence" },
+        "scope_relation": { "type": "string", "enum": ["introduced", "enabled", "regressed", "pre_existing", "unrelated", "unknown"] },
+        "patch_status": { "type": "string", "enum": ["not_applied", "bypass", "incomplete", "applied"] },
+        "severity": { "type": "string", "enum": ["low", "medium", "high", "critical", ""] },
+        "confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "domain_refs": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
+        "capability_view": { "type": "object", "additionalProperties": true },
+        "primitive": { "type": "object", "additionalProperties": true },
+        "status": { "type": "string", "enum": ["ok", "no-finding", "ill-posed", "missing-input", "partial"] }
+      }
+    },
+    "hypothesisDefinition": {
+      "type": "object",
+      "required": ["hypothesis_id", "statement", "obligation_ids"],
+      "additionalProperties": true,
+      "properties": {
+        "hypothesis_id": { "type": "string", "minLength": 1 },
+        "statement": { "type": "string", "minLength": 1 },
+        "obligation_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "domain_refs": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
+        "candidate_code_locations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "counterexampleAttempt": {
+      "type": "object",
+      "required": ["dimension", "cases", "result", "evidence"],
+      "additionalProperties": true,
+      "properties": {
+        "dimension": { "type": "string", "minLength": 1 },
+        "cases": { "type": "array", "minItems": 2, "items": { "type": "string", "minLength": 1 } },
+        "result": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "hypothesisBatch": {
+      "type": "object",
+      "required": ["schema_version", "package_id", "manifest_revision", "hypothesis_results", "newly_discovered_hypotheses", "coverage_matrix", "counterexample_attempts", "unresolved_cases", "proposed_coverage_closed"],
+      "additionalProperties": true,
+      "properties": {
+        "schema_version": { "type": "string", "enum": ["1.0"] },
+        "package_id": { "type": "string", "minLength": 1 },
+        "manifest_revision": { "type": "integer", "minimum": 1 },
+        "hypothesis_results": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "allOf": [
+              { "$ref": "#/definitions/investigationResult" },
+              { "type": "object", "required": ["hypothesis_id"] }
+            ]
+          }
+        },
+        "newly_discovered_hypotheses": {
+          "description": "Only hypotheses first discovered in this investigation pass. Hypotheses already present in the manifest must not be repeated here.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/hypothesisDefinition" }
+        },
+        "coverage_matrix": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["obligation_id", "hypothesis_ids", "assessment"],
+            "additionalProperties": true,
+            "properties": {
+              "obligation_id": { "type": "string", "minLength": 1 },
+              "hypothesis_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+              "assessment": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "counterexample_attempts": { "type": "array", "items": { "$ref": "#/definitions/counterexampleAttempt" } },
+        "unresolved_cases": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "proposed_coverage_closed": { "type": "boolean" }
+      }
+    }
+  }
+}

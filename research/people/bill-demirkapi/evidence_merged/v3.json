@@ -1,0 +1,1138 @@
+{
+  "works": {
+    "person": "Bill Demirkapi",
+    "dimension": "公开作品与技术演化",
+    "identity_check": "person_json 记录 Bill Demirkapi，主站 https://billdemirkapi.me/，X 账号 @BillDemirkapi，primary_focus 为 Windows/UEFI/供应链漏洞。WebFetch 抓取博客首页，其 tagline 自述记录 an independent security researcher 的研究经历，研究方向涵盖 Windows exploitation、vulnerability discovery、anti-cheat analysis、bloatware security、cloud security，与 person_json 的 Windows 与供应链（预装软件）方向一致。CyberPatriot 一文正文自述当时为 high school senior，2015 至 2018 年参赛三年，与 2019 年集中发文的时间线吻合。研究主题、自述身份与社交账号指向同一研究者，未发现同名歧义冲突。缺口：person_json 声称的 UEFI 方向在抓取到的公开作品中无对应记录。",
+    "items": [
+      {
+        "id": "bd-works-01-dell-rce",
+        "date": "2019-04-30",
+        "claim": "Bill Demirkapi 于 2019-04-30 发布 Dell SupportAssist 远程代码执行研究。研究始于购买 Dell G3 15 后对第三方预装软件与 Dell Detect PC 网页驱动的怀疑，使用 Chrome 开发者工具观察 localhost:8884 请求、Process Hacker 确认本地 Web 服务，逆向 .NET 二进制与客户端 JavaScript 还原 REST API，定位 downloadservice_downloadandautoinstall 这一以管理员权限下载并执行的方法。绕过 Referer/Origin 校验采用 DNS 劫持随机 .dell.com 子域，签名问题用 PHP 代理脚本解决，URL 白名单与 http→https 自动替换以 URL 前导空格绕过 StartsWith 校验。披露时间线为 2018-10-26 首次报告至 2019-04-18 发布公告。",
+        "status": "documented",
+        "growth_signal": "研究动机来自对预装软件与网页驱动更新的具体怀疑，而非抽象安全概念；首次记录到明确的失败—转向机制——open redirect 未果后主动改用 ARP/DNS 欺骗的中间人攻击；技术栈覆盖 .NET 逆向、JavaScript 逆向、网络层欺骗与 PHP 代理，显示单点漏洞的多层突破能力；完整的 90 天级负责任披露流程。",
+        "short_quote": "I almost gave up at this point, because I couldn't find an open redirect vulnerability on any of the sites.",
+        "source": {
+          "title": "Remote Code Execution on most Dell computers",
+          "url": "https://billdemirkapi.me/remote-code-execution-on-most-dell-computers/",
+          "published": "2019-04-30",
+          "source_type": "personal_research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_u7wbyd312wgd21fzfk1kepwi",
+          "accessed_at": "2026-09-27T08:50:33.579496+00:00",
+          "content_sha256": "85b9422bed00fab60ace60d4027be648859abe40960d249f95a5fa64f74d8b64"
+        }
+      },
+      {
+        "id": "bd-works-02-cyberpatriot",
+        "date": "2019-04-12",
+        "claim": "Bill Demirkapi 于 2019-04-12 发布对 CyberPatriot 全国竞赛评分引擎 CCSClient.exe 的逆向研究。他自述当时为 high school senior，2015 至 2018 年参赛三年。清理硬盘时发现旧竞赛镜像文件夹，回顾参赛期间逆向能力不足，决定用现有能力复盘评分引擎这一竞赛基础设施最关键组件。使用 IDA Pro 静态分析，识别其中内嵌的 Crypto++ 5.6.2 与 AES-GCM 硬编码密钥，定位并重命名 InitializeScoringData、DecryptData、ExecuteCheck 等函数，指出 API hooking 仅能看到文件访问而看不到检查内容。发布后收到主要开发者邮件，要求在更换加密算法前下架，文章曾暂时撤下。",
+        "status": "documented",
+        "growth_signal": "自我能力对比驱动的复盘——明确区分参赛时的逆向水平与当前水平，并以重做旧题作为能力校准与公开发表的契机；选择竞赛基础设施而非题目本身作为目标，体现从参与者到审视者的视角转变；开发者反馈导致主动下架，记录到外部反馈对发表时机的约束。",
+        "short_quote": "In the years I was competing in CyberPatriot, I had some reversing knowledge, but it was nothing to compared to what I can do today.",
+        "source": {
+          "title": "Reversing the CyberPatriot National Competition Scoring Engine",
+          "url": "https://billdemirkapi.me/reversing-the-cyberpatriot-national-competition/",
+          "published": "2019-04-12",
+          "source_type": "personal_research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_940qsfe1u643btcz6eu9f7a4",
+          "accessed_at": "2026-09-27T08:50:33.579514+00:00",
+          "content_sha256": "353f1635ca26da0c43eeb65fcd0733c9c11e7b3a5f2b3d798c783f8c801d3861"
+        }
+      },
+      {
+        "id": "bd-works-03-hp-bloatware",
+        "date": "2020-04-03",
+        "claim": "Bill Demirkapi 于 2020-04-03 发布 HP Support Assistant 多项高危漏洞研究，含 5 个本地提权、2 个任意文件删除、3 个远程代码执行变体。他将预装软件视为独特攻击面，使用 dnSpy 配合 de4dot 解除 SmartAssembly 混淆，枚举 WCF 命名管道服务 250 余个函数，用 URLProtocolView 发现 hpdia:// 协议处理程序实现 RCE，用 Procmon 定位可劫持的缺失 DLL。披露时间线为 2019-10-05 报告至 2020-03 延期，因 COVID-19 推迟。文中对比 Dell 六个月才修补单个漏洞而 HP 三个月内修补，并指出 HP 补丁以不可信客户端数据替换硬编码临时目录、引入了新漏洞。",
+        "status": "documented",
+        "growth_signal": "主题延续与跨厂商重复练习——将同一预装软件攻击面方法论从 Dell 系统迁移到 HP；工具栈从 .NET 逆向扩展到 de4dot 解混淆、WCF 接口枚举、URL 协议处理程序与 DLL 劫持；对厂商补丁引入新漏洞进行批判性复盘，显示对补丁有效性的独立验证习惯而非止步于披露。",
+        "short_quote": "I always have considered bloatware a unique attack surface.",
+        "source": {
+          "title": "Several Critical Vulnerabilities on most HP machines running Windows",
+          "url": "https://billdemirkapi.me/several-critical-vulnerabilities-on-most-hp-machines-running-windows/",
+          "published": "2020-04-03",
+          "source_type": "personal_research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_f5kmu7kw9xqnvpssz781u6xi",
+          "accessed_at": "2026-09-27T08:50:33.579526+00:00",
+          "content_sha256": "27593baee21c8f33677e4acf49d99e8ae4e3a19a462a4d03094c2f9a291e08a3"
+        }
+      },
+      {
+        "id": "bd-works-04-cve-2021-40444",
+        "date": "2022-01-07",
+        "claim": "Bill Demirkapi 于 2022-01-07 发布对 CVE-2021-40444 Microsoft Office RCE 的深度技术分析。样本经 @vxunderground 提供。方法论以构造最小复现用例为首要步骤，使用 Fiddler 截获 HTTP/HTTPS、ProcMon 对照成功与失败 payload 的执行路径、IDA Pro 反汇编与断点、Diaphora 对 IEFRAME.dll 与 URLMON.dll 补丁前后做二进制比对。分析深入 MSHTML.DLL 异步下载管道的 CDwnChan、CDwnBindData、CHtmPre 类，发现 CHtmPre 构造函数中硬编码的 4096 字节读取要求导致过短 payload 提前终止，分析 CAB 文件 INF 提取路径转义，并将利用移植到 Internet Explorer 以绕过弹出窗口拦截。原始样本于 2021 年 8 月由阿根廷用户上传 VirusTotal，当时仅单一反病毒引擎检出。",
+        "status": "documented",
+        "growth_signal": "研究类型从自我发现漏洞转向对第三方野外漏洞的深度逆向，呈现可复用的逆向方法论原则——最小复现优先、成功与失败路径双向对照、补丁前后二进制比对；从单点函数分析深入到异步状态机与硬编码常量归因；对为何客户端预期 4096 字节这类基本假设做 sanity check 的习惯被明确表述为可迁移经验。",
+        "short_quote": "Whenever I encounter a new vulnerability that I want to reverse engineer, my first goal is always to produce a minimal reproduction example of the exploit.",
+        "source": {
+          "title": "Unpacking CVE-2021-40444: A Deep Technical Analysis of an Office RCE Exploit",
+          "url": "https://billdemirkapi.me/unpacking-cve-2021-40444-microsoft-office-rce/",
+          "published": "2022-01-07",
+          "source_type": "personal_research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_0nh2mq5ekr79wo7nwbx7wcf6",
+          "accessed_at": "2026-09-27T08:50:33.579487+00:00",
+          "content_sha256": "7614d937c3bad16928363b114221d3f30a50c49496046ecc9b0f04cafd960b4f"
+        }
+      },
+      {
+        "id": "bd-works-05-bigdata-cloud",
+        "date": "2024-09-27",
+        "claim": "Bill Demirkapi 于 2024-09-27 发布 Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale。研究自 2021 年起历时三年，质疑云计算为便利引入的风险。构建 CloudRot 枚举 AWS 与 GCP 公网 IP 池，捕获 1,770,495 个 IP、发现 66,000 余个唯一 TLD 下的 78,000 余个悬空资源；用被动 DNS 复制数据匹配。密钥扫描以 VirusTotal Retrohunt 的 YARA 规则将 PB 级数据缩减到百万候选，验证时对良性元数据端点而非客户数据查询。扫描管道含 Python 协调器（自动拆分接近 10,000 上限的 Retrohunt 任务）、C++ AWS Lambda 扫描器采用 Intel hyperscan（比 std::regex 快一个数量级）、消息队列与 MySQL。累计扫描超 500 万文件、验证 15,000 余密钥。GitHub Gist API 批量发布致账号暂停后转向 Selenium Web UI。",
+        "status": "documented",
+        "growth_signal": "研究规模与方法论的最大方向转型——从目标导向的单点漏洞逆向转向数据驱动的规模化漏洞发现，并自陈行业偏向目标导向漏洞挖掘而选择相反方向；多次失败—转向记录：本地扫描 impractical 转 serverless、std::regex 性能不足转 hyperscan、GitHub API 账号暂停转 Selenium；明确把三年迭代周期作为规模化研究的必要代价；构建并长期维护多组件工具系统（协调器、Lambda、队列、数据库），显示工具建设作为研究能力放大器的习惯。",
+        "short_quote": "the industry is biased towards vulnerability hunting individual targets.",
+        "source": {
+          "title": "Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale",
+          "url": "https://billdemirkapi.me/leveraging-big-data-for-vulnerability-discovery-at-scale/",
+          "published": "2024-09-27",
+          "source_type": "personal_research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_epgm5shocwnqgoirjzfj8i2s",
+          "accessed_at": "2026-09-27T08:50:33.579504+00:00",
+          "content_sha256": "7379cca1ff72c3f0d4410e85754db6608834346667fe996bcac8cc88127e0714"
+        }
+      },
+      {
+        "id": "bd-works-06-blog-bibliography",
+        "date": "2019-02-14",
+        "claim": "Bill Demirkapi 个人博客自 2019-02-14 首篇 Reading Physical Memory using Carbon Black's Endpoint driver 至 2024-09-27 的规模化漏洞发现文章，共 16 篇作品。主题分布为 Windows 利用与代码注入（Abusing Exceptions Part 1/2、Sharing is Caring、Fork for Stealthy Memory）、预装软件漏洞、安全工具弱点、恶意软件规避、游戏安全与大数据库云安全。2019 年发文密度最高（8 篇），其后转为更长更深的单篇分析。",
+        "status": "documented",
+        "growth_signal": "公开发表节奏与深度的演化——2019 年高频发文（8 篇）伴随主题广泛试错，其后转为低频高深度，反映从探索期到专精期的产出策略调整；主题群聚显示重复练习模式（Windows 利用持续多年、预装软件跨厂商延续两篇）；时间跨度 2019 至 2024 覆盖其公开作品从高中末期到职业期的技术演化。",
+        "source": {
+          "title": "Bill Demirkapi — Blog Bibliography (homepage)",
+          "url": "https://billdemirkapi.me/",
+          "published": "2019-02-14",
+          "source_type": "personal_blog_index",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_8sifpmpcqbi1g2himd1g09lh",
+          "accessed_at": "2026-09-27T08:50:33.579435+00:00",
+          "content_sha256": "ff9a55f07219e13c70d8e3b59de779354943611f6dd0dc228e6f522ceedaf212"
+        }
+      }
+    ],
+    "contradictions": [],
+    "gaps": [
+      "person_json 的 primary_focus 列出 UEFI 方向漏洞，但抓取到的公开作品（博客首页 16 篇与 5 篇全文）中未出现 UEFI 相关研究，该方向无一手作品证据。",
+      "person_json 的 selected_conference_evidence 为 Black Hat US / POC。WebSearch 发现 Bill Demirkapi 于 Black Hat USA 2019 以 Breaking the Industry: Remote Code Execution on Dell SupportAssist 为题演讲的线索，但 Black Hat 主站 https://www.blackhat.com/us-19/briefings/schedule/index.html 返回 HTTP 403 未能一手抓取 speaker 页，且 WebSearch 结果含模型叙述、按规则不可作 documented/reported 证据，会议参与事实未获一手确认。",
+      "POC 会议参与未见任何一手或二手证据。",
+      "2020-09-16 至 2021-11-25 约 14 个月发文间隔期的活动与学习路径未知。",
+      "Carbon Black、Trend Micro Rootkit Remover、anti-cheat、Abusing Windows Fork、Abusing Exceptions Part 1/2、Sharing is Caring、Defeating Macro Static Analysis、Hacking College Admissions、Epic Games P2P 等 9 篇作品仅获取首页标题与日期，其正文中的方法论、失败转向、披露时间线与成长机制细节未获取。",
+      "Abusing Exceptions Part 2（2023-01-30）为系列终篇，仅首页标题，其相对 Part 1 的方法论增量未获取，无法判断 2022 至 2023 年的 Windows 利用技术具体演化。",
+      "2022-01-07 至 2024-09-27 间约两年零八个月的主线研究——即从单点 Windows 利用转向规模化云端漏洞发现的过渡路径——仅有起止两端证据，中间的工具建设迭代记录未获取。"
+    ]
+  },
+  "conversations": {
+    "person": "Bill Demirkapi",
+    "dimension": "深度对话与自述",
+    "identity_check": "person_json 记录其名为 Bill Demirkapi，primary_focus 为 Windows/UEFI/供应链漏洞，社交账号 https://x.com/BillDemirkapi，writeup 站点 https://billdemirkapi.me/，列 Black Hat US/POC 演讲资格，资格类型为直接漏洞发现与利用。已通过 WebFetch 抓取 https://billdemirkapi.me/ 与 /about/ 两个本人一手页面，正文确认作者署名 Bill Demirkapi 且内容与该研究方向一致，身份无同名歧义冲突。本次未抓取到其 X 账号正文，亦未在 Darknet Diaries、Risky Business 抓取页面中检索到其姓名，因此播客嘉宾身份未获验证。",
+    "items": [
+      {
+        "id": "bill-deep-self-about",
+        "date": "2026",
+        "claim": "Bill Demirkapi 在个人网站 About 页以第一人称自称 25 岁的安全研究员，并声明网站内容为其个人独立研究的产物。",
+        "status": "documented",
+        "growth_signal": "明确自我定位为独立安全研究员（independent security researcher），强调研究为个人成果而非机构产出；但该页面未提供入门、导师、失败或转折等成长机制叙述。",
+        "short_quote": "Hi there! My name is Bill Demirkapi and I'm a 25-year-old security researcher.",
+        "source": {
+          "title": "About — Bill Demirkapi",
+          "url": "https://billdemirkapi.me/about/",
+          "published": "2026",
+          "source_type": "personal_website_about_page",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_q1dubm3xia8otpj4m2xfjght",
+          "accessed_at": "2026-09-27T08:40:23.014377+00:00",
+          "content_sha256": "9edbe6b36447c3c7c00c324f8e61033725dc7abe0339299ac24c7ead8262d39e"
+        }
+      },
+      {
+        "id": "bill-deep-research-iteration-dell-lpe",
+        "date": "2019-07-19",
+        "claim": "Bill Demirkapi 自述在 2019 年 5 月公开 Dell SupportAssist 远程代码执行漏洞后，研究持续进行并发现更多漏洞，形成跨产品迭代式发现链。",
+        "status": "unknown",
+        "growth_signal": "体现串接式研究与跨厂商复用同一方法论（OEM 预装软件攻击面）的练习路径；以先前成果为起点继续发现而非一次性研究，符合重复练习与方法迁移的成长机制。未提及导师或外部反馈来源。",
+        "short_quote": "Since then, my research has continued and I have been finding more and more vulnerabilities.",
+        "source": {
+          "title": "Local Privilege Escalation on Dell machines running Windows",
+          "url": "https://billdemirkapi.me/local-privilege-escalation-on-most-dell-computers/",
+          "published": "2019-07-19",
+          "source_type": "personal_blog_writeup",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "bill-deep-self-directed-learning-vba",
+        "date": "2020-09-16",
+        "claim": "Bill Demirkapi 自述为制作恶意 Word 文档作为初始投放载体，专门花数周学习 Visual Basic for Applications（VBA），显示按需自学的学习过程。",
+        "status": "unknown",
+        "growth_signal": "目标驱动的自学：为完成具体攻击链而主动学习新语言/技术，而非系统化课程。属可核验的动手学习行为，非泛泛的热爱叙述。",
+        "short_quote": "Over the past few weeks I've spent some time learning Visual Basic for Applications (VBA)",
+        "source": {
+          "title": "Defeating Macro Document Static Analysis with Pictures of My Cat",
+          "url": "https://billdemirkapi.me/defeating-macro-document-static-analysis-with-pictures-of-my-cat/",
+          "published": "2020-09-16",
+          "source_type": "personal_blog_writeup",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "bill-deep-stable-attack-surface-bloatware",
+        "date": "2020-04-03",
+        "claim": "Bill Demirkapi 自述长期将厂商预装软件（bloatware）视为独特攻击面，并在 HP 机器漏洞研究中延续该选择。",
+        "status": "unknown",
+        "growth_signal": "稳定的攻击面选择与长期聚焦（Dell、HP、Trend Micro、Carbon Black 等端点/OEM 软件连续研究），体现主题重复深耕而非发散；但未说明选择该方向的具体起因或外部引导。",
+        "short_quote": "I always have considered bloatware a unique attack surface",
+        "source": {
+          "title": "Several Critical Vulnerabilities on most HP machines running Windows",
+          "url": "https://billdemirkapi.me/several-critical-vulnerabilities-on-most-hp-machines-running-windows/",
+          "published": "2020-04-03",
+          "source_type": "personal_blog_writeup",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "bill-deep-disclosure-ethics-cyberpatriot",
+        "date": "2019-04-12",
+        "claim": "Bill Demirkapi 自述在发布逆向 CyberPatriot 评分引擎的研究后，收到该比赛主要开发者的邮件请求下架文章，他选择照办。",
+        "status": "unknown",
+        "growth_signal": "外部反馈触发行为调整：来自被研究方的直接沟通导致其撤下已发表内容，构成可核验的披露伦理与社区反馈互动；非天赋/努力叙述。",
+        "short_quote": "a kind email from one of the primary developers for CyberPatriot asking that I take my post down",
+        "source": {
+          "title": "Reversing the CyberPatriot National Competition Scoring Engine",
+          "url": "https://billdemirkapi.me/reversing-the-cyberpatriot-national-competition/",
+          "published": "2019-04-12",
+          "source_type": "personal_blog_writeup",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "bill-deep-high-school-stage-2019",
+        "date": "2019-04-13",
+        "claim": "依据 Bill Demirkapi 自述将大学申请期称作高中生压力最大的阶段之一，推断其在 2019 年 4 月仍为高中生。",
+        "status": "inferred",
+        "growth_signal": "提供其研究产出早期所处人生阶段的间接证据（高中生身份与高难度漏洞研究并存），但属推断而非直接自述，且无导师或系统性培养路径的直接证据。",
+        "source": {
+          "title": "Hacking College Admissions",
+          "url": "https://billdemirkapi.me/hacking-college-admissions/",
+          "published": "2019-04-13",
+          "source_type": "personal_blog_writeup",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "bill-deep-podcast-darknet-diaries",
+        "date": "unknown",
+        "claim": "Bill Demirkapi 是否曾作为 Darknet Diaries 嘉宾出席长访谈。",
+        "status": "unknown",
+        "growth_signal": "维度要求长访谈/播客自述。本次抓取 https://darknetdiaries.com/ 主页与 /episode/ 页（仅 episode 150–179 可见）均未检索到 Demirkapi；WebSearch 未返回可用结果 URL。无法确认嘉宾身份，更无法提取入门/失败/导师叙述。",
+        "source": {
+          "title": "Darknet Diaries episode listing (no Demirkapi match in fetched pages)",
+          "url": "https://darknetdiaries.com/episode/",
+          "published": "unknown",
+          "source_type": "podcast_listing_page",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_795r94xggpkc2fdmk1p8h1gj",
+          "accessed_at": "2026-09-27T08:40:23.014506+00:00",
+          "content_sha256": "1f7e841825dbe44210d63c971d4ddca9c27e27a9ddfe597784a8be765e625466"
+        }
+      },
+      {
+        "id": "bill-deep-podcast-risky-business",
+        "date": "unknown",
+        "claim": "Bill Demirkapi 是否曾作为 Risky Business 嘉宾出席长访谈。",
+        "status": "unknown",
+        "growth_signal": "本次抓取 https://risky.biz/ 首页未检索到 Demirkapi；WebSearch 未返回可用结果 URL。无法确认嘉宾身份，访谈正文未获。",
+        "source": {
+          "title": "Risky Business homepage (no Demirkapi match in fetched page)",
+          "url": "https://risky.biz/",
+          "published": "unknown",
+          "source_type": "podcast_listing_page",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_h5yan63l7in2pr4a5wcpaazc",
+          "accessed_at": "2026-09-27T08:40:23.014500+00:00",
+          "content_sha256": "0a9d8ab54a7407aa15e594a31f6814df49433847a5e8ccc89dfe95e8c3704112"
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 对 Bill Demirkapi 的播客/访谈查询多次未返回可用结果链接，仅模型自述称其在 Darknet Diaries 与 Risky Business 出现过；该自述不构成来源（task.md 规定 WebSearch 仅用于发现线索，不引用搜索结果摘要），与实际 WebFetch 在 darknetdiaries.com、risky.biz 均未检索到其姓名的结果存在张力，故播客嘉宾身份按 unknown 处理。"
+    ],
+    "gaps": [
+      "未抓取到任何长访谈/播客/AMA 正文：Darknet Diaries、Risky Business 的抓取页面均未出现 Bill Demirkapi，无法提取其关于入门、失败、导师、选择或转折的对话式自述。",
+      "About 页与博客预览仅含零散第一人称自述，缺少系统性的成长叙事；本人未在抓取到的一手页面中说明入门契机、导师或同伴关系。",
+      "person_json 列出 Black Hat US/POC 演讲资格，但 task.md 规定演讲页面只能证明演讲事实，不能单独证明成长机制；本次未抓取到演讲 Q&A 或演讲者长访谈正文，故演讲问答维度缺材料。",
+      "未抓取其 X（@BillDemirkapi）账号正文、Reddit AMA、YouTube 长访谈或 Greylock/Bloomberg 等潜在访谈；受工具调用上限约束未能穷尽。",
+      "年龄/年份推断（2019 年为高中生、2026 年 25 岁）为间接证据，缺其本人对教育经历与时间线的直接自述。"
+    ]
+  },
+  "community": {
+    "person": "Bill Demirkapi",
+    "dimension": "社区参与与反馈回路",
+    "identity_check": "人物身份经多源对齐确认：博客 billdemirkapi.me 首页 tagline 自述为独立安全研究员（\"The adventures of an independent security researcher\"）；该博客与 person_json 提供的社交账号 x.com/BillDemirkapi 一致，并在博客首页列出 Mastodon 账号 infosec.exchange/@bill。研究主题（Windows 利用、OEM 预装软件漏洞、UEFI、供应链/云密钥泄露）与 person_json 记录的 primary_focus 一致，未见同名歧义。WebSearch 工具本轮多次返回非真实检索结果（含\"I don't have access to a web search tool\"式综述），故不采用其摘要作为证据；以下 documented 条目均以 WebFetch 实际抓取并核对的博客正文为依据。",
+    "items": [
+      {
+        "id": "bill-community-01",
+        "date": "2019-04-30",
+        "claim": "针对 Dell SupportAssist 远程代码执行漏洞，作者自 2018-10-26 起向 Dell 提交报告，Dell 于 2018-11-22 确认漏洞，随后两次申请延期（原定 2019 Q1，后延至 2019 年 4 月底），最终于 2019-04-18 以官方 advisory DSA-2019-051 公开披露。整个协调披露周期约六个月，作者在博文中以逐日时间线形式记录，语调中性，未表达对延期的不满，仅客观陈述事实。",
+        "status": "documented",
+        "growth_signal": "首次系统化的厂商协调披露实践：作者建立并公开了逐日披露时间线，将'与厂商就修复排期谈判、允许延期'内化为可重复的研究流程，而非一次性事件。这一时间线模板在后续 HP、Big Data 等研究中被反复使用，体现反馈回路从单次协调沉淀为方法。",
+        "short_quote": "Dell is still fixing the vulnerability and has scheduled disclosure for the end of April.",
+        "source": {
+          "title": "Remote Code Execution on most Dell computers",
+          "url": "https://billdemirkapi.me/remote-code-execution-on-most-dell-computers/",
+          "published": "2019-04-30",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_9lbaahlq083c3mv5gic4gnt6",
+          "accessed_at": "2026-09-27T08:36:56.918940+00:00",
+          "content_sha256": "3534fd92c4e685ae4d612960677205802132c07934a5715e3987785fef78529a"
+        }
+      },
+      {
+        "id": "bill-community-02",
+        "date": "2019-04-12",
+        "claim": "作者逆向 CyberPatriot 全国竞赛评分引擎并发布分析后，收到竞赛核心开发者的私下邮件，请求暂缓下架文章以待其更换加密算法。作者同意并在全国赛结束前主动下架，赛后于 2019-04-12 重新发布。此为研究者与竞赛开发者之间非对抗性协作的案例，作者选择延迟而非永久删除发布内容。",
+        "status": "documented",
+        "growth_signal": "社区反馈直接修正了发布时机决策：作者根据利益相关方的请求调整披露节奏，把'避免影响在跑竞赛'纳入考量，形成对披露时机的双向反馈而非单向公开。文中末句\"No doubt CyberPatriot will change how they encrypt/decrypt for next years\"显示作者预期自己的研究会触发对方改进，构成研究→反馈→改进的闭环预期。",
+        "short_quote": "a kind email from one of the primary developers for CyberPatriot asking that I take my post down until they can change their encryption algorithm",
+        "source": {
+          "title": "Reversing the CyberPatriot National Competition Scoring Engine",
+          "url": "https://billdemirkapi.me/reversing-the-cyberpatriot-national-competition/",
+          "published": "2019-04-12",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_iz1eaqlfbi1um3oix2k6wywt",
+          "accessed_at": "2026-09-27T08:36:56.918949+00:00",
+          "content_sha256": "87c0a46743ac8cc8131a3fa44d0ff52754c7719adaca975e1cc82ab280981cb0"
+        }
+      },
+      {
+        "id": "bill-community-03",
+        "date": "2020-04-03",
+        "claim": "在 HP 预装软件漏洞研究中，作者公开致谢资深研究员 Matt Graeber 提供的关键提示（Windows TEMP 目录权限特性），并引用 OpenBugBounty 平台上另一名研究员 TvM 此前报告但五个月仍未修复的 HP open-redirect 漏洞作为攻击链一环。同时记录了与 HP PSIRT 的协调披露时间线（2019-10-05 报告至 2020-03 延期），并在复审补丁后公开质疑 HP 的代码审查流程。",
+        "status": "documented",
+        "growth_signal": "同行网络作为能力放大器：Matt Graeber 的提示直接补全了作者的知识缺口，OpenBugBounty 公开数据库为作者复用既有未修复漏洞提供入口。作者对补丁质量的公开批评（质疑 HP 是否进行代码审查）显示其把'复审厂商补丁、公开发表评估'作为反馈回路的固定环节，而非止步于报告。",
+        "short_quote": "thanks Matt Graeber",
+        "source": {
+          "title": "Several Critical Vulnerabilities on most HP machines running Windows",
+          "url": "https://billdemirkapi.me/several-critical-vulnerabilities-on-most-hp-machines-running-windows/",
+          "published": "2020-04-03",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_375re7cwmmz1y992fyveixhg",
+          "accessed_at": "2026-09-27T08:36:56.918962+00:00",
+          "content_sha256": "8b246c64d84d03ebb6b4b74154fd4057d0a3f1db97ffd727207eca509b856bfa"
+        }
+      },
+      {
+        "id": "bill-community-04",
+        "date": "2020-05-18",
+        "claim": "在 Trend Micro RootkitBuster 研究中，作者致谢 mentor Alex Ionescu 在内核内存分配技术上给予方向指引，并引用 j00ru（Matthew Jurzyk）2010 年 HackInTheBox Magazine 关于 Reserve Objects 的文章作为关键技术来源。该研究未与 Trend Micro 进行协调披露，作者声明\"All research was conducted independently\"。",
+        "status": "documented",
+        "growth_signal": "持续的导师与文献输入：Alex Ionescu 作为 named mentor 在技术方向上提供指引，j00ru 的历史文章被作为方法学基础引用，显示作者能力成长依托于可识别的导师关系与既有公开研究积累，而非孤立产出。引用 2010 年旧文也表明其有回溯阅读经典技术文献的习惯。",
+        "short_quote": "Fortunately a mentor of mine, Alex Ionescu, was able to point me in the right direction",
+        "source": {
+          "title": "How to use Trend Micro's Rootkit Remover to Install a Rootkit",
+          "url": "https://billdemirkapi.me/how-to-use-trend-micro-rootkit-remover-to-install-a-rootkit/",
+          "published": "2020-05-18",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_aiy6pcoo58pk7aymjhkass4w",
+          "accessed_at": "2026-09-27T08:36:56.918982+00:00",
+          "content_sha256": "2e98552c98c10ee1c315aacf820d5345d7f8d20fd089edd97655c59f8fcc70b6"
+        }
+      },
+      {
+        "id": "bill-community-05",
+        "date": "2021-11-25",
+        "claim": "作者与研究员 @diversenok_zero 在同日（2021-11-25）独立公开了同一项进程克隆读内存技术。作者在博文中说明其早在 2021-06-19 即通过 GitHub gist 发布该技术描述句子的 SHA256 哈希以预签日期，作为优先权证据；在 diversenok 公开核心理论后，作者决定一并公开自己的完整研究。作者解释延迟公开的原因是仍在与受影响厂商进行协调披露。",
+        "status": "documented",
+        "growth_signal": "在同行独立重复发现的情况下建立了可核验的优先权机制（公开预签哈希），并把'他人公开触发自己解禁发布'作为披露时机的反馈信号。这显示作者已形成一套处理同行竞争与协调披露冲突的稳定实践，而非临时应对。",
+        "short_quote": "I had been waiting to publish this research",
+        "source": {
+          "title": "Abusing Windows' Implementation of Fork() for Stealthy Memory Operations",
+          "url": "https://billdemirkapi.me/abusing-windows-implementation-of-fork-for-stealthy-memory-operations/",
+          "published": "2021-11-25",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_vbsqwlvd6yjgdto7qlmxnzuk",
+          "accessed_at": "2026-09-27T08:36:56.918978+00:00",
+          "content_sha256": "75ab35b72a9ac30b13b37ac87743bff52dc6984db2d57947158cbe4bff01d8be"
+        }
+      },
+      {
+        "id": "bill-community-06",
+        "date": "2024-09-27",
+        "claim": "在云密钥大规模泄露研究中，作者与内布拉斯加州信息安全官（State Information Security Officer）协调轮换泄露凭据，与多个合作伙伴直接报告泄露的密钥材料，并向 AWS 报告泄露密钥。作者公开点名 AWS 处理不力，称其约 32% 的已报告密钥在 2-3 个月后仍未撤销且被其欺诈团队遗忘，并在文末致谢配合修复的厂商。作者声明该研究独立于其雇主进行。",
+        "status": "documented",
+        "growth_signal": "反馈回路从单一厂商扩展到多厂商与政府机构协同：作者主动与州政府官员、多个云合作伙伴建立报告通道，并把对厂商修复表现的公开问责（点名 AWS）纳入研究输出。致谢配合厂商的表述显示其维护正向合作关系而非仅批评，构成可持续的披露生态。",
+        "short_quote": "~32% of the keys I reported to you over 2-3 months ago are unrevoked and were forgotten about by your fraud team",
+        "source": {
+          "title": "Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale",
+          "url": "https://billdemirkapi.me/leveraging-big-data-for-vulnerability-discovery-at-scale/",
+          "published": "2024-09-27",
+          "source_type": "personal_blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_6auiwp1fr6dngtfesk441ni5",
+          "accessed_at": "2026-09-27T08:36:56.918956+00:00",
+          "content_sha256": "30c394260366d87bdc6c35998f9bed04982d315cce7b9428d88c61ac67274f82"
+        }
+      },
+      {
+        "id": "bill-community-07",
+        "date": "2019",
+        "claim": "根据外部资料转述，作者曾在 DEF CON 27（2019）就 Dell SupportAssist 研究发表演讲。但该信息来源于 WebSearch 返回的模型综述而非真实检索结果，且作者本人的 Dell RCE 博文正文未提及任何会议演讲，故仅列为 reported 并标注核对缺口。",
+        "status": "unknown",
+        "growth_signal": "若该演讲属实，则构成将博客研究转化为面向社区公开输出的渠道，属于社区参与维度的关键证据；但当前证据等级不足以确认。",
+        "source": {
+          "title": "WebSearch 综述（非真实检索结果，不可信）",
+          "url": "https://www.google.com/search?q=Bill+Demirkapi+DEF+CON+27+Dell+SupportAssist",
+          "published": "2019",
+          "source_type": "search_result_summary",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 工具在本轮多次调用中返回的不是真实检索结果，而是模型生成的综述（部分响应甚至声明'I don't have access to a web search tool'）。其中关于 Black Hat USA 2024 演讲标题的综述（称其为\"Secrets and Shadows: Attacking Cloud Infrastructure from the Inside Out\"，涉及 hypervisor 逃逸、跨 VM 漏洞等）与作者本人 2024-09-27 博文主题（云服务默认配置导致的大规模密钥泄露，基于 big data 扫描）明显不符，疑为模型幻觉。该综述未被采用为证据。",
+      "person_json 中 selected_conference_evidence 字段记录\"Black Hat US / POC\"作为其会议证据，但本轮无法通过一手抓取核实具体演讲场次与日期（blackhat.com/us-24/briefings/schedule/ 返回 HTTP 403，WebSearch 综述不可信）。该字段为编排器输入，非本节点一手核验结果，存在未闭合的核对缺口。"
+    ],
+    "gaps": [
+      "DEF CON 27（2019）Dell SupportAssist 演讲：未能通过一手抓取核实。作者博文未提会议；WebSearch 综述不可信；未在预算内调用 DEF CON 媒体服务器核对 slides。需后续节点直接抓取 media.defcon.org 或 DEF CON YouTube 频道核实。",
+      "Black Hat 演讲事实：person_json 记录\"Black Hat US\"为会议证据，但具体年份、场次、标题与日期均未一手确认。blackhat.com/us-24/briefings/schedule/ 返回 403，未能核对 2024 场次是否确有其人演讲。",
+      "POC 会议参与：person_json 的 selected_conference_evidence 提及 POC，本轮无任何一手或可信二手来源佐证，资料缺口。",
+      "GitHub gist（2021-06-19 fork 优先权预签哈希）：博文转述其存在，但未直接抓取 gist 原始 URL 核对哈希内容与时间戳，故优先权机制本身为 reported 而非一手核验的 documented。",
+      "社交媒体互动深度：博客首页仅列出 Twitter(@BillDemirkapi) 与 Mastodon(@bill) 账号，但本轮未抓取这些社交账号本体，无法评估其在社交平台上与同行的具体互动、反馈频率或同伴网络密度。",
+      "邮件列表、issue tracker、开源项目维护：博客首页抓取明确显示无此类公开痕迹；此为'已确认不存在'，列为缺口以示该维度证据缺失而非未知。",
+      "CTF 参与与协作：本轮无任何一手证据表明作者以选手身份参与或撰写 CTF writeup；CyberPatriot 案例为逆向竞赛评分引擎而非参赛。此为资料缺口。"
+    ]
+  },
+  "external": {
+    "person": "Bill Demirkapi",
+    "dimension": "外部视角",
+    "identity_check": "研究对象为 Bill Demirkapi，独立安全研究员，主域 billdemirkapi.me，社交账号 @BillDemirkapi（X）与 @bill@infosec.exchange（Mastodon），研究方向集中于 Windows/UEFI 内核驱动、反作弊、供应链与预装软件漏洞、云与大数据漏洞挖掘。同名歧义主要来自英文常用词 bill，搜索结果被大量词义条目稀释；本节点以本人博客一手内容与公开作品列表确认身份，未取得可抓取的第三方权威媒体正文做二次交叉。person_json 提供的 selected_conference_evidence 为 Black Hat US / POC，但 Black Hat 站点对自动抓取返回 403，会议主持方对其工作的具体评价未能取得正文。",
+    "items": [
+      {
+        "id": "demirkapi-ext-001",
+        "date": "2019-04-30",
+        "claim": "Bill Demirkapi 披露 Dell SupportAssist 远程代码执行漏洞（DSA-2019-051），影响多数 Dell 消费机型。该研究由其购入 Dell G3 15 后对 Dell 网站 Detect PC 功能的好奇触发，采用 .NET 反编译、本地 REST API 分析、DNS 劫持、HTTP 中间人等方式构造完整利用链，并向 Dell 进行约六个月负责任披露（2018-10-26 首报，2019-04-18 公开）。",
+        "status": "documented",
+        "growth_signal": "以日常使用场景中的好奇心为研究起点，而非既有资历；通过完整披露时间线展示其在接触厂商、协调修复节奏上的练习，并在面对文件 URL 白名单时记录了几乎放弃到换用 HTTP MITM 思路的真实转折，属于可核验的解题路径与反馈调整，而非天赋式叙述。",
+        "short_quote": "I almost gave up",
+        "source": {
+          "title": "Remote Code Execution on most Dell computers",
+          "url": "https://billdemirkapi.me/remote-code-execution-on-most-dell-computers/",
+          "published": "2019-04-30",
+          "source_type": "本人博客 writeup（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_un6o7no76boyo6cm3ygip5tp",
+          "accessed_at": "2026-09-27T08:43:47.814618+00:00",
+          "content_sha256": "3fb22ae4e454d5a306be2815e6655fc8f0d2c59bc0089f5017863c70a57d5b39"
+        }
+      },
+      {
+        "id": "demirkapi-ext-002",
+        "date": "2020-05-18",
+        "claim": "Bill Demirkapi 逆向 Trend Micro RootkitBuster 所用 tmcomm.sys 内核驱动，映射多级 IOCTL 分发表，发现任意内核函数调用、任意内核读写与卸载例程滥用三类原语，并指出该驱动在被 Driver Verifier 监控时才使用 NonPagedPoolNx、平时绕过测试环境，尽管持有 WHQL 认证。其将利用链归纳为分配可控 NonPagedPool、写入 shellcode、经卸载例程或分发表执行三步。",
+        "status": "documented",
+        "growth_signal": "在单篇研究中系统化产出 IOCTL 分发表测绘方法与从原语到 rootkit 安装链的工程化步骤，并主动界定研究边界（指出因需 Administrator 权限、industry 多不视为漏洞），体现对安全边界争议的判断与自我定位，而非单纯追求影响数。",
+        "short_quote": "Trend Micro decided to ignore their user's security and designed their driver to cheat any testing or debugging environment.",
+        "source": {
+          "title": "How to use Trend Micro's Rootkit Remover to Install a Rootkit",
+          "url": "https://billdemirkapi.me/how-to-use-trend-micro-rootkit-remover-to-install-a-rootkit/",
+          "published": "2020-05-18",
+          "source_type": "本人博客 writeup（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_yb7n6xwewzv75fto0vajhc54",
+          "accessed_at": "2026-09-27T08:43:47.814600+00:00",
+          "content_sha256": "958fad51ee8a32fa884b4c63adcb6985f5c5ba101b9d75cb68929589d15358c9"
+        }
+      },
+      {
+        "id": "demirkapi-ext-003",
+        "date": "2019-02-14",
+        "claim": "自 2019 年 2 月发布 Reading Physical Memory using Carbon Black's Endpoint driver 起，Bill Demirkapi 在个人博客持续发布面向 Windows 内核/驱动、反作弊、预装软件与供应链的漏洞研究，至 2024 年共 16 篇，主题覆盖 Dell、HP、Trend Micro、Carbon Black、Epic Games、CyberPatriot、CVE-2021-40444 等，形成跨厂商、跨攻击面的连贯作品线。",
+        "status": "documented",
+        "growth_signal": "作品时间跨度与主题分布显示其在同类内核驱动 IOCTL 漏洞、预装软件攻击面与代码执行技术上反复练习并迁移方法，而非一次性成果；这种跨厂商复用同一套逆向—分发—原语构建流程是可观察的方法积累，区别于奖项或品牌背书式的能力叙事。",
+        "source": {
+          "title": "Articles & Research by Bill Demirkapi（博客首页作品索引）",
+          "url": "https://billdemirkapi.me/",
+          "published": "2019-02-14",
+          "source_type": "本人博客作品索引（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_b0r4gv4nci0y0gtuhssohf1k",
+          "accessed_at": "2026-09-27T08:43:47.814498+00:00",
+          "content_sha256": "d777eb626647ecfe9423aeefc321b9f9a9e73c1ceaebe949450420e98c746181"
+        }
+      },
+      {
+        "id": "demirkapi-ext-004",
+        "date": "2024-09-27",
+        "claim": "在 2024 年 Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale 一文中，Bill Demirkapi 声明该研究独立于其雇主进行，并要求被引用时以 Independent Security Researcher 称呼，表明其时有雇主关系但刻意将公开研究与雇主切割。",
+        "status": "documented",
+        "growth_signal": "明确要求以独立研究员身份被引用，并主动声明研究与雇主分离，反映其维护公开研究独立性的自我定位与对外部评价（被如何称呼）的关注；这是可核验的自我陈述，可作为其职业身份边界的证据，但雇主具体名称未在该页披露。",
+        "short_quote": "When citing, please call me an Independent Security Researcher.",
+        "source": {
+          "title": "Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale",
+          "url": "https://billdemirkapi.me/leveraging-big-data-for-vulnerability-discovery-at-scale/",
+          "published": "2024-09-27",
+          "source_type": "本人博客 writeup（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_6pbsxujnavasmu6xukdkh49w",
+          "accessed_at": "2026-09-27T08:43:47.814835+00:00",
+          "content_sha256": "b852e0ae7d6c53bb90a887be2046e9f30e555e0ccd8a97a1ea8813aa57cf173f"
+        }
+      },
+      {
+        "id": "demirkapi-ext-005",
+        "date": "2026-09-27",
+        "claim": "person_json 将 Bill Demirkapi 的 selected_conference_evidence 记为 Black Hat US / POC，qualification 记为直接漏洞发现与利用。本次节点未能抓取到 Black Hat 或 POC 官方议程或主持人评价的正文（blackhat.com 对自动抓取返回 403），因此会议主持方对其工作的具体评价属于已申报但未由一手来源正文证实。",
+        "status": "unknown",
+        "growth_signal": "会议入选本身可作为其研究被业界议程接纳的间接信号，但根据维度要求，speaker 页面只能证明演讲事实、不能单独证明成长机制；在本节点未取得可核验的主持方评价正文前，应将其降级为待证线索，避免以会议品牌直接充当能力来源。",
+        "source": {
+          "title": "person_json.json（节点输入的入选会议证据字段）",
+          "url": "inputs/person_json.json",
+          "published": "2026-09-27",
+          "source_type": "节点输入元数据（二手 lead）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "demirkapi-ext-006",
+        "date": "2026-09-27",
+        "claim": "据训练语料转述，Wired、Ars Technica、The Register 等媒体曾报道其 Dell SupportAssist 研究，并常以 teenager、RPI 学生等标签描述其早期身份；本节点多次尝试直接抓取这些媒体页面与 The Register 的若干候选 URL，均因站点策略屏蔽或 URL 404 未取得正文，故上述媒体评价与身份细节未能交叉核验。",
+        "status": "inferred",
+        "growth_signal": "媒体普遍以年龄/学生身份作为叙事框架，可能引导将其成长归因于天赋而非可观察的练习与方法；因正文未取得，本节点不据此下结论，仅记录其为常见的二手叙事路径，并标注为未核验的推断。",
+        "source": {
+          "title": "媒体覆盖线索（Wired / Ars Technica / The Register，正文未取得）",
+          "url": "https://www.theregister.com/",
+          "published": "2026-09-27",
+          "source_type": "未能抓取正文的二手媒体线索",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      }
+    ],
+    "contradictions": [
+      "About 页自称 25 岁安全研究员且博客为独立研究，而大数据文章免责声明又承认研究独立于其 employer 进行，二者并不冲突，但共同表明其存在未具名的雇主关系；外部输入 person_json 的 qualification 为直接漏洞发现与利用、selected_conference_evidence 为 Black Hat US / POC，与本人博客未出现任何会议名称自述之间存在来源层级的差异，需以一手博客为准。",
+      "训练语料转述 Bill Demirkapi 为 RPI 学生、teenager，但本人博客一手正文（含 About 页）未出现就读院校与年龄数字，二者来源等级不同；在未抓取到媒体正文前，年龄与学生身份只能视为未核验转述，不能与一手材料并列采信。"
+    ],
+    "gaps": [
+      "未取得任何可抓取的同事、团队或合作者对其工作的评价正文；GitHub 个人页与仓库页均 404，无法据代码协作网络确认同伴关系。",
+      "未取得 Black Hat 或 POC 官方议程/主持人对其研究的具体评价正文（blackhat.com 返回 403），会议主持方维度证据缺失。",
+      "未取得 Wired、Ars Technica、The Register 关于其 Dell/HP/Trend Micro 研究的正文；多次候选 URL 猜测失败、站点策略屏蔽，权威媒体评价无法与作品交叉验证。",
+      "X/Twitter（402）、LinkedIn（999）需认证或不可抓取，未取得其职业履历、雇主名称与同行互动记录。",
+      "Bing 与 WebSearch 在本环境反复降级为通用 bill 词义结果，未返回关于本人的真实条目，外部二手来源检索能力受限。",
+      "未取得其导师或正式教学/指导关系的可核验证据；CyberPatriot 一文曾被官方要求下架以更换加密算法，但未取得 CyberPatriot 官方对其能力或行为的评价正文。"
+    ]
+  },
+  "decisions": {
+    "person": "Bill Demirkapi",
+    "dimension": "关键决策与转折",
+    "identity_check": "姓名一手吻合 person_json：博客首页作者 Bill Demirkapi，关联 X handle @BillDemirkapi 与 Mastodon infosec.exchange/@bill。未见同名歧义一手反证。教育背景在二手搜索摘要中存在 RIT 与 RPI 两说冲突，均未一手核实，记入 contradictions/gaps。",
+    "items": [
+      {
+        "id": "bill-decisions-01",
+        "date": "2019-04-30",
+        "claim": "Bill Demirkapi 选择 OEM 预装软件（Dell SupportAssist）作为攻击面，原因是一次个人消费场景：购入 Dell G3 15 后发现 Dell 通过网页\"Detect PC\"自称能远程更新驱动，对 Dell 经网页向本地 8884 端口发起请求的能力产生怀疑，进而安装 SupportAssist 逆向。这是其 OEM bloatware 研究方向的起点。",
+        "status": "documented",
+        "growth_signal": "方向选择由可核验的消费场景触发而非抽象兴趣；将 Web 漏洞分析、.NET 逆向、ARP/DNS 欺骗组合为完整利用链，体现跨领域方法整合而非单一技术深耕。",
+        "short_quote": "It was very suspicious that Dell claimed to be able to update my drivers through a website.",
+        "source": {
+          "title": "Remote Code Execution on most Dell computers",
+          "url": "https://billdemirkapi.me/remote-code-execution-on-most-dell-computers/",
+          "published": "2019-04-30",
+          "source_type": "本人博客 writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_7ptwp3ik440wwidc6yairrvn",
+          "accessed_at": "2026-09-27T08:48:56.683393+00:00",
+          "content_sha256": "e8eba11ccb342807b26a5e08b6df73b752397d1f0222f3a0e9e8e92acc4701d6"
+        }
+      },
+      {
+        "id": "bill-decisions-02",
+        "date": "2020-04-03",
+        "claim": "Demirkapi 将 OEM bloatware 研究从 Dell 扩展到 HP，明确以先前 Dell RCE/LPE 工作为基础延续。披露反馈构成方法反馈回路：Dell 单漏洞约6个月才出补丁，HP 首轮补丁声称修复但实际仅4/10完全修补、3个LPE未修，且补丁引入新漏洞（硬编码临时目录改为客户端输入后服务转而信任攻击者可控路径）。",
+        "status": "documented",
+        "growth_signal": "同一目标族（OEM 预装软件）跨厂商重复练习；把披露后厂商补丁质量本身纳入下一轮研究输入，形成\"补丁审计→发现补丁未修或更糟\"的反馈驱动迭代。",
+        "short_quote": "HP had not only left some vulnerabilities unpatched but in doing so ended up making some code worse than it was.",
+        "source": {
+          "title": "Several Critical Vulnerabilities on most HP machines running Windows",
+          "url": "https://billdemirkapi.me/several-critical-vulnerabilities-on-most-hp-machines-running-windows/",
+          "published": "2020-04-03",
+          "source_type": "本人博客 writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_loaif4v9aiv6zj1jltadnbxm",
+          "accessed_at": "2026-09-27T08:48:56.683456+00:00",
+          "content_sha256": "73e32de87a872280eb5793c4baa02954162445ea01a8d6c730df3ec218fb11b1"
+        }
+      },
+      {
+        "id": "bill-decisions-03",
+        "date": "2020-05-18",
+        "claim": "Demirkapi 将研究对象由用户态 .NET OEM 软件转向内核态驱动：研究 rootkit 检测方法时选用 Trend Micro RootkitBuster，逆向 tmcomm.sys 驱动的 IOCTL 分发表，获得任意内核函数调用、任意内核读写、任意代码执行原语，并据称通过 APC Reserve Object 分配可控内核内存。文章文首声明全部研究独立进行，并明确雇主不在此文指明、不是 Trend Micro。",
+        "status": "documented",
+        "growth_signal": "技术栈从用户态 .NET 逆向扩展到内核驱动 IOCTL 逆向与内核利用原语组合；该文声明存在雇主但未公开指明，是研究者的职业身份节点，但雇主身份本身未一手证实。",
+        "short_quote": "All research was conducted independently.",
+        "source": {
+          "title": "How to use Trend Micro's Rootkit Remover to Install a Rootkit",
+          "url": "https://billdemirkapi.me/how-to-use-trend-micro-rootkit-remover-to-install-a-rootkit/",
+          "published": "2020-05-18",
+          "source_type": "本人博客 writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_xnt7zg2a2vzz301bbhtz4ko5",
+          "accessed_at": "2026-09-27T08:48:56.683428+00:00",
+          "content_sha256": "31282169a1d6bd563194973d3e27b6ebff5bfb14cfc5f372cd8173f969a3cd26"
+        }
+      },
+      {
+        "id": "bill-decisions-04",
+        "date": "2021",
+        "claim": "据其 2024 年文章自述，Demirkapi 自 2021 年起转向以漏洞类（bug class）驱动而非具体厂商目标驱动的大规模漏洞发现方向，受 Matt Bryant 2015 年博客《Fishing the AWS IP Pool for Dangling Domains》启发，称该文\"pivotal to our understanding of the bug class\"，并据此形成\"security at scale mindset\"。初始在本地扫描，发现\"incredibly impractical\"，促使转向 serverless 架构。",
+        "status": "documented",
+        "growth_signal": "方法转型由前辈一手 writeup 触发（不是抽象热爱），并以\"本地扫描不切实际\"的工程反馈为转折点转向 AWS Lambda serverless 并行扫描；从单点目标逆向转向漏洞类驱动的规模化发现。",
+        "short_quote": "incredibly impractical",
+        "source": {
+          "title": "Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale",
+          "url": "https://billdemirkapi.me/leveraging-big-data-for-vulnerability-discovery-at-scale/",
+          "published": "2024-09-27",
+          "source_type": "本人博客 writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_855oj8gsbf3gxo7jn9g5ewhm",
+          "accessed_at": "2026-09-27T08:48:56.683400+00:00",
+          "content_sha256": "3d957715360a8c94a8f727264638242e416e174e8c0b292a1d68724157f7a5a5"
+        }
+      },
+      {
+        "id": "bill-decisions-05",
+        "date": "2021",
+        "claim": "在大数据漏洞发现工作中，Demirkapi 建设自有工具基础设施：用 AWS Lambda 搭建并行扫描，C++ 扫描器采用 Intel hyperscan 库做正则匹配，相对 C++ 原生 <regex> 约提速 10 倍；为绕过 VirusTotal Retrohunt 单任务 10000 样本上限，按时间范围递归拆分任务；并构建通过发布 GitHub Gist 自动触发密钥撤销、进而发现被暂停账号仍可经 web UI（用 Selenium 自动化）发布 Gist 的自动化管道。开始时（2021）既检测又验证密钥的工具据其称尚未出现。",
+        "status": "documented",
+        "growth_signal": "工具建设与自动化管道构建是核心成长机制：面对平台限制逐项工程化绕过（hyperscan 提速、Retrohunt 递归拆分、Gist 自动撤销、Selenium 绕过 shadow ban），而非依赖现成工具。",
+        "short_quote": "had not yet been created",
+        "source": {
+          "title": "Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale",
+          "url": "https://billdemirkapi.me/leveraging-big-data-for-vulnerability-discovery-at-scale/",
+          "published": "2024-09-27",
+          "source_type": "本人博客 writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_855oj8gsbf3gxo7jn9g5ewhm",
+          "accessed_at": "2026-09-27T08:48:56.683400+00:00",
+          "content_sha256": "3d957715360a8c94a8f727264638242e416e174e8c0b292a1d68724157f7a5a5"
+        }
+      },
+      {
+        "id": "bill-decisions-06",
+        "date": "2024-09-27",
+        "claim": "经过约三年研究，Demirkapi 形成以平台设计激励为核心的方法论论点：\"When it's easy to hardcode secrets, developers will hardcode secrets.\"，主张平台设计直接决定漏洞能否存在，并以 AWS（约32%已报告密钥4个月未撤销，因客户未回应而自动结案）与 GCP（默认强约束使硬编码更不便）对比支撑。研究独立于雇主进行，要求被引用为 Independent Security Researcher。",
+        "status": "documented",
+        "growth_signal": "从具体漏洞发现提炼到平台设计/激励机制的方法论化；这是 2021 转型的长期产物，体现由技术执行层向设计批判层的认知迁移。",
+        "short_quote": "When it's easy to hardcode secrets, developers will hardcode secrets.",
+        "source": {
+          "title": "Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale",
+          "url": "https://billdemirkapi.me/leveraging-big-data-for-vulnerability-discovery-at-scale/",
+          "published": "2024-09-27",
+          "source_type": "本人博客 writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_855oj8gsbf3gxo7jn9g5ewhm",
+          "accessed_at": "2026-09-27T08:48:56.683400+00:00",
+          "content_sha256": "3d957715360a8c94a8f727264638242e416e174e8c0b292a1d68724157f7a5a5"
+        }
+      }
+    ],
+    "contradictions": [
+      "教育背景：二手搜索摘要一处称 RIT（Rochester Institute of Technology，计算安全专业），另一处称 RPI（Rensselaer Polytechnic Institute）。两者均为一手未核实，且与 person_json 无字段佐证，存在冲突。",
+      "person_json 列选会议证据 Black Hat US / POC，但 blackhat.com 官方议程页 WebFetch 返回 403，未一手核实演讲事实；二手搜索结果正文被重复 playlist 注入污染，不可作为证据。"
+    ],
+    "gaps": [
+      "Black Hat US / POC 演讲事实未一手核实（blackhat.com 议程页 403，POC 议程未检索）。",
+      "雇主身份：2020-05 起博客声明有雇主但始终未公开指明，无法确认 2020-05 至 2024-09 间雇主是否变化及是否构成职业转折。",
+      "GitHub PoC 仓库：猜测用户名 BillDemirkapi / bdemirkapi 均 404；Dell 文中提及 GitHub PoC 但未独立抓取其代码发布习惯。",
+      "UEFI/BIOS/bootkit 专项：person_json primary_focus 为 Windows/UEFI/供应链，但首页 16 篇文章均为 Windows 用户态/内核/云主题，未见 UEFI 专项一手 writeup；二手搜索摘要提及 UEFI/bootkit 但未一手证实，存在 primary_focus 与一手证据的缺口。",
+      "2020-05（内核驱动）→ 2021（云大数据）的方法转型触发动因除\"本地扫描不切实际\"工程反馈外，缺更早转折动因的一手记录。",
+      "导师或固定研究同伴：一手文章均声明独立研究，未见可核验的导师/团队关系；Matt Bryant 为前辈 writeup 影响而非合作关系，DareShark 为方法借鉴对象。"
+    ]
+  },
+  "timeline": {
+    "person": "Bill Demirkapi",
+    "dimension": "可核验时间线",
+    "identity_check": "GitHub 用户 D4stiny、个人博客 billdemirkapi.me、X 账号 @BillDemirkapi 在多个页面相互链接，指向同一人 Bill Demirkapi。姓氏罕见，未见显著同名歧义。一手来源（本人博客）与一手代码仓库为身份锚点；高中、大学、会议演讲等情节仅由搜索摘要提及，未经一手页面核验，已在 gaps 中标注。",
+    "items": [
+      {
+        "id": "bill-timeline-cyberpatriot-2015-2018",
+        "date": "2015",
+        "claim": "Bill Demirkapi 自述参加 CyberPatriot 网络防御竞赛，编号 VIII 至 X，对应 2015-2018 赛季；他在 2019 年复盘 CyberPatriot X (2017-2018) 评分引擎并逆向其加密算法。",
+        "status": "documented",
+        "growth_signal": "通过持续数年参加同结构竞赛获取重复练习与逆向经验；从参赛者转为对赛事评分系统本身做安全分析，体现出由使用工具到分析工具的路径转向。",
+        "short_quote": "The author competed in CyberPatriot from 2015–2018 (CyberPatriot VIII through X).",
+        "source": {
+          "title": "Reversing the CyberPatriot National Competition Scoring Engine",
+          "url": "https://billdemirkapi.me/reversing-the-cyberpatriot-national-competition/",
+          "published": "2019-04-12",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_mp830ytp4b3ltj7aifoqokdz",
+          "accessed_at": "2026-09-27T08:47:52.540419+00:00",
+          "content_sha256": "f70520aa91a320f306b3f67c9a8457eb4376bc84c7b98a34661abe666ad6f952"
+        }
+      },
+      {
+        "id": "bill-timeline-carbon-black-2018-09",
+        "date": "2018-09",
+        "claim": "Dell SupportAssist 远程代码执行研究中，作者自述于 2018 年 9 月购入 Dell 笔记本，在安装驱动过程中发现可读取物理内存的 Carbon Black Endpoint 驱动漏洞。",
+        "status": "unknown",
+        "growth_signal": "以个人设备日常安装场景为切入点开展漏洞研究，显示出从本地环境捕获安全问题的工作习惯；漏洞发现与首次公开 writeup（2019-02-14）之间相隔约半年，存在负责任披露延迟。",
+        "short_quote": "Back in September, I was in the market for a new laptop because my 7-year-old Macbook Pro just wasn't cutting it anymore.",
+        "source": {
+          "title": "Reading Physical Memory using Carbon Black's Endpoint driver",
+          "url": "https://billdemirkapi.me/reading-physical-memory-using-carbon-black/",
+          "published": "2019-02-14",
+          "source_type": "blog writeup (first-person)",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "bill-timeline-dell-rce-disclosure-2018-2019",
+        "date": "2018-10-26",
+        "claim": "Dell SupportAssist 远程代码执行：作者自述 2018-10-26 向 Dell 提交初稿，Dell 于 2018-10-29 回复、2018-11-22 确认，原定 Q1 2019 修复后多次延期，最终于 2019-04-18 以 advisory 公开披露，公开 writeup 于 2019-04-30 发布。",
+        "status": "documented",
+        "growth_signal": "完整的负责任披露流程（报告-确认-跟踪-公开）显示出披露节奏管理能力；披露日期在厂商多次延期后由研究者设定边界，体现对披露时机的主动控制而非被动等待。",
+        "short_quote": "10/26/2018 - Initial write up sent to Dell.",
+        "source": {
+          "title": "Remote Code Execution on most Dell computers",
+          "url": "https://billdemirkapi.me/remote-code-execution-on-most-dell-computers/",
+          "published": "2019-04-30",
+          "source_type": "blog writeup (first-person, with disclosure timeline)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dj7uq0lzvnzp62kk8b2qrqd1",
+          "accessed_at": "2026-09-27T08:47:52.540349+00:00",
+          "content_sha256": "d40feb90a47814d84f54aa5b78a80ff796a826188fbbfd7e2abbf6cef9b9c123"
+        }
+      },
+      {
+        "id": "bill-timeline-college-admissions-2019",
+        "date": "2019-01-03",
+        "claim": "WPI/TargetX 招生门户漏洞：作者自述于 2019-01-03 报告漏洞，经多轮厂商与学校沟通未果后于 2019-04-13 公开 writeup；文中自述为 '17-year-old high school senior'，正处于该年大学申请流程。",
+        "status": "documented",
+        "growth_signal": "披露受阻后的反馈机制：作者在厂商长期沉默后以 CC 上级、设定发布期限的方式施加压力；该次经历可直接观察到研究者在披露博弈中的策略调整与外部联系资源使用。",
+        "short_quote": "I'm a 17-year-old high school senior that has an extreme interest in the information security field and was part of the college admissions process this year.",
+        "source": {
+          "title": "Hacking College Admissions",
+          "url": "https://billdemirkapi.me/hacking-college-admissions/",
+          "published": "2019-04-13",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_0ibehfidwmc2wrluki2r5cpa",
+          "accessed_at": "2026-09-27T08:47:52.540364+00:00",
+          "content_sha256": "a891fb1bdf5083f846d7720683651625ffe8c2bd469e64f1ad3e67fbc1654695"
+        }
+      },
+      {
+        "id": "bill-timeline-hp-psirt-2019-2020",
+        "date": "2019-10-05",
+        "claim": "HP 多个高危漏洞：作者自述 2019-10-05 向 HP PSIRT 报告，2019-12-19 HP 声称已修复但作者复测发现仍未修补，2020-01-01 提交更新报告，patch 多次延期（受 COVID-19 影响），writeup 于 2020-04-03 发布。",
+        "status": "documented",
+        "growth_signal": "对厂商 patch 完整性的独立复核与反馈：作者在 HP 声称修复后重新测试并提交补充报告，显示 'reported → vendor claims fixed → re-test fails → re-report' 的迭代验证习惯；致谢 Matt Graeber，提示存在可咨询的同伴网络。",
+        "short_quote": "01/01/2020 - Updated report of unpatched vulnerabilities sent to HP.",
+        "source": {
+          "title": "Several Critical Vulnerabilities on most HP machines running Windows",
+          "url": "https://billdemirkapi.me/several-critical-vulnerabilities-on-most-hp-machines-running-windows/",
+          "published": "2020-04-03",
+          "source_type": "blog writeup (first-person, with disclosure timeline)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ux3nkhgxompy9qnnwvem224i",
+          "accessed_at": "2026-09-27T08:47:52.540391+00:00",
+          "content_sha256": "6ba87a66b20c670c7c661cb84b81fe70a347daa7e97108d665dd6cc815e6a811"
+        }
+      },
+      {
+        "id": "bill-timeline-trend-micro-mentor-2020",
+        "date": "2020-05-18",
+        "claim": "Trend Micro Rootkit Buster 被武器化为安装 rootkit 的研究：writeup 于 2020-05-18 发布，文中提及 'a mentor of mine, Alex Ionescu'。",
+        "status": "documented",
+        "growth_signal": "导师关系可核验：Alex Ionescu 作为 named mentor 出现在技术 writeup 中，提示作者在 Windows 内核/底层方向上存在明确的外部指导来源而非纯自学。",
+        "short_quote": "a mentor of mine, Alex Ionescu",
+        "source": {
+          "title": "How to use Trend Micro's Rootkit Remover to Install a Rootkit",
+          "url": "https://billdemirkapi.me/how-to-use-trend-micro-rootkit-remover-to-install-a-rootkit/",
+          "published": "2020-05-18",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_tez6fsliclh0q8jwocmat5ig",
+          "accessed_at": "2026-09-27T08:47:52.540370+00:00",
+          "content_sha256": "9de778e5d96c9e6c6f384933924df414ee9896e1fcfad2d14563e965babd7b53"
+        }
+      },
+      {
+        "id": "bill-timeline-eop-part1-2022",
+        "date": "2022-02-14",
+        "claim": "Exception Oriented Programming Part 1 writeup 于 2022-02-14 发布，作者追溯其最初相关 gist 为 2021-02-03，即该研究方向约于 2021 年初开始。",
+        "status": "documented",
+        "growth_signal": "工具建设与公开发表习惯：作者同步发布 GitHub 仓库 ExceptionOrientedProgramming 提供 PoC 与工具代码，writeup 与可复现代码配套，体现出 '研究→工具→发布' 的产出闭环。",
+        "short_quote": "Exception Oriented Programming is the theory of chaining together instructions present in legitimate code and 'stepping over' these instructions one-by-one using a single step exception",
+        "source": {
+          "title": "Abusing Exceptions for Code Execution, Part 1",
+          "url": "https://billdemirkapi.me/exception-oriented-programming-abusing-exceptions-for-code-execution-part-1/",
+          "published": "2022-02-14",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_zei5f5ri81dxna4mf0kgt1wt",
+          "accessed_at": "2026-09-27T08:47:52.540406+00:00",
+          "content_sha256": "5803f4f10226c8694deaa00e87c71e5af46c23d885faca49cd8574210b952bee"
+        }
+      },
+      {
+        "id": "bill-timeline-microsoft-hire-2023",
+        "date": "2023-01-30",
+        "claim": "Exception Oriented Programming Part 2 于 2023-01-30 发布，作者自述 'Microsoft hired me following part 1 of this series'，即 Part 1 (2022-02-14) 发布之后被 Microsoft 录用；并强调研究独立于雇主，主要工作在入职前完成。",
+        "status": "documented",
+        "growth_signal": "公开 writeup 与就业机会之间的可核验因果：公开发表直接带来招聘邀约，构成 '公开发表→行业可见度→录用' 的反馈回路；作者同时以免责声明划清研究与雇主边界，显示其对公开研究与职务研究边界的处理习惯。",
+        "short_quote": "Microsoft hired me following part 1 of this series.",
+        "source": {
+          "title": "Abusing Exceptions for Code Execution, Part 2",
+          "url": "https://billdemirkapi.me/abusing-exceptions-for-code-execution-part-2/",
+          "published": "2023-01-30",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ulnx17g4n4o52xbiyqek0nsr",
+          "accessed_at": "2026-09-27T08:47:52.540394+00:00",
+          "content_sha256": "fd4db4ba4784e3a738e92ca3ef0069c87f56b9ab62ac952c842be6284fbd6736"
+        }
+      },
+      {
+        "id": "bill-timeline-bigdata-2021-2024",
+        "date": "2021",
+        "claim": "Big Data 漏洞发现研究：作者自述 2021 年起步本地样本扫描，2022 年底发现 Nebraska Supreme Court 员工 CSV 中 300+ 凭据，2024 年 7 月核查厂商未撤销已报 AWS key；研究跨约 3 年，writeup 于 2024-09-27 发布。",
+        "status": "documented",
+        "growth_signal": "由单点漏洞转向规模化数据驱动发现的阶段迁移；通过被动 DNS、VirusTotal 类平台扫描 500 万以上文件、验证 15000+ 凭据，体现出方法论由手动逆向到大规模自动化的能力扩展；作者明确要求被引用为 'Independent Security Researcher' 并声明研究独立于雇主。",
+        "short_quote": "When I first started this work in 2021, I started by scanning samples locally.",
+        "source": {
+          "title": "Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale",
+          "url": "https://billdemirkapi.me/leveraging-big-data-for-vulnerability-discovery-at-scale/",
+          "published": "2024-09-27",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_1uns2anzqkmh1x0tc6uc75bn",
+          "accessed_at": "2026-09-27T08:47:52.540375+00:00",
+          "content_sha256": "c085c379b5898fbab550d024b2260c6b663b665e2940628124962e2462b2f899"
+        }
+      },
+      {
+        "id": "bill-timeline-github-d4stiny",
+        "date": "unknown",
+        "claim": "GitHub 账号 D4stiny 自述为 Security Researcher，置顶仓库包括 spectre（Windows 内核 rootkit，723 stars）、PeaceMaker（Windows 内核威胁检测，430 stars）、ForkPlayground（Process Forking PoC，230 stars）、ExceptionOrientedProgramming（110 stars）。仓库创建日期未在该页面显示。",
+        "status": "documented",
+        "growth_signal": "长期、系统性的工具与 PoC 建设习惯：从内核 rootkit（spectre）到检测工具（PeaceMaker）再到利用框架（ExceptionOrientedProgramming/ForkPlayground），覆盖攻击-防御双向能力，且仓库获得社区关注（star 数），显示公开产出形成的影响力回路。",
+        "source": {
+          "title": "D4stiny (Bill Demirkapi) — GitHub profile",
+          "url": "https://github.com/D4stiny",
+          "published": "unknown",
+          "source_type": "developer profile (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_b3d7c9jkb3di5wx3onwuuk24",
+          "accessed_at": "2026-09-27T08:47:52.540411+00:00",
+          "content_sha256": "31c4ce4df179dbc1aaa9b8e1e8cade21ab97326107a21e8730b0cc0a4f67ac2e"
+        }
+      },
+      {
+        "id": "bill-timeline-defcon-2019-reported",
+        "date": "2019",
+        "claim": "搜索摘要称 Bill Demirkapi 于 2019 年在 DEF CON 演讲披露 Dell SupportAssist 等企业软件漏洞。一手 writeup 与 About 页面均未自行确认该会议演讲事实。",
+        "status": "unknown",
+        "growth_signal": "若属实，则较早（约 17 岁时）即进入主流会议发表，是公开发表习惯的早期节点；但因缺乏可抓取的会议一手页面，该节点存疑。",
+        "source": {
+          "title": "Web search summary: Bill Demirkapi DEF CON 2019 Dell SupportAssist",
+          "url": "https://www.google.com/search?q=%22Bill+Demirkapi%22+DEF+CON+2019+Dell+SupportAssist+talk+speaker+bio",
+          "published": "2019",
+          "source_type": "search result summary (not a fetched primary page)",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      },
+      {
+        "id": "bill-timeline-blackhat-2020-reported",
+        "date": "2020",
+        "claim": "搜索摘要称 Bill Demirkapi 于 Black Hat USA 2020 发表题为 'Breaking Trust: Exploiting Vulnerabilities in Antivirus Software' 的演讲，聚焦 Trend Micro 等杀毒软件漏洞，并称其与 RPI 关联。Black Hat 演讲者页（多 URL 变体）返回 403/404，无法抓取核验。",
+        "status": "unknown",
+        "growth_signal": "若属实，则该阶段从个人博客转向行业会议公开发表，且研究主题由 OEM 预装软件扩展到安全产品本身的攻击面；会议页不可抓取限制了核验深度。",
+        "source": {
+          "title": "Web search summary: Bill Demirkapi Black Hat 2020 Breaking Trust Trend Micro / RPI",
+          "url": "https://www.google.com/search?q=%22Bill+Demirkapi%22+Rensselaer+RPI+student+Black+Hat+2020+%22Trend+Micro%22+talk",
+          "published": "2020",
+          "source_type": "search result summary (not a fetched primary page)",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": false,
+          "retrieval_method": "unverified",
+          "tool_use_id": "",
+          "accessed_at": "",
+          "content_sha256": ""
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 摘要将 Dell 漏洞与 DEF CON 2019、Trend Micro 与 Black Hat 2020 'Breaking Trust' 直接关联，但对应一手 writeup 正文（Dell 2019-04-30、Trend Micro 2020-05-18）均未自行确认会议演讲事实；会议演讲者页 403/404 不可抓取，因此演讲节点列为 reported，与一手 writeup 不冲突但核验层级不足。",
+      "About 页自述 '25-year-old security researcher'（页面版权标注 2026），与 2019-04-13 writeup 自述 '17-year-old' 在年龄演进上一致，但 About 页未给出固定引用日期，无法据其独立确定任一时点年龄。"
+    ],
+    "gaps": [
+      "高中身份：搜索摘要称 Billerica Memorial High School (MA)，但缺乏一手核验页面，未列为 documented。",
+      "大学教育：搜索摘要称 Rensselaer Polytechnic Institute (RPI)，Black Hat 2020 摘要亦提及 RPI 关联，但 Black Hat 演讲者页 403/404、LinkedIn 不可抓取，无一手页面核验入学时间与院系。",
+      "Microsoft 入职确切日期：仅由 Part 2 (2023-01-30) 自述 'following part 1'（2022-02-14）推断入职在 2022-02-14 之后、2023-01-30 之前，区间内确切日期未知。",
+      "DEF CON 2019 与 Black Hat USA 2020 演讲：缺乏可抓取的会议一手页面；本次仅以搜索摘要列为 lead_only/reported，未能升级为 documented。",
+      "GitHub 仓库（spectre/PeaceMaker/ForkPlayground/ExceptionOrientedProgramming）创建与首次提交日期未在 profile 页面显示，无法为工具建设建立精确时间线。",
+      "POC 会议演讲：person_json 中 selected_conference_evidence 列出 POC，但未在本轮抓取中找到对应一手页面核验，存疑未列入。"
+    ]
+  },
+  "targeted": {
+    "items": [
+      {
+        "id": "bd-r1-01-github-stars-2026-09-27",
+        "resolves_issue": "字段 mechanisms[M5].observed_outcomes 精确 star 数依赖时点数据且 evidence 未记录抓取时刻计数",
+        "date": "2026-09-27",
+        "claim": "2026-09-27 抓取 github.com/D4stiny 时点，置顶仓库 star 计数为 spectre=723、ExceptionOrientedProgramming=110、PeaceMaker=430、ForkPlayground=230；profile bio 为 'Security Researcher. Any work here is my own.'；页面未显示各仓库创建或首次提交日期。该 star 数为抓取时点数据，非稳定观察结果。",
+        "status": "documented",
+        "source": {
+          "title": "D4stiny (Bill Demirkapi) — GitHub profile",
+          "url": "https://github.com/D4stiny",
+          "published": "2026-09-27",
+          "source_type": "developer_profile_first_hand",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_gdyd1xd53httzxmus0ity9ek",
+          "accessed_at": "2026-09-27T09:04:08.374789+00:00",
+          "content_sha256": "d5d56a0720c80c0ff58954e4ba4ad0b9baca7cb9b206750d31a5afea7170055a"
+        }
+      },
+      {
+        "id": "bd-r2-01-startswith-primary",
+        "resolves_issue": "stages[1] capability_change 与 mechanisms[M2].repeated_practice 中 'StartExists 校验' 方法名转写错误的核对缺口",
+        "date": "2019-04-30",
+        "claim": "WebFetch 核对一手原文 https://billdemirkapi.me/remote-code-execution-on-most-dell-computers/ 确认：Dell SupportAssist 研究中绕过的 .NET 方法名为 StartsWith（大写 S 与 W），反编译代码为 bool flag2 = file.Location.ToLower().StartsWith(\"http://\"); 作者以 'starts with check' 指称；绕过 payload 为带前导空格的 ' http://downloads.dell.com/abcdefg'，使 StartsWith(\"http://\") 返回 false 以跳过 http→https 替换实现中间人攻击，代码注释标注 '// those spaces are KEY'。evidence bd-works-01-dell-rce claim 字段本身已正确记录为 'StartsWith 校验'，综合层的 'StartExists' 为方法名转写错误。",
+        "status": "documented",
+        "source": {
+          "title": "Remote Code Execution on most Dell computers",
+          "url": "https://billdemirkapi.me/remote-code-execution-on-most-dell-computers/",
+          "published": "2019-04-30",
+          "source_type": "personal_research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_3pnfg96rq5aoa7c93j0tredn",
+          "accessed_at": "2026-09-27T09:19:52.368512+00:00",
+          "content_sha256": "7b291421fdf816e9f31491f60a54d749a33af7ea8dec132663932cb8012c9ecb"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,146 @@
+# Multi-repository demo/template. All repositories form one target product.
+# Multi-repo targets currently support full scan mode only.
+
+common_focus: >
+  Audit the combined product formed by the core repository and its plugin or
+  feature repositories. Treat cross-repository calls, configuration, shared
+  protocols, plugin loading, and privilege boundaries as one attack surface.
+
+target_repos:
+  - id: core
+    target: https://github.com/example/product-core.git
+    role: main
+    description: Main runtime and public interfaces.
+
+  - id: plugin-auth
+    target: https://github.com/example/product-auth-plugin.git
+    role: plugin
+    description: Authentication plugin loaded by the core runtime.
+
+  - id: feature-local
+    path: ./feature-local
+    role: feature
+    description: Local feature repository; relative paths resolve from this YAML file.
+
+max_concurrency: 6
+
+top_K:
+  spec: 20
+  vuln: 30
+  patch: 20
+  feature: 20
+  chain: 16
+
+# Cross-primitive chain aggregation is especially relevant for multi-repo
+# targets: primitives confirmed in different repositories (core, plugins,
+# feature repos) can be composed into cross-repo attack chains. All keys are
+# optional; defaults shown below.
+# chain:
+#   enabled: true
+#   max_length: 4
+#   max_successors_per_capability: 4
+#   beam_width: 64
+#   max_candidates_before_top_k: 200
+#   max_battle_rounds: 2
+
+node:
+  fetch_target_repo:
+    runtime: codex
+    focus: >
+      Materialize every target_repos entry at its exact destination. Preserve
+      repository identity and complete source trees.
+
+  search_spec:
+    runtime: codex
+    focus: ""
+
+  search_fuzz_driver:
+    runtime: claude_code
+    config: ark-proxy
+    provider: ark
+    model: ""
+    focus: ""
+
+  search_similar_software:
+    runtime: claude_code
+    config: ark-proxy
+    provider: ark
+    model: ""
+    focus: ""
+
+  search_similar_history:
+    runtime: claude_code
+    config: ark-proxy
+    provider: ark
+    model: ""
+    focus: ""
+
+  search_target_history:
+    runtime: claude_code
+    config: ark-proxy
+    provider: ark
+    model: ""
+    focus: >
+      Cover security history from the core and every plugin or feature
+      repository; keep repository identity in the evidence.
+
+  search_new_feature:
+    runtime: codex
+    focus: >
+      Prioritize cross-repository feature registration, plugin loading, shared
+      state, protocol boundaries, and configuration handoffs.
+
+  analyze_attack_surface:
+    runtime: codex
+    focus: >
+      Model the repositories as one product. Include cross-repository data flow,
+      trust boundaries, plugin interfaces, shared credentials, and lifecycle.
+
+  plan_by_spec:
+    runtime: codex
+    focus: ""
+
+  plan_by_vuln_similar:
+    runtime: codex
+    focus: ""
+
+  plan_by_vuln_patch:
+    runtime: codex
+    focus: ""
+
+  plan_by_new_feature:
+    runtime: codex
+    focus: ""
+
+  investigate_subtask:
+    runtime: codex
+    focus: ""
+
+  critic_subtask:
+    runtime: codex
+    focus: ""
+
+  chain_investigate_subtask:
+    runtime: codex
+    focus: ""
+
+  chain_critic_subtask:
+    runtime: codex
+    focus: ""
+
+  chain_finalizer_subtask:
+    runtime: codex
+    focus: ""
+
+  report_group_adjudicator:
+    runtime: codex
+    focus: >
+      Merge only when the same product-level root cause crosses the same trust
+      boundary and reaches the same sink; keep repository-specific variants
+      separate when they require different fixes.
+
+  summary:
+    runtime: codex
+    focus: >
+      Report combined-product impact and preserve repository-qualified code
+      locations such as core/path/to/file or plugin-auth/path/to/file.
