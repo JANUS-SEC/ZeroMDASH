@@ -1,0 +1,391 @@
+{
+  "person": "James Kettle (albinowax)",
+  "dimension": "公开作品与技术演化",
+  "identity_check": "person_json 记录研究对象为 James Kettle (albinowax), rank 23, 主攻 HTTP/Web, writeup 证据指向 https://portswigger.net/research。作者页 https://portswigger.net/research/james-kettle 署名为 Director of Research, 关联账号 @albinowax, 与 person_json 的 social (https://x.com/albinowax) 一致。各被抓取的 writeup 页面正文均署名 James Kettle。未发现同名歧义证据。索引页 https://portswigger.net/research 不在逐篇条目上标注作者, 因此仅作线索来源, 不作为结论依据; 逐篇作者身份以作者页与具体 writeup 页面为准。",
+  "items": [
+    {
+      "id": "albinowax-works-001",
+      "date": "2016-11-04",
+      "claim": "James Kettle 在 2016 年发表 Backslash Powered Scanner, 提出以响应差异为核心的扫描方法论, 目标从扫描已知漏洞签名转向识别'有趣行为', 以探测包括 SSTI 在内的未知注入类; 文中转述其 2013 年曾尝试基于最长公共子序列的正则生成方法, 因 O(n²) 复杂度与自我拒绝服务问题被放弃, 后退化为基于响应属性(状态码、行数、词数、HTML 结构、反射计数)的差分方法。",
+      "status": "documented",
+      "growth_signal": "早期形成可复用的方法论范式(差分探测), 并明确记录前一次方法失败与改道原因(2013 LCS-regex 不可行 → 2016 属性差分), 体现对自身技术路线的复盘而非一次性成果。该差分思想在后续 2019 超时差分、2021 HTTP/2 超时差分与 2022 行为差分中反复出现, 构成技术演化的稳定内核。同时伴随工具产出 Backslash Powered Scanner 与 Distribute Damage, 形成研究即工具的习惯。",
+      "short_quote": "Rather than scanning for vulnerabilities, we need to scan for interesting behaviour.",
+      "source": {
+        "title": "Backslash Powered Scanning: hunting unknown vulnerability classes",
+        "url": "https://portswigger.net/research/backslash-powered-scanning-hunting-unknown-vulnerability-classes",
+        "published": "2016-11-04",
+        "source_type": "research_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_63j2ema1o2p3vocxgmypztvd",
+        "accessed_at": "2026-09-27T04:09:04.593117+00:00",
+        "content_sha256": "7f8152c5247be809e0584529c06c9cef17abf54971c5baa2b2488affec73fa9f"
+      }
+    },
+    {
+      "id": "albinowax-works-002",
+      "date": "2019-08-07",
+      "claim": "2019 年 James Kettle 发表 HTTP Desync Attacks: Request Smuggling Reborn, 重新激活 2005 年提出的 HTTP Request Smuggling 漏洞类, 给出 Detect/Confirm/Explore/Store 四阶段方法论, 区分 CL.TE 与 TE.CL 取向, 并以超时探测降低误报与对他人影响; 同时发布开源 Burp Suite 扩展 HTTP Request Smuggler 并将检测能力并入 Burp Suite 核心扫描器。",
+      "status": "documented",
+      "growth_signal": "目标难度从单点注入类升级到协议解析分歧(前后端对请求边界的不一致), 方法论上把 2016 的差分思想迁移到超时差分。研究产出直接驱动商业工具(Burp Scanner)集成, 形成研究→工具→反馈的闭环。文内记录真实目标(New Relic、Trello、Red Hat、PayPal)与赏金数额, 显示以 bug bounty 反馈校准技术有效性的习惯。",
+      "short_quote": "poisoning back-end sockets and prepending arbitrary content to other users' requests",
+      "source": {
+        "title": "HTTP Desync Attacks: Request Smuggling Reborn",
+        "url": "https://portswigger.net/research/http-desync-attacks-request-smuggling-reborn",
+        "published": "2019-08-07",
+        "source_type": "research_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_rgn3gtl6rs4htaw5zw9sxw8i",
+        "accessed_at": "2026-09-27T04:09:04.593085+00:00",
+        "content_sha256": "18cb1e3de921d9a61cde7bb628165c90b0a022af094e0dcb5b64a5dedd3d1f24"
+      }
+    },
+    {
+      "id": "albinowax-works-003",
+      "date": "2021-08-05",
+      "claim": "2021 年 James Kettle 发表 HTTP/2: The Sequel is Always Worse, 自行从零编写开源 HTTP/2 协议栈并集成进 Turbo Intruder, 用字符映射(^→\\r, ~→\\n, `→:) 构造畸形请求, 识别 H2.CL、H2.TE、H2.X 请求拆分与响应队列投毒等 HTTP/2 专属漏洞类, 并发展出 desync-powered request tunnelling。文中记录 Bitbucket 盲向隧道耗时约四个月、其缓存投毒耗时约六个月, HEAD 方法突破系在 Burp Repeater 中尝试降低响应延迟时偶然发现。",
+      "status": "documented",
+      "growth_signal": "目标难度升至协议级: 为研究新协议自建底层工具(自写 HTTP/2 栈), 体现为解决研究问题而建设基础设施的习惯。迭代周期以月计(4 个月、6 个月), 并如实记录偶然突破点(HEAD 方法 by blind luck), 区分系统尝试与运气成分。Apache 漏洞报告(2021-05-11)到补丁(2021-09-16, 2.4.49)相隔 86 天, 显示其对修复时滞的跟踪习惯。多项赏金(Netflix $20K、Atlassian $15K、Verizon $10K+$7K)捐出, 形成公开回馈通道。",
+      "short_quote": "I'll introduce multiple new classes of HTTP/2-exclusive threats caused by both implementation flaws and RFC imperfections.",
+      "source": {
+        "title": "HTTP/2: The Sequel is Always Worse",
+        "url": "https://portswigger.net/research/http2",
+        "published": "2021-08-05",
+        "source_type": "research_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_nxurhja2h2bb8iys5m0lwvms",
+        "accessed_at": "2026-09-27T04:09:04.593093+00:00",
+        "content_sha256": "9462251f68279ca9bc03b99d098b27e549d4e06861780efa655e8bdccffa0bac"
+      }
+    },
+    {
+      "id": "albinowax-works-004",
+      "date": "2022-08-10",
+      "claim": "2022 年 James Kettle 发表 Browser-Powered Desync Attacks, 提出客户端反同步(client-side desync, CSD), 将走私点前移到受害者浏览器与前端之间, 使单服务器站点亦可被攻击; 涵盖 CL.0/H2.0、pause-based desync、MITM-powered desync。文中给出演化路径: connection-state attacks → AWS ALB 意外走私 → early-read 检测 connection-locked CL.TE → CL.0 浏览器兼容 → H2.0 → CSD 方法论 → pause-based desync → MITM-powered desync, 明确建立在 2019 与 2021 工作之上。",
+      "status": "documented",
+      "growth_signal": "方法论复用并扩张: 把 2019/2021 的前后端走私思路迁移到客户端, 关键认识是'走私无需头混淆、符合规范的请求亦可触发可被浏览器利用的反同步'。工具同步更新(HTTP Request Smuggler 增 CSD 检测与 connection-state probe, Turbo Intruder 增 pause 参数), 并提供 Web Security Academy 免费 lab。CVE 反馈链密集(CVE-2022-20713/22720/23959), 赏金 $17,500 捐出, 显示以厂商反馈校准技术有效性的持续习惯。",
+      "short_quote": "I'll show you how to turn your victim's web browser into a desync delivery platform",
+      "source": {
+        "title": "Browser-Powered Desync Attacks: A New Frontier in HTTP Request Smuggling",
+        "url": "https://portswigger.net/research/browser-powered-desync-attacks",
+        "published": "2022-08-10",
+        "source_type": "research_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_x07u7ec725uzqitdt2z0ffox",
+        "accessed_at": "2026-09-27T04:09:04.593109+00:00",
+        "content_sha256": "5ea7e67d395e40834f274871b4763134a4f4621c715f827997c30a9094d9c0dc"
+      }
+    },
+    {
+      "id": "albinowax-works-005",
+      "date": "2023-08-09",
+      "claim": "2023 年 James Kettle 发表 Smashing the State Machine: the true potential of web race conditions, 提出 single-packet attack——将 20–30 个 HTTP/2 请求的最终帧合并进单个 TCP 包以消除网络抖动, 并把竞态分类为 limit-overrun 之外的多端点、单端点、对象遮蔽、延迟碰撞等类。该技术由其 HTTP/1.1 last-byte sync 演化而来, 并借鉴 2020 USENIX Timeless Timing Attacks; 文中自述 2016 年 Josip Franjković 的 Facebook 竞态因当时缺乏技术手段被搁置七年, 直至 single-packet attack 成形后得以解释。",
+      "status": "documented",
+      "growth_signal": "目标难度升至时序竞态: 把单包攻击作为通用原语, 复用既有工具(Turbo Intruder 增 single-packet 模板与 race-single-packet-attack.py, Burp Repeater 增并行发送组)。体现跨年长期回访未解问题的习惯(2016→2023), 并明确吸收外部学术成果(2020 USENIX)与同行发现(Franjković), 区分原创与借鉴, 显示以公开学术与同行工作为输入而非孤立研究的复盘方式。",
+      "short_quote": "every endpoint might be sending an application through invisible sub-states.",
+      "source": {
+        "title": "Smashing the state machine: the true potential of web race conditions",
+        "url": "https://portswigger.net/research/smashing-the-state-machine",
+        "published": "2023-08-09",
+        "source_type": "research_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_kowb3tijzq7dv8ldzuihtaoe",
+        "accessed_at": "2026-09-27T04:09:04.593102+00:00",
+        "content_sha256": "3759f722acfd94c0e22e8f3df3fe40852276ed79652db16e82adf8d0f7dd8c63"
+      }
+    },
+    {
+      "id": "albinowax-works-006",
+      "date": "2016-2023",
+      "claim": "James Kettle 在 2016 至 2023 年间的 writeup 普遍伴随工具建设与公开发表: 自建并持续维护 Turbo Intruder(2021 自写 HTTP/2 栈、2022 pause 参数、2023 single-packet attack)、HTTP Request Smuggler(2019 创建、2021 H2 检测、2022 CSD 检测)、Param Miner(2021 用于猜测内部头名), 多项检测能力被并入 Burp Suite 核心扫描器; 工具均开源, 并以 PortSwigger Web Security Academy 免费 lab 复现关键漏洞。Black Hat USA 与 DEF CON 演讲为固定发表渠道。",
+      "status": "documented",
+      "growth_signal": "工具作为研究副产物形成正反馈: 每篇 writeup 对应工具升级, 工具反过来支撑下一轮更难目标, 构成可复用的研究基础设施。开源与免费 lab 显示其将研究方法工具化、可传播化的习惯; 通过 Burp Scanner 集成使方法论被规模化采用, 提供持续的实战反馈。Black Hat/DEF CON 与 PortSwigger blog 的组合构成稳定的公开发表节奏。",
+      "source": {
+        "title": "PortSwigger Research — James Kettle 作者页与各 writeup 工具说明",
+        "url": "https://portswigger.net/research/james-kettle",
+        "published": "2016-2023",
+        "source_type": "research_index",
+        "level": "first_hand_other"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_jde0us69hiswpeihwt4ksrqj",
+        "accessed_at": "2026-09-27T04:09:04.593077+00:00",
+        "content_sha256": "a789c199cfe36a0c4e6a314fb962bdb7a06ad89aadc5baa91d658b49e150a7f6"
+      }
+    }
+  ],
+  "contradictions": [
+    "索引页 https://portswigger.net/research 不在逐篇条目上标注作者, 与作者页 https://portswigger.net/research/james-kettle 列出的 Favourite Papers 存在署名粒度差异; 处理方式: 索引页仅作 lead_only 线索, 逐篇作者以具体 writeup 页面正文署名为准, 不构成内容冲突。",
+    "2022 Browser-Powered Desync 页面标注 updated 2025-09-03, 原始发布日为 2022-08-10; 处理方式: 以原始发布日为 date, 更新事实记入说明, 不影响技术演化时间线。",
+    "WebSearch 调用返回异常响应(声明无搜索能力并给出训练数据式概述), 与工具预期行为不符; 处理方式: 不采用其任何内容作为证据, 全部结论以 WebFetch 成功抓取的一手页面为准, 不计入 contradictions 实质内容。"
+  ],
+  "gaps": [
+    "2013 年最长公共子序列正则差分原型无公开链接, 仅在 2016 writeup 中转述, 无法独立核验其细节与失败原因。",
+    "未抓取 2024–2026 年最新 writeup: 作者页 Favourite Papers 仅列至 2023, 索引页列出 2025-2026 文章(如 The Fragile Lock: Novel Bypasses For SAML Authentication, 2025-12-10; CSS: the bomb inside your inbox, 2026-08-06)但未署名, 因受 8 次工具调用上限与逐篇核验要求限制未逐一确认作者, 留作缺口。",
+    "未独立核验导师或同伴关系: 2023 writeup 提及借鉴 Josip Franjković 2016 Facebook 发现与 2020 USENIX Timeless Timing Attacks 论文, 但未发现其明确导师或固定合作者的公开材料。",
+    "演讲材料(speaker 页/Slides)未单独抓取; 按任务要求, 会议 speaker 页仅能证明演讲事实, 不能单独证明成长机制, 故不作为独立证据, 相应的演讲事实仅在 source_type 中隐含, 未单列条目。",
+    "赏金与捐款数额(2019 PayPal $18,900 后 $20,000; 2021 Netflix/Atlassian/Verizon 等超 50% 捐出; 2022 $17,500 全捐)为作者在 writeup 内自报, 无第三方财务核验; 标记为作者一手自述。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-works-20260927-120501-051",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790482144587489000-james-kettle-albinowax-works.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "65020d3c-83a7-4a14-8270-27f1b5358cef",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_ekxsv1fguib9yz1d5uo4nrd1",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-works-20260927-120501-051/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T04:09:04.592985+00:00"
+      },
+      {
+        "tool_use_id": "call_63j2w1you0972lphtd97t1pb",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-works-20260927-120501-051/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-27T04:09:04.593010+00:00"
+      },
+      {
+        "tool_use_id": "call_n8csk95ga1e1e1lazbtysqp7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-works-20260927-120501-051/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "eea5d6df9e3d26575b227c1b7969b4fa02b86ef80b0650dcec926521d4240d44",
+        "accessed_at": "2026-09-27T04:09:04.593022+00:00"
+      },
+      {
+        "tool_use_id": "call_40th0yxu04wpoirtycrr8q62",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-works-20260927-120501-051/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "eccd442dbfddb55a2303fdfb6293767e1985a741efaa75cf0b7a2a894c70a92b",
+        "accessed_at": "2026-09-27T04:09:04.593028+00:00"
+      },
+      {
+        "tool_use_id": "call_7g95v98iz7ev9bqy60pjdksf",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-works-20260927-120501-051/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "98d6159955e4031db24639369d116819220986aa8ec32370f8ce25cc7e814219",
+        "accessed_at": "2026-09-27T04:09:04.593032+00:00"
+      },
+      {
+        "tool_use_id": "call_jg5ivh49sk8hvv8rv7qo9bz9",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-works-20260927-120501-051/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6e5034a8a6d972f492d2b08811243633e8b01984efe14e10fad4de7367634388",
+        "accessed_at": "2026-09-27T04:09:04.593036+00:00"
+      },
+      {
+        "tool_use_id": "call_062w9auijn6zuh8o7ypu6z6z",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-works-20260927-120501-051/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-27T04:09:04.593040+00:00"
+      },
+      {
+        "tool_use_id": "call_bzj1okkjy7zzsdcbelpucgtu",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://portswigger.net/research",
+          "prompt": "List all research articles by James Kettle (albinowax). For each, provide the title, publication date (ISO if available), URL, and a one-sentence summary of the technical subject (e.g., HTTP request smuggling, web cache deception, browser-powered desync, etc.). Distinguish which articles are authored by James Kettle versus other researchers."
+        },
+        "success": true,
+        "content_sha256": "d4b57afa720bca43cedbf6996159920a59f53504f090813ceda320b2ffda25dd",
+        "accessed_at": "2026-09-27T04:09:04.593057+00:00"
+      },
+      {
+        "tool_use_id": "call_2zw9lmvgbxy2emxmihw4eiet",
+        "tool": "WebSearch",
+        "input": {
+          "query": "James Kettle albinowax PortSwigger research writeups list by year"
+        },
+        "success": true,
+        "content_sha256": "a7d736937b1d81c67e657e8e50288d05f0ce3c4d34a58d19f7a0fee6bbbed5d7",
+        "accessed_at": "2026-09-27T04:09:04.593053+00:00"
+      },
+      {
+        "tool_use_id": "call_jde0us69hiswpeihwt4ksrqj",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all research articles by James Kettle shown on this author page. For each, give title, exact publication date (ISO format), URL path, and one-sentence technical summary.",
+          "url": "https://portswigger.net/research/james-kettle"
+        },
+        "success": true,
+        "content_sha256": "a789c199cfe36a0c4e6a314fb962bdb7a06ad89aadc5baa91d658b49e150a7f6",
+        "accessed_at": "2026-09-27T04:09:04.593077+00:00"
+      },
+      {
+        "tool_use_id": "call_f2rzlic686prrqfxg3yk7ybg",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the title, publication date, author, and core technical contribution of this article? Describe the vulnerability class, the research methodology, and any tools or techniques introduced. Quote at most one short sentence from the text if it states the main contribution.",
+          "url": "https://portswigger.net/research/http-desync-attack-request-smuggling-on-the-web-application-tier"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T04:09:04.593072+00:00"
+      },
+      {
+        "tool_use_id": "call_rgn3gtl6rs4htaw5zw9sxw8i",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the exact title, publication date (ISO), author, and core technical contribution? Describe the vulnerability class, methodology, and any tools introduced. Quote at most one short sentence if it states the main contribution.",
+          "url": "https://portswigger.net/research/http-desync-attacks-request-smuggling-reborn"
+        },
+        "success": true,
+        "content_sha256": "18cb1e3de921d9a61cde7bb628165c90b0a022af094e0dcb5b64a5dedd3d1f24",
+        "accessed_at": "2026-09-27T04:09:04.593085+00:00"
+      },
+      {
+        "tool_use_id": "call_nxurhja2h2bb8iys5m0lwvms",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the exact title, publication date (ISO), author, and core technical contribution? Describe the vulnerability class, methodology, and any tools introduced. Also note any mention of how the author developed and tested the technique (timeline, lab setup, iteration). Quote at most one short sentence if it states the main contribution.",
+          "url": "https://portswigger.net/research/http2"
+        },
+        "success": true,
+        "content_sha256": "9462251f68279ca9bc03b99d098b27e549d4e06861780efa655e8bdccffa0bac",
+        "accessed_at": "2026-09-27T04:09:04.593093+00:00"
+      },
+      {
+        "tool_use_id": "call_x07u7ec725uzqitdt2z0ffox",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Exact title, publication date (ISO), author, core technical contribution, vulnerability class, methodology, tools introduced/updated, and any mention of iteration timeline, lab setup, or how the technique evolved from prior work. Quote at most one short sentence for the main contribution.",
+          "url": "https://portswigger.net/research/browser-powered-desync-attacks"
+        },
+        "success": true,
+        "content_sha256": "5ea7e67d395e40834f274871b4763134a4f4621c715f827997c30a9094d9c0dc",
+        "accessed_at": "2026-09-27T04:09:04.593109+00:00"
+      },
+      {
+        "tool_use_id": "call_kowb3tijzq7dv8ldzuihtaoe",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Exact title, publication date (ISO), author, core technical contribution, vulnerability class, methodology, tools introduced/updated, and any mention of iteration timeline, the single-packet attack concept, and how it evolved from prior race-condition work. Quote at most one short sentence for the main contribution.",
+          "url": "https://portswigger.net/research/smashing-the-state-machine"
+        },
+        "success": true,
+        "content_sha256": "3759f722acfd94c0e22e8f3df3fe40852276ed79652db16e82adf8d0f7dd8c63",
+        "accessed_at": "2026-09-27T04:09:04.593102+00:00"
+      },
+      {
+        "tool_use_id": "call_63j2ema1o2p3vocxgmypztvd",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Exact title, publication date (ISO), author, core technical contribution, vulnerability class, methodology, tools introduced/updated, and any mention of iteration timeline, differential analysis, or how the technique relates to later research. Quote at most one short sentence for the main contribution.",
+          "url": "https://portswigger.net/research/backslash-powered-scanning-hunting-unknown-vulnerability-classes"
+        },
+        "success": true,
+        "content_sha256": "7f8152c5247be809e0584529c06c9cef17abf54971c5baa2b2488affec73fa9f",
+        "accessed_at": "2026-09-27T04:09:04.593117+00:00"
+      },
+      {
+        "tool_use_id": "call_3v1jy6zozdono6dnzcpue4rb",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-works-20260927-120501-051/checkpoint.md",
+          "content": "# Checkpoint — James Kettle (albinowax) / 公开作品与技术演化\n\n## 身份确认\n- person_json: \"James Kettle (albinowax)\", rank 23, primary_focus=HTTP/Web, social=https://x.com/albinowax, writeup_evidence=https://portswigger.net/research, 研究岗位 PortSwigger。\n- 维度: 公开作品与技术演化。\n- 身份核对: PortSwigger 作者页 /research/james-kettle 列出 \"Director of Research\", @albinowax; 各 writeup 页作者署名一致。无同名歧义证据。\n\n## 已抓取来源 (web_fetch 成功, URL=source.url 一致)\n1. https://portswigger.net/research (索引页, 无逐篇署名 → lead_only, 仅用于发现)\n2. https://portswigger.net/research/james-kettle (作者/收藏页, 列出 Favourite Papers → first_hand_other)\n3. https://portswigger.net/research/backslash-powered-scanning-hunting-unknown-vulnerability-classes — 2016-11-04, primary\n4. https://portswigger.net/research/http-desync-attacks-request-smuggling-reborn — 2019-08-07, primary\n5. https://portswigger.net/research/http2 — 2021-08-05, primary\n6. https://portswigger.net/research/browser-powered-desync-attacks — 2022-08-10, primary\n7. https://portswigger.net/research/smashing-the-state-machine — 2023-08-09, primary\n\nWebSearch 调用返回异常 (声明无搜索能力), 已忽略其内容, 仅以 WebFetch 一手页面为准。\n未读取 404 页面: /research/http-desync-attack-request-smuggling-on-the-web-application-tier (URL 猜测错误, 不采用)。\n\n## 技术演化主线 (documented)\n- 2016: 差异响应扫描 (Backslash Powered Scanner) — 转向\"扫描有趣行为\"而非签名; 差分方法可发现未知注入类。提到 2013 首次尝试 LCS-regex 失败 (O(n²)), 退化为属性差分。\n- 2019: HTTP Desync / Request Smuggling Reborn — 四阶段方法 (Detect/Confirm/Explore/Store), HTTP Request Smuggler 扩展 + Burp Scanner 集成; CL.TE/TE.CL 定向。\n- 2021: HTTP/2: The Sequel is Always Worse — 自写 HTTP/2 stack 集成进 Turbo Intruder; H2.CL/H2.TE/H2.X/response-queue poisoning/desync tunnelling; Bitbucket 盲隧 4 个月、缓存投毒 6 个月的迭代记录明确。\n- 2022: Browser-Powered Desync (CSD) — 把浏览器变成走私投递平台; CL.0/H2.0/pause-based desync; 在 2019/2021 工作基础上\"connection-state → AWS ALB → early-read → CL.0 → H2.0 → CSD 方法论 → pause-based\"逐步演化。\n- 2023: Smashing the State Machine — single-packet attack; 由 HTTP/1.1 last-byte sync 演化, 借鉴 2020 USENIX Timeless Timing Attacks; 自述 2016 Facebook 竞态因缺乏技术手段被搁置 7 年。\n\n## 工具建设习惯 (documented, 同一作者持续维护)\n- Turbo Intruder: HTTP/2 stack (2021) → pause-based 参数 (2022) → single-packet attack (2023)。\n- HTTP Request Smuggler: 2019 创建 → 2021 H2 检测 → 2022 CSD 检测。\n- Param Miner: 2021 用于猜测内部头名。\n- Burp Suite 核心扫描器: 多次集成研究成果。\n- 代码开源 + Web Security Academy 免费 lab: 2022 起明确。\n\n## 反馈 / 复盘机制 (documented)\n- Bug bounty 反馈驱动: PayPal $18,900 后 $20,000 bypass (2019); Netflix/Atlassian/Verizon (2021); 2021/2022 赏金全部捐慈善。\n- 多厂商 CVE 反馈: CVE-2021-21295/33193, CVE-2022-20713/22720/23959。\n- 修复时滞记录: Apache 86 天 (2021-05-11 报告 → 2021-09-16 补丁)。\n- 历史未解问题的长期回访: 2016 Facebook 竞态 → 2023 解决; 2013 LCS-regex → 2016 属性差分。\n- 自述偶然突破: Bitbucket HEAD 方法 \"by blind luck\"; 但前置为 4–6 个月系统尝试。\n\n## 增长信号归纳 (用于 growth_signal 字段)\n- 方法论复用: 差分思想 (2016 响应差分) → 2019 超时差分 → 2021 H2 超时差分 → 2022 行为差分。\n- 难度升级: 单一漏洞类 → 协议级 (HTTP/2) → 客户端协同 (CSD) → 时序竞态 (single-packet)。\n- 工具作为研究副产物: 每篇 writeup 伴随工具更新, 形成正反馈。\n- 公开发表习惯: Black Hat USA/DEF CON 演讲 + PortSwigger blog + GitHub 开源 + Web Security Academy lab。\n\n## 资料缺口 (gaps)\n- 2016 之前的作品 (2013 LCS-regex 原型) 无公开链接, 仅在 2016 writeup 内转述。\n- 未抓取 2024–2026 最新 writeup (作者页 Favourite Papers 仅列至 2023; 索引页列出 2025–2026 文章但未署名)。\n- 未确认导师/同伴关系; 仅在 2023 writeup 提及借鉴 Josip Franjković 2016 Facebook 发现与 2020 USENIX 论文。\n- 演讲材料本身未单独抓取 (speaker 页不能单独证明成长机制, 按任务要求不作为独立证据)。\n- 自述收入/捐款金额为作者自报, 标记 documented-for-claim 但数值来自一手 writeup。\n\n## 下一步\n- 6 条 items 基本覆盖 2016/2019/2021/2022/2023 + 工具建设横切项。\n- contradictions: 暂无材料冲突; WebSearch 返回异常不作为证据, 不计入冲突。\n- 直接写 output.json。\n"
+        },
+        "success": true,
+        "content_sha256": "355f836e498c7db61f4251ead5c3d01b391003a6a81dfc29f9e9fc21f0610e8f",
+        "accessed_at": "2026-09-27T04:09:04.593122+00:00"
+      },
+      {
+        "tool_use_id": "call_6lzze8id1d60tqzvfw8hh001",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-works-20260927-120501-051/output.json",
+          "content": "{\n  \"person\": \"James Kettle (albinowax)\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"person_json 记录研究对象为 James Kettle (albinowax), rank 23, 主攻 HTTP/Web, writeup 证据指向 https://portswigger.net/research。作者页 https://portswigger.net/research/james-kettle 署名为 Director of Research, 关联账号 @albinowax, 与 person_json 的 social (https://x.com/albinowax) 一致。各被抓取的 writeup 页面正文均署名 James Kettle。未发现同名歧义证据。索引页 https://portswigger.net/research 不在逐篇条目上标注作者, 因此仅作线索来源, 不作为结论依据; 逐篇作者身份以作者页与具体 writeup 页面为准。\",\n  \"items\": [\n    {\n      \"id\": \"albinowax-works-001\",\n      \"date\": \"2016-11-04\",\n      \"claim\": \"James Kettle 在 2016 年发表 Backslash Powered Scanner, 提出以响应差异为核心的扫描方法论, 目标从扫描已知漏洞签名转向识别'有趣行为', 以探测包括 SSTI 在内的未知注入类; 文中转述其 2013 年曾尝试基于最长公共子序列的正则生成方法, 因 O(n²) 复杂度与自我拒绝服务问题被放弃, 后退化为基于响应属性(状态码、行数、词数、HTML 结构、反射计数)的差分方法。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"早期形成可复用的方法论范式(差分探测), 并明确记录前一次方法失败与改道原因(2013 LCS-regex 不可行 → 2016 属性差分), 体现对自身技术路线的复盘而非一次性成果。该差分思想在后续 2019 超时差分、2021 HTTP/2 超时差分与 2022 行为差分中反复出现, 构成技术演化的稳定内核。同时伴随工具产出 Backslash Powered Scanner 与 Distribute Damage, 形成研究即工具的习惯。\",\n      \"short_quote\": \"Rather than scanning for vulnerabilities, we need to scan for interesting behaviour.\",\n      \"source\": {\n        \"title\": \"Backslash Powered Scanning: hunting unknown vulnerability classes\",\n        \"url\": \"https://portswigger.net/research/backslash-powered-scanning-hunting-unknown-vulnerability-classes\",\n        \"published\": \"2016-11-04\",\n        \"source_type\": \"research_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"albinowax-works-002\",\n      \"date\": \"2019-08-07\",\n      \"claim\": \"2019 年 James Kettle 发表 HTTP Desync Attacks: Request Smuggling Reborn, 重新激活 2005 年提出的 HTTP Request Smuggling 漏洞类, 给出 Detect/Confirm/Explore/Store 四阶段方法论, 区分 CL.TE 与 TE.CL 取向, 并以超时探测降低误报与对他人影响; 同时发布开源 Burp Suite 扩展 HTTP Request Smuggler 并将检测能力并入 Burp Suite 核心扫描器。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"目标难度从单点注入类升级到协议解析分歧(前后端对请求边界的不一致), 方法论上把 2016 的差分思想迁移到超时差分。研究产出直接驱动商业工具(Burp Scanner)集成, 形成研究→工具→反馈的闭环。文内记录真实目标(New Relic、Trello、Red Hat、PayPal)与赏金数额, 显示以 bug bounty 反馈校准技术有效性的习惯。\",\n      \"short_quote\": \"poisoning back-end sockets and prepending arbitrary content to other users' requests\",\n      \"source\": {\n        \"title\": \"HTTP Desync Attacks: Request Smuggling Reborn\",\n        \"url\": \"https://portswigger.net/research/http-desync-attacks-request-smuggling-reborn\",\n        \"published\": \"2019-08-07\",\n        \"source_type\": \"research_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"albinowax-works-003\",\n      \"date\": \"2021-08-05\",\n      \"claim\": \"2021 年 James Kettle 发表 HTTP/2: The Sequel is Always Worse, 自行从零编写开源 HTTP/2 协议栈并集成进 Turbo Intruder, 用字符映射(^→\\\\r, ~→\\\\n, `→:) 构造畸形请求, 识别 H2.CL、H2.TE、H2.X 请求拆分与响应队列投毒等 HTTP/2 专属漏洞类, 并发展出 desync-powered request tunnelling。文中记录 Bitbucket 盲向隧道耗时约四个月、其缓存投毒耗时约六个月, HEAD 方法突破系在 Burp Repeater 中尝试降低响应延迟时偶然发现。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"目标难度升至协议级: 为研究新协议自建底层工具(自写 HTTP/2 栈), 体现为解决研究问题而建设基础设施的习惯。迭代周期以月计(4 个月、6 个月), 并如实记录偶然突破点(HEAD 方法 by blind luck), 区分系统尝试与运气成分。Apache 漏洞报告(2021-05-11)到补丁(2021-09-16, 2.4.49)相隔 86 天, 显示其对修复时滞的跟踪习惯。多项赏金(Netflix $20K、Atlassian $15K、Verizon $10K+$7K)捐出, 形成公开回馈通道。\",\n      \"short_quote\": \"I'll introduce multiple new classes of HTTP/2-exclusive threats caused by both implementation flaws and RFC imperfections.\",\n      \"source\": {\n        \"title\": \"HTTP/2: The Sequel is Always Worse\",\n        \"url\": \"https://portswigger.net/research/http2\",\n        \"published\": \"2021-08-05\",\n        \"source_type\": \"research_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"albinowax-works-004\",\n      \"date\": \"2022-08-10\",\n      \"claim\": \"2022 年 James Kettle 发表 Browser-Powered Desync Attacks, 提出客户端反同步(client-side desync, CSD), 将走私点前移到受害者浏览器与前端之间, 使单服务器站点亦可被攻击; 涵盖 CL.0/H2.0、pause-based desync、MITM-powered desync。文中给出演化路径: connection-state attacks → AWS ALB 意外走私 → early-read 检测 connection-locked CL.TE → CL.0 浏览器兼容 → H2.0 → CSD 方法论 → pause-based desync → MITM-powered desync, 明确建立在 2019 与 2021 工作之上。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"方法论复用并扩张: 把 2019/2021 的前后端走私思路迁移到客户端, 关键认识是'走私无需头混淆、符合规范的请求亦可触发可被浏览器利用的反同步'。工具同步更新(HTTP Request Smuggler 增 CSD 检测与 connection-state probe, Turbo Intruder 增 pause 参数), 并提供 Web Security Academy 免费 lab。CVE 反馈链密集(CVE-2022-20713/22720/23959), 赏金 $17,500 捐出, 显示以厂商反馈校准技术有效性的持续习惯。\",\n      \"short_quote\": \"I'll show you how to turn your victim's web browser into a desync delivery platform\",\n      \"source\": {\n        \"title\": \"Browser-Powered Desync Attacks: A New Frontier in HTTP Request Smuggling\",\n        \"url\": \"https://portswigger.net/research/browser-powered-desync-attacks\",\n        \"published\": \"2022-08-10\",\n        \"source_type\": \"research_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"albinowax-works-005\",\n      \"date\": \"2023-08-09\",\n      \"claim\": \"2023 年 James Kettle 发表 Smashing the State Machine: the true potential of web race conditions, 提出 single-packet attack——将 20–30 个 HTTP/2 请求的最终帧合并进单个 TCP 包以消除网络抖动, 并把竞态分类为 limit-overrun 之外的多端点、单端点、对象遮蔽、延迟碰撞等类。该技术由其 HTTP/1.1 last-byte sync 演化而来, 并借鉴 2020 USENIX Timeless Timing Attacks; 文中自述 2016 年 Josip Franjković 的 Facebook 竞态因当时缺乏技术手段被搁置七年, 直至 single-packet attack 成形后得以解释。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"目标难度升至时序竞态: 把单包攻击作为通用原语, 复用既有工具(Turbo Intruder 增 single-packet 模板与 race-single-packet-attack.py, Burp Repeater 增并行发送组)。体现跨年长期回访未解问题的习惯(2016→2023), 并明确吸收外部学术成果(2020 USENIX)与同行发现(Franjković), 区分原创与借鉴, 显示以公开学术与同行工作为输入而非孤立研究的复盘方式。\",\n      \"short_quote\": \"every endpoint might be sending an application through invisible sub-states.\",\n      \"source\": {\n        \"title\": \"Smashing the state machine: the true potential of web race conditions\",\n        \"url\": \"https://portswigger.net/research/smashing-the-state-machine\",\n        \"published\": \"2023-08-09\",\n        \"source_type\": \"research_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"albinowax-works-006\",\n      \"date\": \"2016-2023\",\n      \"claim\": \"James Kettle 在 2016 至 2023 年间的 writeup 普遍伴随工具建设与公开发表: 自建并持续维护 Turbo Intruder(2021 自写 HTTP/2 栈、2022 pause 参数、2023 single-packet attack)、HTTP Request Smuggler(2019 创建、2021 H2 检测、2022 CSD 检测)、Param Miner(2021 用于猜测内部头名), 多项检测能力被并入 Burp Suite 核心扫描器; 工具均开源, 并以 PortSwigger Web Security Academy 免费 lab 复现关键漏洞。Black Hat USA 与 DEF CON 演讲为固定发表渠道。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"工具作为研究副产物形成正反馈: 每篇 writeup 对应工具升级, 工具反过来支撑下一轮更难目标, 构成可复用的研究基础设施。开源与免费 lab 显示其将研究方法工具化、可传播化的习惯; 通过 Burp Scanner 集成使方法论被规模化采用, 提供持续的实战反馈。Black Hat/DEF CON 与 PortSwigger blog 的组合构成稳定的公开发表节奏。\",\n      \"source\": {\n        \"title\": \"PortSwigger Research — James Kettle 作者页与各 writeup 工具说明\",\n        \"url\": \"https://portswigger.net/research/james-kettle\",\n        \"published\": \"2016-2023\",\n        \"source_type\": \"research_index\",\n        \"level\": \"first_hand_other\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"索引页 https://portswigger.net/research 不在逐篇条目上标注作者, 与作者页 https://portswigger.net/research/james-kettle 列出的 Favourite Papers 存在署名粒度差异; 处理方式: 索引页仅作 lead_only 线索, 逐篇作者以具体 writeup 页面正文署名为准, 不构成内容冲突。\",\n    \"2022 Browser-Powered Desync 页面标注 updated 2025-09-03, 原始发布日为 2022-08-10; 处理方式: 以原始发布日为 date, 更新事实记入说明, 不影响技术演化时间线。\",\n    \"WebSearch 调用返回异常响应(声明无搜索能力并给出训练数据式概述), 与工具预期行为不符; 处理方式: 不采用其任何内容作为证据, 全部结论以 WebFetch 成功抓取的一手页面为准, 不计入 contradictions 实质内容。\"\n  ],\n  \"gaps\": [\n    \"2013 年最长公共子序列正则差分原型无公开链接, 仅在 2016 writeup 中转述, 无法独立核验其细节与失败原因。\",\n    \"未抓取 2024–2026 年最新 writeup: 作者页 Favourite Papers 仅列至 2023, 索引页列出 2025-2026 文章(如 The Fragile Lock: Novel Bypasses For SAML Authentication, 2025-12-10; CSS: the bomb inside your inbox, 2026-08-06)但未署名, 因受 8 次工具调用上限与逐篇核验要求限制未逐一确认作者, 留作缺口。\",\n    \"未独立核验导师或同伴关系: 2023 writeup 提及借鉴 Josip Franjković 2016 Facebook 发现与 2020 USENIX Timeless Timing Attacks 论文, 但未发现其明确导师或固定合作者的公开材料。\",\n    \"演讲材料(speaker 页/Slides)未单独抓取; 按任务要求, 会议 speaker 页仅能证明演讲事实, 不能单独证明成长机制, 故不作为独立证据, 相应的演讲事实仅在 source_type 中隐含, 未单列条目。\",\n    \"赏金与捐款数额(2019 PayPal $18,900 后 $20,000; 2021 Netflix/Atlassian/Verizon 等超 50% 捐出; 2022 $17,500 全捐)为作者在 writeup 内自报, 无第三方财务核验; 标记为作者一手自述。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "933d072b69eaf209e8be60f96c799888343e04fec82a27846c88196739d84657",
+        "accessed_at": "2026-09-27T04:09:04.593127+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790482144593140000-james-kettle-albinowax-works.json",
+    "label": "James Kettle (albinowax):works",
+    "elapsed_seconds": 243.54,
+    "prompt_sha256": "7e9f1f2f8f8d03c1b1efd3b1c7e15841b5723768a68879611d5a4d0fbae88ec1",
+    "num_turns": 19,
+    "total_cost_usd": 0.665362,
+    "usage": {
+      "input_tokens": 22872,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 211776,
+      "output_tokens": 6932,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 29366,
+        "outputTokens": 15396,
+        "cacheReadInputTokens": 267264,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.665362,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

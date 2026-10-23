@@ -1,0 +1,403 @@
+{
+  "person": "Qian Chen",
+  "expertise": [
+    "嵌入式与网络设备固件漏洞分析（Synology NAS、MikroTik RouterOS、NETGEAR、ASUS 路由器、FortiGate 防火墙）",
+    "二层发现协议（CDP/LLDP）漏洞的系统化静态分析与跨厂商扩展",
+    "基于缓冲区溢出（含堆溢出）与整数溢出的代码执行利用",
+    "补丁比对定位漏洞与利用重建（patch diffing）",
+    "嵌入式固件仿真调试（QEMU、Qiling/Unicorn 混合仿真）",
+    "协议解析工具建设（Wireshark 插件、去混淆工具 deflat）"
+  ],
+  "stages": [
+    {
+      "period": "2019-2020",
+      "stage": "起步阶段：消费级设备研究与工程记录惯例形成",
+      "capability_change": "以下能力成长叙述锚定于 cq674350529 账号持有者（GitHub/博客/Medium/X handle 字符串一致），与姓名 Qian Chen 的唯一对应仅来自编排器 person_json 输入，未经一手来源独立确认（GitHub display name 为 CQ，README 不含姓名 Qian Chen）。此阶段将 Synology NAS 设备研究整理为 POC 2019 会议演讲并在本人 GitHub 仓库归档，并开始记录 QEMU 仿真中的具体工程问题，形成将研究产出整理为会议演讲材料并以本人仓库 PDF 归档的可复用惯例，后续每年延续；同期出现固件仿真工程问题的早期记录。",
+      "evidence_ids": [
+        "qc-pub-01",
+        "qc-pub-02",
+        "qc-ext-006"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2021-2022",
+      "stage": "系统化研究阶段：按服务逐一拆解设备族与跨厂商协议扩展",
+      "capability_change": "对单一设备族（Synology NAS）按服务逐项完成协议解析与漏洞分析后，迁移至同族其他服务或同类协议，再跨厂商扩展，形成系统化研究路径；自研 Wireshark 插件 syno_finder 解析 finder 协议（9999/udp）。同时以 Armis Labs 的 CDPwn 为起点，先验证 CDP 漏洞修复情况并扩展发现，再迁移到更具通用性的 LLDP，研究命名 LCDPwn 即 Learn from CDPwn。LCDPwn 项目页自报研究规模（作者自报数值，未经逐厂商 advisory 核验，见 evidence_json.gaps）：约 30 家厂商约 70 款网络设备、CDP 端约 20 个 Cisco 设备漏洞、LLDP 端约 50 个漏洞，项目页逐一列出 57 个 CVE ID（CVE-2020-3505 至 CVE-2023-20047 区间），未显式声明总数 58。研究对象由消费级 NAS 扩展至 MikroTik RouterOS IPC 消息机制与企业级二层协议。",
+      "evidence_ids": [
+        "qc-pub-03",
+        "qc-pub-04",
+        "qc-ext-003",
+        "qc-ext-004",
+        "qc-ext-005",
+        "qc-r1-lcdpwn-scope"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2023-2024",
+      "stage": "方法转向阶段：以补丁比对为入口定位漏洞，并基于他人 writeup 重建利用",
+      "capability_change": "因 advisory 信息有限而改以厂商补丁为入口定位漏洞，2023 年 Synology-SA-18:64 远程代码执行分析为该方法首次明确记录；该方法在 2025 年 FortiGate 研究中成为主线。同期针对 NETGEAR R7800/R8500 上 Netatalk/afpd 的 dsi_writeinit 缓冲区溢出，据博客首页摘要称自行推进至完整代码执行而非仅停留在公开 PoC 的控制流劫持（独立正文返回 HTTP 403 未复核，列为缺口）；并多次基于他人 writeup 重建分析（ASUS RT-AX56U V2 天府杯 2021 整数溢出，作者自述未发现该整数溢出漏洞，参考两篇外部 writeup 并致谢 @Yimi Hu 与 @CataLpa；Pwn2Own Tokyo 2020 Synology DS418Play Netatalk 堆溢出，致谢 DEVCORE 与 @Angelboy；MiniDLNA CVE-2023-33476，作者注明发现者为 @hyprdude，自身贡献集中在利用思路）。",
+      "evidence_ids": [
+        "qc-pub-05",
+        "qc-pub-06",
+        "qc-pub-08",
+        "qc-pub-09",
+        "qc-r1-asus-post"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2025",
+      "stage": "方法成熟阶段：补丁比对确立为系统性方法，目标升级至企业级防火墙，工具链随研究推进逐步积累",
+      "capability_change": "将 2023 年起采用的补丁比对方法确立为系统性方法论（演讲题目即 Patch Diffing, You Are My Sword），目标由消费级设备升级至企业级 FortiGate 防火墙，分析两个 N-day 漏洞；同期提出结合 QEMU user mode 与 Unicorn 的部分仿真方案用于嵌入式固件调试与漏洞验证，并公开发表，工具链随研究推进逐步积累而非一次性产出。deflat 去混淆工具仓库（基于 SnowGirls/deflat 与 Tencent Security 博客、Quarkslab 文章的方法整合）作为研究副产物公开。",
+      "evidence_ids": [
+        "qc-pub-10",
+        "qc-pub-11",
+        "qc-ext-001",
+        "qc-ext-002",
+        "qc-ext-007",
+        "qc-r1-github-identity"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "以已公开研究为起点的系统化扩展研究",
+      "starting_conditions": "以下能力成长叙述锚定于 cq674350529 账号持有者（GitHub/博客/Medium/X handle 字符串一致），与姓名 Qian Chen 的唯一对应仅来自编排器 person_json 输入，未经一手来源独立确认。起步条件为已具备单一设备族（Synology NAS）的公开研究产出与会议演讲经验，且 Armis Labs 已公开 CDPwn 研究，提供可验证的起点。",
+      "repeated_practice": "对单一设备族按服务逐项完成协议解析与漏洞分析后，迁移至同族其他服务或同类协议，再跨厂商扩展；以 CDPwn 为起点先验证 CDP 漏洞修复情况并扩展发现，再迁移到更具通用性的 LLDP；对 Synology finder 协议自研 Wireshark 插件。",
+      "feedback": "厂商补丁可得性与 advisory 信息有限迫使改以补丁为入口（advisory 信息有限为反馈点）；LCDPwn 项目页以 most of bugs are valid and have been fixed 隐含厂商确认，但未给出逐厂商 advisory 核验，故该反馈仅以作者自报呈现，未经独立核验。",
+      "intermediate_capability": "形成按服务逐项完成协议解析与漏洞分析后迁移至同族其他服务或同类协议再跨厂商扩展的系统化研究路径，以及对单一攻击面连续研究的可复用流程。",
+      "observed_outcomes": [
+        "Synology NAS 系列四部分分析（环境搭建、findhostd、iscsi_snapshot_comm_core、HTTP 请求流程）与 syno_finder Wireshark 插件",
+        "LCDPwn：项目页自报约 30 厂商约 70 设备、CDP 端约 20 个 Cisco 设备漏洞、LLDP 端约 50 个漏洞，逐一列出 57 个 CVE ID（作者自报，未经逐厂商 advisory 核验，见 evidence_json.gaps）",
+        "MikroTik RouterOS IPC 消息机制研究（POC 2022）"
+      ],
+      "evidence_ids": [
+        "qc-pub-03",
+        "qc-pub-04",
+        "qc-ext-003",
+        "qc-ext-004",
+        "qc-ext-005",
+        "qc-r1-lcdpwn-scope"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "研究覆盖面与 CVE 数量可能部分源于补丁可得性与公开材料密度而非个人能力差异；LCDPwn 数值为作者自报，未经逐厂商 advisory 核验，且本轮未能取得独立第三方来源，故能力差异的证据强度受限。"
+    },
+    {
+      "name": "基于他人 writeup 与竞赛漏洞细节的复现式重建",
+      "starting_conditions": "存在可获取的公开 writeup、advisory PoC 与竞赛漏洞细节分享渠道（DEVCORE 团队、@Angelboy、@hyprdude、@Yimi Hu、@CataLpa 等）。",
+      "repeated_practice": "在他人发现或公开 PoC 基础上承接利用思路环节并重建分析：ASUS RT-AX56U V2 天府杯 2021 整数溢出（作者自述未发现该整数溢出漏洞，参考两篇外部 writeup，重点关注漏洞利用思路）；Pwn2Own Tokyo 2020 Synology DS418Play Netatalk 堆溢出（致谢 DEVCORE 与 @Angelboy 分享细节）；MiniDLNA CVE-2023-33476（作者注明发现者为 @hyprdude，自身贡献集中在利用思路）；NETGEAR R7800/R8500 Netatalk dsi_writeinit 缓冲区溢出（据博客首页摘要称自行推进至完整代码执行而非仅停留在公开 PoC 的控制流劫持，独立正文返回 HTTP 403 未复核，列为缺口）。",
+      "feedback": "作者对原始发现权明确归属（注明发现者 @hyprdude、致谢提供细节与思路者），并自述部分漏洞非本人发现，据此可区分其贡献集中在利用思路与重建环节，而非原始发现。",
+      "intermediate_capability": "形成对已有公开材料逐层推进的利用重建能力，明确区分原始发现与利用思路贡献。",
+      "observed_outcomes": [
+        "ASUS RT-AX56U V2 整数溢出利用思路分析（2023-08-05）",
+        "MiniDLNA CVE-2023-33476 利用思路分析（2024-04-02）",
+        "Pwn2Own Tokyo 2020 Synology Netatalk 堆溢出分析（2024-09-03）",
+        "NETGEAR Netatalk dsi_writeinit 缓冲区溢出分析（2023-02-10，正文级完整代码执行表述依据博客首页摘要，独立正文未复核）"
+      ],
+      "evidence_ids": [
+        "qc-pub-06",
+        "qc-pub-08",
+        "qc-pub-09",
+        "qc-r1-asus-post"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "基于他人 writeup 的重建频次较高，也可能反映公开竞赛漏洞细节可得性而非独立发现能力；贡献集中在利用思路环节而非原始发现，能力边界需据此限定。"
+    },
+    {
+      "name": "补丁比对定位漏洞与利用重建",
+      "starting_conditions": "advisory 信息有限，厂商补丁可作为攻击面地图；已具备对单一设备族的分析与利用重建经验。",
+      "repeated_practice": "以厂商补丁为入口定位并分析漏洞：2023 年 Synology-SA-18:64 远程代码执行（因 advisory 信息有限而改以补丁比对方式定位和分析）；2025 年 FortiGate 两个 N-day 漏洞（以补丁比对为核心方法，题目即 Patch Diffing, You Are My Sword）。",
+      "feedback": "advisory 信息有限构成转向补丁比对的直接反馈点；补丁可得性使该方法可重复适用于多厂商设备。",
+      "intermediate_capability": "将补丁比对从单次工程方法确立为系统性方法论，可用于跨厂商定位 N-day 漏洞。",
+      "observed_outcomes": [
+        "Synology-SA-18:64 远程代码执行补丁比对分析（2023-01-06）",
+        "FortiGate 两个 N-day 漏洞补丁比对分析（OffByOne 2025 演讲）"
+      ],
+      "evidence_ids": [
+        "qc-pub-05",
+        "qc-pub-11",
+        "qc-ext-001"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "补丁比对方法的复用也可能受补丁可得性与目标厂商补丁发布习惯驱动，而非纯能力演进；2023 至 2025 仅两次明确记录，跨时期重复证据偏弱。"
+    },
+    {
+      "name": "工具链随研究推进逐步积累",
+      "starting_conditions": "研究初期即遇到固件仿真与协议解析的工程问题，需自建工具支持设备调试与漏洞验证。",
+      "repeated_practice": "随研究推进逐步积累工具：2020 年记录 QEMU 仿真 Illegal instruction 排障；2021 年自研 syno_finder Wireshark 插件解析 Synology finder 协议；2025 年提出结合 QEMU user mode 与 Unicorn 的部分仿真方案并公开发表；维护 deflat 去混淆工具（基于 SnowGirls/deflat 与 Tencent Security 博客、Quarkslab 文章方法整合，针对 OLLVM 控制流平坦化与虚假控制流，支持 x86/ARM）。",
+      "feedback": "工程问题（仿真异常、协议无解析器、混淆阻碍分析）直接驱动工具建设；deflat 仓库获 734 stars 与 125 forks，该数值为平台声誉指标而非能力证据，仅反映外部采用情况，不构成具体技术评价。",
+      "intermediate_capability": "将单点工程经验整理为可复用方法并公开发表，工具链成为研究基础设施而非一次性脚本。",
+      "observed_outcomes": [
+        "QEMU 仿真排障记录（2020-05-09）",
+        "syno_finder Wireshark 插件（2021）",
+        "Partial Emulation with Qiling/QEMU 部分仿真方案（2025-10-27）",
+        "deflat 去混淆工具仓库（截至抓取 734 stars/125 forks，平台声誉指标）"
+      ],
+      "evidence_ids": [
+        "qc-pub-02",
+        "qc-pub-03",
+        "qc-pub-10",
+        "qc-ext-007"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "工具建设的连续性也可能反映研究问题驱动的必然需求而非个人工具建设意愿；deflat 整合既有方法（SnowGirls/deflat、Tencent Security、Quarkslab），原创性证据不足，stars/forks 反映平台传播而非能力。"
+    }
+  ],
+  "tensions": [
+    "四阶段模型基于已公开的演讲、博客与 GitHub 仓库构建，未公开的尝试、未中稿议题与未完成研究不可见，可观测能力受公开产出幸存偏差约束，不可据以推断未公开工作的规模或失败率。",
+    "deflat 仓库 stars/forks、博客阅读量等平台声誉指标不构成能力证据，仅反映外部采用与传播情况；独立第三方技术评价（Black Hat、POC、HITB、OffByOne 官网 speaker bio/abstract 与评价）因抓取受阻（403/ECONNREFUSED/404）全部缺失。",
+    "身份锚定存在未消解的不确定性：GitHub display name 为 CQ 而非 Qian Chen，README 不含姓名 Qian Chen 或钱晨，姓名与 handle 的唯一对应仅来自编排器 person_json 输入，未经一手来源独立确认；Medium 渠道返回 404，X 返回 402，二者 handle 一致性仅由 GitHub README 链接推断。",
+    "部分贡献集中在利用思路与重建环节而非原始发现（ASUS 整数溢出自述未发现、MiniDLNA 注明发现者为 @hyprdude），与漏洞发现的能力表述存在张力，需区分发现能力与利用重建能力。"
+  ],
+  "transferable_practices": [
+    "以已公开研究为起点、先验证修复情况再扩展、再迁移到更具通用性的同类对象的研究路径，可迁移至任意可获取公开前人工作的协议或设备领域。",
+    "advisory 信息有限时改以厂商补丁为入口定位漏洞的方法，可迁移至任何按补丁发布流程修复漏洞的厂商。",
+    "对单一设备族按服务逐项拆解并自研协议解析工具（如 Wireshark 插件），再迁移同类对象的工作流，可迁移至任何二进制协议密集的嵌入式设备研究。",
+    "基于他人 writeup 与竞赛漏洞细节重建利用思路并明确标注发现权归属的协作式贡献方式，可迁移至任何有公开漏洞细节分享的研究社区。"
+  ],
+  "non_transferable_conditions": [
+    "研究覆盖的厂商与设备数量（LCDPwn 自报约 30 厂商约 70 设备、57 个 CVE ID）依赖作者个人投入与特定时期 Layer 2 协议漏洞分布，且为作者自报、未经逐厂商 advisory 核验，不可作为可迁移方法效果的已核验证据。",
+    "演讲被 Black Hat、POC、HITB、OffByOne 接受的事实依赖会议选题与年度评审，不可作为能力必然产出的条件迁移。",
+    "deflat 的 stars/forks 数值依赖 GitHub 平台传播与发布时机，属平台声誉而非能力证据，不可迁移为方法有效性。",
+    "BHEU 2023 演讲标注 cooperated 但合作者未列名，协作网络为个人特有条件，不可迁移。"
+  ],
+  "open_questions": [
+    "NETGEAR Netatalk dsi_writeinit 缓冲区溢出独立博文正文返回 HTTP 403，其完整代码执行与超越 SSD advisory PoC 控制流劫持表述未独立复核，来源粒度仍为缺口。",
+    "LCDPwn 列出的 57 个 CVE ID 未逐一从各厂商官方 advisory 核验归属与状态，本轮亦未取得独立第三方来源（WebSearch 无 web-search 能力），逐厂商 advisory 核验仍为缺口。",
+    "独立第三方对各项演讲的逐字 speaker bio/abstract/技术评价全部缺失（Black Hat 403、POC 证书错误/ECONNREFUSED、HITB 动态加载 404、OffByOne ECONNREFUSED），无法支撑 distinctive 标注。",
+    "姓名 Qian Chen 与 handle cq674350529 的唯一对应仅来自编排器输入，GitHub display name 为 CQ、README 不含姓名，Medium 渠道返回 404，身份与姓名的对应关系未一手确认。",
+    "2019 年 POC 之前未发现公开作品记录，研究起步阶段缺失；conversations/community/decisions/timeline 四维材料正文均不可读（微信验证墙、X 402），入门路径、导师、失败与转折的成长机制证据全部缺失。",
+    "BHEU 2023 演讲标注 cooperated 但未列出合作者，协作同伴或导师关系无法识别；雇主/机构归属未知（GitHub bio 仅写 IoT and protocol security researcher）。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790559624469667000-qian-chen-synthesis-v2.json",
+    "resume_response_paths": [
+      "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790559752596293000-qian-chen-synthesis-v2-resume-1.json"
+    ],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "51e0eed5-5d56-409a-ab1a-d548cc5a828d",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_z9tsv5zdcdt0gzht1i1qcfh4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T01:42:32.600870+00:00"
+      },
+      {
+        "tool_use_id": "call_2h11ry1w6kh7y1r8q5j21hd3",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "d7ffffc25886de447e77eb337f4ba43f2e82a450c70a81f38dff34bbb2aafa42",
+        "accessed_at": "2026-09-28T01:42:32.600886+00:00"
+      },
+      {
+        "tool_use_id": "call_4s9m4n2g7hcdtxhk2c1nz7wf",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "7eb62e720468ab93a4b7d1779a8ffefc2f2e323fb8c61e26307439c1d87a914a",
+        "accessed_at": "2026-09-28T01:42:32.600893+00:00"
+      },
+      {
+        "tool_use_id": "call_lxx3edd9dnnex49zll8ubl6q",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "33d8d953f2b4abe2ca17b886cb33790aa1117aa087ad19f26353f736522150b8",
+        "accessed_at": "2026-09-28T01:42:32.600947+00:00"
+      },
+      {
+        "tool_use_id": "call_1z3333i1m7pqyfsf4s5xgni6",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "764b57313245368d5c16228bb7691a89a39543bccba1bad0060948202bd8fe82",
+        "accessed_at": "2026-09-28T01:42:32.601034+00:00"
+      },
+      {
+        "tool_use_id": "call_zu76feea5f294kbit7oubugw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/inputs/revision_context.json",
+          "offset": 327,
+          "limit": 62
+        },
+        "success": true,
+        "content_sha256": "b34c9a5bd89fe88a079c02980ff105f1a8834e41954aa0bdb45406df1ff3e3ec",
+        "accessed_at": "2026-09-28T01:42:32.601101+00:00"
+      },
+      {
+        "tool_use_id": "call_qig3oclm30xicec6tlhz1wyg",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/checkpoint.md",
+          "content": "# Checkpoint — Qian Chen 综合分析 v2\n\n## 任务契约\n- 节点：综合分析（synthesis v2），重建领域能力成长过程（非罗列成就）。\n- 输入：person_json、evidence_json（六维）、revision_context（R1 定向补证与纠错）。\n- 输出：output.json 须符合 output.schema.json（additionalProperties=false，不得填 _run/verification）。\n\n## 证据可用性盘点\n- 可用作实质证据（documented/inferred 且 verified_in_run=true）：\n  - works：qc-pub-01,02,03,04,05,06,08,09,10,11\n  - external：qc-ext-001,002,003,004,005,006,007(inferred),008\n  - targeted：qc-r1-asus-post, qc-r1-lcdpwn-scope, qc-r1-github-identity\n- 不可用作实质证据：\n  - qc-pub-07（作废，由 qc-r1-asus-post 替代）—— 综合中一律不引用\n  - qc-ext-009（verified_in_run=false，status=unknown）—— 仅作\"独立第三方评价缺失\"缺口标记，不放入 evidence_ids\n  - conversations/community/decisions/timeline 各 item（unknown/lead_only，正文不可读）—— 不作实质证据\n\n## 修订指令落实映射\n| 指令 | 落实位置 |\n|---|---|\n| RR1 深耕→长周期系统化研究/连续研究 | M0.name 用中性表述；全文不用\"深耕\" |\n| RR2 沉淀→随研究推进逐步积累/将单点工程经验整理为可复用方法并公开发表 | M3（工具链机制）repeated_practice/intermediate_capability；stage[3].capability_change |\n| RR3 由点及面/由广而深→按服务逐项完成后迁移同族/同类再跨厂商扩展 | M0.name/intermediate_capability；stage[1].capability_change |\n| RR4 expertise 删除\"栈\"→缓冲区溢出（含堆溢出）与整数溢出 | expertise 列表 |\n| RR5 LCDPwn 58 CVE→57 个 CVE ID（作者自报，未逐厂商核验）；30 厂商/70 设备标注自报 | stage[1].capability_change、M0.observed_outcomes/feedback、M0.alternative_explanation |\n| RR6 删除 M0 distinctive，仅留 repeated/generative | M0.validation_tests |\n| RR7 幸存者偏差 + deflat stars/forks 标注平台声誉 | tensions（无 biases 字段，schema additionalProperties=false）+ M3.feedback |\n| RR8 身份锚定限定 | stage[0].capability_change 首句 + M0.starting_conditions 首句 |\n| CI2 qc-pub-07→qc-r1-asus-post；qc-pub-06 正文级判断标注\"首页摘要/独立正文 403 未复核\" | stage[2].capability_change、M1.repeated_practice |\n\n## 结构决策\n- 4 阶段（与修订上下文 stage[1]/[2]/[3] 索引对齐）：2019-2020 / 2021-2022 / 2023-2024 / 2025\n- 4 主机制（M0 系统化扩展/M1 基于他人 writeup 重建/M2 补丁比对/M3 工具链积累含 deflat）\n  - deflat 折入 M3（满足约束#1 的 2/3 准则；单独成机制重复练习证据过弱）；RR7 的 stars/forks 标注在 M3.feedback 落实\n- tensions 承接 biases 内容（survivorship + 平台声誉），因 schema 无 biases 字段\n\n## 待办\n- 写入 output.json，逐字段对照 schema 校验。\n"
+        },
+        "success": true,
+        "content_sha256": "7eab74f9d921ad39d18342ca074966af6ae427dc174c69f8313831a675011c5b",
+        "accessed_at": "2026-09-28T01:42:32.601921+00:00"
+      },
+      {
+        "tool_use_id": "call_l3u7rr7lgoxyqdbt83ugmrhp",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/output.json",
+          "content": "{\n  \"person\": \"Qian Chen\",\n  \"expertise\": [\n    \"嵌入式与网络设备固件漏洞分析（Synology NAS、MikroTik RouterOS、NETGEAR、ASUS 路由器、FortiGate 防火墙）\",\n    \"二层发现协议（CDP/LLDP）漏洞的系统化静态分析与跨厂商扩展\",\n    \"基于缓冲区溢出（含堆溢出）与整数溢出的代码执行利用\",\n    \"补丁比对定位漏洞与利用重建（patch diffing）\",\n    \"嵌入式固件仿真调试（QEMU、Qiling/Unicorn 混合仿真）\",\n    \"协议解析工具建设（Wireshark 插件、去混淆工具 deflat）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2019-2020\",\n      \"stage\": \"起步阶段：消费级设备研究与工程记录惯例形成\",\n      \"capability_change\": \"以下能力成长叙述锚定于 cq674350529 账号持有者（GitHub/博客/Medium/X handle 字符串一致），与姓名 Qian Chen 的唯一对应仅来自编排器 person_json 输入，未经一手来源独立确认（GitHub display name 为 CQ，README 不含姓名 Qian Chen）。此阶段将 Synology NAS 设备研究整理为 POC 2019 会议演讲并在本人 GitHub 仓库归档，并开始记录 QEMU 仿真中的具体工程问题，形成\"研究产出整理为会议演讲材料并以本人仓库 PDF 归档\"的可复用惯例，后续每年延续；同期出现固件仿真工程问题的早期记录。\",\n      \"evidence_ids\": [\"qc-pub-01\", \"qc-pub-02\", \"qc-ext-006\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2021-2022\",\n      \"stage\": \"系统化研究阶段：按服务逐一拆解设备族与跨厂商协议扩展\",\n      \"capability_change\": \"对单一设备族（Synology NAS）按服务逐项完成协议解析与漏洞分析后，迁移至同族其他服务或同类协议，再跨厂商扩展，形成系统化研究路径；自研 Wireshark 插件 syno_finder 解析 finder 协议（9999/udp）。同时以 Armis Labs 的 CDPwn 为起点，先验证 CDP 漏洞修复情况并扩展发现，再迁移到更具通用性的 LLDP，研究命名 LCDPwn 即 Learn from CDPwn。LCDPwn 项目页自报研究规模（作者自报数值，未经逐厂商 advisory 核验，见 evidence_json.gaps）：约 30 家厂商约 70 款网络设备、CDP 端约 20 个 Cisco 设备漏洞、LLDP 端约 50 个漏洞，项目页逐一列出 57 个 CVE ID（CVE-2020-3505 至 CVE-2023-20047 区间），未显式声明总数 58。研究对象由消费级 NAS 扩展至 MikroTik RouterOS IPC 消息机制与企业级二层协议。\",\n      \"evidence_ids\": [\"qc-pub-03\", \"qc-pub-04\", \"qc-ext-003\", \"qc-ext-004\", \"qc-ext-005\", \"qc-r1-lcdpwn-scope\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023-2024\",\n      \"stage\": \"方法转向阶段：以补丁比对为入口定位漏洞，并基于他人 writeup 重建利用\",\n      \"capability_change\": \"因 advisory 信息有限而改以厂商补丁为入口定位漏洞，2023 年 Synology-SA-18:64 远程代码执行分析为该方法首次明确记录；该方法在 2025 年 FortiGate 研究中成为主线。同期针对 NETGEAR R7800/R8500 上 Netatalk/afpd 的 dsi_writeinit 缓冲区溢出，据博客首页摘要称自行推进至完整代码执行而非仅停留在公开 PoC 的控制流劫持（独立正文返回 HTTP 403 未复核，列为缺口）；并多次基于他人 writeup 重建分析（ASUS RT-AX56U V2 天府杯 2021 整数溢出，作者自述未发现该整数溢出漏洞，参考两篇外部 writeup 并致谢 @Yimi Hu 与 @CataLpa；Pwn2Own Tokyo 2020 Synology DS418Play Netatalk 堆溢出，致谢 DEVCORE 与 @Angelboy；MiniDLNA CVE-2023-33476，作者注明发现者为 @hyprdude，自身贡献集中在利用思路）。\",\n      \"evidence_ids\": [\"qc-pub-05\", \"qc-pub-06\", \"qc-pub-08\", \"qc-pub-09\", \"qc-r1-asus-post\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2025\",\n      \"stage\": \"方法成熟阶段：补丁比对确立为系统性方法，目标升级至企业级防火墙，工具链随研究推进逐步积累\",\n      \"capability_change\": \"将 2023 年起采用的补丁比对方法确立为系统性方法论（演讲题目即 Patch Diffing, You Are My Sword），目标由消费级设备升级至企业级 FortiGate 防火墙，分析两个 N-day 漏洞；同期提出结合 QEMU user mode 与 Unicorn 的部分仿真方案用于嵌入式固件调试与漏洞验证，并公开发表，工具链随研究推进逐步积累而非一次性产出。deflat 去混淆工具仓库（基于 SnowGirls/deflat 与 Tencent Security 博客、Quarkslab 文章的方法整合）作为研究副产物公开。\",\n      \"evidence_ids\": [\"qc-pub-10\", \"qc-pub-11\", \"qc-ext-001\", \"qc-ext-002\", \"qc-ext-007\", \"qc-r1-github-identity\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"以已公开研究为起点的系统化扩展研究\",\n      \"starting_conditions\": \"以下能力成长叙述锚定于 cq674350529 账号持有者（GitHub/博客/Medium/X handle 字符串一致），与姓名 Qian Chen 的唯一对应仅来自编排器 person_json 输入，未经一手来源独立确认。起步条件为已具备单一设备族（Synology NAS）的公开研究产出与会议演讲经验，且 Armis Labs 已公开 CDPwn 研究，提供可验证的起点。\",\n      \"repeated_practice\": \"对单一设备族按服务逐项完成协议解析与漏洞分析后，迁移至同族其他服务或同类协议，再跨厂商扩展；以 CDPwn 为起点先验证 CDP 漏洞修复情况并扩展发现，再迁移到更具通用性的 LLDP；对 Synology finder 协议自研 Wireshark 插件。\",\n      \"feedback\": \"厂商补丁可得性与 advisory 信息有限迫使改以补丁为入口（advisory 信息有限为反馈点）；LCDPwn 项目页以\"most of bugs are valid and have been fixed\"隐含厂商确认，但未给出逐厂商 advisory 核验，故该反馈仅以作者自报呈现，未经独立核验。\",\n      \"intermediate_capability\": \"形成按服务逐项完成协议解析与漏洞分析后迁移至同族其他服务或同类协议再跨厂商扩展的系统化研究路径，以及对单一攻击面连续研究的可复用流程。\",\n      \"observed_outcomes\": [\n        \"Synology NAS 系列四部分分析（环境搭建、findhostd、iscsi_snapshot_comm_core、HTTP 请求流程）与 syno_finder Wireshark 插件\",\n        \"LCDPwn：项目页自报约 30 厂商约 70 设备、CDP 端约 20 个 Cisco 设备漏洞、LLDP 端约 50 个漏洞，逐一列出 57 个 CVE ID（作者自报，未经逐厂商 advisory 核验，见 evidence_json.gaps）\",\n        \"MikroTik RouterOS IPC 消息机制研究（POC 2022）\"\n      ],\n      \"evidence_ids\": [\"qc-pub-03\", \"qc-pub-04\", \"qc-ext-003\", \"qc-ext-004\", \"qc-ext-005\", \"qc-r1-lcdpwn-scope\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"研究覆盖面与 CVE 数量可能部分源于补丁可得性与公开材料密度而非个人能力差异；LCDPwn 数值为作者自报，未经逐厂商 advisory 核验，且本轮未能取得独立第三方来源，故能力差异的证据强度受限。\"\n    },\n    {\n      \"name\": \"基于他人 writeup 与竞赛漏洞细节的复现式重建\",\n      \"starting_conditions\": \"存在可获取的公开 writeup、advisory PoC 与竞赛漏洞细节分享渠道（DEVCORE 团队、@Angelboy、@hyprdude、@Yimi Hu、@CataLpa 等）。\",\n      \"repeated_practice\": \"在他人发现或公开 PoC 基础上承接利用思路环节并重建分析：ASUS RT-AX56U V2 天府杯 2021 整数溢出（作者自述未发现该整数溢出漏洞，参考两篇外部 writeup，重点关注漏洞利用思路）；Pwn2Own Tokyo 2020 Synology DS418Play Netatalk 堆溢出（致谢 DEVCORE 与 @Angelboy 分享细节）；MiniDLNA CVE-2023-33476（作者注明发现者为 @hyprdude，自身贡献集中在利用思路）；NETGEAR R7800/R8500 Netatalk dsi_writeinit 缓冲区溢出（据博客首页摘要称自行推进至完整代码执行而非仅停留在公开 PoC 的控制流劫持，独立正文返回 HTTP 403 未复核，列为缺口）。\",\n      \"feedback\": \"作者对原始发现权明确归属（注明发现者 @hyprdude、致谢提供细节与思路者），并自述部分漏洞非本人发现，据此可区分其贡献集中在利用思路与重建环节，而非原始发现。\",\n      \"intermediate_capability\": \"形成对已有公开材料逐层推进的利用重建能力，明确区分原始发现与利用思路贡献。\",\n      \"observed_outcomes\": [\n        \"ASUS RT-AX56U V2 整数溢出利用思路分析（2023-08-05）\",\n        \"MiniDLNA CVE-2023-33476 利用思路分析（2024-04-02）\",\n        \"Pwn2Own Tokyo 2020 Synology Netatalk 堆溢出分析（2024-09-03）\",\n        \"NETGEAR Netatalk dsi_writeinit 缓冲区溢出分析（2023-02-10，正文级完整代码执行表述依据博客首页摘要，独立正文未复核）\"\n      ],\n      \"evidence_ids\": [\"qc-pub-06\", \"qc-pub-08\", \"qc-pub-09\", \"qc-r1-asus-post\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"基于他人 writeup 的重建频次较高，也可能反映公开竞赛漏洞细节可得性而非独立发现能力；贡献集中在利用思路环节而非原始发现，能力边界需据此限定。\"\n    },\n    {\n      \"name\": \"补丁比对定位漏洞与利用重建\",\n      \"starting_conditions\": \"advisory 信息有限，厂商补丁可作为攻击面地图；已具备对单一设备族的分析与利用重建经验。\",\n      \"repeated_practice\": \"以厂商补丁为入口定位并分析漏洞：2023 年 Synology-SA-18:64 远程代码执行（因 advisory 信息有限而改以补丁比对方式定位和分析）；2025 年 FortiGate 两个 N-day 漏洞（以补丁比对为核心方法，题目即 Patch Diffing, You Are My Sword）。\",\n      \"feedback\": \"advisory 信息有限构成转向补丁比对的直接反馈点；补丁可得性使该方法可重复适用于多厂商设备。\",\n      \"intermediate_capability\": \"将补丁比对从单次工程方法确立为系统性方法论，可用于跨厂商定位 N-day 漏洞。\",\n      \"observed_outcomes\": [\n        \"Synology-SA-18:64 远程代码执行补丁比对分析（2023-01-06）\",\n        \"FortiGate 两个 N-day 漏洞补丁比对分析（OffByOne 2025 演讲）\"\n      ],\n      \"evidence_ids\": [\"qc-pub-05\", \"qc-pub-11\", \"qc-ext-001\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"补丁比对方法的复用也可能受补丁可得性与目标厂商补丁发布习惯驱动，而非纯能力演进；2023 至 2025 仅两次明确记录，跨时期重复证据偏弱。\"\n    },\n    {\n      \"name\": \"工具链随研究推进逐步积累\",\n      \"starting_conditions\": \"研究初期即遇到固件仿真与协议解析的工程问题，需自建工具支持设备调试与漏洞验证。\",\n      \"repeated_practice\": \"随研究推进逐步积累工具：2020 年记录 QEMU 仿真 Illegal instruction 排障；2021 年自研 syno_finder Wireshark 插件解析 Synology finder 协议；2025 年提出结合 QEMU user mode 与 Unicorn 的部分仿真方案并公开发表；维护 deflat 去混淆工具（基于 SnowGirls/deflat 与 Tencent Security 博客、Quarkslab 文章方法整合，针对 OLLVM 控制流平坦化与虚假控制流，支持 x86/ARM）。\",\n      \"feedback\": \"工程问题（仿真异常、协议无解析器、混淆阻碍分析）直接驱动工具建设；deflat 仓库获 734 stars 与 125 forks，该数值为平台声誉指标而非能力证据，仅反映外部采用情况，不构成具体技术评价。\",\n      \"intermediate_capability\": \"将单点工程经验整理为可复用方法并公开发表，工具链成为研究基础设施而非一次性脚本。\",\n      \"observed_outcomes\": [\n        \"QEMU 仿真排障记录（2020-05-09）\",\n        \"syno_finder Wireshark 插件（2021）\",\n        \"Partial Emulation with Qiling/QEMU 部分仿真方案（2025-10-27）\",\n        \"deflat 去混淆工具仓库（截至抓取 734 stars/125 forks，平台声誉指标）\"\n      ],\n      \"evidence_ids\": [\"qc-pub-02\", \"qc-pub-03\", \"qc-pub-10\", \"qc-ext-007\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"工具建设的连续性也可能反映研究问题驱动的必然需求而非个人工具建设意愿；deflat 整合既有方法（SnowGirls/deflat、Tencent Security、Quarkslab），原创性证据不足，stars/forks 反映平台传播而非能力。\"\n    }\n  ],\n  \"tensions\": [\n    \"四阶段模型基于已公开的演讲、博客与 GitHub 仓库构建，未公开的尝试、未中稿议题与未完成研究不可见，可观测能力受公开产出幸存偏差约束，不可据以推断未公开工作的规模或失败率。\",\n    \"deflat 仓库 stars/forks、博客阅读量等平台声誉指标不构成能力证据，仅反映外部采用与传播情况；独立第三方技术评价（Black Hat、POC、HITB、OffByOne 官网 speaker bio/abstract 与评价）因抓取受阻（403/ECONNREFUSED/404）全部缺失。\",\n    \"身份锚定存在未消解的不确定性：GitHub display name 为 CQ 而非 Qian Chen，README 不含姓名 Qian Chen 或钱晨，姓名与 handle 的唯一对应仅来自编排器 person_json 输入，未经一手来源独立确认；Medium 渠道返回 404，X 返回 402，二者 handle 一致性仅由 GitHub README 链接推断。\",\n    \"部分贡献集中在利用思路与重建环节而非原始发现（ASUS 整数溢出自述未发现、MiniDLNA 注明发现者为 @hyprdude），与\"漏洞发现\"的能力表述存在张力，需区分发现能力与利用重建能力。\"\n  ],\n  \"transferable_practices\": [\n    \"以已公开研究为起点、先验证修复情况再扩展、再迁移到更具通用性的同类对象的研究路径，可迁移至任意可获取公开前人工作的协议或设备领域。\",\n    \"advisory 信息有限时改以厂商补丁为入口定位漏洞的方法，可迁移至任何按补丁发布流程修复漏洞的厂商。\",\n    \"对单一设备族按服务逐项拆解并自研协议解析工具（如 Wireshark 插件），再迁移同类对象的工作流，可迁移至任何二进制协议密集的嵌入式设备研究。\",\n    \"基于他人 writeup 与竞赛漏洞细节重建利用思路并明确标注发现权归属的协作式贡献方式，可迁移至任何有公开漏洞细节分享的研究社区。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"研究覆盖的厂商与设备数量（LCDPwn 自报约 30 厂商约 70 设备、57 个 CVE ID）依赖作者个人投入与特定时期 Layer 2 协议漏洞分布，且为作者自报、未经逐厂商 advisory 核验，不可作为可迁移方法效果的已核验证据。\",\n    \"演讲被 Black Hat、POC、HITB、OffByOne 接受的事实依赖会议选题与年度评审，不可作为能力必然产出的条件迁移。\",\n    \"deflat 的 stars/forks 数值依赖 GitHub 平台传播与发布时机，属平台声誉而非能力证据，不可迁移为方法有效性。\",\n    \"BHEU 2023 演讲标注 cooperated 但合作者未列名，协作网络为个人特有条件，不可迁移。\"\n  ],\n  \"open_questions\": [\n    \"NETGEAR Netatalk dsi_writeinit 缓冲区溢出独立博文正文返回 HTTP 403，其\"完整代码执行\"与\"超越 SSD advisory PoC 控制流劫持\"表述未独立复核，来源粒度仍为缺口。\",\n    \"LCDPwn 列出的 57 个 CVE ID 未逐一从各厂商官方 advisory 核验归属与状态，本轮亦未取得独立第三方来源（WebSearch 无 web-search 能力），逐厂商 advisory 核验仍为缺口。\",\n    \"独立第三方对各项演讲的逐字 speaker bio/abstract/技术评价全部缺失（Black Hat 403、POC 证书错误/ECONNREFUSED、HITB 动态加载 404、OffByOne ECONNREFUSED），无法支撑 distinctive 标注。\",\n    \"姓名 Qian Chen 与 handle cq674350529 的唯一对应仅来自编排器输入，GitHub display name 为 CQ、README 不含姓名，Medium 渠道返回 404，身份与姓名的对应关系未一手确认。\",\n    \"2019 年 POC 之前未发现公开作品记录，研究起步阶段缺失；conversations/community/decisions/timeline 四维材料正文均不可读（微信验证墙、X 402），入门路径、导师、失败与转折的成长机制证据全部缺失。\",\n    \"BHEU 2023 演讲标注 cooperated 但未列出合作者，协作同伴或导师关系无法识别；雇主/机构归属未知（GitHub bio 仅写 IoT and protocol security researcher）。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "c376020eca8c768cf8d6e591c9cbae4cfdf5abf075f04098713bff97d2547406",
+        "accessed_at": "2026-09-28T01:42:32.601927+00:00"
+      },
+      {
+        "tool_use_id": "call_db6g8orog51h36f6epl0p749",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/checkpoint.md"
+        },
+        "success": true,
+        "content_sha256": "de9bccd4f33a84a291602b8e080e224579e727d17824dd09496e4d8864fbc25d",
+        "accessed_at": "2026-09-28T01:42:32.601943+00:00"
+      },
+      {
+        "tool_use_id": "call_edf6wzf40xo64756tw506lvj",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "d7ffffc25886de447e77eb337f4ba43f2e82a450c70a81f38dff34bbb2aafa42",
+        "accessed_at": "2026-09-28T01:42:32.601948+00:00"
+      },
+      {
+        "tool_use_id": "call_9kmoq2maufwxs8uh3s8sp85d",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/output.json"
+        },
+        "success": true,
+        "content_sha256": "71523b1c0be9e240c1da231b9ca8af1304b9e769dc6e35843c7ca03e92e2bc1a",
+        "accessed_at": "2026-09-28T01:42:32.601978+00:00"
+      },
+      {
+        "tool_use_id": "call_xqjh5fx00rnyrow9oz2f4jvw",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "not a real fetch",
+          "url": "file:///Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/recovery-errors.json"
+        },
+        "success": false,
+        "content_sha256": "82e45382e7d625da9fd553fe7ffad1cc3723573f619e00b822f856bfa7919749",
+        "accessed_at": "2026-09-28T01:42:32.601982+00:00"
+      },
+      {
+        "tool_use_id": "call_6tegrxdqbpf6d1p1psazyxop",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "noop",
+          "url": "https://jsonplaceholder.typicode.com/404"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-28T01:42:32.601989+00:00"
+      },
+      {
+        "tool_use_id": "call_384yp6gtya3qw6ayl6wuikbv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/output.json",
+          "offset": 42,
+          "limit": 30
+        },
+        "success": true,
+        "content_sha256": "9e970e5cc0999528d9bcfae1519202c760880eb838a4cee42882367d70d99e93",
+        "accessed_at": "2026-09-28T01:42:32.601998+00:00"
+      },
+      {
+        "tool_use_id": "call_kt2om7jmm5ff01rns7u3xh47",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/qian-chen-synthesis-v2-20260928-093346-472/output.json",
+          "content": "{\n  \"person\": \"Qian Chen\",\n  \"expertise\": [\n    \"嵌入式与网络设备固件漏洞分析（Synology NAS、MikroTik RouterOS、NETGEAR、ASUS 路由器、FortiGate 防火墙）\",\n    \"二层发现协议（CDP/LLDP）漏洞的系统化静态分析与跨厂商扩展\",\n    \"基于缓冲区溢出（含堆溢出）与整数溢出的代码执行利用\",\n    \"补丁比对定位漏洞与利用重建（patch diffing）\",\n    \"嵌入式固件仿真调试（QEMU、Qiling/Unicorn 混合仿真）\",\n    \"协议解析工具建设（Wireshark 插件、去混淆工具 deflat）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2019-2020\",\n      \"stage\": \"起步阶段：消费级设备研究与工程记录惯例形成\",\n      \"capability_change\": \"以下能力成长叙述锚定于 cq674350529 账号持有者（GitHub/博客/Medium/X handle 字符串一致），与姓名 Qian Chen 的唯一对应仅来自编排器 person_json 输入，未经一手来源独立确认（GitHub display name 为 CQ，README 不含姓名 Qian Chen）。此阶段将 Synology NAS 设备研究整理为 POC 2019 会议演讲并在本人 GitHub 仓库归档，并开始记录 QEMU 仿真中的具体工程问题，形成将研究产出整理为会议演讲材料并以本人仓库 PDF 归档的可复用惯例，后续每年延续；同期出现固件仿真工程问题的早期记录。\",\n      \"evidence_ids\": [\"qc-pub-01\", \"qc-pub-02\", \"qc-ext-006\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2021-2022\",\n      \"stage\": \"系统化研究阶段：按服务逐一拆解设备族与跨厂商协议扩展\",\n      \"capability_change\": \"对单一设备族（Synology NAS）按服务逐项完成协议解析与漏洞分析后，迁移至同族其他服务或同类协议，再跨厂商扩展，形成系统化研究路径；自研 Wireshark 插件 syno_finder 解析 finder 协议（9999/udp）。同时以 Armis Labs 的 CDPwn 为起点，先验证 CDP 漏洞修复情况并扩展发现，再迁移到更具通用性的 LLDP，研究命名 LCDPwn 即 Learn from CDPwn。LCDPwn 项目页自报研究规模（作者自报数值，未经逐厂商 advisory 核验，见 evidence_json.gaps）：约 30 家厂商约 70 款网络设备、CDP 端约 20 个 Cisco 设备漏洞、LLDP 端约 50 个漏洞，项目页逐一列出 57 个 CVE ID（CVE-2020-3505 至 CVE-2023-20047 区间），未显式声明总数 58。研究对象由消费级 NAS 扩展至 MikroTik RouterOS IPC 消息机制与企业级二层协议。\",\n      \"evidence_ids\": [\"qc-pub-03\", \"qc-pub-04\", \"qc-ext-003\", \"qc-ext-004\", \"qc-ext-005\", \"qc-r1-lcdpwn-scope\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023-2024\",\n      \"stage\": \"方法转向阶段：以补丁比对为入口定位漏洞，并基于他人 writeup 重建利用\",\n      \"capability_change\": \"因 advisory 信息有限而改以厂商补丁为入口定位漏洞，2023 年 Synology-SA-18:64 远程代码执行分析为该方法首次明确记录；该方法在 2025 年 FortiGate 研究中成为主线。同期针对 NETGEAR R7800/R8500 上 Netatalk/afpd 的 dsi_writeinit 缓冲区溢出，据博客首页摘要称自行推进至完整代码执行而非仅停留在公开 PoC 的控制流劫持（独立正文返回 HTTP 403 未复核，列为缺口）；并多次基于他人 writeup 重建分析（ASUS RT-AX56U V2 天府杯 2021 整数溢出，作者自述未发现该整数溢出漏洞，参考两篇外部 writeup 并致谢 @Yimi Hu 与 @CataLpa；Pwn2Own Tokyo 2020 Synology DS418Play Netatalk 堆溢出，致谢 DEVCORE 与 @Angelboy；MiniDLNA CVE-2023-33476，作者注明发现者为 @hyprdude，自身贡献集中在利用思路）。\",\n      \"evidence_ids\": [\"qc-pub-05\", \"qc-pub-06\", \"qc-pub-08\", \"qc-pub-09\", \"qc-r1-asus-post\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2025\",\n      \"stage\": \"方法成熟阶段：补丁比对确立为系统性方法，目标升级至企业级防火墙，工具链随研究推进逐步积累\",\n      \"capability_change\": \"将 2023 年起采用的补丁比对方法确立为系统性方法论（演讲题目即 Patch Diffing, You Are My Sword），目标由消费级设备升级至企业级 FortiGate 防火墙，分析两个 N-day 漏洞；同期提出结合 QEMU user mode 与 Unicorn 的部分仿真方案用于嵌入式固件调试与漏洞验证，并公开发表，工具链随研究推进逐步积累而非一次性产出。deflat 去混淆工具仓库（基于 SnowGirls/deflat 与 Tencent Security 博客、Quarkslab 文章的方法整合）作为研究副产物公开。\",\n      \"evidence_ids\": [\"qc-pub-10\", \"qc-pub-11\", \"qc-ext-001\", \"qc-ext-002\", \"qc-ext-007\", \"qc-r1-github-identity\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"以已公开研究为起点的系统化扩展研究\",\n      \"starting_conditions\": \"以下能力成长叙述锚定于 cq674350529 账号持有者（GitHub/博客/Medium/X handle 字符串一致），与姓名 Qian Chen 的唯一对应仅来自编排器 person_json 输入，未经一手来源独立确认。起步条件为已具备单一设备族（Synology NAS）的公开研究产出与会议演讲经验，且 Armis Labs 已公开 CDPwn 研究，提供可验证的起点。\",\n      \"repeated_practice\": \"对单一设备族按服务逐项完成协议解析与漏洞分析后，迁移至同族其他服务或同类协议，再跨厂商扩展；以 CDPwn 为起点先验证 CDP 漏洞修复情况并扩展发现，再迁移到更具通用性的 LLDP；对 Synology finder 协议自研 Wireshark 插件。\",\n      \"feedback\": \"厂商补丁可得性与 advisory 信息有限迫使改以补丁为入口（advisory 信息有限为反馈点）；LCDPwn 项目页以 most of bugs are valid and have been fixed 隐含厂商确认，但未给出逐厂商 advisory 核验，故该反馈仅以作者自报呈现，未经独立核验。\",\n      \"intermediate_capability\": \"形成按服务逐项完成协议解析与漏洞分析后迁移至同族其他服务或同类协议再跨厂商扩展的系统化研究路径，以及对单一攻击面连续研究的可复用流程。\",\n      \"observed_outcomes\": [\n        \"Synology NAS 系列四部分分析（环境搭建、findhostd、iscsi_snapshot_comm_core、HTTP 请求流程）与 syno_finder Wireshark 插件\",\n        \"LCDPwn：项目页自报约 30 厂商约 70 设备、CDP 端约 20 个 Cisco 设备漏洞、LLDP 端约 50 个漏洞，逐一列出 57 个 CVE ID（作者自报，未经逐厂商 advisory 核验，见 evidence_json.gaps）\",\n        \"MikroTik RouterOS IPC 消息机制研究（POC 2022）\"\n      ],\n      \"evidence_ids\": [\"qc-pub-03\", \"qc-pub-04\", \"qc-ext-003\", \"qc-ext-004\", \"qc-ext-005\", \"qc-r1-lcdpwn-scope\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"研究覆盖面与 CVE 数量可能部分源于补丁可得性与公开材料密度而非个人能力差异；LCDPwn 数值为作者自报，未经逐厂商 advisory 核验，且本轮未能取得独立第三方来源，故能力差异的证据强度受限。\"\n    },\n    {\n      \"name\": \"基于他人 writeup 与竞赛漏洞细节的复现式重建\",\n      \"starting_conditions\": \"存在可获取的公开 writeup、advisory PoC 与竞赛漏洞细节分享渠道（DEVCORE 团队、@Angelboy、@hyprdude、@Yimi Hu、@CataLpa 等）。\",\n      \"repeated_practice\": \"在他人发现或公开 PoC 基础上承接利用思路环节并重建分析：ASUS RT-AX56U V2 天府杯 2021 整数溢出（作者自述未发现该整数溢出漏洞，参考两篇外部 writeup，重点关注漏洞利用思路）；Pwn2Own Tokyo 2020 Synology DS418Play Netatalk 堆溢出（致谢 DEVCORE 与 @Angelboy 分享细节）；MiniDLNA CVE-2023-33476（作者注明发现者为 @hyprdude，自身贡献集中在利用思路）；NETGEAR R7800/R8500 Netatalk dsi_writeinit 缓冲区溢出（据博客首页摘要称自行推进至完整代码执行而非仅停留在公开 PoC 的控制流劫持，独立正文返回 HTTP 403 未复核，列为缺口）。\",\n      \"feedback\": \"作者对原始发现权明确归属（注明发现者 @hyprdude、致谢提供细节与思路者），并自述部分漏洞非本人发现，据此可区分其贡献集中在利用思路与重建环节，而非原始发现。\",\n      \"intermediate_capability\": \"形成对已有公开材料逐层推进的利用重建能力，明确区分原始发现与利用思路贡献。\",\n      \"observed_outcomes\": [\n        \"ASUS RT-AX56U V2 整数溢出利用思路分析（2023-08-05）\",\n        \"MiniDLNA CVE-2023-33476 利用思路分析（2024-04-02）\",\n        \"Pwn2Own Tokyo 2020 Synology Netatalk 堆溢出分析（2024-09-03）\",\n        \"NETGEAR Netatalk dsi_writeinit 缓冲区溢出分析（2023-02-10，正文级完整代码执行表述依据博客首页摘要，独立正文未复核）\"\n      ],\n      \"evidence_ids\": [\"qc-pub-06\", \"qc-pub-08\", \"qc-pub-09\", \"qc-r1-asus-post\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"基于他人 writeup 的重建频次较高，也可能反映公开竞赛漏洞细节可得性而非独立发现能力；贡献集中在利用思路环节而非原始发现，能力边界需据此限定。\"\n    },\n    {\n      \"name\": \"补丁比对定位漏洞与利用重建\",\n      \"starting_conditions\": \"advisory 信息有限，厂商补丁可作为攻击面地图；已具备对单一设备族的分析与利用重建经验。\",\n      \"repeated_practice\": \"以厂商补丁为入口定位并分析漏洞：2023 年 Synology-SA-18:64 远程代码执行（因 advisory 信息有限而改以补丁比对方式定位和分析）；2025 年 FortiGate 两个 N-day 漏洞（以补丁比对为核心方法，题目即 Patch Diffing, You Are My Sword）。\",\n      \"feedback\": \"advisory 信息有限构成转向补丁比对的直接反馈点；补丁可得性使该方法可重复适用于多厂商设备。\",\n      \"intermediate_capability\": \"将补丁比对从单次工程方法确立为系统性方法论，可用于跨厂商定位 N-day 漏洞。\",\n      \"observed_outcomes\": [\n        \"Synology-SA-18:64 远程代码执行补丁比对分析（2023-01-06）\",\n        \"FortiGate 两个 N-day 漏洞补丁比对分析（OffByOne 2025 演讲）\"\n      ],\n      \"evidence_ids\": [\"qc-pub-05\", \"qc-pub-11\", \"qc-ext-001\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"补丁比对方法的复用也可能受补丁可得性与目标厂商补丁发布习惯驱动，而非纯能力演进；2023 至 2025 仅两次明确记录，跨时期重复证据偏弱。\"\n    },\n    {\n      \"name\": \"工具链随研究推进逐步积累\",\n      \"starting_conditions\": \"研究初期即遇到固件仿真与协议解析的工程问题，需自建工具支持设备调试与漏洞验证。\",\n      \"repeated_practice\": \"随研究推进逐步积累工具：2020 年记录 QEMU 仿真 Illegal instruction 排障；2021 年自研 syno_finder Wireshark 插件解析 Synology finder 协议；2025 年提出结合 QEMU user mode 与 Unicorn 的部分仿真方案并公开发表；维护 deflat 去混淆工具（基于 SnowGirls/deflat 与 Tencent Security 博客、Quarkslab 文章方法整合，针对 OLLVM 控制流平坦化与虚假控制流，支持 x86/ARM）。\",\n      \"feedback\": \"工程问题（仿真异常、协议无解析器、混淆阻碍分析）直接驱动工具建设；deflat 仓库获 734 stars 与 125 forks，该数值为平台声誉指标而非能力证据，仅反映外部采用情况，不构成具体技术评价。\",\n      \"intermediate_capability\": \"将单点工程经验整理为可复用方法并公开发表，工具链成为研究基础设施而非一次性脚本。\",\n      \"observed_outcomes\": [\n        \"QEMU 仿真排障记录（2020-05-09）\",\n        \"syno_finder Wireshark 插件（2021）\",\n        \"Partial Emulation with Qiling/QEMU 部分仿真方案（2025-10-27）\",\n        \"deflat 去混淆工具仓库（截至抓取 734 stars/125 forks，平台声誉指标）\"\n      ],\n      \"evidence_ids\": [\"qc-pub-02\", \"qc-pub-03\", \"qc-pub-10\", \"qc-ext-007\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"工具建设的连续性也可能反映研究问题驱动的必然需求而非个人工具建设意愿；deflat 整合既有方法（SnowGirls/deflat、Tencent Security、Quarkslab），原创性证据不足，stars/forks 反映平台传播而非能力。\"\n    }\n  ],\n  \"tensions\": [\n    \"四阶段模型基于已公开的演讲、博客与 GitHub 仓库构建，未公开的尝试、未中稿议题与未完成研究不可见，可观测能力受公开产出幸存偏差约束，不可据以推断未公开工作的规模或失败率。\",\n    \"deflat 仓库 stars/forks、博客阅读量等平台声誉指标不构成能力证据，仅反映外部采用与传播情况；独立第三方技术评价（Black Hat、POC、HITB、OffByOne 官网 speaker bio/abstract 与评价）因抓取受阻（403/ECONNREFUSED/404）全部缺失。\",\n    \"身份锚定存在未消解的不确定性：GitHub display name 为 CQ 而非 Qian Chen，README 不含姓名 Qian Chen 或钱晨，姓名与 handle 的唯一对应仅来自编排器 person_json 输入，未经一手来源独立确认；Medium 渠道返回 404，X 返回 402，二者 handle 一致性仅由 GitHub README 链接推断。\",\n    \"部分贡献集中在利用思路与重建环节而非原始发现（ASUS 整数溢出自述未发现、MiniDLNA 注明发现者为 @hyprdude），与漏洞发现的能力表述存在张力，需区分发现能力与利用重建能力。\"\n  ],\n  \"transferable_practices\": [\n    \"以已公开研究为起点、先验证修复情况再扩展、再迁移到更具通用性的同类对象的研究路径，可迁移至任意可获取公开前人工作的协议或设备领域。\",\n    \"advisory 信息有限时改以厂商补丁为入口定位漏洞的方法，可迁移至任何按补丁发布流程修复漏洞的厂商。\",\n    \"对单一设备族按服务逐项拆解并自研协议解析工具（如 Wireshark 插件），再迁移同类对象的工作流，可迁移至任何二进制协议密集的嵌入式设备研究。\",\n    \"基于他人 writeup 与竞赛漏洞细节重建利用思路并明确标注发现权归属的协作式贡献方式，可迁移至任何有公开漏洞细节分享的研究社区。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"研究覆盖的厂商与设备数量（LCDPwn 自报约 30 厂商约 70 设备、57 个 CVE ID）依赖作者个人投入与特定时期 Layer 2 协议漏洞分布，且为作者自报、未经逐厂商 advisory 核验，不可作为可迁移方法效果的已核验证据。\",\n    \"演讲被 Black Hat、POC、HITB、OffByOne 接受的事实依赖会议选题与年度评审，不可作为能力必然产出的条件迁移。\",\n    \"deflat 的 stars/forks 数值依赖 GitHub 平台传播与发布时机，属平台声誉而非能力证据，不可迁移为方法有效性。\",\n    \"BHEU 2023 演讲标注 cooperated 但合作者未列名，协作网络为个人特有条件，不可迁移。\"\n  ],\n  \"open_questions\": [\n    \"NETGEAR Netatalk dsi_writeinit 缓冲区溢出独立博文正文返回 HTTP 403，其完整代码执行与超越 SSD advisory PoC 控制流劫持表述未独立复核，来源粒度仍为缺口。\",\n    \"LCDPwn 列出的 57 个 CVE ID 未逐一从各厂商官方 advisory 核验归属与状态，本轮亦未取得独立第三方来源（WebSearch 无 web-search 能力），逐厂商 advisory 核验仍为缺口。\",\n    \"独立第三方对各项演讲的逐字 speaker bio/abstract/技术评价全部缺失（Black Hat 403、POC 证书错误/ECONNREFUSED、HITB 动态加载 404、OffByOne ECONNREFUSED），无法支撑 distinctive 标注。\",\n    \"姓名 Qian Chen 与 handle cq674350529 的唯一对应仅来自编排器输入，GitHub display name 为 CQ、README 不含姓名，Medium 渠道返回 404，身份与姓名的对应关系未一手确认。\",\n    \"2019 年 POC 之前未发现公开作品记录，研究起步阶段缺失；conversations/community/decisions/timeline 四维材料正文均不可读（微信验证墙、X 402），入门路径、导师、失败与转折的成长机制证据全部缺失。\",\n    \"BHEU 2023 演讲标注 cooperated 但未列出合作者，协作同伴或导师关系无法识别；雇主/机构归属未知（GitHub bio 仅写 IoT and protocol security researcher）。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "9a4deded9c0a5e2e144cb5fec19d0fdf57b94e0d7955551146251e9286bff154",
+        "accessed_at": "2026-09-28T01:42:32.602001+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790559752602015000-qian-chen-synthesis-v2.json",
+    "label": "Qian Chen:synthesis:v2",
+    "elapsed_seconds": 526.12,
+    "prompt_sha256": "75b4e1fae55af4ee685b84192d3e1cbda24f7484d68fe9de65928ea493f8b0a7",
+    "num_turns": 17,
+    "total_cost_usd": 1.397844,
+    "usage": {
+      "input_tokens": 14969,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 436416,
+      "output_tokens": 7228,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 14969,
+        "outputTokens": 7228,
+        "cacheReadInputTokens": 436416,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.473753,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

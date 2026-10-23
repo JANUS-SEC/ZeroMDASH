@@ -1,0 +1,672 @@
+{
+  "works": {
+    "person": "Ben Hawkes",
+    "dimension": "公开作品与技术演化",
+    "identity_check": "种子记录 rank 65、name=Ben Hawkes、primary_focus=浏览器与图片解析漏洞、social=x.com/benhawkes、writeup=blog.isosceles.com/the-webp-0day。抓取的 blog.isosceles.com 多篇文章（Exploit Equivalence Classes 2023-08-23、The WebP 0day 2023-09-21、OpenSSH Backdoors 2024-08-23）正文署名均为 Ben Hawkes；projectzero.google 的 Attacking the Qualcomm Adreno GPU（2020-09-08）署名为 Ben Hawkes, Project Zero。其中 WebP 0day（CVE-2023-4863，libwebp VP8L 解析器堆溢出）属图片解析漏洞，与种子 primary_focus 吻合，且该 URL 与种子 writeup_evidence 完全一致。未发现与其他名为 Ben Hawkes 者的混淆；x.com/benhawkes 与 blog.isosceles.com 指向同一作者（种子与抓取正文互相印证）。身份核对待编排器复核。",
+    "items": [
+      {
+        "id": "BH-WORKS-01",
+        "date": "2020-09-08",
+        "claim": "Ben Hawkes 在 Google Project Zero 期间发表 Attacking the Qualcomm Adreno GPU，分析 CVE-2020-11179：Qualcomm Adreno GPU 的 KGSL 内核驱动中 scratch buffer 为各 GPU context 共享的全局映射，可被用户提交的 GPU 命令写入；scratch buffer 存储 ringbuffer 的读指针 RPTR，攻击者通过 CP_MEM_WRITE 写入恶意 RPTR，使 CPU 与 GPU 对 ringbuffer 布局的理解失步，进而覆盖未处理的 ringbuffer 条目，竞争性地在受保护模式关闭的 context 切换窗口内插入受控间接跳转，关闭受保护模式后改写 GPU 的 TTBR0 指向伪造页表，获得物理内存任意读写并最终改写 sys_call_table 实现内核代码执行。该问题是对 CVE-2019-10567 补丁的绕过：原补丁随机化了 scratch buffer 的 GPU 地址并阻止用户性能分析命令直接出现在 ringbuffer 上，但 scratch buffer 仍可被用户命令写入。作者明确声明研究建立在 Guang Gong 报告 CVE-2019-10567 及其 Black Hat 论文之上，并发布 PoC Adrenaline（P0 Issue 2052）。",
+        "status": "documented",
+        "growth_signal": "目标难度与硬件状态机介入。研究方法为硬件/驱动逆向结合竞争窗口手工构造 PoC（buddy allocator 喷射定位已知物理地址、原始 GPU 命令序列经 IOCTL_KGSL_GPU_COMMAND 提交）。复盘方式为对前序补丁有效性的质疑：作者指出原补丁的有效性未被进一步检验，并把高质量 bug 报告视为后续挖掘的洞察来源，主张对 GPU 安全关键组件提高透明度。同伴/前置工作明确为 Guang Gong 的 Black Hat 论文。",
+        "short_quote": "This research was built upon the work by Guang Gong.",
+        "source": {
+          "title": "Attacking the Qualcomm Adreno GPU",
+          "url": "https://projectzero.google/2020/09/attacking-qualcomm-adreno-gpu.html",
+          "published": "2020-09-08",
+          "source_type": "vulnerability writeup (vendor research blog, Project Zero)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_bhwnz3l4gacjjqk5rfyme6oh",
+          "accessed_at": "2026-09-27T21:05:22.033887+00:00",
+          "content_sha256": "851846dfd72c696beae6924a9715128875156e4b16d9e75a18ef79e14639b522"
+        }
+      },
+      {
+        "id": "BH-WORKS-02",
+        "date": "2023-08-23",
+        "claim": "Ben Hawkes 在独立博客 blog.isosceles.com 发表 Exploit Equivalence Classes，提出将集合论中的等价类概念应用于漏洞可利用性评估：若新发现漏洞在与既有已利用漏洞相同的平台条件、缓解措施与环境下降级产生相同原语（如 JavaScript 引擎利用中的 addrof/fakeobj），则可归入同一 exploit 等价类，无需重新编写完整利用即可判定可利用性。作者援引 Saelo 关于 addrof/fakeobj 原语的 Phrack 文章与 v8 sandbox、Brandon Azad 的 PAC bypass、Microsoft 的 Exploitability Index 作为既有框架参照。作者自述背景为学习数学、短暂尝试密码学后转向认为更易入手的 hacking，并据此尝试将抽象数学概念映射到安全实践，同时承认该映射的不完美。",
+        "status": "documented",
+        "growth_signal": "研究方法从单一漏洞挖掘抽象为可复用的可利用性判定框架。引用同行（Saelo、Brandon Azad）的 primitive 与 bypass 工作作为方法论基础，体现对社区既有成果的吸收与再结构化。复盘方式为对现有可利用性标注体系（如 'high risk' / 'exploitation less likely'）的系统性质疑。",
+        "short_quote": "An exploit is just a collection of primitives that are cleverly stitched together to do something that we all agree is unexpected.",
+        "source": {
+          "title": "Exploit Equivalence Classes",
+          "url": "https://blog.isosceles.com/exploit-equivalence-classes/",
+          "published": "2023-08-23",
+          "source_type": "methodology essay (personal research blog)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_u5a268f8qs2cgiazlny2qhl0",
+          "accessed_at": "2026-09-27T21:05:22.033898+00:00",
+          "content_sha256": "1fda1f9ef1f2af1a7e5af3c6a43962139efb3d6a41c809c1439594a7a604af97"
+        }
+      },
+      {
+        "id": "BH-WORKS-03",
+        "date": "2023-09-21",
+        "claim": "Ben Hawkes 发表 The WebP 0day，分析 CVE-2023-4863：libwebp 的 VP8L 无损解码路径中 BuildHuffmanTable 函数存在堆缓冲区溢出。预计算缓冲区大小源自 Mark Adler 的 enough 工具（计算有效且完整 Huffman 码的最大表大小），但代码未考虑某些在一致性检查拒绝它们之前仍被部分处理的无效 Huffman 树；攻击者依次构造两个不同字母表大小（280 与 256）的最大化有效 Huffman 表，再为第三个字母表大小（40）构造一种特定的无效 Huffman 树，使 ReplicateValue 操作在最终节点数一致性检查之前越界写入。该漏洞疑与 Apple CVE-2023-41064（BLASTPASS，归因于 NSO Group Pegasus）同源。作者约用三个全天工作，与 @mistymntncop 协作（后者提供 WebP 构造 harness），使用 ASan 检测，参考 Mark Adler 的 enough 工具与 mistymntncop 构造 harness；OSS-Fuzz 虽持续模糊 libwebp 但未发现此问题。作者推断该漏洞系通过人工代码审计发现，并批评厂商扣留技术细节造成的攻防不对称、以及业界对模糊测试在复杂解析器安全保证上的过度依赖，主张加大人工源码审计与沙箱化投入。",
+        "status": "documented",
+        "growth_signal": "目标难度为前置条件极其复杂的解析器内存安全（需连续构造四张最大化有效 Huffman 表后再构造特定无效表）。研究方法为工具链辅助的人工审计：组合 enough 工具、第三方 WebP 构造 harness 与 ASan，但仍归结为对 Huffman 表分配路径的人工追踪。同伴为 @mistymntncop（协作构造与测试）。复盘方式为对模糊测试覆盖能力的系统性批评与对人工审计持久性的强调，并对厂商信息不对称提出公开批评，呈现从纯技术挖掘向流程与防御架构反思的转向。",
+        "short_quote": "this format is incredibly complex and fragile, and the preconditions to trigger this issue are immense",
+        "source": {
+          "title": "The WebP 0day",
+          "url": "https://blog.isosceles.com/the-webp-0day/",
+          "published": "2023-09-21",
+          "source_type": "vulnerability writeup (personal research blog)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_h668w2y8bvwkae94wmkm776s",
+          "accessed_at": "2026-09-27T21:05:22.033778+00:00",
+          "content_sha256": "7a7d2fe3278c67e967d722f67ad16ab6a3ba253508b35f30e226be830277a9a4"
+        }
+      },
+      {
+        "id": "BH-WORKS-04",
+        "date": "2024-08-23",
+        "claim": "Ben Hawkes 发表 OpenSSH Backdoors，对 2002 年 ftp.openbsd.org 上被植入木马的 OpenSSH 发行文件事件与 2024 年针对 systemd 系 Linux 发行版的 xz-utils/liblzma 后门进行对比分析，考察两次供应链攻击的相似性与差异及对供应链安全的启示。文章未引用具体 CVE 编号，但讨论 exim 相关漏洞（关联 Qualys 的 21Nails 研究），并指出 zlib.net 托管基础设施上 CPanel、Pure-FTPD、Apache httpd、Dovecot 等攻击面。作者描述的方法包括校验和验证（2002 攻击经 FreeBSD ports 系统的校验和差异被检测）、构建系统挂钩（两次攻击均针对构建基础设施）、仅二进制测试文件载荷暂存与社会工程获取受信维护者身份（xz-utils），以及性能回归分析（2024 后门据此被发现）。防御方面提及 Linux Landlock 沙箱（约 250 行代码即可为 make 写一个能阻止 2002 攻击的 Landlock 沙箱）、Android 的 SELinux 与 seccomp-bpf 作为隔离示例。",
+        "status": "documented",
+        "growth_signal": "目标范围扩展至供应链与构建系统，超越单一内存安全漏洞。研究方法转为历史比较分析与防御架构讨论。复盘方式为对沙箱设计理念的修正：作者自述以往认为沙箱仅适用于处理不可信数据的代码部分，现主张在代码本身即不可信的世界中，所有代码都应遵循最小权限约束。呈现从漏洞挖掘到防御架构与系统设计的明确转向。",
+        "short_quote": "In a world where it's the code rather than the data that is untrusted, the goal should be to reorient toward system designs where all code is constrained to least privilege",
+        "source": {
+          "title": "OpenSSH Backdoors",
+          "url": "https://blog.isosceles.com/openssh-backdoors/",
+          "published": "2024-08-23",
+          "source_type": "comparative analysis essay (personal research blog)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_b4qcivye81lx70ybrm1xydpj",
+          "accessed_at": "2026-09-27T21:05:22.033911+00:00",
+          "content_sha256": "b7ea38bc3f145b5fc8193cba36f9b826856e3349b27dbd2b3f2915da34ab544b"
+        }
+      }
+    ],
+    "contradictions": [
+      "本地种子将 Ben Hawkes 的 primary_focus 标注为'浏览器与图片解析漏洞'；抓取到的最早一手作品（2020 P0 的 Adreno GPU 内核驱动研究）属移动 GPU/内核攻击而非浏览器或图片解析。该标注与抓取材料在时间覆盖上不完全一致：图片解析（WebP/libwebp, 2023）确为其作品，但浏览器漏洞专门作品在本次抓取范围内未获一手来源。二者并非互斥（同一作者可跨领域），但种子描述侧重其后期作品类型。"
+    ],
+    "gaps": [
+      "Project Zero issue tracker (project-zero.issues.chromium.org) 需认证无法抓取，故 BH-WORKS-01 中提及的 Issue 2052 与 PoC Adrenaline 仅通过 P0 博客正文间接 documented，issue tracker 原始条目未直接核验。",
+      "Ben Hawkes 在 Project Zero 之前（如传说中 Matasano Security 或更早期）的职业生涯与作品缺一手来源：本地种子为空，WebSearch 在本环境返回无可用结果，无法 documented 或 inferred 其早期作品演化。",
+      "isosceles 博客中 Phineas Fisher (2023-09-14)、What is a good Linux Kernel bug? (2023-08-30)、Robots Dream of Root Shells (2024-03-11) 三篇仅有标题级别信息（lead_only），未抓取正文，故未作为 documented item 纳入；其对演化的具体贡献未知。",
+      "浏览器漏洞专门作品（primary_focus 之一）未在本次抓取中获一手来源；需后续抓取 P0 时期 Chrome/Skia 相关文章或 P0 issue tracker 记录以补全。"
+    ]
+  },
+  "conversations": {
+    "person": "Ben Hawkes",
+    "dimension": "深度对话与自述",
+    "identity_check": "研究对象为浏览器/图片解析漏洞研究员 Ben Hawkes（person_json：rank 65，x.com/benhawkes，writeup_evidence 为 blog.isosceles.com/the-webp-0day/）。WebFetch 成功抓取 https://blog.isosceles.com/the-webp-0day/，正文末署名 \"#### Ben Hawkes\"，bio 指向 /author/ben/，发布于 Isosceles blog，分析对象为 CVE-2023-4863（libwebp 堆缓冲区溢出），与 person_json 的研究方向一致，确认身份。同名歧义：isoscelesgroup.com 上的 Ben Hawkes（2024-04-01 加入的 COO）为商业咨询公司高管，非本研究对象；blog.isosceles.com 与 isoscelesgroup.com 为不同站点。搜索摘要（非抓取正文，仅作 lead）显示其曾以 Google Project Zero 身份在 Black Hat Europe 2019、DEF CON 27、OffensiveCon 2020 演讲，对应人物一致，但 Project Zero blog 标签页实际抓取显示已无其署名文章，projectzero.google 当前团队列表亦不含其名，说明已离开 Project Zero。",
+    "items": [
+      {
+        "id": "bh-conv-01",
+        "date": "2023-09",
+        "claim": "在 Isosceles 博客上以本人署名发布 CVE-2023-4863（libwebp WebP 堆缓冲区溢出）的复现与根因分析，并自述完成此次复现分析花费约 3 个完整工作日。",
+        "status": "documented",
+        "growth_signal": "可见的重复实践与技术深耕信号：对在野 0day 主动进行独立复现与根因 writeup，并在文中标注实际投入工作量（约 3 个完整工作日），体现以可核验工作量为度量的研究习惯，而非诉诸天赋或热情类表述。该 writeup 与其早前关于 Phineas Fisher 的文章构成持续的个人研究博客序列。",
+        "short_quote": "took about 3 full work days worth of work",
+        "source": {
+          "title": "The WebP 0day (CVE-2023-4863)",
+          "url": "https://blog.isosceles.com/the-webp-0day/",
+          "published": "2023-09",
+          "source_type": "本人技术 writeup / 博客",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_e2og5d8962esum2u7zikm5vk",
+          "accessed_at": "2026-09-27T21:00:31.815095+00:00",
+          "content_sha256": "e81872cb0bddd92d2e97f8c533669b48711af4c641881c0180491ee898bf865f"
+        }
+      }
+    ],
+    "contradictions": [
+      "存在同名歧义：isoscelesgroup.com 上的 Ben Hawkes 为商业咨询公司 Isosceles 的 COO（2024-04-01 加入），其公开履历为运营管理背景，与浏览器/图片解析漏洞研究员非同一人；二者仅域名相似（blog.isosceles.com 与 isoscelesgroup.com），不可混淆。本研究依据 blog.isosceles.com 的 WebP writeup 署名确认研究员身份。"
+    ],
+    "gaps": [
+      "未抓取到任何长访谈、播客、AMA 或演讲问答正文，故对入门路径、学习方式、失败经历、导师或同伴、职业选择与转折等自述维度，缺乏 documented/reported 级证据；当前仅有 1 条来自技术 writeup 的 documented 条目，覆盖面不足以支撑成长机制分析。",
+      "搜索摘要提示 Ben Hawkes 曾以 Google Project Zero 身份在 Black Hat Europe 2019（The Science of Uninformed Bypasses）、DEF CON 27、OffensiveCon 2020 等场合演讲，但这些仅为搜索结果摘要，未能抓取正文；且会议 speaker 页面按任务规则只能证明演讲事实、不能单独证明成长机制。",
+      "关键演讲/会议页面抓取失败：blackhat.com/eu-19 briefings/speakers/ben-hawkes.html 返回 404，offensivecon.org/offensivecon2020/ 返回 403、其 /speakers.html 返回 404，未能取得 speaker bio 正文。",
+      "Project Zero 旧博客（googleprojectzero.blogspot.com）已 301 迁移至 projectzero.google；标签页 /search?label=Ben%20Hawkes 实际抓取显示 \"No posts with label Ben Hawkes\"，/p/talks-and-papers.html 返回 404；projectzero.google 当前团队列表不含 Ben Hawkes，因此无法从 Project Zero 官方渠道取得其本人 bio 或第一人称叙述。",
+      "Wayback Machine（web.archive.org）不可用（工具拒绝抓取），无法取得上述失效页面的归档版本。",
+      "从 Google Project Zero 到独立/Isosceles 阶段研究工作的转折过程，以及加入 Project Zero 的经过，均无一手叙述来源；x.com/benhawkes 为一手社交账号但本轮未抓取（需认证且按规则未抓取内容只能作 lead_only）。",
+      "关于导师、同伴、反馈机制、工具建设习惯与公开发表习惯的具体自述，本轮无任何正文级证据。"
+    ]
+  },
+  "community": {
+    "person": "Ben Hawkes",
+    "dimension": "社区参与与反馈回路",
+    "identity_check": "身份经一手来源确认：blog.isosceles.com 首页将其标注为 'analysis and insights on hacking, security research, and application security from Ben Hawkes'，且其为该站唯一署名作者；WebP 0day writeup (https://blog.isosceles.com/the-webp-0day/, 2023-09-21) 同样署名 Ben Hawkes，与 person_json.writeup_evidence 一致。social 字段 x.com/benhawkes 尝试抓取返回 HTTP 402，无法核验，仅作 lead_only 处理。同名歧义方面：Project Zero 博客 archive 页无作者署名，其首页近期文章作者列表不含 Ben Hawkes，提示其较早离开 Project Zero 或近期未署名发文，PZ 时期归属未能从抓取页面直接确认，记为缺口。",
+    "items": [
+      {
+        "id": "benhawkes-community-01-webp-mistymntncop",
+        "date": "2023-09-21",
+        "claim": "在分析 CVE-2023-4863（libwebp Huffman 表构造越界写）期间，Ben Hawkes 与研究者 @mistymntncop 建立非正式协作：两人在互不知情的情况下各自尝试复现该问题，建立联系后对方提供了用于构造任意 Huffman 编码数据 WebP 的 harness 代码，以及将畸形 Huffman 树可视化的工具；Ben Hawkes 随后借助 Mark Adler 的 'enough' 工具理解预算缓冲区大小，最终定位到构造手法（四张合法最大表加一张畸形表触发 ReplicateValue 越界写，最多写入分配末尾约 400 字节）。这一过程展示了同伴网络、工具共享与相互反馈如何直接促成漏洞完成定位。",
+        "status": "documented",
+        "growth_signal": "同伴网络与工具共享构成反馈回路：独立复现遇到瓶颈时主动联络同行、整合对方 harness 与可视化工具、再叠加自己的分析工具链，是反复练习中可被外部证据观察到的能力形成机制，而非笼统的天赋或努力。",
+        "short_quote": "around this time I started chatting with @mistymntncop. It turns out that they had also been attempting to reproduce this issue, and they had built harness code to create a well-formed WebP with arbitrary Huffman coding data",
+        "source": {
+          "title": "The WebP 0day (blog.isosceles.com)",
+          "url": "https://blog.isosceles.com/the-webp-0day/",
+          "published": "2023-09-21",
+          "source_type": "个人研究博客 writeup（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_snjyudcxqhc76ak8cq527iox",
+          "accessed_at": "2026-09-27T20:49:49.515556+00:00",
+          "content_sha256": "2876c2d63fd3fe266440c167a73217eb00f7f5adb7da2e9e8b65a967ae8bdcd3"
+        }
+      },
+      {
+        "id": "benhawkes-community-02-disclosure-asymmetry-feedback",
+        "date": "2023-09-21",
+        "claim": "Ben Hawkes 在同一 writeup 中对厂商披露提出公开批评，认为厂商不公开基本技术细节会造成有利于攻击者、不利于防御者的不对称，并据此主张加大对源码审查与沙箱的投入；他将 fuzzing 未能发现该 bug 归因于触发路径过窄，并据此调整自身判断。这构成一种公开反馈回路：将社区级的披露实践问题写成公开文字，影响后续防御者讨论。",
+        "status": "documented",
+        "growth_signal": "将负面观察（fuzzing 失效、披露不透明）转化为可公开发表的批评与方法主张，是其反馈回路的对外一侧；自我反馈体现为对 fuzzing 局限性的重新评估并转向源码审查与沙箱的判断调整。",
+        "short_quote": "withholding basic technical details about how these attacks are working in an asymmetry that mostly benefits attackers",
+        "source": {
+          "title": "The WebP 0day (blog.isosceles.com)",
+          "url": "https://blog.isosceles.com/the-webp-0day/",
+          "published": "2023-09-21",
+          "source_type": "个人研究博客 writeup（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_snjyudcxqhc76ak8cq527iox",
+          "accessed_at": "2026-09-27T20:49:49.515556+00:00",
+          "content_sha256": "2876c2d63fd3fe266440c167a73217eb00f7f5adb7da2e9e8b65a967ae8bdcd3"
+        }
+      },
+      {
+        "id": "benhawkes-community-03-sustained-public-output",
+        "date": "2023-08-23",
+        "claim": "blog.isosceles.com 是 Ben Hawkes 的个人研究博客，首页将其标为唯一署名作者，列出从 2023-08-23（Exploit Equivalence Classes）到 2024-08-23（OpenSSH Backdoors）共 6 篇文章，主题覆盖漏洞质量评估、漏洞等价类、fuzzing/自动化、WebP 解析漏洞、SSH 后门等。持续公开写作构成可观察的输出习惯。",
+        "status": "documented",
+        "growth_signal": "跨主题持续公开 writeup 是其能力输出的稳定形态：以方法类文章（如 Exploit Equivalence Classes、What is a 'good' Linux Kernel bug?）与具体漏洞分析交替进行，显示把个人判断固化为公共可复用材料的习惯。",
+        "short_quote": "analysis and insights on hacking, security research, and application security from Ben Hawkes",
+        "source": {
+          "title": "Isosceles blog index (blog.isosceles.com)",
+          "url": "https://blog.isosceles.com/",
+          "published": "2024-08-23（首页最新文章日期）",
+          "source_type": "个人研究博客首页（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dakz9ahlinfsz29xldimlfo6",
+          "accessed_at": "2026-09-27T20:49:49.515569+00:00",
+          "content_sha256": "13f08a91b4081aa0e5213ae9b918142cf93cc1837049cdd1c541ee9f4afd3651"
+        }
+      },
+      {
+        "id": "benhawkes-community-04-pz-archive-output",
+        "date": "2014-07-15",
+        "claim": "Project Zero 博客 archive（现迁移至 projectzero.google）覆盖 2014-07-15 至 2026-09-21 的完整文章标题与日期列表，主题包括浏览器、内核、移动平台 exploitation、fuzzing、在野 0-day 分析与披露政策等，社区级公开输出规模可观。但 archive 页本身不含作者署名，无法据其直接判定哪些文章为 Ben Hawkes 所作。",
+        "status": "inferred",
+        "growth_signal": "Project Zero 体系的公开披露实践（90 天披露、在野 0-day 根因分析、政策迭代）构成 Ben Hawkes 所属研究社区的整体反馈回路背景；其个人贡献的具体文章未能从 archive 页单独确认，记为缺口。",
+        "source": {
+          "title": "Project Zero Blog Archive (projectzero.google)",
+          "url": "https://projectzero.google/archive.html",
+          "published": "2014-07-15（archive 最早文章日期）",
+          "source_type": "研究团队博客 archive（二手/团队级）",
+          "level": "authoritative_secondary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ywxizcogy18vte18f0vu15se",
+          "accessed_at": "2026-09-27T20:49:49.515594+00:00",
+          "content_sha256": "720064cd831c682896c24e4dbfc207d20a8da1264ca5cfc4b9cf4c84cade245f"
+        }
+      }
+    ],
+    "contradictions": [
+      "Project Zero 博客首页（projectzero.google）近期文章作者列表不含 Ben Hawkes，而 person_json 将其 selected_conference_evidence 标为 Project Zero 关联的 Black Hat US / POC；archive 页又无作者署名。三者尚不能直接互证其 PZ 时期具体产出归属，存在归属缺口而非直接矛盾。"
+    ],
+    "gaps": [
+      "Project Zero 博客 archive 页不含作者署名，未能从抓取页面确认 Ben Hawkes 在 PZ 时期具体撰写了哪些文章、其社区反馈回路的 PZ 阶段细节无法直接取证。",
+      "社交账号 x.com/benhawkes 返回 HTTP 402 无法抓取，person_json.social 仅作 lead_only，未能核验其社交媒体上的社区互动、同伴网络或公开反馈内容。",
+      "Black Hat US / POC 演讲页面（person_json.selected_conference_evidence）未在本轮抓取范围内取证，无法据此判断其演讲活动与社区反馈的关联。",
+      "Ben Hawkes 离开 Project Zero、转入/创立 Isosceles 的时间线未从抓取来源直接确认，影响对其社区身份变迁的解释。",
+      "WebP writeup 中提及 Apple SEAR、Citizen Lab、Google 的多厂商披露链条，但 Ben Hawkes 与这些团队直接互动的程度未在文中展开，记为缺口而非推断。"
+    ]
+  },
+  "external": {
+    "person": "Ben Hawkes",
+    "dimension": "外部视角",
+    "identity_check": "身份唯一性经交叉验证：blog.isosceles.com 的 WebP writeup 作者署名为 Ben Hawkes；英文维基百科 Ben Hawkes 条目主语同一人，并记载其曾任 Google Project Zero 经理；维基百科 Google Project Zero 条目将 Ben Hawkes 列为前成员。三处来源指向同一人，未见同名歧义。GitHub 账号 benhawkes bio 为空且仅 fork 一个仓库，未作为研究产出证据使用。",
+    "items": [
+      {
+        "id": "BH-EXT-01",
+        "date": "2014-07-15/2022-05-04",
+        "claim": "权威二手来源记载 Ben Hawkes 为 Google Project Zero 前成员，并转述一手来源指其 'eventually became the team's manager'，于 2022-05-04 辞职（resigned）。该条目同时指出 Hawkes 在加入 Project Zero 之前曾任职于负责 Google 产品上线安全审查的团队。",
+        "status": "reported",
+        "growth_signal": "从 Project Zero 个人研究者角色上升至团队 manager，再于 2022 年辞职并转而独立运营 Isosceles 博客，反映其在研究实践中由个案挖掘者向方向协调/管理角色、再向独立研究者的轨迹变化。但需注意：组织品牌（Google Project Zero）与职衔（manager）本身不应直接等同于能力来源；维基条目未给出 'manager' 角色的具体一手评价来源链接，仅以二手转述形式出现。",
+        "source": {
+          "title": "Google Project Zero — Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Google_Project_Zero",
+          "published": "2026-01",
+          "source_type": "encyclopedia",
+          "level": "authoritative_secondary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_4vt7xxt9wewj9xrzpiue3824",
+          "accessed_at": "2026-09-27T20:55:45.148962+00:00",
+          "content_sha256": "670844e219ebed7e03f11176f18f9676f81fc183b58f166d8bcf2b53f2a39d4b"
+        }
+      },
+      {
+        "id": "BH-EXT-02",
+        "date": "2023-09-21",
+        "claim": "Ben Hawkes 于其本人博客 Isosceles 发表对 CVE-2023-4863（WebP libwebp VP8L Huffman 表堆缓冲区溢出）的根因 writeup，记录其采用人工代码审查与实验（manual experimentation）、暴力搜索（brute-force）、借助 Mark Adler 的 enough 工具复算缓冲区上限，并与协作者 @mistymntncop 构造自定义 harness 共同触发；正文明确该项工作耗时约 '3 full work days worth of work'，并推断该漏洞最初更可能经人工代码审阅而非模糊测试发现。",
+        "status": "documented",
+        "growth_signal": "一手 writeup 直接呈现方法论选择：面对模糊测试（含 Google OSS-Fuzz）未能覆盖的漏洞类，Hawkes 倾向人工代码审查+定向实验+工具辅助（enough）+同行协作的组合，而非扩大模糊测试语料。可交叉验证外部媒体对其 '漏洞发现者' 身份的归功，并显示其能力来源于具体的方法论与反复构造 PoC 的过程，而非笼统的 '天赋'。注意：此为一手自述，用于交叉验证外部评价，本身并非外部第三方评价。",
+        "short_quote": "In practice it took about 3 full work days worth of work",
+        "source": {
+          "title": "The WebP 0day — Isosceles Blog (Ben Hawkes)",
+          "url": "https://blog.isosceles.com/the-webp-0day/",
+          "published": "2023-09-21",
+          "source_type": "blog_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_86orma3bltnw01zpqu3tyd31",
+          "accessed_at": "2026-09-27T20:55:45.148822+00:00",
+          "content_sha256": "f56cdfdcee791ead0a4ffff46254b57f4ca5aae1dbb6c92e8823ea2e15834958"
+        }
+      },
+      {
+        "id": "BH-EXT-03",
+        "date": "2023-08-23/2024-08-23",
+        "claim": "Ben Hawkes 在其本人 Isosceles 博客于 2023-08 至 2024-08 间发表至少 6 篇文章，主题涵盖 OpenSSH 后门机制（OpenSSH Backdoors, 2024-08-23）、漏洞利用自动化与 AI（Robots Dream of Root Shells, 2024-03-11）、WebP 0day（2023-09-21）、Phineas Fisher 黑客行动主义分析（2023-09-14）、Linux 内核漏洞质量评估（What is a 'good' Linux Kernel bug?, 2023-08-30）、漏洞利用等价类理论（Exploit Equivalence Classes, 2023-08-23）。",
+        "status": "documented",
+        "growth_signal": "一手作品列表显示其研究兴趣由个案漏洞分析扩展至方法论抽象（exploit equivalence classes、'good bug' 评估框架）、威胁行动者分析与自动化趋势，与外部媒体归功其多平台 CVE 披露的方向互补。此为一手作品，作为外部评价的交叉验证材料：外部权威二手来源关注的 '具体 CVE 披露者' 身份与其自身博客关注的 '方法论与漏洞理论' 形成互补而非冲突。",
+        "source": {
+          "title": "Isosceles Blog — article index (Ben Hawkes)",
+          "url": "https://blog.isosceles.com/",
+          "published": "2024-08-23",
+          "source_type": "blog_index",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_d6088ooq7jymjl8tpmk8a3dh",
+          "accessed_at": "2026-09-27T20:55:45.148892+00:00",
+          "content_sha256": "6c1ef9974f1aefdbf79120d5f63b0d5093560aadac0095b129c3a2dec2cc8176"
+        }
+      },
+      {
+        "id": "BH-EXT-04",
+        "date": "2015/2019",
+        "claim": "权威二手来源（维基百科 Ben Hawkes 条目）转述多家媒体的报道，将一系列高影响漏洞披露归功于 Hawkes，覆盖多平台多年度：2015 年 Adobe Flash 安全公告所涉关键漏洞；2015 年 The Register 报道的经网页视频劫持 Windows PC 的 Office 相关漏洞；2019 年 iOS 12.1.4 中两个可被用于监听通话的零日漏洞；以及多个 Ubuntu 内核与 OpenSSH 漏洞补丁。条目另引 Wired（Greenberg 2014-07-15 'Meet Project Zero, Google's Secret Team of Bug-Hunting Hackers'）描述其团队归属。",
+        "status": "reported",
+        "growth_signal": "外部权威二手来源在多年跨度上将多平台高影响漏洞披露归功于 Hawkes，从外部视角支撑其持续的多平台漏洞发现能力这一观察。但具体一手媒体原文（Wired、The Register、BleepingComputer）及 USENIX speaker 页面在本次研究中无法直接抓取，仅经维基百科转述可见，故仅作 reported（二手转述）处理，一手层面为 lead_only。",
+        "source": {
+          "title": "Ben Hawkes — Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Ben_Hawkes",
+          "published": "2026-01",
+          "source_type": "encyclopedia",
+          "level": "authoritative_secondary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_zmuuadwd2e3hsh6yz4wjdegw",
+          "accessed_at": "2026-09-27T20:55:45.148995+00:00",
+          "content_sha256": "3fb19de46671bf8f5311cf6a0b52d7f3bd9d0fd50a73886df4fd1bdcfa666819"
+        }
+      }
+    ],
+    "contradictions": [
+      "种子记录 person_json 将 primary_focus 标注为 '浏览器与图片解析漏洞'，但权威二手来源（维基百科 Ben Hawkes 条目）列举的归功披露事件覆盖 Adobe Flash、Microsoft Office、Apple iOS、Linux kernel 等多平台，且 Isosceles 博客后期主题扩展至 OpenSSH 后门、Linux 内核漏洞评价、exploit equivalence classes 理论、Phineas Fisher 行动主义分析与 AI 自动化。'浏览器与图片解析' 仅为多个领域之一而非唯一焦点，外部材料与种子标注的焦点范围存在张力（非硬性冲突，primary_focus 可解读为 '重点之一'）。",
+      "维度问题要求 '避免把奖项和组织品牌直接解释为能力来源'，而本次可获取的外部权威二手来源对 Hawkes 的评价高度依赖其 Google Project Zero 经理职衔与组织品牌。职衔层面的评价缺乏可抓取的一手引用链接（Wired 原文无法抓取），故在 '外部评价' 维度上，真正可交叉验证的能力证据来自其一手 writeup（BH-EXT-02）与作品列表（BH-EXT-03），而非职衔本身。"
+    ],
+    "gaps": [
+      "person_json 提示的 'Black Hat US' 与 'POC' 会议出席事实无法经外部页面核实：Black Hat speaker 页面返回 403/404；POC（Power of Community）官网仅列 2026 议程与年度归档链接，未含历史 speaker 名单。会议主持/同行对其的具体评价缺失。",
+      "Wired（Greenberg 2014-07-15 'Meet Project Zero, Google's Secret Team of Bug-Hunting Hackers'）、The Register（Nichols 2015-06-09）、BleepingComputer（Gatlan 2019-02-08）及 USENIX speaker bio 等一手页面在本次研究中均无法直接抓取（wired.com 抓取被拒、usenix.org 返回 404/403、其余 404），外部 '评价原话' 缺失，仅能经维基百科转述以 reported 形式记录，一手层面为 lead_only。",
+      "未能获取同事/团队同伴对 Hawkes 的具体评价原文（如 Project Zero 现任成员 Jann Horn、Tavis Ormandy 等对其工作方式的公开评论），同事层面的外部评价为本维度的资料缺口。",
+      "维基百科 Ben Hawkes 条目为 stub（存根），最后编辑 2026-01，生平深度有限；其加入 Project Zero 的确切时间、任 manager 的起止时间、创立 Isosceles 的时间均未在可抓取来源中明确给出。"
+    ]
+  },
+  "decisions": {
+    "person": "Ben Hawkes",
+    "dimension": "关键决策与转折",
+    "identity_check": "身份核对：目标人物为安全研究员 Ben Hawkes，X 账号 @benhawkes（person_json.json 提供），与 blog.isosceles.com 的署名作者 Ben Hawkes（/author/ben/）一致，WebP 0day 分析一文由其撰写并署名；Wikipedia「Project Zero (Google)」将其列为该团队创始成员并记载 2022-05-04 辞职，与 Project Zero 官网首页（已无 Hawkes 署名）相互印证。无其他高混淆同名人物。早期职业（NCC Group、Mozilla）的归属仅见于 WebSearch 返回且疑似模型生成的片段，未抓取到一手页面证实，故相关条目标注 unknown/lead_only，未据以下结论。",
+    "items": [
+      {
+        "id": "bh-decisions-01",
+        "date": "2014",
+        "claim": "Ben Hawkes 于 2014 年成为 Google Project Zero 的创始成员之一，将其漏洞研究工作置于浏览器与系统软件薄弱环节的公开披露上。",
+        "status": "reported",
+        "growth_signal": "加入新成立的专职零日研究团队，对应从一般漏洞研究向持续公开披露与对抗性研究的方向选择；团队成立本身以「向厂商施压、缩短修复周期」为目标，构成可核验的方法转型背景。",
+        "source": {
+          "title": "Project Zero (Google) — Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Project_Zero_(Google)",
+          "published": "2026",
+          "source_type": "百科条目",
+          "level": "authoritative_secondary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_xyy0m7ujmoq3vf3uxe1kvk8j",
+          "accessed_at": "2026-09-27T20:49:29.365650+00:00",
+          "content_sha256": "f9de4425a775e0dea4cd991f07bbd8802ef6147086527b9a52b8a5f8de82ba2b"
+        }
+      },
+      {
+        "id": "bh-decisions-02",
+        "date": "2022-05-04",
+        "claim": "Hawkes 在成为 Project Zero 团队 manager 之后于 2022 年 5 月 4 日辞职，离开 Google。",
+        "status": "reported",
+        "growth_signal": "由研究执行角色转入管理角色再离职，构成职务与职业阶段的双重转折；Wikipedia 转述该日期但未附本人一手声明，故标注 reported 而非 documented。",
+        "source": {
+          "title": "Project Zero (Google) — Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Project_Zero_(Google)",
+          "published": "2026",
+          "source_type": "百科条目",
+          "level": "authoritative_secondary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_xyy0m7ujmoq3vf3uxe1kvk8j",
+          "accessed_at": "2026-09-27T20:49:29.365650+00:00",
+          "content_sha256": "f9de4425a775e0dea4cd991f07bbd8802ef6147086527b9a52b8a5f8de82ba2b"
+        }
+      },
+      {
+        "id": "bh-decisions-03",
+        "date": "2023-08-23",
+        "claim": "自 2023 年 8 月起，Hawkes 以个人/Isosceles 名义在 blog.isosceles.com 持续发布独立 writeup，首篇可追溯文章《Exploit Equivalence Classes》发布于 2023-08-23，研究方向转向 Linux 内核漏洞分类、漏洞质量评估与 exploit 分析的方法论化。",
+        "status": "documented",
+        "growth_signal": "离职后选择独立/小团队研究并恢复公开 writeup 节奏，且 2023-08-30 的《What is a \"good\" Linux Kernel bug?》与《Exploit Equivalence Classes》显示从单纯漏洞挖掘向「漏洞质量与可利用性度量」的方法论建设转变。",
+        "source": {
+          "title": "Isosceles Blog — Author: Ben Hawkes",
+          "url": "https://blog.isosceles.com/author/ben/",
+          "published": "2023-08-23",
+          "source_type": "作者文章索引页",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_b4npm9wcf86wbgpo1c6aqhlc",
+          "accessed_at": "2026-09-27T20:49:29.365616+00:00",
+          "content_sha256": "e567ca4640304690fc08c3ade1a84ecdd722f41427af80a288b67e91a36bfb92"
+        }
+      },
+      {
+        "id": "bh-decisions-04",
+        "date": "2023-09-21",
+        "claim": "2023 年 9 月 Hawkes 在独立研究中聚焦图片解析漏洞，发布 libwebp 堆缓冲区溢出（CVE-2023-4863）的技术分析，并将其与 Project Zero 此前记录的 FreeType 漏洞作类比，显示其从 Project Zero 时期的浏览器/系统研究向图像解析器与 fuzzing 产物的延伸。",
+        "status": "documented",
+        "growth_signal": "独立完成约三个工作日的逆向与分析（本人记述「took about 3 full work days worth of work」并致谢 @mistymntncop 协作），体现离职后延续高强度单一漏洞深挖与公开 writeup 的工作习惯，并建立外部协作网络。",
+        "short_quote": "took about 3 full work days worth of work",
+        "source": {
+          "title": "The WebP 0day — Isosceles Blog",
+          "url": "https://blog.isosceles.com/the-webp-0day/",
+          "published": "2023-09-21",
+          "source_type": "本人 writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_r0elctrh8e802rv3ygf3dkj3",
+          "accessed_at": "2026-09-27T20:49:29.365605+00:00",
+          "content_sha256": "31727e2ee72bcd41b578b623d84dacf06c5e3ce2b4da4da95f854a90475946bb"
+        }
+      },
+      {
+        "id": "bh-decisions-05",
+        "date": "2024-08-23",
+        "claim": "至 2024 年 8 月，Hawkes 的独立研究方向扩展到 OpenSSH 后门与供应链/植入物识别（《OpenSSH Backdoors》），延续其在 Isosceles 平台的公开 writeup 节奏，研究主题从内存安全漏洞向运行时安全与威胁分析过渡。",
+        "status": "documented",
+        "growth_signal": "主题选择与公开发表节奏的延续表明其建立了一套独立的研究-发表循环；该文章日期与 2023 年首篇相隔一年，可核验其 Isosceles 时期 writeup 的持续性。",
+        "source": {
+          "title": "Isosceles Blog — Author: Ben Hawkes",
+          "url": "https://blog.isosceles.com/author/ben/",
+          "published": "2024-08-23",
+          "source_type": "作者文章索引页",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_b4npm9wcf86wbgpo1c6aqhlc",
+          "accessed_at": "2026-09-27T20:49:29.365616+00:00",
+          "content_sha256": "e567ca4640304690fc08c3ade1a84ecdd722f41427af80a288b67e91a36bfb92"
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 返回的片段称 Ben Hawkes 曾任职「NCC Group」与「Mozilla」，且 GitHub 片段显示「Google Project Zero, Mozilla, NCC Group」；但实际抓取 github.com/benhawkes 时该 profile 无 bio、无雇主信息，唯一可见仓库为 firedancer fork。该归属仅来自疑似模型生成的搜索片段，未抓取到一手页面证实，与抓取结果冲突，故不纳入 documented 结论。"
+    ],
+    "gaps": [
+      "Hawkes 加入 Project Zero 前的雇主历史（NCC Group、Mozilla）无可抓取的一手来源证实；Wikipedia Project Zero 条目未记载其加入前的职业背景。",
+      "Project Zero 加入的确切日期与「manager」任命时间未见一手 writeup 或官方公告佐证，仅有 Wikipedia 转述。",
+      "2022-05-04 离开 Google 至 2023-08-23 首篇 Isosceles 文章之间约 15 个月的去向、是否经历过渡性雇主或休息期，无公开证据。",
+      "Isosceles 的公司性质、Hawkes 在其中的角色（雇员、合伙人、自雇）未从 isosceles.com 抓取到说明文字；该站仅提供 hawkes@isosceles.com 与地址，无 about/team 页正文。",
+      "person_json.json 标注的「浏览器与图片解析漏洞」primary_focus 与其 Mozilla 时期或 Project Zero 时期的对应关系无法从已抓取来源确证。",
+      "Wikipedia Project Zero 条目自身标注需要更多来源核实（citation needed），其转述的辞职日期与 manager 角色未经 Hawkes 本人一手声明。"
+    ]
+  },
+  "timeline": {
+    "person": "Ben Hawkes",
+    "dimension": "可核验时间线",
+    "identity_check": "person_json 指向 @benhawkes、blog.isosceles.com、Black Hat US/POC、资质=漏洞发现+根因 writeup。抓取 blog.isosceles.com 首页，标语为 'analysis and insights on hacking, security research, and application security from Ben Hawkes'；逐篇 WebFetch 确认七篇正文均署名 Ben Hawkes，与 person_json 中的 writeup_evidence（https://blog.isosceles.com/the-webp-0day/）一致。身份一致，未发现同名歧义干扰核心证据。更早阶段（Project Zero、TippingPoint/DVLabs）的身份归属仅来自 WebSearch 合成摘要、无可用一手 URL，故身份核验仅对一手博客部分成立。",
+    "items": [
+      {
+        "id": "ben-timeline-001",
+        "date": "2023-08-23",
+        "claim": "Ben Hawkes 在 Isosceles Blog 发表《Exploit Equivalence Classes》，主题为漏洞利用等价类划分。",
+        "status": "documented",
+        "growth_signal": "在公开独立博客持续发表技术 writeup，体现漏洞利用理论的抽象化与方法论整理习惯；通过将具体漏洞归纳为等价类，显示从单个漏洞分析向系统性分类的能力演进。",
+        "short_quote": "Aug 23, 2023",
+        "source": {
+          "title": "Exploit Equivalence Classes",
+          "url": "https://blog.isosceles.com/exploit-equivalence-classes/",
+          "published": "2023-08-23",
+          "source_type": "本人技术博客（独立运营）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_3gltv33hkj8cr2i9dr5lwjfk",
+          "accessed_at": "2026-09-27T20:55:28.951112+00:00",
+          "content_sha256": "287343719475d5418e9beba9d72c97e4b93e77473c6e1f5902f30644c4f55894"
+        }
+      },
+      {
+        "id": "ben-timeline-002",
+        "date": "2023-08-30",
+        "claim": "Ben Hawkes 发表《What is a \"good\" Linux Kernel bug?》，讨论跨 Android、服务器、云、IoT 等场景下 Linux 内核漏洞评判标准。",
+        "status": "documented",
+        "growth_signal": "从单点漏洞分析扩展到跨部署场景的漏洞价值评估，体现对不同目标环境（移动/服务器/云/IoT）的系统性理解；文末以幽默方式暗示其内核漏洞研究经验跨多年。",
+        "short_quote": "Ben Hawkes",
+        "source": {
+          "title": "What is a \"good\" Linux Kernel bug?",
+          "url": "https://blog.isosceles.com/what-is-a-good-linux-kernel-bug/",
+          "published": "2023-08-30",
+          "source_type": "本人技术博客（独立运营）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_g1zv97l1nr0fhi8dko6yjrrm",
+          "accessed_at": "2026-09-27T20:55:28.951080+00:00",
+          "content_sha256": "830bbd0585f487375b726e720cfc1a687dc95ef9a797c58de28f356582b5ff35"
+        }
+      },
+      {
+        "id": "ben-timeline-003",
+        "date": "2023-09-14",
+        "claim": "Ben Hawkes 发表《Phineas Fisher, Hacktivism, and Magic Tricks》，分析 Phineas Fisher 的攻击技术。",
+        "status": "documented",
+        "growth_signal": "在自研漏洞分析之外，转向对真实在野攻击者（hacktivist）技战术的复盘，体现从攻击者视角研究攻防博弈的研究取向。",
+        "short_quote": "Sep 14, 2023",
+        "source": {
+          "title": "Phineas Fisher, Hacktivism, and Magic Tricks",
+          "url": "https://blog.isosceles.com/phineas-fisher-hacktivism-and-magic-tricks/",
+          "published": "2023-09-14",
+          "source_type": "本人技术博客（独立运营）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_fvvyioj81trm7g5x6n3dlrkv",
+          "accessed_at": "2026-09-27T20:55:28.951091+00:00",
+          "content_sha256": "ae2857722424beb16c1742a235797583b46c81bc921d9d87697e5360f566e511"
+        }
+      },
+      {
+        "id": "ben-timeline-004",
+        "date": "2023-09-21",
+        "claim": "Ben Hawkes 发表《The WebP 0day》，根因分析 CVE-2023-4863（libwebp VP8L Huffman 堆缓冲区溢出）。根因为 BuildHuffmanTable 用 Mark Adler 的 enough 工具预计算的有效码表尺寸分配缓冲区，但会先部分处理非法 Huffman 树（ReplicateValue）再做节点数一致性检查；构造 4 个最大有效表加特定非法表可将写指针推过分配边界，越界写最远约 400 字节。补丁策略为改为先只计算大小不写入的 first pass，非法输入返回 0 失败。作者自述约耗费 3 个完整工作日，并注明 @mistymntncop 有重大技术贡献。",
+        "status": "documented",
+        "growth_signal": "在公开 0day 事件（BLASTPASS/Pegasus NSO Group 关联）发生后短时间内完成根因复现与补丁机制分析，体现针对复杂数据解析路径的逆向与差分研究能力，以及与社区研究者协作的习惯；事件时间线（Citizen Lab 9 月初检测、Apple 9 月 6 日报 Chrome、libwebp 补丁 9 月 7 日、Chrome 更新 9 月 11 日）显示其研究紧贴在野事件节奏。",
+        "short_quote": "Sep 21, 2023",
+        "source": {
+          "title": "The WebP 0day",
+          "url": "https://blog.isosceles.com/the-webp-0day/",
+          "published": "2023-09-21",
+          "source_type": "本人漏洞根因 writeup（一手）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_0o9xbtpdhmtvndcewpsoyowq",
+          "accessed_at": "2026-09-27T20:55:28.950987+00:00",
+          "content_sha256": "899ecbe460886ccdbb8c0df1bf3b6bf0fbaf4ee4ae9acfed965b224fe1da6e5a"
+        }
+      },
+      {
+        "id": "ben-timeline-005",
+        "date": "2024-03-11",
+        "claim": "Ben Hawkes 发表《Robots Dream of Root Shells》。",
+        "status": "documented",
+        "growth_signal": "延续在独立博客的技术输出节奏；标题指向自动化/机器人化攻击相关研究主题，体现对自动化安全研究方向的关注（正文具体内容未在本次摘录，仅确认作者与发布日期）。",
+        "short_quote": "Mar 11, 2024",
+        "source": {
+          "title": "Robots Dream of Root Shells",
+          "url": "https://blog.isosceles.com/robots-dream-of-root-shells/",
+          "published": "2024-03-11",
+          "source_type": "本人技术博客（独立运营）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_znm7lpezmct6yo318ff5avro",
+          "accessed_at": "2026-09-27T20:55:28.951099+00:00",
+          "content_sha256": "d9d2b96bfa53219bd1e60d74f3cbeddc0c95fe3e5c2002d7b26697191247c4bf"
+        }
+      },
+      {
+        "id": "ben-timeline-006",
+        "date": "2024-08-23",
+        "claim": "Ben Hawkes 发表《OpenSSH Backdoors》。",
+        "status": "documented",
+        "growth_signal": "研究主题从浏览器/图片解析转向 OpenSSH 等基础设施软件的后门与攻击面，体现跨软件生态的安全研究对象迁移（正文具体内容未在本次摘录，仅确认作者与发布日期）。",
+        "short_quote": "Aug 23, 2024",
+        "source": {
+          "title": "OpenSSH Backdoors",
+          "url": "https://blog.isosceles.com/openssh-backdoors/",
+          "published": "2024-08-23",
+          "source_type": "本人技术博客（独立运营）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_i7ra3b077irpa583a2hdszjj",
+          "accessed_at": "2026-09-27T20:55:28.951108+00:00",
+          "content_sha256": "3f395d56926b44c67414cefff51f37243fae89b9e8c946dbb4098493984158cc"
+        }
+      },
+      {
+        "id": "ben-timeline-007",
+        "date": "2014",
+        "claim": "据 WebSearch 合成摘要，Google 于 2014 年 7 月发布 Project Zero 团队，Ben Hawkes 为创始成员之一，专注于内核安全与漏洞缓解分析；但本次未能抓取到 Project Zero 旧 blogspot 一手公告页面，旧站已 301 跳转至 projectzero.google，新站前 18 篇无 Hawkes 署名，projectzero.google/about、/people/、/blog/ 均返回 404。",
+        "status": "inferred",
+        "growth_signal": "若属实，则该阶段为其内核漏洞与缓解绕过研究的体系化建设期，并进入团队管理角色；但当前缺乏可访问一手 URL。",
+        "source": {
+          "title": "WebSearch 合成摘要（Project Zero founding / Ben Hawkes）— 无可引用一手 URL",
+          "url": "https://projectzero.google/",
+          "published": "2014",
+          "source_type": "搜索引擎合成摘要（非一手页面）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_gm74ryx5qexrudplaud6tsj4",
+          "accessed_at": "2026-09-27T20:55:28.951051+00:00",
+          "content_sha256": "b68250363a741fd4e3db76a042b1d262b7f59f05c93d6e9cb03dae9601a008d2"
+        }
+      },
+      {
+        "id": "ben-timeline-008",
+        "date": "2019",
+        "claim": "据 WebSearch 合成摘要，Ben Hawkes 约在 2019 年底/2020 年初从 Project Zero 转至 Google DeepMind，从事 AI 与安全交叉方向；本次未能抓取到一手离职/转岗公告页面。",
+        "status": "inferred",
+        "growth_signal": "若属实，则标志其从传统漏洞挖掘向 AI 辅助安全研究方向的能力迁移；但当前缺乏可访问一手 URL。",
+        "source": {
+          "title": "WebSearch 合成摘要（Ben Hawkes Project Zero -> DeepMind）— 无可引用一手 URL",
+          "url": "https://blog.isosceles.com/",
+          "published": "2019",
+          "source_type": "搜索引擎合成摘要（非一手页面）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_qn0mzspjh7qxpsckluli3x5k",
+          "accessed_at": "2026-09-27T20:55:28.951038+00:00",
+          "content_sha256": "2dd955d75802194cbf6fe29e4ee58d83321a42ca4a6a33a22cc20bc1ed29cb5b"
+        }
+      }
+    ],
+    "contradictions": [
+      "本次未发现相互冲突的一手材料。各一手来源（七篇 Isosceles 博客文章）发布日期彼此一致、作者归属一致。"
+    ],
+    "gaps": [
+      "Project Zero 创立（2014-07）及 Ben Hawkes 作为创始成员的归属：仅来自 WebSearch 合成摘要，无可引用一手 URL；旧 googleprojectzero.blogspot.com 已 301 跳转至 projectzero.google，projectzero.google/about、/people/、/blog/ 均 404，新站列表中未见 Hawkes 署名。无法以一手页面确认其加入年份与团队成员身份。",
+      "Ben Hawkes 从 Project Zero 转至 DeepMind 的时间（约 2019/2020）：仅来自 WebSearch 合成摘要，未抓到一手离职或转岗公告。无法确认确切年份与角色。",
+      "TippingPoint DVLabs / ZDI 早期职业经历、以及 CVE-2006-3460（PowerPoint）归属：仅来自 WebSearch 合成摘要，无可用一手 URL，未纳入 documented 时间线。",
+      "教育背景、雇主与具体职位、Black Hat US/POC 演讲的确切年份与标题：未抓取到一手演讲页或个人履历页，无法核验。",
+      "Project Zero 时期具体 blog 文章（如内核缓解/Mitigations 系列等）的标题与日期：未抓取到一手 URL。",
+      "《Robots Dream of Root Shells》《OpenSSH Backdoors》两文仅确认作者与发布日期，正文具体技术内容未在本次摘录，growth_signal 中关于主题方向的推断受此限制。"
+    ]
+  },
+  "targeted": {
+    "items": []
+  }
+}

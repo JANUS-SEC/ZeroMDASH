@@ -1,0 +1,390 @@
+{
+  "person": "Maxime Rossi Bellom",
+  "dimension": "公开作品与技术演化",
+  "identity_check": "person_json 记录的姓名 Maxime Rossi Bellom、primary_focus（Android/启动链/安全芯片漏洞）、writeup_evidence（Quarkslab 作者页）与抓取到的 Quarkslab 作者索引页内容一致：作者页列出 4 篇文章，主题覆盖 MediaTek 内核漏洞（2020）、Titan M 安全芯片（2022）、Android 数据加密（2023）、Samsung 启动链（2024），均属 Android/启动链/安全芯片方向，与 person_json 的 qualification「移动平台漏洞发现与利用」相符。未发现同名歧义。social（x.com/max_r_b）未单独抓取，仅作为身份线索。",
+  "items": [
+    {
+      "id": "mr-works-01",
+      "date": "2020-03-24",
+      "claim": "独立完成（无合著者）的 Quarkslab 博客文章分析 MediaTek CMDQ 驱动漏洞 CVE-2020-0069，证明该驱动对任意应用无权限开放，通过 IOCTL 提交 CMDQ_CODE_MOVE/READ/WRITE 命令可实现内核物理内存任意读写；并在 Xiaomi Redmi 6a（MT6762M）上构建 PoC。这是作者在该作者页上最早可查的公开作品，目标为单一内核驱动 IOCTL 漏洞，方法以阅读开源内核源码与命令格式图为主。",
+      "status": "documented",
+      "growth_signal": "工具建设习惯的起点：除 PoC 外，作者编写 LD_PRELOAD 的 syscall_hook.c 追踪库，拦截并转储 mtk-su root 利用程序的 IOCTL 命令序列，从而独立逆向已存在 rootkit 的底层漏洞，而非直接复现 mtk-su。这种「PoC + 动态追踪」双轨方法在后续作品中反复出现。",
+      "short_quote": "We may wonder why this device driver needs to be accessible to every application and not only to the HAL and media-related processes.",
+      "source": {
+        "title": "CVE-2020-0069: Autopsy of the Most Stable MediaTek Rootkit",
+        "url": "https://blog.quarkslab.com/cve-2020-0069-autopsy-of-the-most-stable-mediatek-rootkit.html",
+        "published": "2020-03-24",
+        "source_type": "一手 writeup（Quarkslab 博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_dnhyb708mefusoe06t9hhwew",
+        "accessed_at": "2026-09-28T00:19:57.682064+00:00",
+        "content_sha256": "72fab7465f1a9bb978d1b156bb92ce145e74d6feb5c8f7842406c12e71d91478"
+      }
+    },
+    {
+      "id": "mr-works-02",
+      "date": "2020-03-24",
+      "claim": "配套开源 PoC 仓库 quarkslab/CVE-2020-0069_poc 提供 kernel_rw.c（内核读写）、poc.sh（将内核数据中 \"Linux\" 改为 \"minix\" 的演示）、syscall_hook.c（追踪 mtk-su），使用 ndk-build 针对 armeabi-v7a 构建。仓库仅单个 commit。",
+      "status": "documented",
+      "growth_signal": "公开作品习惯的早期例证：在 writeup 之外同步开源可复现的 PoC 与自定义追踪工具，建立可被后续研究复用的资产。",
+      "source": {
+        "title": "quarkslab/CVE-2020-0069_poc (GitHub 仓库)",
+        "url": "https://github.com/quarkslab/CVE-2020-0069_poc",
+        "published": "2020-03-24",
+        "source_type": "一手代码仓库（GitHub）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_ccgvfcf6ojmh53zvz7e4kd6l",
+        "accessed_at": "2026-09-28T00:19:57.682105+00:00",
+        "content_sha256": "1e4d377cf57082652bbf10395cd5a4011295ed3ffe6f1a917e76bd5376442f11"
+      }
+    },
+    {
+      "id": "mr-works-03",
+      "date": "2022-08-11",
+      "claim": "合著（Damiano Melotti）Quarkslab 博客文章分析 Google Pixel Titan M 安全芯片固件漏洞 CVE-2022-20233（严重级）：Keymaster 任务处理 ImportKey 请求时以攻击者可控整数作为栈缓冲区偏移写出单字节 0x01，构成越界写。作者利用 Black Hat EU 2021 前作中自研的 nosclient 工具发送任意命令，并探索两条模糊测试路径——黑盒（libprotobuf-mutator/Radamsa 经 nosclient 在设备上运行）与模拟化（AFL++ Unicorn 模式在笔记本上模拟固件指令）；新漏洞由模拟化模糊测试中 UC_ERR_WRITE_UNMAPPED 崩溃发现。利用单字节写改写请求存储位置，经多次栈迁移 gadget、替换 DestroyAttestationIds 处理器为 gadget 并写入 trampoline，再用 ROP 调用 memcpy（跳过 null-check 基本块）实现芯片内任意内存读，泄露 StrongBox 密钥。报告日期 2022-03-02，2022 年 6 月修复。",
+      "status": "documented",
+      "growth_signal": "技术栈与方法论的跃迁：从 2020 年的单一内核 IOCTL 漏洞升级到安全芯片固件、单字节越界写与 ROP；显式引入并比较两种模糊测试方法，建立可复用的 nosclient 工具。失败与反馈机制明确：黑盒模糊测试仅复现已知 bug 且状态浅；模拟化模糊测试因缺乏全系统模拟而漏掉一个已知 bug；Google 初期无法复现，经 Titan M 工程团队调查后才确认，赏金从 10000 美元提升至 75000 美元。",
+      "short_quote": "there is always a trade-off between the time spent reverse engineering to identify these patterns, and the time you actually let the fuzzer run freely.",
+      "source": {
+        "title": "Attacking Titan M with Only One Byte",
+        "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+        "published": "2022-08-11",
+        "source_type": "一手 writeup（Quarkslab 博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_5syqbwb2l0sp1vkid436021n",
+        "accessed_at": "2026-09-28T00:19:57.682086+00:00",
+        "content_sha256": "35858edb2bd7762c169ec85804200ecb31b4d3372277d27f53a76c0bd12879c9"
+      }
+    },
+    {
+      "id": "mr-works-04",
+      "date": "2023-08-14",
+      "claim": "合著（Damiano Melotti）Quarkslab 博客文章研究攻击者拥有高端软件漏洞时能否攻破 Android File-Based Encryption（FBE）。复用 2022 年 Titan M（CVE-2022-20233）利用获取芯片代码执行与任意读原语，逆向 Weaver 任务提取密钥与值；另一路径经 MTKClient（Bjoern Kerler 外部工具）利用 Mediatek BootROM 漏洞绕过安全启动，patch TEEGRIS 的 userboot.so/root_task 并 patch Gatekeeper 始终接受凭据，再用裁剪版 Magisk root Android、用 Frida hook system_server 泄露 Keymaster 中间 AES 解密结果，最后以 AES-GCM tag 校验为成功预言机对 scrypt 参数离线暴破。REcon'23 演讲。",
+      "status": "documented",
+      "growth_signal": "迭代复用前作与跨工具整合：2022 年建立的 nosclient/Titan M 成果被直接复用，叠加外部 MTKClient、Frida、scrypt 暴破，构成多组件攻击链。承认工具局限（暴破脚本性能不足，需更强硬件/VM），并明确指出无论链多少漏洞仍须暴破凭据这一限制——对自身方法边界的清醒复盘。",
+      "short_quote": "they still need to bruteforce the credentials to feed them into the key derivation process.",
+      "source": {
+        "title": "Android Data Encryption in depth",
+        "url": "https://blog.quarkslab.com/android-data-encryption-in-depth.html",
+        "published": "2023-08-14",
+        "source_type": "一手 writeup（Quarkslab 博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_1kerkl05653baqfknjdo8pkc",
+        "accessed_at": "2026-09-28T00:19:57.682094+00:00",
+        "content_sha256": "98db0b327ba05625fc84dd24e9350fc60137f7621961de3360ebe831b9141307"
+      }
+    },
+    {
+      "id": "mr-works-05",
+      "date": "2024-10-15",
+      "claim": "合著（Raphaël Neveu；contributors Damiano Melotti、Gabrielle Viala）Quarkslab 博客文章披露 Samsung Galaxy A225F 启动链 4 个漏洞并链式利用：CVE-2024-20832（SVE-2023-2079，Little Kernel 自定义 JPEG 解析器堆溢出，up_param 分区启动时不校验）+ CVE-2024-20865（SVE-2024-0234，Odin 经 GPT 无认证刷写并可改 PIT）链式实现经 USB 在 Little Kernel 持久代码执行；CVE-2024-20820（SVE-2023-2215，Secure Monitor SMC handler 0xc2000526 读越界）+ CVE-2024-20021（SMC handler 0x8200022a 任意物理内存映射，每次最多 1MB、共 8 次）链式泄露 Secure World 内存含 Android Keystore 密钥。基于对该设备 Android File-Based Encryption 前作的熟悉。全部 PoC 开源，发表于 Black Hat USA 2024 与 SSTIC 2024。",
+      "status": "documented",
+      "growth_signal": "难度与发表规格的进一步升级：从单漏洞/单芯片上升到启动链多层（Little Kernel + Secure Monitor）4 漏洞链式利用，并明确以前作对该设备启动流程的熟悉为基础——体现跨作品的知识与方法积累。同时延续同步开源 PoC 与会议发表（Black Hat US、SSTIC）的公开作品习惯。",
+      "short_quote": "The GPT happens to be flashable through Odin without authentication!",
+      "source": {
+        "title": "Attacking the Samsung Galaxy A* Boot Chain",
+        "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+        "published": "2024-10-15",
+        "source_type": "一手 writeup（Quarkslab 博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_40v06ndeyctdj8iraq9xc3a6",
+        "accessed_at": "2026-09-28T00:19:57.682072+00:00",
+        "content_sha256": "d2265c0f6f203e5af700ba9faee5f0e4d634cad65dda5016fab8b7d86c2f5834"
+      }
+    },
+    {
+      "id": "mr-works-06",
+      "date": "2024-10-15",
+      "claim": "该启动链研究于 Black Hat USA 2024 与 SSTIC 2024 发表，并在 GitHub 开源全部 4 个漏洞的 PoC 代码。作者页作者索引亦将 2024 年文章归类为 Android，主题为 Samsung 启动链、Secure World、Android Keystore。",
+      "status": "documented",
+      "growth_signal": "公开发表习惯的延续：writeup 与会议演讲（Black Hat US、SSTIC）配套，且持续将 PoC 开源，与 2020 年 CVE-2020-0069 PoC 仓库一脉相承。",
+      "source": {
+        "title": "Attacking the Samsung Galaxy A* Boot Chain (含 Black Hat USA 2024 / SSTIC 2024 发表与 GitHub PoC)",
+        "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+        "published": "2024-10-15",
+        "source_type": "一手 writeup（Quarkslab 博客，含会议发表声明）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_40v06ndeyctdj8iraq9xc3a6",
+        "accessed_at": "2026-09-28T00:19:57.682072+00:00",
+        "content_sha256": "d2265c0f6f203e5af700ba9faee5f0e4d634cad65dda5016fab8b7d86c2f5834"
+      }
+    }
+  ],
+  "contradictions": [
+    "未发现互相冲突的材料。"
+  ],
+  "gaps": [
+    "person_json 提及「OffByOne 2024」演讲，但抓取的来源未证实其具体题目与日期；未单独抓取 OffByOne 议程页。",
+    "Titan M 系列前作 Black Hat EU 2021（首次逆向 Titan M 固件并构建 nosclient）未抓取原文，2022 年文章仅转述其存在；该前作的确切标题、日期与方法细节缺口。",
+    "2023 年 REcon'23 与 2024 年 Black Hat USA 2024 / SSTIC 2024 的会议议程页未单独抓取，仅以 writeup 本身的发表声明为证；演讲与 writeup 内容差异未知。",
+    "作者 2019 年及更早的公开作品/经历无公开 writeup 记录，技术演化起点之前的状态未知。",
+    "个人经历、导师或同伴关系、重复练习的具体形式无公开材料；仅能从作品序列推断工具复用与方法迭代，无法直接证实成长机制的人际与练习维度。",
+    "social 字段 https://x.com/max_r_b 未抓取，仅作为身份线索保留，不作 documented 证据。",
+    "WebSearch 在本轮返回「无能力」声明而非结果，所有线索均来自 WebFetch 直接抓取；作者页以外的索引（如 Google Scholar、DBLP、CVE 数据库条目）未覆盖。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-works-20260928-081515-528",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790554797671984000-maxime-rossi-bellom-works.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "6ad32d2a-b4d8-44df-8fbb-e789482786af",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_o6ehe9e1j4tm8ao9rhul0s1j",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-works-20260928-081515-528/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-28T00:19:57.681879+00:00"
+      },
+      {
+        "tool_use_id": "call_wx5opdptk64f0m8he50baggp",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-works-20260928-081515-528/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-28T00:19:57.681902+00:00"
+      },
+      {
+        "tool_use_id": "call_7v3phvd9t348xtnsjhd0is8a",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-works-20260928-081515-528/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "56895a41db261ccf81e70fbe70c0591cee07eca8ef581722d58d0124f8d6b6da",
+        "accessed_at": "2026-09-28T00:19:57.681913+00:00"
+      },
+      {
+        "tool_use_id": "call_otvl3wqvvpwo4ri7mibhjmrg",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-works-20260928-081515-528/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "6edc158cb959c09bfc928b47a2e3b675c54b9caf033d1761e2f9ae8f18f749df",
+        "accessed_at": "2026-09-28T00:19:57.681922+00:00"
+      },
+      {
+        "tool_use_id": "call_bui1w3cqlmbh5o4grj661pzn",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-works-20260928-081515-528/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "98d6159955e4031db24639369d116819220986aa8ec32370f8ce25cc7e814219",
+        "accessed_at": "2026-09-28T00:19:57.681927+00:00"
+      },
+      {
+        "tool_use_id": "call_v5z9qj9y7jjbn6yk0ws31cmg",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-works-20260928-081515-528/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6e5034a8a6d972f492d2b08811243633e8b01984efe14e10fad4de7367634388",
+        "accessed_at": "2026-09-28T00:19:57.681931+00:00"
+      },
+      {
+        "tool_use_id": "call_iadfgbrwv8k972c9jx6geacq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-works-20260928-081515-528/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-28T00:19:57.681936+00:00"
+      },
+      {
+        "tool_use_id": "call_41iuls4zbn4smxmfp99swtig",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://blog.quarkslab.com/author/maxime-rossi-bellom.html",
+          "prompt": "List every article title, publication date, and summary written by Maxime Rossi Bellom. Include any CVE numbers, Android/bootchain/secure-chip topics, conference mentions, or co-authors."
+        },
+        "success": true,
+        "content_sha256": "1f656b31fbf4cbecfe97a0e4e1c1276385b52c271ef56819258d57bfe21addf3",
+        "accessed_at": "2026-09-28T00:19:57.681967+00:00"
+      },
+      {
+        "tool_use_id": "call_2qj2enuk0a6qtyncteuiw3rw",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Maxime Rossi Bellom Quarkslab Android vulnerability writeup"
+        },
+        "success": true,
+        "content_sha256": "dca040e48802e0cd883de521e54ba0256c53b9928d62733a7cabe3b5dbb6613f",
+        "accessed_at": "2026-09-28T00:19:57.681971+00:00"
+      },
+      {
+        "tool_use_id": "call_97frrldtzyp4oi0jgjp655i7",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the exact full URL (href) for each article by Maxime Rossi Bellom, including the https://blog.quarkslab.com/ prefix. List all article links verbatim.",
+          "url": "https://blog.quarkslab.com/author/maxime-rossi-bellom.html"
+        },
+        "success": true,
+        "content_sha256": "a3ff6f34369792cd784fde9d2c771d05013a60a7799ce9f0fe6aa5bae001df1f",
+        "accessed_at": "2026-09-28T00:19:57.682057+00:00"
+      },
+      {
+        "tool_use_id": "call_40v06ndeyctdj8iraq9xc3a6",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize the technical content. Capture: CVE numbers, target component, vulnerability type, exploit technique, research methodology, what tools/methods were used, any mention of repeated practice, prior work building, failed attempts, and how the author reflects on the work. Quote at most one short sentence verbatim if it illustrates growth or methodology. Include exact publication date.",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html"
+        },
+        "success": true,
+        "content_sha256": "d2265c0f6f203e5af700ba9faee5f0e4d634cad65dda5016fab8b7d86c2f5834",
+        "accessed_at": "2026-09-28T00:19:57.682072+00:00"
+      },
+      {
+        "tool_use_id": "call_dnhyb708mefusoe06t9hhwew",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize the technical content. Capture: CVE numbers, target component, vulnerability type, exploit technique, research methodology, what tools/methods were used, any mention of repeated practice, prior work building, failed attempts, and how the author reflects on the work. Quote at most one short sentence verbatim if it illustrates growth or methodology. Include exact publication date.",
+          "url": "https://blog.quarkslab.com/cve-2020-0069-autopsy-of-the-most-stable-mediatek-rootkit.html"
+        },
+        "success": true,
+        "content_sha256": "72fab7465f1a9bb978d1b156bb92ce145e74d6feb5c8f7842406c12e71d91478",
+        "accessed_at": "2026-09-28T00:19:57.682064+00:00"
+      },
+      {
+        "tool_use_id": "call_5syqbwb2l0sp1vkid436021n",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize the technical content. Capture: CVE numbers, target component, vulnerability type, exploit technique, research methodology, what tools/methods were used, any mention of repeated practice, prior work building, failed attempts, and how the author reflects on the work. Quote at most one short sentence verbatim if it illustrates growth or methodology. Include exact publication date.",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html"
+        },
+        "success": true,
+        "content_sha256": "35858edb2bd7762c169ec85804200ecb31b4d3372277d27f53a76c0bd12879c9",
+        "accessed_at": "2026-09-28T00:19:57.682086+00:00"
+      },
+      {
+        "tool_use_id": "call_1kerkl05653baqfknjdo8pkc",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize the technical content. Capture: CVE numbers, target component, vulnerability type, exploit technique, research methodology, what tools/methods were used, any mention of repeated practice, prior work building, failed attempts, and how the author reflects on the work. Quote at most one short sentence verbatim if it illustrates growth or methodology. Include exact publication date.",
+          "url": "https://blog.quarkslab.com/android-data-encryption-in-depth.html"
+        },
+        "success": true,
+        "content_sha256": "98db0b327ba05625fc84dd24e9350fc60137f7621961de3360ebe831b9141307",
+        "accessed_at": "2026-09-28T00:19:57.682094+00:00"
+      },
+      {
+        "tool_use_id": "call_bg5ly0gnie1fey8qtf2ed27k",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List repositories by this organization related to Maxime Rossi Bellom's research: CVE-2020-0069, Titan M, Samsung Galaxy A boot chain, nosclient. For each repo return name, description, and any commit/release dates if visible.",
+          "url": "https://github.com/quarkslab"
+        },
+        "success": true,
+        "content_sha256": "1e7b58c47d8ed32e3f08a5a0b1b2dd3297b8dbd5b51539e061d3987ace9ddb2f",
+        "accessed_at": "2026-09-28T00:19:57.682100+00:00"
+      },
+      {
+        "tool_use_id": "call_ccgvfcf6ojmh53zvz7e4kd6l",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the repository description, README summary, languages used, and the date the repository was created or last updated. What does it demonstrate about the author's methodology?",
+          "url": "https://github.com/quarkslab/CVE-2020-0069_poc"
+        },
+        "success": true,
+        "content_sha256": "1e4d377cf57082652bbf10395cd5a4011295ed3ffe6f1a917e76bd5376442f11",
+        "accessed_at": "2026-09-28T00:19:57.682105+00:00"
+      },
+      {
+        "tool_use_id": "call_ntrfrkwhflcc3ab57mjof7od",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-works-20260928-081515-528/checkpoint.md",
+          "content": "# Checkpoint — Maxime Rossi Bellom / 公开作品与技术演化\n\n## 身份确认\n- person_json: name=Maxime Rossi Bellom, primary_focus=Android/启动链/安全芯片漏洞, social=x.com/max_r_b, writeup_evidence=Quarkslab 作者页。\n- 一手来源：Quarkslab 作者页（WebFetch）列出 4 篇文章，主题与 person_json 描述一致（Android、boot chain、secure chip、kernel）。无同名歧义发现。\n\n## 已抓取来源（全部 WebFetch，URL 与 source.url 一致）\n1. https://blog.quarkslab.com/author/maxime-rossi-bellom.html — 作者索引页（证实 4 篇文章与日期）。\n2. https://blog.quarkslab.com/cve-2020-0069-autopsy-of-the-most-stable-mediatek-rootkit.html — 2020-03-24，CVE-2020-0069，MediaTek CMDQ 驱动，内核读写 + mtk-su 逆向，独著。GitHub PoC: quarkslab/CVE-2020-0069_poc。\n3. https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html — 2022-08-11，CVE-2022-20233，Titan M 单字节 OOB 写，黑盒+模拟化模糊测试，ROP 读任意内存。nosclient 工具。\n4. https://blog.quarkslab.com/android-data-encryption-in-depth.html — 2023-08-14，FBE 对抗，复用 Titan M 成果 + Mediatek BootROM (MTKClient) + Gatekeeper/Weaver + Frida + 离线 scrypt 暴破。合著 Damiano Melotti。\n5. https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html — 2024-10-15，4 个 CVE（CVE-2024-20832/20865/20820 + CVE-2024-20021），链式攻击 Samsung Galaxy A boot chain，Secure Monitor 读 OOB + 任意物理内存映射，泄露 Keystore。合著 Raphaël Neveu。Black Hat USA 2024 / SSTIC 2024。\n6. https://github.com/quarkslab/CVE-2020-0069_poc — PoC 仓库（kernel_rw.c / poc.sh / syscall_hook.c），armeabi-v7a，单 commit。\n\n## 技术演化主线（documented）\n- 2020：单一内核驱动 IOCTL 漏洞（CMDQ），物理内存读写 + LD_PRELOAD tracer 逆向已存在 rootkit。基础工具建设（tracer）。\n- 2022：安全芯片固件，单字节 OOB 写 + ROP 读任意内存；引入黑盒模糊测试（libprotobuf-mutator/Radamsa via nosclient）与模拟化模糊测试（AFL++ Unicorn 模式）。建立 nosclient 工具。\n- 2023：多组件对抗 Android FBE，复用 Titan M（2022）+ Mediatek BootROM 成果，叠加 Gatekeeper/Weaver patch + Frida + 离线暴破。明显迭代复用前作。\n- 2024：4 漏洞链式 boot chain + Secure Monitor，跨 Little Kernel/Secure Monitor 多层，Black Hat US + SSTIC 发表。\n\n## 工具建设习惯（documented）\n- CVE-2020-0069：syscall_hook.c (LD_PRELOAD tracer) + kernel_rw.c，开源 PoC。\n- Titan M：nosclient（自研黑盒命令工具，源于 Black Hat EU 2021 前作）。\n- 2023：复用 nosclient + MTKClient（Bjoern Kerler 外部工具）+ Frida。\n- 2024：链式 PoC 全部开源（GitHub）。\n\n## 失败/反馈机制（documented）\n- Titan M：黑盒模糊测试只能复现已知 bug、浅状态；模拟化模糊测试漏掉一个已知 bug；找不到干净 stack-pivot gadget（\"had to be creative\"）；Google 最初无法复现，经 Titan M 工程团队调查后才确认。赏金从 $10k 升至 $75k（新 exploit）。\n- 2023：暴破脚本性能不足，承认需更强硬件/VM。\n- CVE-2020-0069：tracer 有 \"alloc failed\" / \"uncatched ioctl\"，部分 IOCTL 未覆盖。\n\n## 仍然缺失（gaps）\n- 早期（2019 及更早）作品/经历无公开 writeup 记录。\n- OffByOne 2024 演讲（person_json 提及）未在抓取来源中证实具体题目；Black Hat EU 2021 前作（Titan M 初次逆向）未抓取原文。\n- Black Hat US 2024 / SSTIC 2024 议程页未单独抓取（writeup 本身已作为一手材料）。\n- 个人经历/导师关系无公开材料。\n\n## 工具调用计数\nWebFetch ×6（作者索引×2 + 4 篇 writeup + 2 个 GitHub；作者索引二次调用为取确切 URL）。WebSearch 不可用（返回无能力声明）。\n"
+        },
+        "success": true,
+        "content_sha256": "bba0cec9b9dc61abaecff1acbc9b05bb48fa3dd001d99ca64a4f5e75e2b9c89e",
+        "accessed_at": "2026-09-28T00:19:57.682111+00:00"
+      },
+      {
+        "tool_use_id": "call_rl0ba5s5jz4o2tll9h1upsny",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-works-20260928-081515-528/output.json",
+          "content": "{\n  \"person\": \"Maxime Rossi Bellom\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"person_json 记录的姓名 Maxime Rossi Bellom、primary_focus（Android/启动链/安全芯片漏洞）、writeup_evidence（Quarkslab 作者页）与抓取到的 Quarkslab 作者索引页内容一致：作者页列出 4 篇文章，主题覆盖 MediaTek 内核漏洞（2020）、Titan M 安全芯片（2022）、Android 数据加密（2023）、Samsung 启动链（2024），均属 Android/启动链/安全芯片方向，与 person_json 的 qualification「移动平台漏洞发现与利用」相符。未发现同名歧义。social（x.com/max_r_b）未单独抓取，仅作为身份线索。\",\n  \"items\": [\n    {\n      \"id\": \"mr-works-01\",\n      \"date\": \"2020-03-24\",\n      \"claim\": \"独立完成（无合著者）的 Quarkslab 博客文章分析 MediaTek CMDQ 驱动漏洞 CVE-2020-0069，证明该驱动对任意应用无权限开放，通过 IOCTL 提交 CMDQ_CODE_MOVE/READ/WRITE 命令可实现内核物理内存任意读写；并在 Xiaomi Redmi 6a（MT6762M）上构建 PoC。这是作者在该作者页上最早可查的公开作品，目标为单一内核驱动 IOCTL 漏洞，方法以阅读开源内核源码与命令格式图为主。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"工具建设习惯的起点：除 PoC 外，作者编写 LD_PRELOAD 的 syscall_hook.c 追踪库，拦截并转储 mtk-su root 利用程序的 IOCTL 命令序列，从而独立逆向已存在 rootkit 的底层漏洞，而非直接复现 mtk-su。这种「PoC + 动态追踪」双轨方法在后续作品中反复出现。\",\n      \"short_quote\": \"We may wonder why this device driver needs to be accessible to every application and not only to the HAL and media-related processes.\",\n      \"source\": {\n        \"title\": \"CVE-2020-0069: Autopsy of the Most Stable MediaTek Rootkit\",\n        \"url\": \"https://blog.quarkslab.com/cve-2020-0069-autopsy-of-the-most-stable-mediatek-rootkit.html\",\n        \"published\": \"2020-03-24\",\n        \"source_type\": \"一手 writeup（Quarkslab 博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mr-works-02\",\n      \"date\": \"2020-03-24\",\n      \"claim\": \"配套开源 PoC 仓库 quarkslab/CVE-2020-0069_poc 提供 kernel_rw.c（内核读写）、poc.sh（将内核数据中 \\\"Linux\\\" 改为 \\\"minix\\\" 的演示）、syscall_hook.c（追踪 mtk-su），使用 ndk-build 针对 armeabi-v7a 构建。仓库仅单个 commit。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"公开作品习惯的早期例证：在 writeup 之外同步开源可复现的 PoC 与自定义追踪工具，建立可被后续研究复用的资产。\",\n      \"source\": {\n        \"title\": \"quarkslab/CVE-2020-0069_poc (GitHub 仓库)\",\n        \"url\": \"https://github.com/quarkslab/CVE-2020-0069_poc\",\n        \"published\": \"2020-03-24\",\n        \"source_type\": \"一手代码仓库（GitHub）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mr-works-03\",\n      \"date\": \"2022-08-11\",\n      \"claim\": \"合著（Damiano Melotti）Quarkslab 博客文章分析 Google Pixel Titan M 安全芯片固件漏洞 CVE-2022-20233（严重级）：Keymaster 任务处理 ImportKey 请求时以攻击者可控整数作为栈缓冲区偏移写出单字节 0x01，构成越界写。作者利用 Black Hat EU 2021 前作中自研的 nosclient 工具发送任意命令，并探索两条模糊测试路径——黑盒（libprotobuf-mutator/Radamsa 经 nosclient 在设备上运行）与模拟化（AFL++ Unicorn 模式在笔记本上模拟固件指令）；新漏洞由模拟化模糊测试中 UC_ERR_WRITE_UNMAPPED 崩溃发现。利用单字节写改写请求存储位置，经多次栈迁移 gadget、替换 DestroyAttestationIds 处理器为 gadget 并写入 trampoline，再用 ROP 调用 memcpy（跳过 null-check 基本块）实现芯片内任意内存读，泄露 StrongBox 密钥。报告日期 2022-03-02，2022 年 6 月修复。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"技术栈与方法论的跃迁：从 2020 年的单一内核 IOCTL 漏洞升级到安全芯片固件、单字节越界写与 ROP；显式引入并比较两种模糊测试方法，建立可复用的 nosclient 工具。失败与反馈机制明确：黑盒模糊测试仅复现已知 bug 且状态浅；模拟化模糊测试因缺乏全系统模拟而漏掉一个已知 bug；Google 初期无法复现，经 Titan M 工程团队调查后才确认，赏金从 10000 美元提升至 75000 美元。\",\n      \"short_quote\": \"there is always a trade-off between the time spent reverse engineering to identify these patterns, and the time you actually let the fuzzer run freely.\",\n      \"source\": {\n        \"title\": \"Attacking Titan M with Only One Byte\",\n        \"url\": \"https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html\",\n        \"published\": \"2022-08-11\",\n        \"source_type\": \"一手 writeup（Quarkslab 博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mr-works-04\",\n      \"date\": \"2023-08-14\",\n      \"claim\": \"合著（Damiano Melotti）Quarkslab 博客文章研究攻击者拥有高端软件漏洞时能否攻破 Android File-Based Encryption（FBE）。复用 2022 年 Titan M（CVE-2022-20233）利用获取芯片代码执行与任意读原语，逆向 Weaver 任务提取密钥与值；另一路径经 MTKClient（Bjoern Kerler 外部工具）利用 Mediatek BootROM 漏洞绕过安全启动，patch TEEGRIS 的 userboot.so/root_task 并 patch Gatekeeper 始终接受凭据，再用裁剪版 Magisk root Android、用 Frida hook system_server 泄露 Keymaster 中间 AES 解密结果，最后以 AES-GCM tag 校验为成功预言机对 scrypt 参数离线暴破。REcon'23 演讲。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"迭代复用前作与跨工具整合：2022 年建立的 nosclient/Titan M 成果被直接复用，叠加外部 MTKClient、Frida、scrypt 暴破，构成多组件攻击链。承认工具局限（暴破脚本性能不足，需更强硬件/VM），并明确指出无论链多少漏洞仍须暴破凭据这一限制——对自身方法边界的清醒复盘。\",\n      \"short_quote\": \"they still need to bruteforce the credentials to feed them into the key derivation process.\",\n      \"source\": {\n        \"title\": \"Android Data Encryption in depth\",\n        \"url\": \"https://blog.quarkslab.com/android-data-encryption-in-depth.html\",\n        \"published\": \"2023-08-14\",\n        \"source_type\": \"一手 writeup（Quarkslab 博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mr-works-05\",\n      \"date\": \"2024-10-15\",\n      \"claim\": \"合著（Raphaël Neveu；contributors Damiano Melotti、Gabrielle Viala）Quarkslab 博客文章披露 Samsung Galaxy A225F 启动链 4 个漏洞并链式利用：CVE-2024-20832（SVE-2023-2079，Little Kernel 自定义 JPEG 解析器堆溢出，up_param 分区启动时不校验）+ CVE-2024-20865（SVE-2024-0234，Odin 经 GPT 无认证刷写并可改 PIT）链式实现经 USB 在 Little Kernel 持久代码执行；CVE-2024-20820（SVE-2023-2215，Secure Monitor SMC handler 0xc2000526 读越界）+ CVE-2024-20021（SMC handler 0x8200022a 任意物理内存映射，每次最多 1MB、共 8 次）链式泄露 Secure World 内存含 Android Keystore 密钥。基于对该设备 Android File-Based Encryption 前作的熟悉。全部 PoC 开源，发表于 Black Hat USA 2024 与 SSTIC 2024。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"难度与发表规格的进一步升级：从单漏洞/单芯片上升到启动链多层（Little Kernel + Secure Monitor）4 漏洞链式利用，并明确以前作对该设备启动流程的熟悉为基础——体现跨作品的知识与方法积累。同时延续同步开源 PoC 与会议发表（Black Hat US、SSTIC）的公开作品习惯。\",\n      \"short_quote\": \"The GPT happens to be flashable through Odin without authentication!\",\n      \"source\": {\n        \"title\": \"Attacking the Samsung Galaxy A* Boot Chain\",\n        \"url\": \"https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html\",\n        \"published\": \"2024-10-15\",\n        \"source_type\": \"一手 writeup（Quarkslab 博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mr-works-06\",\n      \"date\": \"2024-10-15\",\n      \"claim\": \"该启动链研究于 Black Hat USA 2024 与 SSTIC 2024 发表，并在 GitHub 开源全部 4 个漏洞的 PoC 代码。作者页作者索引亦将 2024 年文章归类为 Android，主题为 Samsung 启动链、Secure World、Android Keystore。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"公开发表习惯的延续：writeup 与会议演讲（Black Hat US、SSTIC）配套，且持续将 PoC 开源，与 2020 年 CVE-2020-0069 PoC 仓库一脉相承。\",\n      \"source\": {\n        \"title\": \"Attacking the Samsung Galaxy A* Boot Chain (含 Black Hat USA 2024 / SSTIC 2024 发表与 GitHub PoC)\",\n        \"url\": \"https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html\",\n        \"published\": \"2024-10-15\",\n        \"source_type\": \"一手 writeup（Quarkslab 博客，含会议发表声明）\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"未发现互相冲突的材料。\"\n  ],\n  \"gaps\": [\n    \"person_json 提及「OffByOne 2024」演讲，但抓取的来源未证实其具体题目与日期；未单独抓取 OffByOne 议程页。\",\n    \"Titan M 系列前作 Black Hat EU 2021（首次逆向 Titan M 固件并构建 nosclient）未抓取原文，2022 年文章仅转述其存在；该前作的确切标题、日期与方法细节缺口。\",\n    \"2023 年 REcon'23 与 2024 年 Black Hat USA 2024 / SSTIC 2024 的会议议程页未单独抓取，仅以 writeup 本身的发表声明为证；演讲与 writeup 内容差异未知。\",\n    \"作者 2019 年及更早的公开作品/经历无公开 writeup 记录，技术演化起点之前的状态未知。\",\n    \"个人经历、导师或同伴关系、重复练习的具体形式无公开材料；仅能从作品序列推断工具复用与方法迭代，无法直接证实成长机制的人际与练习维度。\",\n    \"social 字段 https://x.com/max_r_b 未抓取，仅作为身份线索保留，不作 documented 证据。\",\n    \"WebSearch 在本轮返回「无能力」声明而非结果，所有线索均来自 WebFetch 直接抓取；作者页以外的索引（如 Google Scholar、DBLP、CVE 数据库条目）未覆盖。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "7ff20de08c55be2805acbec64c57f8f5a0a9f2825f4dcaf7a3e3a2af4d69b1f1",
+        "accessed_at": "2026-09-28T00:19:57.682115+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790554797682131000-maxime-rossi-bellom-works.json",
+    "label": "Maxime Rossi Bellom:works",
+    "elapsed_seconds": 282.15,
+    "prompt_sha256": "b5abaf345810d8780599b78620a29cbb769350b29c653127716c3e6974d84a46",
+    "num_turns": 19,
+    "total_cost_usd": 0.700764,
+    "usage": {
+      "input_tokens": 21593,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 144000,
+      "output_tokens": 7717,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 31971,
+        "outputTokens": 18261,
+        "cacheReadInputTokens": 168768,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.700764,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

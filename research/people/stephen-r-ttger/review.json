@@ -1,0 +1,200 @@
+{
+  "person": "Stephen Röttger",
+  "verdict": "revise",
+  "score": 74,
+  "scores": {
+    "traceability": 22,
+    "causal_restraint": 13,
+    "timeline": 13,
+    "alternatives": 11,
+    "domain_explanatory_power": 7,
+    "transfer_boundaries": 8
+  },
+  "critical_issues": [
+    "mechanisms[0]（以先验背景加复杂度可控为标准的领域进入与目标选择）将 validation_tests 标为 repeated 并称该判据在 2015 ntpd、2019 TurboFan、2020 RIDL 三处重复出现，但与一手证据冲突：2019 TurboFan 的选取依据是危险 API 模式预判（stephen-ext-01 引文 When I noticed this function in the past, I was convinced that one of the callers will get it wrong），2020 RIDL 作者自述无硬件背景（sr-r3-01 引文 way out of my comfort zone），二者均非先验背景加复杂度可控。该判据仅在 2015 ntpd 可核证，repeated 不成立。",
+    "mechanisms[0].intermediate_capability 称作者能在新领域沿用此判据选取切入点，但 2020 RIDL 的证据方向与该判据相反（无先验背景、跨入此前回避领域），该句与一手证据冲突，构成承重因果超证据。",
+    "mechanisms[1]（系统性审计危险 API 模式的所有调用点）将 validation_tests 标为 repeated 并称 2020 RIDL 工作沿用该方法分析 Chrome Mojo IPC port name 泄露的利用方式与 RIDL/MDS 数据采样路径。但 2020 一手证据（stephen-ext-02、sr-r3-01）记录的是以 RIDL/MDS 替换前序软件 info leak 构建 exploit chain，非对所有调用点的系统性审计；调用点审计方法仅在 2019 TurboFan 可核证，repeated 不成立。",
+    "mechanisms[1].repeated_practice 称 2020 RIDL 工作中系统性分析 Chrome Mojo IPC port name 泄露的利用方式，未标注该 port name 泄露为 @NedWilliamson 前序他人工作 prior art（sr-r3-01 引文 crbug.com/779314 by @NedWilliamson），与 mechanisms[2] 对 Mojo IPC 的 prior-art 标注不一致，隐含 Röttger 对该泄露进行了系统性审计，构成跨字段因果归因不一致。"
+  ],
+  "unsupported_claims": [
+    "mechanisms[0].repeated_practice 将 2019 TurboFan 与 2020 RIDL 列为先验背景加复杂度可控判据的重复实例：2019 证据为危险 API 模式预判，2020 证据为无先验背景下跨入回避领域，均不构成该判据的重复。",
+    "mechanisms[0].intermediate_capability 称作者能在新领域沿用该判据选取切入点：2019 与 2020 一手证据均未显示沿用该判据，2020 且方向相反。",
+    "mechanisms[0].observed_outcomes 将 2020 RIDL 工作跨入硬件侧信道领域作为该判据的观察输出，证据不支持其以先验背景加复杂度可控为判据进入硬件领域。",
+    "mechanisms[1].repeated_practice 称 2020 RIDL 沿用系统性审计所有调用点方法分析 Mojo IPC port name 泄露与 RIDL/MDS 数据采样：2020 证据为 exploit chain 构建而非调用点审计，且 Mojo IPC port name 泄露为 prior art。",
+    "mechanisms[1].observed_outcomes 将 2020 RIDL 工作中系统性分析 Mojo IPC port name 泄露与 RIDL/MDS 数据采样的串联路径列为调用点审计方法的观察输出：该路径为 exploit chain 构建，非调用点审计。",
+    "mechanisms[1].validation_tests=“repeated”：调用点审计方法仅在 2019 TurboFan 单次可核证，2020 不构成重复。"
+  ],
+  "biases": [
+    "幸存者偏差：成长机制仅能从已公开发表的 writeup 样本（Project Zero 2015/2019/2020、v8.dev 2023）观察，未发表、失败或 2015 年之前的工作在可抓取范围不可见，机制跨时期稳定性据此受限；mechanisms[3].alternative_explanation 已标注，但 mechanisms[0]/[1] 的重复性主张同样受该偏差影响而未被标注。",
+    "组织声誉偏差：三篇可核证文章（ntpd 2015、Trashing the Flow of Data 2019、Escaping the Chrome Sandbox with RIDL 2020）均为 Project Zero guest post（sr-r1-conv-01、sr-r3-01），团队页 team.html 抓取返回 404，Project Zero 在职成员定位未由一手来源证实，仅作客座作者定位；tensions 已据此弱化在职推断，但 expertise 与 stages 总述处未明确区分 Project Zero guest post 作者与 Project Zero 在职成员，读者易据 Project Zero 名称侧向强化在职归属印象。",
+    "叙事连贯性偏差：mechanisms[0]/[1] 的重复性主张因三篇 writeup 在发表平台与叙述结构上的连贯性而显得成立，但跨时期判据/方法的实际匹配度低于叙述所呈现的强度，连贯性掩盖了判据不匹配与单例事实。"
+  ],
+  "required_revisions": [
+    "字段 mechanisms[0].repeated_practice：删除将 2019 TurboFan 与 2020 RIDL 列为先验背景加复杂度可控判据重复实例的表述。原措辞为该判据在 2015 ntpd（先验协议背景加简单复杂度）与 2019 TurboFan JIT 两处出现，2020 RIDL 工作亦显式串联前序能力作为迁移起点。改写方向：明确该判据仅在 2015 ntpd 可核证；2019 TurboFan 的选取依据为危险 API 模式预判（非先验背景加复杂度可控），2020 RIDL 作者自述无硬件先验背景（sr-r3-01 引文 way out of my comfort zone），均不构成该判据的重复实例；跨时期重复性证据仅 1 处，不足以支持 repeated 标注。",
+    "字段 mechanisms[0].validation_tests：将“repeated”“generative”改为仅“generative”，或删除“repeated”，与上述单例事实一致。",
+    "字段 mechanisms[0].intermediate_capability：删除并能在新领域沿用此判据选取切入点一句。原措辞为形成以先验背景加复杂度可控为标准的领域进入与目标选择能力，并能在新领域沿用此判据选取切入点。改写方向：改为仅保留形成以先验背景加复杂度可控为标准的领域进入与目标选择能力（在 2015 ntpd 入门中可核证）；删除新领域沿用此判据的表述，因 2019 与 2020 一手证据均未显示沿用，2020 且方向相反。",
+    "字段 mechanisms[0].observed_outcomes：删除将 2020 RIDL 工作跨入硬件侧信道领域作为该判据观察输出的条目，或改写为标注该工作未以该判据进入硬件领域（作者自述无硬件先验背景，sr-r3-01），不应作为先验背景加复杂度可控判据的输出。",
+    "字段 mechanisms[1].repeated_practice：删除 2020 RIDL 工作中沿用系统性审计方法分析 Chrome Mojo IPC port name 泄露的利用方式，并对 RIDL/MDS 数据采样路径进行系统性分析一句。原措辞将该句列为调用点审计方法的重复实践。改写方向：明确调用点审计方法仅在 2019 TurboFan 可核证；2020 RIDL 工作记录的是 exploit chain 构建（以 RIDL/MDS 替换前序软件 info leak），非对所有调用点的系统性审计；如保留 2020 表述须限定为该机制的单次可核证实例并删除沿用一词。",
+    "字段 mechanisms[1].repeated_practice 中 Chrome Mojo IPC port name 泄露：补充 prior-art 标注。原措辞称 2020 RIDL 工作中沿用系统性审计方法分析 Chrome Mojo IPC port name 泄露的利用方式，未标注该泄露归属。改写方向：在该处补注该 port name 泄露为 @NedWilliamson 前序他人工作 prior art（sr-r3-01 引文 crbug.com/779314 by @NedWilliamson），与 mechanisms[2] 的 prior-art 标注跨字段一致，避免隐含 Röttger 对该泄露进行了系统性审计。",
+    "字段 mechanisms[1].observed_outcomes：删除 2020 RIDL 工作中系统性分析 Mojo IPC port name 泄露与 RIDL/MDS 数据采样的串联路径一条，或改写为标注该串联为 exploit chain 构建而非调用点审计方法的输出。",
+    "字段 mechanisms[1].validation_tests：将“repeated”“distinctive”改为仅“distinctive”，或删除“repeated”，与调用点审计方法仅 2019 单例的事实一致。",
+    "字段 mechanisms[0].feedback 与 mechanisms[2].feedback：将自撰叙述中的英文“info leak”统一为中文“信息泄露”或“软件信息泄露”，与 mechanisms[3].observed_outcomes 的软件泄露用语一致，消除自撰叙述中英文混用。原文短引文如 How to replace step 2. and 3. above with a CPU bug 仍以引文形式保留并注明出处。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790710432165616000-stephen-r-ttger-review-v5.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "0fcfb5f3-2702-4a99-954f-37809c1b43ff",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_pg3bx297hr4ecapdoo0spxom",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-29T19:33:52.238139+00:00"
+      },
+      {
+        "tool_use_id": "call_r2plaa6d7zlvpo3kh0m0k83z",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294/task.md"
+        },
+        "success": true,
+        "content_sha256": "57f593401bde92c50710e02f7e41028de4acc9093e4056a756e61519d1f57660",
+        "accessed_at": "2026-09-29T19:33:52.238178+00:00"
+      },
+      {
+        "tool_use_id": "call_n9pdyh40z7g6fqlxuf3kt2b3",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "d1302f8506cbed79964f9fe3c0a321731c135a8e41902c32c6d6c09c0535e294",
+        "accessed_at": "2026-09-29T19:33:52.238186+00:00"
+      },
+      {
+        "tool_use_id": "call_15bgg41fvmvlm3vhvsk50zlx",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "2bfdadd4852f15cdf120bd97015249afe18a916622af548a5f4c82813f95d03b",
+        "accessed_at": "2026-09-29T19:33:52.238194+00:00"
+      },
+      {
+        "tool_use_id": "call_bhik7lqy52vqlrn2170exbpk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "05ab363d08f81e311d00a357d2e1915a73aec1a7ac4980c3a8ddc2b46d4f92a0",
+        "accessed_at": "2026-09-29T19:33:52.238246+00:00"
+      },
+      {
+        "tool_use_id": "call_ec2x5ubuq4sdwriecrruto9g",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294/inputs/synthesis_json.json"
+        },
+        "success": true,
+        "content_sha256": "b2a21062d43c8c6376a6f9a7e8be11399842f04e16c606b5aa742a5f4a8e093d",
+        "accessed_at": "2026-09-29T19:33:52.238309+00:00"
+      },
+      {
+        "tool_use_id": "call_5cq89gmu2koajfgbakbrvkk9",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294/inputs/evidence_json.json",
+          "offset": 544,
+          "limit": 543
+        },
+        "success": true,
+        "content_sha256": "24c1bec34af1d54346c4449c63c478531332f79cbe69e54e7a7d5fc4b9699758",
+        "accessed_at": "2026-09-29T19:33:52.238392+00:00"
+      },
+      {
+        "tool_use_id": "call_hrgtfkfluf23qz9cbb9bkfuc",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294/inputs/evidence_json.json",
+          "limit": 469,
+          "offset": 1087
+        },
+        "success": true,
+        "content_sha256": "005f1d3957764991729c11e199f49d55bc8b5b2e41a35225659d19c3c7cd5966",
+        "accessed_at": "2026-09-29T19:33:52.238467+00:00"
+      },
+      {
+        "tool_use_id": "call_ts7hmxucr4410voazuggqibd",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294/checkpoint.md",
+          "content": "# Checkpoint — Stephen Röttger 复核 v5\n\n## 任务\n独立复核 synthesis v5（经 4 轮定向补证后的综合结论）。逐项审计来源支撑、人物同一性、时间线、因果强度、替代解释、幸存者偏差、组织声誉偏差、可迁移边界，以及进入最终报告的自撰字段语言规范。\n\n## 已读取输入\n- CLAUDE.md、task.md、output.schema.json\n- inputs/person_json.json（rank 98，Stephen Röttger，primary_focus 浏览器与 Linux 内核漏洞，X @st3p_ro，writeup_evidence github.blog 作者页）\n- inputs/evidence_json.json（六维 + 4 轮 targeted_research 全部读取，1555 行）\n- inputs/synthesis_json.json（synthesis v5，5 阶段 + 4 机制 + tensions/transferable/non_transferable/open_questions）\n\n## 有效证据基线（verified_in_run=true）\n- roettger-deepconv-01/02/03（2015-01-02, ntpd fuzzing 自述、OS X 经验缺口/GOT 技术难点、末尾读者练习）\n- sr-works-01/02/03（2018-12, GitHub sroettger: 35c3ctf_chals/gce-ctf/play-my-challenge + fork security-research-pocs/nsjail）\n- stephen-ext-01（2019-05-10, Trashing the Flow of Data, TurboFan JIT Array.prototype.indexOf/includes 全调用点审计；与 Samuel Groß(fuzzilli) 交叉验证）\n- stephen-ext-02（2020-02-15, Escaping Chrome Sandbox with RIDL, guest post；RIDL/MDS + Mojo IPC port name(@NedWilliamson prior art)；Xeon Gold 6154 / Core i7-7600U）\n- srottger-tl-02（2023-10-09, v8.dev Control-flow Integrity in V8）\n- sr-r1-tl-01（2014-12-20, NVD CVE-2014-9295, 未署发现者, CVSS v2 7.5）\n- sr-r1-conv-01（2015-01-02, ntpd 为 Project Zero 首篇 guest post, Chris Evans 前言）\n- sr-r3-01（2020-02-15, RIDL 原文确认 Mojo IPC port name 为 @NedWilliamson prior art \"crbug.com/779314\"；迭代选择 \"How to replace step 2. and 3. above with a CPU bug\"；两次 guest post；comfort zone；缓解误判反思；disable HT）\n\n## 不使用证据（verified_in_run=false / lead_only）\n- sr-works-04、roettger-decisions-01-05、srottger-tl-01\n\n## 4 轮修订落实核查\n- R1（时间/身份/同事/舒适区/卡点/从零重建/外部授权/transferable 前提/单例）：stages[0] period 改 2015-01 + CVE NVD；CTF 阶段 confidence=low + 身份推断标注；删\"同事\"改\"Samuel Groß（fuzzilli 作者）\"；\"舒适区/卡点/从零重建\"已清；删\"不依赖外部授权\"；transferable 各条加前提；mechanisms[2] 标单例。✓\n- R2（Mojo IPC 既有能力超证据/expertise 2019 日期/幸存者偏差/组织资源）：Mojo IPC 改为 2020 内引入且 prior art；expertise 头部 \"Chrome Mojo IPC 原语分析（2020）\"；M3.alternative_explanation 加幸存者偏差；M1/M2.alternative_explanation 加组织资源。✓\n- R3（intermediate_capability prior-art/feedback 出处/repeated_practice prior-art/stages[0] 对应）：M2.intermediate_capability 标 prior art；M2.feedback 标 sr-r3-01 出处；M0.repeated_practice 标 prior art；stages[0] \"产出\"→\"对应\"。✓\n- R4（tensions 三篇 guest post/stages[2] guest post 标注/evidence_ids/stages[0] 对应）：tensions[0] 三篇 guest post + \"仅作客座作者定位\"；stages[2] 补 (guest post) + evidence_ids 补 sr-r3-01；stages[0] \"对应 CVE-2014-9295\"。✓\n\n## 复核发现的关键问题（causal restraint）\n\n### 问题 1：mechanisms[0] \"repeated\" 超证据 + intermediate_capability 与证据相反\n- M0 判据\"先验背景加复杂度可控\"仅在 2015 ntpd（先验 NTP 背景 + 简单协议）清晰可核证。\n- 2019 TurboFan 选取逻辑为\"危险 API 模式预判\"（stephen-ext-01 引文 \"When I noticed this function in the past, I was convinced that one of the callers will get it wrong\"），非先验背景加复杂度可控。\n- 2020 RIDL 明示无先验硬件背景（sr-r3-01 引文 \"out of my comfort zone\"），与判据相反。\n- M0.repeated_practice 将 2019/2020 计为该判据重复实例；validation_tests=\"repeated\"。超证据。\n- M0.intermediate_capability \"并能在新领域沿用此判据选取切入点\"：2019/2020 均未沿用，2020 且相反。该句与一手证据冲突。\n\n### 问题 2：mechanisms[1] \"repeated\" 超证据 + Mojo IPC prior-art 跨字段不一致\n- M1 方法\"系统性审计危险 API 模式的所有调用点\"仅在 2019 TurboFan 可核证。\n- M1.repeated_practice \"2020 RIDL 工作中沿用系统性审计方法分析 Chrome Mojo IPC port name 泄露的利用方式，并对 RIDL/MDS 数据采样路径进行系统性分析\"：2020 证据（stephen-ext-02、sr-r3-01）为 exploit chain 构建（以 RIDL/MDS 替换软件 info leak），非审计所有调用点。\n- \"分析 Chrome Mojo IPC port name 泄露的利用方式\"未标注该泄露为 @NedWilliamson prior art（sr-r3-01 引文 \"crbug.com/779314 by @NedWilliamson\"），与 M2 的 prior-art 标注不一致，隐含 Röttger 审计了该泄露。\n- validation_tests=\"repeated\"：调用点审计方法仅 2019 单例，\"repeated\" 不成立。\n\n### 问题 3：语言一致性（次要）\n- M0.feedback 与 M2.feedback 自撰叙述用\"info leak\"（英文），M3.observed_outcomes 用\"软件泄露\"（中文）指同一概念，自撰叙述中英文混用不一致。\n\n## 评分\n- traceability 22/25：证据均 verified_in_run=true，无作废证据被引用，evidence_ids 与六维一致；GitHub 身份未交叉证明但已标注推断。\n- causal_restraint 13/25：M0/M1 \"repeated\" 超证据；M0.intermediate_capability 与 2020 证据相反；M1 Mojo IPC prior-art 跨字段不一致。alternative_explanation 与 hedge 部分存在但未针对判据/方法不匹配作具体标注。\n- timeline 13/15：时间线一致、有序、hedge 充分；2018-12 CTF 为推断。\n- alternatives 11/15：每机制有 alternative_explanation，含组织资源/平台叙事/幸存者偏差；但未捕获 M0/M1 判据/方法不匹配的特定过度归因。\n- domain_explanatory_power 7/10：机制对成长有解释力，但样本限于 3-4 篇 writeup，且 M0/M1 重复性超证据削弱解释力。\n- transferable_boundaries 8/10：transferable 各条有前提限定，non_transferable 列组织资源；M0 criterion 可迁移性被 2020 证据反证但未标注。\n- 总分 74（< 75）→ verdict 必须 revise。\n\n## 状态\n复核完成，verdict=revise，score=74。准备写入 output.json。\n"
+        },
+        "success": true,
+        "content_sha256": "5d858e296ee6d305cd38cbed8db4789c9283e84eae4dbc49548fef3e96d1329c",
+        "accessed_at": "2026-09-29T19:33:52.239863+00:00"
+      },
+      {
+        "tool_use_id": "call_o7ke02uezx3lbmibvz5jj5yj",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-review-v5-20260930-032512-294/output.json",
+          "content": "{\n  \"person\": \"Stephen Röttger\",\n  \"verdict\": \"revise\",\n  \"score\": 74,\n  \"scores\": {\n    \"traceability\": 22,\n    \"causal_restraint\": 13,\n    \"timeline\": 13,\n    \"alternatives\": 11,\n    \"domain_explanatory_power\": 7,\n    \"transfer_boundaries\": 8\n  },\n  \"critical_issues\": [\n    \"mechanisms[0]（以先验背景加复杂度可控为标准的领域进入与目标选择）将 validation_tests 标为 repeated 并称该判据在 2015 ntpd、2019 TurboFan、2020 RIDL 三处重复出现，但与一手证据冲突：2019 TurboFan 的选取依据是危险 API 模式预判（stephen-ext-01 引文 When I noticed this function in the past, I was convinced that one of the callers will get it wrong），2020 RIDL 作者自述无硬件背景（sr-r3-01 引文 way out of my comfort zone），二者均非先验背景加复杂度可控。该判据仅在 2015 ntpd 可核证，repeated 不成立。\",\n    \"mechanisms[0].intermediate_capability 称作者能在新领域沿用此判据选取切入点，但 2020 RIDL 的证据方向与该判据相反（无先验背景、跨入此前回避领域），该句与一手证据冲突，构成承重因果超证据。\",\n    \"mechanisms[1]（系统性审计危险 API 模式的所有调用点）将 validation_tests 标为 repeated 并称 2020 RIDL 工作沿用该方法分析 Chrome Mojo IPC port name 泄露的利用方式与 RIDL/MDS 数据采样路径。但 2020 一手证据（stephen-ext-02、sr-r3-01）记录的是以 RIDL/MDS 替换前序软件 info leak 构建 exploit chain，非对所有调用点的系统性审计；调用点审计方法仅在 2019 TurboFan 可核证，repeated 不成立。\",\n    \"mechanisms[1].repeated_practice 称 2020 RIDL 工作中系统性分析 Chrome Mojo IPC port name 泄露的利用方式，未标注该 port name 泄露为 @NedWilliamson 前序他人工作 prior art（sr-r3-01 引文 crbug.com/779314 by @NedWilliamson），与 mechanisms[2] 对 Mojo IPC 的 prior-art 标注不一致，隐含 Röttger 对该泄露进行了系统性审计，构成跨字段因果归因不一致。\"\n  ],\n  \"unsupported_claims\": [\n    \"mechanisms[0].repeated_practice 将 2019 TurboFan 与 2020 RIDL 列为先验背景加复杂度可控判据的重复实例：2019 证据为危险 API 模式预判，2020 证据为无先验背景下跨入回避领域，均不构成该判据的重复。\",\n    \"mechanisms[0].intermediate_capability 称作者能在新领域沿用该判据选取切入点：2019 与 2020 一手证据均未显示沿用该判据，2020 且方向相反。\",\n    \"mechanisms[0].observed_outcomes 将 2020 RIDL 工作跨入硬件侧信道领域作为该判据的观察输出，证据不支持其以先验背景加复杂度可控为判据进入硬件领域。\",\n    \"mechanisms[1].repeated_practice 称 2020 RIDL 沿用系统性审计所有调用点方法分析 Mojo IPC port name 泄露与 RIDL/MDS 数据采样：2020 证据为 exploit chain 构建而非调用点审计，且 Mojo IPC port name 泄露为 prior art。\",\n    \"mechanisms[1].observed_outcomes 将 2020 RIDL 工作中系统性分析 Mojo IPC port name 泄露与 RIDL/MDS 数据采样的串联路径列为调用点审计方法的观察输出：该路径为 exploit chain 构建，非调用点审计。\",\n    \"mechanisms[1].validation_tests=“repeated”：调用点审计方法仅在 2019 TurboFan 单次可核证，2020 不构成重复。\"\n  ],\n  \"biases\": [\n    \"幸存者偏差：成长机制仅能从已公开发表的 writeup 样本（Project Zero 2015/2019/2020、v8.dev 2023）观察，未发表、失败或 2015 年之前的工作在可抓取范围不可见，机制跨时期稳定性据此受限；mechanisms[3].alternative_explanation 已标注，但 mechanisms[0]/[1] 的重复性主张同样受该偏差影响而未被标注。\",\n    \"组织声誉偏差：三篇可核证文章（ntpd 2015、Trashing the Flow of Data 2019、Escaping the Chrome Sandbox with RIDL 2020）均为 Project Zero guest post（sr-r1-conv-01、sr-r3-01），团队页 team.html 抓取返回 404，Project Zero 在职成员定位未由一手来源证实，仅作客座作者定位；tensions 已据此弱化在职推断，但 expertise 与 stages 总述处未明确区分 Project Zero guest post 作者与 Project Zero 在职成员，读者易据 Project Zero 名称侧向强化在职归属印象。\",\n    \"叙事连贯性偏差：mechanisms[0]/[1] 的重复性主张因三篇 writeup 在发表平台与叙述结构上的连贯性而显得成立，但跨时期判据/方法的实际匹配度低于叙述所呈现的强度，连贯性掩盖了判据不匹配与单例事实。\"\n  ],\n  \"required_revisions\": [\n    \"字段 mechanisms[0].repeated_practice：删除将 2019 TurboFan 与 2020 RIDL 列为先验背景加复杂度可控判据重复实例的表述。原措辞为该判据在 2015 ntpd（先验协议背景加简单复杂度）与 2019 TurboFan JIT 两处出现，2020 RIDL 工作亦显式串联前序能力作为迁移起点。改写方向：明确该判据仅在 2015 ntpd 可核证；2019 TurboFan 的选取依据为危险 API 模式预判（非先验背景加复杂度可控），2020 RIDL 作者自述无硬件先验背景（sr-r3-01 引文 way out of my comfort zone），均不构成该判据的重复实例；跨时期重复性证据仅 1 处，不足以支持 repeated 标注。\",\n    \"字段 mechanisms[0].validation_tests：将“repeated”“generative”改为仅“generative”，或删除“repeated”，与上述单例事实一致。\",\n    \"字段 mechanisms[0].intermediate_capability：删除并能在新领域沿用此判据选取切入点一句。原措辞为形成以先验背景加复杂度可控为标准的领域进入与目标选择能力，并能在新领域沿用此判据选取切入点。改写方向：改为仅保留形成以先验背景加复杂度可控为标准的领域进入与目标选择能力（在 2015 ntpd 入门中可核证）；删除新领域沿用此判据的表述，因 2019 与 2020 一手证据均未显示沿用，2020 且方向相反。\",\n    \"字段 mechanisms[0].observed_outcomes：删除将 2020 RIDL 工作跨入硬件侧信道领域作为该判据观察输出的条目，或改写为标注该工作未以该判据进入硬件领域（作者自述无硬件先验背景，sr-r3-01），不应作为先验背景加复杂度可控判据的输出。\",\n    \"字段 mechanisms[1].repeated_practice：删除 2020 RIDL 工作中沿用系统性审计方法分析 Chrome Mojo IPC port name 泄露的利用方式，并对 RIDL/MDS 数据采样路径进行系统性分析一句。原措辞将该句列为调用点审计方法的重复实践。改写方向：明确调用点审计方法仅在 2019 TurboFan 可核证；2020 RIDL 工作记录的是 exploit chain 构建（以 RIDL/MDS 替换前序软件 info leak），非对所有调用点的系统性审计；如保留 2020 表述须限定为该机制的单次可核证实例并删除沿用一词。\",\n    \"字段 mechanisms[1].repeated_practice 中 Chrome Mojo IPC port name 泄露：补充 prior-art 标注。原措辞称 2020 RIDL 工作中沿用系统性审计方法分析 Chrome Mojo IPC port name 泄露的利用方式，未标注该泄露归属。改写方向：在该处补注该 port name 泄露为 @NedWilliamson 前序他人工作 prior art（sr-r3-01 引文 crbug.com/779314 by @NedWilliamson），与 mechanisms[2] 的 prior-art 标注跨字段一致，避免隐含 Röttger 对该泄露进行了系统性审计。\",\n    \"字段 mechanisms[1].observed_outcomes：删除 2020 RIDL 工作中系统性分析 Mojo IPC port name 泄露与 RIDL/MDS 数据采样的串联路径一条，或改写为标注该串联为 exploit chain 构建而非调用点审计方法的输出。\",\n    \"字段 mechanisms[1].validation_tests：将“repeated”“distinctive”改为仅“distinctive”，或删除“repeated”，与调用点审计方法仅 2019 单例的事实一致。\",\n    \"字段 mechanisms[0].feedback 与 mechanisms[2].feedback：将自撰叙述中的英文“info leak”统一为中文“信息泄露”或“软件信息泄露”，与 mechanisms[3].observed_outcomes 的软件泄露用语一致，消除自撰叙述中英文混用。原文短引文如 How to replace step 2. and 3. above with a CPU bug 仍以引文形式保留并注明出处。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "545888eae952e6caf41c68b3dd8de75d7cb5a433d4595dd1bea36df381b33df3",
+        "accessed_at": "2026-09-29T19:33:52.239868+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790710432239901000-stephen-r-ttger-review-v5.json",
+    "label": "Stephen Röttger:review:v5",
+    "elapsed_seconds": 519.94,
+    "prompt_sha256": "92f950e6153979e3cb9c132adeec543788f2d205172b2d6b90d31a7ff1f28f8e",
+    "num_turns": 11,
+    "total_cost_usd": 1.690336,
+    "usage": {
+      "input_tokens": 171119,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 231232,
+      "output_tokens": 28765,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 171119,
+        "outputTokens": 28765,
+        "cacheReadInputTokens": 231232,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.690336,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

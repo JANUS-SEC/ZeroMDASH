@@ -1,0 +1,370 @@
+{
+  "person": "Maxime Rossi Bellom",
+  "expertise": [
+    "移动平台漏洞发现与利用",
+    "Android 启动链漏洞（Little Kernel、Odin、Secure Monitor）",
+    "安全芯片固件漏洞（Google Titan M、TrustZone/Secure World）",
+    "Android 数据加密体系（File-Based Encryption、Gatekeeper、Weaver、StrongBox）",
+    "内核驱动 IOCTL 与物理内存读写原语构建",
+    "芯片固件仿真模糊测试（Unicorn + AFL++ unicorn mode）",
+    "ROP 链构造与单字节越界写利用",
+    "可复用研究工具开发与开源（tracing 库、nosclient、patched Magisk、Frida hooks）"
+  ],
+  "stages": [
+    {
+      "period": "2020-03（首个可核验公开作品）",
+      "stage": "以事后分析与利用复现起手，建立源码审查、自建工具与 PoC 开源的研究范式",
+      "capability_change": "可核验的最早公开作品为对 MediaTek CMDQ 驱动漏洞 CVE-2020-0069 的 autopsy。作者明确声明非原始发现者，未联系厂商，而是基于已流通的 mtk-su 利用与 Xiaomi Redmi 6a 开源内核源码，逆向 CMDQ 驱动 IOCTL 与 DMA 命令格式，构建任意物理内存读写 PoC，并编写可被 mtk-su 预加载以拦截并转储 CMDQ IOCTL 序列的 tracing 库。由此区分'发现漏洞'与'理解既有漏洞'两种研究行为，确立以源码审查、自建追踪工具与 PoC 开源为构成要素的研究起点。",
+      "evidence_ids": [
+        "mr-works-01",
+        "mr-works-02",
+        "mrb-community-01-mediatek-solo-2020",
+        "mrb-ext-01",
+        "mrb-dec-01-mediatek-autopsy-2020",
+        "mrb-tl-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2021 年末至 2022-08（约 18 个月）",
+      "stage": "从单干事后分析转向对单一高价值目标的长期原始研究与团队协作",
+      "capability_change": "与 Damiano Melotti、Philippe Teuwen 组成三人小组，对 Google Pixel Titan M 安全芯片展开约 18 个月原始研究。研究顺序为先自建通信工具 nosclient 再寻找漏洞；在缺少调试器、栈踪迹与即时副作用的情况下，于主板 UART 引脚焊接线缆以获取调试输出。方法上由基于 libprotobuf-mutator/Radamsa 的黑盒模糊测试（仅复现已知问题、发现两个 NPE 崩溃）转向基于 Unicorn 与 AFL++ unicorn mode 的仿真模糊测试，并以'能否复现已知漏洞'作为新工具链有效性的判据。漏洞 CVE-2022-20233 由仿真模糊测试中的 UC_ERR_WRITE_UNMAPPED 崩溃发现，利用链由单字节越界写经多次栈迁移 gadget、替换处理器、写入 trampoline，并以 ROP 调用 memcpy（跳过 null-check 基本块）实现芯片内任意内存读以泄露 StrongBox 密钥。研究先后在 Black Hat EU 2021（whitepaper，据 2022 writeup 转述）、TROOPERS22（议程页核验）、Black Hat USA 2022 发表。",
+      "evidence_ids": [
+        "mr-works-03",
+        "mrb-conv-01",
+        "mrb-conv-02",
+        "mrb-conv-03",
+        "mrb-conv-04",
+        "mrb-community-02-titanm-vendor-feedback-2022",
+        "mrb-community-03-tool-building-nosclient-2022",
+        "mrb-ext-02",
+        "mrb-ext-03",
+        "mrb-dec-02-titanm-reverse-2021",
+        "mrb-dec-03-method-pivot-fuzzing-2022",
+        "mrb-dec-04-titanm-disclosure-reward-2022",
+        "mrb-tl-02",
+        "mrb-tl-03",
+        "mrb-tl-04"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2023-08（REcon'23）",
+      "stage": "研究主线系统化扩展：复用前作原语并整合第三方工具，从单芯片扩至完整加密栈",
+      "capability_change": "研究动因包含一次外部咨询（一台主 SoC 已损坏但 Titan M 仍工作的设备能否恢复数据，结论否定），进而转向系统问题：攻击者拥有广泛软件漏洞时能否击穿 Android File-Based Encryption。研究直接复用 2022 年 Titan M 任意读原语与 nosclient 提取 Weaver 密钥，并首次引入 MediaTek 方向：以第三方工具 MTKClient 绕过 MediaTek SoC 安全启动，选择 MediaTek 版三星 Galaxy A22 作为 Gatekeeper 路径目标；同时改造 Magisk 使其可从笔记本直接使用并禁用交互授权提示，并以 Frida hook system_server 泄露 Keymaster 中间 AES 解密结果，最终以 AES-GCM tag 校验为成功预言机对 scrypt 参数离线暴破。作者承认暴破脚本性能不足、需更强硬件/VM，并明确指出无论链多少漏洞仍须暴破凭据这一方法边界。",
+      "evidence_ids": [
+        "mr-works-04",
+        "mrb-community-03-tool-building-nosclient-2022",
+        "mrb-community-04-fbe-conference-and-prior-work-2023",
+        "mrb-ext-05",
+        "mrb-dec-05-android-encryption-extension-2023",
+        "mrb-tl-05",
+        "mrb-tl-06"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2024-06 至 2024-10",
+      "stage": "对完整信任链的系统性拆解与合作网络重组",
+      "capability_change": "与 Raphaël Neveu 合著（Damiano Melotti、Gabrielle Viala 列为贡献者与审稿人），对 Samsung Galaxy A225F 启动链产出 4 个 CVE 并链式利用：CVE-2024-20832（Little Kernel 自定义 JPEG 解析器堆溢出，up_param 分区启动时不校验）与 CVE-2024-20865（Odin 经 GPT 无认证刷写并可改 PIT）链式实现经 USB 在 Little Kernel 持久代码执行；CVE-2024-20820（Secure Monitor SMC handler 0xc2000526 读越界）与 CVE-2024-20021（SMC handler 0x8200022a 任意物理内存映射，每次最多 1MB、共 8 次）链式泄露 Secure World 内存含 Android Keystore 密钥。研究显式以前作对该设备启动流程的熟悉为目标选型依据。SSTIC 2024 以白皮书形式首发（议程页核验），Black Hat USA 2024 演讲据 writeup 转述（议程页 HTTP 403 未独立核验），全部 PoC 开源。",
+      "evidence_ids": [
+        "mr-works-05",
+        "mr-works-06",
+        "mrb-conv-05",
+        "mrb-conv-06",
+        "mrb-community-05-collaborator-network-2024",
+        "mrb-ext-06",
+        "mrb-ext-07",
+        "mrb-dec-06-samsung-bootchain-sstic-2024",
+        "mrb-dec-07-samsung-bootchain-writeup-2024",
+        "mrb-tl-07",
+        "mrb-tl-08",
+        "mrb-tl-09"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "自建可复用工具栈作为研究基础设施（工具先行于漏洞寻找）",
+      "starting_conditions": "2020 年首作即体现该模式：在分析 MediaTek CVE-2020-0069 时即编写 LD_PRELOAD 的 syscall_hook.c 追踪库拦截并转储 mtk-su 的 IOCTL 命令序列，而非直接复现 mtk-su；并同步开源 PoC 仓库。Quarkslab 提供团队共享资产与同行校对环境（见 [[quarkslab-team-and-peer-review-environment]] 待建）。",
+      "repeated_practice": "在每一研究阶段先构建或改造可复用工具，再展开漏洞工作：2020 tracing 库 + 内核读写 PoC；2021-2022 为 Titan M 构建 nosclient（原生运行于 Android、直接与内核驱动通信的自定义客户端），先发表背景 whitepaper 再追求利用；2023 复用 nosclient 提取 Weaver 密钥，并改造 Magisk 为可从笔记本直接使用的基础设施、编写 Frida hooks 与暴破脚本；2024 延续同步开源全部 4 个漏洞 PoC 的习惯。",
+      "feedback": "工具的有效性在后续研究中被实际复用所验证：nosclient 在 2023 FBE 研究中被直接复用为提取 Weaver 密值与试错寻址的入口；自建工具开源后亦被社区复用与消费（nosclient、Samsung PoC）。同时团队对'黑盒模糊测试仅覆盖浅层状态'的判断，构成对工具选型的内部反馈。",
+      "intermediate_capability": "形成'工具先行 + PoC 开源 + 跨作品复用'的稳定研究流程：把工具建设视为研究流程的构成部分而非副产品，使下一项研究可建立在上一项的自有工具资产之上。",
+      "observed_outcomes": [
+        "CVE-2020-0069 PoC 仓库（kernel_rw.c、poc.sh、syscall_hook.c）开源",
+        "nosclient 成为 Titan M 与 Android FBE 两项研究共用的基础工具",
+        "Samsung 启动链 4 个漏洞 PoC 全部开源"
+      ],
+      "evidence_ids": [
+        "mr-works-01",
+        "mr-works-02",
+        "mrb-conv-02",
+        "mrb-community-03-tool-building-nosclient-2022",
+        "mrb-dec-02-titanm-reverse-2021",
+        "mrb-dec-05-android-encryption-extension-2023",
+        "mrb-dec-07-samsung-bootchain-writeup-2024",
+        "mr-works-05",
+        "mr-works-06"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "nosclient 系 Quarkslab 团队共享资产而非个人独有产物，其跨作品复用部分可由'同一团队的资产传承'解释，而非纯个人习惯。但 2020 年独立作者的 tracing 库与 PoC 同步开源行为早于团队 Titan M 工作，可作个人习得的早期证据，二者需分开看待。"
+    },
+    {
+      "name": "以已知漏洞复现与可观测副作用作为新方法有效性的判据",
+      "starting_conditions": "2020 年首作即以'理解既有漏洞'为方法：用 tracing 库反向已存在的 mtk-su rootkit 的底层 IOCTL 调用序列，而非直接复现 mtk-su。该方法依赖对已知结果的还原作为信任基础。",
+      "repeated_practice": "2022 年在为 Titan M 建立仿真模糊测试方案后，先以'能否再次发现已知的 bug'作为新方案有效性判据（'we asked ourselves whether we could once again find the bugs we already knew about, to prove the effectiveness of this new solution'）；在厂商反馈环节，于缺少 Titan M 调试工具时仍以可观测副作用（焊接 UART 线获取调试日志、在 Pixel 3 上演示重定向至 task_print_list 的完整代码执行）作为证据说服厂商。",
+      "feedback": "Google 初期无法复现构成负反馈，团队以递进式 PoC（单字节写→完整代码执行→密钥外泄视频）重新提交并获得赏金上调（10000 美元→75000 美元）；以厂商自身公告的 Titan M 代码执行最高 100 万美元悬赏条款作为奖励谈判依据。该反馈回路强化了'以可演示影响作为说服筹码'的做法。",
+      "intermediate_capability": "形成'以可复现、可观测的结果校验新方法、以递进 PoC 推进定性'的方法论：将新工具链的信任建立在已知结果复现之上，将披露推进建立在可观测副作用与递进演示之上。",
+      "observed_outcomes": [
+        "仿真模糊测试方案经复现已知 bug 后被采用，并直接促成 CVE-2022-20233 的发现（UC_ERR_WRITE_UNMAPPED 崩溃）",
+        "Google 由初期无法复现转为确认并上调赏金至 75000 美元、评定 Critical 严重等级"
+      ],
+      "evidence_ids": [
+        "mr-works-01",
+        "mrb-conv-01",
+        "mrb-conv-03",
+        "mrb-community-02-titanm-vendor-feedback-2022",
+        "mrb-ext-03",
+        "mrb-dec-03-method-pivot-fuzzing-2022",
+        "mrb-dec-04-titanm-disclosure-reward-2022"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "奖励上调部分可由 Google 内部评审流程与公告机制解释，而非个人谈判能力直接所致；但'由无法复现到提交密钥外泄 PoC'的递进行为本身在 writeup 中有可核验的时间线记录，属可观察行为而非推断。"
+    },
+    {
+      "name": "沿设备族与芯片族纵向累积选题，以前作知识作为下一项目目标选型依据",
+      "starting_conditions": "2020 年以 MediaTek SoC（Xiaomi Redmi 6a，MT6762M）为对象；2022 年 Titan M 研究显式以'Google Pixel 手机中最安全组件、设备全部安全最终锚定的组件'为选型理由，即以信任链锚点为目标而非边角组件。",
+      "repeated_practice": "2023 年 Android FBE 研究复用 2022 年 Titan M 任意读原语与 nosclient，并沿 Samsung A 系列 + MediaTek 组合扩展靶机选型；2024 年 Samsung Galaxy A225F 启动链研究显式以前作对该设备启动流程的熟悉为选型依据（'we had gathered a good knowledge over its boot process during our previous research'），并指出影响范围扩展至多数基于 MediaTek SoC 的 Samsung 设备。",
+      "feedback": "前作的设备/芯片知识被证明可直接降低下一项目的目标选择与攻击路径规划成本，形成'副产物即下一项目起点'的正反馈；外部咨询（损坏设备能否恢复数据）作为 2023 年研究触发点，显示选题兼受现实问题驱动。",
+      "intermediate_capability": "形成沿设备族（Samsung A 系列）、芯片族（MediaTek、Titan M、TrustZone/Secure World）纵向累积的研究路径，选题由既有能力沉淀驱动而非随机选题。",
+      "observed_outcomes": [
+        "2023 FBE 研究直接建立在 2022 Titan M 原语之上",
+        "2024 Samsung 启动链研究以 2023 FBE 研究积累的 boot 流程认知为选型依据"
+      ],
+      "evidence_ids": [
+        "mr-works-04",
+        "mr-works-05",
+        "mrb-conv-05",
+        "mrb-community-04-fbe-conference-and-prior-work-2023",
+        "mrb-community-05-collaborator-network-2024",
+        "mrb-dec-05-android-encryption-extension-2023",
+        "mrb-dec-07-samsung-bootchain-writeup-2024"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "选题连续性部分可由 Quarkslab 团队主题分工与设备采购延续解释，而非纯个人偏好；但 writeup 中对'前作认知作为选型依据'的显式陈述为可核验的一手自述。"
+    },
+    {
+      "name": "以技术约束为依据的方法选择与失败纳入约束的处理方式",
+      "starting_conditions": "2022 年 Titan M 研究中，团队先使用黑盒模糊测试，仅复现已知问题并发现两个 NPE 崩溃（被认为不够严重），并明确判断'black-box fuzzing tends to only exercise the targets' shallow states'。",
+      "repeated_practice": "以明确技术判断为由放弃黑盒、转向仿真模糊测试，并对逆向工程成本与模糊测试自由运行成本作权衡论述（'there is always a trade-off between the time spent reverse engineering to identify these patterns, and the time you actually let the fuzzer run freely'）；在编写利用时，把'ROP 链写入首 gadget 位置会破坏使芯片崩溃的内存'这一具体失败作为约束纳入链的布置，而非回避；2023 年承认暴破脚本性能不足与'仍须暴破凭据'的方法边界。",
+      "feedback": "仿真模糊测试转向直接促成 CVE-2022-20233 发现（UC_ERR_WRITE_UNMAPPED 崩溃）；但对仿真化模糊测试因缺乏全系统模拟而漏掉一个已知 bug 的失败亦有显式记录，构成对方法局限的内部反馈。",
+      "intermediate_capability": "形成以技术约束为依据的方法选择习惯，并把失败与边界（崩溃内存、暴破性能、凭据暴破上限）作为约束逐步排除式处理，而非回避或归因于运气。",
+      "observed_outcomes": [
+        "由黑盒转向仿真模糊测试促成 CVE-2022-20233 发现",
+        "在崩溃约束下完成 Titan M ROP 链与 StrongBox 密钥泄露"
+      ],
+      "evidence_ids": [
+        "mr-works-03",
+        "mrb-conv-03",
+        "mrb-conv-04",
+        "mrb-dec-03-method-pivot-fuzzing-2022",
+        "mr-works-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "方法选择的权衡论述集中在 Titan M 单一项目，跨项目重复性弱于其他主机制；其作为主机制的部分依据是它解释了后续 ROP 链布置与暴破边界的处理方式，但'方法选择'本身可部分由团队共识解释。"
+    }
+  ],
+  "tensions": [
+    "2020 年首作明确区分'发现漏洞'与'理解既有漏洞'，作者声明非 CVE-2020-0069 原始发现者且未联系厂商；而 2022/2023/2024 的 Titan M 与 Samsung 工作为原始研究并经完整厂商披露流程。若将 2020 autopsy 误读为原始 0day 发现会与文中陈述矛盾，故按原文定性为事后分析/利用复现。",
+    "仿真模糊测试因缺乏全系统模拟而漏掉一个已知 bug，黑盒模糊测试亦仅覆盖浅层状态——两套方法均有显式失败记录，与'方法转型直接促成发现'的叙事存在张力：转型降低了发现门槛但未消除方法局限。",
+    "Google 初期无法复现 Titan M 漏洞，且初始 10000 美元奖励被 Quarkslab 认为与公告的 100 万美元上限不符；该争议在 writeup 中由作者一方叙述，Google 方面的独立二次确认缺失，75000 美元赏金无 Google 官方或独立媒体的二次确认。",
+    "合作者结构在 2024 年由长期合作者 Damiano Melotti 转为致谢、Raphaël Neveu 成为新合著者，其具体原因（项目分配、人员变动或研究需要）无公开材料说明，仅能由署名变化推断。",
+    "person_json 列出的 'OffByOne 2024' 在所有抓取到的 writeup 正文中均未出现，亦未独立抓取到该会议议程；与 writeup 正文出现的 Black Hat USA 2024、SSTIC 2024 之间存在未消解的来源冲突，暂记为资料缺口而非已确认节点。"
+  ],
+  "transferable_practices": [
+    "在针对新目标展开漏洞工作前，先构建可直接与目标通信或观测其行为的可复用工具（如 tracing 库、自定义客户端），并把工具与 PoC 同步开源以建立可被后续研究复用的资产。",
+    "为新建立的模糊测试或分析方法设立'能否复现已知漏洞/已知结果'的有效性判据，再将其用于未知漏洞发现，以建立对新方法的信任。",
+    "在缺少调试器或栈踪迹时，以可观测副作用（如 UART 焊接取调试日志、可演示的代码执行或数据外泄）作为证据，并以递进式 PoC（由单字节原语到完整代码执行再到数据外泄）推进厂商定性。",
+    "沿设备族或芯片族纵向累积选题，把上一项研究的副产物（对设备启动流程、芯片原语的知识）作为下一项研究的目标选型与攻击路径规划依据。",
+    "把利用过程中的具体失败（如写入位置破坏关键内存）作为约束纳入利用链布置，并对方法局限（暴破性能、凭据暴破上限）作显式复盘而非回避。"
+  ],
+  "non_transferable_conditions": [
+    "Quarkslab 团队环境与同行校对：nosclient 为三人小组共享资产，文末致谢同事校对、OffensiveCon 许可使用演讲图等团队与会议资源属组织条件，非个人可独占复现。",
+    "厂商悬赏条款与披露渠道：Google 公告的 Titan M 代码执行最高 100 万美元悬赏、Android Security Bulletin 收录与 Pixel 安全更新通道，构成奖励上调与修复的外部条件，研究者个人无法复制该反馈回路。",
+    "固件与源码可得性：Titan M 固件公开可取、Xiaomi/Amazon 开源内核源码可得、XDA 上 mtk-su exploit 二进制流通等条件是 autopsy 与仿真模糊测试的前提，非研究者个人可控。",
+    "约 18 个月的长期投入周期与物理工程手段（焊接 UART）受研究时间预算与硬件可拆解性约束，非任意环境可复现。",
+    "合著者与贡献者网络（Damiano Melotti、Philippe Teuwen、Raphaël Neveu、Gabrielle Viala）的具体协作关系与分工无公开材料，其协作模式不可由作品序列直接复制。"
+  ],
+  "open_questions": [
+    "2020-03 首作之前的研究轨迹、入职 Quarkslab 时间、教育与训练背景均无公开证据，能力成长起点之前的状态未知（多维度共同 gap）。",
+    "Black Hat EU 2021（Titan M 先导 whitepaper）、Black Hat USA 2022、REcon'23 议程页未独立抓取，相关演讲仅由 2022/2023 writeup 转述记为 reported，演讲与 writeup 内容差异未知。",
+    "SSTIC 2024 白皮书原文与 Black Hat USA 2024 议程页（HTTP 403）未独立核验，白皮书与 writeup 的内容关系未知。",
+    "person_json 记录的 'OffByOne 2024' 在所有抓取到的 writeup 正文中未出现，亦未独立抓取其议程，与已确认的 Black Hat USA 2024 / SSTIC 2024 之间存在未消解的来源冲突。",
+    "社交账号 x.com/max_r_b 抓取返回 HTTP 402，无法核实其社区互动、披露动态或同行交流内容，仅作身份线索，不作为 documented 证据（mrb-community-06 status=unknown）。",
+    "75000 美元赏金仅由一手 writeup 记载，无 Google 官方或独立媒体的二次确认。",
+    "2024 年合作者由 Damiano Melotti 转为 Raphaël Neveu 的具体原因无公开材料，仅能由署名变化推断。",
+    "未找到针对研究对象本人的长访谈、播客或 AMA；其对入门、学习、失败、导师与转折点的自述在公开来源中缺失，机制中的人际与练习维度主要靠作品序列间接推断。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-synthesis-v1-20260928-081957-692",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790554940992080000-maxime-rossi-bellom-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "ae7f836b-38b8-49a0-9df8-56898762eace",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_6bdrdg0qke3pc3xldsn05xk9",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-synthesis-v1-20260928-081957-692/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-28T00:22:20.998104+00:00"
+      },
+      {
+        "tool_use_id": "call_x5stns1w3q5xgbr9aaaaps3j",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-synthesis-v1-20260928-081957-692/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T00:22:20.998135+00:00"
+      },
+      {
+        "tool_use_id": "call_t223cijrmb82thboni1mp3ce",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-synthesis-v1-20260928-081957-692/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "32ff443a18254f357a9d8172559a70cd89d95eba64d571307bd3e209c7baa057",
+        "accessed_at": "2026-09-28T00:22:20.998144+00:00"
+      },
+      {
+        "tool_use_id": "call_m758q58z8ac2nrw2z9lrizqz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-synthesis-v1-20260928-081957-692/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "6edc158cb959c09bfc928b47a2e3b675c54b9caf033d1761e2f9ae8f18f749df",
+        "accessed_at": "2026-09-28T00:22:20.998152+00:00"
+      },
+      {
+        "tool_use_id": "call_sl3pzplnzb9evn6fipdzzbyv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-synthesis-v1-20260928-081957-692/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "008355b3818511d1089155de70fc654d422c21284198c31bf9fa3fb5b61abe1f",
+        "accessed_at": "2026-09-28T00:22:20.998283+00:00"
+      },
+      {
+        "tool_use_id": "call_m85zsd6b6is36xytiaz9pl6s",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-synthesis-v1-20260928-081957-692/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-28T00:22:20.998312+00:00"
+      },
+      {
+        "tool_use_id": "call_630tawjzn6l59ocj7sowl8zw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-synthesis-v1-20260928-081957-692/inputs/evidence_json.json",
+          "offset": 799,
+          "limit": 205
+        },
+        "success": true,
+        "content_sha256": "8209ead1e3bb7bb98825d42045125633722e58178bd920c3c72f85fb76425c8f",
+        "accessed_at": "2026-09-28T00:22:20.998352+00:00"
+      },
+      {
+        "tool_use_id": "call_twfpdyacva234lyqylpsbql0",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-synthesis-v1-20260928-081957-692/checkpoint.md",
+          "content": "# 综合节点 checkpoint — Maxime Rossi Bellom\n\n首次综合（revision_context 为空，无定向补证）。\n\n## 已读取输入\n- person_json.json：rank=73（未核验），primary_focus=Android/启动链/安全芯片漏洞，Quarkslab，x.com/max_r_b（未抓取），qualification=移动平台漏洞发现与利用\n- evidence_json.json：works/conversations/community/external/decisions/timeline 六维 + targeted(空)，全部 verified_in_run=true\n- revision_context.json：[]（首次综合，无作废证据，无新增补证）\n\n## 有效证据 id 清单（status=unknown 的 mrb-community-06 不用作主机制支撑，但保留为资料缺口）\n- works: mr-works-01..06（06 与 05 同源）\n- conversations: mrb-conv-01..06\n- community: mrb-community-01..05（06=unknown 社交账号）\n- external: mrb-ext-01..07（07=reported 会议自述）\n- decisions: mrb-dec-01..07\n- timeline: mrb-tl-01..09（02/06/07/08=reported 转述）\n\n## 拟定主机制（满足\"重复+解释后续+区分度\"至少两项）\n1. 自建可复用工具栈作为研究基础设施（tracing库→nosclient→patched Magisk/Frida hooks→Samsung链PoC）：跨 2020/2022/2023/2024 四时期重复，解释后续多成果，区分度高\n2. 以已知漏洞复现/可观测副作用作为新方法有效性的判据（mtk-su复现→fuzzing复现已知bug→UART演示→递进PoC说服厂商）：跨时期重复，解释 Titan M 发现+披露奖励上调\n3. 沿设备族/芯片族纵向累积选题（MediaTek→Titan M→FBE栈→Samsung+MediaTek启动链）：跨时期重复，解释目标选型\n4. 披露谈判中以递进式 PoC 与厂商上限条款作为筹码（单字节写→完整代码执行→密钥外泄视频；引用100万上限）：相对有区分度，但主要单点 Titan M 事件，列为主机制需谨慎——单点但可解释奖励上调与披露习惯，归入机制4\n\n## 拟定阶段\n- 阶段1（2020）：独立事后分析起手——源码审查+自建tracing库+PoC开源，区分\"发现\"与\"理解\"\n- 阶段2（2021末–2022.08）：长期原始研究转型——18个月、团队协作、工具(nosclient)先行、方法转型(emulation fuzzing)、单字节原语+ROP、披露谈判\n- 阶段3（2023）：研究主线系统化扩展——复用前作原语+引入第三方工具+自建基础设施，从单芯片扩至加密栈\n- 阶段4（2024）：完整信任链系统性拆解——跨组件4漏洞链、合作者重组、SSTIC首发+Black Hat扩散双轨\n\n## 矛盾/失败/偶然/外部条件\n- 失败：黑盒fuzzing仅复现已知、仅2个NPE；模拟化fuzzing漏掉一个已知bug；Google初期无法复现；暴破脚本性能不足\n- 偶然：2023研究由一次外部咨询（损坏设备能否恢复数据）触发\n- 外部条件：Quarkslab团队与同行校对；厂商悬赏条款（100万上限）；固件公开可取；XDA/开源内核源码可得\n- 矛盾：person_json 的 OffByOne 2024 与 writeup 正文无对应（资料缺口）；WebSearch 量子物理同名歧义与 Windows内核幻觉（已排除）\n\n## 竞争性解释\n- 工具复用可部分由\"Quarkslab团队共享资产\"解释，而非个人习惯——需把可迁移(自建tracing/PoC同步开源)与不可迁移(团队nosclient/同行校对)分开\n- 奖励上调可部分由\"厂商流程\"解释，而非个人谈判能力——但递进PoC行为本身是可观察的\n\n## 未完成\n- 待写入 output.json（按 schema 字段逐项检查）\n"
+        },
+        "success": true,
+        "content_sha256": "e07a482ee3810c842e1f2f47414e90572d80f31f1a33833c431b6a26b1d01b8b",
+        "accessed_at": "2026-09-28T00:22:20.998363+00:00"
+      },
+      {
+        "tool_use_id": "call_cshohtggvocaiedu6habxm7w",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/maxime-rossi-bellom-synthesis-v1-20260928-081957-692/output.json",
+          "content": "{\n  \"person\": \"Maxime Rossi Bellom\",\n  \"expertise\": [\n    \"移动平台漏洞发现与利用\",\n    \"Android 启动链漏洞（Little Kernel、Odin、Secure Monitor）\",\n    \"安全芯片固件漏洞（Google Titan M、TrustZone/Secure World）\",\n    \"Android 数据加密体系（File-Based Encryption、Gatekeeper、Weaver、StrongBox）\",\n    \"内核驱动 IOCTL 与物理内存读写原语构建\",\n    \"芯片固件仿真模糊测试（Unicorn + AFL++ unicorn mode）\",\n    \"ROP 链构造与单字节越界写利用\",\n    \"可复用研究工具开发与开源（tracing 库、nosclient、patched Magisk、Frida hooks）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2020-03（首个可核验公开作品）\",\n      \"stage\": \"以事后分析与利用复现起手，建立源码审查、自建工具与 PoC 开源的研究范式\",\n      \"capability_change\": \"可核验的最早公开作品为对 MediaTek CMDQ 驱动漏洞 CVE-2020-0069 的 autopsy。作者明确声明非原始发现者，未联系厂商，而是基于已流通的 mtk-su 利用与 Xiaomi Redmi 6a 开源内核源码，逆向 CMDQ 驱动 IOCTL 与 DMA 命令格式，构建任意物理内存读写 PoC，并编写可被 mtk-su 预加载以拦截并转储 CMDQ IOCTL 序列的 tracing 库。由此区分'发现漏洞'与'理解既有漏洞'两种研究行为，确立以源码审查、自建追踪工具与 PoC 开源为构成要素的研究起点。\",\n      \"evidence_ids\": [\n        \"mr-works-01\",\n        \"mr-works-02\",\n        \"mrb-community-01-mediatek-solo-2020\",\n        \"mrb-ext-01\",\n        \"mrb-dec-01-mediatek-autopsy-2020\",\n        \"mrb-tl-01\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2021 年末至 2022-08（约 18 个月）\",\n      \"stage\": \"从单干事后分析转向对单一高价值目标的长期原始研究与团队协作\",\n      \"capability_change\": \"与 Damiano Melotti、Philippe Teuwen 组成三人小组，对 Google Pixel Titan M 安全芯片展开约 18 个月原始研究。研究顺序为先自建通信工具 nosclient 再寻找漏洞；在缺少调试器、栈踪迹与即时副作用的情况下，于主板 UART 引脚焊接线缆以获取调试输出。方法上由基于 libprotobuf-mutator/Radamsa 的黑盒模糊测试（仅复现已知问题、发现两个 NPE 崩溃）转向基于 Unicorn 与 AFL++ unicorn mode 的仿真模糊测试，并以'能否复现已知漏洞'作为新工具链有效性的判据。漏洞 CVE-2022-20233 由仿真模糊测试中的 UC_ERR_WRITE_UNMAPPED 崩溃发现，利用链由单字节越界写经多次栈迁移 gadget、替换处理器、写入 trampoline，并以 ROP 调用 memcpy（跳过 null-check 基本块）实现芯片内任意内存读以泄露 StrongBox 密钥。研究先后在 Black Hat EU 2021（whitepaper，据 2022 writeup 转述）、TROOPERS22（议程页核验）、Black Hat USA 2022 发表。\",\n      \"evidence_ids\": [\n        \"mr-works-03\",\n        \"mrb-conv-01\",\n        \"mrb-conv-02\",\n        \"mrb-conv-03\",\n        \"mrb-conv-04\",\n        \"mrb-community-02-titanm-vendor-feedback-2022\",\n        \"mrb-community-03-tool-building-nosclient-2022\",\n        \"mrb-ext-02\",\n        \"mrb-ext-03\",\n        \"mrb-dec-02-titanm-reverse-2021\",\n        \"mrb-dec-03-method-pivot-fuzzing-2022\",\n        \"mrb-dec-04-titanm-disclosure-reward-2022\",\n        \"mrb-tl-02\",\n        \"mrb-tl-03\",\n        \"mrb-tl-04\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023-08（REcon'23）\",\n      \"stage\": \"研究主线系统化扩展：复用前作原语并整合第三方工具，从单芯片扩至完整加密栈\",\n      \"capability_change\": \"研究动因包含一次外部咨询（一台主 SoC 已损坏但 Titan M 仍工作的设备能否恢复数据，结论否定），进而转向系统问题：攻击者拥有广泛软件漏洞时能否击穿 Android File-Based Encryption。研究直接复用 2022 年 Titan M 任意读原语与 nosclient 提取 Weaver 密钥，并首次引入 MediaTek 方向：以第三方工具 MTKClient 绕过 MediaTek SoC 安全启动，选择 MediaTek 版三星 Galaxy A22 作为 Gatekeeper 路径目标；同时改造 Magisk 使其可从笔记本直接使用并禁用交互授权提示，并以 Frida hook system_server 泄露 Keymaster 中间 AES 解密结果，最终以 AES-GCM tag 校验为成功预言机对 scrypt 参数离线暴破。作者承认暴破脚本性能不足、需更强硬件/VM，并明确指出无论链多少漏洞仍须暴破凭据这一方法边界。\",\n      \"evidence_ids\": [\n        \"mr-works-04\",\n        \"mrb-community-03-tool-building-nosclient-2022\",\n        \"mrb-community-04-fbe-conference-and-prior-work-2023\",\n        \"mrb-ext-05\",\n        \"mrb-dec-05-android-encryption-extension-2023\",\n        \"mrb-tl-05\",\n        \"mrb-tl-06\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2024-06 至 2024-10\",\n      \"stage\": \"对完整信任链的系统性拆解与合作网络重组\",\n      \"capability_change\": \"与 Raphaël Neveu 合著（Damiano Melotti、Gabrielle Viala 列为贡献者与审稿人），对 Samsung Galaxy A225F 启动链产出 4 个 CVE 并链式利用：CVE-2024-20832（Little Kernel 自定义 JPEG 解析器堆溢出，up_param 分区启动时不校验）与 CVE-2024-20865（Odin 经 GPT 无认证刷写并可改 PIT）链式实现经 USB 在 Little Kernel 持久代码执行；CVE-2024-20820（Secure Monitor SMC handler 0xc2000526 读越界）与 CVE-2024-20021（SMC handler 0x8200022a 任意物理内存映射，每次最多 1MB、共 8 次）链式泄露 Secure World 内存含 Android Keystore 密钥。研究显式以前作对该设备启动流程的熟悉为目标选型依据。SSTIC 2024 以白皮书形式首发（议程页核验），Black Hat USA 2024 演讲据 writeup 转述（议程页 HTTP 403 未独立核验），全部 PoC 开源。\",\n      \"evidence_ids\": [\n        \"mr-works-05\",\n        \"mr-works-06\",\n        \"mrb-conv-05\",\n        \"mrb-conv-06\",\n        \"mrb-community-05-collaborator-network-2024\",\n        \"mrb-ext-06\",\n        \"mrb-ext-07\",\n        \"mrb-dec-06-samsung-bootchain-sstic-2024\",\n        \"mrb-dec-07-samsung-bootchain-writeup-2024\",\n        \"mrb-tl-07\",\n        \"mrb-tl-08\",\n        \"mrb-tl-09\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"自建可复用工具栈作为研究基础设施（工具先行于漏洞寻找）\",\n      \"starting_conditions\": \"2020 年首作即体现该模式：在分析 MediaTek CVE-2020-0069 时即编写 LD_PRELOAD 的 syscall_hook.c 追踪库拦截并转储 mtk-su 的 IOCTL 命令序列，而非直接复现 mtk-su；并同步开源 PoC 仓库。Quarkslab 提供团队共享资产与同行校对环境（见 [[quarkslab-team-and-peer-review-environment]] 待建）。\",\n      \"repeated_practice\": \"在每一研究阶段先构建或改造可复用工具，再展开漏洞工作：2020 tracing 库 + 内核读写 PoC；2021-2022 为 Titan M 构建 nosclient（原生运行于 Android、直接与内核驱动通信的自定义客户端），先发表背景 whitepaper 再追求利用；2023 复用 nosclient 提取 Weaver 密钥，并改造 Magisk 为可从笔记本直接使用的基础设施、编写 Frida hooks 与暴破脚本；2024 延续同步开源全部 4 个漏洞 PoC 的习惯。\",\n      \"feedback\": \"工具的有效性在后续研究中被实际复用所验证：nosclient 在 2023 FBE 研究中被直接复用为提取 Weaver 密值与试错寻址的入口；自建工具开源后亦被社区复用与消费（nosclient、Samsung PoC）。同时团队对'黑盒模糊测试仅覆盖浅层状态'的判断，构成对工具选型的内部反馈。\",\n      \"intermediate_capability\": \"形成'工具先行 + PoC 开源 + 跨作品复用'的稳定研究流程：把工具建设视为研究流程的构成部分而非副产品，使下一项研究可建立在上一项的自有工具资产之上。\",\n      \"observed_outcomes\": [\n        \"CVE-2020-0069 PoC 仓库（kernel_rw.c、poc.sh、syscall_hook.c）开源\",\n        \"nosclient 成为 Titan M 与 Android FBE 两项研究共用的基础工具\",\n        \"Samsung 启动链 4 个漏洞 PoC 全部开源\"\n      ],\n      \"evidence_ids\": [\n        \"mr-works-01\",\n        \"mr-works-02\",\n        \"mrb-conv-02\",\n        \"mrb-community-03-tool-building-nosclient-2022\",\n        \"mrb-dec-02-titanm-reverse-2021\",\n        \"mrb-dec-05-android-encryption-extension-2023\",\n        \"mrb-dec-07-samsung-bootchain-writeup-2024\",\n        \"mr-works-05\",\n        \"mr-works-06\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"nosclient 系 Quarkslab 团队共享资产而非个人独有产物，其跨作品复用部分可由'同一团队的资产传承'解释，而非纯个人习惯。但 2020 年独立作者的 tracing 库与 PoC 同步开源行为早于团队 Titan M 工作，可作个人习得的早期证据，二者需分开看待。\"\n    },\n    {\n      \"name\": \"以已知漏洞复现与可观测副作用作为新方法有效性的判据\",\n      \"starting_conditions\": \"2020 年首作即以'理解既有漏洞'为方法：用 tracing 库反向已存在的 mtk-su rootkit 的底层 IOCTL 调用序列，而非直接复现 mtk-su。该方法依赖对已知结果的还原作为信任基础。\",\n      \"repeated_practice\": \"2022 年在为 Titan M 建立仿真模糊测试方案后，先以'能否再次发现已知的 bug'作为新方案有效性判据（'we asked ourselves whether we could once again find the bugs we already knew about, to prove the effectiveness of this new solution'）；在厂商反馈环节，于缺少 Titan M 调试工具时仍以可观测副作用（焊接 UART 线获取调试日志、在 Pixel 3 上演示重定向至 task_print_list 的完整代码执行）作为证据说服厂商。\",\n      \"feedback\": \"Google 初期无法复现构成负反馈，团队以递进式 PoC（单字节写→完整代码执行→密钥外泄视频）重新提交并获得赏金上调（10000 美元→75000 美元）；以厂商自身公告的 Titan M 代码执行最高 100 万美元悬赏条款作为奖励谈判依据。该反馈回路强化了'以可演示影响作为说服筹码'的做法。\",\n      \"intermediate_capability\": \"形成'以可复现、可观测的结果校验新方法、以递进 PoC 推进定性'的方法论：将新工具链的信任建立在已知结果复现之上，将披露推进建立在可观测副作用与递进演示之上。\",\n      \"observed_outcomes\": [\n        \"仿真模糊测试方案经复现已知 bug 后被采用，并直接促成 CVE-2022-20233 的发现（UC_ERR_WRITE_UNMAPPED 崩溃）\",\n        \"Google 由初期无法复现转为确认并上调赏金至 75000 美元、评定 Critical 严重等级\"\n      ],\n      \"evidence_ids\": [\n        \"mr-works-01\",\n        \"mrb-conv-01\",\n        \"mrb-conv-03\",\n        \"mrb-community-02-titanm-vendor-feedback-2022\",\n        \"mrb-ext-03\",\n        \"mrb-dec-03-method-pivot-fuzzing-2022\",\n        \"mrb-dec-04-titanm-disclosure-reward-2022\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"奖励上调部分可由 Google 内部评审流程与公告机制解释，而非个人谈判能力直接所致；但'由无法复现到提交密钥外泄 PoC'的递进行为本身在 writeup 中有可核验的时间线记录，属可观察行为而非推断。\"\n    },\n    {\n      \"name\": \"沿设备族与芯片族纵向累积选题，以前作知识作为下一项目目标选型依据\",\n      \"starting_conditions\": \"2020 年以 MediaTek SoC（Xiaomi Redmi 6a，MT6762M）为对象；2022 年 Titan M 研究显式以'Google Pixel 手机中最安全组件、设备全部安全最终锚定的组件'为选型理由，即以信任链锚点为目标而非边角组件。\",\n      \"repeated_practice\": \"2023 年 Android FBE 研究复用 2022 年 Titan M 任意读原语与 nosclient，并沿 Samsung A 系列 + MediaTek 组合扩展靶机选型；2024 年 Samsung Galaxy A225F 启动链研究显式以前作对该设备启动流程的熟悉为选型依据（'we had gathered a good knowledge over its boot process during our previous research'），并指出影响范围扩展至多数基于 MediaTek SoC 的 Samsung 设备。\",\n      \"feedback\": \"前作的设备/芯片知识被证明可直接降低下一项目的目标选择与攻击路径规划成本，形成'副产物即下一项目起点'的正反馈；外部咨询（损坏设备能否恢复数据）作为 2023 年研究触发点，显示选题兼受现实问题驱动。\",\n      \"intermediate_capability\": \"形成沿设备族（Samsung A 系列）、芯片族（MediaTek、Titan M、TrustZone/Secure World）纵向累积的研究路径，选题由既有能力沉淀驱动而非随机选题。\",\n      \"observed_outcomes\": [\n        \"2023 FBE 研究直接建立在 2022 Titan M 原语之上\",\n        \"2024 Samsung 启动链研究以 2023 FBE 研究积累的 boot 流程认知为选型依据\"\n      ],\n      \"evidence_ids\": [\n        \"mr-works-04\",\n        \"mr-works-05\",\n        \"mrb-conv-05\",\n        \"mrb-community-04-fbe-conference-and-prior-work-2023\",\n        \"mrb-community-05-collaborator-network-2024\",\n        \"mrb-dec-05-android-encryption-extension-2023\",\n        \"mrb-dec-07-samsung-bootchain-writeup-2024\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"选题连续性部分可由 Quarkslab 团队主题分工与设备采购延续解释，而非纯个人偏好；但 writeup 中对'前作认知作为选型依据'的显式陈述为可核验的一手自述。\"\n    },\n    {\n      \"name\": \"以技术约束为依据的方法选择与失败纳入约束的处理方式\",\n      \"starting_conditions\": \"2022 年 Titan M 研究中，团队先使用黑盒模糊测试，仅复现已知问题并发现两个 NPE 崩溃（被认为不够严重），并明确判断'black-box fuzzing tends to only exercise the targets' shallow states'。\",\n      \"repeated_practice\": \"以明确技术判断为由放弃黑盒、转向仿真模糊测试，并对逆向工程成本与模糊测试自由运行成本作权衡论述（'there is always a trade-off between the time spent reverse engineering to identify these patterns, and the time you actually let the fuzzer run freely'）；在编写利用时，把'ROP 链写入首 gadget 位置会破坏使芯片崩溃的内存'这一具体失败作为约束纳入链的布置，而非回避；2023 年承认暴破脚本性能不足与'仍须暴破凭据'的方法边界。\",\n      \"feedback\": \"仿真模糊测试转向直接促成 CVE-2022-20233 发现（UC_ERR_WRITE_UNMAPPED 崩溃）；但对仿真化模糊测试因缺乏全系统模拟而漏掉一个已知 bug 的失败亦有显式记录，构成对方法局限的内部反馈。\",\n      \"intermediate_capability\": \"形成以技术约束为依据的方法选择习惯，并把失败与边界（崩溃内存、暴破性能、凭据暴破上限）作为约束逐步排除式处理，而非回避或归因于运气。\",\n      \"observed_outcomes\": [\n        \"由黑盒转向仿真模糊测试促成 CVE-2022-20233 发现\",\n        \"在崩溃约束下完成 Titan M ROP 链与 StrongBox 密钥泄露\"\n      ],\n      \"evidence_ids\": [\n        \"mr-works-03\",\n        \"mrb-conv-03\",\n        \"mrb-conv-04\",\n        \"mrb-dec-03-method-pivot-fuzzing-2022\",\n        \"mr-works-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"方法选择的权衡论述集中在 Titan M 单一项目，跨项目重复性弱于其他主机制；其作为主机制的部分依据是它解释了后续 ROP 链布置与暴破边界的处理方式，但'方法选择'本身可部分由团队共识解释。\"\n    }\n  ],\n  \"tensions\": [\n    \"2020 年首作明确区分'发现漏洞'与'理解既有漏洞'，作者声明非 CVE-2020-0069 原始发现者且未联系厂商；而 2022/2023/2024 的 Titan M 与 Samsung 工作为原始研究并经完整厂商披露流程。若将 2020 autopsy 误读为原始 0day 发现会与文中陈述矛盾，故按原文定性为事后分析/利用复现。\",\n    \"仿真模糊测试因缺乏全系统模拟而漏掉一个已知 bug，黑盒模糊测试亦仅覆盖浅层状态——两套方法均有显式失败记录，与'方法转型直接促成发现'的叙事存在张力：转型降低了发现门槛但未消除方法局限。\",\n    \"Google 初期无法复现 Titan M 漏洞，且初始 10000 美元奖励被 Quarkslab 认为与公告的 100 万美元上限不符；该争议在 writeup 中由作者一方叙述，Google 方面的独立二次确认缺失，75000 美元赏金无 Google 官方或独立媒体的二次确认。\",\n    \"合作者结构在 2024 年由长期合作者 Damiano Melotti 转为致谢、Raphaël Neveu 成为新合著者，其具体原因（项目分配、人员变动或研究需要）无公开材料说明，仅能由署名变化推断。\",\n    \"person_json 列出的 'OffByOne 2024' 在所有抓取到的 writeup 正文中均未出现，亦未独立抓取到该会议议程；与 writeup 正文出现的 Black Hat USA 2024、SSTIC 2024 之间存在未消解的来源冲突，暂记为资料缺口而非已确认节点。\"\n  ],\n  \"transferable_practices\": [\n    \"在针对新目标展开漏洞工作前，先构建可直接与目标通信或观测其行为的可复用工具（如 tracing 库、自定义客户端），并把工具与 PoC 同步开源以建立可被后续研究复用的资产。\",\n    \"为新建立的模糊测试或分析方法设立'能否复现已知漏洞/已知结果'的有效性判据，再将其用于未知漏洞发现，以建立对新方法的信任。\",\n    \"在缺少调试器或栈踪迹时，以可观测副作用（如 UART 焊接取调试日志、可演示的代码执行或数据外泄）作为证据，并以递进式 PoC（由单字节原语到完整代码执行再到数据外泄）推进厂商定性。\",\n    \"沿设备族或芯片族纵向累积选题，把上一项研究的副产物（对设备启动流程、芯片原语的知识）作为下一项研究的目标选型与攻击路径规划依据。\",\n    \"把利用过程中的具体失败（如写入位置破坏关键内存）作为约束纳入利用链布置，并对方法局限（暴破性能、凭据暴破上限）作显式复盘而非回避。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Quarkslab 团队环境与同行校对：nosclient 为三人小组共享资产，文末致谢同事校对、OffensiveCon 许可使用演讲图等团队与会议资源属组织条件，非个人可独占复现。\",\n    \"厂商悬赏条款与披露渠道：Google 公告的 Titan M 代码执行最高 100 万美元悬赏、Android Security Bulletin 收录与 Pixel 安全更新通道，构成奖励上调与修复的外部条件，研究者个人无法复制该反馈回路。\",\n    \"固件与源码可得性：Titan M 固件公开可取、Xiaomi/Amazon 开源内核源码可得、XDA 上 mtk-su exploit 二进制流通等条件是 autopsy 与仿真模糊测试的前提，非研究者个人可控。\",\n    \"约 18 个月的长期投入周期与物理工程手段（焊接 UART）受研究时间预算与硬件可拆解性约束，非任意环境可复现。\",\n    \"合著者与贡献者网络（Damiano Melotti、Philippe Teuwen、Raphaël Neveu、Gabrielle Viala）的具体协作关系与分工无公开材料，其协作模式不可由作品序列直接复制。\"\n  ],\n  \"open_questions\": [\n    \"2020-03 首作之前的研究轨迹、入职 Quarkslab 时间、教育与训练背景均无公开证据，能力成长起点之前的状态未知（多维度共同 gap）。\",\n    \"Black Hat EU 2021（Titan M 先导 whitepaper）、Black Hat USA 2022、REcon'23 议程页未独立抓取，相关演讲仅由 2022/2023 writeup 转述记为 reported，演讲与 writeup 内容差异未知。\",\n    \"SSTIC 2024 白皮书原文与 Black Hat USA 2024 议程页（HTTP 403）未独立核验，白皮书与 writeup 的内容关系未知。\",\n    \"person_json 记录的 'OffByOne 2024' 在所有抓取到的 writeup 正文中未出现，亦未独立抓取其议程，与已确认的 Black Hat USA 2024 / SSTIC 2024 之间存在未消解的来源冲突。\",\n    \"社交账号 x.com/max_r_b 抓取返回 HTTP 402，无法核实其社区互动、披露动态或同行交流内容，仅作身份线索，不作为 documented 证据（mrb-community-06 status=unknown）。\",\n    \"75000 美元赏金仅由一手 writeup 记载，无 Google 官方或独立媒体的二次确认。\",\n    \"2024 年合作者由 Damiano Melotti 转为 Raphaël Neveu 的具体原因无公开材料，仅能由署名变化推断。\",\n    \"未找到针对研究对象本人的长访谈、播客或 AMA；其对入门、学习、失败、导师与转折点的自述在公开来源中缺失，机制中的人际与练习维度主要靠作品序列间接推断。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "d96944c821a91ebf3802172921b933b5efda7c7aeb9628ede4a85a90b73c88ce",
+        "accessed_at": "2026-09-28T00:22:20.998373+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790554940998396000-maxime-rossi-bellom-synthesis-v1.json",
+    "label": "Maxime Rossi Bellom:synthesis:v1",
+    "elapsed_seconds": 143.3,
+    "prompt_sha256": "0d5f8332c7c673b5deaace77145a52bc755df4078d4aee47482d80ff88033b0d",
+    "num_turns": 10,
+    "total_cost_usd": 0.495361,
+    "usage": {
+      "input_tokens": 43701,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 138112,
+      "output_tokens": 8312,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 43701,
+        "outputTokens": 8312,
+        "cacheReadInputTokens": 138112,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.495361,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

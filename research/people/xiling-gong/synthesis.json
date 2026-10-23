@@ -1,0 +1,205 @@
+{
+  "person": "Xiling Gong",
+  "expertise": [
+    "Qualcomm KGSL GPU 驱动内存损坏（use-after-free，由 VBO/BMO bind-unbind 竞态触发）的分析与利用（androidoffsec.withgoogle.com 2026-03-28 文章，CVE-2024-23380，合著 @Rishika Hooda；一手 writeup 核验，primary）",
+    "本地种子所述「Android 内核与 SoC 漏洞」「Android 底层漏洞发现与利用」方向（lead_only，未经一手核验的范围陈述；已核验范围内的具体方向为上一条）"
+  ],
+  "stages": [
+    {
+      "period": "2026-03（单点；此前此后时点无 verified 来源）",
+      "stage": "公开 KGSL GPU UAF-to-root writeup（CVE-2024-23380）",
+      "capability_change": "在 2026-03-28 经 androidoffsec.withgoogle.com 公开一篇 Qualcomm KGSL GPU 驱动 use-after-free 到 Android root 的完整利用 writeup（CVE-2024-23380，合著 @Rishika Hooda），展示从竞态触发、物理页回收与 spray、经 GPU CP_MEM_TO_MEM 扫描可控物理页、篡改 kgsl_memdesc 的 physaddr/size/ops，到 mmap 将内核映射为可写用户态内存并 patch sel_read_enforce 关闭 SELinux 的完整链，并经正文 banner 自述归属 Google Android Red Team。此为本节点唯一经一手核验的能力快照；由于仅存在单一时点的 verified 来源，无法据以重建该能力随时间如何形成或演化的成长轨迹，亦无法据以判断此为一长期积累的稳态能力还是专项攻坚产物。",
+      "evidence_ids": [
+        "r2-works-kgsl-writeup-01",
+        "r2-works-kgsl-writeup-02"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "GPU 驱动物理页能力为核心的内核任意读写构造",
+      "starting_conditions": "已核验的起点仅为 2026-03-28 一篇公开 writeup 的存在与其技术内容（r2-works-kgsl-writeup-01/02）。该 writeup 假定作者已具备对 Qualcomm KGSL GPU 驱动内部结构（VBO/BMO refcount、kgsl_mem_entry、kgsl_memdesc 的 physaddr/size/ops、CP_MEM_TO_MEM 命令流）与 Android 内核低内存回收、slab/堆布局、SELinux 运行机制的理解，并能访问 GPU 驱动提供的物理页访问能力。这些前置条件本身无一手来源直接记录，属由成品 writeup 反推的推断；作者此前是否有 KGSL 或其他 GPU 驱动研究经历、是否经由团队协作取得前置能力，均无可核验来源。",
+      "repeated_practice": "无可核验的跨时期重复行为或练习过程：六维取证 20 个 item 全部 status=unknown、verified_in_run=false、level=lead_only，定向补证仅取得单篇 writeup。仅能从该 writeup 的成品推断一次完整利用链的构造过程——根因为两线程并发对同一 VBO 执行 bind/unbind 致 BMO refcount 竞争、backend 物理页释放后 VBO 仍可访问的物理页 use-after-free；利用六步为触发竞态→低压回收释放页进内核堆→spray kgsl_mem_entry→经 CP_MEM_TO_MEM 扫描可控物理页→篡改 kgsl_memdesc 的 physaddr/size/ops→mmap 将内核映为可写用户态内存并 patch sel_read_enforce 关闭 SELinux。是否存在同类漏洞或同类链的反复实践，缺乏证据。",
+      "feedback": "可核验的反馈来源仅限成品 writeup 自身与团队写作环境：writeup 经 Google Android 官方安全博客（androidoffsec.withgoogle.com）发布，正文致谢队友 Martijn Bogaard、Xingyu Jin、Zi Fan Tan，同站另有 @Zi Fan Tan、@Gulshan Singh、@Eugene Rodionov 的 Binder 系列文章，提示其处于一个内部可相互评审的团队写作环境。该环境是否构成对其研究方法的实质性反馈回路（评审、复现、纠错），以及公开渠道（x.com/lazydogsec、Black Hat Asia/POC）是否提供同行反馈，均未取得一手核验，列为缺口。",
+      "intermediate_capability": "由成品 writeup 反推，作者在 2026-03 时点具备或可调用以下中间能力（均为推断，非跨时期稳态能力的直接证据）：(1) 对 Qualcomm KGSL GPU 驱动内部对象生命周期与 refcount 语义的分析；(2) 经 GPU 命令流（CP_MEM_TO_MEM）构造可控物理页扫描以绕过 CPU 侧地址随机化/隔离的能力；(3) 将内核物理页经 kgsl_contiguous_vmfault 路径映射为用户态可写内存，再 patch sel_read_enforce 关闭 SELinux，并绕过 kCFI/W^X/DEP 的利用收尾能力。这些能力的形成过程无来源支撑。",
+      "observed_outcomes": [
+        "公开 writeup《A Technical Deep Dive into CVE-2024-23380: Exploiting GPU Memory Corruption to Android Root》（androidoffsec.withgoogle.com，2026-03-28，合著 @Rishika Hooda）",
+        "正文自述归属 Google Android Red Team（banner「Exploit by Xiling Gong of Android RedTeam, Google:)」，页脚「© Google, 2026」）",
+        "该 writeup 描述的影响为 Android root + 内核任意读写/代码执行，并绕过 kCFI/W^X/DEP"
+      ],
+      "evidence_ids": [
+        "r2-works-kgsl-writeup-01",
+        "r2-works-kgsl-writeup-02"
+      ],
+      "validation_tests": [
+        "generative"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "竞争性解释一（组织资源归因）：该 writeup 的复杂度、官方发布渠道与团队致谢，提示其可能是 Google Android Red Team 内部资源、协作评审与漏洞/样本获取条件下的产物，而非可归因于个人成长路径的稳定能力；在此解释下，'机制' 的真正驱动力是组织资源而非个人反复练习。竞争性解释二（单点专项 vs 可迁移能力）：该能力可能是一次针对特定 CVE 的专项攻坚结果，缺乏证据表明其为可跨驱动、跨时期复用的稳定方法论。两种解释均与材料相容，无法据单篇 writeup 排除任一。"
+    }
+  ],
+  "tensions": [
+    "身份同一性部分成立：Xiling Gong 与 androidoffsec.withgoogle.com 作者的绑定经一手 writeup 署名核验成立（r2-works-kgsl-writeup-01，primary）；但 Xiling Gong 与 @lazydogsec（x.com 本轮 HTTP 402）、与 Black Hat Asia/POC 演讲者（blackhat.com 本轮 HTTP 403、POC 议程页未抓取）的绑定仍待一手核验。因此不能笼统断言'身份同一性成立'，亦不能维持 round 1 的'身份同一性未成立'结论，应表述为部分成立。",
+    "组织归属非对称：Google Android Red Team 归属经 writeup 正文 banner 直接证实（r2-works-kgsl-writeup-01）；external 维度记录的 360 Alpha Lab / Qihoo 360 线索无源 URL、本轮未取得任何一手材料，维持 lead_only。二者证据等级悬殊，不应并列表述为'两条排他未核验线索'。",
+    "成长过程目标与材料结构性不匹配：task 要求重建'领域能力的成长过程'，但已核验来源仅为 2026-03-28 单一时点的单篇 writeup，无可核验的此前/此后时点。因此本报告只能提供单点能力快照，'成长过程'本身属资料缺口，单点反推的机制 confidence 为 low。",
+    "样本偏差：本地种子 rank=95 属高排名样本（幸存者偏差——样本偏向已公开成名者），且 writeup 平台为 Google 官方安全域（组织声誉偏差——品牌声誉可能使读者高估其专业能力的可迁移性）。两类偏差均可能使读者高估普通研究者复制其路径的可能性。",
+    "种子方向与已核验方向口径差异：本地种子 primary_focus='Android 内核与 SoC 漏洞'、qualification='Android 底层漏洞发现与利用' 为较宽泛的范围陈述（lead_only）；经一手核验的具体方向为 Qualcomm KGSL GPU 驱动内存损坏的分析与利用。两者不矛盾，但后者是前者范围内的一个具体子方向，不可据核验子方向反推整条范围陈述均已核验。"
+  ],
+  "transferable_practices": [
+    "将 GPU 驱动物理页访问能力作为内核地址空间桥接原语：经 GPU 命令流（如 CP_MEM_TO_MEM）扫描可控物理页、再篡改驱动内部描述符（如 kgsl_memdesc 的 physaddr/size/ops）以经驱动 fault 路径将内核物理页映射为用户态可写内存的构造思路，是 writeup 中明确给出、原则上可迁移到其他持有'用户可控物理页访问'能力驱动的技术原语（依据 r2-works-kgsl-writeup-02；属单篇 writeup 提取的可迁移技术原语，非跨人可迁移的能力保证）。",
+    "利用竞态致物理页 use-after-free 后经低压回收回收入内核堆、再以驱动对象 spray 复位的内存布局操纵方法（依据 r2-works-kgsl-writeup-02；同上，为技术方法层面的可参考做法，其有效性受具体内核版本、回收路径与对象布局约束）。",
+    "以 patch sel_read_enforce 关闭 SELinux 作为内核任意读写后的提权收尾，并显式评估 kCFI/W^X/DEP 绕过约束的收尾设计（依据 r2-works-kgsl-writeup-02；为利用收尾设计层面的可参考做法）。"
+  ],
+  "non_transferable_conditions": [
+    "组织资源：Google Android Red Team 归属及其带来的内部协作评审（致谢队友 Martijn Bogaard、Xingyu Jin、Zi Fan Tan）、官方发布渠道（androidoffsec.withgoogle.com）与同站团队写作环境（@Zi Fan Tan、@Gulshan Singh、@Eugene Rodionov 的 Binder 系列），属个人特有条件，普通研究者不具备等价资源（依据 r2-works-kgsl-writeup-01）。",
+    "单点样本：仅 1 篇已核验 writeup，无法据以判断其研究方法是否具备跨时期、跨驱动的稳定性；本报告不主张其研究方法具备跨人可迁移性。",
+    "高排名幸存者偏差：本地种子 rank=95 偏向已公开成名者，相关可迁移性判断可能过度乐观。",
+    "组织声誉偏差：作品平台为 Google 官方安全域，可能使读者高估其专业能力的可迁移性。",
+    "合著与团队贡献不可分离：已核验 writeup 为合著（@Rishika Hooda），且致谢多名队友，单篇成品中个人贡献份额与个人能力边界无法据署名分离，不可整体归因为个人能力。",
+    "前置能力无可核验来源：作者对 KGSL 驱动内部结构、低内存回收、SELinux 运行机制的理解等前置能力，无一手来源记录，属由成品反推的推断，不可作为可迁移条件。"
+  ],
+  "open_questions": [
+    "@lazydogsec 账号归属待核验：x.com/lazydogsec 本轮 WebFetch 返回 HTTP 402，账号持有人、bio、雇主自述与可见发帖时间均未取得一手核验，身份绑定中此组维持待核验。",
+    "Black Hat Asia / POC 演讲事实待核验：blackhat.com 本轮返回 HTTP 403、POC（Power of Community）议程页未抓取，研究对象在该会议的演讲年份、议题标题、摘要与合著者未取得一手核验；本地种子所标'Black Hat Asia / POC'维持 lead_only。",
+    "CVE-2024-23380 官方公告正文待核验：NVD 本轮回退至首页而非 CVE 条目正文，Qualcomm 官方安全公告未抓取；CVE 技术细节以一手 writeup（r2-works-kgsl-writeup-02）为准，NVD/Qualcomm 公告详情（CVSS、官方描述 verbatim）列为待核验。",
+    "成长过程整体缺失：缺乏 2026-03 前后的教育、工作、项目、其他漏洞、工具建设、公开演讲、失败/转向等任何时点的一手来源，无法重建能力成长轨迹；单点反推的机制 confidence 为 low，'成长过程'本身为结构性资料缺口。",
+    "个人与团队贡献分离：已核验 writeup 为合著且致谢多名队友，个人贡献份额与个人能力边界无法据署名分离。",
+    "前置能力来源缺失：作者对 KGSL 驱动、低内存回收、SELinux 等前置理解的形成路径无一手来源，相关陈述均为由成品反推的推断。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/xiling-gong-synthesis-v3-20260928-182005-093",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790591100334888000-xiling-gong-synthesis-v3.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "c3d3b208-4c4c-469f-ac41-00ecbf4026b3",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_b4u8hfrsi8k5iiq7t3c38bzy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/xiling-gong-synthesis-v3-20260928-182005-093/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T10:25:00.371165+00:00"
+      },
+      {
+        "tool_use_id": "call_xk1u4618n6hvfqysrut59jim",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/xiling-gong-synthesis-v3-20260928-182005-093/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "25a28ef3478b3312b4f9eccf7b585327bf7c76e328f835732336ce84015d97e4",
+        "accessed_at": "2026-09-28T10:25:00.371183+00:00"
+      },
+      {
+        "tool_use_id": "call_5wewgrqz77mve86xgr45ycl0",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/xiling-gong-synthesis-v3-20260928-182005-093/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "6ea537d1ad533228872e53a3ffd899cc011cd67dc277d117099afc24bfc40a02",
+        "accessed_at": "2026-09-28T10:25:00.371190+00:00"
+      },
+      {
+        "tool_use_id": "call_mw0h93w0zexbqywf6wruhzkj",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/xiling-gong-synthesis-v3-20260928-182005-093/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "a49b41d5da9cefdedabd556e7b6a174e94e41f2fbc18fa75ffe5e9a011bfb03e",
+        "accessed_at": "2026-09-28T10:25:00.371242+00:00"
+      },
+      {
+        "tool_use_id": "call_fpozmf2le9i6xf37aayxqg1m",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/xiling-gong-synthesis-v3-20260928-182005-093/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "54fdbc9a6bd1edfccfa2453e0d3a980b60b958f49eceb401e8f566d8d42d083e",
+        "accessed_at": "2026-09-28T10:25:00.371322+00:00"
+      },
+      {
+        "tool_use_id": "call_8jyhqjwwmwbvm49dnqnmymdp",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/xiling-gong-synthesis-v3-20260928-182005-093/inputs/revision_context.json",
+          "offset": 464,
+          "limit": 215
+        },
+        "success": true,
+        "content_sha256": "de102d08cb14ca772187073cfb6287d4e7dc5638484fc91186859662a22009b0",
+        "accessed_at": "2026-09-28T10:25:00.371375+00:00"
+      },
+      {
+        "tool_use_id": "call_9jgp769ro9gpxpl8aehlzqil",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/xiling-gong-synthesis-v3-20260928-182005-093/checkpoint.md",
+          "content": "# Checkpoint — Xiling Gong 综合 v3（synthesis round 3）\n\n节点类型：综合分析（synthesis v3）。输入为六维取证 evidence_json + 定向补证 revision_context（round 1 / round 2）。\n\n## 输入摘要\n\n- person_json.json（本地种子）：name_or_handle=Xiling Gong，rank=95，primary_focus=Android 内核与 SoC 漏洞，social=https://x.com/lazydogsec，writeup_evidence=https://androidoffsec.withgoogle.com/，selected_conference_evidence=Black Hat Asia / POC，qualification=Android 底层漏洞发现与利用。\n- evidence_json.json（六维取证）：works / conversations / community / external / decisions / timeline 共 20 个 item，全部 status=unknown、verified_in_run=false、level=lead_only；targeted.items 嵌入 2 条 r2 新证据。\n- revision_context.json：round 1 未取得任一 verified 来源；round 2 成功 WebFetch androidoffsec.withgoogle.com，产出 2 条 verified_in_run=true 证据（r2-works-kgsl-writeup-01 / -02），并给出 synthesis_instructions 要求撤销「身份同一性未成立」笼统结论、撤销 stages/mechanisms 留空、改写 tensions/non_transferable/open_questions。\n\n## 已核验事实（verified_in_run=true，均来自同一篇 writeup，2026-03-28）\n\n- 身份绑定：Xiling Gong ↔ androidoffsec.withgoogle.com 作者 —— 一手核验成立（r2-01）。\n- 组织归属：Google Android Red Team —— 一手正文 banner 直接证实（r2-01）；360 Alpha Lab / Qihoo 360 线索无源 URL，维持 lead_only。\n- 技术方向：Qualcomm KGSL GPU 驱动内存损坏（UAF / VBO-BMO bind-unbind 竞态）的分析与利用（r2-01/02）。\n- 技术机制：UAF 竞态 → 低压回收释放页入内核堆 → spray kgsl_mem_entry → CP_MEM_TO_MEM 扫可控物理页 → 篡改 kgsl_memdesc(physaddr/size/ops) → mmap 内核映为可写用户内存 → patch sel_read_enforce 关 SELinux → root + 内核任意读写/代码执行，绕 kCFI/W^X/DEP（r2-02）。\n- 合著：@Rishika Hooda；致谢队友 Martijn Bogaard、Xingyu Jin、Zi Fan Tan；同站另有 @Zi Fan Tan / @Gulshan Singh / @Eugene Rodionov 的 Binder 系列文章（团队写作环境）。\n\n## 未核验（lead_only / 待核验）\n\n- @lazydogsec 账号归属：x.com 本轮 HTTP 402，未核验。\n- Black Hat Asia / POC 演讲事实：blackhat.com HTTP 403、POC 议程页未抓取，维持 lead_only。\n- CVE-2024-23380 官方公告正文：NVD 回退首页、Qualcomm 公告未抓取，待核验。\n- 六维取证 20 个 item：全部 unknown / lead_only，为缺口记录，不作正向证据使用。\n\n## 关键判断与约束遵守\n\n1. 仅 1 篇已核验 writeup → 只能重建 1 个 stage（单点能力快照，非成长轨迹）+ 1 个 mechanism（单点反推，repeated_practice 显式标注无可核验跨时期重复）。\n2. 不虚构前后时点、不凑齐阶段；capability_change / repeated_practice 等字段显式标注「单点」「推断」「缺口」。\n3. stages/mechanisms evidence_ids 仅引 r2-01 / r2-02（verified_in_run=true），满足「至少有 verified_in_run=true 支撑」；lead_only 的 20 个 item 不作正向支撑。\n4. tensions 保留：身份部分成立、组织归属非对称、单点样本与成长过程目标的结构性张力、幸存者/组织声誉偏差、种子方向与已核验方向口径差异。\n5. transferable_practices 基于 r2-02 技术原语，non_transferable_conditions 显式列组织资源/样本偏差/单点/合著等个人特有条件，避免幸存者偏差外推。\n6. mechanism 至少 1 个竞争性解释：组织资源归因 vs 个人成长归因；单点专项攻坚 vs 稳定可迁移能力。\n7. 不自填 _run / verification。\n\n## 待提交\n\n- output.json：按 output.schema.json 写入 person / expertise / stages(1) / mechanisms(1) / tensions(5) / transferable_practices / non_transferable_conditions / open_questions；无 additionalProperties，无 _run。\n"
+        },
+        "success": true,
+        "content_sha256": "e43f0e6b4e00fe92e8cb0845b1017ff928269fbc955c721342684cd46307b43b",
+        "accessed_at": "2026-09-28T10:25:00.371795+00:00"
+      },
+      {
+        "tool_use_id": "call_a1q0vu2na9fe57l5xiirvh6o",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/xiling-gong-synthesis-v3-20260928-182005-093/output.json",
+          "content": "{\n  \"person\": \"Xiling Gong\",\n  \"expertise\": [\n    \"Qualcomm KGSL GPU 驱动内存损坏（use-after-free，由 VBO/BMO bind-unbind 竞态触发）的分析与利用（androidoffsec.withgoogle.com 2026-03-28 文章，CVE-2024-23380，合著 @Rishika Hooda；一手 writeup 核验，primary）\",\n    \"本地种子所述「Android 内核与 SoC 漏洞」「Android 底层漏洞发现与利用」方向（lead_only，未经一手核验的范围陈述；已核验范围内的具体方向为上一条）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2026-03（单点；此前此后时点无 verified 来源）\",\n      \"stage\": \"公开 KGSL GPU UAF-to-root writeup（CVE-2024-23380）\",\n      \"capability_change\": \"在 2026-03-28 经 androidoffsec.withgoogle.com 公开一篇 Qualcomm KGSL GPU 驱动 use-after-free 到 Android root 的完整利用 writeup（CVE-2024-23380，合著 @Rishika Hooda），展示从竞态触发、物理页回收与 spray、经 GPU CP_MEM_TO_MEM 扫描可控物理页、篡改 kgsl_memdesc 的 physaddr/size/ops，到 mmap 将内核映射为可写用户态内存并 patch sel_read_enforce 关闭 SELinux 的完整链，并经正文 banner 自述归属 Google Android Red Team。此为本节点唯一经一手核验的能力快照；由于仅存在单一时点的 verified 来源，无法据以重建该能力随时间如何形成或演化的成长轨迹，亦无法据以判断此为一长期积累的稳态能力还是专项攻坚产物。\",\n      \"evidence_ids\": [\n        \"r2-works-kgsl-writeup-01\",\n        \"r2-works-kgsl-writeup-02\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"GPU 驱动物理页能力为核心的内核任意读写构造\",\n      \"starting_conditions\": \"已核验的起点仅为 2026-03-28 一篇公开 writeup 的存在与其技术内容（r2-works-kgsl-writeup-01/02）。该 writeup 假定作者已具备对 Qualcomm KGSL GPU 驱动内部结构（VBO/BMO refcount、kgsl_mem_entry、kgsl_memdesc 的 physaddr/size/ops、CP_MEM_TO_MEM 命令流）与 Android 内核低内存回收、slab/堆布局、SELinux 运行机制的理解，并能访问 GPU 驱动提供的物理页访问能力。这些前置条件本身无一手来源直接记录，属由成品 writeup 反推的推断；作者此前是否有 KGSL 或其他 GPU 驱动研究经历、是否经由团队协作取得前置能力，均无可核验来源。\",\n      \"repeated_practice\": \"无可核验的跨时期重复行为或练习过程：六维取证 20 个 item 全部 status=unknown、verified_in_run=false、level=lead_only，定向补证仅取得单篇 writeup。仅能从该 writeup 的成品推断一次完整利用链的构造过程——根因为两线程并发对同一 VBO 执行 bind/unbind 致 BMO refcount 竞争、backend 物理页释放后 VBO 仍可访问的物理页 use-after-free；利用六步为触发竞态→低压回收释放页进内核堆→spray kgsl_mem_entry→经 CP_MEM_TO_MEM 扫描可控物理页→篡改 kgsl_memdesc 的 physaddr/size/ops→mmap 将内核映为可写用户态内存并 patch sel_read_enforce 关闭 SELinux。是否存在同类漏洞或同类链的反复实践，缺乏证据。\",\n      \"feedback\": \"可核验的反馈来源仅限成品 writeup 自身与团队写作环境：writeup 经 Google Android 官方安全博客（androidoffsec.withgoogle.com）发布，正文致谢队友 Martijn Bogaard、Xingyu Jin、Zi Fan Tan，同站另有 @Zi Fan Tan、@Gulshan Singh、@Eugene Rodionov 的 Binder 系列文章，提示其处于一个内部可相互评审的团队写作环境。该环境是否构成对其研究方法的实质性反馈回路（评审、复现、纠错），以及公开渠道（x.com/lazydogsec、Black Hat Asia/POC）是否提供同行反馈，均未取得一手核验，列为缺口。\",\n      \"intermediate_capability\": \"由成品 writeup 反推，作者在 2026-03 时点具备或可调用以下中间能力（均为推断，非跨时期稳态能力的直接证据）：(1) 对 Qualcomm KGSL GPU 驱动内部对象生命周期与 refcount 语义的分析；(2) 经 GPU 命令流（CP_MEM_TO_MEM）构造可控物理页扫描以绕过 CPU 侧地址随机化/隔离的能力；(3) 将内核物理页经 kgsl_contiguous_vmfault 路径映射为用户态可写内存，再 patch sel_read_enforce 关闭 SELinux，并绕过 kCFI/W^X/DEP 的利用收尾能力。这些能力的形成过程无来源支撑。\",\n      \"observed_outcomes\": [\n        \"公开 writeup《A Technical Deep Dive into CVE-2024-23380: Exploiting GPU Memory Corruption to Android Root》（androidoffsec.withgoogle.com，2026-03-28，合著 @Rishika Hooda）\",\n        \"正文自述归属 Google Android Red Team（banner「Exploit by Xiling Gong of Android RedTeam, Google:)」，页脚「© Google, 2026」）\",\n        \"该 writeup 描述的影响为 Android root + 内核任意读写/代码执行，并绕过 kCFI/W^X/DEP\"\n      ],\n      \"evidence_ids\": [\n        \"r2-works-kgsl-writeup-01\",\n        \"r2-works-kgsl-writeup-02\"\n      ],\n      \"validation_tests\": [\n        \"generative\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"竞争性解释一（组织资源归因）：该 writeup 的复杂度、官方发布渠道与团队致谢，提示其可能是 Google Android Red Team 内部资源、协作评审与漏洞/样本获取条件下的产物，而非可归因于个人成长路径的稳定能力；在此解释下，'机制' 的真正驱动力是组织资源而非个人反复练习。竞争性解释二（单点专项 vs 可迁移能力）：该能力可能是一次针对特定 CVE 的专项攻坚结果，缺乏证据表明其为可跨驱动、跨时期复用的稳定方法论。两种解释均与材料相容，无法据单篇 writeup 排除任一。\"\n    }\n  ],\n  \"tensions\": [\n    \"身份同一性部分成立：Xiling Gong 与 androidoffsec.withgoogle.com 作者的绑定经一手 writeup 署名核验成立（r2-works-kgsl-writeup-01，primary）；但 Xiling Gong 与 @lazydogsec（x.com 本轮 HTTP 402）、与 Black Hat Asia/POC 演讲者（blackhat.com 本轮 HTTP 403、POC 议程页未抓取）的绑定仍待一手核验。因此不能笼统断言'身份同一性成立'，亦不能维持 round 1 的'身份同一性未成立'结论，应表述为部分成立。\",\n    \"组织归属非对称：Google Android Red Team 归属经 writeup 正文 banner 直接证实（r2-works-kgsl-writeup-01）；external 维度记录的 360 Alpha Lab / Qihoo 360 线索无源 URL、本轮未取得任何一手材料，维持 lead_only。二者证据等级悬殊，不应并列表述为'两条排他未核验线索'。\",\n    \"成长过程目标与材料结构性不匹配：task 要求重建'领域能力的成长过程'，但已核验来源仅为 2026-03-28 单一时点的单篇 writeup，无可核验的此前/此后时点。因此本报告只能提供单点能力快照，'成长过程'本身属资料缺口，单点反推的机制 confidence 为 low。\",\n    \"样本偏差：本地种子 rank=95 属高排名样本（幸存者偏差——样本偏向已公开成名者），且 writeup 平台为 Google 官方安全域（组织声誉偏差——品牌声誉可能使读者高估其专业能力的可迁移性）。两类偏差均可能使读者高估普通研究者复制其路径的可能性。\",\n    \"种子方向与已核验方向口径差异：本地种子 primary_focus='Android 内核与 SoC 漏洞'、qualification='Android 底层漏洞发现与利用' 为较宽泛的范围陈述（lead_only）；经一手核验的具体方向为 Qualcomm KGSL GPU 驱动内存损坏的分析与利用。两者不矛盾，但后者是前者范围内的一个具体子方向，不可据核验子方向反推整条范围陈述均已核验。\"\n  ],\n  \"transferable_practices\": [\n    \"将 GPU 驱动物理页访问能力作为内核地址空间桥接原语：经 GPU 命令流（如 CP_MEM_TO_MEM）扫描可控物理页、再篡改驱动内部描述符（如 kgsl_memdesc 的 physaddr/size/ops）以经驱动 fault 路径将内核物理页映射为用户态可写内存的构造思路，是 writeup 中明确给出、原则上可迁移到其他持有'用户可控物理页访问'能力驱动的技术原语（依据 r2-works-kgsl-writeup-02；属单篇 writeup 提取的可迁移技术原语，非跨人可迁移的能力保证）。\",\n    \"利用竞态致物理页 use-after-free 后经低压回收回收入内核堆、再以驱动对象 spray 复位的内存布局操纵方法（依据 r2-works-kgsl-writeup-02；同上，为技术方法层面的可参考做法，其有效性受具体内核版本、回收路径与对象布局约束）。\",\n    \"以 patch sel_read_enforce 关闭 SELinux 作为内核任意读写后的提权收尾，并显式评估 kCFI/W^X/DEP 绕过约束的收尾设计（依据 r2-works-kgsl-writeup-02；为利用收尾设计层面的可参考做法）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"组织资源：Google Android Red Team 归属及其带来的内部协作评审（致谢队友 Martijn Bogaard、Xingyu Jin、Zi Fan Tan）、官方发布渠道（androidoffsec.withgoogle.com）与同站团队写作环境（@Zi Fan Tan、@Gulshan Singh、@Eugene Rodionov 的 Binder 系列），属个人特有条件，普通研究者不具备等价资源（依据 r2-works-kgsl-writeup-01）。\",\n    \"单点样本：仅 1 篇已核验 writeup，无法据以判断其研究方法是否具备跨时期、跨驱动的稳定性；本报告不主张其研究方法具备跨人可迁移性。\",\n    \"高排名幸存者偏差：本地种子 rank=95 偏向已公开成名者，相关可迁移性判断可能过度乐观。\",\n    \"组织声誉偏差：作品平台为 Google 官方安全域，可能使读者高估其专业能力的可迁移性。\",\n    \"合著与团队贡献不可分离：已核验 writeup 为合著（@Rishika Hooda），且致谢多名队友，单篇成品中个人贡献份额与个人能力边界无法据署名分离，不可整体归因为个人能力。\",\n    \"前置能力无可核验来源：作者对 KGSL 驱动内部结构、低内存回收、SELinux 运行机制的理解等前置能力，无一手来源记录，属由成品反推的推断，不可作为可迁移条件。\"\n  ],\n  \"open_questions\": [\n    \"@lazydogsec 账号归属待核验：x.com/lazydogsec 本轮 WebFetch 返回 HTTP 402，账号持有人、bio、雇主自述与可见发帖时间均未取得一手核验，身份绑定中此组维持待核验。\",\n    \"Black Hat Asia / POC 演讲事实待核验：blackhat.com 本轮返回 HTTP 403、POC（Power of Community）议程页未抓取，研究对象在该会议的演讲年份、议题标题、摘要与合著者未取得一手核验；本地种子所标'Black Hat Asia / POC'维持 lead_only。\",\n    \"CVE-2024-23380 官方公告正文待核验：NVD 本轮回退至首页而非 CVE 条目正文，Qualcomm 官方安全公告未抓取；CVE 技术细节以一手 writeup（r2-works-kgsl-writeup-02）为准，NVD/Qualcomm 公告详情（CVSS、官方描述 verbatim）列为待核验。\",\n    \"成长过程整体缺失：缺乏 2026-03 前后的教育、工作、项目、其他漏洞、工具建设、公开演讲、失败/转向等任何时点的一手来源，无法重建能力成长轨迹；单点反推的机制 confidence 为 low，'成长过程'本身为结构性资料缺口。\",\n    \"个人与团队贡献分离：已核验 writeup 为合著且致谢多名队友，个人贡献份额与个人能力边界无法据署名分离。\",\n    \"前置能力来源缺失：作者对 KGSL 驱动、低内存回收、SELinux 等前置理解的形成路径无一手来源，相关陈述均为由成品反推的推断。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "c5679b26103d9bf9dbcd73546d32261dc2bddab746767a1d7f0ee0d8afab1502",
+        "accessed_at": "2026-09-28T10:25:00.371804+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790591100371824000-xiling-gong-synthesis-v3.json",
+    "label": "Xiling Gong:synthesis:v3",
+    "elapsed_seconds": 295.27,
+    "prompt_sha256": "c5534897d3e99ec1f70f4acde863c3cfd2b7c970ee7bd60b4b2a3da97f51cf07",
+    "num_turns": 9,
+    "total_cost_usd": 0.713716,
+    "usage": {
+      "input_tokens": 53089,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 168192,
+      "output_tokens": 14567,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 53089,
+        "outputTokens": 14567,
+        "cacheReadInputTokens": 168192,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.713716,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

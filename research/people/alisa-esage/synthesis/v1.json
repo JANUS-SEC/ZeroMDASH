@@ -1,0 +1,266 @@
+{
+  "person": "Alisa Esage",
+  "expertise": [
+    "x86 固件与管理子系统逆向（Intel ME / AMT / SMM，ring -2/-3 执行环境）",
+    "嵌入式与物联网设备漏洞研究（消费级路由器、蓝牙、无人机辅助软件）",
+    "网络设备平台漏洞利用基础设施建设（Cisco IOS on PowerPC 的 shellcode 模板、egg-hunter 与 ROP gadget 查找工具）",
+    "多架构漏洞利用原语开发（x86/PowerPC 的 shellcode、ROP、egg-hunter）",
+    "IDA Pro 自动化与固件加载插件开发（meloader、PPCGadgetFinder 等 IDA/IDAPython 工具）",
+    "可复现 PoC 公开发布与 CVE 跟踪体系接入"
+  ],
+  "stages": [
+    {
+      "period": "2017",
+      "stage": "Intel 固件与管理子系统集中研究阶段",
+      "capability_change": "在单一平台（Intel）上同时对 AMT 认证绕过（CVE-2017-5689）、SMM USBRT（CVE-2017-5721）发布可复现 PoC，并配套发布 Intel ME 固件的 IDA 加载插件 meloader。能力从单点漏洞利用转向对 ring -2/-3 低层固件攻击面的集中研究，并同步建设配套逆向工具，而非仅交付利用代码。",
+      "evidence_ids": [
+        "AE-PW-002",
+        "alisa-timeline-01",
+        "AE-PW-001"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2017",
+      "stage": "低层固件与应用层 RCE 并置阶段",
+      "capability_change": "同一年度内同时出现 Intel 固件低层研究与应用层 RCE（CVE-2017-11882，Microsoft Office Equation Editor）PoC 仓库；后者为该组织传播最广的产出（495 星）。该阶段研究范围并非单一硬件方向，应用层与低层方向并置，但低层固件为其区分度所在。",
+      "evidence_ids": [
+        "alisa-timeline-02",
+        "AE-PW-002"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2018",
+      "stage": "攻击面横向扩展至嵌入式/IoT 阶段",
+      "capability_change": "攻击面从单一平台（Intel 固件）横向扩展到多类嵌入式/IoT 设备：Norton Core 蓝牙漏洞（CVE-2018-5234）、DJI Assistant 2 WebSocket、D-Link DIR8xx 路由器、Huawei 防火墙工具，并保持各设备配套专用 PoC 的统一命名习惯（DIR8xx_PoC、dji-ws-tools、ble_norton_core、Huawei-firewall-tools）。能力由纵深转向广度，针对每类新设备快速复制工具化 PoC 流程。",
+      "evidence_ids": [
+        "AE-PW-003",
+        "alisa-timeline-03"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "未标注年份",
+      "stage": "可复用漏洞利用基础设施建设阶段",
+      "capability_change": "针对单一平台（Cisco IOS on PowerPC）构建一整套可复用基础设施：tcl_shellcode（C 语言 shellcode 模板）、iomem_hunter（汇编 egg-hunter shellcode）、cisco_tools（项目汇总）与 PPCGadgetFinder（IDAPython 的 PowerPC ROP gadget 查找脚本）。这是该作品集中工具建设最系统化的部分，标志能力从逐漏洞 PoC 转向平台级可复用利用基础设施。",
+      "evidence_ids": [
+        "alisa-timeline-04",
+        "AE-PW-003"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "截至 2026-09-28 的公开产出落差",
+      "stage": "公开渠道可核验材料稀疏阶段",
+      "capability_change": "个人 GitHub 账号（github.com/alisaesage）显示零公开仓库、无 bio、无 README；组织级 GitHub（embedi）可核验活动集中于 2017-2018，2019 年后的演化路径缺乏抓取证据。该阶段反映的不是能力下降，而是公开可核验材料的断层，后续能力变化无法据公开渠道重建。",
+      "evidence_ids": [
+        "AE-PW-001",
+        "AE-PW-004",
+        "alisaesage-conv-01"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "PoC 与专用逆向工具成对发布",
+      "starting_conditions": "存在对高特权低层子系统（Intel ME/AMT/SMM、Cisco IOS、嵌入式设备）的攻击面入手需求，以及 IDA Pro 作为主要逆向工作台的工程条件；公开发布渠道为组织级 GitHub 组织（embedi）。",
+      "repeated_practice": "在每个研究目标上同时产出两类制品：可复现的漏洞利用 PoC（以 CVE 编号命名仓库）与面向该平台/固件的专用逆向辅助工具（IDA 加载器 meloader、IDAPython gadget 查找脚本 PPCGadgetFinder、shellcode 模板 tcl_shellcode、egg-hunter iomem_hunter）。该模式在 2017 Intel 固件、未标注年份 Cisco IOS、2018 IoT 设备等多次重复。",
+      "feedback": "资料缺口：issue 评论、社区讨论、作者署名、同行评价在本次抓取范围内均未取得可核验正文，无法据证据记录反馈来源与回路。组织级 GitHub 反馈（star、fork）仅 alisa-timeline-02 提及 CVE-2017-11882 为 495 星的传播度数据，但该数据不能等同于对研究方法的反馈，且未署名到个人。",
+      "intermediate_capability": "形成可复用的逆向工具链建设习惯与平台级利用基础设施积累能力，使后续针对新平台能快速复制工具化 PoC 流程。",
+      "observed_outcomes": [
+        "同一阶段（2017）内 Intel AMT/SMM 多 CVE PoC 与专用 IDA 固件加载器 meloader 并存",
+        "针对 Cisco IOS 平台沉淀出 shellcode 模板 + egg-hunter + ROP gadget 查找器一整套可复用基础设施",
+        "2018 年扩展到新设备时保持 PoC 命名与配套工具的统一习惯"
+      ],
+      "evidence_ids": [
+        "AE-PW-002",
+        "AE-PW-003",
+        "alisa-timeline-01",
+        "alisa-timeline-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "组织级仓库的成对发布也可能由组织内多名成员协作完成而非单一个人反复练习；组织页显示 no public members，个人与作品集的署名关系未由一手来源证实，因此该机制在个人层面属推断，无法据现有证据排除组织协作或他人贡献的解释。"
+    },
+    {
+      "name": "跨架构低层攻击面目标扩展",
+      "starting_conditions": "2017 年在单一平台（Intel 固件/管理子系统）建立低层研究基础后，面对新的设备类别（嵌入式/IoT 路由器、无人机辅助软件、蓝牙设备、网络设备）的攻击面差异。",
+      "repeated_practice": "从单一平台 Intel 固件（AMT/SMM/ME）扩展到 PowerPC 架构（Cisco IOS）与多类嵌入式/IoT 设备（Norton Core 蓝牙、D-Link、Huawei、DJI），并在不同架构上复用 ROP/shellcode/egg-hunter 原语与 IDA 自动化方法，调整到目标架构（PowerPC gadget 查找、Cisco IOS C 语言 shellcode 模板）。",
+      "feedback": "资料缺口：未取得任何本人自述、长访谈或同行评价，说明为何选择这些目标、如何评估各架构攻击面优先级；反馈来源在本次抓取范围内不可核验。WebSearch 片段提及基带/调制解调器研究方向，但对应一手页面均抓取失败，不能作为反馈或方向选择的证据。",
+      "intermediate_capability": "形成跨架构迁移低层漏洞利用原语与逆向工具的能力，能在新平台快速建立可复用的利用基础设施。",
+      "observed_outcomes": [
+        "2018 年攻击面横向扩展到蓝牙/路由器/无人机辅助软件/防火墙多类设备",
+        "在 PowerPC 架构上建立独立的 ROP gadget 查找与 shellcode 模板基础设施",
+        "覆盖多架构 shellcode（x86 与 PowerPC）与 egg-hunter 技术"
+      ],
+      "evidence_ids": [
+        "AE-PW-002",
+        "AE-PW-003",
+        "alisa-timeline-03",
+        "alisa-timeline-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "目标扩展也可能是组织层面基于市场需求或客户委托选择目标，而非个人能力驱动的主动迁移；因组织归属与个人决策均未由一手来源证实，跨架构扩展作为个人成长机制属推断，无法排除组织业务驱动的外部解释。"
+    }
+  ],
+  "tensions": [
+    "person_json 标注 primary_focus 含'基带'，且 WebSearch 片段提及基带/调制解调器研究方向；但一手抓取的 embedi GitHub 作品集（12 仓库）中无任何基带/调制解调器专门制品，公开可核验方向集中在 Intel 固件、IoT/路由器、Cisco IOS，'基带'标注与可核验作品集之间存在张力且未解决。",
+    "embedi 组织自述为防御方（'Protects against known and unknown attacks'），与其公开仓库以攻击性 PoC/利用工具为主的表述存在张力；二者并非互斥，但缺乏原始 writeup 调和，组织定位与产出性质的对应关系未由一手来源澄清。",
+    "person_json 将 github.com/embedi 列为 writeup_evidence，但该组织页显示 no public members，且 github.com/alisaesage 为空账号，Alisa Esage 与该组织仓库的个人作者关系仅推断，'writeup_evidence 证明个人作品'的用法与组织无公开成员的事实存在入口证据不足的张力。",
+    "WebSearch 摘要给出互相冲突的法定姓名归属（Shevchenko / Voznesenskaya / Shcherbakova）及互相冲突的创始人身份（Toughscore / Blue Frost Security / 与 VDA Labs 关联），均无可抓取一手来源佐证，与 person_json 给出的身份线索无法互相印证或排除。",
+    "person_json 标注会议证据为 Black Hat Asia / POC，但 blackhat.com 议程页与 speakers 页返回 403、POC 历史页返回 404，会议参与事实未由一手议程页证实，WebSearch 片段另提及 Black Hat USA 2024 演讲，但同样不可抓取，会议出席在多个互相冲突的说法间无法文档化。"
+  ],
+  "transferable_practices": [
+    "在研究每个漏洞目标时同时产出可复现 PoC 与面向该平台/固件的专用逆向辅助工具，将一次性发现沉淀为可复用工具，降低后续同类目标的重复逆向成本。",
+    "针对新平台优先建设平台级可复用基础设施（shellcode 模板、gadget 查找器、egg-hunter、固件加载器），而非逐漏洞交付孤立 PoC，使能力可跨目标迁移。",
+    "跨架构迁移时将底层利用原语（ROP/shellcode/egg-hunter）与 IDA 自动化方法调整到目标架构，复用方法论而替换架构相关部分，作为进入新平台攻击面的方法。"
+  ],
+  "non_transferable_conditions": [
+    "对高特权低层子系统（Intel ME/AMT/SMM ring -2/-3、Cisco IOS on PowerPC、嵌入式设备固件）的具体攻击面知识，依赖对相应固件/硬件的长期逆向投入与硬件/固件样本获取条件，非通用方法论可替代。",
+    "组织级 GitHub 公开发布渠道与组织（embedi）的工程资源、CVE 跟踪体系接入，是组织条件而非个人可普遍复制的方法。",
+    "Alisa Esage 与 embedi 组织的个人归属关系未由一手来源证实，以下能力归因均建立在'组织作品集可代表个人'的推断之上，存在组织协作或他人贡献的不可排除解释。",
+    "基带/调制解调器方向在公开可核验作品中缺失，seed 标注的该方向若属实，其研究条件与材料（基带芯片样本、专有协议文档、测试设备）属个人特有条件，公开渠道无可迁移方法证据。"
+  ],
+  "open_questions": [
+    "Alisa Esage 与 embedi GitHub 组织的成员/雇佣关系、职衔与任职时段未由一手来源证实，组织级作品集在多大程度可代表个人产出，仍是资料缺口。",
+    "Alisa Esage 与 Alisa Shevchenko / Alisa Shcherbakova / Alisa Voznesenskaya 是否为同一人未解决；WebSearch 给出互相冲突的姓氏归属，无一手页面可消歧。",
+    "person_json 标注的'基带'方向与一手作品集不符：是否存在非公开的基带研究、已下线的会议演讲或未公开渠道作品，公开渠道不足以判断。",
+    "Black Hat Asia / POC 的具体演讲标题、年份与议题（是否涉及基带/调制解调器）未由会议一手议程页证实；WebSearch 片段提及 Black Hat USA 2024 演讲，但同样不可抓取，会议出席事实待核验。",
+    "2019 年后该组织/个人公开作品的演化路径缺乏抓取证据，近七年（约 2019-2026）的能力变化无法据公开渠道重建。",
+    "两个机制均依赖反馈回路，但 issue 评论、社区讨论、同行评价、本人自述在本次抓取范围内全部缺失，工具建设与目标扩展的反馈来源无法据证据记录，机制置信度受限于此。",
+    "各 CVE（CVE-2017-5689 / CVE-2017-5721 / CVE-2017-11882 / CVE-2018-5234）的精确披露日期、对应 advisory、是否由 Embedi 或 Alisa Esage 报告，均未抓取确认。",
+    "WebSearch 提及的 Toughscore / Blue Frost Security / VDA Labs / Group-IB / Positive Technologies 等机构关联均无一手来源佐证，雇主变动时间线缺失。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alisa-esage-synthesis-v1-20260928-145642-800",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790578952382918000-alisa-esage-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "a0353325-96b5-49d0-9016-118feaa708a4",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_u395wkzr9i7triu07eoc8qhb",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alisa-esage-synthesis-v1-20260928-145642-800/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T07:02:32.427584+00:00"
+      },
+      {
+        "tool_use_id": "call_ayx663e6hp7g9koxoyigeq29",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alisa-esage-synthesis-v1-20260928-145642-800/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "c91fb4b6e7ee2aefdd84066252502e93ee680549a3c10a928b471573946ef952",
+        "accessed_at": "2026-09-28T07:02:32.427620+00:00"
+      },
+      {
+        "tool_use_id": "call_bg8vvui22y2egqpy9a82bp6s",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alisa-esage-synthesis-v1-20260928-145642-800/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "016d6ce265388cb5826682761584ce2c5e36a49e426157ec38aba512a88f34eb",
+        "accessed_at": "2026-09-28T07:02:32.427628+00:00"
+      },
+      {
+        "tool_use_id": "call_he3g4yzq2d03ny4odo7p67yv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alisa-esage-synthesis-v1-20260928-145642-800/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "373aebc0fff47c238c48b58fffbffe6e0403a35c426ade9591bc7e9ddd982e8e",
+        "accessed_at": "2026-09-28T07:02:32.427686+00:00"
+      },
+      {
+        "tool_use_id": "call_qaxhexfaf2fooqzrwq7v71bi",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alisa-esage-synthesis-v1-20260928-145642-800/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-28T07:02:32.427690+00:00"
+      },
+      {
+        "tool_use_id": "call_p4vg31ofcwworrkldbunu9yl",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alisa-esage-synthesis-v1-20260928-145642-800/checkpoint.md",
+          "content": "# Checkpoint — Alisa Esage 综合分析 (iter1)\n\n## 任务状态\n- 节点：综合分析（六维取证 Agent 汇总）\n- revision_context.json 为空 → 首次综合，无定向补证 item，无作废 evidence id\n- 进度：输入读取完成，综合完成，output.json 已写入\n\n## 证据基线\n- 唯一成功抓取的一手页面：github.com/embedi（组织页，六维 Agent 独立确认）\n- 关键约束：组织页显示 \"no public members\" → 个人署名关系仅 lead/inferred 级别\n- x.com/alisaesage=402；github.com/alisaesage=空账号；blackhat.com=403；POC 页=404；embedi.org/blog=404\n\n## 有效 evidence id（均 verified_in_run=true，无作废）\n- works: AE-PW-001(documented) / AE-PW-002(documented) / AE-PW-003(documented) / AE-PW-004(inferred)\n- conversations: alisaesage-conv-01(unknown)\n- community: esage-cmty-01(documented) / esage-cmty-02(unknown)\n- external: AE-EXT-01(documented)\n- decisions: esage-decisions-01(reported)\n- timeline: alisa-timeline-01..05(documented) / alisa-timeline-06(unknown)\n\n## 综合结构\n- 4 stages：2017 Intel 固件集中 → 2018 IoT 扩展 → undated Cisco/PowerPC 可复用基础设施 → 2026-09-28 公开产出落差\n- 2 mechanisms：(1) PoC+专用工具成对发布；(2) 跨架构低层攻击面目标扩展\n- 两者 feedback 字段均如实标为资料缺口（issue/同行评价/自述均无可抓取正文）\n- tensions/open_questions 覆盖：个人归属未证实、基带标注不符、组织防御自述 vs 攻击 PoC、姓名歧义、会议未核实、2019 后断裂\n\n## 待办\n- 无（首次综合按可用证据完成；如需 iter2 应定向补证：Black Hat 议程归档、CVE advisory、embedi 成员/雇佣关系、基带方向一手来源）\n"
+        },
+        "success": true,
+        "content_sha256": "f5552ed72344fcf94ba933862f5803cfc39cefe3e917b90649af66b27cad45a0",
+        "accessed_at": "2026-09-28T07:02:32.428178+00:00"
+      },
+      {
+        "tool_use_id": "call_86av2olyrip6d3t76wn65d8a",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alisa-esage-synthesis-v1-20260928-145642-800/output.json",
+          "content": "{\n  \"person\": \"Alisa Esage\",\n  \"expertise\": [\n    \"x86 固件与管理子系统逆向（Intel ME / AMT / SMM，ring -2/-3 执行环境）\",\n    \"嵌入式与物联网设备漏洞研究（消费级路由器、蓝牙、无人机辅助软件）\",\n    \"网络设备平台漏洞利用基础设施建设（Cisco IOS on PowerPC 的 shellcode 模板、egg-hunter 与 ROP gadget 查找工具）\",\n    \"多架构漏洞利用原语开发（x86/PowerPC 的 shellcode、ROP、egg-hunter）\",\n    \"IDA Pro 自动化与固件加载插件开发（meloader、PPCGadgetFinder 等 IDA/IDAPython 工具）\",\n    \"可复现 PoC 公开发布与 CVE 跟踪体系接入\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2017\",\n      \"stage\": \"Intel 固件与管理子系统集中研究阶段\",\n      \"capability_change\": \"在单一平台（Intel）上同时对 AMT 认证绕过（CVE-2017-5689）、SMM USBRT（CVE-2017-5721）发布可复现 PoC，并配套发布 Intel ME 固件的 IDA 加载插件 meloader。能力从单点漏洞利用转向对 ring -2/-3 低层固件攻击面的集中研究，并同步建设配套逆向工具，而非仅交付利用代码。\",\n      \"evidence_ids\": [\n        \"AE-PW-002\",\n        \"alisa-timeline-01\",\n        \"AE-PW-001\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2017\",\n      \"stage\": \"低层固件与应用层 RCE 并置阶段\",\n      \"capability_change\": \"同一年度内同时出现 Intel 固件低层研究与应用层 RCE（CVE-2017-11882，Microsoft Office Equation Editor）PoC 仓库；后者为该组织传播最广的产出（495 星）。该阶段研究范围并非单一硬件方向，应用层与低层方向并置，但低层固件为其区分度所在。\",\n      \"evidence_ids\": [\n        \"alisa-timeline-02\",\n        \"AE-PW-002\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2018\",\n      \"stage\": \"攻击面横向扩展至嵌入式/IoT 阶段\",\n      \"capability_change\": \"攻击面从单一平台（Intel 固件）横向扩展到多类嵌入式/IoT 设备：Norton Core 蓝牙漏洞（CVE-2018-5234）、DJI Assistant 2 WebSocket、D-Link DIR8xx 路由器、Huawei 防火墙工具，并保持各设备配套专用 PoC 的统一命名习惯（DIR8xx_PoC、dji-ws-tools、ble_norton_core、Huawei-firewall-tools）。能力由纵深转向广度，针对每类新设备快速复制工具化 PoC 流程。\",\n      \"evidence_ids\": [\n        \"AE-PW-003\",\n        \"alisa-timeline-03\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"未标注年份\",\n      \"stage\": \"可复用漏洞利用基础设施建设阶段\",\n      \"capability_change\": \"针对单一平台（Cisco IOS on PowerPC）构建一整套可复用基础设施：tcl_shellcode（C 语言 shellcode 模板）、iomem_hunter（汇编 egg-hunter shellcode）、cisco_tools（项目汇总）与 PPCGadgetFinder（IDAPython 的 PowerPC ROP gadget 查找脚本）。这是该作品集中工具建设最系统化的部分，标志能力从逐漏洞 PoC 转向平台级可复用利用基础设施。\",\n      \"evidence_ids\": [\n        \"alisa-timeline-04\",\n        \"AE-PW-003\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"截至 2026-09-28 的公开产出落差\",\n      \"stage\": \"公开渠道可核验材料稀疏阶段\",\n      \"capability_change\": \"个人 GitHub 账号（github.com/alisaesage）显示零公开仓库、无 bio、无 README；组织级 GitHub（embedi）可核验活动集中于 2017-2018，2019 年后的演化路径缺乏抓取证据。该阶段反映的不是能力下降，而是公开可核验材料的断层，后续能力变化无法据公开渠道重建。\",\n      \"evidence_ids\": [\n        \"AE-PW-001\",\n        \"AE-PW-004\",\n        \"alisaesage-conv-01\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"PoC 与专用逆向工具成对发布\",\n      \"starting_conditions\": \"存在对高特权低层子系统（Intel ME/AMT/SMM、Cisco IOS、嵌入式设备）的攻击面入手需求，以及 IDA Pro 作为主要逆向工作台的工程条件；公开发布渠道为组织级 GitHub 组织（embedi）。\",\n      \"repeated_practice\": \"在每个研究目标上同时产出两类制品：可复现的漏洞利用 PoC（以 CVE 编号命名仓库）与面向该平台/固件的专用逆向辅助工具（IDA 加载器 meloader、IDAPython gadget 查找脚本 PPCGadgetFinder、shellcode 模板 tcl_shellcode、egg-hunter iomem_hunter）。该模式在 2017 Intel 固件、未标注年份 Cisco IOS、2018 IoT 设备等多次重复。\",\n      \"feedback\": \"资料缺口：issue 评论、社区讨论、作者署名、同行评价在本次抓取范围内均未取得可核验正文，无法据证据记录反馈来源与回路。组织级 GitHub 反馈（star、fork）仅 alisa-timeline-02 提及 CVE-2017-11882 为 495 星的传播度数据，但该数据不能等同于对研究方法的反馈，且未署名到个人。\",\n      \"intermediate_capability\": \"形成可复用的逆向工具链建设习惯与平台级利用基础设施积累能力，使后续针对新平台能快速复制工具化 PoC 流程。\",\n      \"observed_outcomes\": [\n        \"同一阶段（2017）内 Intel AMT/SMM 多 CVE PoC 与专用 IDA 固件加载器 meloader 并存\",\n        \"针对 Cisco IOS 平台沉淀出 shellcode 模板 + egg-hunter + ROP gadget 查找器一整套可复用基础设施\",\n        \"2018 年扩展到新设备时保持 PoC 命名与配套工具的统一习惯\"\n      ],\n      \"evidence_ids\": [\n        \"AE-PW-002\",\n        \"AE-PW-003\",\n        \"alisa-timeline-01\",\n        \"alisa-timeline-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"组织级仓库的成对发布也可能由组织内多名成员协作完成而非单一个人反复练习；组织页显示 no public members，个人与作品集的署名关系未由一手来源证实，因此该机制在个人层面属推断，无法据现有证据排除组织协作或他人贡献的解释。\"\n    },\n    {\n      \"name\": \"跨架构低层攻击面目标扩展\",\n      \"starting_conditions\": \"2017 年在单一平台（Intel 固件/管理子系统）建立低层研究基础后，面对新的设备类别（嵌入式/IoT 路由器、无人机辅助软件、蓝牙设备、网络设备）的攻击面差异。\",\n      \"repeated_practice\": \"从单一平台 Intel 固件（AMT/SMM/ME）扩展到 PowerPC 架构（Cisco IOS）与多类嵌入式/IoT 设备（Norton Core 蓝牙、D-Link、Huawei、DJI），并在不同架构上复用 ROP/shellcode/egg-hunter 原语与 IDA 自动化方法，调整到目标架构（PowerPC gadget 查找、Cisco IOS C 语言 shellcode 模板）。\",\n      \"feedback\": \"资料缺口：未取得任何本人自述、长访谈或同行评价，说明为何选择这些目标、如何评估各架构攻击面优先级；反馈来源在本次抓取范围内不可核验。WebSearch 片段提及基带/调制解调器研究方向，但对应一手页面均抓取失败，不能作为反馈或方向选择的证据。\",\n      \"intermediate_capability\": \"形成跨架构迁移低层漏洞利用原语与逆向工具的能力，能在新平台快速建立可复用的利用基础设施。\",\n      \"observed_outcomes\": [\n        \"2018 年攻击面横向扩展到蓝牙/路由器/无人机辅助软件/防火墙多类设备\",\n        \"在 PowerPC 架构上建立独立的 ROP gadget 查找与 shellcode 模板基础设施\",\n        \"覆盖多架构 shellcode（x86 与 PowerPC）与 egg-hunter 技术\"\n      ],\n      \"evidence_ids\": [\n        \"AE-PW-002\",\n        \"AE-PW-003\",\n        \"alisa-timeline-03\",\n        \"alisa-timeline-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"目标扩展也可能是组织层面基于市场需求或客户委托选择目标，而非个人能力驱动的主动迁移；因组织归属与个人决策均未由一手来源证实，跨架构扩展作为个人成长机制属推断，无法排除组织业务驱动的外部解释。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 标注 primary_focus 含'基带'，且 WebSearch 片段提及基带/调制解调器研究方向；但一手抓取的 embedi GitHub 作品集（12 仓库）中无任何基带/调制解调器专门制品，公开可核验方向集中在 Intel 固件、IoT/路由器、Cisco IOS，'基带'标注与可核验作品集之间存在张力且未解决。\",\n    \"embedi 组织自述为防御方（'Protects against known and unknown attacks'），与其公开仓库以攻击性 PoC/利用工具为主的表述存在张力；二者并非互斥，但缺乏原始 writeup 调和，组织定位与产出性质的对应关系未由一手来源澄清。\",\n    \"person_json 将 github.com/embedi 列为 writeup_evidence，但该组织页显示 no public members，且 github.com/alisaesage 为空账号，Alisa Esage 与该组织仓库的个人作者关系仅推断，'writeup_evidence 证明个人作品'的用法与组织无公开成员的事实存在入口证据不足的张力。\",\n    \"WebSearch 摘要给出互相冲突的法定姓名归属（Shevchenko / Voznesenskaya / Shcherbakova）及互相冲突的创始人身份（Toughscore / Blue Frost Security / 与 VDA Labs 关联），均无可抓取一手来源佐证，与 person_json 给出的身份线索无法互相印证或排除。\",\n    \"person_json 标注会议证据为 Black Hat Asia / POC，但 blackhat.com 议程页与 speakers 页返回 403、POC 历史页返回 404，会议参与事实未由一手议程页证实，WebSearch 片段另提及 Black Hat USA 2024 演讲，但同样不可抓取，会议出席在多个互相冲突的说法间无法文档化。\"\n  ],\n  \"transferable_practices\": [\n    \"在研究每个漏洞目标时同时产出可复现 PoC 与面向该平台/固件的专用逆向辅助工具，将一次性发现沉淀为可复用工具，降低后续同类目标的重复逆向成本。\",\n    \"针对新平台优先建设平台级可复用基础设施（shellcode 模板、gadget 查找器、egg-hunter、固件加载器），而非逐漏洞交付孤立 PoC，使能力可跨目标迁移。\",\n    \"跨架构迁移时将底层利用原语（ROP/shellcode/egg-hunter）与 IDA 自动化方法调整到目标架构，复用方法论而替换架构相关部分，作为进入新平台攻击面的方法。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"对高特权低层子系统（Intel ME/AMT/SMM ring -2/-3、Cisco IOS on PowerPC、嵌入式设备固件）的具体攻击面知识，依赖对相应固件/硬件的长期逆向投入与硬件/固件样本获取条件，非通用方法论可替代。\",\n    \"组织级 GitHub 公开发布渠道与组织（embedi）的工程资源、CVE 跟踪体系接入，是组织条件而非个人可普遍复制的方法。\",\n    \"Alisa Esage 与 embedi 组织的个人归属关系未由一手来源证实，以下能力归因均建立在'组织作品集可代表个人'的推断之上，存在组织协作或他人贡献的不可排除解释。\",\n    \"基带/调制解调器方向在公开可核验作品中缺失，seed 标注的该方向若属实，其研究条件与材料（基带芯片样本、专有协议文档、测试设备）属个人特有条件，公开渠道无可迁移方法证据。\"\n  ],\n  \"open_questions\": [\n    \"Alisa Esage 与 embedi GitHub 组织的成员/雇佣关系、职衔与任职时段未由一手来源证实，组织级作品集在多大程度可代表个人产出，仍是资料缺口。\",\n    \"Alisa Esage 与 Alisa Shevchenko / Alisa Shcherbakova / Alisa Voznesenskaya 是否为同一人未解决；WebSearch 给出互相冲突的姓氏归属，无一手页面可消歧。\",\n    \"person_json 标注的'基带'方向与一手作品集不符：是否存在非公开的基带研究、已下线的会议演讲或未公开渠道作品，公开渠道不足以判断。\",\n    \"Black Hat Asia / POC 的具体演讲标题、年份与议题（是否涉及基带/调制解调器）未由会议一手议程页证实；WebSearch 片段提及 Black Hat USA 2024 演讲，但同样不可抓取，会议出席事实待核验。\",\n    \"2019 年后该组织/个人公开作品的演化路径缺乏抓取证据，近七年（约 2019-2026）的能力变化无法据公开渠道重建。\",\n    \"两个机制均依赖反馈回路，但 issue 评论、社区讨论、同行评价、本人自述在本次抓取范围内全部缺失，工具建设与目标扩展的反馈来源无法据证据记录，机制置信度受限于此。\",\n    \"各 CVE（CVE-2017-5689 / CVE-2017-5721 / CVE-2017-11882 / CVE-2018-5234）的精确披露日期、对应 advisory、是否由 Embedi 或 Alisa Esage 报告，均未抓取确认。\",\n    \"WebSearch 提及的 Toughscore / Blue Frost Security / VDA Labs / Group-IB / Positive Technologies 等机构关联均无一手来源佐证，雇主变动时间线缺失。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "96b65af79e070f69429813079d3e63f319ebb4e93d10d3cadbc7b652dcd02a05",
+        "accessed_at": "2026-09-28T07:02:32.428182+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790578952428194000-alisa-esage-synthesis-v1.json",
+    "label": "Alisa Esage:synthesis:v1",
+    "elapsed_seconds": 349.63,
+    "prompt_sha256": "fa3adee4a64c7734606c8f1d0b480f7ed7e851fe352d0b9514ac01419aa53478",
+    "num_turns": 8,
+    "total_cost_usd": 0.5838059999999999,
+    "usage": {
+      "input_tokens": 28197,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 75392,
+      "output_tokens": 16205,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 28197,
+        "outputTokens": 16205,
+        "cacheReadInputTokens": 75392,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.5838059999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

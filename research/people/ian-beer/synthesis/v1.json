@@ -1,0 +1,444 @@
+{
+  "person": "Ian Beer",
+  "expertise": [
+    "iOS/macOS (XNU kernel, IOKit, Mach IPC) 漏洞利用与研究",
+    "iOS/macOS 完整利用链构建（渲染器→沙箱逃逸→内核→root）",
+    "XNU 内核漏洞利用原语设计与命名（exception-oriented exploitation、pipe buffer 读写、fake kernel task port）",
+    "变体分析（variant analysis）作为系统化研究方法",
+    "跨攻击面/跨处理器边界研究（Wi-Fi AWDL 协议、DCP 协处理器固件逆向与利用）",
+    "在野利用链的事件响应式分析（in-the-wild exploit chain analysis）",
+    "漏洞披露流程与披露期限决策（90 天标准、7 天紧急政策）",
+    "以技术 writeup 承载设计批评与公共议题（架构层/政策层论证）"
+  ],
+  "stages": [
+    {
+      "period": "2014（春-11 月）",
+      "stage": "入场即端到端全链：渲染器→沙箱逃逸→内核→root",
+      "capability_change": "Beer 在 2014-03 CanSecWest Pwn4Fun 的 Safari 利用 writeup（2014-11 发表）中已展示完整三段链——Safari 渲染器整数截断、经 IOKit GPU 驱动 (AppleIntelHD4000Graphics, IGAccelGLContext::unmap_user_memory selector 0x201) 沙箱逃逸、内核控制流劫持与 KASLR 经 IOKit 注册表 IOPlatformArgs 泄漏绕过，纯 ROP 绕 SMEP 后以 root 启动 Calculator.app。起点即以『完整利用链』而非单个 bug 为产出单位，并自建 DYLD-interposing 模糊测试器随机翻转 IOConnectCallMethod 参数位定位 GPU 驱动 bug，同时引用 Dionysus Blazakis、Meder Kydyraliev、winocm 等前人工作，表明其成长建立在社区研究脉络之上。该阶段确立其『自建工具优先于套用框架』与『端到端全链』两个早期倾向。",
+      "evidence_ids": [
+        "ian-beer-pubworks-01-pwn4fun-2014"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2016-10 至 2017-04",
+      "stage": "从单点 bug hunter 转向系统理论家：架构性批判与原语命名",
+      "capability_change": "Beer 在 task_t considered harmful（2016-10-25）中把研究目标从『找单个 bug』升级为『指出设计类缺陷』——把 task_t 定位为架构性而非实现性问题（区分结构性内存安全与时序性内存安全），记录 4 轮 bypass→mitigation→bypass 迭代，促使 Apple 在 10.12.1 根因重构 execve。随后在 exception-oriented exploitation（2017-04-18，CVE-2017-2370）中命名并系统化一种新利用范式（故意触发 brk 异常使内核把攻击者控制的寄存器状态写入越界 ipc_kmsg，把一次性溢出转化为可重复的受控读写原语），并坦承 iOS 内核研究的引导问题——复用自己上一条 mach_portal exploit 的内核读写权作为新研究开发平台，自述『build my own kernel debugger (with printfs and hexdumps)』。该阶段确立『把每个补丁当作新攻击面』『上一条 exploit 作为下一条开发底座』与『considered harmful 命名框架把漏洞报告升华为设计批评』三项可识别的写作与方法论转向。",
+      "evidence_ids": [
+        "ian-beer-pubworks-02-taskt-2016",
+        "ian-beer-pubworks-03-exception-oriented-2017",
+        "ib_dia_exc_bootstrap_old_exploit_as_dev_platform",
+        "ib_dia_exc_diy_kernel_debugger",
+        "ib_dia_exc_cites_esser_and_pegasus",
+        "ib_dia_exc_critique_targets_process_not_person",
+        "ib-dec-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2018-10",
+      "stage": "方法论教师转向：变体分析显式化与攻防激励不对称",
+      "capability_change": "Beer 在 Deja-XNU（2018-10-18）中把变体分析（variant analysis）从隐含动作提升为显式方法论立场：复访本人 2014 年 CVE-2014-4461 IODataQueue 内核漏洞，发现几乎相同的用户态变体信任共享内存中的 queueSize 值，在内核版修复后『又存在了四年』；自述在公开演讲变体分析前先亲自执行一遍以暴露防御方系统性盲区，并给出明确判断『Variant analysis is really important, but attackers are the only parties incentivized to do a good job of it』。研究目标从『找 bug』转向『示范方法论缺口』——识别出攻击者有动力做变体分析、防御方没有的结构性不对称。同时批评 Apple 安全公告透明度，论证遗漏修复条目会『provide a disincentive for people to update their devices』。同年（据种子与 Azad 2020-06 综述转述，发布日期未一手核实）multi_path/empty_list 引入 pipe buffer 稳定读写技术并被同事后续复用。该阶段确立『先做再讲』的方法论诚信与『把输出本身视为推动厂商加固的反馈输入』的反馈自觉。",
+      "evidence_ids": [
+        "ian-beer-pubworks-04-deja-xnu-2018",
+        "ib_dia_dejaxnu_practice_before_preach",
+        "ib_dia_dejaxnu_attackers_only_incentivized",
+        "ib_dia_dejaxnu_bulletin_transparency_critique",
+        "ian-beer-comm-07",
+        "ib-dec-03"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2019-02 至 2019-08",
+      "stage": "政治技术家转向：在野利用事件响应与公共议题框架重定向",
+      "capability_change": "Beer 与 Google TAG 协作分析野外 iOS 利用链（5 条完整独立利用链、跨 iOS 10-12、14 个漏洞，发现时至少一条提权链仍为 0-day），2019-02-01 以 7 天披露期限向 Apple 报告，促发 2019-02-07 iOS 12.1.4 带外发布——把 P0 标准 90 天政策压缩为 7 天紧急政策用于针对真实人群的活跃利用。8 月 29 日发布系列深度分析，主动把讨论从『百万美元异见者』重定向为『监控第 n+1 个潜在异见者的边际成本』，并点名基于地理区域或族裔群体的定向监控。该重定向引发 Apple 罕见地以新闻室公开声明逐句反驳（称攻击窄定向、非大规模、约两月而非两年、修复已在进行中）；Beer 未公开回应争论，让技术记录自证。该阶段确立『把技术 writeup 同时作为公共议题反馈通道』『以发布→厂商公开反驳为影响力的反向印证』与『把披露期限视为强制函数而非可协商便利』三项可观察的机制化行为。",
+      "evidence_ids": [
+        "ian-beer-pubworks-05-itw-chains-2019",
+        "ib_dia_itw_tag_collaboration_and_7day",
+        "ib_dia_itw_political_turning_point",
+        "ib_dia_itw_devices_dual_natured",
+        "ian-beer-comm-03",
+        "ian-beer-comm-08",
+        "ib-ext-05",
+        "ib-dec-04",
+        "ib-tl-itw-deadline",
+        "ib-tl-deepdive"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2020-12",
+      "stage": "能力演示转向：单人零点击作为政策论证",
+      "capability_change": "Beer 发表 AWDL 零点击无线电近距利用（CVE-2020-3843，约 6 个月单人研究），明确为『the longest solo exploitation project I've ever worked on』，单 bug 绕 ARM v8.3 PAC 达成完整内核读写与任意代码执行。文章透明记录 5 个失败方向（OWL 学术客户端无法构建→从零自建；iOS 12 kernelcache 误导致数周空耗；链表 flink 部分覆盖不可行；无 PAC 签名 vtable 时全覆盖致内核 panic；单帧双 SyncTree 溢出无法修复指针），并固化『Can it really be this easy? → In hindsight, there's an obvious reason why this doesn't work』的转向语式。坦承起步对该领域一无所知（『At this point, I had no idea what AWDL was』），读 SEEMOO 论文后自建 AWDL 客户端（libpcap + Raspberry Pi 4B + rtl8187）。把研究时长本身作为政策论据——量化『一人卧室即可构建此前被认为需国家级资源的零点击能力』以挑战防御投入模型。该阶段是『偶然入口、系统跟进』『自建工具投入视为长线省时的复利』与『把死路如实写进公开叙事』三项机制的代表作。",
+      "evidence_ids": [
+        "ian-beer-pubworks-06-awdl-2020",
+        "ib_dia_awdl_opens_with_bedroom_lockdown",
+        "ib_dia_awdl_started_with_no_domain_knowledge",
+        "ib_dia_awdl_dead_ends_and_near_give_up",
+        "ian-beer-comm-01",
+        "ian-beer-comm-02",
+        "ib-dec-05",
+        "ib-tl-awdl"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2021-12 至 2022-06 及之后",
+      "stage": "生态分析家与协作转向：从对抗性披露到联合分析，随后进入静默",
+      "capability_change": "Beer 与 Samuel Groß 合著 FORCEDENTRY（CVE-2021-30860）分析，致谢 Apple SEAR 团队协作进行技术分析、Citizen Lab 分享样本，评估其为『one of the most technically sophisticated exploits we've ever seen』（JBIG2 解码器内以逾 7 万条 segment 指令构建图灵完备虚拟机），结尾以『Make zeroday hard.』收束；同年起与曾被其公开批评的 Apple 形成有限技术协作关系。随后发表 Carrier.app（CVE-2021-30983，DCP 协处理器 UniformityCompensator::set 堆溢出），提出『协处理器安全悖论』：把攻击面从 mitigation heavy 的 AP 移到 mitigation light 的 DCP（缺 ASLR/PAC、plain arm64、确定堆、更简 RTKit RTOS）是安全回归，把批判层级从子系统设计（task_t）上升到硬件安全架构策略级。逆向约 7000 函数 stripped 固件时以『My kingdom for a .dSYM!』『Guess we'll have to do this the hard way!』体现面对缺失调试符号的务实姿态。此后 2022-06 至 2026-09 公开输出静默逾 3 年（对照 projectzero.google 实时作者列表确认），是否仍在 Google/P0、转岗或离职均无公开证据。该阶段是批判层级抬升顶点与工作模式从纯单人转向有限协作的可核验终点，同时进入资料缺口。",
+      "evidence_ids": [
+        "ian-beer-pubworks-07-carrier-app-2022",
+        "ib_dia_forcedentry_coauthored_with_gross_sear",
+        "ib_dia_forcedentry_incredible_and_terrifying",
+        "ian-beer-comm-06",
+        "ib-ext-04",
+        "ib-dec-06",
+        "ib-dec-07",
+        "ib-tl-forcedentry",
+        "ib-tl-carrier",
+        "ib-tl-silence"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "自建工具优先于套用既有框架",
+      "starting_conditions": "iOS/macOS 内核研究长期缺乏官方调试支持，学术或社区既有客户端/解析器常不可直接复用；Beer 起步即面对缺调试符号、缺可用客户端的研究环境。",
+      "repeated_practice": "2014 年自建 DYLD-interposing 模糊测试器随机翻转 IOConnectCallMethod 参数位定位 GPU 驱动 bug；2017 年面对 macOS 缺内核调试自建『kernel debugger with printfs and hexdumps』并以 trial and error 确定覆盖值；2020 年 OWL 开源 AWDL 客户端无法构建后从零自写 AWDL 客户端（libpcap + Raspberry Pi 4B + rtl8187 监听模式，双线程注入/ACK 嗅探）；2022 年逆向约 7000 函数 stripped DCP 固件时务实走『the hard way』。",
+      "feedback": "自建工具直接产出可定位 bug 与可用原语；Beer 自述『Investing a little bit of time building this API saved a lot of time in the long run』，把自建投入视为长线省时的复利而非沉没成本；自建工具产生的内核读写权又成为下一项研究的开发底座，形成正反馈。",
+      "intermediate_capability": "在缺官方调试/参考实现的研究环境中，能快速从论文与零散线索出发自建可用的研究/注入/调试基础设施，并把『够用工具』而非『完美工具』作为目标。",
+      "observed_outcomes": [
+        "2014 Safari 全链中 GPU 驱动 bug 经自建模糊测试器定位",
+        "2017 exception-oriented exploitation 经自建内核调试器开发与验证",
+        "2020 AWDL 零点击利用经自建 AWDL 客户端达成",
+        "AWDL 文中明确把自建工具投入表述为长线省时复利"
+      ],
+      "evidence_ids": [
+        "ian-beer-pubworks-01-pwn4fun-2014",
+        "ian-beer-pubworks-06-awdl-2020",
+        "ib_dia_exc_diy_kernel_debugger",
+        "ib_dia_awdl_started_with_no_domain_knowledge",
+        "ib-dec-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "自建工具可能是被迫而非主动选择——既有框架不可用、缺调试符号是客观约束；但 Beer 把自建投入显式表述为复利收益而非抱怨约束，且跨 2014/2017/2020/2022 四个时期反复如此，更接近主动方法论而非被动补救。"
+    },
+    {
+      "name": "把上一条 exploit 作为下一条研究的开发底座",
+      "starting_conditions": "iOS 内核研究存在循环依赖：开发新内核利用需先有内核读写权作为开发平台；Beer 在 2017 年明确指出这一 bootstrap 问题。",
+      "repeated_practice": "2017 年复用 2016 年 mach_portal 的内核读写权作为 exception-oriented exploitation 的开发平台；据 Brandon Azad 2020-06 综述与 Ned Williamson 2019-12 SockPuppet writeup，其 async_wake/extra_recipe/multi_path/empty_list 等产出被同事当作下一项研究的基础设施直接复用（Gal Beniamini 2017-09 Over The Air Vol.2 直接复用 extra_recipe 作为研究平台）；Beer→Beniamini→Azad/Williamson 的方法学接力链在 P0 内部可见。",
+      "feedback": "旧 exploit 的读写原语直接缩短新研究的开发周期；同事以复现 Beer 既有 bug 校准自身工具（Williamson 把 Beer 的 mptcp_usr_connectx 溢出作为 fuzzer seed bug），构成『输出→同伴复用→再产出』反馈回路；输出被同伴当作可继承工程资产而非一次性演示。",
+      "intermediate_capability": "把利用产出本身当作可复用的研究基础设施，形成自我复用的研究阶梯——每一条 exploit 既是一次成果也是下一次开发的工具底座。",
+      "observed_outcomes": [
+        "2017 exception-oriented exploitation 复用 mach_portal 读写权作为开发平台",
+        "Beniamini 2017-09 Wi-Fi 研究直接复用 extra_recipe 并把目标版本固定在 10.2",
+        "Azad 2019-01 voucher_swap 复用 Beer 在 multi_path/empty_list 引入的 pipe buffer 技法",
+        "Williamson 2019-12 SockPuppet 把 Beer 的 mptcp 溢出作为 fuzzer seed bug 校准新人方法学"
+      ],
+      "evidence_ids": [
+        "ian-beer-pubworks-03-exception-oriented-2017",
+        "ib_dia_exc_bootstrap_old_exploit_as_dev_platform",
+        "ib-ext-03",
+        "ian-beer-comm-04",
+        "ian-beer-comm-05",
+        "ib-ext-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "复用旧 exploit 可能只是 iOS 内核研究客观存在的 bootstrap 约束的产物，而非 Beer 个人特有机制；但他在公开 writeup 中显式把这一约束命名为 bootstrap problem 并主动把它方法化，且其产出被同伴显式作为起点复用，区分度高于纯被动复用。"
+    },
+    {
+      "name": "把每个补丁当作新攻击面并升华为架构级批判",
+      "starting_conditions": "Apple 缓解以补丁式增量为主，Beer 从 2016 年起把补丁本身视为新攻击面，并以 bypass→mitigation→bypass 迭代作为研究素材。",
+      "repeated_practice": "2016 task_t considered harmful 记录 4 轮 bypass 迭代并把 task_t 定位为架构性而非实现性问题；2018 Deja-XNU 把同一 IODataQueue 模式的用户态变体在内核版修复后存续四年作为攻防激励不对称的证据；2021-2022 Carrier.app 把批判层级从子系统设计上升到硬件安全架构策略级（AP→DCP 是 mitigation heavy→light 的安全回归）。considered harmful 命名框架与『moving an attack surface from a mitigation heavy environment to a mitigation light one is a regression』构成稳定的写作范式。",
+      "feedback": "把单点 bug 升华为子系统级/架构级理论贡献，使发布获得设计批判效力；Apple 在 10.12.1 因 task_t 系列做根本性 execve 重构（而非补丁）、据 Wikipedia 记录因某次重大披露重构 XNU 相当部分，是厂商工程层面的可观察反馈。",
+      "intermediate_capability": "能从单个 bug 抽象出子系统/硬件架构层的可利用模式，并把漏洞报告重写为设计批评，迫使厂商做根本性重构而非补丁。",
+      "observed_outcomes": [
+        "2016 task_t 促使 Apple 根因重构 execve 而非补丁",
+        "2018 Deja-XNU 揭示用户态变体修复后存续四年",
+        "2022 Carrier.app 把批判层级抬升至硬件安全架构策略",
+        "considered harmful 命名框架成为其稳定写作范式"
+      ],
+      "evidence_ids": [
+        "ian-beer-pubworks-02-taskt-2016",
+        "ian-beer-pubworks-04-deja-xnu-2018",
+        "ian-beer-pubworks-07-carrier-app-2022",
+        "ib-dec-02",
+        "ib-dec-07",
+        "ib-ext-06"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "架构级批判可能部分来自 P0 团队鼓励的写作风格而非 Beer 个人机制；但 considered harmful 命名、bypass-mitigation-bypass 迭代记录、mitigation heavy/light 框架跨 2016/2018/2022 三时期稳定出现，且与同伴写作风格可区分，更接近个人方法论。"
+    },
+    {
+      "name": "先做再讲与失败透明的方法论诚信",
+      "starting_conditions": "公开演讲邀请易诱发空谈方法论的诱惑；Beer 自述在 2018 年受邀公开演讲变体分析时选择先亲自执行一遍。",
+      "repeated_practice": "2018 Deja-XNU 自述『I thought it was important to actually do some variant analysis myself before I gave that talk』；2020 AWDL 文透明记录 5 个失败方向与近放弃时刻（『By this point I've invested a lot of time into this project and am not willing to give up』）；2017 exception-oriented exploitation 把批评锚定在流程与架构而非个人（『a clear failure of the code review processes in place at Apple』『this bug would have been caught in development if the code had any tests』）。",
+      "feedback": "先做再讲使方法论主张获得实证支撑（Deja-XNU 的用户态变体存续四年成为攻击者独有激励判断的证据）；透明记录死路使其方法论诚信在公开叙事中可核验，而非被包装成天赋。",
+      "intermediate_capability": "把『先做再讲』『把死路写进公开叙事』『批评指向流程而非个人』作为可重复的研究伦理约束，使方法论主张自带实证。",
+      "observed_outcomes": [
+        "2018 Deja-XNU 先亲自做变体分析再演讲",
+        "2020 AWDL 文透明记录 5 个失败方向与坚持决定",
+        "2017 exception-oriented exploitation 把批评锚定流程而非个人"
+      ],
+      "evidence_ids": [
+        "ian-beer-pubworks-04-deja-xnu-2018",
+        "ian-beer-pubworks-06-awdl-2020",
+        "ib_dia_dejaxnu_practice_before_preach",
+        "ib_dia_awdl_dead_ends_and_near_give_up",
+        "ib_dia_exc_critique_targets_process_not_person"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "先做再讲与失败透明可能只是 P0 长篇 writeup 风格的产物；但 Beer 在 2018 显式把它表述为自我强制（『important to actually do some variant analysis myself before I gave that talk』），且 AWDL 把死路而非成功路径作为叙事主干，区分度高于普通 writeup。"
+    },
+    {
+      "name": "把技术 writeup 同时作为公共议题反馈通道",
+      "starting_conditions": "Beer 自 2019 起把技术分析主动重定向到政治/伦理框架，并选择以博客长文而非采访/AMA 作为唯一公开对话形式。",
+      "repeated_practice": "2019 ITW 系列把议题从『百万美元异见者』重定向为『监控第 n+1 个潜在异见者的边际成本』并点名族裔/地理定向；2020 AWDL 把研究时长本身作为政策论据（量化单人成本挑战『零点击专属国家级』假设）；2021 FORCEDENTRY 以『one of the most technically sophisticated exploits we've ever seen』与『pretty terrifying』并置承载伦理重量，并以『Make zeroday hard.』收束；2018 Deja-XNU 批评 Apple 公告透明度会抑制用户更新。",
+      "feedback": "writeup 尾声作为公共议题反馈输入，扩大研究影响半径；Apple 罕见地以新闻室公开声明逐句反驳 Beer 2019 系列定性，构成『发布→厂商公开反驳』的反向影响力印证；Beer 不公开回应争论、让技术记录自证，固化『让技术说话』模式。",
+      "intermediate_capability": "把技术 writeup 同时作为政策论证与公共议题塑造手段，用警句式平衡句承载伦理重量（如『treating their mobile devices as both integral to their modern lives, yet also as devices which when compromised, can upload their every action into a database』），而非情绪化口号。",
+      "observed_outcomes": [
+        "2019 ITW 系列把议题重定向到边际成本与族裔定向",
+        "2020 AWDL 把研究时长作为政策论据",
+        "2021 FORCEDENTRY 以技术钦佩与伦理警惕并置收束于 Make zeroday hard.",
+        "Apple 2019-09-06 罕见公开声明逐句反驳 Beer 定性"
+      ],
+      "evidence_ids": [
+        "ian-beer-pubworks-05-itw-chains-2019",
+        "ian-beer-pubworks-06-awdl-2020",
+        "ian-beer-pubworks-07-carrier-app-2022",
+        "ib_dia_itw_political_turning_point",
+        "ib_dia_itw_devices_dual_natured",
+        "ib_dia_forcedentry_incredible_and_terrifying",
+        "ib_dia_dejaxnu_bulletin_transparency_critique",
+        "ian-beer-comm-08",
+        "ib-ext-05",
+        "ib-dec-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "政治化框架可能是 2019 ITW 这一特定事件触发的单次转向而非持续机制；但 2018 公告透明度批评、2019 边际成本框架、2020 政策论证、2021 钦佩与警惕并置跨四时期稳定出现，且 Beer 选择博客长文而非采访作为唯一对话形式使 writeup 事实上承载了其公共议题表达，更接近持续机制。"
+    }
+  ],
+  "tensions": [
+    "『独自在卧室研究』的自我叙事与 Google Project Zero 机构资源并存：Beer 强调『one person, working alone in their bedroom』，但同时依赖带薪职位、与 TAG/Samuel Groß 协作、与 Apple SEAR 合作、拥有 Apple 紧急响应通道；他在 AWDL 文中部分承认此张力（提及他人可能有 development devices, special cables, leaked source code），但 bedroom 框架仍略低估其机构支撑。这是自我叙事与客观条件之间的真实张力而非事实错误。",
+    "『独行研究者』与『高度协作』并存：Beer 大量引用 SEEMOO/Beniamini/Azad/Dullien 等既有社区产出作为输入，FORCEDENTRY 为与 Groß 共著并与 Apple SEAR/Citizen Lab 协同；他自己对此的调和体现在『输入语料来自社区、执行独自完成、输出回馈社区』的区分上。",
+    "对 NSO FORCEDENTRY 的技术钦佩与伦理警惕并存：Beer 同时写下『one of the most technically sophisticated exploits we've ever seen』与『pretty terrifying』，刻意保留张力而非消解。",
+    "2019 mass/indiscriminate vs 窄定向的框架冲突：Beer 把水坑攻击表述为针对按地理/族裔划分人群的大规模监控，Apple 2019-09-06 公开声明逐句反驳称攻击窄定向于特定社群、非大规模、约两月而非两年、修复已在进行中（该反驳原文一手已核验）；Beer 未公开回应争论。这是对同一事实的框架性冲突而非事实错误（对整个族裔=在该人群内部无差别 vs 针对特定群体=非大规模）。",
+    "FORCEDENTRY 样本来源的二手转述与一手正文分歧：本地 seed note 称 Apple 在 FORCEDENTRY 中 shared the exploit sample 给 Beer/Groß，但一手正文明确样本由 Citizen Lab 分享、Apple SEAR 仅 collaborating on the technical analysis；综合以一手正文为准。",
+    "签名归因误置：种子将『Make zeroday hard.』签名归因于 2020-12 AWDL，但一手抓取确认 AWDL 结尾为『I don't think all hope is lost; there's just an awful lot more left to do.』；『Make zeroday hard.』一手确认出现于 2021-12 FORCEDENTRY。签名归因应订正。",
+    "头衔级别措辞分歧：本地 seed note 多处称 Beer 为 founding member / principal early member；Wikipedia Google Project Zero 一手文本仅将其列为 notable members 之一，未逐字确认 founding/principal 头衔；可确认的仅为 Beer 早于 2014-07-15 官宣即以 P0 名义发布。",
+    "公开输出静默（2022-06 至 2026-09 已逾 3 年，对照 projectzero.google 实时作者列表确认）与此前 2014-2022 稳定输出节奏形成转折终点：是否仍在 Google/P0、转岗或离职均无公开证据。"
+  ],
+  "transferable_practices": [
+    "自建可用而非完美的研究/调试/注入工具，把自建投入视为长线省时的复利：在缺官方调试或既有框架不可用的环境中，先写够用的最小客户端/调试器（printf + hexdump 级）以解锁后续研究。",
+    "把上一项研究的产出（读写原语、fuzzer seed、工具链）显式作为下一项研究的开发底座，把 bootstrap 约束方法化为自我复用的研究阶梯。",
+    "对每个厂商补丁做 bypass→mitigation→bypass 迭代分析，把单点 bug 升华为子系统/架构级批判，迫使厂商做根本性重构而非补丁。",
+    "在公开演讲方法论前先亲自执行一遍该方法论（先做再讲），使方法论主张自带实证。",
+    "把死路与坚持决定如实写进公开叙事而非只展示成功路径，以方法诚信提升方法论主张的可核验性。",
+    "把批评锚定在流程与架构而非个人（如『a clear failure of the code review processes』『if the code had any tests』），并附带建设性期望（『lessons are learnt』）。",
+    "对在野利用采用压缩披露期限（如 7 天）作为强制函数，把进攻性研究与事件响应打通。",
+    "把变体分析作为系统化研究动作，识别并主动填补防御方缺乏变体分析激励的结构性缺口。",
+    "把研究时长/成本本身作为政策论据，量化『个人可达成的能力阈值』以挑战防御投入模型。"
+  ],
+  "non_transferable_conditions": [
+    "Project Zero 全职编制 + 90 天/7 天披露政策 + 公开 bugtracker 的机构平台：使 Beer 可持续免费发布本可在漏洞市场变现的完整链；该机构支撑不可由独立研究者个人复制，bedroom 叙事略低估此条件。",
+    "Google 薪资满足财务安全、Google TAG 提供在野利用情报、Apple 紧急响应通道：构成 Beer 选择公开研究而非出售漏洞的约束与前提，独立研究者缺乏等效条件。",
+    "P0 内部方法学接力链（Beer→Beniamini→Azad/Williamson）：同事把其产出当作下一项研究的基础设施直接复用并显式归功，这种同伴级反馈回路是团队内部的非普遍条件。",
+    "早于 2014-07-15 P0 官宣即以 P0 名义发布、并起点即达端到端全链水平：加入 P0 前已是世界级利用链水平，这一起点条件（pre-2014 教育与职业路径无公开记录）不可复制或核实。",
+    "2022-06 后公开静默逾 3 年：其当前 P0 在职状态、是否转内部研究或离职均无公开证据，该静默是否为主动选择或环境变化未知。",
+    "Apple 因其重大披露重构 XNU 相当部分（据 Wikipedia 记载）：这种厂商工程层面的反馈是影响力结果而非可复制方法，依赖特定厂商与时机。"
+  ],
+  "open_questions": [
+    "Beer 加入 P0 前（pre-2014）的教育背景与职业路径无任何公开记录可核实；种子推测其可能来自英国政府/防务背景属低置信度推测。这限制了对『起点即达端到端全链』这一能力形成过程的解释。",
+    "Beer 加入 P0 的确切日期（介于 2014-07-15 成立与其首篇归因帖 2014-10 之间）未知。",
+    "早期帖子（2014-10、2014-11、2015-09 Distributed Objects）与中期帖子（2016-03 Race you to the kernel!、2016-12 mach_portal、2017-04）的发布日期与作者身份本次未一手抓取，相关阶段边界（ib-tl-earlyposts、ib-tl-systemstheorist）仅 inferred 且 verified_in_run=false，不可作为机制基础。",
+    "async_wake（种子称 2017-12-11 GitHub 发布）、multi_path/empty_list（2018）等利用发布的精确日期与仓库位置未一手核实，仅经 Brandon Azad 2020-06 综述间接佐证作者身份与目标版本。",
+    "Beer 是否/何时接受过播客、AMA 或长访谈无法独立确认（WebSearch 两次仅返回占位文本）；其口头自述维度的入门故事与导师叙述几乎只能从博客叙事帖推断。",
+    "'Splitting atoms in XNU' 在种子中被社区广泛引用但所有 URL 模式 404，无法确认其为演讲、博文还是社区误传；故未纳入任何阶段或机制。",
+    "2023-2026 公开静默原因未知：是否仍在 Google/P0、转岗、离职、转内部研究均无公开证据；Twitter/X @i41nbeer 内容访问受限，无法核实其当前社交互动。",
+    "Beer 是否获得过 Pwnie Awards 等公开行业奖项未核实（种子称未见确认）；Beer 是否曾收取 Apple 赏金、与 Apple 安全团队私下协作的具体渠道均无公开一手证据。",
+    "Black Hat USA 2016/2019、HITB Amsterdam 2017 等会议演讲事实未抓取任何议程页（Black Hat 归档 403），演讲问答环节的深度对话内容缺失。",
+    "本次为首次综合（revision_context 为空），无定向补证或纠错；上述缺口在后续复核轮次中若补证，相关阶段边界与 inferred 条目可升级。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790431276513648000-ian-beer-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "76641b20-7d54-4e68-b7a0-2610429f3bf6",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_833gm0fotqjxm4oazlbhb5jq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "e93e1fea0cf7f75fe9b633203878edc6030edd05b6b783634604888d5af128c0",
+        "accessed_at": "2026-09-26T14:01:16.554313+00:00"
+      },
+      {
+        "tool_use_id": "call_wt322ik7k2iubnay238b79sm",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176/task.md"
+        },
+        "success": true,
+        "content_sha256": "c70f31018b384849e4705a0d12fc2dfc66727bd160fb95c42c82cb7b4cd87019",
+        "accessed_at": "2026-09-26T14:01:16.554344+00:00"
+      },
+      {
+        "tool_use_id": "call_3uj1w8nt7andabda70ibibrs",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "af890f69dd22bff5f5d99ca5340b791c6b8d28ea115a0772bd8abd19ebab8f66",
+        "accessed_at": "2026-09-26T14:01:16.554352+00:00"
+      },
+      {
+        "tool_use_id": "call_uenmkr9308qvsk73q6xig7cn",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "bc73bec40b9604a19ed68bca5d6921a6dc6f30a6031e50a23664d263e83e41b0",
+        "accessed_at": "2026-09-26T14:01:16.554361+00:00"
+      },
+      {
+        "tool_use_id": "call_snvqjh4z2o9az9dvm272bcps",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "9c336b561281f23637569c3d91879e9601296338cc10edd61effc7791dcf7059",
+        "accessed_at": "2026-09-26T14:01:16.554432+00:00"
+      },
+      {
+        "tool_use_id": "call_ztj7hbhmyklt6hcpxjtmwrpy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-26T14:01:16.554436+00:00"
+      },
+      {
+        "tool_use_id": "call_6bjzpcbligp4dklz6fpvrxwr",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176/inputs/evidence_json.json",
+          "offset": 759,
+          "limit": 618
+        },
+        "success": true,
+        "content_sha256": "6160058cca1bec6ff292f9cf1fb10697c5a4f67fa6c781dce10c2de5c0215c86",
+        "accessed_at": "2026-09-26T14:01:16.554502+00:00"
+      },
+      {
+        "tool_use_id": "call_mflumgtpn1c9i78amrtab3j0",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176/inputs/evidence_json.json",
+          "offset": 1373
+        },
+        "success": true,
+        "content_sha256": "e02728d92e6e4a7100533597e73a4493a1f3bb621641d6ec3d3a40933299a897",
+        "accessed_at": "2026-09-26T14:01:16.554514+00:00"
+      },
+      {
+        "tool_use_id": "call_lxpnxinq2gm73ikgwvv4yjrr",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176/checkpoint.md",
+          "content": "# Ian Beer 综合分析 — Checkpoint\n\n## 输入确认\n- person_json.json：Ian Beer，rank 3，iOS/macOS 漏洞利用，@i41nbeer，Project Zero。\n- evidence_json.json：六维（works/conversations/community/external/decisions/timeline）+ targeted(空)。\n- revision_context.json：空数组（首次综合，无定向补证/纠错，无作废证据）。\n\n## 证据有效性筛检\n- verified_in_run=true 且非作废的证据方可作为阶段/机制基础。\n- verified_in_run=false（不可作为基础，仅可入 open_questions）：\n  - ib_dia_absence_of_interviews_podcasts_ama（inferred）\n  - ib-tl-earlyposts（inferred）\n  - ib-tl-systemstheorist（inferred）\n- 跨维度核验差异：conversations 维度称 Apple 2019-09 反驳原文\"未成功抓取\"，但 external ib-ext-05（documented, verified_in_run=true）已一手抓取该声明。综合时以 ib-ext-05 为已核验来源。\n\n## 签名归因修正\n- \"Make zeroday hard.\" 一手确认出现于 2021-12 FORCEDENTRY（ib_dia_forcedentry_incredible_and_terrifying, verified）。\n- AWDL（2020-12）结尾一手确认为 \"I don't think all hope is lost; there's just an awful lot more left to do.\"（pubworks-06）。\n- 种子将签名归因于 AWDL 属误归因。\n\n## 阶段划分（6 阶段，均有多重 verified 证据）\n- A 2014 入场：端到端全链 + 自建工具倾向。\n- B 2016-2017：系统理论家转向（task_t / exception-oriented）。\n- C 2018：方法论教师转向（Deja-XNU 变体分析）。\n- D 2019：政治技术家转向（ITW 7-day / 边际成本框架）。\n- E 2020：能力演示转向（AWDL 单人零点击政策论证）。\n- F 2021-2022：生态分析家转向 + 协作转向（FORCEDENTRY / Carrier），随后静默。\n\n## 主机制（5 个，各满足 ≥2 项检验）\n1. 自建工具优先于套用既有框架（repeated/generative/distinctive）。\n2. 把上一条 exploit 作为下一条开发底座（repeated/generative/distinctive）。\n3. 把每个补丁当作新攻击面并升华为架构级批判（repeated/generative/distinctive）。\n4. 先做再讲与失败透明的方法论诚信（repeated/distinctive）。\n5. 把技术 writeup 同时作为公共议题反馈通道（repeated/generative/distinctive）。\n\n## 待办\n- 写 output.json 并对照 Schema 校验字段/枚举/类型。\n"
+        },
+        "success": true,
+        "content_sha256": "99592e0c32b7784deb08d22b3f1685b7aeb0e0cf750c5dd501e7433498ffc830",
+        "accessed_at": "2026-09-26T14:01:16.555069+00:00"
+      },
+      {
+        "tool_use_id": "call_bz1thd2jdkfpbc0vo0ktckt9",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-synthesis-v1-20260926-215356-176/output.json",
+          "content": "{\n  \"person\": \"Ian Beer\",\n  \"expertise\": [\n    \"iOS/macOS (XNU kernel, IOKit, Mach IPC) 漏洞利用与研究\",\n    \"iOS/macOS 完整利用链构建（渲染器→沙箱逃逸→内核→root）\",\n    \"XNU 内核漏洞利用原语设计与命名（exception-oriented exploitation、pipe buffer 读写、fake kernel task port）\",\n    \"变体分析（variant analysis）作为系统化研究方法\",\n    \"跨攻击面/跨处理器边界研究（Wi-Fi AWDL 协议、DCP 协处理器固件逆向与利用）\",\n    \"在野利用链的事件响应式分析（in-the-wild exploit chain analysis）\",\n    \"漏洞披露流程与披露期限决策（90 天标准、7 天紧急政策）\",\n    \"以技术 writeup 承载设计批评与公共议题（架构层/政策层论证）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2014（春-11 月）\",\n      \"stage\": \"入场即端到端全链：渲染器→沙箱逃逸→内核→root\",\n      \"capability_change\": \"Beer 在 2014-03 CanSecWest Pwn4Fun 的 Safari 利用 writeup（2014-11 发表）中已展示完整三段链——Safari 渲染器整数截断、经 IOKit GPU 驱动 (AppleIntelHD4000Graphics, IGAccelGLContext::unmap_user_memory selector 0x201) 沙箱逃逸、内核控制流劫持与 KASLR 经 IOKit 注册表 IOPlatformArgs 泄漏绕过，纯 ROP 绕 SMEP 后以 root 启动 Calculator.app。起点即以『完整利用链』而非单个 bug 为产出单位，并自建 DYLD-interposing 模糊测试器随机翻转 IOConnectCallMethod 参数位定位 GPU 驱动 bug，同时引用 Dionysus Blazakis、Meder Kydyraliev、winocm 等前人工作，表明其成长建立在社区研究脉络之上。该阶段确立其『自建工具优先于套用框架』与『端到端全链』两个早期倾向。\",\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-01-pwn4fun-2014\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2016-10 至 2017-04\",\n      \"stage\": \"从单点 bug hunter 转向系统理论家：架构性批判与原语命名\",\n      \"capability_change\": \"Beer 在 task_t considered harmful（2016-10-25）中把研究目标从『找单个 bug』升级为『指出设计类缺陷』——把 task_t 定位为架构性而非实现性问题（区分结构性内存安全与时序性内存安全），记录 4 轮 bypass→mitigation→bypass 迭代，促使 Apple 在 10.12.1 根因重构 execve。随后在 exception-oriented exploitation（2017-04-18，CVE-2017-2370）中命名并系统化一种新利用范式（故意触发 brk 异常使内核把攻击者控制的寄存器状态写入越界 ipc_kmsg，把一次性溢出转化为可重复的受控读写原语），并坦承 iOS 内核研究的引导问题——复用自己上一条 mach_portal exploit 的内核读写权作为新研究开发平台，自述『build my own kernel debugger (with printfs and hexdumps)』。该阶段确立『把每个补丁当作新攻击面』『上一条 exploit 作为下一条开发底座』与『considered harmful 命名框架把漏洞报告升华为设计批评』三项可识别的写作与方法论转向。\",\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-02-taskt-2016\",\n        \"ian-beer-pubworks-03-exception-oriented-2017\",\n        \"ib_dia_exc_bootstrap_old_exploit_as_dev_platform\",\n        \"ib_dia_exc_diy_kernel_debugger\",\n        \"ib_dia_exc_cites_esser_and_pegasus\",\n        \"ib_dia_exc_critique_targets_process_not_person\",\n        \"ib-dec-02\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2018-10\",\n      \"stage\": \"方法论教师转向：变体分析显式化与攻防激励不对称\",\n      \"capability_change\": \"Beer 在 Deja-XNU（2018-10-18）中把变体分析（variant analysis）从隐含动作提升为显式方法论立场：复访本人 2014 年 CVE-2014-4461 IODataQueue 内核漏洞，发现几乎相同的用户态变体信任共享内存中的 queueSize 值，在内核版修复后『又存在了四年』；自述在公开演讲变体分析前先亲自执行一遍以暴露防御方系统性盲区，并给出明确判断『Variant analysis is really important, but attackers are the only parties incentivized to do a good job of it』。研究目标从『找 bug』转向『示范方法论缺口』——识别出攻击者有动力做变体分析、防御方没有的结构性不对称。同时批评 Apple 安全公告透明度，论证遗漏修复条目会『provide a disincentive for people to update their devices』。同年（据种子与 Azad 2020-06 综述转述，发布日期未一手核实）multi_path/empty_list 引入 pipe buffer 稳定读写技术并被同事后续复用。该阶段确立『先做再讲』的方法论诚信与『把输出本身视为推动厂商加固的反馈输入』的反馈自觉。\",\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-04-deja-xnu-2018\",\n        \"ib_dia_dejaxnu_practice_before_preach\",\n        \"ib_dia_dejaxnu_attackers_only_incentivized\",\n        \"ib_dia_dejaxnu_bulletin_transparency_critique\",\n        \"ian-beer-comm-07\",\n        \"ib-dec-03\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2019-02 至 2019-08\",\n      \"stage\": \"政治技术家转向：在野利用事件响应与公共议题框架重定向\",\n      \"capability_change\": \"Beer 与 Google TAG 协作分析野外 iOS 利用链（5 条完整独立利用链、跨 iOS 10-12、14 个漏洞，发现时至少一条提权链仍为 0-day），2019-02-01 以 7 天披露期限向 Apple 报告，促发 2019-02-07 iOS 12.1.4 带外发布——把 P0 标准 90 天政策压缩为 7 天紧急政策用于针对真实人群的活跃利用。8 月 29 日发布系列深度分析，主动把讨论从『百万美元异见者』重定向为『监控第 n+1 个潜在异见者的边际成本』，并点名基于地理区域或族裔群体的定向监控。该重定向引发 Apple 罕见地以新闻室公开声明逐句反驳（称攻击窄定向、非大规模、约两月而非两年、修复已在进行中）；Beer 未公开回应争论，让技术记录自证。该阶段确立『把技术 writeup 同时作为公共议题反馈通道』『以发布→厂商公开反驳为影响力的反向印证』与『把披露期限视为强制函数而非可协商便利』三项可观察的机制化行为。\",\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-05-itw-chains-2019\",\n        \"ib_dia_itw_tag_collaboration_and_7day\",\n        \"ib_dia_itw_political_turning_point\",\n        \"ib_dia_itw_devices_dual_natured\",\n        \"ian-beer-comm-03\",\n        \"ian-beer-comm-08\",\n        \"ib-ext-05\",\n        \"ib-dec-04\",\n        \"ib-tl-itw-deadline\",\n        \"ib-tl-deepdive\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020-12\",\n      \"stage\": \"能力演示转向：单人零点击作为政策论证\",\n      \"capability_change\": \"Beer 发表 AWDL 零点击无线电近距利用（CVE-2020-3843，约 6 个月单人研究），明确为『the longest solo exploitation project I've ever worked on』，单 bug 绕 ARM v8.3 PAC 达成完整内核读写与任意代码执行。文章透明记录 5 个失败方向（OWL 学术客户端无法构建→从零自建；iOS 12 kernelcache 误导致数周空耗；链表 flink 部分覆盖不可行；无 PAC 签名 vtable 时全覆盖致内核 panic；单帧双 SyncTree 溢出无法修复指针），并固化『Can it really be this easy? → In hindsight, there's an obvious reason why this doesn't work』的转向语式。坦承起步对该领域一无所知（『At this point, I had no idea what AWDL was』），读 SEEMOO 论文后自建 AWDL 客户端（libpcap + Raspberry Pi 4B + rtl8187）。把研究时长本身作为政策论据——量化『一人卧室即可构建此前被认为需国家级资源的零点击能力』以挑战防御投入模型。该阶段是『偶然入口、系统跟进』『自建工具投入视为长线省时的复利』与『把死路如实写进公开叙事』三项机制的代表作。\",\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-06-awdl-2020\",\n        \"ib_dia_awdl_opens_with_bedroom_lockdown\",\n        \"ib_dia_awdl_started_with_no_domain_knowledge\",\n        \"ib_dia_awdl_dead_ends_and_near_give_up\",\n        \"ian-beer-comm-01\",\n        \"ian-beer-comm-02\",\n        \"ib-dec-05\",\n        \"ib-tl-awdl\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2021-12 至 2022-06 及之后\",\n      \"stage\": \"生态分析家与协作转向：从对抗性披露到联合分析，随后进入静默\",\n      \"capability_change\": \"Beer 与 Samuel Groß 合著 FORCEDENTRY（CVE-2021-30860）分析，致谢 Apple SEAR 团队协作进行技术分析、Citizen Lab 分享样本，评估其为『one of the most technically sophisticated exploits we've ever seen』（JBIG2 解码器内以逾 7 万条 segment 指令构建图灵完备虚拟机），结尾以『Make zeroday hard.』收束；同年起与曾被其公开批评的 Apple 形成有限技术协作关系。随后发表 Carrier.app（CVE-2021-30983，DCP 协处理器 UniformityCompensator::set 堆溢出），提出『协处理器安全悖论』：把攻击面从 mitigation heavy 的 AP 移到 mitigation light 的 DCP（缺 ASLR/PAC、plain arm64、确定堆、更简 RTKit RTOS）是安全回归，把批判层级从子系统设计（task_t）上升到硬件安全架构策略级。逆向约 7000 函数 stripped 固件时以『My kingdom for a .dSYM!』『Guess we'll have to do this the hard way!』体现面对缺失调试符号的务实姿态。此后 2022-06 至 2026-09 公开输出静默逾 3 年（对照 projectzero.google 实时作者列表确认），是否仍在 Google/P0、转岗或离职均无公开证据。该阶段是批判层级抬升顶点与工作模式从纯单人转向有限协作的可核验终点，同时进入资料缺口。\",\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-07-carrier-app-2022\",\n        \"ib_dia_forcedentry_coauthored_with_gross_sear\",\n        \"ib_dia_forcedentry_incredible_and_terrifying\",\n        \"ian-beer-comm-06\",\n        \"ib-ext-04\",\n        \"ib-dec-06\",\n        \"ib-dec-07\",\n        \"ib-tl-forcedentry\",\n        \"ib-tl-carrier\",\n        \"ib-tl-silence\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"自建工具优先于套用既有框架\",\n      \"starting_conditions\": \"iOS/macOS 内核研究长期缺乏官方调试支持，学术或社区既有客户端/解析器常不可直接复用；Beer 起步即面对缺调试符号、缺可用客户端的研究环境。\",\n      \"repeated_practice\": \"2014 年自建 DYLD-interposing 模糊测试器随机翻转 IOConnectCallMethod 参数位定位 GPU 驱动 bug；2017 年面对 macOS 缺内核调试自建『kernel debugger with printfs and hexdumps』并以 trial and error 确定覆盖值；2020 年 OWL 开源 AWDL 客户端无法构建后从零自写 AWDL 客户端（libpcap + Raspberry Pi 4B + rtl8187 监听模式，双线程注入/ACK 嗅探）；2022 年逆向约 7000 函数 stripped DCP 固件时务实走『the hard way』。\",\n      \"feedback\": \"自建工具直接产出可定位 bug 与可用原语；Beer 自述『Investing a little bit of time building this API saved a lot of time in the long run』，把自建投入视为长线省时的复利而非沉没成本；自建工具产生的内核读写权又成为下一项研究的开发底座，形成正反馈。\",\n      \"intermediate_capability\": \"在缺官方调试/参考实现的研究环境中，能快速从论文与零散线索出发自建可用的研究/注入/调试基础设施，并把『够用工具』而非『完美工具』作为目标。\",\n      \"observed_outcomes\": [\n        \"2014 Safari 全链中 GPU 驱动 bug 经自建模糊测试器定位\",\n        \"2017 exception-oriented exploitation 经自建内核调试器开发与验证\",\n        \"2020 AWDL 零点击利用经自建 AWDL 客户端达成\",\n        \"AWDL 文中明确把自建工具投入表述为长线省时复利\"\n      ],\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-01-pwn4fun-2014\",\n        \"ian-beer-pubworks-06-awdl-2020\",\n        \"ib_dia_exc_diy_kernel_debugger\",\n        \"ib_dia_awdl_started_with_no_domain_knowledge\",\n        \"ib-dec-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"自建工具可能是被迫而非主动选择——既有框架不可用、缺调试符号是客观约束；但 Beer 把自建投入显式表述为复利收益而非抱怨约束，且跨 2014/2017/2020/2022 四个时期反复如此，更接近主动方法论而非被动补救。\"\n    },\n    {\n      \"name\": \"把上一条 exploit 作为下一条研究的开发底座\",\n      \"starting_conditions\": \"iOS 内核研究存在循环依赖：开发新内核利用需先有内核读写权作为开发平台；Beer 在 2017 年明确指出这一 bootstrap 问题。\",\n      \"repeated_practice\": \"2017 年复用 2016 年 mach_portal 的内核读写权作为 exception-oriented exploitation 的开发平台；据 Brandon Azad 2020-06 综述与 Ned Williamson 2019-12 SockPuppet writeup，其 async_wake/extra_recipe/multi_path/empty_list 等产出被同事当作下一项研究的基础设施直接复用（Gal Beniamini 2017-09 Over The Air Vol.2 直接复用 extra_recipe 作为研究平台）；Beer→Beniamini→Azad/Williamson 的方法学接力链在 P0 内部可见。\",\n      \"feedback\": \"旧 exploit 的读写原语直接缩短新研究的开发周期；同事以复现 Beer 既有 bug 校准自身工具（Williamson 把 Beer 的 mptcp_usr_connectx 溢出作为 fuzzer seed bug），构成『输出→同伴复用→再产出』反馈回路；输出被同伴当作可继承工程资产而非一次性演示。\",\n      \"intermediate_capability\": \"把利用产出本身当作可复用的研究基础设施，形成自我复用的研究阶梯——每一条 exploit 既是一次成果也是下一次开发的工具底座。\",\n      \"observed_outcomes\": [\n        \"2017 exception-oriented exploitation 复用 mach_portal 读写权作为开发平台\",\n        \"Beniamini 2017-09 Wi-Fi 研究直接复用 extra_recipe 并把目标版本固定在 10.2\",\n        \"Azad 2019-01 voucher_swap 复用 Beer 在 multi_path/empty_list 引入的 pipe buffer 技法\",\n        \"Williamson 2019-12 SockPuppet 把 Beer 的 mptcp 溢出作为 fuzzer seed bug 校准新人方法学\"\n      ],\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-03-exception-oriented-2017\",\n        \"ib_dia_exc_bootstrap_old_exploit_as_dev_platform\",\n        \"ib-ext-03\",\n        \"ian-beer-comm-04\",\n        \"ian-beer-comm-05\",\n        \"ib-ext-02\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"复用旧 exploit 可能只是 iOS 内核研究客观存在的 bootstrap 约束的产物，而非 Beer 个人特有机制；但他在公开 writeup 中显式把这一约束命名为 bootstrap problem 并主动把它方法化，且其产出被同伴显式作为起点复用，区分度高于纯被动复用。\"\n    },\n    {\n      \"name\": \"把每个补丁当作新攻击面并升华为架构级批判\",\n      \"starting_conditions\": \"Apple 缓解以补丁式增量为主，Beer 从 2016 年起把补丁本身视为新攻击面，并以 bypass→mitigation→bypass 迭代作为研究素材。\",\n      \"repeated_practice\": \"2016 task_t considered harmful 记录 4 轮 bypass 迭代并把 task_t 定位为架构性而非实现性问题；2018 Deja-XNU 把同一 IODataQueue 模式的用户态变体在内核版修复后存续四年作为攻防激励不对称的证据；2021-2022 Carrier.app 把批判层级从子系统设计上升到硬件安全架构策略级（AP→DCP 是 mitigation heavy→light 的安全回归）。considered harmful 命名框架与『moving an attack surface from a mitigation heavy environment to a mitigation light one is a regression』构成稳定的写作范式。\",\n      \"feedback\": \"把单点 bug 升华为子系统级/架构级理论贡献，使发布获得设计批判效力；Apple 在 10.12.1 因 task_t 系列做根本性 execve 重构（而非补丁）、据 Wikipedia 记录因某次重大披露重构 XNU 相当部分，是厂商工程层面的可观察反馈。\",\n      \"intermediate_capability\": \"能从单个 bug 抽象出子系统/硬件架构层的可利用模式，并把漏洞报告重写为设计批评，迫使厂商做根本性重构而非补丁。\",\n      \"observed_outcomes\": [\n        \"2016 task_t 促使 Apple 根因重构 execve 而非补丁\",\n        \"2018 Deja-XNU 揭示用户态变体修复后存续四年\",\n        \"2022 Carrier.app 把批判层级抬升至硬件安全架构策略\",\n        \"considered harmful 命名框架成为其稳定写作范式\"\n      ],\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-02-taskt-2016\",\n        \"ian-beer-pubworks-04-deja-xnu-2018\",\n        \"ian-beer-pubworks-07-carrier-app-2022\",\n        \"ib-dec-02\",\n        \"ib-dec-07\",\n        \"ib-ext-06\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"架构级批判可能部分来自 P0 团队鼓励的写作风格而非 Beer 个人机制；但 considered harmful 命名、bypass-mitigation-bypass 迭代记录、mitigation heavy/light 框架跨 2016/2018/2022 三时期稳定出现，且与同伴写作风格可区分，更接近个人方法论。\"\n    },\n    {\n      \"name\": \"先做再讲与失败透明的方法论诚信\",\n      \"starting_conditions\": \"公开演讲邀请易诱发空谈方法论的诱惑；Beer 自述在 2018 年受邀公开演讲变体分析时选择先亲自执行一遍。\",\n      \"repeated_practice\": \"2018 Deja-XNU 自述『I thought it was important to actually do some variant analysis myself before I gave that talk』；2020 AWDL 文透明记录 5 个失败方向与近放弃时刻（『By this point I've invested a lot of time into this project and am not willing to give up』）；2017 exception-oriented exploitation 把批评锚定在流程与架构而非个人（『a clear failure of the code review processes in place at Apple』『this bug would have been caught in development if the code had any tests』）。\",\n      \"feedback\": \"先做再讲使方法论主张获得实证支撑（Deja-XNU 的用户态变体存续四年成为攻击者独有激励判断的证据）；透明记录死路使其方法论诚信在公开叙事中可核验，而非被包装成天赋。\",\n      \"intermediate_capability\": \"把『先做再讲』『把死路写进公开叙事』『批评指向流程而非个人』作为可重复的研究伦理约束，使方法论主张自带实证。\",\n      \"observed_outcomes\": [\n        \"2018 Deja-XNU 先亲自做变体分析再演讲\",\n        \"2020 AWDL 文透明记录 5 个失败方向与坚持决定\",\n        \"2017 exception-oriented exploitation 把批评锚定流程而非个人\"\n      ],\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-04-deja-xnu-2018\",\n        \"ian-beer-pubworks-06-awdl-2020\",\n        \"ib_dia_dejaxnu_practice_before_preach\",\n        \"ib_dia_awdl_dead_ends_and_near_give_up\",\n        \"ib_dia_exc_critique_targets_process_not_person\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"先做再讲与失败透明可能只是 P0 长篇 writeup 风格的产物；但 Beer 在 2018 显式把它表述为自我强制（『important to actually do some variant analysis myself before I gave that talk』），且 AWDL 把死路而非成功路径作为叙事主干，区分度高于普通 writeup。\"\n    },\n    {\n      \"name\": \"把技术 writeup 同时作为公共议题反馈通道\",\n      \"starting_conditions\": \"Beer 自 2019 起把技术分析主动重定向到政治/伦理框架，并选择以博客长文而非采访/AMA 作为唯一公开对话形式。\",\n      \"repeated_practice\": \"2019 ITW 系列把议题从『百万美元异见者』重定向为『监控第 n+1 个潜在异见者的边际成本』并点名族裔/地理定向；2020 AWDL 把研究时长本身作为政策论据（量化单人成本挑战『零点击专属国家级』假设）；2021 FORCEDENTRY 以『one of the most technically sophisticated exploits we've ever seen』与『pretty terrifying』并置承载伦理重量，并以『Make zeroday hard.』收束；2018 Deja-XNU 批评 Apple 公告透明度会抑制用户更新。\",\n      \"feedback\": \"writeup 尾声作为公共议题反馈输入，扩大研究影响半径；Apple 罕见地以新闻室公开声明逐句反驳 Beer 2019 系列定性，构成『发布→厂商公开反驳』的反向影响力印证；Beer 不公开回应争论、让技术记录自证，固化『让技术说话』模式。\",\n      \"intermediate_capability\": \"把技术 writeup 同时作为政策论证与公共议题塑造手段，用警句式平衡句承载伦理重量（如『treating their mobile devices as both integral to their modern lives, yet also as devices which when compromised, can upload their every action into a database』），而非情绪化口号。\",\n      \"observed_outcomes\": [\n        \"2019 ITW 系列把议题重定向到边际成本与族裔定向\",\n        \"2020 AWDL 把研究时长作为政策论据\",\n        \"2021 FORCEDENTRY 以技术钦佩与伦理警惕并置收束于 Make zeroday hard.\",\n        \"Apple 2019-09-06 罕见公开声明逐句反驳 Beer 定性\"\n      ],\n      \"evidence_ids\": [\n        \"ian-beer-pubworks-05-itw-chains-2019\",\n        \"ian-beer-pubworks-06-awdl-2020\",\n        \"ian-beer-pubworks-07-carrier-app-2022\",\n        \"ib_dia_itw_political_turning_point\",\n        \"ib_dia_itw_devices_dual_natured\",\n        \"ib_dia_forcedentry_incredible_and_terrifying\",\n        \"ib_dia_dejaxnu_bulletin_transparency_critique\",\n        \"ian-beer-comm-08\",\n        \"ib-ext-05\",\n        \"ib-dec-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"政治化框架可能是 2019 ITW 这一特定事件触发的单次转向而非持续机制；但 2018 公告透明度批评、2019 边际成本框架、2020 政策论证、2021 钦佩与警惕并置跨四时期稳定出现，且 Beer 选择博客长文而非采访作为唯一对话形式使 writeup 事实上承载了其公共议题表达，更接近持续机制。\"\n    }\n  ],\n  \"tensions\": [\n    \"『独自在卧室研究』的自我叙事与 Google Project Zero 机构资源并存：Beer 强调『one person, working alone in their bedroom』，但同时依赖带薪职位、与 TAG/Samuel Groß 协作、与 Apple SEAR 合作、拥有 Apple 紧急响应通道；他在 AWDL 文中部分承认此张力（提及他人可能有 development devices, special cables, leaked source code），但 bedroom 框架仍略低估其机构支撑。这是自我叙事与客观条件之间的真实张力而非事实错误。\",\n    \"『独行研究者』与『高度协作』并存：Beer 大量引用 SEEMOO/Beniamini/Azad/Dullien 等既有社区产出作为输入，FORCEDENTRY 为与 Groß 共著并与 Apple SEAR/Citizen Lab 协同；他自己对此的调和体现在『输入语料来自社区、执行独自完成、输出回馈社区』的区分上。\",\n    \"对 NSO FORCEDENTRY 的技术钦佩与伦理警惕并存：Beer 同时写下『one of the most technically sophisticated exploits we've ever seen』与『pretty terrifying』，刻意保留张力而非消解。\",\n    \"2019 mass/indiscriminate vs 窄定向的框架冲突：Beer 把水坑攻击表述为针对按地理/族裔划分人群的大规模监控，Apple 2019-09-06 公开声明逐句反驳称攻击窄定向于特定社群、非大规模、约两月而非两年、修复已在进行中（该反驳原文一手已核验）；Beer 未公开回应争论。这是对同一事实的框架性冲突而非事实错误（对整个族裔=在该人群内部无差别 vs 针对特定群体=非大规模）。\",\n    \"FORCEDENTRY 样本来源的二手转述与一手正文分歧：本地 seed note 称 Apple 在 FORCEDENTRY 中 shared the exploit sample 给 Beer/Groß，但一手正文明确样本由 Citizen Lab 分享、Apple SEAR 仅 collaborating on the technical analysis；综合以一手正文为准。\",\n    \"签名归因误置：种子将『Make zeroday hard.』签名归因于 2020-12 AWDL，但一手抓取确认 AWDL 结尾为『I don't think all hope is lost; there's just an awful lot more left to do.』；『Make zeroday hard.』一手确认出现于 2021-12 FORCEDENTRY。签名归因应订正。\",\n    \"头衔级别措辞分歧：本地 seed note 多处称 Beer 为 founding member / principal early member；Wikipedia Google Project Zero 一手文本仅将其列为 notable members 之一，未逐字确认 founding/principal 头衔；可确认的仅为 Beer 早于 2014-07-15 官宣即以 P0 名义发布。\",\n    \"公开输出静默（2022-06 至 2026-09 已逾 3 年，对照 projectzero.google 实时作者列表确认）与此前 2014-2022 稳定输出节奏形成转折终点：是否仍在 Google/P0、转岗或离职均无公开证据。\"\n  ],\n  \"transferable_practices\": [\n    \"自建可用而非完美的研究/调试/注入工具，把自建投入视为长线省时的复利：在缺官方调试或既有框架不可用的环境中，先写够用的最小客户端/调试器（printf + hexdump 级）以解锁后续研究。\",\n    \"把上一项研究的产出（读写原语、fuzzer seed、工具链）显式作为下一项研究的开发底座，把 bootstrap 约束方法化为自我复用的研究阶梯。\",\n    \"对每个厂商补丁做 bypass→mitigation→bypass 迭代分析，把单点 bug 升华为子系统/架构级批判，迫使厂商做根本性重构而非补丁。\",\n    \"在公开演讲方法论前先亲自执行一遍该方法论（先做再讲），使方法论主张自带实证。\",\n    \"把死路与坚持决定如实写进公开叙事而非只展示成功路径，以方法诚信提升方法论主张的可核验性。\",\n    \"把批评锚定在流程与架构而非个人（如『a clear failure of the code review processes』『if the code had any tests』），并附带建设性期望（『lessons are learnt』）。\",\n    \"对在野利用采用压缩披露期限（如 7 天）作为强制函数，把进攻性研究与事件响应打通。\",\n    \"把变体分析作为系统化研究动作，识别并主动填补防御方缺乏变体分析激励的结构性缺口。\",\n    \"把研究时长/成本本身作为政策论据，量化『个人可达成的能力阈值』以挑战防御投入模型。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Project Zero 全职编制 + 90 天/7 天披露政策 + 公开 bugtracker 的机构平台：使 Beer 可持续免费发布本可在漏洞市场变现的完整链；该机构支撑不可由独立研究者个人复制，bedroom 叙事略低估此条件。\",\n    \"Google 薪资满足财务安全、Google TAG 提供在野利用情报、Apple 紧急响应通道：构成 Beer 选择公开研究而非出售漏洞的约束与前提，独立研究者缺乏等效条件。\",\n    \"P0 内部方法学接力链（Beer→Beniamini→Azad/Williamson）：同事把其产出当作下一项研究的基础设施直接复用并显式归功，这种同伴级反馈回路是团队内部的非普遍条件。\",\n    \"早于 2014-07-15 P0 官宣即以 P0 名义发布、并起点即达端到端全链水平：加入 P0 前已是世界级利用链水平，这一起点条件（pre-2014 教育与职业路径无公开记录）不可复制或核实。\",\n    \"2022-06 后公开静默逾 3 年：其当前 P0 在职状态、是否转内部研究或离职均无公开证据，该静默是否为主动选择或环境变化未知。\",\n    \"Apple 因其重大披露重构 XNU 相当部分（据 Wikipedia 记载）：这种厂商工程层面的反馈是影响力结果而非可复制方法，依赖特定厂商与时机。\"\n  ],\n  \"open_questions\": [\n    \"Beer 加入 P0 前（pre-2014）的教育背景与职业路径无任何公开记录可核实；种子推测其可能来自英国政府/防务背景属低置信度推测。这限制了对『起点即达端到端全链』这一能力形成过程的解释。\",\n    \"Beer 加入 P0 的确切日期（介于 2014-07-15 成立与其首篇归因帖 2014-10 之间）未知。\",\n    \"早期帖子（2014-10、2014-11、2015-09 Distributed Objects）与中期帖子（2016-03 Race you to the kernel!、2016-12 mach_portal、2017-04）的发布日期与作者身份本次未一手抓取，相关阶段边界（ib-tl-earlyposts、ib-tl-systemstheorist）仅 inferred 且 verified_in_run=false，不可作为机制基础。\",\n    \"async_wake（种子称 2017-12-11 GitHub 发布）、multi_path/empty_list（2018）等利用发布的精确日期与仓库位置未一手核实，仅经 Brandon Azad 2020-06 综述间接佐证作者身份与目标版本。\",\n    \"Beer 是否/何时接受过播客、AMA 或长访谈无法独立确认（WebSearch 两次仅返回占位文本）；其口头自述维度的入门故事与导师叙述几乎只能从博客叙事帖推断。\",\n    \"'Splitting atoms in XNU' 在种子中被社区广泛引用但所有 URL 模式 404，无法确认其为演讲、博文还是社区误传；故未纳入任何阶段或机制。\",\n    \"2023-2026 公开静默原因未知：是否仍在 Google/P0、转岗、离职、转内部研究均无公开证据；Twitter/X @i41nbeer 内容访问受限，无法核实其当前社交互动。\",\n    \"Beer 是否获得过 Pwnie Awards 等公开行业奖项未核实（种子称未见确认）；Beer 是否曾收取 Apple 赏金、与 Apple 安全团队私下协作的具体渠道均无公开一手证据。\",\n    \"Black Hat USA 2016/2019、HITB Amsterdam 2017 等会议演讲事实未抓取任何议程页（Black Hat 归档 403），演讲问答环节的深度对话内容缺失。\",\n    \"本次为首次综合（revision_context 为空），无定向补证或纠错；上述缺口在后续复核轮次中若补证，相关阶段边界与 inferred 条目可升级。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "cc7b5912fab003ea42203338ffe475f96d9afd21a11310b3cafcd9ba4f2eeded",
+        "accessed_at": "2026-09-26T14:01:16.555073+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790431276555107000-ian-beer-synthesis-v1.json",
+    "label": "Ian Beer:synthesis:v1",
+    "elapsed_seconds": 440.37,
+    "prompt_sha256": "fcd5a81e38a7b4cdbfc8f681ce49afdc8a79ac312e6d25ec8ce334ef408190f9",
+    "num_turns": 11,
+    "total_cost_usd": 0.928043,
+    "usage": {
+      "input_tokens": 55217,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 204416,
+      "output_tokens": 21990,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 55217,
+        "outputTokens": 21990,
+        "cacheReadInputTokens": 204416,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.928043,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

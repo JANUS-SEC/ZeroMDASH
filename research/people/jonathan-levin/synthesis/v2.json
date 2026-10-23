@@ -1,0 +1,313 @@
+{
+  "person": "Jonathan Levin",
+  "expertise": [
+    "Apple（iOS/macOS）内核与系统组件漏洞研究",
+    "Apple 平台逆向工程：kernelcache、Mach-O、ARM64、PPL/APRR、IOMMU/DART 结构分析",
+    "Mach API 与 entitlement/AMFI 权限模型分析",
+    "越狱原语推导（TaiG、LiberiOS、LiberTV）",
+    "Android 内核与运行时（据 technologeeks.com 培训页，jl-tl-03）",
+    "自研逆向工具链（jtool/jtool2/jokerlib）"
+  ],
+  "stages": [
+    {
+      "period": "2012–2015（2012 与 2014 为作者自述年份，2015-02-08 与 2015-08-20 为可核验日期）",
+      "stage": "依据作者自述的早期 API 结构观察与方法链推导",
+      "capability_change": "据作者自述（2015-08-20 PST2，见 jl-rev1-002），MOXiI 第一版（原文以 whenever it was published in 2012 表述）已记录 processor_set_tasks()，并自述该问题在 BlackHat 2014 被作为 0-day 公开；未取得独立出版年份与会议方一手核验，先发性属作者自述而非独立核验事实。2015 年 PST2 的研究产出从记录单一 API 行为转为推导 processor_set 路径绕过 entitlement 模型的可复现方法链（mach_host_self → processor_set_default → host_processor_set_priv → processor_set_tasks → pid_for_task）。主要依据为作者自述来源。",
+      "evidence_ids": [
+        "jl-works-002",
+        "jl-rev1-002",
+        "jl-ext-003",
+        "jl-ext-004"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2014–2018（文章索引页未给逐篇日期；2015-10-07 jlaunchctl 为可核验日期，其余依据索引页系列对应关系推断）",
+      "stage": "逐版本跟进与长篇连载的公开记录",
+      "capability_change": "研究产出表现为对 iOS 8.0/10.10 至 iOS 12/10.14 各版本的内部机制逐一记录（jl-works-004），并以多部分长篇连载形式逆向单一目标，如 Taking apart iOS OTA Updates 八部分连载（jl-works-005）。主要依据为作者自述来源与作者站点索引页。",
+      "evidence_ids": [
+        "jl-works-004",
+        "jl-works-005",
+        "jl-conv-01",
+        "jl-ext-006"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017-12-25 至 2017-12-26",
+      "stage": "越狱工具公开发布与社区反馈",
+      "capability_change": "2017-12-25 发布 tvOS 11 的 LiberTV，2017-12-26 发布 iOS 11（11.0–11.1.2）的半 untethered 越狱 LiberiOS；发布即触发大规模社区试用与缺陷反馈（缺 Cydia/Substrate、缺 offset），据 iDownloadBlog 报道（引文：Early reports suggest that apart from missing offsets and lack of Cydia the tool has an excellent success rate），成功率较高但实用性受 Substrate 未适配 iOS 11 限制。",
+      "evidence_ids": [
+        "jl-community-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2019-03-02",
+      "stage": "硬件层 kernelcache PPL 逆向",
+      "capability_change": "研究目标从 OS 层 API 与内核结构转向 A12 kernelcache 中的 PPL（Page Protection Layer）；方法包括 __PPLTEXT/__PPLTRAMP/__PPLDATA 段识别、以 panic 字符串恢复约 150 个 PPL 内部符号、以 MOVZ X15, #N; B _ppl_enter 模式枚举 PPL 服务调用表、APRR_EL1 寄存器位域语义分析、IOMMU/DART 与 NVMe 结构扩展覆盖。研究中以自研 jtool2 的 -l/-G/--analyze 作为主分析工具。主要依据为作者一手 writeup。",
+      "evidence_ids": [
+        "jl-works-003",
+        "jl-ext-001",
+        "jl-works-006"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022–2026（仅 2022-03 与 2026-01 两个稀疏锚点，中间时段无证据）",
+      "stage": "Apple 平台研究收尾与教学产品化延续",
+      "capability_change": "2022-03 作者声明 *OS Internals 三部曲已 complete 并 officially quit Darwin，但仍售书与维护（jl-tl-01/02）；technologeeks.com 列出 2026-01-26 至 30 的 Android Internals 培训，延续跨平台（Apple/Android）教学业务（jl-tl-03/04）。两锚点之间时段无可核验产出，不应读作连续因果。",
+      "evidence_ids": [
+        "jl-tl-01",
+        "jl-tl-02",
+        "jl-tl-03",
+        "jl-tl-04"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "自建逆向工具链与研究需求之间的相互驱动",
+      "starting_conditions": "公开 Mach-O 分析工具（如 Hopper/IDA）不足以直接完成 Apple 平台 kernelcache 与段级符号恢复；作者在 CasaDePPL 中以引文（I don't see Hopper/IDA types getting this far without resorting to scripting）表述这一局限（jl-ext-001）。",
+      "repeated_practice": "jtool → jtool2（含 jokerlib 自动符号化，约 5070 符号 / 6 秒）并集成 disarm gadget finder；每次研究课题直接调用自研工具的 -l/-G/--analyze，研究产出反过来为工具增加功能，如 CasaDePPL 课题促使 jtool2 新增 PPL=1 环境变量输出 PPL 符号（jl-works-006）。",
+      "feedback": "据作者站点，研究课题为新功能提供需求，新工具能力又开启下一轮研究目标。外部用户反馈的 issue 正文未抓取：GitHub 仓库 https://github.com/newosxbook/JTool2 返回 HTTP 404，issue 与作者处理记录无法核验。",
+      "intermediate_capability": "据作者站点，自研 Mach-O/ARM64 分析工具的段识别、gadget 查找与符号化能力持续累积，覆盖从 OS X 10.10 到 iOS 12 的多版本 kernelcache 分析。",
+      "observed_outcomes": [
+        "TaiG 分析（2015-02-08）与 CasaDePPL（2019-03-02）均以 jtool/jtool2 为主工具完成（jl-ext-001）",
+        "CasaDePPL 文中以 jtool2 -l/-G/--analyze 复现 PPL 段识别与符号恢复，并新增 PPL=1 输出（jl-works-006）"
+      ],
+      "evidence_ids": [
+        "jl-works-006",
+        "jl-works-003",
+        "jl-ext-001"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "工具与研究的相互驱动可能并非独立选择，而是自出版（TechnoloG）模式下作者对工具可用性与研究产出同时负责的必然结果；商业分析工具如 IDA 在 ARM64 kernelcache 段级符号恢复上的局限也可能是部分原因。"
+    },
+    {
+      "name": "逐版本跟进与长篇连载的公开记录习惯",
+      "starting_conditions": "个人网站 newosxbook.com 作为公开输出载体，覆盖 iOS/macOS/tvOS/BridgeOS 平台（jl-works-004）。",
+      "repeated_practice": "每个主要 OS 版本发布后系统化记录内部变化（jl-works-004）；对单一目标以多部分长篇连载深挖，如 Taking apart iOS OTA Updates 八部分连载（jl-works-005）；跨 2015–2019 持续发布约 21 篇技术 writeup（jl-ext-004）。",
+      "feedback": "据作者站点，公开文档作为读者反馈与更正的潜在入口；newosxbook.com 配套 ChangeLog、Entitlement Database、XNU 交叉引用等资源（jl-works-001、jl-tl-05）。具体读者提交更正—作者采纳的回路未在一手页面证实（jl-community-05 为 inferred，未核验）。",
+      "intermediate_capability": "据作者站点，形成稳定的版本跟踪与复盘记录能力，跨平台覆盖 iOS/macOS/tvOS/BridgeOS。",
+      "observed_outcomes": [
+        "notes 索引页列出版本跟踪笔记系列覆盖 iOS 8.0/10.10 至 iOS 12/10.14（jl-works-004）",
+        "TaiG 分析（2015-02-08）详述 CVE-2014-4480/4455 与 TOCTOU 利用链（jl-ext-004）",
+        "OTA 八部分连载（jl-works-005）"
+      ],
+      "evidence_ids": [
+        "jl-works-004",
+        "jl-works-005",
+        "jl-conv-01",
+        "jl-ext-004"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "逐版本跟进可能部分源于自出版书籍（*OS Internals）随平台演进而必须同步更新的商业需求，而非纯粹的研究习惯；连载形式也可能是个人站点内容组织方式的选择。"
+    },
+    {
+      "name": "从 API 设计层缺陷推导可复现方法链",
+      "starting_conditions": "对 Mach API 与 Apple entitlement 模型的早期熟悉（jl-works-002 据作者自述可追溯至 2012 MOXiI 第一版）。",
+      "repeated_practice": "从公开 Mach API 反向推导越狱或权限绕过原语，并把根因归结为设计层面问题而非单个可修补漏洞；PST2 中以 mach_host_self → processor_set_default → host_processor_set_priv → processor_set_tasks → pid_for_task 的方法链绕过 task_for_pid() 与 AMFI 检查（jl-works-002）；TaiG 分析中详述 CVE-2014-4480/4455 与 TOCTOU 利用链（jl-ext-004）。",
+      "feedback": "作者在 CasaDePPL 中以引文（Luca - ... pointing out he gave a talk on this at Tensec and BlueHat.il which is well worth reading）自述 Luca 在 Tensec 与 BlueHat.il 就 PPL 主题演讲并指向 iokit.racing/bluehatil.pdf（jl-rev1-001）；该 PDF 在本环境因证书校验错误无法抓取，会议方议程页亦未抓取，仅作未核验线索，不作为同行共振成立的独立依据。作者自述 PST2 中（Pedro was the only one to actually notice this）指 Pedro 注意到书中对 kernel_task 泄露的描述（jl-rev1-002）。",
+      "intermediate_capability": "据作者站点，研究产出从记录单个 API 行为转为识别 API 设计层面的结构缺陷（如 processor_set 路径绕过 entitlement 模型）并产出可复现方法链。",
+      "observed_outcomes": [
+        "PST2（2015-08-20）输出绕过 task_for_pid 与 AMFI 的方法链，并明确关联 TaiG 越狱生态（jl-works-002）",
+        "TaiG 分析（2015-02-08）详述 CVE-2014-4480/4455 与 TOCTOU（jl-ext-004）"
+      ],
+      "evidence_ids": [
+        "jl-works-002",
+        "jl-rev1-002",
+        "jl-ext-004",
+        "jl-ext-003"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "将根因归于设计层缺陷可能部分反映作者作为系统内部机制专著作者需强调机制结构性而非个别补丁的写作立场；该方法是否在 2014 年后被独立重复采纳，因 BlackHat 2014 议程页 403 无法核验，存在资料缺口。"
+    },
+    {
+      "name": "研究积累向结构化教学与出版产品转化",
+      "starting_conditions": "长期 Apple 平台逆向积累；自出版（TechnoloG）保留修订自由度（jl-works-001）。",
+      "repeated_practice": "以版本号而非传统版次迭代 MacOS and *OS Internals 三部曲（Vol I User Mode v1.3.3.7.1 / Vol II Kernel Mode v1.0.2 / Vol III Security & Insecurity v1.6.6），截至 2022-03 仍在售并希望内容相对持久可用（jl-works-001）；jlaunchctl 文章（2015-10-07）推广 Technologeeks 的 OS X/iOS Internals 培训（jl-ext-006）；technologeeks.com 列出 2026-01 的 Android Internals 培训（jl-tl-03）。",
+      "feedback": "据作者站点，培训课程（2015 满员、2016-01 新增）反映教学需求对研究主题的反向选择（jl-ext-006）。",
+      "intermediate_capability": "据作者站点，将分散的逆向产出整理为可独立销售的书籍与可重复讲授的培训课程，覆盖 Apple 与 Android 双平台。",
+      "observed_outcomes": [
+        "*OS Internals 三部曲以版本号持续更新（jl-works-001、jl-tl-02）",
+        "Technologeeks Android Internals 培训延续至 2026-01（jl-tl-03、jl-tl-04）",
+        "jlaunchctl 文章推广 2015/2016 培训（jl-ext-006）"
+      ],
+      "evidence_ids": [
+        "jl-works-001",
+        "jl-tl-01",
+        "jl-tl-02",
+        "jl-tl-03",
+        "jl-ext-006"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "教学与出版产品化可能是自出版研究者可持续的收入路径，而非个人特有能力；Android Internals 培训延续至 2026 可能部分反映培训业务需求而非个人研究重心转移。"
+    }
+  ],
+  "tensions": [
+    "平台研究收尾（2022-03 作者声明 officially quit Darwin）与 person_json 将当前主方向标注为 Apple/Android 内核漏洞之间的不一致；该不一致无法仅凭现有来源判定属实质冲突或时间差（technologeeks.com 仍列 Android Internals 培训，jl-tl-03）。",
+    "同名歧义显著：英文 Wikipedia Jonathan_Levin 消歧页列出至少 5 位同名者（含斯坦福大学校长/经济学家），未收录安全研究员条目；外部权威评价缺失，其认可度主要体现在专业社区（jl-ext-008）。",
+    "作者自述的时序优先性（2012 MOXiI 记录、BlackHat 2014 被 0-day 公开）未取得独立核验，BlackHat 2014 议程页 403 无法抓取（jl-rev1-002）。"
+  ],
+  "transferable_practices": [
+    "以版本号而非版次持续迭代长篇技术文档，跟随平台演进（jl-works-001）。",
+    "对单一目标以多部分长篇连载深挖，保持深度优先（jl-works-005）。",
+    "研究中直接调用自研工具并据研究需求增补工具功能，形成工具与研究需求相互驱动的循环关系（jl-works-006）。",
+    "将每次逆向产出整理为公开文档与可独立销售的书籍（jl-works-001、jl-ext-004）。"
+  ],
+  "non_transferable_conditions": [
+    "自出版（TechnoloG）保留对 *OS Internals 的修订自由度与持续更新权，是个人特有条件（jl-works-001）。",
+    "长期 Apple 平台逆向积累与 jtool/jtool2 自研工具链，是个人前期投入的特定资产，难以直接迁移（jl-works-006）。",
+    "2012 年前后对 Mach API 与 Apple entitlement 模型的早期熟悉，是时间窗口特定的条件（jl-works-002、jl-rev1-002）。",
+    "同名歧义导致外部权威评价缺失，属身份识别层面的不可迁移约束（jl-ext-008）。"
+  ],
+  "open_questions": [
+    "2020 年后是否仍有公开 writeup；2022-03 至 2026-01 之间的研究产出无证据。",
+    "作者是否曾向 Apple 报告漏洞或获得致谢；PST2 与 CasaDePPL 均未提及 CVE 编号或厂商致谢。",
+    "jtool → jtool2 → jokerlib 的精确发布时间线；tools.php 返回 404（jl-works-006 gaps）。",
+    "BlackHat US/Asia、POC 演讲题目、年份与摘要；blackhat.com 403、POC 未抓取（jl-tl-06、jl-works-008 均为未核验线索）。",
+    "Android Internals: A Confectioner's Cookbook 的实际存在与出版细节；technolog.com 未实际抓取（jl-works-007 为 inferred）。",
+    "Luca 在 Tensec/BlueHat.il 的 PPL 演讲 PDF 正文与日期；iokit.racing/bluehatil.pdf 因证书错误无法抓取（jl-rev1-001）。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jonathan-levin-synthesis-v2-20260927-233431-363",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790523736904416000-jonathan-levin-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "4b54f255-88bc-4f84-a2bd-48188585a418",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_qs4hu5l1ubsgpfkq5ko55v0c",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jonathan-levin-synthesis-v2-20260927-233431-363/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T15:42:16.960005+00:00"
+      },
+      {
+        "tool_use_id": "call_h099rt70lpoahbrtq4xq06i7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jonathan-levin-synthesis-v2-20260927-233431-363/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "7160f933a7fc89e984a6dce814fed64fd905d37d5dc2b820937ffe7f1dd87288",
+        "accessed_at": "2026-09-27T15:42:16.960024+00:00"
+      },
+      {
+        "tool_use_id": "call_qmd24x98keo3inj60t2tbbn8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jonathan-levin-synthesis-v2-20260927-233431-363/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "4338fb36c4405edb74418744be7a82c30f55ff22f20674f0298cfb27d1a84eb4",
+        "accessed_at": "2026-09-27T15:42:16.960030+00:00"
+      },
+      {
+        "tool_use_id": "call_wtpcphe1i2hf2n19s2fsz4jf",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jonathan-levin-synthesis-v2-20260927-233431-363/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "7553271f9a331fc5b364bd0c818d4c548715474252eb7fddf7b8c23e1f460fcc",
+        "accessed_at": "2026-09-27T15:42:16.960096+00:00"
+      },
+      {
+        "tool_use_id": "call_x9r2cp34zg2twjl31hlkd3ql",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jonathan-levin-synthesis-v2-20260927-233431-363/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "3b9844fbedce95e4b9ddf49129089aee095c751e26929aa3776f3799b09b0f8f",
+        "accessed_at": "2026-09-27T15:42:16.960151+00:00"
+      },
+      {
+        "tool_use_id": "call_40zzmmpzj2w911jbkc8ewj8p",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jonathan-levin-synthesis-v2-20260927-233431-363/checkpoint.md",
+          "content": "# Checkpoint — Jonathan Levin 综合（synthesis v2）\n\n## 任务状态\n综合六维材料 + revision_context（round 1）的定向补证，重建领域能力成长过程。\n本节点为综合节点，不做新搜索；仅依据 EVIDENCE_JSON 有效证据 + jl-rev1-001/002 新证据，并遵守 invalid_evidence_ids 与 synthesis_instructions。\n\n## 证据有效性分类（已核对 verified_in_run 与内容取回关系）\n- 强（verified=true + 正文取回）：jl-works-001/002/003/004/005/006、jl-conv-01、jl-community-01、jl-ext-001/002/003/004/006/007、jl-tl-01/02/03/04/05/07、jl-rev1-001/002\n- 弱（verified=true 但正文未取回或 inferred）：jl-community-04（402 无正文）、jl-community-05（inferred）— 仅作线索，不进 evidence_ids 支撑列\n- 不可用（verified=false）：jl-works-007/008、jl-community-02、jl-ext-005、jl-tl-06 — 不作支撑\n- invalid（禁用）：jl-community-03-jtool2-github-issues — 全文不引用\n\n## 阶段（5，按可核验日期排，去重叠）\n0. 2012–2015（2012/2014 作者自述 + 2015-02/08 可核验）：早期 API 结构观察与方法链推导 — jl-works-002/jl-rev1-002/jl-ext-004\n1. 2014–2018（索引无逐篇日期；2015-10-07 可核验）：逐版本跟进与长篇连载公开记录 — jl-works-004/005/jl-ext-006/jl-conv-01\n2. 2017-12：越狱工具公开发布与社区反馈 — jl-community-01\n3. 2019-03-02：硬件层 kernelcache PPL 逆向 — jl-works-003/jl-ext-001/jl-works-006\n4. 2022–2026（两锚点稀疏）：研究收尾与教学产品化 — jl-tl-01/02/03/04\n\n## 机制（4，均满足 ≥2/3：跨时期重复/解释多结果/区分度）\n1. 自建逆向工具链与研究需求之间的相互驱动 — jl-works-006/003/jl-ext-001\n2. 逐版本跟进与长篇连载的公开记录习惯 — jl-works-004/005/jl-conv-01/jl-ext-004/002\n3. 从 API 设计层缺陷推导可复现方法链 — jl-works-002/jl-rev1-002/jl-ext-004/003\n4. 研究积累向结构化教学与出版产品转化 — jl-works-001/jl-tl-01/02/03/jl-ext-006\n\n## 修订指令落地核对\n- [x] 删\"先发性\"；stage0 capability_change 标注作者自述 + 未独立核验\n- [x] \"能力...转向\"拟人化 → \"研究产出从...转为...\"\n- [x] \"下沉\" → \"转向\"\n- [x] \"闭环\" → \"相互驱动\"/\"循环关系\"\n- [x] 删 jl-community-03 引用\n- [x] \"沉淀\" → \"整理\"\n- [x] mech2/4 intermediate_capability 加\"据作者站点\"限定\n- [x] mech(对应原 mech3)feedback：jl-ext-007 限定为作者自述（jl-rev1-001），PDF 未抓取不作独立依据\n- [x] tensions\"张力\" → \"不一致\"\n- [x] stage4 period 去重叠 + 说明锚点稀疏\n- [x] stages/mechanisms 显式标注\"主要依据为作者自述来源\"\n\n## 语言规范自检\n去除：闭环/支点/下沉/沉淀/张力/回路/回流/反哺；无拟人；短引文标注为引文。\n\n## 待输出\noutput.json 按 schema 写入；不填 _run/verification。\n"
+        },
+        "success": true,
+        "content_sha256": "85c9d97d69d9c0d86d72f45d4057f9052c20e9b50df77bd5192c7b6b1e9e08d2",
+        "accessed_at": "2026-09-27T15:42:16.960803+00:00"
+      },
+      {
+        "tool_use_id": "call_bymorhccf39w19yxwjgchk03",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jonathan-levin-synthesis-v2-20260927-233431-363/output.json",
+          "content": "{\n  \"person\": \"Jonathan Levin\",\n  \"expertise\": [\n    \"Apple（iOS/macOS）内核与系统组件漏洞研究\",\n    \"Apple 平台逆向工程：kernelcache、Mach-O、ARM64、PPL/APRR、IOMMU/DART 结构分析\",\n    \"Mach API 与 entitlement/AMFI 权限模型分析\",\n    \"越狱原语推导（TaiG、LiberiOS、LiberTV）\",\n    \"Android 内核与运行时（据 technologeeks.com 培训页，jl-tl-03）\",\n    \"自研逆向工具链（jtool/jtool2/jokerlib）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2012–2015（2012 与 2014 为作者自述年份，2015-02-08 与 2015-08-20 为可核验日期）\",\n      \"stage\": \"依据作者自述的早期 API 结构观察与方法链推导\",\n      \"capability_change\": \"据作者自述（2015-08-20 PST2，见 jl-rev1-002），MOXiI 第一版（原文以 whenever it was published in 2012 表述）已记录 processor_set_tasks()，并自述该问题在 BlackHat 2014 被作为 0-day 公开；未取得独立出版年份与会议方一手核验，先发性属作者自述而非独立核验事实。2015 年 PST2 的研究产出从记录单一 API 行为转为推导 processor_set 路径绕过 entitlement 模型的可复现方法链（mach_host_self → processor_set_default → host_processor_set_priv → processor_set_tasks → pid_for_task）。主要依据为作者自述来源。\",\n      \"evidence_ids\": [\"jl-works-002\", \"jl-rev1-002\", \"jl-ext-003\", \"jl-ext-004\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2014–2018（文章索引页未给逐篇日期；2015-10-07 jlaunchctl 为可核验日期，其余依据索引页系列对应关系推断）\",\n      \"stage\": \"逐版本跟进与长篇连载的公开记录\",\n      \"capability_change\": \"研究产出表现为对 iOS 8.0/10.10 至 iOS 12/10.14 各版本的内部机制逐一记录（jl-works-004），并以多部分长篇连载形式逆向单一目标，如 Taking apart iOS OTA Updates 八部分连载（jl-works-005）。主要依据为作者自述来源与作者站点索引页。\",\n      \"evidence_ids\": [\"jl-works-004\", \"jl-works-005\", \"jl-conv-01\", \"jl-ext-006\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017-12-25 至 2017-12-26\",\n      \"stage\": \"越狱工具公开发布与社区反馈\",\n      \"capability_change\": \"2017-12-25 发布 tvOS 11 的 LiberTV，2017-12-26 发布 iOS 11（11.0–11.1.2）的半 untethered 越狱 LiberiOS；发布即触发大规模社区试用与缺陷反馈（缺 Cydia/Substrate、缺 offset），据 iDownloadBlog 报道（引文：Early reports suggest that apart from missing offsets and lack of Cydia the tool has an excellent success rate），成功率较高但实用性受 Substrate 未适配 iOS 11 限制。\",\n      \"evidence_ids\": [\"jl-community-01\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2019-03-02\",\n      \"stage\": \"硬件层 kernelcache PPL 逆向\",\n      \"capability_change\": \"研究目标从 OS 层 API 与内核结构转向 A12 kernelcache 中的 PPL（Page Protection Layer）；方法包括 __PPLTEXT/__PPLTRAMP/__PPLDATA 段识别、以 panic 字符串恢复约 150 个 PPL 内部符号、以 MOVZ X15, #N; B _ppl_enter 模式枚举 PPL 服务调用表、APRR_EL1 寄存器位域语义分析、IOMMU/DART 与 NVMe 结构扩展覆盖。研究中以自研 jtool2 的 -l/-G/--analyze 作为主分析工具。主要依据为作者一手 writeup。\",\n      \"evidence_ids\": [\"jl-works-003\", \"jl-ext-001\", \"jl-works-006\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022–2026（仅 2022-03 与 2026-01 两个稀疏锚点，中间时段无证据）\",\n      \"stage\": \"Apple 平台研究收尾与教学产品化延续\",\n      \"capability_change\": \"2022-03 作者声明 *OS Internals 三部曲已 complete 并 officially quit Darwin，但仍售书与维护（jl-tl-01/02）；technologeeks.com 列出 2026-01-26 至 30 的 Android Internals 培训，延续跨平台（Apple/Android）教学业务（jl-tl-03/04）。两锚点之间时段无可核验产出，不应读作连续因果。\",\n      \"evidence_ids\": [\"jl-tl-01\", \"jl-tl-02\", \"jl-tl-03\", \"jl-tl-04\"],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"自建逆向工具链与研究需求之间的相互驱动\",\n      \"starting_conditions\": \"公开 Mach-O 分析工具（如 Hopper/IDA）不足以直接完成 Apple 平台 kernelcache 与段级符号恢复；作者在 CasaDePPL 中以引文（I don't see Hopper/IDA types getting this far without resorting to scripting）表述这一局限（jl-ext-001）。\",\n      \"repeated_practice\": \"jtool → jtool2（含 jokerlib 自动符号化，约 5070 符号 / 6 秒）并集成 disarm gadget finder；每次研究课题直接调用自研工具的 -l/-G/--analyze，研究产出反过来为工具增加功能，如 CasaDePPL 课题促使 jtool2 新增 PPL=1 环境变量输出 PPL 符号（jl-works-006）。\",\n      \"feedback\": \"据作者站点，研究课题为新功能提供需求，新工具能力又开启下一轮研究目标。外部用户反馈的 issue 正文未抓取：GitHub 仓库 https://github.com/newosxbook/JTool2 返回 HTTP 404，issue 与作者处理记录无法核验。\",\n      \"intermediate_capability\": \"据作者站点，自研 Mach-O/ARM64 分析工具的段识别、gadget 查找与符号化能力持续累积，覆盖从 OS X 10.10 到 iOS 12 的多版本 kernelcache 分析。\",\n      \"observed_outcomes\": [\n        \"TaiG 分析（2015-02-08）与 CasaDePPL（2019-03-02）均以 jtool/jtool2 为主工具完成（jl-ext-001）\",\n        \"CasaDePPL 文中以 jtool2 -l/-G/--analyze 复现 PPL 段识别与符号恢复，并新增 PPL=1 输出（jl-works-006）\"\n      ],\n      \"evidence_ids\": [\"jl-works-006\", \"jl-works-003\", \"jl-ext-001\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"工具与研究的相互驱动可能并非独立选择，而是自出版（TechnoloG）模式下作者对工具可用性与研究产出同时负责的必然结果；商业分析工具如 IDA 在 ARM64 kernelcache 段级符号恢复上的局限也可能是部分原因。\"\n    },\n    {\n      \"name\": \"逐版本跟进与长篇连载的公开记录习惯\",\n      \"starting_conditions\": \"个人网站 newosxbook.com 作为公开输出载体，覆盖 iOS/macOS/tvOS/BridgeOS 平台（jl-works-004）。\",\n      \"repeated_practice\": \"每个主要 OS 版本发布后系统化记录内部变化（jl-works-004）；对单一目标以多部分长篇连载深挖，如 Taking apart iOS OTA Updates 八部分连载（jl-works-005）；跨 2015–2019 持续发布约 21 篇技术 writeup（jl-ext-004）。\",\n      \"feedback\": \"据作者站点，公开文档作为读者反馈与更正的潜在入口；newosxbook.com 配套 ChangeLog、Entitlement Database、XNU 交叉引用等资源（jl-works-001、jl-tl-05）。具体读者提交更正—作者采纳的回路未在一手页面证实（jl-community-05 为 inferred，未核验）。\",\n      \"intermediate_capability\": \"据作者站点，形成稳定的版本跟踪与复盘记录能力，跨平台覆盖 iOS/macOS/tvOS/BridgeOS。\",\n      \"observed_outcomes\": [\n        \"notes 索引页列出版本跟踪笔记系列覆盖 iOS 8.0/10.10 至 iOS 12/10.14（jl-works-004）\",\n        \"TaiG 分析（2015-02-08）详述 CVE-2014-4480/4455 与 TOCTOU 利用链（jl-ext-004）\",\n        \"OTA 八部分连载（jl-works-005）\"\n      ],\n      \"evidence_ids\": [\"jl-works-004\", \"jl-works-005\", \"jl-conv-01\", \"jl-ext-004\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"逐版本跟进可能部分源于自出版书籍（*OS Internals）随平台演进而必须同步更新的商业需求，而非纯粹的研究习惯；连载形式也可能是个人站点内容组织方式的选择。\"\n    },\n    {\n      \"name\": \"从 API 设计层缺陷推导可复现方法链\",\n      \"starting_conditions\": \"对 Mach API 与 Apple entitlement 模型的早期熟悉（jl-works-002 据作者自述可追溯至 2012 MOXiI 第一版）。\",\n      \"repeated_practice\": \"从公开 Mach API 反向推导越狱或权限绕过原语，并把根因归结为设计层面问题而非单个可修补漏洞；PST2 中以 mach_host_self → processor_set_default → host_processor_set_priv → processor_set_tasks → pid_for_task 的方法链绕过 task_for_pid() 与 AMFI 检查（jl-works-002）；TaiG 分析中详述 CVE-2014-4480/4455 与 TOCTOU 利用链（jl-ext-004）。\",\n      \"feedback\": \"作者在 CasaDePPL 中以引文（Luca - ... pointing out he gave a talk on this at Tensec and BlueHat.il which is well worth reading）自述 Luca 在 Tensec 与 BlueHat.il 就 PPL 主题演讲并指向 iokit.racing/bluehatil.pdf（jl-rev1-001）；该 PDF 在本环境因证书校验错误无法抓取，会议方议程页亦未抓取，仅作未核验线索，不作为同行共振成立的独立依据。作者自述 PST2 中（Pedro was the only one to actually notice this）指 Pedro 注意到书中对 kernel_task 泄露的描述（jl-rev1-002）。\",\n      \"intermediate_capability\": \"据作者站点，研究产出从记录单个 API 行为转为识别 API 设计层面的结构缺陷（如 processor_set 路径绕过 entitlement 模型）并产出可复现方法链。\",\n      \"observed_outcomes\": [\n        \"PST2（2015-08-20）输出绕过 task_for_pid 与 AMFI 的方法链，并明确关联 TaiG 越狱生态（jl-works-002）\",\n        \"TaiG 分析（2015-02-08）详述 CVE-2014-4480/4455 与 TOCTOU（jl-ext-004）\"\n      ],\n      \"evidence_ids\": [\"jl-works-002\", \"jl-rev1-002\", \"jl-ext-004\", \"jl-ext-003\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"将根因归于设计层缺陷可能部分反映作者作为系统内部机制专著作者需强调机制结构性而非个别补丁的写作立场；该方法是否在 2014 年后被独立重复采纳，因 BlackHat 2014 议程页 403 无法核验，存在资料缺口。\"\n    },\n    {\n      \"name\": \"研究积累向结构化教学与出版产品转化\",\n      \"starting_conditions\": \"长期 Apple 平台逆向积累；自出版（TechnoloG）保留修订自由度（jl-works-001）。\",\n      \"repeated_practice\": \"以版本号而非传统版次迭代 MacOS and *OS Internals 三部曲（Vol I User Mode v1.3.3.7.1 / Vol II Kernel Mode v1.0.2 / Vol III Security & Insecurity v1.6.6），截至 2022-03 仍在售并希望内容相对持久可用（jl-works-001）；jlaunchctl 文章（2015-10-07）推广 Technologeeks 的 OS X/iOS Internals 培训（jl-ext-006）；technologeeks.com 列出 2026-01 的 Android Internals 培训（jl-tl-03）。\",\n      \"feedback\": \"据作者站点，培训课程（2015 满员、2016-01 新增）反映教学需求对研究主题的反向选择（jl-ext-006）。\",\n      \"intermediate_capability\": \"据作者站点，将分散的逆向产出整理为可独立销售的书籍与可重复讲授的培训课程，覆盖 Apple 与 Android 双平台。\",\n      \"observed_outcomes\": [\n        \"*OS Internals 三部曲以版本号持续更新（jl-works-001、jl-tl-02）\",\n        \"Technologeeks Android Internals 培训延续至 2026-01（jl-tl-03、jl-tl-04）\",\n        \"jlaunchctl 文章推广 2015/2016 培训（jl-ext-006）\"\n      ],\n      \"evidence_ids\": [\"jl-works-001\", \"jl-tl-01\", \"jl-tl-02\", \"jl-tl-03\", \"jl-ext-006\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"教学与出版产品化可能是自出版研究者可持续的收入路径，而非个人特有能力；Android Internals 培训延续至 2026 可能部分反映培训业务需求而非个人研究重心转移。\"\n    }\n  ],\n  \"tensions\": [\n    \"平台研究收尾（2022-03 作者声明 officially quit Darwin）与 person_json 将当前主方向标注为 Apple/Android 内核漏洞之间的不一致；该不一致无法仅凭现有来源判定属实质冲突或时间差（technologeeks.com 仍列 Android Internals 培训，jl-tl-03）。\",\n    \"同名歧义显著：英文 Wikipedia Jonathan_Levin 消歧页列出至少 5 位同名者（含斯坦福大学校长/经济学家），未收录安全研究员条目；外部权威评价缺失，其认可度主要体现在专业社区（jl-ext-008）。\",\n    \"作者自述的时序优先性（2012 MOXiI 记录、BlackHat 2014 被 0-day 公开）未取得独立核验，BlackHat 2014 议程页 403 无法抓取（jl-rev1-002）。\"\n  ],\n  \"transferable_practices\": [\n    \"以版本号而非版次持续迭代长篇技术文档，跟随平台演进（jl-works-001）。\",\n    \"对单一目标以多部分长篇连载深挖，保持深度优先（jl-works-005）。\",\n    \"研究中直接调用自研工具并据研究需求增补工具功能，形成工具与研究需求相互驱动的循环关系（jl-works-006）。\",\n    \"将每次逆向产出整理为公开文档与可独立销售的书籍（jl-works-001、jl-ext-004）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"自出版（TechnoloG）保留对 *OS Internals 的修订自由度与持续更新权，是个人特有条件（jl-works-001）。\",\n    \"长期 Apple 平台逆向积累与 jtool/jtool2 自研工具链，是个人前期投入的特定资产，难以直接迁移（jl-works-006）。\",\n    \"2012 年前后对 Mach API 与 Apple entitlement 模型的早期熟悉，是时间窗口特定的条件（jl-works-002、jl-rev1-002）。\",\n    \"同名歧义导致外部权威评价缺失，属身份识别层面的不可迁移约束（jl-ext-008）。\"\n  ],\n  \"open_questions\": [\n    \"2020 年后是否仍有公开 writeup；2022-03 至 2026-01 之间的研究产出无证据。\",\n    \"作者是否曾向 Apple 报告漏洞或获得致谢；PST2 与 CasaDePPL 均未提及 CVE 编号或厂商致谢。\",\n    \"jtool → jtool2 → jokerlib 的精确发布时间线；tools.php 返回 404（jl-works-006 gaps）。\",\n    \"BlackHat US/Asia、POC 演讲题目、年份与摘要；blackhat.com 403、POC 未抓取（jl-tl-06、jl-works-008 均为未核验线索）。\",\n    \"Android Internals: A Confectioner's Cookbook 的实际存在与出版细节；technolog.com 未实际抓取（jl-works-007 为 inferred）。\",\n    \"Luca 在 Tensec/BlueHat.il 的 PPL 演讲 PDF 正文与日期；iokit.racing/bluehatil.pdf 因证书错误无法抓取（jl-rev1-001）。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "b0cc5b70238eeb4be88b0f4aca1a7ca7f6b526333fcd509833e1bbfa9ad5875b",
+        "accessed_at": "2026-09-27T15:42:16.961013+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790523736961029000-jonathan-levin-synthesis-v2.json",
+    "label": "Jonathan Levin:synthesis:v2",
+    "elapsed_seconds": 465.5,
+    "prompt_sha256": "26dc5c366071bccc106a68ddebdd89e0c357bd7f33696835dfe43d211ed2d910",
+    "num_turns": 8,
+    "total_cost_usd": 0.9368240000000001,
+    "usage": {
+      "input_tokens": 49006,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 116288,
+      "output_tokens": 25346,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 49006,
+        "outputTokens": 25346,
+        "cacheReadInputTokens": 116288,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.9368240000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

@@ -1,0 +1,265 @@
+{
+  "person": "Yuki Chen",
+  "expertise": [
+    "全局范围声明：以下能力领域以 Blue Frost Security 组织级公开产出为证据支撑；Yuki Chen、guhe120 与 Blue Frost Security 的个人绑定未在一手来源证实（yc-r1-002、yc-r1-003 负面结果），故表述为 BFS 组织在该方向的产出，而非已证实的个人能力。",
+    "BFS 组织在 Windows 内核 UAF 提权方向的产出：CVE-2019-1215 ws2ifsl.sys 利用，目标 Windows 10 19H1 x64，演示绕过 kASLR、kCFG、SMEP（yc-tl-01）。",
+    "BFS 组织在 Android Binder 内核利用方向的产出：CVE-2020-0041 单一漏洞拆解为沙箱逃逸与本地提权两条独立利用链（yuki-works-01、yc-r1-001）。",
+    "BFS 组织在 Hyper-V 虚拟化漏洞方向的产出：CVE-2021-28476 vmswitch WPP 代码处理 set OID 请求中的攻击者控制指针解引用（读访问）与越界读（yuki-works-02、yc-tl-03）。",
+    "BFS 组织在跨平台内核与虚拟化攻击面的产出范围：Windows 内核提权、Android Binder、CPU 侧信道（Meltdown KVA shadow）、Hyper-V vmswitch（yuki-works-03、yc-dec-02、yc-tl-05）。"
+  ],
+  "stages": [
+    {
+      "period": "2019",
+      "stage": "Windows 内核 UAF 提权利用",
+      "capability_change": "BFS 组织公开 CVE-2019-1215（ws2ifsl.sys UAF）exploit，目标 Windows 10 19H1 x64，演示绕过 kASLR、kCFG、SMEP；体现内核 UAF 利用工程化与公开 PoC 产出习惯。机构账号署名，个人作者身份未证实。",
+      "evidence_ids": [
+        "yc-tl-01"
+      ],
+      "confidence": "low"
+    },
+    {
+      "period": "2020",
+      "stage": "Android Binder 内核利用链拆分",
+      "capability_change": "BFS 组织公开 CVE-2020-0041（Android Binder）仓库，分为 sandbox/ 与 lpe/ 两目录，分别对应沙箱逃逸与本地提权两条独立利用链；README 引用两篇 BFS blog（2020-03-31 sandbox escape、2020-04-08 escalating to root）。commit 历史含个人账号 yubiguel 与 ab（yc-r1-001），但不能据此绑定 Yuki Chen。机构账号署名，个人作者身份未证实。",
+      "evidence_ids": [
+        "yuki-works-01",
+        "yc-r1-001"
+      ],
+      "confidence": "low"
+    },
+    {
+      "period": "2021",
+      "stage": "Hyper-V vmswitch 虚拟化漏洞",
+      "capability_change": "BFS 组织公开 CVE-2021-28476（Microsoft Hyper-V vmswitch 多重漏洞），位于 WPP 代码处理 set OID 请求路径，含攻击者控制指针解引用（读访问）与越界读；PoC 以 poc.patch 形式提供，README 指向 bfs-sa-2021-001 公告。研究目标从通用内核 IPC 子系统迁移到虚拟化网络栈。机构账号署名，个人作者身份未证实。",
+      "evidence_ids": [
+        "yuki-works-02",
+        "yc-tl-03",
+        "yc-tl-04"
+      ],
+      "confidence": "low"
+    },
+    {
+      "period": "2019–2023（组织级范围）",
+      "stage": "BFS 多平台内核与虚拟化研究范围",
+      "capability_change": "BFS GitHub 组织（Blue Frost Security GmbH，Frankfurt）公开 6 个仓库，覆盖 Meltdown KVA shadow、CVE-2019-1215、CVE-2020-0041、CVE-2023-2008、Windows-Drive-Remapping-EoP、CVE-2021-28476，语言以 C 与 C++ 为主；组织层面呈现跨侧信道、Windows 提权、移动内核与虚拟化的研究范围。组织级证据，个人归属未证实。",
+      "evidence_ids": [
+        "yuki-works-03",
+        "yc-tl-05",
+        "yc-dec-02",
+        "yc-community-001",
+        "yc-r1-003"
+      ],
+      "confidence": "low"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "以可复现 PoC 与分阶段技术拆解交付漏洞研究产出",
+      "starting_conditions": "BFS 组织在 GitHub 以机构账号 bluefrostsecurity 公开漏洞 PoC 仓库，每个仓库含 README 与可运行 exploit 或 patch 代码。",
+      "repeated_practice": "跨 2019 至 2021 多个 CVE 仓库均以 PoC 代码加 README 形式交付：CVE-2019-1215 exploit、CVE-2020-0041 分 sandbox/ 与 lpe/ 两目录对应两条利用链、CVE-2021-28476 以 poc.patch 提供触发代码。",
+      "feedback": "GitHub fork 与 star 构成最小公开反馈（CVE-2020-0041 约 257 star、74 fork，CVE-2019-1215 约 149 star、45 fork，yc-r1-003），但建立在机构账号之上，不能等同于个人社区反馈；README 引用 BFS blog 与 advisory 链接，blog 正文未抓取（yc-tl-02）。",
+      "intermediate_capability": "将漏洞发现转化为最小可复现 PoC，并以分目录结构拆解利用链阶段的工程化交付习惯。",
+      "observed_outcomes": [
+        "CVE-2019-1215 仓库提供 Windows 10 19H1 x64 exploit，演示绕过 kASLR、kCFG、SMEP（yc-tl-01）。",
+        "CVE-2020-0041 仓库分 sandbox/ 与 lpe/ 两目录组织沙箱逃逸与本地提权两条利用链（yuki-works-01、yc-r1-001）。",
+        "CVE-2019-1215 仓库 README 引用 BFS blog 技术分析链接，blog 正文未抓取（yc-tl-02）。"
+      ],
+      "evidence_ids": [
+        "yuki-works-01",
+        "yuki-works-02",
+        "yc-tl-01",
+        "yc-tl-02",
+        "yc-r1-001",
+        "yc-r1-003"
+      ],
+      "validation_tests": [
+        "repeated"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "该交付模式可由 BFS 组织的标准化发布流程解释，而非个人能力；个人作者身份未证实，commit 历史中出现的个人账号 yubiguel、ab 无可抓取绑定信息（yc-r1-002）。"
+    },
+    {
+      "name": "跨平台内核与虚拟化攻击面横向迁移",
+      "starting_conditions": "BFS 组织公开仓库覆盖 Windows 内核 EoP、Android Binder、Meltdown KVA shadow、Hyper-V vmswitch 等多个攻击面。",
+      "repeated_practice": "跨 2019 至 2021，研究目标对象从 Windows 内核 UAF（ws2ifsl.sys）迁移到 Android Binder IPC 子系统，再到 Hyper-V vmswitch 虚拟化网络栈。",
+      "feedback": "CVE-2021-28476 README 指向 CVE-2021-28476 编号与 bfs-sa-2021-001 公告，MSRC 致谢与发现者署名未核实（yc-r1-004）；厂商侧反馈无可读正文。",
+      "intermediate_capability": "将内核利用方法论从单一子系统扩展到不同操作系统、内核与虚拟化子系统的横向迁移能力。",
+      "observed_outcomes": [
+        "CVE-2019-1215 Windows 内核 UAF 提权（yc-tl-01）。",
+        "CVE-2020-0041 Android Binder 沙箱逃逸与本地提权（yuki-works-01）。",
+        "CVE-2021-28476 Hyper-V vmswitch WPP 与 OID 处理路径的指针解引用与越界读（yuki-works-02、yc-tl-03）。",
+        "BFS 组织 6 仓库横跨侧信道、Windows EoP、移动内核与虚拟化（yuki-works-03、yc-dec-02、yc-tl-05）。"
+      ],
+      "evidence_ids": [
+        "yc-tl-01",
+        "yuki-works-01",
+        "yuki-works-02",
+        "yuki-works-03",
+        "yc-dec-02",
+        "yc-tl-05",
+        "yc-r1-004"
+      ],
+      "validation_tests": [
+        "repeated"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "跨平台迁移可由 BFS 组织内团队分工解释，不同成员负责不同平台，而非单一个体能力迁移；本轮补证未取得区分个人与团队分工的一手依据。"
+    }
+  ],
+  "tensions": [
+    "身份绑定未证实：person_json 将 Yuki Chen 与 social 账号 guhe120、writeup_evidence 指向 bluefrostsecurity 关联，但所有可抓取 BFS 来源均以机构账号署名，未出现个人姓名；定向补证（yc-r1-001、yc-r1-002、yc-r1-003）未取得一手绑定页面，Yuki Chen、guhe120 与 Blue Frost Security 的三方绑定停留在 inferred。",
+    "POC 会议证据矛盾：person_json 将 POC 列为 selected_conference_evidence，但 POC 2020 官方演讲者名单不含 Yuki Chen，最接近同名者 Liang Chen（iOS 安全方向）已排除（yc-community-002）；POC 参与主张未在可抓取议程坐实。",
+    "commit 个人账号与机构账号并存：CVE-2020-0041 commit 历史含个人账号 yubiguel 与 ab（yc-r1-001），但 yubiguel 主页无可抓取绑定信息（yc-r1-002），不能据以绑定身份；该事实与全部机构账号署名的简化叙述存在差异，但不解决归属问题。"
+  ],
+  "transferable_practices": [
+    "以最小可复现补丁或 exploit 代码加 README 交付漏洞 PoC，并以分目录结构拆解利用链阶段（CVE-2020-0041 sandbox/ 与 lpe/、CVE-2021-28476 poc.patch）。",
+    "README 引用配套技术分析链接，形成仓库与 writeup 双轨交付（CVE-2019-1215、CVE-2021-28476 README 均引用 BFS blog 或 advisory 链接）。",
+    "跨平台内核与虚拟化攻击面的研究目标横向选择方法论，从通用内核 IPC 子系统扩展到虚拟化网络栈。"
+  ],
+  "non_transferable_conditions": [
+    "BFS-SA-YYYY-NNN 公告编号体系依附 Blue Frost Security 机构（Blue Frost Security GmbH，Frankfurt），不随个人迁移。",
+    "Blue Frost Security GmbH 组织账号、labs.bluefrostsecurity.de 站点与 GitHub 组织 follower 及 star 基础设施属组织资源，个人迁移不携带。",
+    "与微软、Google 等厂商的披露渠道与致谢关系以机构署名建立，个人作者身份在可抓取来源中未证实。"
+  ],
+  "open_questions": [
+    "身份绑定：Yuki Chen、guhe120 与 Blue Frost Security 的三方绑定在可抓取一手来源中未证实（yc-r1-002、yc-r1-003 负面结果），所有 stages 与 mechanisms 实质描述 BFS 组织级产出，个人成长叙事存在归属越界风险。",
+    "姓名歧义：ch3rn0byl、Tencent Keen Lab、Dark Navy 等关联来自 WebSearch 模型生成摘要而非抓取页面（本轮实测 WebSearch 工具三次均返回模型自述而非真实搜索结果页），是否与 Yuki Chen 为同一人或同名歧义，未消解。",
+    "会议演讲事实：Black Hat US/EU 与 POC 议程一手页面未抓取，会议演讲未坐实；POC 2020 官方名单不含 Yuki Chen（yc-community-002）。",
+    "writeup 与 advisory 正文缺口：labs.bluefrostsecurity.de 全站不可达，CVE-2019-1215 blog 与 BFS-SA-2021-001 advisory 正文未读取，相关漏洞技术细节、确切披露日期与作者署名缺口。",
+    "厂商致谢缺口：MSRC、NVD、Android 致谢或详情页无可读正文（yc-r1-004），CVE-2020-0041 与 CVE-2021-28476 报告者身份在厂商来源层面未获证实。",
+    "个人账号绑定：commit 历史出现的个人账号 yubiguel 与 ab（yc-r1-001）与 Yuki Chen 的关系未消解，yubiguel 主页无可抓取绑定信息（yc-r1-002），存在同名或别名混淆风险。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yuki-chen-synthesis-v2-20260927-182629-058",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790505131607323000-yuki-chen-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "c6162c79-0f13-4f66-891e-b24b4563abfa",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_tsfieseat5h1y7abr0pmrmrd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yuki-chen-synthesis-v2-20260927-182629-058/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T10:32:11.671570+00:00"
+      },
+      {
+        "tool_use_id": "call_mm2k64semdvqmq7bz7ohawmv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yuki-chen-synthesis-v2-20260927-182629-058/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T10:32:11.671600+00:00"
+      },
+      {
+        "tool_use_id": "call_pfoph284pidcr9moip9eabd8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yuki-chen-synthesis-v2-20260927-182629-058/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "b68ff6247d133138c8206e08a9c5ea888d89511d361d26c7cafe0cd2b1018498",
+        "accessed_at": "2026-09-27T10:32:11.671608+00:00"
+      },
+      {
+        "tool_use_id": "call_1dvvm2ta27zcr364s4euvdk9",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yuki-chen-synthesis-v2-20260927-182629-058/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "03839842e57daa3e434a3371bbad1bc2608a024cdffc25a285c6023c647a6031",
+        "accessed_at": "2026-09-27T10:32:11.671622+00:00"
+      },
+      {
+        "tool_use_id": "call_7dztogk0icjlq4q466k9ybfy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yuki-chen-synthesis-v2-20260927-182629-058/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "57e62476c8f2730bd274aea79639f52d4edf76e263fb91722d77d3c01f33f063",
+        "accessed_at": "2026-09-27T10:32:11.671684+00:00"
+      },
+      {
+        "tool_use_id": "call_cgo1egeodtme9x52kp3yazwd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yuki-chen-synthesis-v2-20260927-182629-058/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "516804463450fcefb7a20eb72b384d4c6f569bd75f9dd5f0dd7a6914bf4c962c",
+        "accessed_at": "2026-09-27T10:32:11.671750+00:00"
+      },
+      {
+        "tool_use_id": "call_o93fompim9shxsnu7t20bxz7",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yuki-chen-synthesis-v2-20260927-182629-058/checkpoint.md",
+          "content": "# 检查点 — Yuki Chen 综合 v2\n\n## 已读取输入\n- task.md：综合分析师任务，6 维材料 + revision_context，重建能力成长过程；7 条约束（主机制门槛、status 分开、保留矛盾/竞争性解释、可迁移 vs 特有条件、evidence id 引用、专业书面语、仅输出 schema JSON）。\n- output.schema.json：required = person/expertise/stages/mechanisms/tensions/transferable_practices/non_transferable_conditions/open_questions；stages 与 mechanisms 均 additionalProperties=false；confidence 枚举 high/medium/low；validation_tests 枚举 repeated/generative/distinctive。\n- inputs/person_json.json：Yuki Chen，rank 41，primary_focus=Windows 内核与 Hyper-V，social=x.com/guhe120，writeup_evidence=github.com/bluefrostsecurity，会议 Black Hat US/EU / POC。\n- inputs/evidence_json.json：works(3)/conversations(3)/community(2)/external(4)/decisions(3)/timeline(6)/targeted(4)。\n- inputs/revision_context.json：revision_round=1，7 actions + 4 new_evidence(yc-r1-001~004) + 9 synthesis_instructions + 4 unresolved；invalid_evidence_ids=[]。\n\n## 核心（贯穿全局）\n- 身份绑定 Yuki Chen↔guhe120↔Blue Frost Security 在可抓取一手来源中未证实。所有可抓取 BFS 来源以机构账号 bluefrostsecurity 署名，无个人姓名。定向补证 yc-r1-001/002/003 均为负面结果。\n- 故 stages/mechanisms 实质描述 BFS 组织级产出与产出习惯；expertise 顶层加全局范围声明，能力条目改以\"BFS 组织在该方向产出\"表述（执行 required_revisions[5]）。\n\n## 逐条执行 revision_context.synthesis_instructions\n1. stages[2]（2021 Hyper-V）confidence medium→low；capability_change 末尾保留\"机构账号署名，个人作者身份未证实\"。✓\n2. mechanisms[1] validation_tests 移除 distinctive，仅留 repeated（迁移可由团队分工解释，无区分个人/团队的一手依据）。✓\n3. transferable_practices 删除\"机构公告编号体系双轨产出\"，改将 BFS-SA-YYYY-NNN 编号体系列入 non_transferable_conditions，注明依附 BFS 机构、不随个人迁移。✓\n4. tensions 不再以已核验语气列 ch3rn0byl/Keen Lab/Dark Navy 矛盾；降级为 open_questions 待消歧项，明确来源为 WebSearch 模型生成摘要（本轮实测三次返回模型自述）。✓\n5. expertise 顶层加全局范围声明。✓\n6. mechanisms[0] observed_outcomes[2] 改为\"CVE-2019-1215 仓库 README 引用 BFS blog 技术分析链接，blog 正文未抓取\"，不用\"以...形式发布\"已核实语气。✓\n7. mechanisms[1] feedback 改为\"README 指向 CVE-2021-28476 编号，MSRC 致谢与发现者署名未核实\"。✓\n8. 采纳 yc-r1-001：mechanism 1 与 stage 2 以克制措辞补充\"commit 历史含个人账号 yubiguel/ab\"，但不推断 yubiguel 即 Yuki Chen（yc-r1-002 负面结果）。✓\n9. 保留 unresolved，在 open_questions 显式声明身份绑定/会议/labs 正文/厂商致谢缺口。✓\n\n## 阶段（4 个，全 low）\n- Stage 1 (2019)：Windows 内核 UAF 提权（CVE-2019-1215 ws2ifsl.sys，绕过 kASLR/kCFG/SMEP）。ev=yc-tl-01。\n- Stage 2 (2020)：Android Binder 利用链拆分（CVE-2020-0041 sandbox/ 与 lpe/ 两目录）。ev=yuki-works-01、yc-r1-001。\n- Stage 3 (2021)：Hyper-V vmswitch（CVE-2021-28476 WPP set OID 指针解引用+OOB 读）。ev=yuki-works-02、yc-tl-03、yc-tl-04。\n- Stage 4 (2019–2023 组织级范围)：BFS 6 仓库跨侧信道/Windows EoP/移动内核/虚拟化。ev=yuki-works-03、yc-tl-05、yc-dec-02、yc-community-001、yc-r1-003。\n\n## 主机制（2 个，全 low，validation_tests 仅 repeated）\n- M1 以可复现 PoC 与分阶段技术拆解交付产出。ev=yuki-works-01/02、yc-tl-01/02、yc-r1-001/003。\n- M2 跨平台内核/虚拟化攻击面横向迁移。ev=yc-tl-01、yuki-works-01/02/03、yc-dec-02、yc-tl-05、yc-r1-004。\n\n## 证据状态核验（每个 stage/mechanism 至少 1 个 verified_in_run=true）\n- 已用 documented+verified：yc-tl-01、yuki-works-01/02/03、yc-r1-001/002/003、yc-tl-03/04/05、yc-dec-02、yc-community-001。\n- 已用 unknown 但带缺口限定：yc-tl-02（blog 正文未抓取）、yc-r1-004（厂商致谢无可读正文）。两者所在 stage/mechanism 均另有 verified=true 来源。\n- 未使用 inferred/未verified：yc-tl-06、yc-dec-03、yc-ext-001 等不直接引用，避免推断堆叠。\n\n## 未完成事项\n- output.json 待写入并逐字段核对 schema。\n- 身份绑定、Black Hat/POC 议程一手页面、labs.bluefrostsecurity.de blog/advisory 正文、厂商致谢四处缺口保持 unresolved，已在 open_questions 显式声明。\n"
+        },
+        "success": true,
+        "content_sha256": "d50391dc65b0371433dd225ec2877791236a3d4a069c9c302a32be5320c911a9",
+        "accessed_at": "2026-09-27T10:32:11.672892+00:00"
+      },
+      {
+        "tool_use_id": "call_0v88kso8569ot5h10yqku8dt",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yuki-chen-synthesis-v2-20260927-182629-058/output.json",
+          "content": "{\n  \"person\": \"Yuki Chen\",\n  \"expertise\": [\n    \"全局范围声明：以下能力领域以 Blue Frost Security 组织级公开产出为证据支撑；Yuki Chen、guhe120 与 Blue Frost Security 的个人绑定未在一手来源证实（yc-r1-002、yc-r1-003 负面结果），故表述为 BFS 组织在该方向的产出，而非已证实的个人能力。\",\n    \"BFS 组织在 Windows 内核 UAF 提权方向的产出：CVE-2019-1215 ws2ifsl.sys 利用，目标 Windows 10 19H1 x64，演示绕过 kASLR、kCFG、SMEP（yc-tl-01）。\",\n    \"BFS 组织在 Android Binder 内核利用方向的产出：CVE-2020-0041 单一漏洞拆解为沙箱逃逸与本地提权两条独立利用链（yuki-works-01、yc-r1-001）。\",\n    \"BFS 组织在 Hyper-V 虚拟化漏洞方向的产出：CVE-2021-28476 vmswitch WPP 代码处理 set OID 请求中的攻击者控制指针解引用（读访问）与越界读（yuki-works-02、yc-tl-03）。\",\n    \"BFS 组织在跨平台内核与虚拟化攻击面的产出范围：Windows 内核提权、Android Binder、CPU 侧信道（Meltdown KVA shadow）、Hyper-V vmswitch（yuki-works-03、yc-dec-02、yc-tl-05）。\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2019\",\n      \"stage\": \"Windows 内核 UAF 提权利用\",\n      \"capability_change\": \"BFS 组织公开 CVE-2019-1215（ws2ifsl.sys UAF）exploit，目标 Windows 10 19H1 x64，演示绕过 kASLR、kCFG、SMEP；体现内核 UAF 利用工程化与公开 PoC 产出习惯。机构账号署名，个人作者身份未证实。\",\n      \"evidence_ids\": [\"yc-tl-01\"],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2020\",\n      \"stage\": \"Android Binder 内核利用链拆分\",\n      \"capability_change\": \"BFS 组织公开 CVE-2020-0041（Android Binder）仓库，分为 sandbox/ 与 lpe/ 两目录，分别对应沙箱逃逸与本地提权两条独立利用链；README 引用两篇 BFS blog（2020-03-31 sandbox escape、2020-04-08 escalating to root）。commit 历史含个人账号 yubiguel 与 ab（yc-r1-001），但不能据此绑定 Yuki Chen。机构账号署名，个人作者身份未证实。\",\n      \"evidence_ids\": [\"yuki-works-01\", \"yc-r1-001\"],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2021\",\n      \"stage\": \"Hyper-V vmswitch 虚拟化漏洞\",\n      \"capability_change\": \"BFS 组织公开 CVE-2021-28476（Microsoft Hyper-V vmswitch 多重漏洞），位于 WPP 代码处理 set OID 请求路径，含攻击者控制指针解引用（读访问）与越界读；PoC 以 poc.patch 形式提供，README 指向 bfs-sa-2021-001 公告。研究目标从通用内核 IPC 子系统迁移到虚拟化网络栈。机构账号署名，个人作者身份未证实。\",\n      \"evidence_ids\": [\"yuki-works-02\", \"yc-tl-03\", \"yc-tl-04\"],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2019–2023（组织级范围）\",\n      \"stage\": \"BFS 多平台内核与虚拟化研究范围\",\n      \"capability_change\": \"BFS GitHub 组织（Blue Frost Security GmbH，Frankfurt）公开 6 个仓库，覆盖 Meltdown KVA shadow、CVE-2019-1215、CVE-2020-0041、CVE-2023-2008、Windows-Drive-Remapping-EoP、CVE-2021-28476，语言以 C 与 C++ 为主；组织层面呈现跨侧信道、Windows 提权、移动内核与虚拟化的研究范围。组织级证据，个人归属未证实。\",\n      \"evidence_ids\": [\"yuki-works-03\", \"yc-tl-05\", \"yc-dec-02\", \"yc-community-001\", \"yc-r1-003\"],\n      \"confidence\": \"low\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"以可复现 PoC 与分阶段技术拆解交付漏洞研究产出\",\n      \"starting_conditions\": \"BFS 组织在 GitHub 以机构账号 bluefrostsecurity 公开漏洞 PoC 仓库，每个仓库含 README 与可运行 exploit 或 patch 代码。\",\n      \"repeated_practice\": \"跨 2019 至 2021 多个 CVE 仓库均以 PoC 代码加 README 形式交付：CVE-2019-1215 exploit、CVE-2020-0041 分 sandbox/ 与 lpe/ 两目录对应两条利用链、CVE-2021-28476 以 poc.patch 提供触发代码。\",\n      \"feedback\": \"GitHub fork 与 star 构成最小公开反馈（CVE-2020-0041 约 257 star、74 fork，CVE-2019-1215 约 149 star、45 fork，yc-r1-003），但建立在机构账号之上，不能等同于个人社区反馈；README 引用 BFS blog 与 advisory 链接，blog 正文未抓取（yc-tl-02）。\",\n      \"intermediate_capability\": \"将漏洞发现转化为最小可复现 PoC，并以分目录结构拆解利用链阶段的工程化交付习惯。\",\n      \"observed_outcomes\": [\n        \"CVE-2019-1215 仓库提供 Windows 10 19H1 x64 exploit，演示绕过 kASLR、kCFG、SMEP（yc-tl-01）。\",\n        \"CVE-2020-0041 仓库分 sandbox/ 与 lpe/ 两目录组织沙箱逃逸与本地提权两条利用链（yuki-works-01、yc-r1-001）。\",\n        \"CVE-2019-1215 仓库 README 引用 BFS blog 技术分析链接，blog 正文未抓取（yc-tl-02）。\"\n      ],\n      \"evidence_ids\": [\"yuki-works-01\", \"yuki-works-02\", \"yc-tl-01\", \"yc-tl-02\", \"yc-r1-001\", \"yc-r1-003\"],\n      \"validation_tests\": [\"repeated\"],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"该交付模式可由 BFS 组织的标准化发布流程解释，而非个人能力；个人作者身份未证实，commit 历史中出现的个人账号 yubiguel、ab 无可抓取绑定信息（yc-r1-002）。\"\n    },\n    {\n      \"name\": \"跨平台内核与虚拟化攻击面横向迁移\",\n      \"starting_conditions\": \"BFS 组织公开仓库覆盖 Windows 内核 EoP、Android Binder、Meltdown KVA shadow、Hyper-V vmswitch 等多个攻击面。\",\n      \"repeated_practice\": \"跨 2019 至 2021，研究目标对象从 Windows 内核 UAF（ws2ifsl.sys）迁移到 Android Binder IPC 子系统，再到 Hyper-V vmswitch 虚拟化网络栈。\",\n      \"feedback\": \"CVE-2021-28476 README 指向 CVE-2021-28476 编号与 bfs-sa-2021-001 公告，MSRC 致谢与发现者署名未核实（yc-r1-004）；厂商侧反馈无可读正文。\",\n      \"intermediate_capability\": \"将内核利用方法论从单一子系统扩展到不同操作系统、内核与虚拟化子系统的横向迁移能力。\",\n      \"observed_outcomes\": [\n        \"CVE-2019-1215 Windows 内核 UAF 提权（yc-tl-01）。\",\n        \"CVE-2020-0041 Android Binder 沙箱逃逸与本地提权（yuki-works-01）。\",\n        \"CVE-2021-28476 Hyper-V vmswitch WPP 与 OID 处理路径的指针解引用与越界读（yuki-works-02、yc-tl-03）。\",\n        \"BFS 组织 6 仓库横跨侧信道、Windows EoP、移动内核与虚拟化（yuki-works-03、yc-dec-02、yc-tl-05）。\"\n      ],\n      \"evidence_ids\": [\"yc-tl-01\", \"yuki-works-01\", \"yuki-works-02\", \"yuki-works-03\", \"yc-dec-02\", \"yc-tl-05\", \"yc-r1-004\"],\n      \"validation_tests\": [\"repeated\"],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"跨平台迁移可由 BFS 组织内团队分工解释，不同成员负责不同平台，而非单一个体能力迁移；本轮补证未取得区分个人与团队分工的一手依据。\"\n    }\n  ],\n  \"tensions\": [\n    \"身份绑定未证实：person_json 将 Yuki Chen 与 social 账号 guhe120、writeup_evidence 指向 bluefrostsecurity 关联，但所有可抓取 BFS 来源均以机构账号署名，未出现个人姓名；定向补证（yc-r1-001、yc-r1-002、yc-r1-003）未取得一手绑定页面，Yuki Chen、guhe120 与 Blue Frost Security 的三方绑定停留在 inferred。\",\n    \"POC 会议证据矛盾：person_json 将 POC 列为 selected_conference_evidence，但 POC 2020 官方演讲者名单不含 Yuki Chen，最接近同名者 Liang Chen（iOS 安全方向）已排除（yc-community-002）；POC 参与主张未在可抓取议程坐实。\",\n    \"commit 个人账号与机构账号并存：CVE-2020-0041 commit 历史含个人账号 yubiguel 与 ab（yc-r1-001），但 yubiguel 主页无可抓取绑定信息（yc-r1-002），不能据以绑定身份；该事实与全部机构账号署名的简化叙述存在差异，但不解决归属问题。\"\n  ],\n  \"transferable_practices\": [\n    \"以最小可复现补丁或 exploit 代码加 README 交付漏洞 PoC，并以分目录结构拆解利用链阶段（CVE-2020-0041 sandbox/ 与 lpe/、CVE-2021-28476 poc.patch）。\",\n    \"README 引用配套技术分析链接，形成仓库与 writeup 双轨交付（CVE-2019-1215、CVE-2021-28476 README 均引用 BFS blog 或 advisory 链接）。\",\n    \"跨平台内核与虚拟化攻击面的研究目标横向选择方法论，从通用内核 IPC 子系统扩展到虚拟化网络栈。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"BFS-SA-YYYY-NNN 公告编号体系依附 Blue Frost Security 机构（Blue Frost Security GmbH，Frankfurt），不随个人迁移。\",\n    \"Blue Frost Security GmbH 组织账号、labs.bluefrostsecurity.de 站点与 GitHub 组织 follower 及 star 基础设施属组织资源，个人迁移不携带。\",\n    \"与微软、Google 等厂商的披露渠道与致谢关系以机构署名建立，个人作者身份在可抓取来源中未证实。\"\n  ],\n  \"open_questions\": [\n    \"身份绑定：Yuki Chen、guhe120 与 Blue Frost Security 的三方绑定在可抓取一手来源中未证实（yc-r1-002、yc-r1-003 负面结果），所有 stages 与 mechanisms 实质描述 BFS 组织级产出，个人成长叙事存在归属越界风险。\",\n    \"姓名歧义：ch3rn0byl、Tencent Keen Lab、Dark Navy 等关联来自 WebSearch 模型生成摘要而非抓取页面（本轮实测 WebSearch 工具三次均返回模型自述而非真实搜索结果页），是否与 Yuki Chen 为同一人或同名歧义，未消解。\",\n    \"会议演讲事实：Black Hat US/EU 与 POC 议程一手页面未抓取，会议演讲未坐实；POC 2020 官方名单不含 Yuki Chen（yc-community-002）。\",\n    \"writeup 与 advisory 正文缺口：labs.bluefrostsecurity.de 全站不可达，CVE-2019-1215 blog 与 BFS-SA-2021-001 advisory 正文未读取，相关漏洞技术细节、确切披露日期与作者署名缺口。\",\n    \"厂商致谢缺口：MSRC、NVD、Android 致谢或详情页无可读正文（yc-r1-004），CVE-2020-0041 与 CVE-2021-28476 报告者身份在厂商来源层面未获证实。\",\n    \"个人账号绑定：commit 历史出现的个人账号 yubiguel 与 ab（yc-r1-001）与 Yuki Chen 的关系未消解，yubiguel 主页无可抓取绑定信息（yc-r1-002），存在同名或别名混淆风险。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "5ec934a3ff2a39aa6fb5776919d1b2beaf41f42337ecdfd13e3c112a747cf667",
+        "accessed_at": "2026-09-27T10:32:11.672911+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790505131672977000-yuki-chen-synthesis-v2.json",
+    "label": "Yuki Chen:synthesis:v2",
+    "elapsed_seconds": 342.6,
+    "prompt_sha256": "df887516b32ef06bb08bf670463ac6cb4da41324009363e73d54bacac4a2dd24",
+    "num_turns": 9,
+    "total_cost_usd": 0.8775919999999999,
+    "usage": {
+      "input_tokens": 47426,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 71424,
+      "output_tokens": 24190,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 47426,
+        "outputTokens": 24190,
+        "cacheReadInputTokens": 71424,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.8775919999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

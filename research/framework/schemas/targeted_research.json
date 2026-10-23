@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["person", "revision_round", "actions", "new_evidence", "invalid_evidence_ids", "synthesis_instructions", "unresolved"],
+  "properties": {
+    "_run": {"type": "object"},
+    "person": {"type": "string"},
+    "revision_round": {"type": "integer", "minimum": 1},
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["review_issue", "category", "action", "result"],
+        "properties": {
+          "review_issue": {"type": "string"},
+          "category": {"enum": ["missing_evidence", "incorrect_source", "identity_or_timeline_error", "overclaim"]},
+          "action": {"type": "string"},
+          "result": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "new_evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "resolves_issue", "date", "claim", "status", "source"],
+        "properties": {
+          "id": {"type": "string"},
+          "verification": {
+            "type": "object",
+            "description": "由编排器依据实际工具事件填写；Agent 不得自行声明已核验。",
+            "properties": {
+              "verified_in_run": {"type": "boolean"},
+              "retrieval_method": {"enum": ["web_fetch", "unverified"]},
+              "tool_use_id": {"type": "string"},
+              "accessed_at": {"type": "string"},
+              "content_sha256": {"type": "string"}
+            },
+            "additionalProperties": false
+          },
+          "resolves_issue": {"type": "string"},
+          "date": {"type": "string"},
+          "claim": {"type": "string"},
+          "status": {"enum": ["documented", "reported", "inferred", "unknown"]},
+          "source": {
+            "type": "object",
+            "required": ["title", "url", "published", "source_type", "level"],
+            "properties": {
+              "title": {"type": "string"},
+              "url": {"type": "string"},
+              "published": {"type": "string"},
+              "source_type": {"type": "string"},
+              "level": {"enum": ["primary", "first_hand_other", "authoritative_secondary", "lead_only"]}
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "invalid_evidence_ids": {"type": "array", "items": {"type": "string"}},
+    "synthesis_instructions": {"type": "array", "items": {"type": "string"}},
+    "unresolved": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

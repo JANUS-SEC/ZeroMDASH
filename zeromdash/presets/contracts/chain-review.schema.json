@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "zeromdash://contracts/chain-review.schema.json",
+  "title": "Chain Review",
+  "description": "Per-iteration output of chain_critic_subtask.",
+  "type": "object",
+  "required": [
+    "verdict",
+    "reasoning",
+    "all_primitives_confirmed",
+    "bindings_valid",
+    "global_constraints_satisfiable",
+    "direct_security_impact",
+    "cvss4_vector",
+    "selected_skills",
+    "edge_verdicts",
+    "transition_verdicts",
+    "emergent_impact_verdict",
+    "closure_verdict",
+    "fact_verdicts"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["confirm", "reject", "revise"]
+    },
+    "reasoning": { "type": "string" },
+    "all_primitives_confirmed": { "type": "boolean" },
+    "bindings_valid": { "type": "boolean" },
+    "global_constraints_satisfiable": { "type": "boolean" },
+    "edge_verdicts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["edge_id", "verdict", "reasoning", "evidence"],
+        "additionalProperties": true,
+        "properties": {
+          "edge_id": { "type": "string", "minLength": 1 },
+          "verdict": { "type": "string", "enum": ["confirm", "reject", "revise"] },
+          "reasoning": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+        }
+      }
+    },
+    "transition_verdicts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["transition_id", "verdict", "reasoning", "evidence"],
+        "additionalProperties": true,
+        "properties": {
+          "transition_id": { "type": "string", "minLength": 1 },
+          "verdict": { "type": "string", "enum": ["confirm", "reject", "revise"] },
+          "reasoning": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "violated_invariant_ids": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "emergent_impact_verdict": {
+      "type": "object",
+      "required": ["confirmed", "reasoning", "evidence"],
+      "additionalProperties": true,
+      "properties": {
+        "confirmed": { "type": "boolean" },
+        "reasoning": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "violated_invariant_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "closure_verdict": {
+      "type": "string",
+      "enum": ["closed", "open"]
+    },
+    "fact_verdicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fact_id", "classification", "blocking", "resolved", "reasoning", "evidence"],
+        "additionalProperties": true,
+        "properties": {
+          "fact_id": { "type": "string", "minLength": 1 },
+          "classification": {
+            "type": "string",
+            "enum": ["blocking_unmet_fact", "validation_gap", "deployment_constraint", "impact_limit"]
+          },
+          "blocking": { "type": "boolean" },
+          "resolved": { "type": "boolean" },
+          "reasoning": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "required_external_primitives": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "violated_security_property": { "type": "string" },
+    "direct_security_impact": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "cvss4_vector": { "type": "string" },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "scope_verdict": {
+      "type": "string",
+      "enum": ["introduced", "enabled", "regressed", "pre_existing", "unrelated", "unknown", "full_repository", ""]
+    },
+    "gate_decision": {
+      "type": "string",
+      "enum": ["block", "warn", "ignore", ""]
+    },
+    "selected_skills": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "feedback": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

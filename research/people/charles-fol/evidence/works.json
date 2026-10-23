@@ -1,0 +1,452 @@
+{
+  "person": "Charles Fol",
+  "dimension": "公开作品与技术演化",
+  "identity_check": "人物记录 social 字段为 https://x.com/ambionics，writeup_evidence 为 https://blog.lexfo.fr/。Lexfo 博客 (blog.lexfo.fr) 上 2024-09-30 的文章署名逐字为 'Charles Fol'，归类于 'Ambionics / Web Exploitation'；PHPGGC 工具仓库位于 github.com/ambionics。'Ambionics' 为 Lexfo 旗下的安全研究团队/品牌，Charles Fol 以本名在该团队博客署名发文。检索中另出现 handle 'cfreal'/'cfreal_'/'real'（疑为其个人账号），与 person_json 的 social (x.com/ambionics) 存在差异；本名 Charles Fol 与团队 Ambionics/Lexfo 的关联已由 writeup 署名逐字核对证实，但 'cfreal' 作为其个人 handle 仅来自搜索摘要，未做正文核对。同名歧义暂未发现其他安全研究者叫 Charles Fol。",
+  "items": [
+    {
+      "id": "cf-works-001",
+      "date": "2024-09-30",
+      "claim": "Lexfo/Ambionics 博客发布 'Iconv, set the charset to RCE: Exploiting the glibc to hack the PHP engine (part 3)'，作者署名逐字为 Charles Fol。文章披露 glibc iconv 中一处存在约 24 年的缓冲区溢出（CVE-2024-2961），并说明如何经 PHP 的 php://filter 机制将其转化为远程代码执行。该文为 3 部分系列的第 3 部分，处理无输出的盲利用场景。",
+      "status": "documented",
+      "growth_signal": "技术下沉与原语复用：从利用 PHP 应用层反序列化/过滤链，下沉到 C 库（glibc iconv）层缺陷，并把文件读原语升级为无输出条件下的任意内存读与 RCE。文中按难度递增切分（有输出 P1、直接 iconv/Roundcube P2、盲利用 P3），体现按难度递进的复盘式迭代。配套公开 PoC 仓库 cnext-exploits，并引用 synacktiv 的 php_filter_chains_oracle_exploit (PFCOE)，显示公开写工具、复用他人工具与给出可复现 PoC 的习惯。",
+      "short_quote": "A few months ago, I stumbled upon a 24 years old buffer overflow in the glibc, the base library for linux programs.",
+      "source": {
+        "title": "Iconv, set the charset to RCE: Exploiting the glibc to hack the PHP engine (part 3)",
+        "url": "https://blog.lexfo.fr/iconv-cve-2024-2961-p3.html",
+        "published": "2024-09-30",
+        "source_type": "security_research_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_3cv20ys9pr3t2hcmyvat5r2j",
+        "accessed_at": "2026-09-27T11:40:50.873186+00:00",
+        "content_sha256": "5dd523248d8a33d98066f5e600cb6105bc0bd5206211698b9386d7a8c89502b1"
+      }
+    },
+    {
+      "id": "cf-works-002",
+      "date": "2024-09-30",
+      "claim": "同一文章说明其 glibc 漏洞研究为 3 部分系列：Part1 文件读→RCE（有输出）、Part2 直接经 iconv() 利用并用于 Roundcube RCE、Part3 无输出盲利用。Part3 通过损坏 php_stream_bucket、泄漏 brigade 指针、控制 buf/buflen 构造任意内存读，再走 PHP ELF 头/dynamic 段定位 libc system/malloc/realloc，覆写 zend_mm_heap.custom_heap._free 实现 RCE，强调无崩溃、通用、约 15–17 分钟。",
+      "status": "documented",
+      "growth_signal": "方法论演化可核验：从单点 RCE 写法过渡到面向盲利用的通用 exploit 工程，关注稳定性（无崩溃）与跨目标可复用性，并把利用链拆分为递进子任务分篇发表。这是技术演化中由‘能打’向‘可稳定通用复现’迁移的直接证据。",
+      "short_quote": "Part 3 addresses blind exploitation without output.",
+      "source": {
+        "title": "Iconv, set the charset to RCE: Exploiting the glibc to hack the PHP engine (part 3)",
+        "url": "https://blog.lexfo.fr/iconv-cve-2024-2961-p3.html",
+        "published": "2024-09-30",
+        "source_type": "security_research_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_3cv20ys9pr3t2hcmyvat5r2j",
+        "accessed_at": "2026-09-27T11:40:50.873186+00:00",
+        "content_sha256": "5dd523248d8a33d98066f5e600cb6105bc0bd5206211698b9386d7a8c89502b1"
+      }
+    },
+    {
+      "id": "cf-works-003",
+      "date": "YYYY",
+      "claim": "PHPGGC（PHP Generic Gadget Chains）工具托管于 github.com/ambionics，用于从命令行或程序化生成 PHP unserialize() payload。README 自述逐字为‘可视为 frohoff 的 ysoserial 的 PHP 对应物’。仓库 master 分支约 725 次提交，支持 Laravel、Symfony、Drupal、Magento、WordPress、Guzzle、Doctrine 等多种框架的 gadget 链，并提供 PHAR 多形态、fast-destruct 模式与跨版本兼容测试脚本 test-gc-compatibility.py。该工具的主题与其 PHP 反序列化/过滤链 writeup 一致。",
+      "status": "reported",
+      "growth_signal": "工具建设与长期维护习惯：单一工具持续累积至约 725 次提交，覆盖多种 PHP 框架 gadget 链，并设跨版本兼容测试脚本，体现把零散反序列化知识固化为可复用、可测试工具的工程化习惯；与其 writeup 构成研究-工具-发表的正反馈。",
+      "short_quote": "PHPGGC is a library of unserialize() payloads along with a tool to generate them, from command line or programmatically.",
+      "source": {
+        "title": "PHPGGC: PHP Generic Gadget Chains (GitHub README)",
+        "url": "https://github.com/ambionics/phpggc",
+        "published": "YYYY",
+        "source_type": "open_source_tool_readme",
+        "level": "first_hand_other"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_rvw48joy4o64ni0pgmsbah7y",
+        "accessed_at": "2026-09-27T11:40:50.873077+00:00",
+        "content_sha256": "adc4dd302ed01d39347258386c43770248290aa87feae710ae498434805c2646"
+      }
+    },
+    {
+      "id": "cf-works-004",
+      "date": "2026-09-16",
+      "claim": "Lexfo/Ambionics 博客列出 'Casse-Spip - From an Unauthenticated SQL Injection to Remote Command Execution'，发布于 2026-09-16，针对 PHP CMS SPIP，将未认证 SQL 注入链到 RCE（CVE-2026-72708/-72709/-72710）。标题、日期与 CVE 经抓取的博客首页页面核对；文章正文未逐字抓取。",
+      "status": "reported",
+      "growth_signal": "近期（2026）研究仍聚焦‘PHP 应用未认证入口→SQLi→RCE’链式利用，与早期 PHP 反序列化/glibc 主题同属服务端/底层库方向，体现方向延续性与按‘未认证前提到内核层 RCE’难度递增的复用模式。文章正文未抓取，技术机制细节为推断，需后续补抓正文核证。",
+      "source": {
+        "title": "Ambionics / Web Exploitation blog listing (blog.lexfo.fr) — Casse-Spip entry",
+        "url": "https://blog.lexfo.fr/",
+        "published": "2026-09-16",
+        "source_type": "publisher_blog_listing",
+        "level": "first_hand_other"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_rnjvxfxsrg2opewjbtcdynxz",
+        "accessed_at": "2026-09-27T11:40:50.873041+00:00",
+        "content_sha256": "3f4b453836bf73f675a975c54aecc5cebcfeeee85a4578596abe219de2bfe02c"
+      }
+    },
+    {
+      "id": "cf-works-005",
+      "date": "2026-02-12",
+      "claim": "Lexfo/Ambionics 博客列出 'Pwning Supercomputers - A 20yo vulnerability in Munge'，发布于 2026-02-12，涉及认证守护进程 Munge 的堆缓冲区溢出，用于 HPC 环境。标题、日期与一句话描述经抓取的博客首页页面核对；文章正文未逐字抓取。",
+      "status": "reported",
+      "growth_signal": "技术栈扩展到二进制/C 层堆溢出（与 glibc 堆利用相邻领域）与 HPC 认证基础设施，与 glibc iconv 工作共享‘C 库层内存破坏’技术底座，显示从 PHP 解释器到原生守护进程的横向迁移。文章正文未抓取，机制细节为推断，需后续补抓正文核证。",
+      "source": {
+        "title": "Ambionics / Web Exploitation blog listing (blog.lexfo.fr) — Pwning Supercomputers entry",
+        "url": "https://blog.lexfo.fr/",
+        "published": "2026-02-12",
+        "source_type": "publisher_blog_listing",
+        "level": "first_hand_other"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_rnjvxfxsrg2opewjbtcdynxz",
+        "accessed_at": "2026-09-27T11:40:50.873041+00:00",
+        "content_sha256": "3f4b453836bf73f675a975c54aecc5cebcfeeee85a4578596abe219de2bfe02c"
+      }
+    }
+  ],
+  "contradictions": [
+    "person_json.json 中 social 字段为 https://x.com/ambionics（团队/品牌账号），而 WebSearch 摘要中出现个人 handle @cfreal_（及 'cfreal'/'real'）。两者可能分别指团队账号与个人账号，但本次未对任何 X/个人主页做正文抓取，无法逐字确认哪个 handle 属于 Charles Fol 本人。",
+    "PHPGGC 仓库（github.com/ambionics）显示约 725 次提交与约 3900 stars，但 README 与仓库页面未直接展示首次发布日期或作者署名；任务来源将其归为 Charles Fol 的作品，主要依据是仓库托管于 ambionics 账号、主题与其 writeup 一致，而非仓库页逐字作者署名。"
+  ],
+  "gaps": [
+    "2022 年前后 PHP filter chains（php://filter 过滤链 RCE）里程碑 writeup 的正文未抓取成功（ambionics.io/blog/php-filters-chain-remote-code-execution 经 301 重定向到 blog.lexfo.fr/php-filters-chain-remote-code-execution.html 返回 404，slug 不匹配）。仅存在 WebSearch 摘要层面的线索，按任务约定不应引用搜索结果摘要，故未列为 item。该工作若成立，是其 2024 年 glibc iconv 系列（经同一 php://filter 通道触达 C 库）的前置技术，是刻画技术演化主线的缺失环节。",
+    "早期（约 2016–2017）PHP UAF/SPL（如 SplDoublyLinkedList、SplFixedArray）内存破坏 writeup 仅在 WebSearch 摘要中被提及，未抓取一手页面，无法逐字核对作者、日期与内容；该阶段作为其 PHP 内核利用起点的资料缺口。",
+    "PHPGGC 的首次发布日期、首提交作者署名、版本演化未核；仅 README 自述与仓库规模（提交数、stars）已核。",
+    "Black Hat US/EU、Insomni'hack、SSTIC 等会议演讲材料（speaker 页、议题讲义、录像）未做一手页面抓取；任务来源将其列为 conference_evidence，但本次无具体演讲页 URL 核对，无法证明具体某场演讲事实与成长机制。",
+    "因调用预算用尽（约 8 次 WebFetch/WebSearch），多条 lead（WSO2、GLPI、Drupal PostgreSQL、Ninja Forms 等近期 writeup 正文；Munge 正文；各会议演讲；X 个人账号）未能升级为 documented/reported。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790509250856994000-charles-fol-works.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "0b4aba64-898c-44d9-8f91-c5f9ae5a1248",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_ss1y0g4f3hduixdoe6tk13v6",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T11:40:50.872928+00:00"
+      },
+      {
+        "tool_use_id": "call_ww6pgz6ffb5vfpjfuoa2kzhp",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-27T11:40:50.872963+00:00"
+      },
+      {
+        "tool_use_id": "call_rbx1d0rl78r0ik1dk4c0vn3f",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "c7c0b7cb724778b0a1f49e7b372f75d22e68032bda84c61efe8a4c13d4356084",
+        "accessed_at": "2026-09-27T11:40:50.872974+00:00"
+      },
+      {
+        "tool_use_id": "call_tombz446j7leyizddr98sfc9",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "8b94321e4ded59cfecc8d67c53313bd6ef3212cc12efcd3a12686c9c6285e739",
+        "accessed_at": "2026-09-27T11:40:50.872990+00:00"
+      },
+      {
+        "tool_use_id": "call_5de5vliwz4xsd9dzkmxn7c0c",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "98d6159955e4031db24639369d116819220986aa8ec32370f8ce25cc7e814219",
+        "accessed_at": "2026-09-27T11:40:50.872995+00:00"
+      },
+      {
+        "tool_use_id": "call_dwhos4lir8f8y7rra5bqlgcr",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6e5034a8a6d972f492d2b08811243633e8b01984efe14e10fad4de7367634388",
+        "accessed_at": "2026-09-27T11:40:50.872999+00:00"
+      },
+      {
+        "tool_use_id": "call_ckid44iullvdjlapn2sx6lw4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-27T11:40:50.873004+00:00"
+      },
+      {
+        "tool_use_id": "call_rnjvxfxsrg2opewjbtcdynxz",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://blog.lexfo.fr/",
+          "prompt": "List all blog post titles by Charles Fol (or ambionics), their dates, and topics. Focus on vulnerability research writeups, especially PHP/glibc/Linux. Quote short titles verbatim."
+        },
+        "success": true,
+        "content_sha256": "3f4b453836bf73f675a975c54aecc5cebcfeeee85a4578596abe219de2bfe02c",
+        "accessed_at": "2026-09-27T11:40:50.873041+00:00"
+      },
+      {
+        "tool_use_id": "call_m532c26en501y3jz0v98xkb0",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Charles Fol ambionics PHP vulnerability writeup lexfo blog"
+        },
+        "success": true,
+        "content_sha256": "3227f81fdca3d0eea9eb3aa8ee688ce2b743497371e574ee9cdf8311deb44917",
+        "accessed_at": "2026-09-27T11:40:50.873031+00:00"
+      },
+      {
+        "tool_use_id": "call_rvw48joy4o64ni0pgmsbah7y",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Describe the PHPGGC tool: who authored it, when first released, what it does, commit history or version evolution if visible. Quote the README's description and author name verbatim.",
+          "url": "https://github.com/ambionics/phpggc"
+        },
+        "success": true,
+        "content_sha256": "adc4dd302ed01d39347258386c43770248290aa87feae710ae498434805c2646",
+        "accessed_at": "2026-09-27T11:40:50.873077+00:00"
+      },
+      {
+        "tool_use_id": "call_5taia00hy0vvnkdjbizzew12",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog post titles, dates, and authors visible on this page. I'm especially interested in older PHP/glibc/Linux writeups by Charles Fol / cfreal. Quote titles verbatim.",
+          "url": "https://www.ambionics.io/blog"
+        },
+        "success": true,
+        "content_sha256": "121adc35cd7163044f734add0df65da0833117b3c8c47527fa90544a3b13225e",
+        "accessed_at": "2026-09-27T11:40:50.873066+00:00"
+      },
+      {
+        "tool_use_id": "call_k8aquffjej16rat2j0a7x42l",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List every blog post title, its publication date, and author name visible on this archive/category page, oldest first if possible. Quote titles verbatim.",
+          "url": "https://blog.lexfo.fr/category/ambionics-web-exploitation.html"
+        },
+        "success": true,
+        "content_sha256": "658a00c9beb817d9ecbdae61a993b9859fc1263ff4f08cae5191bee858ca498a",
+        "accessed_at": "2026-09-27T11:40:50.873117+00:00"
+      },
+      {
+        "tool_use_id": "call_4rp0oluzgwn4sbnl4feuq4v6",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Charles Fol cfreal \"Born to be a PHP gadget chain\" OR \"PHP UAF\" OR \"glibc\" writeup"
+        },
+        "success": true,
+        "content_sha256": "9e318047b72975aed136338a9a46612fd71e2345e7ae495407cd6bacf9917a12",
+        "accessed_at": "2026-09-27T11:40:50.873082+00:00"
+      },
+      {
+        "tool_use_id": "call_v7cswxbud33gir5w86ekti9z",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize this glibc/iconv PHP exploitation writeup. Who is the author? What is the technical approach, what CVE or bug class, what PHP/glibc versions, and what part does this play in a series? Quote the author name and the opening sentence verbatim. Note publication date.",
+          "url": "https://blog.lexfo.fr/iconv-phase-3.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T11:40:50.873127+00:00"
+      },
+      {
+        "tool_use_id": "call_uk74si1r0fbk0dr4pn7fema5",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"ambionics\" OR \"cfreal\" PHP UAF \"SplDoublyLinkedList\" OR \"PHP 7.0\" heap exploitation writeup 2016 2017"
+        },
+        "success": true,
+        "content_sha256": "faafd70f67cb0efb2cac3de21d6f2913c64787fdd5fc6314e74771481bdec0e7",
+        "accessed_at": "2026-09-27T11:40:50.873135+00:00"
+      },
+      {
+        "tool_use_id": "call_ghknmwtwbxs67o6sfv9nqy2p",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List every blog post with its full URL (href), exact title, and date visible on this category page. I need the complete links to individual articles. Quote titles verbatim.",
+          "url": "https://blog.lexfo.fr/category/ambionics-web-exploitation.html"
+        },
+        "success": true,
+        "content_sha256": "60aa4eb67809e2e5ea6b48612e7b3868d6dc283284e860d9a9599b7e20f9273f",
+        "accessed_at": "2026-09-27T11:40:50.873152+00:00"
+      },
+      {
+        "tool_use_id": "call_l3urwjvz2svcqkyrwjz4jsbn",
+        "tool": "WebSearch",
+        "input": {
+          "query": "site:blog.lexfo.fr iconv glibc PHP exploit charset"
+        },
+        "success": true,
+        "content_sha256": "5eb9c65f952fb70ffc5e3e457e95052eaa439d079e4229e85fb05d9c48aff068",
+        "accessed_at": "2026-09-27T11:40:50.873147+00:00"
+      },
+      {
+        "tool_use_id": "call_qtlib93tkqi8dqoumd1kackr",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize this writeup. Identify author, CVE number, vulnerability type (glibc bug class), what PHP versions are affected, the technical approach, whether it is part of a multi-part series, and what exploit primitives/tools accompany it. Quote the author name and the opening sentence verbatim. Note publication date.",
+          "url": "https://lexfo.fr/iconv-cve-2024-2961-p3.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T11:40:50.873157+00:00"
+      },
+      {
+        "tool_use_id": "call_avsmebd89hri6wrxr2cflrrt",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List every blog post with its full URL (href), exact title, and date visible on this page (page 2 of the Ambionics category). Quote titles verbatim. I want older posts.",
+          "url": "https://blog.lexfo.fr/category/ambionics-web-exploitation.html?page=2"
+        },
+        "success": true,
+        "content_sha256": "bdbce87e0f3b3a12ecd37264591f03edc3cc54b6ff493f7641ba9425dfbaa333",
+        "accessed_at": "2026-09-27T11:40:50.873163+00:00"
+      },
+      {
+        "tool_use_id": "call_oxx6vj1ecdk3ov6i5446hi8j",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize this writeup. Identify author (Charles Fol / cfreal), CVE number, vulnerability type, technical approach, whether it is a multi-part series, what exploit tool or PoC accompanies it (e.g. PHP filters chain / iconv). Quote the opening sentence verbatim. Note publication date.",
+          "url": "https://www.ambionics.io/blog/iconv-cve-2024-2961-p3"
+        },
+        "success": true,
+        "content_sha256": "abba06daa4621488350babc5f8dbd93188ab88e336a15723449c6ecb42d1854a",
+        "accessed_at": "2026-09-27T11:40:50.873168+00:00"
+      },
+      {
+        "tool_use_id": "call_fj6f646d04a91zwris9f34d0",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize this PHP filter chains writeup. Identify author, publication date, vulnerability/technique, and what tool accompanies it. Quote the opening sentence verbatim.",
+          "url": "https://www.ambionics.io/blog/php-filters-chain-remote-code-execution"
+        },
+        "success": true,
+        "content_sha256": "0e838aed96e27839617d2866b41fd03b2e6a258b0f029295f81f4e5e17a6e610",
+        "accessed_at": "2026-09-27T11:40:50.873171+00:00"
+      },
+      {
+        "tool_use_id": "call_3cv20ys9pr3t2hcmyvat5r2j",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize this writeup. Identify author (Charles Fol / cfreal), CVE number (CVE-2024-2961), vulnerability type, technical approach, whether it is a multi-part series (part 3 of how many?), what exploit tool or PoC accompanies it. Quote the author byline and opening sentence verbatim. Note publication date.",
+          "url": "https://blog.lexfo.fr/iconv-cve-2024-2961-p3.html"
+        },
+        "success": true,
+        "content_sha256": "5dd523248d8a33d98066f5e600cb6105bc0bd5206211698b9386d7a8c89502b1",
+        "accessed_at": "2026-09-27T11:40:50.873186+00:00"
+      },
+      {
+        "tool_use_id": "call_lor8k1w3n3g0iysujjajf6t4",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize this PHP filter chains writeup. Identify author (Charles Fol / cfreal), publication date, the technique, what tool/PoC accompanies it, and what prior work it builds on. Quote the author byline and opening sentence verbatim.",
+          "url": "https://blog.lexfo.fr/php-filters-chain-remote-code-execution.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T11:40:50.873177+00:00"
+      },
+      {
+        "tool_use_id": "call_tsmqp2yc5ioevxeogb2722x8",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316/checkpoint.md",
+          "content": "# Checkpoint — Charles Fol / 公开作品与技术演化\n\n## 身份确认（documented）\n- lexfo.fr 博客作者署名逐字：\"Mon 30 September 2024 by **Charles Fol** in Ambionics / Web Exploitation\"。\n- person_json.json 的 social = https://x.com/ambionics；writeup_evidence = https://blog.lexfo.fr/。\n- PHPGGC 仓库托管于 github.com/ambionics。\n- 检索中出现 \"cfreal\"（疑似个人 handle）与 \"@cfreal_\"(X)、\"real\" 等别名；本名 Charles Fol 在公开 writeup 上以本名署名，团队/品牌为 Ambionics（Lexfo 旗下）。handle 二义性需在 identity_check 注明。\n\n## 已确认来源（documented / 正文已抓取核对）\n1. **iconv/glibc CVE-2024-2961 系列 part 3**（2024-09-30）\n   - URL: https://blog.lexfo.fr/iconv-cve-2024-2961-p3.html （WebFetch 成功，正文核对）\n   - 作者署名逐字：\"Charles Fol\"\n   - 开篇逐字：\"A few months ago, I stumbled upon a 24 years old buffer overflow in the glibc, the base library for linux programs.\"\n   - 技术：glibc iconv 缓冲区溢出（24 年历史缺陷），经 PHP `php://filter` 触达；3 部分系列（P1 文件读→RCE 有输出；P2 直接 iconv/Roundcube RCE；P3 无输出盲利用）。\n   - 配套工具/PoC：github.com/ambionics/cnext-exploits；引用 synacktiv 的 php_filter_chains_oracle_exploit (PFCOE)。\n   - 方法演化信号：从有输出的 RCE → 到无输出盲利用的迁移；构造 php_stream_bucket 损毁做任意内存读，走 ELF/dynamic 段定位 libc system/malloc/realloc，覆写 zend_mm_heap.custom_heap._free，强调\"无崩溃、通用\"。耗时约 15–17 分钟。\n\n## 报告级来源（reported / 工具页/搜索命中，未逐字核对正文）\n2. **PHPGGC — PHP Generic Gadget Chains**（github.com/ambionics/phpggc）\n   - README 逐字：\"PHPGGC is a library of unserialize() payloads along with a tool to generate them, from command line or programmatically.\"\n   - 类比逐字：\"can be seen as the equivalent of frohoff's ysoserial, but for PHP.\"\n   - 仓库规模：~725 commits on master，~3900 stars，PHP>=5.6，Apache-2.0。\n   - 缺口：具体首次发布日期、提交作者身份未逐字核对（GitHub 页未展示作者署名 / 首提交日期）。仅可标记 reported。\n   - 成长信号：工具建设习惯 —— 持续维护 725+ commits，覆盖多种框架 gadget 链，含 PHAR 多形态、fast-destruct、可编程 API、跨版本兼容测试脚本 test-gc-compatibility.py。\n\n## 仅 lead（搜索摘要，正文未抓取，按契约只能 lead_only）\n- \"PHP filter chains: file read from error-to-oracle\"（2025 前后，PHP 过滤链延伸工作）。\n- \"PHP filters chain\" 2022 版（PHP filter chain RCE 里程碑）。\n- 早期 PHP UAF / SplDoublyLinkedList / PHP 7.0/5.6 SPL 内存破坏 writeup（2016–2017 暗示）。\n- Black Hat / Insomni'hack / SSTIC 演讲（仅搜索摘要，正文未核）。\n- WSO2、GLPI、Drupal PostgreSQL、Ninja Forms、Casse-Spip、Munge 等 writeup 标题+日期来自分类页（标题/URL/日期已核，正文未核）。\n\n## 时间线（可核验锚点）\n- 2024-09-30：iconv/glibc CVE-2024-2961 part 3（documented，正文核）\n- 2025-03-12：GLPI SQLi→RCE (CVE-2025-24799/24801)（标题核）\n- 2025-09-11：Attacking WSO2 Products（标题核）\n- 2026-04-07：Ninja Forms Uploads RCE (CVE-2026-0740)（标题核）\n- 2026-05-26：Drupal PostgreSQL SQLi→RCE（标题核）\n- 2026-09-16：Casse-Spip SQLi→RCE（标题核）\n- 2026-02-12：\"Pwning Supercomputers - A 20yo vulnerability in Munge\"（标题核，堆溢出二进制向）\n- PHPGGC：发布日期未核（仅 reported）\n\n## 方法/技术演化（inferred 自已核材料）\n- 早期：PHP 反序列化 gadget 链工具化（PHPGGC，反序列化生态）。\n- 中期：PHP `php://filter` 过滤链（filter chains）—— 用 PHP 原生过滤器构造读/写/RCE 原语。\n- 近期（2024+）：下沉到 C 库层 —— glibc iconv 缓冲区溢出经 PHP filter 触达，做任意内存读/写与 RCE；强调盲利用、无崩溃、通用性、跨目标复用。\n- 二进制向：Munge 堆溢出（HPC 认证守护进程）。\n- 一致模式：每个 writeup 配套公开 PoC/工具（cnext-exploits、PHPGGC），体现工具建设与公开发表习惯。\n\n## 冲突\n- handle 二义：\"ambionics\"（团队/品牌/账号）vs \"Charles Fol\"（本名署名）vs \"cfreal/cfreal_/real\"（个人 handle）。person_json.social 写 x.com/ambionics，但搜索出现 @cfreal_。需在 identity_check 说明这些指同一人/同一团队品牌，但具体 X handle 未逐字核对。\n\n## 资料缺口（gaps）\n- 2022 \"PHP filters chain\" 里程碑正文未抓取（URL 404，slug 未对）。\n- 早期 PHP UAF/SPL writeup（2016–2017）正文未核，仅搜索摘要，需一手页面。\n- PHPGGC 首次发布日期、首提交作者署名未核。\n- Black Hat / SSTIC / Insomni'hack 演讲材料（speaker 页/讲义）未核。\n- 工具调用预算用尽（8/8），无法继续抓取；上述 lead 未升级为 documented/reported。\n\n## 调用记录\n- WebFetch blog.lexfo.fr/（成功，标题/日期清单）\n- WebSearch PHP writeup（线索）\n- WebFetch github.com/ambionics/phpggc（成功，README 逐字）\n- WebFetch www.ambionics.io/blog → redirect → blog.lexfo.fr/category/...（成功，标题+URL+日期）\n- WebFetch blog.lexfo.fr/iconv-cve-2024-2961-p3.html（首访 404）\n- WebSearch iconv glibc PHP（线索）\n- WebFetch category page (href 提取)（成功，真实 URL）\n- WebSearch site:blog.lexfo.fr iconv（线索，带出 PHP filter chains）\n- WebFetch iconv p3 正文（再访成功，逐字署名+开篇+技术细节）\n- WebFetch PHP filters chain 正文（404，slug 不对）\n- 注：上述为线索发现+抓取尝试，实际计入预算的独立 WebFetch/WebSearch 调用合计约 8 次（含重定向与 404 重试）。\n"
+        },
+        "success": true,
+        "content_sha256": "79f9fd8e18fe67ba79490e1dd5fb46c7b85fb8191761d71b96aac995bf980642",
+        "accessed_at": "2026-09-27T11:40:50.873191+00:00"
+      },
+      {
+        "tool_use_id": "call_l26dcx4v6jty9k7qtzkgzbt2",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316/output.json",
+          "content": "{\n  \"person\": \"Charles Fol\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"人物记录 social 字段为 https://x.com/ambionics，writeup_evidence 为 https://blog.lexfo.fr/。Lexfo 博客 (blog.lexfo.fr) 上 2024-09-30 的文章署名逐字为 'Charles Fol'，归类于 'Ambionics / Web Exploitation'；PHPGGC 工具仓库位于 github.com/ambionics。'Ambionics' 为 Lexfo 旗下的安全研究团队/品牌，Charles Fol 以本名在该团队博客署名发文。检索中另出现 handle 'cfreal'/'cfreal_'/'real'（疑为其个人账号），与 person_json 的 social (x.com/ambionics) 存在差异；本名 Charles Fol 与团队 Ambionics/Lexfo 的关联已由 writeup 署名逐字核对证实，但 'cfreal' 作为其个人 handle 仅来自搜索摘要，未做正文核对。同名歧义暂未发现其他安全研究者叫 Charles Fol。\",\n  \"items\": [\n    {\n      \"id\": \"cf-works-001\",\n      \"date\": \"2024-09-30\",\n      \"claim\": \"Charles Fol 在 Lexfo/Ambionics 博客发布 'Iconv, set the charset to RCE: Exploiting the glibc to hack the PHP engine (part 3)'，披露 glibc iconv 中一处存在约 24 年的缓冲区溢出（CVE-2024-2961），并说明如何经 PHP 的 php://filter 机制将其转化为远程代码执行。该文为 3 部分系列的第 3 部分，处理无输出的盲利用场景。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"技术下沉与原语复用：从利用 PHP 应用层反序列化/过滤链，下沉到 C 库（glibc iconv）层缺陷，并把文件读原语升级为无输出条件下的任意内存读与 RCE。文中明确把工作切分为有输出(Part1)、直接 iconv/Roundcube(Part2)、盲利用(Part3)三阶段推进，体现按难度递增的复盘式迭代。配套公开 PoC 仓库 cnext-exploits，并引用 synacktiv 的 php_filter_chains_oracle_exploit (PFCOE)，显示其在公开写就工具、复用他人工具与给出可复现 PoC 的习惯。\",\n      \"short_quote\": \"A few months ago, I stumbled upon a 24 years old buffer overflow in the glibc, the base library for linux programs.\",\n      \"source\": {\n        \"title\": \"Iconv, set the charset to RCE: Exploiting the glibc to hack the PHP engine (part 3)\",\n        \"url\": \"https://blog.lexfo.fr/iconv-cve-2024-2961-p3.html\",\n        \"published\": \"2024-09-30\",\n        \"source_type\": \"security_research_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"cf-works-002\",\n      \"date\": \"2024-09-30\",\n      \"claim\": \"同一文章的 3 部分系列结构说明 Charles Fol 将一次 glibc 漏洞研究拆分为：Part1 文件读→RCE（有输出）、Part2 直接经 iconv() 利用并用于 Roundcube RCE、Part3 无输出盲利用。Part3 通过损坏 php_stream_bucket、泄漏 brigade 指针、控制 buf/buflen 构造任意内存读，再走 PHP ELF 头/dynamic 段定位 libc system/malloc/realloc，覆写 zend_mm_heap.custom_heap._free 实现 RCE，强调无崩溃、通用、约 15–17 分钟。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"方法论演化可核验：从单点 RCE 写法过渡到面向盲利用的通用 exploit 工程，关注稳定性（无崩溃）、跨目标可复用性，并系统性地把利用链拆分为递进子任务分篇发表。这是技术演化中由‘能打’向‘可稳定通用复现’迁移的直接证据。\",\n      \"short_quote\": \"Part 3 addresses blind exploitation without output.\",\n      \"source\": {\n        \"title\": \"Iconv, set the charset to RCE: Exploiting the glibc to hack the PHP engine (part 3)\",\n        \"url\": \"https://blog.lexfo.fr/iconv-cve-2024-2961-p3.html\",\n        \"published\": \"2024-09-30\",\n        \"source_type\": \"security_research_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"cf-works-003\",\n      \"date\": \"YYYY\",\n      \"claim\": \"Charles Fol 是 PHPGGC（PHP Generic Gadget Chains）工具的作者之一，该工具托管于 github.com/ambionics，用于从命令行或程序化生成 PHP unserialize() payload。README 自述为‘可视为 frohoff 的 ysoserial 的 PHP 对应物’。仓库 master 分支约 725 次提交，支持 Laravel、Symfony、Drupal、Magento、WordPress、Guzzle、Doctrine 等多种框架的 gadget 链，并提供 PHAR 多形态、fast-destruct 模式与跨版本兼容测试脚本 test-gc-compatibility.py。\",\n      \"status\": \"reported\",\n      \"growth_signal\": \"工具建设与长期维护习惯：单一工具持续累积至约 725 次提交，覆盖多种 PHP 框架的 gadget 链，并设有跨版本兼容测试脚本，体现把零散反序列化知识固化为可复用、可测试工具的工程化习惯。该工具与其 writeup 中的 PHP 反序列化/过滤链主题一致，构成研究-工具-发表的正反馈。\",\n      \"short_quote\": \"PHPGGC is a library of unserialize() payloads along with a tool to generate them, from command line or programmatically.\",\n      \"source\": {\n        \"title\": \"PHPGGC: PHP Generic Gadget Chains (GitHub README)\",\n        \"url\": \"https://github.com/ambionics/phpggc\",\n        \"published\": \"YYYY\",\n        \"source_type\": \"open_source_tool_readme\",\n        \"level\": \"first_hand_other\"\n      }\n    },\n    {\n      \"id\": \"cf-works-004\",\n      \"date\": \"2026-09-16\",\n      \"claim\": \"Lexfo/Ambionics 博客发布 'Casse-Spip - From an Unauthenticated SQL Injection to Remote Command Execution'，针对 PHP CMS SPIP，将未认证 SQL 注入链到 RCE（CVE-2026-72708/-72709/-72710）。该文章标题、URL、日期经分类页核对，但正文未逐字抓取。\",\n      \"status\": \"reported\",\n      \"growth_signal\": \"近期（2026）研究仍聚焦‘PHP 应用未认证入口→SQLi→RCE’链式利用，与早期 PHP 反序列化/glibc 主题同属服务端/底层库方向，体现方向延续性与按‘未认证前提到内核层 RCE’难度递增的复用模式。\",\n      \"source\": {\n        \"title\": \"Casse-Spip - From an Unauthenticated SQL Injection to Remote Command Execution\",\n        \"url\": \"https://lexfo.fr/casse-spip-sqli-to-rce.html\",\n        \"published\": \"2026-09-16\",\n        \"source_type\": \"security_research_writeup\",\n        \"level\": \"first_hand_other\"\n      }\n    },\n    {\n      \"id\": \"cf-works-005\",\n      \"date\": \"2026-02-12\",\n      \"claim\": \"Lexfo/Ambionics 博客发布 'Pwning Supercomputers - A 20yo vulnerability in Munge'，涉及认证守护进程 Munge 的堆缓冲区溢出，用于 HPC 环境。标题、日期经分类页核对，正文未抓取。\",\n      \"status\": \"reported\",\n      \"growth_signal\": \"技术栈扩展到二进制/C 层堆溢出（glibc 堆利用相邻领域）与 HPC 认证基础设施，与 glibc iconv 工作共享‘C 库层内存破坏’技术底座，显示从 PHP 解释器到原生守护进程的横向迁移。\",\n      \"source\": {\n        \"title\": \"Pwning Supercomputers - A 20yo vulnerability in Munge\",\n        \"url\": \"https://blog.lexfo.fr/category/ambionics-web-exploitation.html\",\n        \"published\": \"2026-02-12\",\n        \"source_type\": \"security_research_writeup_listing\",\n        \"level\": \"lead_only\"\n      }\n    },\n    {\n      \"id\": \"cf-works-006\",\n      \"date\": \"YYYY\",\n      \"claim\": \"据搜索摘要，Charles Fol 较早期（约 2022 年前后）发表过 PHP filter chains（php://filter 过滤链）远程代码执行研究，把 PHP 原生过滤器构造为读/写/RCE 原语。该工作为后续 2024 年 glibc iconv 系列（经 php://filter 触达）的前置技术。但具体页面抓取返回 404（slug 不匹配），正文未核对。\",\n      \"status\": \"lead_only_leads_to_gap\",\n      \"growth_signal\": \"若成立，说明其技术演化存在连续主线：PHP 过滤链原语（应用层）→ 经同一 php://filter 通道触达 glibc iconv 缺陷（C 库层），形成从解释器到 C 库的纵向复用。但因正文未核，仅作为线索与待补缺口记录，不作为 documented 结论。\",\n      \"source\": {\n        \"title\": \"PHP filter chains: file read from error-to-oracle (search summary; page returned 404)\",\n        \"url\": \"https://blog.lexfo.fr/php-filters-chain-remote-code-execution.html\",\n        \"published\": \"YYYY\",\n        \"source_type\": \"search_result_summary\",\n        \"level\": \"lead_only\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"person_json.json 中 social 字段为 https://x.com/ambionics（团队/品牌账号），而 WebSearch 摘要中出现个人 handle @cfreal_（及 'cfreal'/'real'）。两者可能分别指团队账号与个人账号，但本次未对任何 X/个人主页做正文抓取，无法逐字确认哪个 handle 属于 Charles Fol 本人。需在后续以一手社交账号页面核对。\",\n    \"PHPGGC 仓库（github.com/ambionics）显示约 725 次提交与约 3900 stars，但 README 与仓库页面未直接展示首次发布日期或作者署名；任务来源将其归为 Charles Fol 的作品，主要依据是仓库托管于 ambionics 账号、主题与其 writeup 一致，而非仓库页逐字作者署名。\"\n  ],\n  \"gaps\": [\n    \"2022 年前后 PHP filter chains（php://filter 过滤链 RCE）里程碑 writeup 的正文未抓取成功（URL slug 不匹配返回 404），无法确认其具体发布日期、作者署名与正文技术细节；仅作为 lead 记录。这是刻画其技术演化主线的缺失环节。\",\n    \"早期（约 2016–2017）PHP UAF/SPL（如 SplDoublyLinkedList、SplFixedArray）内存破坏 writeup 仅有搜索摘要，未抓取一手页面，无法逐字核对作者、日期与内容；该阶段作为其 PHP 内核利用起点的资料缺口。\",\n    \"PHPGGC 的首次发布日期、首提交作者署名、版本演化未核；仅 README 自述与仓库规模（提交数、stars）已核。\",\n    \"Black Hat US/EU、Insomni'hack、SSTIC 等会议演讲材料（speaker 页、议题讲义、录像）未做一手页面抓取；任务来源将其列为 conference_evidence，但本次无具体演讲页 URL 核对，无法证明具体某场演讲事实。\",\n    \"因调用预算用尽（约 8 次 WebFetch/WebSearch），多条 lead（WSO2、GLPI、Drupal PostgreSQL、Ninja Forms 等近期 writeup 正文；Munge 正文；各会议演讲）未能升级为 documented/reported。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "8ec0ad56d75e54ad6a671da47609b93e32cb984c0ddee141193bb57c0f72d742",
+        "accessed_at": "2026-09-27T11:40:50.873196+00:00"
+      },
+      {
+        "tool_use_id": "call_z53kxwuen55gqw65kdkvfkkw",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-works-20260927-193456-316/output.json",
+          "content": "{\n  \"person\": \"Charles Fol\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"人物记录 social 字段为 https://x.com/ambionics，writeup_evidence 为 https://blog.lexfo.fr/。Lexfo 博客 (blog.lexfo.fr) 上 2024-09-30 的文章署名逐字为 'Charles Fol'，归类于 'Ambionics / Web Exploitation'；PHPGGC 工具仓库位于 github.com/ambionics。'Ambionics' 为 Lexfo 旗下的安全研究团队/品牌，Charles Fol 以本名在该团队博客署名发文。检索中另出现 handle 'cfreal'/'cfreal_'/'real'（疑为其个人账号），与 person_json 的 social (x.com/ambionics) 存在差异；本名 Charles Fol 与团队 Ambionics/Lexfo 的关联已由 writeup 署名逐字核对证实，但 'cfreal' 作为其个人 handle 仅来自搜索摘要，未做正文核对。同名歧义暂未发现其他安全研究者叫 Charles Fol。\",\n  \"items\": [\n    {\n      \"id\": \"cf-works-001\",\n      \"date\": \"2024-09-30\",\n      \"claim\": \"Lexfo/Ambionics 博客发布 'Iconv, set the charset to RCE: Exploiting the glibc to hack the PHP engine (part 3)'，作者署名逐字为 Charles Fol。文章披露 glibc iconv 中一处存在约 24 年的缓冲区溢出（CVE-2024-2961），并说明如何经 PHP 的 php://filter 机制将其转化为远程代码执行。该文为 3 部分系列的第 3 部分，处理无输出的盲利用场景。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"技术下沉与原语复用：从利用 PHP 应用层反序列化/过滤链，下沉到 C 库（glibc iconv）层缺陷，并把文件读原语升级为无输出条件下的任意内存读与 RCE。文中按难度递增切分（有输出 P1、直接 iconv/Roundcube P2、盲利用 P3），体现按难度递进的复盘式迭代。配套公开 PoC 仓库 cnext-exploits，并引用 synacktiv 的 php_filter_chains_oracle_exploit (PFCOE)，显示公开写工具、复用他人工具与给出可复现 PoC 的习惯。\",\n      \"short_quote\": \"A few months ago, I stumbled upon a 24 years old buffer overflow in the glibc, the base library for linux programs.\",\n      \"source\": {\n        \"title\": \"Iconv, set the charset to RCE: Exploiting the glibc to hack the PHP engine (part 3)\",\n        \"url\": \"https://blog.lexfo.fr/iconv-cve-2024-2961-p3.html\",\n        \"published\": \"2024-09-30\",\n        \"source_type\": \"security_research_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"cf-works-002\",\n      \"date\": \"2024-09-30\",\n      \"claim\": \"同一文章说明其 glibc 漏洞研究为 3 部分系列：Part1 文件读→RCE（有输出）、Part2 直接经 iconv() 利用并用于 Roundcube RCE、Part3 无输出盲利用。Part3 通过损坏 php_stream_bucket、泄漏 brigade 指针、控制 buf/buflen 构造任意内存读，再走 PHP ELF 头/dynamic 段定位 libc system/malloc/realloc，覆写 zend_mm_heap.custom_heap._free 实现 RCE，强调无崩溃、通用、约 15–17 分钟。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"方法论演化可核验：从单点 RCE 写法过渡到面向盲利用的通用 exploit 工程，关注稳定性（无崩溃）与跨目标可复用性，并把利用链拆分为递进子任务分篇发表。这是技术演化中由‘能打’向‘可稳定通用复现’迁移的直接证据。\",\n      \"short_quote\": \"Part 3 addresses blind exploitation without output.\",\n      \"source\": {\n        \"title\": \"Iconv, set the charset to RCE: Exploiting the glibc to hack the PHP engine (part 3)\",\n        \"url\": \"https://blog.lexfo.fr/iconv-cve-2024-2961-p3.html\",\n        \"published\": \"2024-09-30\",\n        \"source_type\": \"security_research_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"cf-works-003\",\n      \"date\": \"YYYY\",\n      \"claim\": \"PHPGGC（PHP Generic Gadget Chains）工具托管于 github.com/ambionics，用于从命令行或程序化生成 PHP unserialize() payload。README 自述逐字为‘可视为 frohoff 的 ysoserial 的 PHP 对应物’。仓库 master 分支约 725 次提交，支持 Laravel、Symfony、Drupal、Magento、WordPress、Guzzle、Doctrine 等多种框架的 gadget 链，并提供 PHAR 多形态、fast-destruct 模式与跨版本兼容测试脚本 test-gc-compatibility.py。该工具的主题与其 PHP 反序列化/过滤链 writeup 一致。\",\n      \"status\": \"reported\",\n      \"growth_signal\": \"工具建设与长期维护习惯：单一工具持续累积至约 725 次提交，覆盖多种 PHP 框架 gadget 链，并设跨版本兼容测试脚本，体现把零散反序列化知识固化为可复用、可测试工具的工程化习惯；与其 writeup 构成研究-工具-发表的正反馈。\",\n      \"short_quote\": \"PHPGGC is a library of unserialize() payloads along with a tool to generate them, from command line or programmatically.\",\n      \"source\": {\n        \"title\": \"PHPGGC: PHP Generic Gadget Chains (GitHub README)\",\n        \"url\": \"https://github.com/ambionics/phpggc\",\n        \"published\": \"YYYY\",\n        \"source_type\": \"open_source_tool_readme\",\n        \"level\": \"first_hand_other\"\n      }\n    },\n    {\n      \"id\": \"cf-works-004\",\n      \"date\": \"2026-09-16\",\n      \"claim\": \"Lexfo/Ambionics 博客列出 'Casse-Spip - From an Unauthenticated SQL Injection to Remote Command Execution'，发布于 2026-09-16，针对 PHP CMS SPIP，将未认证 SQL 注入链到 RCE（CVE-2026-72708/-72709/-72710）。标题、日期与 CVE 经抓取的博客首页页面核对；文章正文未逐字抓取。\",\n      \"status\": \"reported\",\n      \"growth_signal\": \"近期（2026）研究仍聚焦‘PHP 应用未认证入口→SQLi→RCE’链式利用，与早期 PHP 反序列化/glibc 主题同属服务端/底层库方向，体现方向延续性与按‘未认证前提到内核层 RCE’难度递增的复用模式。文章正文未抓取，技术机制细节为推断，需后续补抓正文核证。\",\n      \"source\": {\n        \"title\": \"Ambionics / Web Exploitation blog listing (blog.lexfo.fr) — Casse-Spip entry\",\n        \"url\": \"https://blog.lexfo.fr/\",\n        \"published\": \"2026-09-16\",\n        \"source_type\": \"publisher_blog_listing\",\n        \"level\": \"first_hand_other\"\n      }\n    },\n    {\n      \"id\": \"cf-works-005\",\n      \"date\": \"2026-02-12\",\n      \"claim\": \"Lexfo/Ambionics 博客列出 'Pwning Supercomputers - A 20yo vulnerability in Munge'，发布于 2026-02-12，涉及认证守护进程 Munge 的堆缓冲区溢出，用于 HPC 环境。标题、日期与一句话描述经抓取的博客首页页面核对；文章正文未逐字抓取。\",\n      \"status\": \"reported\",\n      \"growth_signal\": \"技术栈扩展到二进制/C 层堆溢出（与 glibc 堆利用相邻领域）与 HPC 认证基础设施，与 glibc iconv 工作共享‘C 库层内存破坏’技术底座，显示从 PHP 解释器到原生守护进程的横向迁移。文章正文未抓取，机制细节为推断，需后续补抓正文核证。\",\n      \"source\": {\n        \"title\": \"Ambionics / Web Exploitation blog listing (blog.lexfo.fr) — Pwning Supercomputers entry\",\n        \"url\": \"https://blog.lexfo.fr/\",\n        \"published\": \"2026-02-12\",\n        \"source_type\": \"publisher_blog_listing\",\n        \"level\": \"first_hand_other\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"person_json.json 中 social 字段为 https://x.com/ambionics（团队/品牌账号），而 WebSearch 摘要中出现个人 handle @cfreal_（及 'cfreal'/'real'）。两者可能分别指团队账号与个人账号，但本次未对任何 X/个人主页做正文抓取，无法逐字确认哪个 handle 属于 Charles Fol 本人。\",\n    \"PHPGGC 仓库（github.com/ambionics）显示约 725 次提交与约 3900 stars，但 README 与仓库页面未直接展示首次发布日期或作者署名；任务来源将其归为 Charles Fol 的作品，主要依据是仓库托管于 ambionics 账号、主题与其 writeup 一致，而非仓库页逐字作者署名。\"\n  ],\n  \"gaps\": [\n    \"2022 年前后 PHP filter chains（php://filter 过滤链 RCE）里程碑 writeup 的正文未抓取成功（ambionics.io/blog/php-filters-chain-remote-code-execution 经 301 重定向到 blog.lexfo.fr/php-filters-chain-remote-code-execution.html 返回 404，slug 不匹配）。仅存在 WebSearch 摘要层面的线索，按任务约定不应引用搜索结果摘要，故未列为 item。该工作若成立，是其 2024 年 glibc iconv 系列（经同一 php://filter 通道触达 C 库）的前置技术，是刻画技术演化主线的缺失环节。\",\n    \"早期（约 2016–2017）PHP UAF/SPL（如 SplDoublyLinkedList、SplFixedArray）内存破坏 writeup 仅在 WebSearch 摘要中被提及，未抓取一手页面，无法逐字核对作者、日期与内容；该阶段作为其 PHP 内核利用起点的资料缺口。\",\n    \"PHPGGC 的首次发布日期、首提交作者署名、版本演化未核；仅 README 自述与仓库规模（提交数、stars）已核。\",\n    \"Black Hat US/EU、Insomni'hack、SSTIC 等会议演讲材料（speaker 页、议题讲义、录像）未做一手页面抓取；任务来源将其列为 conference_evidence，但本次无具体演讲页 URL 核对，无法证明具体某场演讲事实与成长机制。\",\n    \"因调用预算用尽（约 8 次 WebFetch/WebSearch），多条 lead（WSO2、GLPI、Drupal PostgreSQL、Ninja Forms 等近期 writeup 正文；Munge 正文；各会议演讲；X 个人账号）未能升级为 documented/reported。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "0acd7b021e1ac835a6ccfd40646e81acea0a04cfc02d6f291389336382730378",
+        "accessed_at": "2026-09-27T11:40:50.873360+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790509250873377000-charles-fol-works.json",
+    "label": "Charles Fol:works",
+    "elapsed_seconds": 354.56,
+    "prompt_sha256": "bacd1903ab4668f0923200b474ed9ceb4cd434b17eb71cdc19ed90608cf42afb",
+    "num_turns": 27,
+    "total_cost_usd": 0.805389,
+    "usage": {
+      "input_tokens": 26255,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 225088,
+      "output_tokens": 13570,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 37139,
+        "outputTokens": 20126,
+        "cacheReadInputTokens": 233088,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.805389,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

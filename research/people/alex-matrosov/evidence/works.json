@@ -1,0 +1,604 @@
+{
+  "person": "Alex Matrosov",
+  "dimension": "公开作品与技术演化",
+  "identity_check": "person_json 记录 name_or_handle='Alex Matrosov', primary_focus='UEFI 与固件供应链漏洞', social=x.com/matrosov, writeup_evidence=binarly.io/blog。多个 WebSearch 摘要声称 Matrosov 是 Binarly 创始人/CEO，但 WebFetch 无法抓取 binarly.io/about 正文（页面仅返回 header 与 'Skip to main content'，正文由 JS 渲染缺失），故头衔未能一手核实，只能视为 lead_only。x.com/matrosov 抓取返回 402 Payment Required，社交身份未一手核实。可一手核实的是：binarly-io GitHub 组织存在且托管 UEFI 固件研究仓库（Vulnerability-REsearch、ToolsAndPoCs、fwhunt-scan、fwhunt-ida），与 person_json 所列 primary_focus 一致；该组织的研究方向与 Matrosov 的公开定位方向相符，但 Matrosov 个人在这些 advisory 中的具体署名未在一手抓取中出现（见归因缺口）。",
+  "items": [
+    {
+      "id": "matrosov-works-001",
+      "date": "2023-12-06",
+      "claim": "Binarly 以 'LogoFAIL' 名义披露了一类 UEFI 固件图像解析漏洞，影响多个 IBV（Insyde/AMI/Phoenix 等）及其下游 OEM；漏洞类根因为 DXE 阶段 BMP 图像解析时对 BmpHeader->ImageOffset 缺少上界校验，可被用于泄露物理内存内容。代表性 advisory BRLY-LOGOFAIL-2023-001 对应 CVE-2023-40238。",
+      "status": "documented",
+      "growth_signal": "研究呈现'漏洞类'而非孤立缺陷的模式：同一目录下含 BRLY-LOGOFAIL-2023-001 至 -030 共 30 个 advisory，覆盖多个厂商与型号，表明研究方法从单一漏洞转向系统化扫描同类解析缺陷并横向归因到上游 IBV 供应链。披露流程规范化（Lenovo PSIRT 2023-06-21 通知 → Insyde 2023-09-10 确认 → CVE 2023-11-27 → 2023-12-06 公开），体现成熟的多厂商协同披露节奏。",
+      "short_quote": "The attacker can make it as high as 0xFFFFFFFF and thus display the contents of physical memory (in the form of pixels).",
+      "source": {
+        "title": "BRLY-LOGOFAIL-2023-001 — Memory contents leak / information disclosure vulnerability in DXE driver (raw markdown)",
+        "url": "https://raw.githubusercontent.com/binarly-io/Vulnerability-REsearch/main/LogoFAIL/BRLY-LOGOFAIL-2023-001.md",
+        "published": "2024-06-19",
+        "source_type": "advisory / 漏洞公告（一手）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_r5467jmlmpf9hs5m53zdrq5s",
+        "accessed_at": "2026-09-27T18:26:10.845672+00:00",
+        "content_sha256": "a417675eaf89260a9cebed207c5cd6ec07df15e355e62acd45a10d96274efd0c"
+      }
+    },
+    {
+      "id": "matrosov-works-002",
+      "date": "2024-07-25",
+      "claim": "Binarly 披露 'PKfail'（CVE-2024-8105）：设备厂商使用 AMI 提供的默认测试 Platform Key 作为 UEFI Secure Boot 根信任，导致 Secure Boot 完全绕过；影响 AMI、Acer、Dell、Gigabyte、Fujitsu、Supermicro 等多厂商数百型号，CERT/CC 案号 VU#455367。",
+      "status": "documented",
+      "growth_signal": "相对 LogoFAIL 的内存破坏类，PKfail 转向供应链信任根（密钥管理）缺陷，研究范围从固件解析逻辑扩展到固件供应链根信任；检测方法依赖 PK 证书 subject/issuer 字段是否含 'DO NOT TRUST'/'DO NOT SHIP'，体现可自动化、可规模化复现的检测工程化，并在 Gigabyte GB-BER5-5500 上完成端到端确认。这是对 LogoFAIL 方法的横向迁移：先大规模扫描定位共性，再端到端验证。",
+      "short_quote": "PKfail is the result of device vendors using as Platform Key a default test key provided by AMI.",
+      "source": {
+        "title": "BRLY-2024-005 — Usage of default test keys leads to complete Secure Boot bypass (raw markdown)",
+        "url": "https://raw.githubusercontent.com/binarly-io/Vulnerability-REsearch/main/PKfail/BRLY-2024-005.md",
+        "published": "2024-07-25",
+        "source_type": "advisory / 漏洞公告（一手）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_dk62kczs9vvb7mh6am4mq0t6",
+        "accessed_at": "2026-09-27T18:26:10.845678+00:00",
+        "content_sha256": "d4a24ccfd767f030284ee663d17eeabeb7fbba0b2a79abcee60cdd4dc9e31f78"
+      }
+    },
+    {
+      "id": "matrosov-works-003",
+      "date": "2026-09-07",
+      "claim": "binarly-io GitHub 组织托管结构化的固件漏洞研究仓库 Vulnerability-REsearch，根目录按厂商/类别分设 20 个目录（AMD、AMI、Clevo、Dell、EDK2、FirmwareBleed、Fujitsu、Gigabyte、HP、Insyde、Intel、Lenovo、Lighttpd、LogoFAIL、Microsoft、PKfail、Qualcomm、SecretsResearch、Supermicro、U-Boot），并声明采用 90 天披露时限政策。",
+      "status": "documented",
+      "growth_signal": "公开作品的载体从单一 writeup 演化为按厂商/类别组织的公开 advisory 仓库；90 天披露时限作为明文政策写入 README，表明披露流程制度化。多厂商目录并存说明研究覆盖面横向扩张，且以可检索的版本化形式沉淀。",
+      "short_quote": "All issues discovered by BINARLY team are subject to a 90-days disclosure deadline.",
+      "source": {
+        "title": "binarly-io/Vulnerability-REsearch — README（GitHub 仓库页）",
+        "url": "https://github.com/binarly-io/Vulnerability-REsearch",
+        "published": "2026-09-07",
+        "source_type": "代码仓库 / README（一手）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_n2lu3sbvt3ueiokjhecpff7c",
+        "accessed_at": "2026-09-27T18:26:10.845648+00:00",
+        "content_sha256": "cf41240a467137f9877d1cdc94093efd52d37f864fb5bc55f6bbb8f00a4d7a7a"
+      }
+    },
+    {
+      "id": "matrosov-works-004",
+      "date": "2025-05-02",
+      "claim": "binarly-io 维护面向 UEFI 固件的分析与检测工具链：fwhunt-scan（分析 UEFI 固件并用 FwHunt 规则检测已知漏洞，GPL-3.0）、fwhunt-ida（在 IDA 中生成 FwHunt 规则的辅助插件）、以及 efiXplorer（advisory 中署名 'BINARLY efiXplorer team'）。LogoFAIL advisory 作者署名即标注为 'BINARLY efiXplorer team'。",
+      "status": "documented",
+      "growth_signal": "工具建设与漏洞研究形成正向循环：自研 IDA 插件与扫描规则格式（FwHunt）被复用于漏洞发现与检测规则沉淀，'advisory 署名 efiXplorer team' 表明 advisory 写作与工具产出由同一团队完成。这是将一次性漏洞发现转化为可复用检测能力的机制，体现重复练习与工具沉淀。",
+      "short_quote": "Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules",
+      "source": {
+        "title": "binarly-io/fwhunt-scan — 仓库描述（GitHub 组织页）",
+        "url": "https://github.com/binarly-io",
+        "published": "2025-05-02",
+        "source_type": "代码仓库 / 工具（一手）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_aehwpjiu997pmneustqvp4ks",
+        "accessed_at": "2026-09-27T18:26:10.845640+00:00",
+        "content_sha256": "b20730243c1877b8d25fa27120abd826b465e774587d82a4afa101568e5194f2"
+      }
+    },
+    {
+      "id": "matrosov-works-005",
+      "date": "2024-06-21",
+      "claim": "LogoFAIL advisory 文件 BRLY-LOGOFAIL-2023-001 的唯一一次提交由 GitHub 用户 'yeggor' 完成，提交信息为 'Add LogoFAIL advisories (BRLY-LOGOFAIL-2023-001 - BRLY-LOGOFAIL-2023-030)'；该提交记录中未出现 Alex Matrosov 的姓名或账号。",
+      "status": "documented",
+      "growth_signal": "在代码/文档层面，LogoFAIL 的 advisory 文件由 'yeggor' 提交，advisory 正文署名为集体 'BINARLY efiXplorer team'。这构成对'作品归因到 Matrosov 个人'的限制：仓库与团队产物可一手证实，但具体文件的个人作者关系无法从一手提交记录中证实，需作为推断缺口处理，不得将团队成果直接等同于 Matrosov 个人作品。",
+      "short_quote": "Add LogoFAIL advisories (BRLY-LOGOFAIL-2023-001 - BRLY-LOGOFAIL-2023-030)",
+      "source": {
+        "title": "BRLY-LOGOFAIL-2023-001.md commit history — GitHub",
+        "url": "https://github.com/binarly-io/Vulnerability-REsearch/commits/main/LogoFAIL/BRLY-LOGOFAIL-2023-001.md",
+        "published": "2024-06-21",
+        "source_type": "提交历史（一手）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_frqhr54vxm13xh62ckf1u4ry",
+        "accessed_at": "2026-09-27T18:26:10.845698+00:00",
+        "content_sha256": "8aab99a91641a503cbd60032901318c8efccf977e1c129c9db71a4209bc50433"
+      }
+    },
+    {
+      "id": "matrosov-works-006",
+      "date": "2026-09-28",
+      "claim": "Matrosov 个人是否为 LogoFAIL/PKfail 的研究者或主讲人（如 Black Hat Europe 2023）未能一手核实：BlackHat.com 议程页返回 403 Forbidden，logofail.com 返回 ECONNREFUSED，binarly.io/research 与 binarly.io/about 正文因 JS 渲染缺失；WebSearch 摘要声称 Matrosov 在 Black Hat 讲解 LogoFAIL，但按任务要求不得引用搜索摘要作为证据。",
+      "status": "unknown",
+      "growth_signal": "归因缺口：将个人姓名与团队成果关联所需的'演讲事实'或'作者署名'一手来源在本轮抓取中均不可得（403/ECONNREFUSED/JS 渲染空正文）。在缺乏一手证据时按任务约束留空，不以搜索摘要合理化补全。后续可通过 Black Hat EU 2023 议程镜像、Binarly 团队页或 Matrosov 个人主页一手核实。",
+      "source": {
+        "title": "（无可用一手来源；Black Hat 议程 403、logofail.com 拒绝连接、Binarly 页面 JS 渲染无正文）",
+        "url": "https://www.blackhat.com/eu-23/briefings/schedule/index.html",
+        "published": "unknown",
+        "source_type": "议程页（抓取失败）",
+        "level": "lead_only"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_bbtm34eghqaepu37kjszf66m",
+        "accessed_at": "2026-09-27T18:26:10.845617+00:00",
+        "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47"
+      }
+    },
+    {
+      "id": "matrosov-works-007",
+      "date": "unknown",
+      "claim": "Matrosov 早期职业履历（常被关联为 ESET、NVIDIA 等公司的威胁分析/逆向工程背景）未取得任何一手来源；person_json 亦未提供早期 writeup 线索。本地种子笔记为'没有发现本地种子材料'。",
+      "status": "unknown",
+      "growth_signal": "技术演化维度存在早期阶段缺口：无法从一手来源重建 Matrosov 从恶意软件逆向/打包器分析（早期常见方向）到 UEFI 固件供应链研究（后期方向）的转折节点与反馈机制。此为该维度的结构性未解问题，需后续专门检索早期 writeup 与履历。",
+      "source": {
+        "title": "（无；本地种子笔记声明未发现本地种子材料）",
+        "url": "local_seed_note.md",
+        "published": "unknown",
+        "source_type": "本地种子（空）",
+        "level": "lead_only"
+      },
+      "verification": {
+        "verified_in_run": false,
+        "retrieval_method": "unverified",
+        "tool_use_id": "",
+        "accessed_at": "",
+        "content_sha256": ""
+      }
+    }
+  ],
+  "contradictions": [
+    "WebSearch 摘要多次声称 Alex Matrosov 是 Binarly 的 'founder and CEO'；但 WebFetch 无法一手核实（binarly.io/about 仅返回 header，正文 JS 渲染缺失）。该头衔目前仅为二手搜索摘要，未达 documented，不应作为事实陈述。",
+    "WebSearch 摘要将 LogoFAIL 披露描述为 2023 年 12 月 Black Hat Europe；一手 advisory 文件 BRLY-LOGOFAIL-2023-001 将 BINARLY 公开日期标注为 2024-06-19，而 Insyde advisory 发布于 2023-12-06，两者时间点不同（厂商 advisory 发布 vs BINARLY 自身公开），需区分披露时间线的不同节点，避免混用。"
+  ],
+  "gaps": [
+    "Matrosov 在 Binarly 的确切头衔（founder/CEO/研究员等）未一手核实；binarly.io/about 正文因 JS 渲染抓取失败。",
+    "Matrosov 与 LogoFAIL/PKfail 的个人作者/主讲关系未一手证实：advisory 正文署名为集体 'BINARLY team'/'BINARLY efiXplorer team'，LogoFAIL advisory 文件提交者为 'yeggor' 而非 Matrosov。",
+    "Black Hat EU 2023（及任何其他会议）LogoFAIL/PKfail 的主讲事实未一手核实：BlackHat.com 议程 403、logofail.com ECONNREFUSED。",
+    "Matrosov 早期职业履历（ESET/NVIDIA 等常被关联的背景）无任何一手来源，person_json 与本地种子均未提供早期 writeup 线索。",
+    "技术演化的'早期阶段→固件研究方向'转折点、导师/同伴、失败与反馈机制等成长机制缺乏一手证据，无法重建完整演化曲线。",
+    "本轮 WebFetch 多数返回 403/404/ECONNREFUSED 或 JS 渲染空正文（Black Hat、logofail.com、binarly.io/about、binarly.io/research、binarly.io/blog、binarly.io/posts/...、binarly.io/advisories/...），有效一手来源集中在 raw.githubusercontent.com 与 github.com 仓库页，覆盖面有限。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-matrosov-works-20260928-022102-404",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790533570839527000-alex-matrosov-works.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "52df5a72-64b9-44c6-8939-cc33a6e6c080",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_nwiccvgn8dgs5h2dcki5trwz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-matrosov-works-20260928-022102-404/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-27T18:26:10.845467+00:00"
+      },
+      {
+        "tool_use_id": "call_w7vwmhbnz9bakthi0rv16pto",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-matrosov-works-20260928-022102-404/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "801978df5b5e497dcd7b5958dfd94fe5866e6a4f139bbd9dd2a0f33802620382",
+        "accessed_at": "2026-09-27T18:26:10.845499+00:00"
+      },
+      {
+        "tool_use_id": "call_8pj8ongwikjn0hug5w4dtd20",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-matrosov-works-20260928-022102-404/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "b3c99fcdfd00977059e858d779a3d71755c71847d09ffaf7f325d13df914e9f3",
+        "accessed_at": "2026-09-27T18:26:10.845512+00:00"
+      },
+      {
+        "tool_use_id": "call_f64n1da242iibuqc5vzsjdmk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-matrosov-works-20260928-022102-404/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "98d6159955e4031db24639369d116819220986aa8ec32370f8ce25cc7e814219",
+        "accessed_at": "2026-09-27T18:26:10.845517+00:00"
+      },
+      {
+        "tool_use_id": "call_5qyynvkbo6a8240ygzrmmg9x",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-matrosov-works-20260928-022102-404/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6e5034a8a6d972f492d2b08811243633e8b01984efe14e10fad4de7367634388",
+        "accessed_at": "2026-09-27T18:26:10.845521+00:00"
+      },
+      {
+        "tool_use_id": "call_122j32gfjgmy962iorwmplny",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-matrosov-works-20260928-022102-404/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-27T18:26:10.845526+00:00"
+      },
+      {
+        "tool_use_id": "call_mtri48qbp3hl5lrjve9qpzk4",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Alex Matrosov firmware security research Binarly UEFI writeup"
+        },
+        "success": true,
+        "content_sha256": "9a6e677b6af52e2226f831aa4ac3a210afcca4cb51ac5d2bb1cbc121c907d3fc",
+        "accessed_at": "2026-09-27T18:26:10.845558+00:00"
+      },
+      {
+        "tool_use_id": "call_663ibpnwrme5ds4wwkwgjnif",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Alex Matrosov Black Hat presentation UEFI LogoFAIL talk"
+        },
+        "success": true,
+        "content_sha256": "70077cbc1365e7022431bde02fb9632169e7f479e54736e13d85d91b25a3d744",
+        "accessed_at": "2026-09-27T18:26:10.845564+00:00"
+      },
+      {
+        "tool_use_id": "call_vcvndwg9jo8vkx4748dhptv2",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://www.binarly.io/blog",
+          "prompt": "List all blog posts authored by or about Alex Matrosov. For each, give the exact title, URL, publication date, and a one-line description of the technical topic. Also note any references to specific CVEs, firmware/UEFI products, or tools."
+        },
+        "success": true,
+        "content_sha256": "686e34d1fa6396cc4e8f4d69a7d4fa8c9a3ccb924254453dfd9d7232f2c50a9a",
+        "accessed_at": "2026-09-27T18:26:10.845574+00:00"
+      },
+      {
+        "tool_use_id": "call_qn7uqtdi4xlxaydq92u158a5",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://www.blackhat.com/us-23/briefings/schedule/index.html",
+          "prompt": "Find any briefing by Alex Matrosov. Give the exact talk title, date, co-speakers, and a description."
+        },
+        "success": true,
+        "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47",
+        "accessed_at": "2026-09-27T18:26:10.845569+00:00"
+      },
+      {
+        "tool_use_id": "call_4379csmry2q47ghaf53tpoom",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is this account holder? What is their bio, role, and any links to companies or research? Quote exact text from the profile.",
+          "url": "https://x.com/matrosov"
+        },
+        "success": true,
+        "content_sha256": "8ced59a07c6da6e7c0c0269f5d6b660bb374bf9f396f7c48c4ea1b37bdbb0191",
+        "accessed_at": "2026-09-27T18:26:10.845579+00:00"
+      },
+      {
+        "tool_use_id": "call_yayz6hymnrvmtgf7weiz6s3q",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Alex Matrosov\" Binarly LogoFAIL CVE-2023 image parsing firmware"
+        },
+        "success": true,
+        "content_sha256": "f4a959a2d59f81af7b21a9ed1981d735a1b9b0af3afbcc5169ede4145fd631e1",
+        "accessed_at": "2026-09-27T18:26:10.845584+00:00"
+      },
+      {
+        "tool_use_id": "call_47fdq8lm9li9j06llykbvxxy",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Find any text about Alex Matrosov, his role/title, and the LogoFAIL vulnerability (CVE-2023-40238). Give exact quotes, dates, and author bylines if present.",
+          "url": "https://binarly.io/posts/Logofail_a_new_class_of_BIOS_vulnerabilities_affecting_the_majority_of_PCs/index.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T18:26:10.845588+00:00"
+      },
+      {
+        "tool_use_id": "call_amqobs980bdxeuo1glwj5o5j",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Alex Matrosov\" Binarly bio founder CEO advisory NVIDIA ESET"
+        },
+        "success": true,
+        "content_sha256": "8ec39a799d0a3eedbdac06a8b1bffd2023fdbd18f6f92236aa1a0a62c8117683",
+        "accessed_at": "2026-09-27T18:26:10.845592+00:00"
+      },
+      {
+        "tool_use_id": "call_okezmtxlt444iuvm1kc9gk8m",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Find the LogoFAIL vulnerability disclosure details. Give the exact advisory title, date, CVE number, affected vendors, authors/researchers named, and any technical description. Quote exact text where possible.",
+          "url": "https://binarly.io/advisories/BRLY-2023-002/index.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T18:26:10.845596+00:00"
+      },
+      {
+        "tool_use_id": "call_c6qkth2me25hna7in3cgbxrp",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Alex Matrosov Bitdefender ESET threat analysis packer reverse engineering"
+        },
+        "success": true,
+        "content_sha256": "4bbae9d57c17f82c6de80b9d33a93dc04fd648af84351e1df038900f847cd49d",
+        "accessed_at": "2026-09-27T18:26:10.845600+00:00"
+      },
+      {
+        "tool_use_id": "call_yikldawic5qzoqpeur0ldpvc",
+        "tool": "WebSearch",
+        "input": {
+          "query": "site:binarly.io LogoFAIL advisory disclosure"
+        },
+        "success": true,
+        "content_sha256": "cf3633114ef11cdec9fedfd2920ae7bd77b46bb7bdf476988897b49a9882321c",
+        "accessed_at": "2026-09-27T18:26:10.845605+00:00"
+      },
+      {
+        "tool_use_id": "call_bgxnz1r7oamqp33ub0ue0nfa",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Matrosov\" \"Rooting UEFI\" OR \"Sentryo\" OR \"Ryzen\" site:binarly.io"
+        },
+        "success": true,
+        "content_sha256": "51714a05de8a96474cc10970b24abb04941907576198110b623265654cd5567b",
+        "accessed_at": "2026-09-27T18:26:10.845612+00:00"
+      },
+      {
+        "tool_use_id": "call_1q7paviw5uprml449w3pom81",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List the LogoFAIL vulnerability research disclosure details: exact title, publication date, CVE identifiers, authors, affected vendors, and the technical summary. Quote exact text.",
+          "url": "https://binarly.io/blog/logofail-a-new-class-of-uefi-vulnerabilities"
+        },
+        "success": true,
+        "content_sha256": "77b69666f733861bd4ff23d972c61a3522c26cab90996a35f6cfff3a3b5ca86e",
+        "accessed_at": "2026-09-27T18:26:10.845622+00:00"
+      },
+      {
+        "tool_use_id": "call_bbtm34eghqaepu37kjszf66m",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Find briefing(s) by Alex Matrosov. Give exact title, date, co-speakers, and description.",
+          "url": "https://www.blackhat.com/eu-23/briefings/schedule/index.html"
+        },
+        "success": true,
+        "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47",
+        "accessed_at": "2026-09-27T18:26:10.845617+00:00"
+      },
+      {
+        "tool_use_id": "call_vpkglemdtrhh1oc15chpd5qm",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Find exact text about the LogoFAIL vulnerability: title, disclosure date, CVE numbers, named researchers/authors, affected vendors, and technical description of the image parsing flaw. Quote exact text from the page.",
+          "url": "https://logofail.com"
+        },
+        "success": false,
+        "content_sha256": "415e894063094cf47adb4abf7c6d433a373fccbea3415ec86d5cf3fc73acee80",
+        "accessed_at": "2026-09-27T18:26:10.845626+00:00"
+      },
+      {
+        "tool_use_id": "call_1a2ztny8rgdgah50bo5p1b5i",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Matrosov\" Binarly DEF CON 2022 OR 2023 firmware supply chain talk title"
+        },
+        "success": true,
+        "content_sha256": "e0393f31119e893b93fb6a8b522da751097ea1086cb445ed652ee1c1ef01e235",
+        "accessed_at": "2026-09-27T18:26:10.845631+00:00"
+      },
+      {
+        "tool_use_id": "call_1y58n5637n8ai5tq7b8d6stm",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List research posts and advisories. For each, give exact title, URL, publication date, named authors, and CVE numbers if any. Quote exact text.",
+          "url": "https://www.binarly.io/research"
+        },
+        "success": true,
+        "content_sha256": "0f5309cd62dfdc25bb877dc4ca719661ef96a89a47e50ddbab6b36830b8685d3",
+        "accessed_at": "2026-09-27T18:26:10.845636+00:00"
+      },
+      {
+        "tool_use_id": "call_aehwpjiu997pmneustqvp4ks",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List repositories under this organization related to UEFI or firmware security. Give exact repo name, description, last update, and any README excerpt mentioning the author or vulnerability research.",
+          "url": "https://github.com/binarly-io"
+        },
+        "success": true,
+        "content_sha256": "b20730243c1877b8d25fa27120abd826b465e774587d82a4afa101568e5194f2",
+        "accessed_at": "2026-09-27T18:26:10.845640+00:00"
+      },
+      {
+        "tool_use_id": "call_n2lu3sbvt3ueiokjhecpff7c",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List the contents and README. Give exact repository description, the list of advisory directories or files (especially any LogoFAIL or CVE-2023 entries), dates from commit history if visible, and any named authors/contributors. Quote exact text.",
+          "url": "https://github.com/binarly-io/Vulnerability-REsearch"
+        },
+        "success": true,
+        "content_sha256": "cf41240a467137f9877d1cdc94093efd52d37f864fb5bc55f6bbb8f00a4d7a7a",
+        "accessed_at": "2026-09-27T18:26:10.845648+00:00"
+      },
+      {
+        "tool_use_id": "call_hdaoz1u5rrcs4sywhdgx7mbc",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List the contents and README. Give exact repository description, list of tool/PoC directories (especially anything named LogoFAIL or related to UEFI image parsing), and any named authors or dates. Quote exact text.",
+          "url": "https://github.com/binarly-io/ToolsAndPoCs"
+        },
+        "success": true,
+        "content_sha256": "ccf77cd593ca99365401d3d18e1c2556e7536a1f600c837b85a1c4a007137252",
+        "accessed_at": "2026-09-27T18:26:10.845653+00:00"
+      },
+      {
+        "tool_use_id": "call_4yvg8dufoxk0cfvlxczbfz88",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List the files and subdirectories in this LogoFAIL directory. Give exact file names, any README content, dates, CVE numbers, and named authors. Quote exact text.",
+          "url": "https://github.com/binarly-io/Vulnerability-REsearch/tree/master/LogoFAIL"
+        },
+        "success": true,
+        "content_sha256": "169902a9dd06e451f2edcdad58fa04e9015243fd5c79f8d6641213627ec066c7",
+        "accessed_at": "2026-09-27T18:26:10.845665+00:00"
+      },
+      {
+        "tool_use_id": "call_sf8e2l1g3jlxcgacf1dw1n7z",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List the files and subdirectories in this PKfail directory. Give exact file names, any README content, dates, CVE numbers, and named authors. Quote exact text.",
+          "url": "https://github.com/binarly-io/Vulnerability-REsearch/tree/master/PKfail"
+        },
+        "success": true,
+        "content_sha256": "f5dc56ab570fe259e770d5c5888f7dd2fc963df16792db9150a623a84a37f753",
+        "accessed_at": "2026-09-27T18:26:10.845659+00:00"
+      },
+      {
+        "tool_use_id": "call_r5467jmlmpf9hs5m53zdrq5s",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Give the full raw content of this advisory file. Include: advisory ID, title, CVE number, publication date, affected vendor/product, CVSS, technical description, and any named researcher/author. Quote exact text.",
+          "url": "https://raw.githubusercontent.com/binarly-io/Vulnerability-REsearch/main/LogoFAIL/BRLY-LOGOFAIL-2023-001.md"
+        },
+        "success": true,
+        "content_sha256": "a417675eaf89260a9cebed207c5cd6ec07df15e355e62acd45a10d96274efd0c",
+        "accessed_at": "2026-09-27T18:26:10.845672+00:00"
+      },
+      {
+        "tool_use_id": "call_dk62kczs9vvb7mh6am4mq0t6",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Give the full raw content of this advisory file. Include: advisory ID, title, CVE number, publication date, affected vendor/product, CVSS, technical description, and any named researcher/author. Quote exact text.",
+          "url": "https://raw.githubusercontent.com/binarly-io/Vulnerability-REsearch/main/PKfail/BRLY-2024-005.md"
+        },
+        "success": true,
+        "content_sha256": "d4a24ccfd767f030284ee663d17eeabeb7fbba0b2a79abcee60cdd4dc9e31f78",
+        "accessed_at": "2026-09-27T18:26:10.845678+00:00"
+      },
+      {
+        "tool_use_id": "call_hu6ddjtyxm7wd5f3o27s23n5",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Give the exact text of this page: the title, the named authors/researchers mentioned, their roles, and any description of what Binarly does and who founded it. Quote exact text where possible.",
+          "url": "https://www.binarly.io/about"
+        },
+        "success": true,
+        "content_sha256": "2cfadecc71f400f5504f342be5a6b5ee75bb71812bef677430bccf306cf3e1a4",
+        "accessed_at": "2026-09-27T18:26:10.845687+00:00"
+      },
+      {
+        "tool_use_id": "call_w0wbng4w9pmk9oieneov6h85",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List the FirmwareBleed directory contents and any README or advisory with title, CVE, date, and named authors. Quote exact text.",
+          "url": "https://raw.githubusercontent.com/binarly-io/Vulnerability-REsearch/main/FirmwareBleed/README.md"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T18:26:10.845683+00:00"
+      },
+      {
+        "tool_use_id": "call_frqhr54vxm13xh62ckf1u4ry",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Show the commit history of this file or repository. List commit authors, dates, and messages. I need to confirm whether Alex Matrosov authored or committed this LogoFAIL advisory research. Quote exact author names and commit messages.",
+          "url": "https://github.com/binarly-io/Vulnerability-REsearch/commits/main/LogoFAIL/BRLY-LOGOFAIL-2023-001.md"
+        },
+        "success": true,
+        "content_sha256": "8aab99a91641a503cbd60032901318c8efccf977e1c129c9db71a4209bc50433",
+        "accessed_at": "2026-09-27T18:26:10.845698+00:00"
+      },
+      {
+        "tool_use_id": "call_zasdy6lcpym7c7oadvs1f571",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List the contributors to this repository with their commit counts and any linked profiles. I need to see if Alex Matrosov (matrosov) is a contributor.",
+          "url": "https://github.com/binarly-io/Vulnerability-REsearch/graphs/contributors"
+        },
+        "success": true,
+        "content_sha256": "4961b62b88063f2886eb07173b8060ed373d56f439d72f4f27abccca2c98ed6b",
+        "accessed_at": "2026-09-27T18:26:10.845693+00:00"
+      },
+      {
+        "tool_use_id": "call_w9fr0ip935ebuwuoqn4xofh7",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-matrosov-works-20260928-022102-404/checkpoint.md",
+          "content": "# Checkpoint — Alex Matrosov / 公开作品与技术演化\n\n## 身份核对\n- person_json: name_or_handle=\"Alex Matrosov\", primary_focus=\"UEFI 与固件供应链漏洞\", social x.com/matrosov, writeup_evidence binarly.io/blog.\n- 多个 WebSearch 摘要声称 Matrosov 是 Binarly \"founder/CEO\"，但 WebFetch 无法抓取 binarly.io/about 正文（JS 渲染，仅返回 header），无法一手核实其头衔。此为 lead_only。\n- x.com/matrosov 返回 402 Payment Required，无法一手核实社交身份。\n\n## 已确认的一手证据（WebFetch 成功）\n1. GitHub org binarly-io 存在，含 Vulnerability-REsearch、ToolsAndPoCs、fwhunt-scan、fwhunt-ida 等仓库。\n2. Vulnerability-REsearch 仓库 README: \"All issues discovered by BINARLY team are subject to a 90-days disclosure deadline.\" License CC BY-NC-ND 4.0。20 个厂商/类别目录（AMD/AMI/EDK2/LogoFAIL/PKfail/FirmwareBleed 等）。\n3. LogoFAIL 目录含 30 个 advisory 文件 BRLY-LOGOFAIL-2023-001..030（系统性研究）。\n4. BRLY-LOGOFAIL-2023-001.md 原文: CVE-2023-40238, \"Memory contents leak / information disclosure vulnerability in DXE driver\", Insyde BmpDecoderDxe, \"The attacker can make it as high as 0xFFFFFFFF and thus display the contents of physical memory (in the form of pixels).\", 缺失 ImageOffset 上界校验。CVSS 6.0。作者署名 \"BINARLY efiXplorer team\"。披露时间线: Lenovo PSIRT 通知 2023-06-21, Insyde 确认 2023-09-10, CVE 分配 2023-11-27, Insyde advisory 2023-12-06, BINARLY 公开 2024-06-19。\n5. PKfail: BRLY-2024-005.md, CVE-2024-8105, \"Usage of default test keys leads to complete Secure Boot bypass\", AMI 默认测试 PK 导致 Secure Boot 绕过, CVSS 8.2, CERT/CC VU#455367, 多厂商(AMI/Acer/Dell/Gigabyte/Fujitsu/Supermicro 等), 署名 \"BINARLY REsearch team\", 厂商 advisory 约 2024-07-25。\n\n## 归因限制（关键缺口）\n- LogoFAIL advisory 文件 commit 作者 = GitHub 用户 \"yeggor\"，而非 Matrosov。无法从代码层面一手证实 Matrosov 个人撰写了具体 advisory。\n- 所有 advisory 署名为集体 \"BINARLY team\"，未点名 Matrosov。Matrosov 与 LogoFAIL/PKfail 的个人关联只能 inferred，未 document。\n- BlackHat.com 议程页 403，logofail.com ECONNREFUSED，Binarly 研究页 JS 渲染无正文 → 无法一手确认 Matrosov 是 LogoFAIL 的 Black Hat EU 2023 主讲人（搜索摘要如此声称，但不能引用摘要）。\n\n## 演化/方法学信号（来自一手 advisory 正文）\n- LogoFAIL: 同一类图像解析缺陷（BMP ImageOffset 缺上界）跨 30 个厂商/型号的 DXE 驱动 → 系统化扫描 + 模式化漏洞类研究。\n- PKfail: 跨数百型号的 PK 默认密钥检测，检测字符串 \"DO NOT TRUST\"/\"DO NOT SHIP\" → 自动化检测 + 供应链横向分析。\n- 工具链: fwhunt-scan / fwhunt-ida / efiXplorer → 固件模块扫描与 IDA 插件，工具建设是研究复用机制。\n- 90 天披露时限政策 → 规范化披露流程。\n\n## 缺口清单\n1. Matrosov 在 Binarly 的确切头衔未一手核实。\n2. Matrosov 与 LogoFAIL/PKfail 的个人作者关系未一手证实（仅集体署名）。\n3. 早期工作（ESET/NVIDIA 等履历）未取得一手来源。\n4. Black Hat/DEF CON 具体演讲年份与讲题未一手核实（议程页 403）。\n5. LogoFAIL 披露事件本身的 Black Hat 演讲事实未一手核实。\n"
+        },
+        "success": true,
+        "content_sha256": "7a5a35adaa5dbee0213667c050722aa2b7dff7f63293e0de8d0845248e13b5f5",
+        "accessed_at": "2026-09-27T18:26:10.845703+00:00"
+      },
+      {
+        "tool_use_id": "call_ky1fnkqxvoufcl3xu1w4d3xz",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-matrosov-works-20260928-022102-404/output.json",
+          "content": "{\n  \"person\": \"Alex Matrosov\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"person_json 记录 name_or_handle='Alex Matrosov', primary_focus='UEFI 与固件供应链漏洞', social=x.com/matrosov, writeup_evidence=binarly.io/blog。多个 WebSearch 摘要声称 Matrosov 是 Binarly 创始人/CEO，但 WebFetch 无法抓取 binarly.io/about 正文（页面仅返回 header 与 'Skip to main content'，正文由 JS 渲染缺失），故头衔未能一手核实，只能视为 lead_only。x.com/matrosov 抓取返回 402 Payment Required，社交身份未一手核实。可一手核实的是：binarly-io GitHub 组织存在且托管 UEFI 固件研究仓库（Vulnerability-REsearch、ToolsAndPoCs、fwhunt-scan、fwhunt-ida），与 person_json 所列 primary_focus 一致；该组织的研究方向与 Matrosov 的公开定位方向相符，但 Matrosov 个人在这些 advisory 中的具体署名未在一手抓取中出现（见归因缺口）。\",\n  \"items\": [\n    {\n      \"id\": \"matrosov-works-001\",\n      \"date\": \"2023-12-06\",\n      \"claim\": \"Binarly 以 'LogoFAIL' 名义披露了一类 UEFI 固件图像解析漏洞，影响多个 IBV（Insyde/AMI/Phoenix 等）及其下游 OEM；漏洞类根因为 DXE 阶段 BMP 图像解析时对 BmpHeader->ImageOffset 缺少上界校验，可被用于泄露物理内存内容。代表性 advisory BRLY-LOGOFAIL-2023-001 对应 CVE-2023-40238。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"研究呈现'漏洞类'而非孤立缺陷的模式：同一目录下含 BRLY-LOGOFAIL-2023-001 至 -030 共 30 个 advisory，覆盖多个厂商与型号，表明研究方法从单一漏洞转向系统化扫描同类解析缺陷并横向归因到上游 IBV 供应链。披露流程规范化（Lenovo PSIRT 2023-06-21 通知 → Insyde 2023-09-10 确认 → CVE 2023-11-27 → 2023-12-06 公开），体现成熟的多厂商协同披露节奏。\",\n      \"short_quote\": \"The attacker can make it as high as 0xFFFFFFFF and thus display the contents of physical memory (in the form of pixels).\",\n      \"source\": {\n        \"title\": \"BRLY-LOGOFAIL-2023-001 — Memory contents leak / information disclosure vulnerability in DXE driver (raw markdown)\",\n        \"url\": \"https://raw.githubusercontent.com/binarly-io/Vulnerability-REsearch/main/LogoFAIL/BRLY-LOGOFAIL-2023-001.md\",\n        \"published\": \"2024-06-19\",\n        \"source_type\": \"advisory / 漏洞公告（一手）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"matrosov-works-002\",\n      \"date\": \"2024-07-25\",\n      \"claim\": \"Binarly 披露 'PKfail'（CVE-2024-8105）：设备厂商使用 AMI 提供的默认测试 Platform Key 作为 UEFI Secure Boot 根信任，导致 Secure Boot 完全绕过；影响 AMI、Acer、Dell、Gigabyte、Fujitsu、Supermicro 等多厂商数百型号，CERT/CC 案号 VU#455367。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"相对 LogoFAIL 的内存破坏类，PKfail 转向供应链信任根（密钥管理）缺陷，研究范围从固件解析逻辑扩展到固件供应链根信任；检测方法依赖 PK 证书 subject/issuer 字段是否含 'DO NOT TRUST'/'DO NOT SHIP'，体现可自动化、可规模化复现的检测工程化，并在 Gigabyte GB-BER5-5500 上完成端到端确认。这是对 LogoFAIL 方法的横向迁移：先大规模扫描定位共性，再端到端验证。\",\n      \"short_quote\": \"PKfail is the result of device vendors using as Platform Key a default test key provided by AMI.\",\n      \"source\": {\n        \"title\": \"BRLY-2024-005 — Usage of default test keys leads to complete Secure Boot bypass (raw markdown)\",\n        \"url\": \"https://raw.githubusercontent.com/binarly-io/Vulnerability-REsearch/main/PKfail/BRLY-2024-005.md\",\n        \"published\": \"2024-07-25\",\n        \"source_type\": \"advisory / 漏洞公告（一手）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"matrosov-works-003\",\n      \"date\": \"2026-09-07\",\n      \"claim\": \"binarly-io GitHub 组织托管结构化的固件漏洞研究仓库 Vulnerability-REsearch，根目录按厂商/类别分设 20 个目录（AMD、AMI、Clevo、Dell、EDK2、FirmwareBleed、Fujitsu、Gigabyte、HP、Insyde、Intel、Lenovo、Lighttpd、LogoFAIL、Microsoft、PKfail、Qualcomm、SecretsResearch、Supermicro、U-Boot），并声明采用 90 天披露时限政策。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"公开作品的载体从单一 writeup 演化为按厂商/类别组织的公开 advisory 仓库；90 天披露时限作为明文政策写入 README，表明披露流程制度化。多厂商目录并存说明研究覆盖面横向扩张，且以可检索的版本化形式沉淀。\",\n      \"short_quote\": \"All issues discovered by BINARLY team are subject to a 90-days disclosure deadline.\",\n      \"source\": {\n        \"title\": \"binarly-io/Vulnerability-REsearch — README（GitHub 仓库页）\",\n        \"url\": \"https://github.com/binarly-io/Vulnerability-REsearch\",\n        \"published\": \"2026-09-07\",\n        \"source_type\": \"代码仓库 / README（一手）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"matrosov-works-004\",\n      \"date\": \"2025-05-02\",\n      \"claim\": \"binarly-io 维护面向 UEFI 固件的分析与检测工具链：fwhunt-scan（分析 UEFI 固件并用 FwHunt 规则检测已知漏洞，GPL-3.0）、fwhunt-ida（在 IDA 中生成 FwHunt 规则的辅助插件）、以及 efiXplorer（advisory 中署名 'BINARLY efiXplorer team'）。LogoFAIL advisory 作者署名即标注为 'BINARLY efiXplorer team'。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"工具建设与漏洞研究形成正向循环：自研 IDA 插件与扫描规则格式（FwHunt）被复用于漏洞发现与检测规则沉淀，'advisory 署名 efiXplorer team' 表明 advisory 写作与工具产出由同一团队完成。这是将一次性漏洞发现转化为可复用检测能力的机制，体现重复练习与工具沉淀。\",\n      \"short_quote\": \"Tools for analyzing UEFI firmware and checking UEFI modules with FwHunt rules\",\n      \"source\": {\n        \"title\": \"binarly-io/fwhunt-scan — 仓库描述（GitHub 组织页）\",\n        \"url\": \"https://github.com/binarly-io\",\n        \"published\": \"2025-05-02\",\n        \"source_type\": \"代码仓库 / 工具（一手）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"matrosov-works-005\",\n      \"date\": \"2024-06-21\",\n      \"claim\": \"LogoFAIL advisory 文件 BRLY-LOGOFAIL-2023-001 的唯一一次提交由 GitHub 用户 'yeggor' 完成，提交信息为 'Add LogoFAIL advisories (BRLY-LOGOFAIL-2023-001 - BRLY-LOGOFAIL-2023-030)'；该提交记录中未出现 Alex Matrosov 的姓名或账号。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"在代码/文档层面，LogoFAIL 的 advisory 文件由 'yeggor' 提交，advisory 正文署名为集体 'BINARLY efiXplorer team'。这构成对'作品归因到 Matrosov 个人'的限制：仓库与团队产物可一手证实，但具体文件的个人作者关系无法从一手提交记录中证实，需作为推断缺口处理，不得将团队成果直接等同于 Matrosov 个人作品。\",\n      \"short_quote\": \"Add LogoFAIL advisories (BRLY-LOGOFAIL-2023-001 - BRLY-LOGOFAIL-2023-030)\",\n      \"source\": {\n        \"title\": \"BRLY-LOGOFAIL-2023-001.md commit history — GitHub\",\n        \"url\": \"https://github.com/binarly-io/Vulnerability-REsearch/commits/main/LogoFAIL/BRLY-LOGOFAIL-2023-001.md\",\n        \"published\": \"2024-06-21\",\n        \"source_type\": \"提交历史（一手）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"matrosov-works-006\",\n      \"date\": \"2026-09-28\",\n      \"claim\": \"Matrosov 个人是否为 LogoFAIL/PKfail 的研究者或主讲人（如 Black Hat Europe 2023）未能一手核实：BlackHat.com 议程页返回 403 Forbidden，logofail.com 返回 ECONNREFUSED，binarly.io/research 与 binarly.io/about 正文因 JS 渲染缺失；WebSearch 摘要声称 Matrosov 在 Black Hat 讲解 LogoFAIL，但按任务要求不得引用搜索摘要作为证据。\",\n      \"status\": \"unknown\",\n      \"growth_signal\": \"归因缺口：将个人姓名与团队成果关联所需的'演讲事实'或'作者署名'一手来源在本轮抓取中均不可得（403/ECONNREFUSED/JS 渲染空正文）。在缺乏一手证据时按任务约束留空，不以搜索摘要合理化补全。后续可通过 Black Hat EU 2023 议程镜像、Binarly 团队页或 Matrosov 个人主页一手核实。\",\n      \"source\": {\n        \"title\": \"（无可用一手来源；Black Hat 议程 403、logofail.com 拒绝连接、Binarly 页面 JS 渲染无正文）\",\n        \"url\": \"https://www.blackhat.com/eu-23/briefings/schedule/index.html\",\n        \"published\": \"unknown\",\n        \"source_type\": \"议程页（抓取失败）\",\n        \"level\": \"lead_only\"\n      }\n    },\n    {\n      \"id\": \"matrosov-works-007\",\n      \"date\": \"unknown\",\n      \"claim\": \"Matrosov 早期职业履历（常被关联为 ESET、NVIDIA 等公司的威胁分析/逆向工程背景）未取得任何一手来源；person_json 亦未提供早期 writeup 线索。本地种子笔记为'没有发现本地种子材料'。\",\n      \"status\": \"unknown\",\n      \"growth_signal\": \"技术演化维度存在早期阶段缺口：无法从一手来源重建 Matrosov 从恶意软件逆向/打包器分析（早期常见方向）到 UEFI 固件供应链研究（后期方向）的转折节点与反馈机制。此为该维度的结构性未解问题，需后续专门检索早期 writeup 与履历。\",\n      \"source\": {\n        \"title\": \"（无；本地种子笔记声明未发现本地种子材料）\",\n        \"url\": \"local_seed_note.md\",\n        \"published\": \"unknown\",\n        \"source_type\": \"本地种子（空）\",\n        \"level\": \"lead_only\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"WebSearch 摘要多次声称 Alex Matrosov 是 Binarly 的 'founder and CEO'；但 WebFetch 无法一手核实（binarly.io/about 仅返回 header，正文 JS 渲染缺失）。该头衔目前仅为二手搜索摘要，未达 documented，不应作为事实陈述。\",\n    \"WebSearch 摘要将 LogoFAIL 披露描述为 2023 年 12 月 Black Hat Europe；一手 advisory 文件 BRLY-LOGOFAIL-2023-001 将 BINARLY 公开日期标注为 2024-06-19，而 Insyde advisory 发布于 2023-12-06，两者时间点不同（厂商 advisory 发布 vs BINARLY 自身公开），需区分披露时间线的不同节点，避免混用。\"\n  ],\n  \"gaps\": [\n    \"Matrosov 在 Binarly 的确切头衔（founder/CEO/研究员等）未一手核实；binarly.io/about 正文因 JS 渲染抓取失败。\",\n    \"Matrosov 与 LogoFAIL/PKfail 的个人作者/主讲关系未一手证实：advisory 正文署名为集体 'BINARLY team'/'BINARLY efiXplorer team'，LogoFAIL advisory 文件提交者为 'yeggor' 而非 Matrosov。\",\n    \"Black Hat EU 2023（及任何其他会议）LogoFAIL/PKfail 的主讲事实未一手核实：BlackHat.com 议程 403、logofail.com ECONNREFUSED。\",\n    \"Matrosov 早期职业履历（ESET/NVIDIA 等常被关联的背景）无任何一手来源，person_json 与本地种子均未提供早期 writeup 线索。\",\n    \"技术演化的'早期阶段→固件研究方向'转折点、导师/同伴、失败与反馈机制等成长机制缺乏一手证据，无法重建完整演化曲线。\",\n    \"本轮 WebFetch 多数返回 403/404/ECONNREFUSED 或 JS 渲染空正文（Black Hat、logofail.com、binarly.io/about、binarly.io/research、binarly.io/blog、binarly.io/posts/...、binarly.io/advisories/...），有效一手来源集中在 raw.githubusercontent.com 与 github.com 仓库页，覆盖面有限。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "4bb8bb0e8317d8201c8e25776eccca50b4058a0d1f38f613914c689eeaa4fff1",
+        "accessed_at": "2026-09-27T18:26:10.845707+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790533570845723000-alex-matrosov-works.json",
+    "label": "Alex Matrosov:works",
+    "elapsed_seconds": 308.44,
+    "prompt_sha256": "cd6743ac972ad1d1dd8435ec7996b51a425d49eedd06edfbd5183523625267c1",
+    "num_turns": 19,
+    "total_cost_usd": 1.123973,
+    "usage": {
+      "input_tokens": 21411,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 278976,
+      "output_tokens": 7633,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 113467,
+        "outputTokens": 16686,
+        "cacheReadInputTokens": 278976,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.123973,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": true,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

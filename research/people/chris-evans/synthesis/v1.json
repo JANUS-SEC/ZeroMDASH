@@ -1,0 +1,413 @@
+{
+  "person": "Chris Evans",
+  "expertise": [
+    "浏览器与跨域逻辑漏洞：同源策略、CSS 跨域信息窃取、Cookie Forcing、E4X 注入，并以跨浏览器对比为方法",
+    "内存破坏漏洞：解析器堆缓冲区溢出、UAF/double-free、glibc 单字节堆溢出，及其对 ASLR/canary 等缓解的绕过分析",
+    "软件沙箱与系统调用过滤：vsftpd 的 ptrace 与 seccomp filter 沙箱、Chromium Linux 沙箱",
+    "规模化模糊测试基础设施（Clusterfuzzing）与漏洞发现效能的可量化度量",
+    "漏洞披露政策与外部激励机制设计：Chromium 安全赏金、Project Zero 90 天自动公开政策",
+    "服务器端图像处理栈缺陷与 ASLR 缺失的远程证明、跨用户数据泄露原语组合",
+    "缓解原语设计：把整类漏洞成因分析转化为加固补丁建议（safe memcpy、glibc malloc unlink 校验）",
+    "历史硬件逆向工程：芯片开盖、ROM 提取、软盘保护与模拟信号恢复"
+  ],
+  "stages": [
+    {
+      "period": "2008–2009",
+      "stage": "协议层与跨域逻辑缺陷的公开取证起点",
+      "capability_change": "以真实世界协议部署缺陷（FTP-over-SSL 数据连接可窃取）与浏览器跨域逻辑缺陷为公开 writeup 主题，形成“系统接口与边界”分析风格而非单点内存破坏；早期即与同伴合讲会议议题，跨域 leakiness 研究线在 PacSec、HiTB Dubai 反复复用。同期开始把内核沙箱经验（vsftpd ptrace 沙箱）作为独立于漏洞研究的防御工事并行维护。",
+      "evidence_ids": [
+        "ce-timeline-2008-02-13-ftpssl",
+        "ce-timeline-2008-02-27-ghostscript",
+        "ce-timeline-2008-03-05-sunjdk",
+        "ce-timeline-2008-11-16-pacsec",
+        "ce-ext-005",
+        "ce-ext-006",
+        "ce-timeline-2009-02-18-vsftpd-seccomp",
+        "ce-timeline-2009-10-19-chromium-sandbox",
+        "ce-ext-003",
+        "ce-ext-004",
+        "ce-ext-002"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2009–2012",
+      "stage": "沙箱防御工事的代际更替与浏览器攻击面对接",
+      "capability_change": "把自维护的部署单元（vsftpd）作为沙箱实验载体，将 ptrace 沙箱经多轮 pre-release 测试迭代为 seccomp filter 沙箱；同时把内核沙箱经验迁移到 Chromium Linux 沙箱与 Pepper Flash 攻击面，形成“边研究边建设防御工具”的并行闭环，并对接浏览器插件攻击面。",
+      "evidence_ids": [
+        "ce-timeline-2009-02-18-vsftpd-seccomp",
+        "ce-timeline-2012-04-09-vsftpd-seccomp-filter",
+        "ce-timeline-2012-07-04-chrome-linux-flash-sandbox",
+        "ce-timeline-2009-10-19-chromium-sandbox",
+        "ce-ext-003",
+        "ce-ext-004"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2010–2012",
+      "stage": "披露激励机制的工程化与迭代",
+      "capability_change": "从个人漏洞发现转向设计外部激励机制：发起 Chromium 安全赏金计划，并以半年运行结果上调赏金额度；把披露时限量化为可衡量的工程目标（60 天修复期限，以自身 6 天修复周期为参照）。对行业赛事（Pwn2Own）规则提出可核验的批评与改进建议，将研究判断反馈到公开机制层面。",
+      "evidence_ids": [
+        "ce-works-2010-01-chromium-bounty-launch",
+        "ce-timeline-2010-01-28-chromium-bounty-launch",
+        "ce-timeline-2010-07-20-chromium-bounty-increase",
+        "ce-works-2010-02-responsible-disclosure-deadline",
+        "ce-timeline-2010-07-20-responsible-disclosure",
+        "ce-timeline-2012-03-22-pwn2own-critique",
+        "ce-ext-007"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2011–2014",
+      "stage": "内存破坏跨栈延伸与缓解效能评估",
+      "capability_change": "攻击面从浏览器扩展到底层库（glibc fnmatch 栈指针环绕，绕过 canary 与 ASLR）与 PDF 解析栈（Foxit 任意文件写，136 字符 PoC）。方法上从个案 PoC 升级为对整类漏洞的缓解效能工程化评估：系统分析 ASAN 作为运行时缓解对线性溢出、非线性溢出、UAF、未初始化值、坏 vtable 五类的覆盖与可绕过边界，并明确写出每种缓解的失败模式。",
+      "evidence_ids": [
+        "ce-timeline-2011-02-24-glibc-fnmatch",
+        "ce-timeline-2011-03-05-foxit-pdf",
+        "ce-timeline-2011-03-08-chrome10",
+        "ce-works-2014-02-asan-as-protection"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2014–2017",
+      "stage": "研究能力制度化为团队与缓解原语设计",
+      "capability_change": "将个人白帽倡导制度化为全职跨厂商研究团队 Project Zero，设定不限定软件范围、仅向厂商报告且补丁后公开的披露流程。同期把对整类漏洞的成因分析直接转化为加固补丁建议（safe memcpy、glibc malloc unlink 长度链校验），从分析者向缓解设计者延伸，主题贯穿浏览器与底层库两个栈。",
+      "evidence_ids": [
+        "ce-works-2014-01-flash-0day-catalog-whitehat",
+        "chris-evans-decisions-002",
+        "chris-evans-decisions-003",
+        "ce-community-01",
+        "ce-community-02",
+        "ce-works-2017-02-glibc-malloc-and-source-blocking"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2017",
+      "stage": "服务器图像栈与 ASLR 缺失的远程证明",
+      "capability_change": "研究目标从浏览器客户端转向服务器端图像处理栈，连续审查 ImageMagick 多个解码器（RLE 未初始化内存、PSD zlib 解压未校验）的未初始化内存与越界读缺陷，将其复用为 ASLR 缺失的远程证明工具与跨用户认证 Cookie 外泄原语，体现把单个漏洞原语组合为可验证探测链条（漏洞→ASLR 状态判断→数据外泄）的能力。",
+      "evidence_ids": [
+        "ce-works-2017-01-imagemagick-aslr-proof"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2020–2021",
+      "stage": "硬件逆向与跨学科协作输出",
+      "capability_change": "研究主题转向历史芯片硬件逆向（Intel 8271 开盖与 ROM 提取、软盘保护机制、模拟信号恢复），方法论上引入芯片开盖、对照实验与向原始作者求证；在自身不擅长的领域（信号处理）主动寻求同伴协作，并以公开致谢与交叉引用回馈协作网络。研究能力延续体现为“推翻错误假设、转向硬件证据”的反馈机制，但已偏离浏览器/内存破坏主线。",
+      "evidence_ids": [
+        "ce-timeline-2020-11-16-intel8271",
+        "ce-deepconv-001",
+        "ce-deepconv-002",
+        "ce-deepconv-003",
+        "ce-community-04",
+        "ce-community-05",
+        "ce-community-07"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "A. 部署单元作为沙箱实验载体：builder 与 breaker 并行",
+      "starting_conditions": "2009 年起自维护一个真实部署的守护进程 vsftpd，同时持续进行漏洞研究；具备内核沙箱（ptrace、seccomp）工程能力。",
+      "repeated_practice": "把自维护的 vsftpd 作为沙箱/加固实验载体，先用 ptrace 沙箱，再经多轮 pre-release（pre1/pre2）公开测试，迭代为 seccomp filter 沙箱；把同一沙箱主题跨项目迁移到 Chromium Linux 沙箱与 Pepper Flash 攻击面。",
+      "feedback": "pre-release 公开测试反馈与浏览器加固特性的落地情况（Chrome 10 单日发放超 1.6 万美元赏金并新增插件阻断等特性）作为机制运行结果的信号。",
+      "intermediate_capability": "形成“边研究边建设防御工具”的重复练习闭环，沙箱设计能力可跨项目迁移。",
+      "observed_outcomes": [
+        "vsftpd-2.1.0 引入 ptrace 沙箱（2009）",
+        "vsftpd-3.0.0 以 seccomp filter 替代 ptrace，经 pre1/pre2 测试落地（2012）",
+        "Chromium Linux 沙箱议题在 HITB Malaysia 与同事合讲，并撰写专题帖（2009-10）",
+        "Chrome 20 在 Linux 以 Pepper Flash 附带沙箱，64 位 Ubuntu 叠加 seccomp filter（2012-07）"
+      ],
+      "evidence_ids": [
+        "ce-timeline-2009-02-18-vsftpd-seccomp",
+        "ce-timeline-2012-04-09-vsftpd-seccomp-filter",
+        "ce-timeline-2012-07-04-chrome-linux-flash-sandbox",
+        "ce-timeline-2009-10-19-chromium-sandbox",
+        "ce-ext-003",
+        "ce-ext-004",
+        "ce-timeline-2011-03-08-chrome10"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "vsftpd 与 Chromium 沙箱议题的并存也可能源于 2009 年转入 Chromium 项目后职责范围自然扩展（reported），而非其主动并行 builder/breaker 的个人特有方法；组织平台提供的工作面是竞争性解释。"
+    },
+    {
+      "name": "B. 规模化 fuzzing 基础设施与效果可量化度量",
+      "starting_conditions": "2009 年已将模糊测试作为系统性漏洞发现工具公开记录（Clusterfuzzing、packet boundaries 方向），并与 Chromium 平台资源结合。",
+      "repeated_practice": "命名并公开 fuzzing 方向（Clusterfuzzing），并以因果链（大规模 fuzzing → 修补 → 0day 干涸期）量化论证其效果，引用 Tavis Ormandy 对 Flash 的 80+ 修复导致近一年无内存破坏 0day 作为对照例证。",
+      "feedback": "以修补后 0day 间隔作为方法有效性的可测量反馈，并以 Adobe Flash 在野 0day 清单（自 2010 年起 18 个以上）作为论证数据。",
+      "intermediate_capability": "把大规模 fuzzing 识别为可复用的有效方法论，并将单点漏洞研究升级为“研究方法本身的有效性”与“研究生态”视角。",
+      "observed_outcomes": [
+        "公开 Clusterfuzzing 与 packet boundary fuzzing 方向（2009）",
+        "以 Ormandy 80+ 修复与近一年无 Flash 内存破坏 0day 论证白帽研究压缩 0day 供给（2014-03）",
+        "号召研究者离开 greyhat、转向关键软件白帽研究，并提出 Internet Bug Bounty 对近乎确定可利用漏洞提供最高 10000 美元奖励"
+      ],
+      "evidence_ids": [
+        "ce-ext-009",
+        "ce-works-2014-01-flash-0day-catalog-whitehat",
+        "chris-evans-decisions-002"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "fuzzing 效果度量的论证高度依赖 Ormandy 的 Flash 修补数据作为外部对照例证，而非 Evans 自身 fuzzing 产出的直接统计；其个人 fuzzing 产出在公开 GitHub 未呈现（ce-community-06 仅有复古计算仓库），方法有效性主张部分依赖他人成果作旁证。"
+    },
+    {
+      "name": "C. 披露政策与外部激励机制制度化",
+      "starting_conditions": "2010 年已介入披露政策辩论（60 天修复期限），并对行业赛事规则提出批评；具备把个人研究判断上升为流程主张的公开写作习惯。",
+      "repeated_practice": "从设计 Chromium 赏金计划并以运行结果上调额度，到把披露时限量化为工程目标，再到组建 Project Zero 并设定不限定软件范围、仅向厂商报告、补丁后公开、外部数据库记录的标准化披露流程（90 天自动公开）。",
+      "feedback": "Project Zero 90 天政策在 2014–2015 年间引发与 Microsoft 的公开争议（Microsoft 批评到点公开使客户面临风险），使披露政策本身成为社区公开辩论对象；团队据此接受厂商与同行反向反馈。",
+      "intermediate_capability": "把个人白帽倡导制度化为全职团队与成文、可预测、自动到点的披露政策，将厂商回应时间从可变博弈固化为公开约束。",
+      "observed_outcomes": [
+        "发起 Chromium 安全赏金计划并以运行结果上调额度（2010）",
+        "提出 60 天修复期限并把自身 6 天修复周期作参照（2010-07）",
+        "Project Zero 公告（Researcher Herder，不限定软件范围、补丁后公开，2014-07）",
+        "90 天自动公开政策引发与 Microsoft 公开争议（2014–2015）"
+      ],
+      "evidence_ids": [
+        "ce-works-2010-01-chromium-bounty-launch",
+        "ce-works-2010-02-responsible-disclosure-deadline",
+        "ce-timeline-2010-01-28-chromium-bounty-launch",
+        "ce-timeline-2010-07-20-chromium-bounty-increase",
+        "ce-timeline-2010-07-20-responsible-disclosure",
+        "chris-evans-decisions-003",
+        "ce-community-01",
+        "ce-community-02",
+        "ce-community-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "Project Zero 创立与 90 天政策由团队而非个人决定，Evans 的“创始负责人”角色为 inferred（ce-community-01/08），其个人对政策的具体塑造程度缺一手材料；政策的制度化也可能由 Google 组织资源驱动而非个人方法迁移。Microsoft 争端细节仅以搜索摘要级线索获得，未取得一手正文。"
+    },
+    {
+      "name": "D. 跨上下文对比与原语链组合",
+      "starting_conditions": "2008 年起即以跨浏览器对比与历史溯源（2006–2010 漏洞历史）为方法，评估同一漏洞对多个上下文的影响。",
+      "repeated_practice": "反复对同一缺陷跨上下文评估（Sun JDK JPEG 同时威胁 applet 与服务端图像处理；CSS 跨域对比 IE/Opera/Chrome）；后期把单个漏洞原语组合为可验证探测链条（ImageMagick RLE/PSD 未初始化内存 → ASLR 状态判断 → 跨用户认证 Cookie 外泄）。",
+      "feedback": "跨浏览器修补速度对比与赏金回收（Dropbox 343 美元、Yahoo! 28000 美元慈善捐款并弃用 ImageMagick）作为原语链有效性的外部反馈。",
+      "intermediate_capability": "形成“同一缺陷多影响域”分析与“漏洞→状态判断→数据外泄”原语链组合能力，可跨软件栈复用。",
+      "observed_outcomes": [
+        "Sun JDK JPEG 跨 applet 与服务端上下文评估（2008-03）",
+        "IE8 CSS 跨域窃取对比 Opera/Chrome 修补速度（2010-08）",
+        "ImageMagick RLE/PSD 漏洞链证明 Dropbox/Box ASLR 缺失并外泄 Yahoo! Mail 认证 Cookie（2017）"
+      ],
+      "evidence_ids": [
+        "ce-timeline-2008-03-05-sunjdk",
+        "ce-works-2010-03-ie-cross-origin-css",
+        "ce-works-2017-01-imagemagick-aslr-proof"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "跨上下文对比是 2008–2010 年浏览器安全研究圈的通行方法，未必为个人特有；原语链组合能力在 2017 年仅由单篇 ImageMagick 系列支撑，样本单一，跨时期重复性证据有限。"
+    },
+    {
+      "name": "E. 承认缺口、迭代与同伴协作的反馈回路",
+      "starting_conditions": "在跨学科任务（信号处理、芯片硬件）中自述知识有限，且自陈开发中出现大量 bug；具备向外部专长与原始作者求证的习惯。",
+      "repeated_practice": "公开记录失败方法（MCS-48 错误解码理论、激进低通滤波）与迭代过程（至电压趋势法 100% 恢复数据）；以多物理驱动器对照实验并直接联系原作者 Simon Hosler 求证 1980 年代实现细节；在 Intel 8271 逆向中致谢 Sean Riddle、Ken Shirriff 等分工协作。",
+      "feedback": "对照实验与原作者求证作为补强证据；推翻错误假设、转向硬件证据以修正方向；对工具质量做不留情自评（“none of it is close to production quality”），不将半成品包装为成果。",
+      "intermediate_capability": "在自身不擅长的领域主动寻求同伴协作与外部专长，以分工完成单一研究者难以闭合的逆向任务，并以公开致谢与交叉引用回馈协作网络。",
+      "observed_outcomes": [
+        "Intel 8271 芯片开盖逆向，发现双处理器架构并提取未知指令集（2020-11）",
+        "软盘保护机制对照实验并向原作者求证（2020-12）",
+        "软盘信号恢复经失败方法迭代至 100% 恢复（2021-05）",
+        "以博客为入口开放恢复服务邀约并回流至 stardot.org.uk 论坛与 FloppyControlApp 项目"
+      ],
+      "evidence_ids": [
+        "ce-deepconv-001",
+        "ce-deepconv-002",
+        "ce-deepconv-003",
+        "ce-timeline-2020-11-16-intel8271",
+        "ce-community-05",
+        "ce-community-07"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "该机制的全部一手材料均来自 2020–2021 复古计算自述（conversations 维度三篇均为硬件/复古项目），未覆盖浏览器漏洞侧的同伴协作与迭代习惯；其“坚持而非天赋”的自我归因属本人自述，缺乏独立佐证，可能受叙事重构影响。把硬件阶段的协作模式回溯解释其全部生涯的成长机制，存在跨领域外推风险。"
+    }
+  ],
+  "tensions": [
+    "person_json 的 selected_conference_evidence 标注为 Black Hat US/EU / BlueHat，但一手可抓取的演讲证据为 PacSec 2008、HiTB Dubai 2009、HITB Malaysia 2009；Black Hat / BlueHat 未能一手确认（blackhat.com 返回 403），与 seed 标注存在尚未消解的张力。",
+    "Project Zero 创立角色（ce-community-01/08）与 90 天政策由团队而非个人决定，Evans 的“创始负责人”角色为 inferred，其个人对政策的具体塑造程度缺一手材料；制度化既可归因于个人方法迁移，也可归因于 Google 组织资源。",
+    "2015 年离开 Google 转投 Stripe 的转职在二手叙述与模型生成搜索中出现，但无一手声明或权威媒体正文（The Register/Threatpost 返回 404，Ars Technica 抓取被拒，LinkedIn 返回 999），转职事实与确切时间未落实，构成事实缺口而非矛盾。",
+    "2020–2021 年输出集中在复古计算与硬件逆向，已偏离 person_json 的 primary_focus（浏览器与内存破坏漏洞）；该阶段能力延续与浏览器漏洞主线的衔接关系未有一手陈述佐证。",
+    "WebSearch 在本运行中多次返回模型自述而非真实结果，多条线索（“too many breakers”、post-Google 履历、PZ-Microsoft 争端细节）仅停留在 lead_only，未升级为 documented/reported，影响外部视角与决策维度的证据等级。"
+  ],
+  "transferable_practices": [
+    "以真实部署的自维护软件作为沙箱/加固实验载体，并通过多轮 pre-release 公开测试迭代机制代际（ptrace→seccomp filter）。",
+    "把单一漏洞研究判断上升为可量化、可预测的披露政策（固定时限、自动到点公开、外部数据库记录），将厂商回应时间从逐案博弈固化为公开约束。",
+    "对自建激励机制以运行结果迭代参数（赏金额度、时限长度），而非一次设定后固定。",
+    "对整类漏洞做缓解效能的逐类工程化评估，并明确写出每种缓解的失败模式与覆盖边界。",
+    "把单个漏洞原语组合为可验证的探测链条（漏洞→状态判断→数据外泄），并在跨上下文（客户端/服务端、跨浏览器）中复用。",
+    "在跨学科任务中公开记录失败方法与迭代过程，以对照实验与向原始作者求证作为补强证据，并对工具质量做不留情自评。",
+    "在自身不擅长的领域主动寻求同伴分工协作，以公开致谢与交叉引用回馈协作网络。"
+  ],
+  "non_transferable_conditions": [
+    "2009 年转入 Chromium/Google Chrome 项目（ce-ext-002 reported）带来的平台资源、同事网络与 Chrome 攻击面，是沙箱迁移与赏金计划得以落地的组织条件，非个人方法可独立复制。",
+    "2014 年创立 Project Zero 所依托的 Google 全职资源与跨厂商研究授权，是把个人白帽倡导制度化为团队的前提，普通研究者无此组织授权。",
+    "person_json 标注的 Black Hat US/EU / BlueHat 会议渠道未一手确认，不能作为可迁移的公开传播条件使用。",
+    "ImageMagick/Adobe Flash 在野 0day 清单与 Ormandy 80+ 修复等外部对照数据，是 2014 年白帽倡导论证的关键旁证，依赖他人成果与特定时期攻击者供给状态，不具个人可复现性。",
+    "2020–2021 硬件逆向所需的芯片开盖（Sean Riddle）、硅分析（Ken Shirriff）等协作专长与复古计算社区（stardot.org.uk）属于特定同伴网络，非浏览器漏洞研究通用条件。"
+  ],
+  "open_questions": [
+    "Chris Evans 离开 Google/Project Zero 及加入 Stripe 的一手声明与确切时间未取得，其浏览器/跨厂商研究经验如何迁移到金融科技平台安全无法判定。",
+    "2013–2019 年博客内容未抓取，该时段是否存在 PDF/PDFium/Chrome OS/sandbox 相关 writeup 与 CVE 未知，浏览器主线的技术演化存在证据缺口。",
+    "Chrome/PDF/PDFium 相关具体漏洞与 CVE 编号未在已抓取页面出现，person_json 的 primary_focus 在 Chrome 内核具体 CVE 层面缺乏一手 writeup 证据。",
+    "Project Zero 与 Microsoft 关于 90 天披露的公开争端缺乏可抓取的一手来源（厂商声明、新闻正文或 PZ 官方博客回应帖），争端细节停留在搜索摘要级。",
+    "Chris Evans 与 Project Zero 现团队成员（Jann Horn、James Forshaw 等）之间的具体协作与同行反馈机制未取得一手材料，仅能由同处一团队作推断。",
+    "Evans 离开 Stripe 之后去向及方法论是否再次转型未有一手材料；近期博客转向复古计算/硬件逆向与浏览器漏洞方向的转折关系未有一手陈述佐证。",
+    "其“坚持而非天赋”的自我归因属本人自述，缺乏独立第三方对其成长过程的评价；可取得的成长机制证据多为本人自述，外部独立佐证不足。",
+    "教育背景、雇主序列及各雇主起止日期（包括是否及何时在 Google、Sun、Apple 任职）无任何一手证据，列为缺口。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/chris-evans-synthesis-v1-20260928-050707-621",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790543601693899000-chris-evans-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "79062b3d-5211-4cc8-9a6e-a6281536de22",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_lq0rfsr2521z6ia3ki5hkgju",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/chris-evans-synthesis-v1-20260928-050707-621/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T21:13:21.742149+00:00"
+      },
+      {
+        "tool_use_id": "call_3h3wwmm97f9urzw50raetryq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/chris-evans-synthesis-v1-20260928-050707-621/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "ee244f975b271ce87b222f37f9a6e03a2aae7ca4b4c832c3796bbb6fea777ef8",
+        "accessed_at": "2026-09-27T21:13:21.742177+00:00"
+      },
+      {
+        "tool_use_id": "call_j5c3rfufkxy274gqc0jpjfl5",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/chris-evans-synthesis-v1-20260928-050707-621/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "c8ef98f0873fc50b42eb8c59c41f9b97957d5010062e3500fa2c91f21b3fe5a3",
+        "accessed_at": "2026-09-27T21:13:21.742186+00:00"
+      },
+      {
+        "tool_use_id": "call_jjsbgsv0k88r2jbsqag8k96y",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/chris-evans-synthesis-v1-20260928-050707-621/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "d257df68815003cc3d4efbdaee880ab51a8ca875351a23cbab40477eb801baca",
+        "accessed_at": "2026-09-27T21:13:21.742266+00:00"
+      },
+      {
+        "tool_use_id": "call_yfmmg89ftkd42arvkl6qrb01",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/chris-evans-synthesis-v1-20260928-050707-621/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-27T21:13:21.742273+00:00"
+      },
+      {
+        "tool_use_id": "call_3lxmay6mp4fusokys22wjpov",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/chris-evans-synthesis-v1-20260928-050707-621/inputs/evidence_json.json",
+          "offset": 975
+        },
+        "success": true,
+        "content_sha256": "8ef65507e4f7d1218742c5ee08151ab93f68851293204ae81c75c4dc65f10439",
+        "accessed_at": "2026-09-27T21:13:21.742299+00:00"
+      },
+      {
+        "tool_use_id": "call_ftulqbg3wmwnuxre19u5m6gx",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/chris-evans-synthesis-v1-20260928-050707-621/checkpoint.md",
+          "content": "# Checkpoint — Chris Evans 综合节点\n\n## 输入状态\n- person_json: 已读（scarybeasts，浏览器与内存破坏漏洞，Black Hat US/EU / BlueHat 线索未落地）\n- evidence_json: 已读全六维 + targeted（空）\n- revision_context: 空（首次综合）\n\n## 证据有效性\n- 无效（verified_in_run=false，已弃用）：\n  - ce-ext-011（\"too many breakers\" 搜索摘要，未抓取正文）\n  - chris-evans-decisions-001（Pwn2Own 批评，未核实）\n- Pwn2Own 批评事实由 ce-timeline-2012-03-22-pwn2own-critique（documented, verified=true）覆盖，可用\n- inferred 但 verified=true：ce-community-01/03/08（PZ 创始角色二手陈述），按推断处理，置信度 medium\n\n## 综合框架\n- 7 stages（2008–2009 协议/跨域对比 → 2009–2012 沙箱防御并行 → 2010–2012 披露激励工程化 → 2011–2014 内存破坏跨栈+缓解评估 → 2014–2017 团队制度化+缓解原语设计 → 2017 服务器图像栈+ASLR证明链 → 2020–2021 硬件逆向+跨学科协作）\n- 5 mechanisms（A builder-breaker 并行 / B fuzzing 基建+效果度量 / C 披露激励制度化 / D 跨上下文对比与原语链 / E 承认缺口+迭代+协作）\n- 每个 stage/mechanism 仅引用 verified_in_run=true 证据\n\n## 竞争性解释（全局）\nEvans 可见能力增长显著受组织平台（2009 Chromium 团队、2014 Google Project Zero）与同事网络中介；2020–2021 输出可能反映离开平台后的个人爱好而非领域持续增长。\n\n## 待办\n- 写 output.json，逐字段对照 schema\n"
+        },
+        "success": true,
+        "content_sha256": "9a19cfd62d639cb4442f49d20329ff443519e3b227ea17d0b78b36e0d1cb0d5e",
+        "accessed_at": "2026-09-27T21:13:21.742821+00:00"
+      },
+      {
+        "tool_use_id": "call_ra1he1jxifh222pr74ustkgn",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/chris-evans-synthesis-v1-20260928-050707-621/output.json",
+          "content": "{\n  \"person\": \"Chris Evans\",\n  \"expertise\": [\n    \"浏览器与跨域逻辑漏洞：同源策略、CSS 跨域信息窃取、Cookie Forcing、E4X 注入，并以跨浏览器对比为方法\",\n    \"内存破坏漏洞：解析器堆缓冲区溢出、UAF/double-free、glibc 单字节堆溢出，及其对 ASLR/canary 等缓解的绕过分析\",\n    \"软件沙箱与系统调用过滤：vsftpd 的 ptrace 与 seccomp filter 沙箱、Chromium Linux 沙箱\",\n    \"规模化模糊测试基础设施（Clusterfuzzing）与漏洞发现效能的可量化度量\",\n    \"漏洞披露政策与外部激励机制设计：Chromium 安全赏金、Project Zero 90 天自动公开政策\",\n    \"服务器端图像处理栈缺陷与 ASLR 缺失的远程证明、跨用户数据泄露原语组合\",\n    \"缓解原语设计：把整类漏洞成因分析转化为加固补丁建议（safe memcpy、glibc malloc unlink 校验）\",\n    \"历史硬件逆向工程：芯片开盖、ROM 提取、软盘保护与模拟信号恢复\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2008–2009\",\n      \"stage\": \"协议层与跨域逻辑缺陷的公开取证起点\",\n      \"capability_change\": \"以真实世界协议部署缺陷（FTP-over-SSL 数据连接可窃取）与浏览器跨域逻辑缺陷为公开 writeup 主题，形成“系统接口与边界”分析风格而非单点内存破坏；早期即与同伴合讲会议议题，跨域 leakiness 研究线在 PacSec、HiTB Dubai 反复复用。同期开始把内核沙箱经验（vsftpd ptrace 沙箱）作为独立于漏洞研究的防御工事并行维护。\",\n      \"evidence_ids\": [\n        \"ce-timeline-2008-02-13-ftpssl\",\n        \"ce-timeline-2008-02-27-ghostscript\",\n        \"ce-timeline-2008-03-05-sunjdk\",\n        \"ce-timeline-2008-11-16-pacsec\",\n        \"ce-ext-005\",\n        \"ce-ext-006\",\n        \"ce-timeline-2009-02-18-vsftpd-seccomp\",\n        \"ce-timeline-2009-10-19-chromium-sandbox\",\n        \"ce-ext-003\",\n        \"ce-ext-004\",\n        \"ce-ext-002\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2009–2012\",\n      \"stage\": \"沙箱防御工事的代际更替与浏览器攻击面对接\",\n      \"capability_change\": \"把自维护的部署单元（vsftpd）作为沙箱实验载体，将 ptrace 沙箱经多轮 pre-release 测试迭代为 seccomp filter 沙箱；同时把内核沙箱经验迁移到 Chromium Linux 沙箱与 Pepper Flash 攻击面，形成“边研究边建设防御工具”的并行闭环，并对接浏览器插件攻击面。\",\n      \"evidence_ids\": [\n        \"ce-timeline-2009-02-18-vsftpd-seccomp\",\n        \"ce-timeline-2012-04-09-vsftpd-seccomp-filter\",\n        \"ce-timeline-2012-07-04-chrome-linux-flash-sandbox\",\n        \"ce-timeline-2009-10-19-chromium-sandbox\",\n        \"ce-ext-003\",\n        \"ce-ext-004\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2010–2012\",\n      \"stage\": \"披露激励机制的工程化与迭代\",\n      \"capability_change\": \"从个人漏洞发现转向设计外部激励机制：发起 Chromium 安全赏金计划，并以半年运行结果上调赏金额度；把披露时限量化为可衡量的工程目标（60 天修复期限，以自身 6 天修复周期为参照）。对行业赛事（Pwn2Own）规则提出可核验的批评与改进建议，将研究判断反馈到公开机制层面。\",\n      \"evidence_ids\": [\n        \"ce-works-2010-01-chromium-bounty-launch\",\n        \"ce-timeline-2010-01-28-chromium-bounty-launch\",\n        \"ce-timeline-2010-07-20-chromium-bounty-increase\",\n        \"ce-works-2010-02-responsible-disclosure-deadline\",\n        \"ce-timeline-2010-07-20-responsible-disclosure\",\n        \"ce-timeline-2012-03-22-pwn2own-critique\",\n        \"ce-ext-007\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2011–2014\",\n      \"stage\": \"内存破坏跨栈延伸与缓解效能评估\",\n      \"capability_change\": \"攻击面从浏览器扩展到底层库（glibc fnmatch 栈指针环绕，绕过 canary 与 ASLR）与 PDF 解析栈（Foxit 任意文件写，136 字符 PoC）。方法上从个案 PoC 升级为对整类漏洞的缓解效能工程化评估：系统分析 ASAN 作为运行时缓解对线性溢出、非线性溢出、UAF、未初始化值、坏 vtable 五类的覆盖与可绕过边界，并明确写出每种缓解的失败模式。\",\n      \"evidence_ids\": [\n        \"ce-timeline-2011-02-24-glibc-fnmatch\",\n        \"ce-timeline-2011-03-05-foxit-pdf\",\n        \"ce-timeline-2011-03-08-chrome10\",\n        \"ce-works-2014-02-asan-as-protection\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2014–2017\",\n      \"stage\": \"研究能力制度化为团队与缓解原语设计\",\n      \"capability_change\": \"将个人白帽倡导制度化为全职跨厂商研究团队 Project Zero，设定不限定软件范围、仅向厂商报告且补丁后公开的披露流程。同期把对整类漏洞的成因分析直接转化为加固补丁建议（safe memcpy、glibc malloc unlink 长度链校验），从分析者向缓解设计者延伸，主题贯穿浏览器与底层库两个栈。\",\n      \"evidence_ids\": [\n        \"ce-works-2014-01-flash-0day-catalog-whitehat\",\n        \"chris-evans-decisions-002\",\n        \"chris-evans-decisions-003\",\n        \"ce-community-01\",\n        \"ce-community-02\",\n        \"ce-works-2017-02-glibc-malloc-and-source-blocking\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2017\",\n      \"stage\": \"服务器图像栈与 ASLR 缺失的远程证明\",\n      \"capability_change\": \"研究目标从浏览器客户端转向服务器端图像处理栈，连续审查 ImageMagick 多个解码器（RLE 未初始化内存、PSD zlib 解压未校验）的未初始化内存与越界读缺陷，将其复用为 ASLR 缺失的远程证明工具与跨用户认证 Cookie 外泄原语，体现把单个漏洞原语组合为可验证探测链条（漏洞→ASLR 状态判断→数据外泄）的能力。\",\n      \"evidence_ids\": [\n        \"ce-works-2017-01-imagemagick-aslr-proof\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2020–2021\",\n      \"stage\": \"硬件逆向与跨学科协作输出\",\n      \"capability_change\": \"研究主题转向历史芯片硬件逆向（Intel 8271 开盖与 ROM 提取、软盘保护机制、模拟信号恢复），方法论上引入芯片开盖、对照实验与向原始作者求证；在自身不擅长的领域（信号处理）主动寻求同伴协作，并以公开致谢与交叉引用回馈协作网络。研究能力延续体现为“推翻错误假设、转向硬件证据”的反馈机制，但已偏离浏览器/内存破坏主线。\",\n      \"evidence_ids\": [\n        \"ce-timeline-2020-11-16-intel8271\",\n        \"ce-deepconv-001\",\n        \"ce-deepconv-002\",\n        \"ce-deepconv-003\",\n        \"ce-community-04\",\n        \"ce-community-05\",\n        \"ce-community-07\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"A. 部署单元作为沙箱实验载体：builder 与 breaker 并行\",\n      \"starting_conditions\": \"2009 年起自维护一个真实部署的守护进程 vsftpd，同时持续进行漏洞研究；具备内核沙箱（ptrace、seccomp）工程能力。\",\n      \"repeated_practice\": \"把自维护的 vsftpd 作为沙箱/加固实验载体，先用 ptrace 沙箱，再经多轮 pre-release（pre1/pre2）公开测试，迭代为 seccomp filter 沙箱；把同一沙箱主题跨项目迁移到 Chromium Linux 沙箱与 Pepper Flash 攻击面。\",\n      \"feedback\": \"pre-release 公开测试反馈与浏览器加固特性的落地情况（Chrome 10 单日发放超 1.6 万美元赏金并新增插件阻断等特性）作为机制运行结果的信号。\",\n      \"intermediate_capability\": \"形成“边研究边建设防御工具”的重复练习闭环，沙箱设计能力可跨项目迁移。\",\n      \"observed_outcomes\": [\n        \"vsftpd-2.1.0 引入 ptrace 沙箱（2009）\",\n        \"vsftpd-3.0.0 以 seccomp filter 替代 ptrace，经 pre1/pre2 测试落地（2012）\",\n        \"Chromium Linux 沙箱议题在 HITB Malaysia 与同事合讲，并撰写专题帖（2009-10）\",\n        \"Chrome 20 在 Linux 以 Pepper Flash 附带沙箱，64 位 Ubuntu 叠加 seccomp filter（2012-07）\"\n      ],\n      \"evidence_ids\": [\n        \"ce-timeline-2009-02-18-vsftpd-seccomp\",\n        \"ce-timeline-2012-04-09-vsftpd-seccomp-filter\",\n        \"ce-timeline-2012-07-04-chrome-linux-flash-sandbox\",\n        \"ce-timeline-2009-10-19-chromium-sandbox\",\n        \"ce-ext-003\",\n        \"ce-ext-004\",\n        \"ce-timeline-2011-03-08-chrome10\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"vsftpd 与 Chromium 沙箱议题的并存也可能源于 2009 年转入 Chromium 项目后职责范围自然扩展（reported），而非其主动并行 builder/breaker 的个人特有方法；组织平台提供的工作面是竞争性解释。\"\n    },\n    {\n      \"name\": \"B. 规模化 fuzzing 基础设施与效果可量化度量\",\n      \"starting_conditions\": \"2009 年已将模糊测试作为系统性漏洞发现工具公开记录（Clusterfuzzing、packet boundaries 方向），并与 Chromium 平台资源结合。\",\n      \"repeated_practice\": \"命名并公开 fuzzing 方向（Clusterfuzzing），并以因果链（大规模 fuzzing → 修补 → 0day 干涸期）量化论证其效果，引用 Tavis Ormandy 对 Flash 的 80+ 修复导致近一年无内存破坏 0day 作为对照例证。\",\n      \"feedback\": \"以修补后 0day 间隔作为方法有效性的可测量反馈，并以 Adobe Flash 在野 0day 清单（自 2010 年起 18 个以上）作为论证数据。\",\n      \"intermediate_capability\": \"把大规模 fuzzing 识别为可复用的有效方法论，并将单点漏洞研究升级为“研究方法本身的有效性”与“研究生态”视角。\",\n      \"observed_outcomes\": [\n        \"公开 Clusterfuzzing 与 packet boundary fuzzing 方向（2009）\",\n        \"以 Ormandy 80+ 修复与近一年无 Flash 内存破坏 0day 论证白帽研究压缩 0day 供给（2014-03）\",\n        \"号召研究者离开 greyhat、转向关键软件白帽研究，并提出 Internet Bug Bounty 对近乎确定可利用漏洞提供最高 10000 美元奖励\"\n      ],\n      \"evidence_ids\": [\n        \"ce-ext-009\",\n        \"ce-works-2014-01-flash-0day-catalog-whitehat\",\n        \"chris-evans-decisions-002\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"fuzzing 效果度量的论证高度依赖 Ormandy 的 Flash 修补数据作为外部对照例证，而非 Evans 自身 fuzzing 产出的直接统计；其个人 fuzzing 产出在公开 GitHub 未呈现（ce-community-06 仅有复古计算仓库），方法有效性主张部分依赖他人成果作旁证。\"\n    },\n    {\n      \"name\": \"C. 披露政策与外部激励机制制度化\",\n      \"starting_conditions\": \"2010 年已介入披露政策辩论（60 天修复期限），并对行业赛事规则提出批评；具备把个人研究判断上升为流程主张的公开写作习惯。\",\n      \"repeated_practice\": \"从设计 Chromium 赏金计划并以运行结果上调额度，到把披露时限量化为工程目标，再到组建 Project Zero 并设定不限定软件范围、仅向厂商报告、补丁后公开、外部数据库记录的标准化披露流程（90 天自动公开）。\",\n      \"feedback\": \"Project Zero 90 天政策在 2014–2015 年间引发与 Microsoft 的公开争议（Microsoft 批评到点公开使客户面临风险），使披露政策本身成为社区公开辩论对象；团队据此接受厂商与同行反向反馈。\",\n      \"intermediate_capability\": \"把个人白帽倡导制度化为全职团队与成文、可预测、自动到点的披露政策，将厂商回应时间从可变博弈固化为公开约束。\",\n      \"observed_outcomes\": [\n        \"发起 Chromium 安全赏金计划并以运行结果上调额度（2010）\",\n        \"提出 60 天修复期限并把自身 6 天修复周期作参照（2010-07）\",\n        \"Project Zero 公告（Researcher Herder，不限定软件范围、补丁后公开，2014-07）\",\n        \"90 天自动公开政策引发与 Microsoft 公开争议（2014–2015）\"\n      ],\n      \"evidence_ids\": [\n        \"ce-works-2010-01-chromium-bounty-launch\",\n        \"ce-works-2010-02-responsible-disclosure-deadline\",\n        \"ce-timeline-2010-01-28-chromium-bounty-launch\",\n        \"ce-timeline-2010-07-20-chromium-bounty-increase\",\n        \"ce-timeline-2010-07-20-responsible-disclosure\",\n        \"chris-evans-decisions-003\",\n        \"ce-community-01\",\n        \"ce-community-02\",\n        \"ce-community-03\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"Project Zero 创立与 90 天政策由团队而非个人决定，Evans 的“创始负责人”角色为 inferred（ce-community-01/08），其个人对政策的具体塑造程度缺一手材料；政策的制度化也可能由 Google 组织资源驱动而非个人方法迁移。Microsoft 争端细节仅以搜索摘要级线索获得，未取得一手正文。\"\n    },\n    {\n      \"name\": \"D. 跨上下文对比与原语链组合\",\n      \"starting_conditions\": \"2008 年起即以跨浏览器对比与历史溯源（2006–2010 漏洞历史）为方法，评估同一漏洞对多个上下文的影响。\",\n      \"repeated_practice\": \"反复对同一缺陷跨上下文评估（Sun JDK JPEG 同时威胁 applet 与服务端图像处理；CSS 跨域对比 IE/Opera/Chrome）；后期把单个漏洞原语组合为可验证探测链条（ImageMagick RLE/PSD 未初始化内存 → ASLR 状态判断 → 跨用户认证 Cookie 外泄）。\",\n      \"feedback\": \"跨浏览器修补速度对比与赏金回收（Dropbox 343 美元、Yahoo! 28000 美元慈善捐款并弃用 ImageMagick）作为原语链有效性的外部反馈。\",\n      \"intermediate_capability\": \"形成“同一缺陷多影响域”分析与“漏洞→状态判断→数据外泄”原语链组合能力，可跨软件栈复用。\",\n      \"observed_outcomes\": [\n        \"Sun JDK JPEG 跨 applet 与服务端上下文评估（2008-03）\",\n        \"IE8 CSS 跨域窃取对比 Opera/Chrome 修补速度（2010-08）\",\n        \"ImageMagick RLE/PSD 漏洞链证明 Dropbox/Box ASLR 缺失并外泄 Yahoo! Mail 认证 Cookie（2017）\"\n      ],\n      \"evidence_ids\": [\n        \"ce-timeline-2008-03-05-sunjdk\",\n        \"ce-works-2010-03-ie-cross-origin-css\",\n        \"ce-works-2017-01-imagemagick-aslr-proof\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"跨上下文对比是 2008–2010 年浏览器安全研究圈的通行方法，未必为个人特有；原语链组合能力在 2017 年仅由单篇 ImageMagick 系列支撑，样本单一，跨时期重复性证据有限。\"\n    },\n    {\n      \"name\": \"E. 承认缺口、迭代与同伴协作的反馈回路\",\n      \"starting_conditions\": \"在跨学科任务（信号处理、芯片硬件）中自述知识有限，且自陈开发中出现大量 bug；具备向外部专长与原始作者求证的习惯。\",\n      \"repeated_practice\": \"公开记录失败方法（MCS-48 错误解码理论、激进低通滤波）与迭代过程（至电压趋势法 100% 恢复数据）；以多物理驱动器对照实验并直接联系原作者 Simon Hosler 求证 1980 年代实现细节；在 Intel 8271 逆向中致谢 Sean Riddle、Ken Shirriff 等分工协作。\",\n      \"feedback\": \"对照实验与原作者求证作为补强证据；推翻错误假设、转向硬件证据以修正方向；对工具质量做不留情自评（“none of it is close to production quality”），不将半成品包装为成果。\",\n      \"intermediate_capability\": \"在自身不擅长的领域主动寻求同伴协作与外部专长，以分工完成单一研究者难以闭合的逆向任务，并以公开致谢与交叉引用回馈协作网络。\",\n      \"observed_outcomes\": [\n        \"Intel 8271 芯片开盖逆向，发现双处理器架构并提取未知指令集（2020-11）\",\n        \"软盘保护机制对照实验并向原作者求证（2020-12）\",\n        \"软盘信号恢复经失败方法迭代至 100% 恢复（2021-05）\",\n        \"以博客为入口开放恢复服务邀约并回流至 stardot.org.uk 论坛与 FloppyControlApp 项目\"\n      ],\n      \"evidence_ids\": [\n        \"ce-deepconv-001\",\n        \"ce-deepconv-002\",\n        \"ce-deepconv-003\",\n        \"ce-timeline-2020-11-16-intel8271\",\n        \"ce-community-05\",\n        \"ce-community-07\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"该机制的全部一手材料均来自 2020–2021 复古计算自述（conversations 维度三篇均为硬件/复古项目），未覆盖浏览器漏洞侧的同伴协作与迭代习惯；其“坚持而非天赋”的自我归因属本人自述，缺乏独立佐证，可能受叙事重构影响。把硬件阶段的协作模式回溯解释其全部生涯的成长机制，存在跨领域外推风险。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 的 selected_conference_evidence 标注为 Black Hat US/EU / BlueHat，但一手可抓取的演讲证据为 PacSec 2008、HiTB Dubai 2009、HITB Malaysia 2009；Black Hat / BlueHat 未能一手确认（blackhat.com 返回 403），与 seed 标注存在尚未消解的张力。\",\n    \"Project Zero 创立角色（ce-community-01/08）与 90 天政策由团队而非个人决定，Evans 的“创始负责人”角色为 inferred，其个人对政策的具体塑造程度缺一手材料；制度化既可归因于个人方法迁移，也可归因于 Google 组织资源。\",\n    \"2015 年离开 Google 转投 Stripe 的转职在二手叙述与模型生成搜索中出现，但无一手声明或权威媒体正文（The Register/Threatpost 返回 404，Ars Technica 抓取被拒，LinkedIn 返回 999），转职事实与确切时间未落实，构成事实缺口而非矛盾。\",\n    \"2020–2021 年输出集中在复古计算与硬件逆向，已偏离 person_json 的 primary_focus（浏览器与内存破坏漏洞）；该阶段能力延续与浏览器漏洞主线的衔接关系未有一手陈述佐证。\",\n    \"WebSearch 在本运行中多次返回模型自述而非真实结果，多条线索（“too many breakers”、post-Google 履历、PZ-Microsoft 争端细节）仅停留在 lead_only，未升级为 documented/reported，影响外部视角与决策维度的证据等级。\"\n  ],\n  \"transferable_practices\": [\n    \"以真实部署的自维护软件作为沙箱/加固实验载体，并通过多轮 pre-release 公开测试迭代机制代际（ptrace→seccomp filter）。\",\n    \"把单一漏洞研究判断上升为可量化、可预测的披露政策（固定时限、自动到点公开、外部数据库记录），将厂商回应时间从逐案博弈固化为公开约束。\",\n    \"对自建激励机制以运行结果迭代参数（赏金额度、时限长度），而非一次设定后固定。\",\n    \"对整类漏洞做缓解效能的逐类工程化评估，并明确写出每种缓解的失败模式与覆盖边界。\",\n    \"把单个漏洞原语组合为可验证的探测链条（漏洞→状态判断→数据外泄），并在跨上下文（客户端/服务端、跨浏览器）中复用。\",\n    \"在跨学科任务中公开记录失败方法与迭代过程，以对照实验与向原始作者求证作为补强证据，并对工具质量做不留情自评。\",\n    \"在自身不擅长的领域主动寻求同伴分工协作，以公开致谢与交叉引用回馈协作网络。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"2009 年转入 Chromium/Google Chrome 项目（ce-ext-002 reported）带来的平台资源、同事网络与 Chrome 攻击面，是沙箱迁移与赏金计划得以落地的组织条件，非个人方法可独立复制。\",\n    \"2014 年创立 Project Zero 所依托的 Google 全职资源与跨厂商研究授权，是把个人白帽倡导制度化为团队的前提，普通研究者无此组织授权。\",\n    \"person_json 标注的 Black Hat US/EU / BlueHat 会议渠道未一手确认，不能作为可迁移的公开传播条件使用。\",\n    \"ImageMagick/Adobe Flash 在野 0day 清单与 Ormandy 80+ 修复等外部对照数据，是 2014 年白帽倡导论证的关键旁证，依赖他人成果与特定时期攻击者供给状态，不具个人可复现性。\",\n    \"2020–2021 硬件逆向所需的芯片开盖（Sean Riddle）、硅分析（Ken Shirriff）等协作专长与复古计算社区（stardot.org.uk）属于特定同伴网络，非浏览器漏洞研究通用条件。\"\n  ],\n  \"open_questions\": [\n    \"Chris Evans 离开 Google/Project Zero 及加入 Stripe 的一手声明与确切时间未取得，其浏览器/跨厂商研究经验如何迁移到金融科技平台安全无法判定。\",\n    \"2013–2019 年博客内容未抓取，该时段是否存在 PDF/PDFium/Chrome OS/sandbox 相关 writeup 与 CVE 未知，浏览器主线的技术演化存在证据缺口。\",\n    \"Chrome/PDF/PDFium 相关具体漏洞与 CVE 编号未在已抓取页面出现，person_json 的 primary_focus 在 Chrome 内核具体 CVE 层面缺乏一手 writeup 证据。\",\n    \"Project Zero 与 Microsoft 关于 90 天披露的公开争端缺乏可抓取的一手来源（厂商声明、新闻正文或 PZ 官方博客回应帖），争端细节停留在搜索摘要级。\",\n    \"Chris Evans 与 Project Zero 现团队成员（Jann Horn、James Forshaw 等）之间的具体协作与同行反馈机制未取得一手材料，仅能由同处一团队作推断。\",\n    \"Evans 离开 Stripe 之后去向及方法论是否再次转型未有一手材料；近期博客转向复古计算/硬件逆向与浏览器漏洞方向的转折关系未有一手陈述佐证。\",\n    \"其“坚持而非天赋”的自我归因属本人自述，缺乏独立第三方对其成长过程的评价；可取得的成长机制证据多为本人自述，外部独立佐证不足。\",\n    \"教育背景、雇主序列及各雇主起止日期（包括是否及何时在 Google、Sun、Apple 任职）无任何一手证据，列为缺口。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "c5eb5421077a74048cd700efa81a85be811403b5748d3214e91ba0f64aac4ab6",
+        "accessed_at": "2026-09-27T21:13:21.742825+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790543601742912000-chris-evans-synthesis-v1.json",
+    "label": "Chris Evans:synthesis:v1",
+    "elapsed_seconds": 374.11,
+    "prompt_sha256": "153b710644ed4d60bf57f80e5c65bead29cc4d20dcfde13a535348c103c69156",
+    "num_turns": 9,
+    "total_cost_usd": 0.808962,
+    "usage": {
+      "input_tokens": 43505,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 137024,
+      "output_tokens": 20917,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 43505,
+        "outputTokens": 20917,
+        "cacheReadInputTokens": 137024,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.808962,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

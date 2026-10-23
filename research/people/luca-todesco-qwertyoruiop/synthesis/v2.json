@@ -1,0 +1,319 @@
+{
+  "person": "Luca Todesco (qwertyoruiop)",
+  "expertise": [
+    "iOS 与 macOS（XNU）内核漏洞利用",
+    "iOS 越狱链构建（内核漏洞利用与 KPP 绕过）",
+    "代码签名绕过原语构建",
+    "利用原语抽象与可复用工具化（64-bit ROP 与堆读写）",
+    "公开 PoC 发布工程（SHA1 校验与供应链完整性）"
+  ],
+  "stages": [
+    {
+      "period": "2012",
+      "stage": "iOS 应用层起点",
+      "capability_change": "以 iOS 平台 Objective-C 应用层项目（Craftplayer）起步，技术栈起点为应用层开发而非内核漏洞；建立公开仓库发布习惯。",
+      "evidence_ids": [
+        "kpwn-2012-craftplayer"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2015",
+      "stage": "XNU/macOS 内核提权与多目标利用原语构建",
+      "capability_change": "目标从应用层转向 macOS XNU 内核本地提权，建立单 CVE 堆溢出利用与 KASLR 绕过技术基线（vpwn，演示输出含 'broke out of kaslr'）；将 64-bit ROP 原语封装为可复用函数 jump/alloc/mem/ptr（phpmess），体现利用原语抽象化与工具化倾向；确立以可运行 PoC 公开披露漏洞、并以 README 形式发表利用演示的发布习惯（vpwn/tpwn/phpmess，其中 tpwn README 标注 'poc or gtfo' 为具体作品处短引文）；同期发布 NULLGuard 防御 kext 缓解 NULL 指针解引用类漏洞，形成攻击 PoC 与防御工具的双向产出。",
+      "evidence_ids": [
+        "kpwn-2015-03-vpwn",
+        "kpwn-2015-08-tpwn",
+        "kpwn-2015-phpmess",
+        "lt-tl-001",
+        "lt-tl-002",
+        "dec-tpwn-osx-lpe-2015",
+        "dec-kpwn-multi-project-attack-defense-portfolio"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2016",
+      "stage": "自主漏洞挖掘与利用链复现",
+      "capability_change": "从利用已知漏洞转向自主挖掘（935csbypass，README 自述 'my own bug this time'，短引文），技术目标转向 iOS 代码签名绕过，采用 trampoline 方式在无 JIT 情形下脱离 ROP 加载任意代码（'get out of rop without JIT'，短引文）；fork Trident 复现 Pegasus/Trident iOS 内核利用链，建立对已公开高水平利用链的复盘学习习惯；尝试通用 XNU 利用工具包建设但未完成公开（xnuexp-toolkit，README 仅 'ETA: son'，作为未达成项据实记录而非成果）。",
+      "evidence_ids": [
+        "kpwn-2016-935csbypass",
+        "kpwn-2016-xnuexp-toolkit",
+        "kpwn-2016-12-trident-fork"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2016-12 至 2017-01",
+      "stage": "iOS 10 越狱链与协作发布",
+      "capability_change": "复杂度从单 CVE LPE 上升为内核漏洞利用与 KPP 绕过的完整越狱链（yalu102）；从单人工作转为与 Marco Grassi 协作（mach_portal + Yalu 于 2016-12-22 释放，yalu102 于 2017-01-26 释放）；面对 iPhone 7/A10 KPP 限制如实公开支持边界（iPhone 7 仅支持至 iOS 10.1.1）；公开发布中规避受版权保护的 IOKit headers 分发并要求 SHA1 校验以防第三方投毒；Project Zero（Ian Beer）于 2016-12 发布 mach_portal，qwertyoruiopz 与 Marco Grassi 对同一漏洞 CVE-2017-2370 独立发现与利用；Apple 于 2017-01-23 发布 iOS 10.2.1 修补 Yalu 所用漏洞，构成厂商对作品所依赖漏洞的事实性回应。",
+      "evidence_ids": [
+        "kpwn-2017-yalu102",
+        "dec-mach-portal-yalu-2016-12-22",
+        "dec-yalu102-2017-01-26-collab-marcograssi",
+        "dec-yalu102-iphone7-kpp-1011-tradeoff",
+        "dec-yalu102-iokit-headers-copyright-stance",
+        "ext-01",
+        "ext-02",
+        "ext-04",
+        "r1-p0-mach-portal-2017-04",
+        "lt-tl-006",
+        "lt-tl-007"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017-12 至 2018",
+      "stage": "跨平台扩展与协作网络",
+      "capability_change": "技术关注从 iOS 内核向 PlayStation 4 内核与 iOS 逆向工程资源整理扩展（fork PS4-5.05-Kernel-Exploit、维护 iOSRE 资源集）；LiberiOS（2017-12-25）将 Ian Beer（Google Project Zero）与 Jonathan Levin 纳入协作列名，扩展协作网络。",
+      "evidence_ids": [
+        "kpwn-2018-ps4-iosre",
+        "ext-03"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "公开 PoC 与 README 演示的发布工程",
+      "starting_conditions": "2012 年起以 iOS/Objective-C 应用层项目建立公开仓库发布习惯（Craftplayer）；具备 iOS 平台熟悉度基础。",
+      "repeated_practice": "vpwn 以可运行演示输出公开（含 'broke out of kaslr'）；tpwn 以 0day 状态公开并标注 'poc or gtfo'（具体作品处短引文）；phpmess 封装 jump/alloc/mem/ptr 可复用原语并复用 'poc||gtfo' 标签；935csbypass 公开 cs_bypass.m 与 cs_tramp.s；yalu102 以 Beta 1–7 分批发布并附 SHA1 校验与下载源告警。",
+      "feedback": "Apple 于 2017-01-23 发布 iOS 10.2.1 修补 Yalu 所用漏洞，构成厂商对作品所依赖漏洞的事实性回应（ext-04）；Wikipedia 权威二手条目记载 Yalu/yalu102 发布（ext-01/ext-02）；Trident fork 表明对已公开利用链的复盘学习。",
+      "intermediate_capability": "将利用封装为可复现、可校验的公开制品的能力，以及对发布物供应链完整性（SHA1 校验、版权规避）的工程意识。",
+      "observed_outcomes": [
+        "yalu102 Beta 1–7 + SHA1 校验 + IOKit headers 版权立场",
+        "NULLGuard 防御 kext 与攻击 PoC 并存",
+        "phpmess 跨目标可复用 ROP 原语（jump/alloc/mem/ptr）"
+      ],
+      "evidence_ids": [
+        "kpwn-2012-craftplayer",
+        "kpwn-2015-03-vpwn",
+        "kpwn-2015-08-tpwn",
+        "kpwn-2015-phpmess",
+        "kpwn-2016-935csbypass",
+        "kpwn-2016-12-trident-fork",
+        "kpwn-2017-yalu102",
+        "ext-01",
+        "ext-02",
+        "ext-04",
+        "dec-yalu102-iokit-headers-copyright-stance",
+        "dec-kpwn-multi-project-attack-defense-portfolio",
+        "lt-tl-007"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "公开披露习惯可能受越狱社区发表规范驱动而非个人能力选择；'poc or gtfo' 为社区通用标签，非个人独创，故仅作为具体作品处短引文保留，不作为叙述类别名。"
+    },
+    {
+      "name": "跨内核/跨目标研究迁移与资源整理",
+      "starting_conditions": "2015 年建立 XNU/macOS 内核提权基线（vpwn/tpwn）。",
+      "repeated_practice": "XNU 内核 LPE（vpwn/tpwn）→ PHP 解释器 UaF 利用并附 macOS rop 文件（phpmess，文件名 pm_rop_osx.php 与 pm_rop_findexec_osx.php）→ fork PS4-5.05-Kernel-Exploit（JavaScript）→ 维护 iOSRE 逆向工程资源集（Shell）；fork Trident 复现 Pegasus 利用链。",
+      "feedback": "PS4 Orbis OS 为 FreeBSD 衍生，与 XNU（Mach/BSD 混合内核）在 BSD 派生组件上存在部分同源关系，使内核利用概念可在相关内核间部分迁移；iOSRE 作为知识资源输出形态。",
+      "intermediate_capability": "跨相关内核/目标的研究注意力迁移与知识资源整理能力。",
+      "observed_outcomes": [
+        "PS4-5.05-Kernel-Exploit fork",
+        "iOSRE 逆向工程资源集",
+        "phpmess 跨目标 rop 文件"
+      ],
+      "evidence_ids": [
+        "kpwn-2015-03-vpwn",
+        "kpwn-2015-08-tpwn",
+        "kpwn-2015-phpmess",
+        "kpwn-2018-ps4-iosre",
+        "kpwn-2016-12-trident-fork"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "PS4/iOSRE fork 可能仅为关注追踪而非深度研究；跨平台利用能力迁移未由实际 PS4 利用作品证实，仅由 fork 行为推断研究注意力扩展。"
+    },
+    {
+      "name": "从复盘复现到自主发现的漏洞研究路径",
+      "starting_conditions": "2016-12 fork Trident 复现 Pegasus/Trident iOS 内核利用链，建立对已公开高水平利用链的复盘学习习惯。",
+      "repeated_practice": "fork Trident 复现已公开高水平利用链（2016-12）；自主发现漏洞（935csbypass，README 自述 'my own bug this time'）；对 CVE-2017-2370（mach_voucher_extract_attr_recipe_trap 堆缓冲区溢出）独立发现与利用。",
+      "feedback": "r1-p0-mach-portal-2017-04（Project Zero 官方博客，一手）将 qwertyoruiopz 命名为 CVE-2017-2370 独立发现/利用者之一，验证其自主发现能力而非纯集成；该一手来源同时加强 kpwn↔qwertyoruiopz 身份链。",
+      "intermediate_capability": "从复盘他人利用链过渡到对同一漏洞独立发现与利用的能力。",
+      "observed_outcomes": [
+        "935csbypass 自主 codesign bypass（'get out of rop without JIT'）",
+        "CVE-2017-2370 独立发现与利用（一手正文确认）",
+        "extra_recipe 整合 Ian Beer + Marco Grassi + 自身工作（lt-tl-005，inferred/lead_only，未由一手页面证实，列为线索）"
+      ],
+      "evidence_ids": [
+        "kpwn-2016-12-trident-fork",
+        "kpwn-2016-935csbypass",
+        "r1-p0-mach-portal-2017-04",
+        "lt-tl-005"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "该环节核心（自主发现 CVE-2017-2370）现有一手来源支撑（r1-p0-mach-portal-2017-04，Project Zero 官方博客）；此前的来源错配（lt-tl-004 将 mach_portal 误归于 Todesco 发布）已作废并纠正——mach_portal 实际由 Project Zero（Ian Beer）发布，qwertyoruiopz 与 Marco Grassi 为 CVE-2017-2370 独立发现/利用者。extra_recipe 整合关系仅由 lt-tl-005（inferred/lead_only，verified_in_run=false）支撑，仓库 404，未由一手页面证实，相关叙述降级为线索。"
+    }
+  ],
+  "tensions": [
+    "身份核验缺口：github.com/qwertyoruiop 与 github.com/kpwn 是否同一人控制的账户未由抓取正文直接证实；r1-p0-mach-portal-2017-04 一手正文将 qwertyoruiopz 命名为 CVE-2017-2370 独立发现/利用者，加强 kpwn↔qwertyoruiopz↔Luca Todesco 身份链（身份链缺口严重性下调），但两账户同人未由一手页面证实，保留为缺口。",
+    "日期不一致：935csbypass 在 works 维度（kpwn-2016-935csbypass）标 2016、timeline 维度（lt-tl-003）标 2015，同源仓库无精确发布日期，仅以 updated 日期推断。",
+    "WebSearch 身份混淆：多次将 qwertyoruiop 误记为 Abraham Masri 或 Samy Kamkar，与 person_json 身份记录冲突，相关聚合叙述降级为 lead_only。",
+    "extra_recipe 仓库（kpwn/extra_recipe、qwertyoruiop/extra_recipe）均返回 404，无法一手证实整合 Ian Beer + Marco Grassi + 自身工作的关系；该叙述仅由 lt-tl-005（inferred/lead_only）支撑。",
+    "mach_portal 发布归属冲突：lt-tl-004 将 mach_portal 误归于 Todesco 发布，已作废；r1-p0-mach-portal-2017-04 一手确认 mach_portal 由 Project Zero（Ian Beer）发布，qwertyoruiopz 与 Marco Grassi 为 CVE-2017-2370 独立发现/利用者。",
+    "Black Hat US/EU、POC 演讲：person_json 列为 selected_conference_evidence，但 blackhat.com 返回 403、POC 日程页 404，未一手核验年份、标题与摘要。",
+    "'poc or gtfo' 为社区通用披露标签，非个人独创；将其作为个人发布习惯特征存在与社区规范混淆的竞争性解释。",
+    "浏览器漏洞研究方向（person_json primary_focus 之一）：本轮无一手证据支撑浏览器/renderer 利用作品，该方向未获证实。"
+  ],
+  "transferable_practices": [
+    "以可运行 PoC + README 演示形式公开披露漏洞，附演示输出而非仅文字描述。",
+    "发布物附 SHA1 校验与下载源告警，规避受版权保护头文件分发，维护供应链完整性。",
+    "攻击 PoC 与配套防御工具（如 NULLGuard kext）并行产出。",
+    "fork 已公开高水平利用链进行复盘学习，作为自主发现的前置练习。",
+    "面对新版本内核防护（如 KPP）如实公开支持边界，而非隐瞒缺陷。"
+  ],
+  "non_transferable_conditions": [
+    "2015-2017 iOS 越狱与 XNU 内核研究的窗口期外部条件。",
+    "与 Marco Grassi、Ian Beer（Project Zero）的协作网络及联名作品机会。",
+    "iOS 10 KPP/A10 新防护的特定技术约束与对应绕过研究时机。",
+    "kpwn 账户下已积累的 iOS/XNU 工具集与社区声誉。",
+    "越狱社区对以可运行 PoC 公开披露漏洞这一规范的接纳与反馈回路。"
+  ],
+  "open_questions": [
+    "github.com/qwertyoruiop 与 github.com/kpwn 是否同一人控制（未由一手页面证实）。",
+    "Black Hat US/EU、POC 演讲的标题、年份与摘要（未一手核验）。",
+    "extra_recipe 整合 Ian Beer + Marco Grassi + 自身工作的关系（lt-tl-005 inferred，仓库 404）。",
+    "mach_portal、extra_recipe、yalu102 的精确发布时间先后（一手页面缺失）。",
+    "2017 年后活动，尤其是浏览器漏洞研究方向（person_json primary_focus 之一），缺一手证据。",
+    "教育背景与正式工作履历（无任何可核验证据）。",
+    "tpwn 两个 CVE 编号（README 以 'cve-2015-????' 遮蔽，无法一手确认）。",
+    "marcograssi 协作者背景与分工（谁负责漏洞、谁负责工程化）。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/luca-todesco-qwertyoruiop-synthesis-v2-20260927-231411-197",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790522407920715000-luca-todesco-qwertyoruiop-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "84ae9a7e-93ff-40f1-939b-d4fbdcb44085",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_0rpwpq729xkd2zktetakkov8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/luca-todesco-qwertyoruiop-synthesis-v2-20260927-231411-197/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T15:20:07.977877+00:00"
+      },
+      {
+        "tool_use_id": "call_hl5edtqdpmhulmok7ajjnzrf",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/luca-todesco-qwertyoruiop-synthesis-v2-20260927-231411-197/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "5e7e3f0173dc2edb3f53fdb175e77a6d55fd755015d6056f255a8cecd77a07a9",
+        "accessed_at": "2026-09-27T15:20:07.977919+00:00"
+      },
+      {
+        "tool_use_id": "call_6is0gaw4saegi120rez5sm1x",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/luca-todesco-qwertyoruiop-synthesis-v2-20260927-231411-197/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "c8be1048cb7ce2ae9f0b6951c8566748a494e5c432d44aad2e2106e77e9e1008",
+        "accessed_at": "2026-09-27T15:20:07.977928+00:00"
+      },
+      {
+        "tool_use_id": "call_5bjf4vw97orh0qh1l06vj82k",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/luca-todesco-qwertyoruiop-synthesis-v2-20260927-231411-197/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "0d640fcb9da5f91ba1662c8d8c8dae7f024d791eee2d29c8846c7baa229fde23",
+        "accessed_at": "2026-09-27T15:20:07.978000+00:00"
+      },
+      {
+        "tool_use_id": "call_qyx64aho4x6obap5k6ohpqeu",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/luca-todesco-qwertyoruiop-synthesis-v2-20260927-231411-197/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "33115b4aff70920359d49440e839680d1f934076295ec751ee0cae6c62a02a8d",
+        "accessed_at": "2026-09-27T15:20:07.978053+00:00"
+      },
+      {
+        "tool_use_id": "call_1x81aqx41375x502hyfryngo",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/luca-todesco-qwertyoruiop-synthesis-v2-20260927-231411-197/checkpoint.md",
+          "content": "# 检查点 — Luca Todesco (qwertyoruiop) 综合分析节点 v2\n\n## 任务状态\n综合分析节点（synthesis v2）。已完成 task.md、output.schema.json、person_json、evidence_json、revision_context 读取。按 revision_context.synthesis_instructions 应用 round-1 复核纠错，重建领域能力成长过程。\n\n## 有效证据（verified_in_run=true 且未作废）\n- works: kpwn-2012-craftplayer, kpwn-2015-03-vpwn, kpwn-2015-08-tpwn, kpwn-2015-phpmess, kpwn-2016-935csbypass, kpwn-2016-xnuexp-toolkit, kpwn-2016-12-trident-fork, kpwn-2017-yalu102, kpwn-2018-ps4-iosre\n- decisions: dec-tpwn-osx-lpe-2015, dec-mach-portal-yalu-2016-12-22(reported), dec-yalu102-2017-01-26-collab-marcograssi, dec-yalu102-iphone7-kpp-1011-tradeoff, dec-yalu102-iokit-headers-copyright-stance, dec-kpwn-multi-project-attack-defense-portfolio\n- external: ext-01, ext-02, ext-03, ext-04, ext-05\n- timeline: lt-tl-001, lt-tl-002, lt-tl-003, lt-tl-006, lt-tl-007\n- targeted(新增): r1-p0-mach-portal-2017-04（primary）\n\n## 弱证据/线索（可引但需标注限制）\n- lt-tl-005: extra_recipe 整合关系，inferred/lead_only, verified_in_run=false；仓库 404。\n- kpwn-blackhat-talk-unverified: Black Hat 演讲，inferred；blackhat.com 403。\n\n## 作废证据（不得使用）\n- lt-tl-004: mach_portal 误归于 Todesco 发布（实际由 Ian Beer/Project Zero 发布）。\n\n## 已应用的 synthesis_instructions\n1. stages[1].capability_change: 'poc or gtfo' 仅作具体作品处短引文（tpwn），不作叙述类别名；改用中性表述\"以可运行 PoC 公开披露漏洞、并以 README 形式发表利用演示的发布习惯\"。\n2. Apple 2017-01-23 补丁（ext-04）从 2017-12 至 2018 阶段移除，并入 2016-12 至 2017-01 阶段；ext-04 仅在该阶段引用一次，capability_change 文本述及该补丁。\n3. mechanisms[2]（复现—集成—自主路径）: 据 r1-p0-mach-portal-2017-04 修正——mach_portal 由 Project Zero（Ian Beer）发布；qwertyoruiopz 与 Marco Grassi 对 CVE-2017-2370 独立发现与利用；evidence_ids 加入 r1-p0-mach-portal-2017-04；移除对 lt-tl-004 的依赖；alternative_explanation 如实说明一手来源支撑。\n4. mechanisms[1].feedback: PS4/XNU 改为\"PS4 Orbis OS 为 FreeBSD 衍生，与 XNU（Mach/BSD 混合内核）在 BSD 派生组件上存在部分同源关系\"。\n5. 身份链: r1-p0-mach-portal-2017-04 一手正文命名 qwertyoruiopz 为 CVE-2017-2370 独立发现/利用者，下调身份核验缺口严重性；但 github.com/qwertyoruiop 与 github.com/kpwn 同人未证实，保留为缺口。\n\n## 阶段结构（5 阶段）\n- Stage 0 (2012): iOS 应用层起点 — kpwn-2012-craftplayer\n- Stage 1 (2015): XNU/macOS 内核提权与多目标利用原语 — vpwn/tpwn/phpmess/NULLGuard\n- Stage 2 (2016): 自主漏洞挖掘与利用链复现 — 935csbypass/xnuexp-toolkit/Trident fork\n- Stage 3 (2016-12 至 2017-01): iOS 10 越狱链与协作发布 — yalu102/mach_portal/Apple 补丁\n- Stage 4 (2017-12 至 2018): 跨平台扩展与协作网络 — PS4/iOSRE/LiberiOS\n\n## 主机制（3 个，均满足\"跨材料/跨时期重复、解释后续多个结果、相对有区分度\"中至少两项）\n- M1: 公开 PoC 与 README 演示的发布工程（repeated+generative+distinctive, high）\n- M2: 跨内核/跨目标研究迁移与资源整理（repeated+distinctive, low — 仅 fork 证据）\n- M3: 从复盘复现到自主发现的漏洞研究路径（repeated+generative+distinctive, medium — 核心一手支撑，extra_recipe 整合为 inferred）\n\n## 待办\n- 写入 output.json，逐字段对照 schema（person 常量、expertise、stages[5]、mechanisms[3]、tensions、transferable_practices、non_transferable_conditions、open_questions）。\n- 不填写 _run / verification。\n"
+        },
+        "success": true,
+        "content_sha256": "1fe3bf212db30447c5ca334d44f6f8619b15d5fe7f76263a49a1ba7f9b44651a",
+        "accessed_at": "2026-09-27T15:20:07.978699+00:00"
+      },
+      {
+        "tool_use_id": "call_vqcuxhmdywn5gsvwsoyc9tb8",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/luca-todesco-qwertyoruiop-synthesis-v2-20260927-231411-197/output.json",
+          "content": "{\n  \"person\": \"Luca Todesco (qwertyoruiop)\",\n  \"expertise\": [\n    \"iOS 与 macOS（XNU）内核漏洞利用\",\n    \"iOS 越狱链构建（内核漏洞利用与 KPP 绕过）\",\n    \"代码签名绕过原语构建\",\n    \"利用原语抽象与可复用工具化（64-bit ROP 与堆读写）\",\n    \"公开 PoC 发布工程（SHA1 校验与供应链完整性）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2012\",\n      \"stage\": \"iOS 应用层起点\",\n      \"capability_change\": \"以 iOS 平台 Objective-C 应用层项目（Craftplayer）起步，技术栈起点为应用层开发而非内核漏洞；建立公开仓库发布习惯。\",\n      \"evidence_ids\": [\n        \"kpwn-2012-craftplayer\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2015\",\n      \"stage\": \"XNU/macOS 内核提权与多目标利用原语构建\",\n      \"capability_change\": \"目标从应用层转向 macOS XNU 内核本地提权，建立单 CVE 堆溢出利用与 KASLR 绕过技术基线（vpwn，演示输出含 'broke out of kaslr'）；将 64-bit ROP 原语封装为可复用函数 jump/alloc/mem/ptr（phpmess），体现利用原语抽象化与工具化倾向；确立以可运行 PoC 公开披露漏洞、并以 README 形式发表利用演示的发布习惯（vpwn/tpwn/phpmess，其中 tpwn README 标注 'poc or gtfo' 为具体作品处短引文）；同期发布 NULLGuard 防御 kext 缓解 NULL 指针解引用类漏洞，形成攻击 PoC 与防御工具的双向产出。\",\n      \"evidence_ids\": [\n        \"kpwn-2015-03-vpwn\",\n        \"kpwn-2015-08-tpwn\",\n        \"kpwn-2015-phpmess\",\n        \"lt-tl-001\",\n        \"lt-tl-002\",\n        \"dec-tpwn-osx-lpe-2015\",\n        \"dec-kpwn-multi-project-attack-defense-portfolio\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2016\",\n      \"stage\": \"自主漏洞挖掘与利用链复现\",\n      \"capability_change\": \"从利用已知漏洞转向自主挖掘（935csbypass，README 自述 'my own bug this time'，短引文），技术目标转向 iOS 代码签名绕过，采用 trampoline 方式在无 JIT 情形下脱离 ROP 加载任意代码（'get out of rop without JIT'，短引文）；fork Trident 复现 Pegasus/Trident iOS 内核利用链，建立对已公开高水平利用链的复盘学习习惯；尝试通用 XNU 利用工具包建设但未完成公开（xnuexp-toolkit，README 仅 'ETA: son'，作为未达成项据实记录而非成果）。\",\n      \"evidence_ids\": [\n        \"kpwn-2016-935csbypass\",\n        \"kpwn-2016-xnuexp-toolkit\",\n        \"kpwn-2016-12-trident-fork\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2016-12 至 2017-01\",\n      \"stage\": \"iOS 10 越狱链与协作发布\",\n      \"capability_change\": \"复杂度从单 CVE LPE 上升为内核漏洞利用与 KPP 绕过的完整越狱链（yalu102）；从单人工作转为与 Marco Grassi 协作（mach_portal + Yalu 于 2016-12-22 释放，yalu102 于 2017-01-26 释放）；面对 iPhone 7/A10 KPP 限制如实公开支持边界（iPhone 7 仅支持至 iOS 10.1.1）；公开发布中规避受版权保护的 IOKit headers 分发并要求 SHA1 校验以防第三方投毒；Project Zero（Ian Beer）于 2016-12 发布 mach_portal，qwertyoruiopz 与 Marco Grassi 对同一漏洞 CVE-2017-2370 独立发现与利用；Apple 于 2017-01-23 发布 iOS 10.2.1 修补 Yalu 所用漏洞，构成厂商对作品所依赖漏洞的事实性回应。\",\n      \"evidence_ids\": [\n        \"kpwn-2017-yalu102\",\n        \"dec-mach-portal-yalu-2016-12-22\",\n        \"dec-yalu102-2017-01-26-collab-marcograssi\",\n        \"dec-yalu102-iphone7-kpp-1011-tradeoff\",\n        \"dec-yalu102-iokit-headers-copyright-stance\",\n        \"ext-01\",\n        \"ext-02\",\n        \"ext-04\",\n        \"r1-p0-mach-portal-2017-04\",\n        \"lt-tl-006\",\n        \"lt-tl-007\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017-12 至 2018\",\n      \"stage\": \"跨平台扩展与协作网络\",\n      \"capability_change\": \"技术关注从 iOS 内核向 PlayStation 4 内核与 iOS 逆向工程资源整理扩展（fork PS4-5.05-Kernel-Exploit、维护 iOSRE 资源集）；LiberiOS（2017-12-25）将 Ian Beer（Google Project Zero）与 Jonathan Levin 纳入协作列名，扩展协作网络。\",\n      \"evidence_ids\": [\n        \"kpwn-2018-ps4-iosre\",\n        \"ext-03\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"公开 PoC 与 README 演示的发布工程\",\n      \"starting_conditions\": \"2012 年起以 iOS/Objective-C 应用层项目建立公开仓库发布习惯（Craftplayer）；具备 iOS 平台熟悉度基础。\",\n      \"repeated_practice\": \"vpwn 以可运行演示输出公开（含 'broke out of kaslr'）；tpwn 以 0day 状态公开并标注 'poc or gtfo'（具体作品处短引文）；phpmess 封装 jump/alloc/mem/ptr 可复用原语并复用 'poc||gtfo' 标签；935csbypass 公开 cs_bypass.m 与 cs_tramp.s；yalu102 以 Beta 1–7 分批发布并附 SHA1 校验与下载源告警。\",\n      \"feedback\": \"Apple 于 2017-01-23 发布 iOS 10.2.1 修补 Yalu 所用漏洞，构成厂商对作品所依赖漏洞的事实性回应（ext-04）；Wikipedia 权威二手条目记载 Yalu/yalu102 发布（ext-01/ext-02）；Trident fork 表明对已公开利用链的复盘学习。\",\n      \"intermediate_capability\": \"将利用封装为可复现、可校验的公开制品的能力，以及对发布物供应链完整性（SHA1 校验、版权规避）的工程意识。\",\n      \"observed_outcomes\": [\n        \"yalu102 Beta 1–7 + SHA1 校验 + IOKit headers 版权立场\",\n        \"NULLGuard 防御 kext 与攻击 PoC 并存\",\n        \"phpmess 跨目标可复用 ROP 原语（jump/alloc/mem/ptr）\"\n      ],\n      \"evidence_ids\": [\n        \"kpwn-2012-craftplayer\",\n        \"kpwn-2015-03-vpwn\",\n        \"kpwn-2015-08-tpwn\",\n        \"kpwn-2015-phpmess\",\n        \"kpwn-2016-935csbypass\",\n        \"kpwn-2016-12-trident-fork\",\n        \"kpwn-2017-yalu102\",\n        \"ext-01\",\n        \"ext-02\",\n        \"ext-04\",\n        \"dec-yalu102-iokit-headers-copyright-stance\",\n        \"dec-kpwn-multi-project-attack-defense-portfolio\",\n        \"lt-tl-007\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"公开披露习惯可能受越狱社区发表规范驱动而非个人能力选择；'poc or gtfo' 为社区通用标签，非个人独创，故仅作为具体作品处短引文保留，不作为叙述类别名。\"\n    },\n    {\n      \"name\": \"跨内核/跨目标研究迁移与资源整理\",\n      \"starting_conditions\": \"2015 年建立 XNU/macOS 内核提权基线（vpwn/tpwn）。\",\n      \"repeated_practice\": \"XNU 内核 LPE（vpwn/tpwn）→ PHP 解释器 UaF 利用并附 macOS rop 文件（phpmess，文件名 pm_rop_osx.php 与 pm_rop_findexec_osx.php）→ fork PS4-5.05-Kernel-Exploit（JavaScript）→ 维护 iOSRE 逆向工程资源集（Shell）；fork Trident 复现 Pegasus 利用链。\",\n      \"feedback\": \"PS4 Orbis OS 为 FreeBSD 衍生，与 XNU（Mach/BSD 混合内核）在 BSD 派生组件上存在部分同源关系，使内核利用概念可在相关内核间部分迁移；iOSRE 作为知识资源输出形态。\",\n      \"intermediate_capability\": \"跨相关内核/目标的研究注意力迁移与知识资源整理能力。\",\n      \"observed_outcomes\": [\n        \"PS4-5.05-Kernel-Exploit fork\",\n        \"iOSRE 逆向工程资源集\",\n        \"phpmess 跨目标 rop 文件\"\n      ],\n      \"evidence_ids\": [\n        \"kpwn-2015-03-vpwn\",\n        \"kpwn-2015-08-tpwn\",\n        \"kpwn-2015-phpmess\",\n        \"kpwn-2018-ps4-iosre\",\n        \"kpwn-2016-12-trident-fork\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"PS4/iOSRE fork 可能仅为关注追踪而非深度研究；跨平台利用能力迁移未由实际 PS4 利用作品证实，仅由 fork 行为推断研究注意力扩展。\"\n    },\n    {\n      \"name\": \"从复盘复现到自主发现的漏洞研究路径\",\n      \"starting_conditions\": \"2016-12 fork Trident 复现 Pegasus/Trident iOS 内核利用链，建立对已公开高水平利用链的复盘学习习惯。\",\n      \"repeated_practice\": \"fork Trident 复现已公开高水平利用链（2016-12）；自主发现漏洞（935csbypass，README 自述 'my own bug this time'）；对 CVE-2017-2370（mach_voucher_extract_attr_recipe_trap 堆缓冲区溢出）独立发现与利用。\",\n      \"feedback\": \"r1-p0-mach-portal-2017-04（Project Zero 官方博客，一手）将 qwertyoruiopz 命名为 CVE-2017-2370 独立发现/利用者之一，验证其自主发现能力而非纯集成；该一手来源同时加强 kpwn↔qwertyoruiopz 身份链。\",\n      \"intermediate_capability\": \"从复盘他人利用链过渡到对同一漏洞独立发现与利用的能力。\",\n      \"observed_outcomes\": [\n        \"935csbypass 自主 codesign bypass（'get out of rop without JIT'）\",\n        \"CVE-2017-2370 独立发现与利用（一手正文确认）\",\n        \"extra_recipe 整合 Ian Beer + Marco Grassi + 自身工作（lt-tl-005，inferred/lead_only，未由一手页面证实，列为线索）\"\n      ],\n      \"evidence_ids\": [\n        \"kpwn-2016-12-trident-fork\",\n        \"kpwn-2016-935csbypass\",\n        \"r1-p0-mach-portal-2017-04\",\n        \"lt-tl-005\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"该环节核心（自主发现 CVE-2017-2370）现有一手来源支撑（r1-p0-mach-portal-2017-04，Project Zero 官方博客）；此前的来源错配（lt-tl-004 将 mach_portal 误归于 Todesco 发布）已作废并纠正——mach_portal 实际由 Project Zero（Ian Beer）发布，qwertyoruiopz 与 Marco Grassi 为 CVE-2017-2370 独立发现/利用者。extra_recipe 整合关系仅由 lt-tl-005（inferred/lead_only，verified_in_run=false）支撑，仓库 404，未由一手页面证实，相关叙述降级为线索。\"\n    }\n  ],\n  \"tensions\": [\n    \"身份核验缺口：github.com/qwertyoruiop 与 github.com/kpwn 是否同一人控制的账户未由抓取正文直接证实；r1-p0-mach-portal-2017-04 一手正文将 qwertyoruiopz 命名为 CVE-2017-2370 独立发现/利用者，加强 kpwn↔qwertyoruiopz↔Luca Todesco 身份链（身份链缺口严重性下调），但两账户同人未由一手页面证实，保留为缺口。\",\n    \"日期不一致：935csbypass 在 works 维度（kpwn-2016-935csbypass）标 2016、timeline 维度（lt-tl-003）标 2015，同源仓库无精确发布日期，仅以 updated 日期推断。\",\n    \"WebSearch 身份混淆：多次将 qwertyoruiop 误记为 Abraham Masri 或 Samy Kamkar，与 person_json 身份记录冲突，相关聚合叙述降级为 lead_only。\",\n    \"extra_recipe 仓库（kpwn/extra_recipe、qwertyoruiop/extra_recipe）均返回 404，无法一手证实整合 Ian Beer + Marco Grassi + 自身工作的关系；该叙述仅由 lt-tl-005（inferred/lead_only）支撑。\",\n    \"mach_portal 发布归属冲突：lt-tl-004 将 mach_portal 误归于 Todesco 发布，已作废；r1-p0-mach-portal-2017-04 一手确认 mach_portal 由 Project Zero（Ian Beer）发布，qwertyoruiopz 与 Marco Grassi 为 CVE-2017-2370 独立发现/利用者。\",\n    \"Black Hat US/EU、POC 演讲：person_json 列为 selected_conference_evidence，但 blackhat.com 返回 403、POC 日程页 404，未一手核验年份、标题与摘要。\",\n    \"'poc or gtfo' 为社区通用披露标签，非个人独创；将其作为个人发布习惯特征存在与社区规范混淆的竞争性解释。\",\n    \"浏览器漏洞研究方向（person_json primary_focus 之一）：本轮无一手证据支撑浏览器/renderer 利用作品，该方向未获证实。\"\n  ],\n  \"transferable_practices\": [\n    \"以可运行 PoC + README 演示形式公开披露漏洞，附演示输出而非仅文字描述。\",\n    \"发布物附 SHA1 校验与下载源告警，规避受版权保护头文件分发，维护供应链完整性。\",\n    \"攻击 PoC 与配套防御工具（如 NULLGuard kext）并行产出。\",\n    \"fork 已公开高水平利用链进行复盘学习，作为自主发现的前置练习。\",\n    \"面对新版本内核防护（如 KPP）如实公开支持边界，而非隐瞒缺陷。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"2015-2017 iOS 越狱与 XNU 内核研究的窗口期外部条件。\",\n    \"与 Marco Grassi、Ian Beer（Project Zero）的协作网络及联名作品机会。\",\n    \"iOS 10 KPP/A10 新防护的特定技术约束与对应绕过研究时机。\",\n    \"kpwn 账户下已积累的 iOS/XNU 工具集与社区声誉。\",\n    \"越狱社区对以可运行 PoC 公开披露漏洞这一规范的接纳与反馈回路。\"\n  ],\n  \"open_questions\": [\n    \"github.com/qwertyoruiop 与 github.com/kpwn 是否同一人控制（未由一手页面证实）。\",\n    \"Black Hat US/EU、POC 演讲的标题、年份与摘要（未一手核验）。\",\n    \"extra_recipe 整合 Ian Beer + Marco Grassi + 自身工作的关系（lt-tl-005 inferred，仓库 404）。\",\n    \"mach_portal、extra_recipe、yalu102 的精确发布时间先后（一手页面缺失）。\",\n    \"2017 年后活动，尤其是浏览器漏洞研究方向（person_json primary_focus 之一），缺一手证据。\",\n    \"教育背景与正式工作履历（无任何可核验证据）。\",\n    \"tpwn 两个 CVE 编号（README 以 'cve-2015-????' 遮蔽，无法一手确认）。\",\n    \"marcograssi 协作者背景与分工（谁负责漏洞、谁负责工程化）。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "d953709fde5320444f7439559353c9086ca4ef0782ed4f8468b1f87390e91fcd",
+        "accessed_at": "2026-09-27T15:20:07.978703+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790522407978718000-luca-todesco-qwertyoruiop-synthesis-v2.json",
+    "label": "Luca Todesco (qwertyoruiop):synthesis:v2",
+    "elapsed_seconds": 356.78,
+    "prompt_sha256": "2649eb7591de77dcd5a462c55bd614abb1462dc488b5df1266cfeda32a8ef114",
+    "num_turns": 8,
+    "total_cost_usd": 0.8750710000000002,
+    "usage": {
+      "input_tokens": 54597,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 73472,
+      "output_tokens": 22614,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 54597,
+        "outputTokens": 22614,
+        "cacheReadInputTokens": 73472,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.8750710000000002,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

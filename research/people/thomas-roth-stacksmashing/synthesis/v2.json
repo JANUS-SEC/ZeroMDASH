@@ -1,0 +1,345 @@
+{
+  "person": "Thomas Roth (stacksmashing)",
+  "expertise": [
+    "硬件与固件漏洞发现",
+    "低成本微控制器（RP2040/Pico/STM32F4）作为硬件攻击与烧录前端",
+    "Apple USB-C/USB-PD VDM 总线探索",
+    "TPM/LPC 总线被动嗅探",
+    "故障注入与电磁扰动攻击",
+    "flashrom/serprog 兼容固件",
+    "固件静态分析工具链（binwalk）",
+    "以视频与开源仓库作为主要公开发表渠道"
+  ],
+  "stages": [
+    {
+      "period": "2010",
+      "stage": "最早可见公开仓库（fork）",
+      "capability_change": "最早可见公开仓库 stacksmashing/yubicrack 创建于 2010-08-18，系自 nezza/yubicrack fork（C 语言，Yubikey 访问码暴力破解），与硬件令牌方向相关联；该仓库为 fork 而非原创发起项目，不足以证明其发起该方向。2010 至 2021 年站点建立之间存在公开证据空白，无法据现有材料还原其间学习路径与研究主线。",
+      "evidence_ids": [
+        "tr-r1-evid-01",
+        "tr-r1-evid-02"
+      ],
+      "confidence": "low"
+    },
+    {
+      "period": "2021",
+      "stage": "个人站点建立与低成本微控制器工具链起步",
+      "capability_change": "建立个人站点 stacksmashing.net（Impressum 登记 Thomas Roth，Esslingen am Neckar），自述制作 IT-security 与硬件破解视频；同期创建 pico-serprog（2021-04-03，Flashrom/serprog 兼容固件，GPL-3.0），开始以 RP2040/Pico 作为低成本硬件前端构建可分发工具。据二手媒体报道转述，相关报道提及对 Apple AirTag 进行芯片开封与故障注入并导出固件；因报道正文与本人一手 writeup 未取得，不作为能力变化的已核实验证，仅作为待核实的二手线索。",
+      "evidence_ids": [
+        "tl-identity-site",
+        "ext-001",
+        "thomas-roth-conversations-01",
+        "stacksmashing-community-site-selfdescription",
+        "tr-r1-evid-03",
+        "tl-airtag-dump-2021"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2022–2023",
+      "stage": "Apple USB-C/USB-PD VDM 配套工具生态建设",
+      "capability_change": "围绕 Apple 设备 USB-C/USB-PD VDM 总线构建自研硬件、固件与主机工具的研究套件：tamarin-c 于 2023-12-28 公开发布，在 USB-C SBU 引脚上对 Apple 设备实现 UART/SWD/JTAG/DCSD/内部总线映射/DFU 入口，并在 iPhone 15 上观测到 ACE SPMI 协议；项目显式声明基于 Marc Zyngier 的 Central Scrutinizer 与 AsahiLinux vdmtool，体现对前人工作的吸收与增量贡献；同期衍生 tamarin-firmware、tamarin-c-hw、macvdmtool 等配套仓库，工具建设与公开发表习惯成熟。",
+      "evidence_ids": [
+        "dec-01-tamarin-usb-c-public-release",
+        "roth-works-05",
+        "tl-tamarin-series-2023",
+        "ext-003"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2024",
+      "stage": "TPM/LPC 嗅探与主动故障注入并行",
+      "capability_change": "发布 pico-tpmsniffer（2024-02-03），基于 Pico 对 LPC 总线 TPM 流量进行被动嗅探，README 明确标注当前仅支持 LPC 而非 SPI TPM，体现对工具适用范围的克制标注；同期围绕 RP2040/Pico 与 STM32F4 维护可分发的攻击与嗅探工具集合（pico-serprog 于 2024-04-30 仍有 push 活动，2026-09-09 仍有更新；stm32f4_password_glitch 进行密码故障注入实验）。研究主题从外设总线扩展到平台固件信任根（TPM/LPC）侧信道观察与主动故障注入。",
+      "evidence_ids": [
+        "roth-works-06",
+        "tl-pico-tools-2024",
+        "tr-r1-evid-03"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2025–2026",
+      "stage": "调试器生态维护与固件静态分析延伸",
+      "capability_change": "openocd-tamarin（2025-05-24 更新）在 Microsoft OpenOCD fork 基础上加入 Tamarin 支持并提供预编译二进制，降低他人复现门槛；2026 年 fork binwalk（Rust 实现，固件分析工具），将工具建设从硬件采集前端延伸到固件解析后端；stm32f4_playground（2026-08-02 更新）显示持续维护 STM32F4 实验。研究方向向固件静态分析与工具栈现代化（Rust 重写）延伸。",
+      "evidence_ids": [
+        "tl-openocd-tamarin-2025",
+        "tl-recent-2026",
+        "dec-05-firmware-analysis-rust-fork",
+        "stacksmashing-community-binwalk-fork"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "低成本微控制器作为通用硬件攻击与烧录前端",
+      "starting_conditions": "2021 年个人站点建立前后，RP2040/Pico 等廉价微控制器在消费市场可得；pico-serprog（2021-04-03 创建）以 Pico 作为 flashrom/serprog 兼容烧录固件，奠定以低成本 MCU 替代专业设备的起点。",
+      "repeated_practice": "跨时期在同一廉价平台（RP2040/Pico、STM32F4）上为不同目标构建工具：pico-serprog（SPI flash 烧录，2021）、pico-tpmsniffer（LPC 总线 TPM 嗅探，2024）、stm32f4_password_glitch（STM32F4 密码故障注入，2024）、stm32f4_playground（2026 仍维护）。",
+      "feedback": "GitHub 仓库的 fork 与 PR 计数（pico-tpmsniffer 约 697 星、101 forks、5 个开放 PR 等）反映关注度与流行度，可能与维护动力相关，但不构成经核实的能力反馈回路；无具名同行评价或 issue 讨论正文样本作为有效反馈证据。",
+      "intermediate_capability": "能够在廉价微控制器上快速构建面向不同总线与目标的可分发硬件攻击前端，并以 homebrew-tap 形成安装渠道。",
+      "observed_outcomes": [
+        "pico-serprog（2021-04-03 创建，2024-04-30 仍有 push）",
+        "pico-tpmsniffer（2024-02-03 发布，LPC 总线 TPM 嗅探）",
+        "stm32f4_password_glitch（2024，STM32F4 密码故障注入）",
+        "stm32f4_playground（2026-08-02 仍维护）"
+      ],
+      "evidence_ids": [
+        "tr-r1-evid-03",
+        "roth-works-06",
+        "tl-pico-tools-2024",
+        "tl-recent-2026"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "该方向可能由 RP2040/Pico 的市场可得性与社区流行度驱动，而非个人方法论选择；低成本 MCU 在 2021 年前后被多个研究者采用，并非该研究者特有。"
+    },
+    {
+      "name": "围绕单一硬件平台构建协调多仓库生态（fork-and-extend）",
+      "starting_conditions": "2022–2023 年 Apple USB-C 配件成为研究目标；前人公开成果可得（Marc Zyngier 的 Central Scrutinizer、AsahiLinux vdmtool、T8012 团队发现），为复用与增量贡献提供基座。",
+      "repeated_practice": "围绕 Tamarin C 硬件平台构建固件（tamarin-firmware）、命令行工具（tamarin-c）、硬件设计（tamarin-c-hw）、调试器适配（openocd-tamarin，fork Microsoft OpenOCD 并加入 Tamarin 支持）多仓库协同；并以 fork 既有社区工具叠加自研支持（openocd-tamarin、binwalk Rust fork）方式做增量建设。",
+      "feedback": "tamarin-c README 显式声明 heavily based on the Central Scrutinizer by Marc Zyngier 与 derives from vdmtool by the AsahiLinux project，体现对前人工作的显式引用与复用；GitHub fork 与 PR 计数反映关注度而非经核实的能力反馈。",
+      "intermediate_capability": "形成自研硬件、固件、主机工具与调试器适配的可复用研究套件，并在他人开源工具之上做差异化维护与预编译二进制分发。",
+      "observed_outcomes": [
+        "tamarin-c/tamarin-firmware/tamarin-c-hw 系列（2023-12 集中更新）",
+        "openocd-tamarin（2025-05-24 更新，预编译二进制）",
+        "macvdmtool（Apple Silicon 间 VDM 工具）",
+        "binwalk Rust fork（2026-01-06 更新）"
+      ],
+      "evidence_ids": [
+        "dec-01-tamarin-usb-c-public-release",
+        "roth-works-05",
+        "tl-tamarin-series-2023",
+        "tl-openocd-tamarin-2025",
+        "stacksmashing-community-binwalk-fork",
+        "dec-05-firmware-analysis-rust-fork"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "多仓库协同可能反映 Apple USB-C 在 2022–2023 年作为热门目标的时期特征，而非个人特有的方法论；fork-and-extend 是开源社区常见做法，并非该研究者独创。"
+    },
+    {
+      "name": "以视频与开源仓库作为主要公开发表渠道",
+      "starting_conditions": "2021 年个人站点 stacksmashing.net 建立，自述 I create videos on IT-security, hardware hacking and more!，将 YouTube 视频与开源仓库设为主要对外输出渠道，而非论文或会议议程。",
+      "repeated_practice": "跨时期以 YouTube 频道（@stacksmashing）与 GitHub 组织（github.com/stacksmashing，约 40 个仓库）持续公开工具与演示；站点 Impressum 与 GitHub README 长期绑定同一 handle 与真名。",
+      "feedback": "GitHub 组织仓库存在活跃 fork 与 PR（pico-tpmsniffer、tamarin-firmware 等），外部贡献者在其工具基础上持续参与；但 star 与 fork 计数反映关注度而非经核实的能力反馈回路，无具名同行评价样本。",
+      "intermediate_capability": "形成面向公众的解释与教学（视频）与可复现工具（开源仓库）双渠道输出习惯，公开仓库本身成为可交叉验证的研究产出物。",
+      "observed_outcomes": [
+        "stacksmashing.net 个人站点（2021 至今）",
+        "GitHub 组织 stacksmashing 约 40 个仓库（C 语言为主）",
+        "YouTube 频道 @stacksmashing（频道数据未一手核实）"
+      ],
+      "evidence_ids": [
+        "tl-identity-site",
+        "ext-001",
+        "thomas-roth-conversations-01",
+        "dec-06-public-output-habit-video",
+        "stacksmashing-community-site-selfdescription",
+        "stacksmashing-community-github-org-tools",
+        "stacksmashing-community-github-feedback"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "以视频为主要输出可能反映个人媒体生产偏好或德语区内容生态，而非能力获得机制本身；视频频道数据未一手核实，无法量化输出频次与观众反馈。"
+    },
+    {
+      "name": "被动嗅探与主动干预两类方法在同一低成本硬件平台上的并行覆盖",
+      "starting_conditions": "2021 年以 pico-serprog（被动烧录）为起点，研究方法以被动总线观察为主；前人公开的 USB-PD VDM 与故障注入方法可得。",
+      "repeated_practice": "在同一低成本硬件平台（RP2040/Pico、STM32F4）上并行构建被动嗅探工具（pico-tpmsniffer，LPC 总线）与主动干预工具（macvdmtool 主动构造 USB-PD VDM 流量；picoemp-fw 电磁脉冲；stm32f4_password_glitch 密码故障注入；stm32f4_playground）。",
+      "feedback": "无经核实的有效能力反馈样本；AirTag 故障注入工作（tl-airtag-dump-2021）为二手媒体报道转述，正文未抓取，不作为已核实证据。",
+      "intermediate_capability": "在同一类廉价硬件上覆盖从被动观察到主动干预（协议构造、电压与电磁故障注入）的方法谱系。",
+      "observed_outcomes": [
+        "pico-tpmsniffer（被动嗅探，2024）",
+        "macvdmtool（主动 VDM 构造，2023）",
+        "stm32f4_playground（2026 仍维护）"
+      ],
+      "evidence_ids": [
+        "roth-works-06",
+        "tl-recent-2026",
+        "tl-airtag-dump-2021"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "主动故障注入与主动协议构造的仓库（picoemp-fw、stm32f4_password_glitch、macvdmtool）多为 lead_only 且 verified_in_run=false，可能为并行兴趣而非方法递进；被动与主动工具在时间上交错（macvdmtool 2023-09 早于 pico-tpmsniffer 2024-02），不构成严格的被动到主动递进；AirTag 报道为二手转述，无法核实物理方法与动机。"
+    }
+  ],
+  "tensions": [
+    "yubicrack 是 fork 而非原创（roth-works-01 已作废，由 tr-r1-evid-01/02 替代）；2010 至 2021 年站点建立之间存在公开证据空白，无法还原其间学习路径与研究主线。",
+    "AirTag 故障注入与芯片开封工作（tl-airtag-dump-2021）为二手媒体报道转述，正文未抓取，物理方法与动机未一手核实；不作为能力变化的已核实验证。",
+    "Black Hat/POC/Hardwear.io/DSTL 会议演讲事实均未能从一手页面核实（议程页 403/404、TLS 证书域名不匹配）；person_json 的 selected_conference_evidence 与可一手核实来源之间存在未消解冲突。",
+    "handle 不一致：person_json 记录 social 为 x.com/stacksmashing，而一手站点 stacksmashing.net 链接的 Twitter 为 @ghidraninja；两者关系未核实。",
+    "GitHub star 与 fork 计数反映关注度与流行度，不等于经核实的能力反馈；将关注度等同于能力反馈存在知名度偏差。",
+    "可观测证据限于现存、未删除、公开仓库，2010–2020 间及任何已删除或私有工作不可见，存在幸存者偏差。",
+    "主动故障注入相关仓库（picoemp-fw、stm32f4_password_glitch、macvdmtool）多为 lead_only 且 verified_in_run=false，被动与主动方法在时间上交错而非严格递进。"
+  ],
+  "transferable_practices": [
+    "在既有开源工具之上做增量建设（fork OpenOCD 加入 Tamarin 支持、fork binwalk Rust 实现），减少对既有开源工具的重复实现。",
+    "围绕单一硬件平台构建协调多仓库生态（固件、命令行工具、硬件设计、调试器适配），而非单点工具。",
+    "显式引用与复用前人公开成果（Central Scrutinizer、AsahiLinux vdmtool），并在 README 注明作者与衍生关系。",
+    "在 README 中明确标注工具能力边界（如 pico-tpmsniffer 标注当前仅支持 LPC 而非 SPI TPM），便于他人判断适用范围。",
+    "为 fork 的工具提供预编译二进制（openocd-tamarin），降低他人复现门槛。"
+  ],
+  "non_transferable_conditions": [
+    "个人站点与 YouTube 频道作为公开输出渠道，依赖个人媒体生产能力与长期内容维护。",
+    "Apple USB-C 配件在 2022–2023 年作为可访问且受关注的研究目标，提供研究主题选择的外部条件。",
+    "RP2040/Pico 在 2021 年前后的市场可得性，为低成本 MCU 工具链提供硬件前提。",
+    "前人公开成果（Central Scrutinizer、AsahiLinux vdmtool）的可得性，为复用与增量贡献提供基座。",
+    "德国 Esslingen am Neckar 的地域身份（站点 Impressum 登记）。"
+  ],
+  "open_questions": [
+    "2010–2020 年间的学习路径、研究主线与教育、雇主背景无公开一手材料。",
+    "Black Hat/POC/Hardwear.io/DSTL 会议演讲的具体标题、年份与摘要未能从一手页面核实。",
+    "YouTube @stacksmashing 频道的创建日期、视频发布时间线与观众反馈数据未一手核实。",
+    "AirTag 相关一手 writeup 与媒体报道正文未取得，物理方法（芯片开封、故障注入）与动机无法核实。",
+    "具体 CVE 与厂商漏洞公告的归属与时间未在抓取中出现。",
+    "x.com/stacksmashing 与 twitter.com/ghidraninja 两个账号的归属关系未核实。",
+    "GitHub 组织 stacksmashing 成员列表非公开，组织归属为推断而非直接证明。",
+    "是否存在经核实的有效能力反馈（具名同行评价、issue 讨论正文、协作 CTF 痕迹）仍为资料缺口。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thomas-roth-stacksmashing-synthesis-v2-20260928-005803-538",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790528609833697000-thomas-roth-stacksmashing-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "294da32c-7334-4f8a-91ab-8e95cd797d09",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_uvp9t6llv2i6w7w94siwmk7d",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thomas-roth-stacksmashing-synthesis-v2-20260928-005803-538/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T17:03:29.879894+00:00"
+      },
+      {
+        "tool_use_id": "call_1rtz3dapxd3cwykb8175i3y6",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thomas-roth-stacksmashing-synthesis-v2-20260928-005803-538/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T17:03:29.879917+00:00"
+      },
+      {
+        "tool_use_id": "call_36fjzapnvjw1jod3xw2loa46",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thomas-roth-stacksmashing-synthesis-v2-20260928-005803-538/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "7d1c812ee18c52be5a22363bcbb286d079c946e511190656b4a04d2d2ff989c8",
+        "accessed_at": "2026-09-27T17:03:29.879923+00:00"
+      },
+      {
+        "tool_use_id": "call_zgq1snr5dy4ys5eqsmu3zibz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thomas-roth-stacksmashing-synthesis-v2-20260928-005803-538/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "4c6ba3436962c1d3d47dca4460d16a65ec1861792f4f2e18603ee6e1fe9e09d9",
+        "accessed_at": "2026-09-27T17:03:29.879937+00:00"
+      },
+      {
+        "tool_use_id": "call_5yc74ihgk1tfss66vkx3ybi0",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thomas-roth-stacksmashing-synthesis-v2-20260928-005803-538/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "dc6c6ee7a56f7c6d2ce014b41b904144528e5ca71ad587a35de0b65257d6229d",
+        "accessed_at": "2026-09-27T17:03:29.880033+00:00"
+      },
+      {
+        "tool_use_id": "call_wvtay7yqzobc2b6he81fjd0c",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thomas-roth-stacksmashing-synthesis-v2-20260928-005803-538/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "032697e359ca11fb4cb35ebb91b167d1b53d35462a37a6400a47a10d3c5100d8",
+        "accessed_at": "2026-09-27T17:03:29.880088+00:00"
+      },
+      {
+        "tool_use_id": "call_zxbktauu0tw60izlnro890l6",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thomas-roth-stacksmashing-synthesis-v2-20260928-005803-538/checkpoint.md",
+          "content": "# Checkpoint — Thomas Roth (stacksmashing) synthesis v2\n\n## 已读取输入\n- task.md — 综合分析 Agent；重建领域能力成长过程（非罗列成就）；每主机制含起点条件→反复行为→反馈来源→中间能力→后续成果；至少满足\"跨材料/跨时期重复、解释多个后续结果、相对有区分度\"中两项才列主机制；documented/reported/inferred/unknown 分开；保留矛盾/失败/偶然机会/外部条件；至少一个竞争性解释；可迁移做法与个人特有条件分开；evidence_ids 用有效 id，被标记无效的不得继续使用；至少有 verified_in_run=true 来源支撑。\n- output.schema.json — required: person/expertise/stages/mechanisms/tensions/transferable_practices/non_transferable_conditions/open_questions；person const=Thomas Roth (stacksmashing)；stages[].required: period/stage/capability_change/evidence_ids/confidence；mechanisms[].required: name/starting_conditions/repeated_practice/feedback/intermediate_capability/observed_outcomes/evidence_ids/validation_tests/confidence/alternative_explanation；validation_tests enum: repeated/generative/distinctive；confidence enum: high/medium/low；additionalProperties=false（不填 _run/verification）。\n- inputs/person_json.json — rank=55, primary_focus=芯片/固件/Apple 配件漏洞, selected_conference_evidence=Black Hat US/EU / POC, social=x.com/stacksmashing, writeup_evidence=stacksmashing.net。\n- inputs/evidence_json.json — 六维 + targeted；有效证据含 verified_in_run=true 的：roth-works-05/06/12、thomas-roth-conversations-01/02、stacksmashing-community-github-org-tools/feedback/binwalk-fork/site-selfdescription/gh2k-exclusion、ext-001/002/003/004、dec-01/05/06、tl-identity-site/airtag-dump-2021/tamarin-series-2023/pico-tools-2024/openocd-tamarin-2025/recent-2026、tr-r1-evid-01/02/03。\n- inputs/revision_context.json — 第 1 轮修订：roth-works-01 作废；新增 tr-r1-evid-01/02/03；AirTag/star-fork/措辞 降级指令；幸存者+知名度偏差须显式记录。\n\n## 修订指令落实\n- stages[0] 不再用 roth-works-01；以 tr-r1-evid-01/02 锚定 2010 年最早可见公开仓库为 fork，删除\"确立研究方向\"原创因果。\n- pico-serprog 区分创建（2021-04-03，tr-r1-evid-03）与 push（2024-04-30），不与 pico-tpmsniffer 并列为 2024 新建。\n- AirTag 能力变化降级为待核实二手线索（tl-airtag-dump-2021，reported）。\n- mechanisms feedback 中 star/fork 计数降级为关注度而非有效反馈回路。\n- transferable_practices 不用\"降低重复造轮子成本\"，改为\"减少对既有开源工具的重复实现\"。\n- tensions 显式记录幸存者偏差与知名度偏差。\n\n## 阶段划分（每阶段至少 1 项 verified_in_run=true）\n1. 2010 — 最早可见公开仓库（fork only）— tr-r1-evid-01/02 — low\n2. 2021 — 个人站点 + 低成本 MCU 工具链起步 — tl-identity-site/ext-001/thomas-roth-conversations-01/stacksmashing-community-site-selfdescription/tr-r1-evid-03/tl-airtag-dump-2021 — medium\n3. 2022–2023 — Apple USB-C/USB-PD VDM 配套工具生态 — dec-01/roth-works-05/tl-tamarin-series-2023/ext-003 — high\n4. 2024 — TPM/LPC 嗅探 + 主动故障注入并行 — roth-works-06/tl-pico-tools-2024/tr-r1-evid-03 — medium\n5. 2025–2026 — 调试器生态维护 + 固件静态分析延伸 — tl-openocd-tamarin-2025/tl-recent-2026/dec-05/stacksmashing-community-binwalk-fork — high\n\n## 主机制（均满足 2-of-3 标准，均有 verified_in_run=true 支撑）\n- M1 低成本 MCU 作为通用硬件攻击/烧录前端 — repeated+generative — medium\n- M2 围绕单一硬件平台构建协调多仓库生态（fork-and-extend）— repeated+generative+distinctive — medium\n- M3 以视频 + 开源仓库作为主要公开发表渠道 — repeated+distinctive — medium\n- M4 被动嗅探与主动干预两类方法在同一低成本硬件平台上的并行覆盖 — repeated+distinctive — low（主动仓库多 lead_only/未抓取，时间交错非递进）\n\n## 矛盾/失败/外部条件/竞争性解释\n- 2010–2021 公开证据空白；yubicrack fork 非原创。\n- AirTag 二手转述未一手核实；Black Hat/POC/Hardwear.io/DSTL 议程页 403/404/TLS 不匹配。\n- handle 不一致（x.com/stacksmashing vs @ghidraninja）。\n- star/fork=关注度非反馈；幸存者偏差+知名度偏差显式记录。\n- 主动故障注入仓库多未抓取；被动主动时间交错。\n- 竞争性解释：RP2040 市场可得性 / Apple USB-C 热门目标 / fork-and-extend 社区常见做法 / 视频输出反映个人媒体偏好。\n\n## 待办\n写 output.json，严格按 schema（不填 _run/verification，additionalProperties=false）。\n"
+        },
+        "success": true,
+        "content_sha256": "920b082b3f551ac2fe6eab02be65b8f47fba155ad59c754612f0779f72cf4baf",
+        "accessed_at": "2026-09-27T17:03:29.880660+00:00"
+      },
+      {
+        "tool_use_id": "call_fal4drd375paziyjkrd9aqvp",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thomas-roth-stacksmashing-synthesis-v2-20260928-005803-538/output.json",
+          "content": "{\n  \"person\": \"Thomas Roth (stacksmashing)\",\n  \"expertise\": [\n    \"硬件与固件漏洞发现\",\n    \"低成本微控制器（RP2040/Pico/STM32F4）作为硬件攻击与烧录前端\",\n    \"Apple USB-C/USB-PD VDM 总线探索\",\n    \"TPM/LPC 总线被动嗅探\",\n    \"故障注入与电磁扰动攻击\",\n    \"flashrom/serprog 兼容固件\",\n    \"固件静态分析工具链（binwalk）\",\n    \"以视频与开源仓库作为主要公开发表渠道\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2010\",\n      \"stage\": \"最早可见公开仓库（fork）\",\n      \"capability_change\": \"最早可见公开仓库 stacksmashing/yubicrack 创建于 2010-08-18，系自 nezza/yubicrack fork（C 语言，Yubikey 访问码暴力破解），与硬件令牌方向相关联；该仓库为 fork 而非原创发起项目，不足以证明其发起该方向。2010 至 2021 年站点建立之间存在公开证据空白，无法据现有材料还原其间学习路径与研究主线。\",\n      \"evidence_ids\": [\"tr-r1-evid-01\", \"tr-r1-evid-02\"],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2021\",\n      \"stage\": \"个人站点建立与低成本微控制器工具链起步\",\n      \"capability_change\": \"建立个人站点 stacksmashing.net（Impressum 登记 Thomas Roth，Esslingen am Neckar），自述制作 IT-security 与硬件破解视频；同期创建 pico-serprog（2021-04-03，Flashrom/serprog 兼容固件，GPL-3.0），开始以 RP2040/Pico 作为低成本硬件前端构建可分发工具。据二手媒体报道转述，相关报道提及对 Apple AirTag 进行芯片开封与故障注入并导出固件；因报道正文与本人一手 writeup 未取得，不作为能力变化的已核实验证，仅作为待核实的二手线索。\",\n      \"evidence_ids\": [\"tl-identity-site\", \"ext-001\", \"thomas-roth-conversations-01\", \"stacksmashing-community-site-selfdescription\", \"tr-r1-evid-03\", \"tl-airtag-dump-2021\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2022–2023\",\n      \"stage\": \"Apple USB-C/USB-PD VDM 配套工具生态建设\",\n      \"capability_change\": \"围绕 Apple 设备 USB-C/USB-PD VDM 总线构建自研硬件、固件与主机工具的研究套件：tamarin-c 于 2023-12-28 公开发布，在 USB-C SBU 引脚上对 Apple 设备实现 UART/SWD/JTAG/DCSD/内部总线映射/DFU 入口，并在 iPhone 15 上观测到 ACE SPMI 协议；项目显式声明基于 Marc Zyngier 的 Central Scrutinizer 与 AsahiLinux vdmtool，体现对前人工作的吸收与增量贡献；同期衍生 tamarin-firmware、tamarin-c-hw、macvdmtool 等配套仓库，工具建设与公开发表习惯成熟。\",\n      \"evidence_ids\": [\"dec-01-tamarin-usb-c-public-release\", \"roth-works-05\", \"tl-tamarin-series-2023\", \"ext-003\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2024\",\n      \"stage\": \"TPM/LPC 嗅探与主动故障注入并行\",\n      \"capability_change\": \"发布 pico-tpmsniffer（2024-02-03），基于 Pico 对 LPC 总线 TPM 流量进行被动嗅探，README 明确标注当前仅支持 LPC 而非 SPI TPM，体现对工具适用范围的克制标注；同期围绕 RP2040/Pico 与 STM32F4 维护可分发的攻击与嗅探工具集合（pico-serprog 于 2024-04-30 仍有 push 活动，2026-09-09 仍有更新；stm32f4_password_glitch 进行密码故障注入实验）。研究主题从外设总线扩展到平台固件信任根（TPM/LPC）侧信道观察与主动故障注入。\",\n      \"evidence_ids\": [\"roth-works-06\", \"tl-pico-tools-2024\", \"tr-r1-evid-03\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2025–2026\",\n      \"stage\": \"调试器生态维护与固件静态分析延伸\",\n      \"capability_change\": \"openocd-tamarin（2025-05-24 更新）在 Microsoft OpenOCD fork 基础上加入 Tamarin 支持并提供预编译二进制，降低他人复现门槛；2026 年 fork binwalk（Rust 实现，固件分析工具），将工具建设从硬件采集前端延伸到固件解析后端；stm32f4_playground（2026-08-02 更新）显示持续维护 STM32F4 实验。研究方向向固件静态分析与工具栈现代化（Rust 重写）延伸。\",\n      \"evidence_ids\": [\"tl-openocd-tamarin-2025\", \"tl-recent-2026\", \"dec-05-firmware-analysis-rust-fork\", \"stacksmashing-community-binwalk-fork\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"低成本微控制器作为通用硬件攻击与烧录前端\",\n      \"starting_conditions\": \"2021 年个人站点建立前后，RP2040/Pico 等廉价微控制器在消费市场可得；pico-serprog（2021-04-03 创建）以 Pico 作为 flashrom/serprog 兼容烧录固件，奠定以低成本 MCU 替代专业设备的起点。\",\n      \"repeated_practice\": \"跨时期在同一廉价平台（RP2040/Pico、STM32F4）上为不同目标构建工具：pico-serprog（SPI flash 烧录，2021）、pico-tpmsniffer（LPC 总线 TPM 嗅探，2024）、stm32f4_password_glitch（STM32F4 密码故障注入，2024）、stm32f4_playground（2026 仍维护）。\",\n      \"feedback\": \"GitHub 仓库的 fork 与 PR 计数（pico-tpmsniffer 约 697 星、101 forks、5 个开放 PR 等）反映关注度与流行度，可能与维护动力相关，但不构成经核实的能力反馈回路；无具名同行评价或 issue 讨论正文样本作为有效反馈证据。\",\n      \"intermediate_capability\": \"能够在廉价微控制器上快速构建面向不同总线与目标的可分发硬件攻击前端，并以 homebrew-tap 形成安装渠道。\",\n      \"observed_outcomes\": [\n        \"pico-serprog（2021-04-03 创建，2024-04-30 仍有 push）\",\n        \"pico-tpmsniffer（2024-02-03 发布，LPC 总线 TPM 嗅探）\",\n        \"stm32f4_password_glitch（2024，STM32F4 密码故障注入）\",\n        \"stm32f4_playground（2026-08-02 仍维护）\"\n      ],\n      \"evidence_ids\": [\"tr-r1-evid-03\", \"roth-works-06\", \"tl-pico-tools-2024\", \"tl-recent-2026\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"该方向可能由 RP2040/Pico 的市场可得性与社区流行度驱动，而非个人方法论选择；低成本 MCU 在 2021 年前后被多个研究者采用，并非该研究者特有。\"\n    },\n    {\n      \"name\": \"围绕单一硬件平台构建协调多仓库生态（fork-and-extend）\",\n      \"starting_conditions\": \"2022–2023 年 Apple USB-C 配件成为研究目标；前人公开成果可得（Marc Zyngier 的 Central Scrutinizer、AsahiLinux vdmtool、T8012 团队发现），为复用与增量贡献提供基座。\",\n      \"repeated_practice\": \"围绕 Tamarin C 硬件平台构建固件（tamarin-firmware）、命令行工具（tamarin-c）、硬件设计（tamarin-c-hw）、调试器适配（openocd-tamarin，fork Microsoft OpenOCD 并加入 Tamarin 支持）多仓库协同；并以 fork 既有社区工具叠加自研支持（openocd-tamarin、binwalk Rust fork）方式做增量建设。\",\n      \"feedback\": \"tamarin-c README 显式声明 heavily based on the Central Scrutinizer by Marc Zyngier 与 derives from vdmtool by the AsahiLinux project，体现对前人工作的显式引用与复用；GitHub fork 与 PR 计数反映关注度而非经核实的能力反馈。\",\n      \"intermediate_capability\": \"形成自研硬件、固件、主机工具与调试器适配的可复用研究套件，并在他人开源工具之上做差异化维护与预编译二进制分发。\",\n      \"observed_outcomes\": [\n        \"tamarin-c/tamarin-firmware/tamarin-c-hw 系列（2023-12 集中更新）\",\n        \"openocd-tamarin（2025-05-24 更新，预编译二进制）\",\n        \"macvdmtool（Apple Silicon 间 VDM 工具）\",\n        \"binwalk Rust fork（2026-01-06 更新）\"\n      ],\n      \"evidence_ids\": [\"dec-01-tamarin-usb-c-public-release\", \"roth-works-05\", \"tl-tamarin-series-2023\", \"tl-openocd-tamarin-2025\", \"stacksmashing-community-binwalk-fork\", \"dec-05-firmware-analysis-rust-fork\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"多仓库协同可能反映 Apple USB-C 在 2022–2023 年作为热门目标的时期特征，而非个人特有的方法论；fork-and-extend 是开源社区常见做法，并非该研究者独创。\"\n    },\n    {\n      \"name\": \"以视频与开源仓库作为主要公开发表渠道\",\n      \"starting_conditions\": \"2021 年个人站点 stacksmashing.net 建立，自述 I create videos on IT-security, hardware hacking and more!，将 YouTube 视频与开源仓库设为主要对外输出渠道，而非论文或会议议程。\",\n      \"repeated_practice\": \"跨时期以 YouTube 频道（@stacksmashing）与 GitHub 组织（github.com/stacksmashing，约 40 个仓库）持续公开工具与演示；站点 Impressum 与 GitHub README 长期绑定同一 handle 与真名。\",\n      \"feedback\": \"GitHub 组织仓库存在活跃 fork 与 PR（pico-tpmsniffer、tamarin-firmware 等），外部贡献者在其工具基础上持续参与；但 star 与 fork 计数反映关注度而非经核实的能力反馈回路，无具名同行评价样本。\",\n      \"intermediate_capability\": \"形成面向公众的解释与教学（视频）与可复现工具（开源仓库）双渠道输出习惯，公开仓库本身成为可交叉验证的研究产出物。\",\n      \"observed_outcomes\": [\n        \"stacksmashing.net 个人站点（2021 至今）\",\n        \"GitHub 组织 stacksmashing 约 40 个仓库（C 语言为主）\",\n        \"YouTube 频道 @stacksmashing（频道数据未一手核实）\"\n      ],\n      \"evidence_ids\": [\"tl-identity-site\", \"ext-001\", \"thomas-roth-conversations-01\", \"dec-06-public-output-habit-video\", \"stacksmashing-community-site-selfdescription\", \"stacksmashing-community-github-org-tools\", \"stacksmashing-community-github-feedback\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"以视频为主要输出可能反映个人媒体生产偏好或德语区内容生态，而非能力获得机制本身；视频频道数据未一手核实，无法量化输出频次与观众反馈。\"\n    },\n    {\n      \"name\": \"被动嗅探与主动干预两类方法在同一低成本硬件平台上的并行覆盖\",\n      \"starting_conditions\": \"2021 年以 pico-serprog（被动烧录）为起点，研究方法以被动总线观察为主；前人公开的 USB-PD VDM 与故障注入方法可得。\",\n      \"repeated_practice\": \"在同一低成本硬件平台（RP2040/Pico、STM32F4）上并行构建被动嗅探工具（pico-tpmsniffer，LPC 总线）与主动干预工具（macvdmtool 主动构造 USB-PD VDM 流量；picoemp-fw 电磁脉冲；stm32f4_password_glitch 密码故障注入；stm32f4_playground）。\",\n      \"feedback\": \"无经核实的有效能力反馈样本；AirTag 故障注入工作（tl-airtag-dump-2021）为二手媒体报道转述，正文未抓取，不作为已核实证据。\",\n      \"intermediate_capability\": \"在同一类廉价硬件上覆盖从被动观察到主动干预（协议构造、电压与电磁故障注入）的方法谱系。\",\n      \"observed_outcomes\": [\n        \"pico-tpmsniffer（被动嗅探，2024）\",\n        \"macvdmtool（主动 VDM 构造，2023）\",\n        \"stm32f4_playground（2026 仍维护）\"\n      ],\n      \"evidence_ids\": [\"roth-works-06\", \"tl-recent-2026\", \"tl-airtag-dump-2021\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"主动故障注入与主动协议构造的仓库（picoemp-fw、stm32f4_password_glitch、macvdmtool）多为 lead_only 且 verified_in_run=false，可能为并行兴趣而非方法递进；被动与主动工具在时间上交错（macvdmtool 2023-09 早于 pico-tpmsniffer 2024-02），不构成严格的被动到主动递进；AirTag 报道为二手转述，无法核实物理方法与动机。\"\n    }\n  ],\n  \"tensions\": [\n    \"yubicrack 是 fork 而非原创（roth-works-01 已作废，由 tr-r1-evid-01/02 替代）；2010 至 2021 年站点建立之间存在公开证据空白，无法还原其间学习路径与研究主线。\",\n    \"AirTag 故障注入与芯片开封工作（tl-airtag-dump-2021）为二手媒体报道转述，正文未抓取，物理方法与动机未一手核实；不作为能力变化的已核实验证。\",\n    \"Black Hat/POC/Hardwear.io/DSTL 会议演讲事实均未能从一手页面核实（议程页 403/404、TLS 证书域名不匹配）；person_json 的 selected_conference_evidence 与可一手核实来源之间存在未消解冲突。\",\n    \"handle 不一致：person_json 记录 social 为 x.com/stacksmashing，而一手站点 stacksmashing.net 链接的 Twitter 为 @ghidraninja；两者关系未核实。\",\n    \"GitHub star 与 fork 计数反映关注度与流行度，不等于经核实的能力反馈；将关注度等同于能力反馈存在知名度偏差。\",\n    \"可观测证据限于现存、未删除、公开仓库，2010–2020 间及任何已删除或私有工作不可见，存在幸存者偏差。\",\n    \"主动故障注入相关仓库（picoemp-fw、stm32f4_password_glitch、macvdmtool）多为 lead_only 且 verified_in_run=false，被动与主动方法在时间上交错而非严格递进。\"\n  ],\n  \"transferable_practices\": [\n    \"在既有开源工具之上做增量建设（fork OpenOCD 加入 Tamarin 支持、fork binwalk Rust 实现），减少对既有开源工具的重复实现。\",\n    \"围绕单一硬件平台构建协调多仓库生态（固件、命令行工具、硬件设计、调试器适配），而非单点工具。\",\n    \"显式引用与复用前人公开成果（Central Scrutinizer、AsahiLinux vdmtool），并在 README 注明作者与衍生关系。\",\n    \"在 README 中明确标注工具能力边界（如 pico-tpmsniffer 标注当前仅支持 LPC 而非 SPI TPM），便于他人判断适用范围。\",\n    \"为 fork 的工具提供预编译二进制（openocd-tamarin），降低他人复现门槛。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"个人站点与 YouTube 频道作为公开输出渠道，依赖个人媒体生产能力与长期内容维护。\",\n    \"Apple USB-C 配件在 2022–2023 年作为可访问且受关注的研究目标，提供研究主题选择的外部条件。\",\n    \"RP2040/Pico 在 2021 年前后的市场可得性，为低成本 MCU 工具链提供硬件前提。\",\n    \"前人公开成果（Central Scrutinizer、AsahiLinux vdmtool）的可得性，为复用与增量贡献提供基座。\",\n    \"德国 Esslingen am Neckar 的地域身份（站点 Impressum 登记）。\"\n  ],\n  \"open_questions\": [\n    \"2010–2020 年间的学习路径、研究主线与教育、雇主背景无公开一手材料。\",\n    \"Black Hat/POC/Hardwear.io/DSTL 会议演讲的具体标题、年份与摘要未能从一手页面核实。\",\n    \"YouTube @stacksmashing 频道的创建日期、视频发布时间线与观众反馈数据未一手核实。\",\n    \"AirTag 相关一手 writeup 与媒体报道正文未取得，物理方法（芯片开封、故障注入）与动机无法核实。\",\n    \"具体 CVE 与厂商漏洞公告的归属与时间未在抓取中出现。\",\n    \"x.com/stacksmashing 与 twitter.com/ghidraninja 两个账号的归属关系未核实。\",\n    \"GitHub 组织 stacksmashing 成员列表非公开，组织归属为推断而非直接证明。\",\n    \"是否存在经核实的有效能力反馈（具名同行评价、issue 讨论正文、协作 CTF 痕迹）仍为资料缺口。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "492419e0dbf8b6873a8ea9b13fcfea4a176d8b6a3fe5bf6d7c15e75fc97d4f90",
+        "accessed_at": "2026-09-27T17:03:29.880664+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790528609880676000-thomas-roth-stacksmashing-synthesis-v2.json",
+    "label": "Thomas Roth (stacksmashing):synthesis:v2",
+    "elapsed_seconds": 326.34,
+    "prompt_sha256": "d0d3f3da837670abc172fc1358aedeb33b2d54a3290a04e891fc77615534e353",
+    "num_turns": 9,
+    "total_cost_usd": 0.7667530000000001,
+    "usage": {
+      "input_tokens": 49480,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 72256,
+      "output_tokens": 19329,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 49480,
+        "outputTokens": 19329,
+        "cacheReadInputTokens": 72256,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.7667530000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

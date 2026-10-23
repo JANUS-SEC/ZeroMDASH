@@ -1,0 +1,256 @@
+{
+  "person": "Marco Grassi",
+  "expertise": [
+    "iOS 与 OS X 内核漏洞发现与利用链构建（基于一手博客与 GitHub 仓库记录，2016-2019）",
+    "移动平台漏洞研究（iOS 沙箱逃逸、Qualcomm MSM 内核、Amazon Fire Phone 内核）",
+    "Rust 逆向与固件分析工具建设（PartialZip、iOS kernelcache 解压、KPP 提取、固件基址搜索、RouterOS 备份处理）",
+    "多类解析器与内核组件漏洞披露（CoreGraphics、IOHIDFamily、containermanagerd、Linux SCSI/tcp、ImageMagick、libtidy、MuPDF、expat）"
+  ],
+  "stages": [
+    {
+      "period": "2016-01 至 2016-11",
+      "stage": "公开漏洞披露节奏的建立与多目标覆盖",
+      "capability_change": "在 11 个月窗口内连续发布十余篇带日期与多数带 CVE 编号的 writeup，研究目标从单一内核信息泄漏扩展到 iOS 内核竞态、iOS 沙箱逃逸、OS X 内核空指针、Apple CoreGraphics、Qualcomm MSM 内核、Amazon Fire Phone 内核及多种解析器；形成按时间可排列、以完整漏洞对象为单位的公开产出习惯。",
+      "evidence_ids": [
+        "MG-RR4-02",
+        "MG-RR4-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2016 至 2019",
+      "stage": "Rust 逆向与固件分析工具建设的持续投入",
+      "capability_change": "在 GitHub 公开维护 4 个 Rust 工具仓库，覆盖 PartialZip 实现、iOS 64 位 kernelcache 解密解压与 KPP 提取、固件基址搜索、RouterOS 备份加解密与打包解包；其中 rust-kernelcache-extractor 累计 305 次 commit、44 个 star、7 个 fork。研究产出从单点漏洞扩展到可复用的逆向工具链。",
+      "evidence_ids": [
+        "MG-RR4-03",
+        "MG-RR4-04",
+        "MG-RR4-01"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "公开 writeup 披露的反复练习",
+      "starting_conditions": "持有个人博客 marcograss.github.io（自述 'Personal blog with some sparse posts about Computer Security, Bugs, Electronics and whatelse'），同一 handle 同时持有 x.com/marcograss 与 github.com/marcograss，具备独立的公开发表渠道，无需依赖外部媒体即可发布技术细节。",
+      "repeated_practice": "2016-01 至 2019-09 间持续在博客发布带日期标注、多数带 CVE 编号的 writeup；2016 年内单年即覆盖 IOHIDFamily、containermanagerd、CoreGraphics、Qualcomm MSM、Fire Phone 内核、Linux kASLR 绕过等多个目标，研究方法在不同目标间重复应用（漏洞定位、可利用性判断、利用链构建、公开披露）。",
+      "feedback": "多条 writeup 附带 CVE 编号（如 CVE-2016-1824、CVE-2016-4673、CVE-2016-2443、CVE-2015-7292、CVE-2016-4794/6162），CVE 编号由 CNA 或厂商确认；博客公开形式本身使研究细节暴露于同行审视。Black Hat US/Asia 与 POC 的会议品牌记录（未核验到具体场次）亦可作为公开发表习惯的间接旁证，但场次与反馈效果未核验。",
+      "intermediate_capability": "形成跨目标的漏洞披露能力：能在 iOS/OS X 内核、Qualcomm 内核、Fire Phone 内核、多种用户态解析器上重复完成从发现到带 CVE 公开的完整流程，并区分可利用与不可利用情形（如 'Some unexploitable but unsandboxable OS X/iOS Kernel NULL pointers'）。",
+      "observed_outcomes": [
+        "2016-05-16 [CVE-2016-1824] Apple IOHIDFamily kernel race condition as root",
+        "2016-06-17 Remotely pwning iOS via WiFi and escaping the Sandbox",
+        "2016-06-17 iOS containermanagerd XPC array out of bound vulnerability",
+        "2016-11-21 [CVE-2016-4673] Apple CoreGraphics macOS/iOS JPEG memory corruption",
+        "2016-05-03 [CVE-2016-2443] Qualcomm MSM debug fs kernel arbitrary write",
+        "2016-01-15 [CVE-2015-7292] Amazon Fire Phone kernel stack based buffer overflow",
+        "2016-01-24 Exploiting a Linux Kernel Infoleak to bypass Linux kASLR"
+      ],
+      "evidence_ids": [
+        "MG-RR4-02",
+        "MG-RR4-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "高密度披露亦可由目标流行度、厂商悬赏计划、组织资源支持或 2016 年 iOS 越狱生态高峰期共同驱动，而非个人能力机制本身；此外 conversations 维度无任何一手访谈材料，无法核验其披露动机是个人习惯、组织任务还是经济激励，此为资料缺口而非已证因果。"
+    },
+    {
+      "name": "Rust 逆向工具的反复建设",
+      "starting_conditions": "具备 iOS 64 位 kernelcache 解密与 KPP 提取的逆向需求，并参考 Levin 的 joker 工具与外部仓库 vault13 的 LZSS decode 实现；GitHub 主页显示名为 Marco Grassi，具备公开代码托管渠道。",
+      "repeated_practice": "在 GitHub 公开维护多个 Rust 工具仓库，主题集中在安全/逆向/固件方向：PartialZip 的 Rust 实现、iOS 64 位 kernelcache 解压与 KPP 提取、固件基址搜索、RouterOS 备份加解密与打包解包；README 采用 KISS 风格，构建方式统一为 cargo build --release。工具建设与 writeup 披露方向一致，覆盖 iOS、固件、RouterOS 等多类目标。",
+      "feedback": "rust-kernelcache-extractor 累计 44 star、7 fork、305 commit，公开仓库的 star/fork 计数与 commit 历史构成可量化的使用反馈；README 中对 Levin joker 工具与 vault13 LZSS 实现的引用表明工具建设建立在对既有方法比较与借鉴之上。",
+      "intermediate_capability": "形成以 Rust 表达的逆向工具链能力：能在 kernelcache 解密解压、KPP 提取、固件基址定位、备份格式逆向等任务上重复产出可复用工具，而非仅完成单次漏洞利用。",
+      "observed_outcomes": [
+        "partialzip — Implementation of PartialZip in Rust",
+        "rust-kernelcache-extractor — Extract a decrypted iOS 64-bit kernelcache（305 commits, 44 stars, 7 forks）",
+        "rbasefind — A firmware base address search tool (forked from sgayou/rbasefind)",
+        "routerosbackuptools — Tools to encrypt/decrypt and pack/unpack RouterOS v6.13+ backup files"
+      ],
+      "evidence_ids": [
+        "MG-RR4-03",
+        "MG-RR4-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "工具集中选择 Rust 亦可由个人语言偏好、Rust 在系统/逆向工具生态中的可用性、或对 KISS 与 GPL 许可的个人取向驱动，与漏洞研究能力无必然因果；4 个 pinned 仓库均为同一方向可由个人兴趣一致性解释，不一定指向能力成长的内在机制。"
+    }
+  ],
+  "tensions": [
+    "writeup_evidence 字段指向 blog.secuinside.com，但该域名实测 ECONNREFUSED 不可达；一手 writeup 实际载于 marcograss.github.io。二者是否为同一人维护、或字段指向已失效旧域名，未核验（MG-RR4-01 与 MG-PUB-01 之间存在载体冲突）。",
+    "WebSearch 综述文本曾出现 iOS 内核/Tencent Keen Lab/意大利籍画像与 Frida/NowSecure/Android 应用静态动态分析画像；经 round 4 一手抓取，GitHub pinned 仓库否定 torchqrnn 同名冲突，且博客 2019-04-03 'Filetype Classifier with CNN' 标签为 reversing 属同一人附带项目，但 Keen Lab/Tencent 雇主关联仍未一手核验，画像归属冲突仅部分消解（mg-ext-id-001、mg-dec-01/02/03）。",
+    "conversations 维度（深度对话与自述）无任何一手材料：未取得访谈、播客、AMA 或演讲问答来源，入门路径、学习路径、失败经历、导师或同伴、转折与选择的自述全部缺失；因此成长机制中的反馈来源只能由 CVE 编号、star/fork 计数等间接信号推断，无法由本人自述佐证。",
+    "2017-2018 年披露缺口：一手 writeup 时间线集中在 2016 年与 2019 年，2017-2018 年的公开 writeup 节点未在博客索引中核验到，是否存在研究重心转移、内部研究或未公开披露，资料缺口无法判断。",
+    "rank 94 与 Black Hat US/Asia、POC 为可见性与声誉信号，不构成能力来源证据；不得以 Keen Lab/Tencent 等团队品牌替代能力来源解释；排名收录本身存在幸存者选择效应，倾向于覆盖已被公开渠道记录的研究员。",
+    "一手 writeup 与 GitHub 仓库均集中于 2016-2019 窗口，2020 年后的公开产出未核验；当前能力状态与近期研究方向无法从已有证据推断。"
+  ],
+  "transferable_practices": [
+    "维护独立的个人博客作为带日期与 CVE 编号的 writeup 载体，使研究产出按时间可排列、可被同行审视，便于建立可核验的披露节奏。",
+    "将重复出现的逆向需求（kernelcache 解压、KPP 提取、固件基址搜索、备份格式处理）抽象为可复用的开源工具，而非止步于单次漏洞利用；README 借鉴既有工具（如 Levin joker）并标注来源。",
+    "在 writeup 中区分可利用与不可利用情形（如 'unexploitable but unsandboxable'），保留对可利用性边界的判断而非仅报告漏洞存在。"
+  ],
+  "non_transferable_conditions": [
+    "独立博客与 GitHub 渠道属个人持有条件，依赖个人长期维护；若研究者无独立发表渠道或受组织发布政策约束，披露节奏无法直接复制。",
+    "2016 年 iOS 越狱与移动安全生态高峰期为披露密度提供了目标流行度与外部激励背景，属时期外部条件，不可在当前时期直接复现。",
+    "Rust 工具链建设依赖个人对 Rust 语言与 KISS/GPL 取向的选择，亦依赖 Levin joker、vault13 等既有方法的存在；缺乏这些既有方法或不同语言偏好的研究者无法直接复用该工具链。",
+    "一手 writeup 与 GitHub 仓库集中于 2016-2019 窗口，且 conversations 维度无任何自述材料，反馈来源与学习路径只能由间接信号推断，属本案例的资料条件限制。"
+  ],
+  "open_questions": [
+    "blog.secuinside.com 与 marcograss.github.io 的关系：二者是否为同一人维护、或 person_json 的 writeup_evidence 字段指向已失效旧域名，未核验。",
+    "Black Hat US/Asia 与 POC 的具体场次、年份、讲题、共同作者未核验：blackhat.com 议程页返回 403 Forbidden，powerofcommunity.net 返回 404 Not Found，议程页一手正文未取得。",
+    "Keen Lab/Tencent 雇主或团队关联未一手核验：仅来自不可引用的 WebSearch 综述文本，未升级为 reported。",
+    "conversations 维度（深度对话与自述）无任何一手材料：未取得访谈、播客、AMA 或演讲问答来源，入门、学习路径、失败经历、导师或同伴、转折与选择的自述全部缺失。",
+    "2017-2018 年的公开披露节点未在博客索引中核验到，该时段的研究活动与产出状态无法判断。",
+    "2020 年后的公开产出与当前研究方向未核验，一手证据集中于 2016-2019 窗口，近期能力状态无法从已有证据推断。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/marco-grassi-synthesis-v5-20260930-030038-772",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790708815074556000-marco-grassi-synthesis-v5.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "8e66409e-3441-4bc4-80ab-c33ab6d745b5",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_ghktrjbckql443dq5bp1pqv2",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/marco-grassi-synthesis-v5-20260930-030038-772/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-29T19:06:55.127372+00:00"
+      },
+      {
+        "tool_use_id": "call_99dsw1blay03z2m2bd8umato",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/marco-grassi-synthesis-v5-20260930-030038-772/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-29T19:06:55.127405+00:00"
+      },
+      {
+        "tool_use_id": "call_l4t1yvpfj3ubu4zpsdl2rsta",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/marco-grassi-synthesis-v5-20260930-030038-772/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "7bbfdae11ea0208d53b812054453f099f2f355842f74dc5a6edb4c7e069f6fb7",
+        "accessed_at": "2026-09-29T19:06:55.127411+00:00"
+      },
+      {
+        "tool_use_id": "call_dftculmqtjntvznveai8tiys",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/marco-grassi-synthesis-v5-20260930-030038-772/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "13a8d1b78fb6eab794d54a8cd6d6c877d701c163f09b9f01823427c0c945c4f6",
+        "accessed_at": "2026-09-29T19:06:55.127421+00:00"
+      },
+      {
+        "tool_use_id": "call_pexd34fcs3lzvyjfghj9li9a",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/marco-grassi-synthesis-v5-20260930-030038-772/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "c9a45ea3aaee38963bed705a8ff48e69f5d6bffe4c4166c864f90885406305d0",
+        "accessed_at": "2026-09-29T19:06:55.127471+00:00"
+      },
+      {
+        "tool_use_id": "call_isqk9hvfa8ie1wugmj47xfpt",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/marco-grassi-synthesis-v5-20260930-030038-772/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "5dc323a1e76dfa07095adcb934605c82aa035109ddc5639e1a569b3bdccaf47b",
+        "accessed_at": "2026-09-29T19:06:55.127540+00:00"
+      },
+      {
+        "tool_use_id": "call_89v02zqiir7oklono4uggukx",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/marco-grassi-synthesis-v5-20260930-030038-772/inputs/revision_context.json",
+          "offset": 584,
+          "limit": 617
+        },
+        "success": true,
+        "content_sha256": "601c4c6a7cc581c38ae329dbfee517800af181d00e6a8c6deb20172f158ea347",
+        "accessed_at": "2026-09-29T19:06:55.127622+00:00"
+      },
+      {
+        "tool_use_id": "call_t5n4181oc56agbb6i7dgu8oo",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/marco-grassi-synthesis-v5-20260930-030038-772/checkpoint.md",
+          "content": "# Checkpoint — Marco Grassi 综合分析 v5\n\n## 任务\n综合分析师。重建领域能力成长过程（非罗列成就）。每个主机制需：起点条件 → 反复行为/练习 → 反馈来源 → 中间能力 → 后续可观察成果。\n\n## 已读取输入\n- CLAUDE.md / task.md / output.schema.json\n- inputs/person_json.json：rank 94，Marco Grassi，primary_focus=Android/iOS 与利用链，social=https://x.com/marcograss，writeup_evidence=https://blog.secuinside.com/（实测 ECONNREFUSED 不可达），selected_conference_evidence=Black Hat US/Asia / POC，qualification=移动端漏洞发现与利用\n- inputs/evidence_json.json：六维 18 条 item，全部 verified_in_run=false / lead_only / unverified\n- inputs/revision_context.json：4 轮修订记录；round 4 新增 MG-RR4-01/02/03/04（均 verified_in_run=true, level=primary），作废 mg-community-github-handle、mg-tl-004\n\n## 有效证据池\n- verified_in_run=true（stages/mechanisms 必须引用至少一条）：\n  - MG-RR4-01：marcograss.github.io 博客（身份关联：同 handle 持有 x.com/github/博客，方向为 iOS/内核/利用链）\n  - MG-RR4-02：writeup 时间线 2016-01 至 2019-09，26 条带日期/CVE，覆盖 iOS/OS X/Linux 内核/Qualcomm/Fire Phone/解析器\n  - MG-RR4-03：GitHub pinned 4 个 Rust 工具（partialzip、rust-kernelcache-extractor、rbasefind、routerosbackuptools），否定 torchqrnn 同名冲突\n  - MG-RR4-04：rust-kernelcache-extractor（iOS 64-bit kernelcache 解密/解压 + KPP 提取，305 commits/44 stars/7 forks）\n- lead_only/unverified（可在 tensions/open_questions 文本中引用，不作 stages/mechanisms 支撑）：MG-PUB-01/02/03/04、mg-community-writeup-blog、mg-community-conference-speaking、mg-ext-conf-001、mg-ext-writeup-001、mg-ext-id-001、mg-dec-01/02/03、mg-tl-001/002/003\n- 已作废（不得使用）：mg-community-github-handle、mg-tl-004\n\n## 综合处置\n- expertise：基于 MG-RR4-* 升级为 documented 能力描述（iOS/OS X 内核+利用链、移动平台、Rust 逆向工具）\n- stages（2 条，均 high，引用 MG-RR4-*）：\n  1. 2016-01 至 2016-11 多目标公开披露习惯建立\n  2. 2016-2019 Rust 逆向与固件分析工具建设\n- mechanisms（2 条，均 high，至少满足\"跨材料/跨时期重复 + 解释多个结果\"两项）：\n  1. 公开 writeup 披露反复练习（repeated+generative）；反馈=CVE 编号由 CNA/厂商确认 + 公开审视；alt=目标流行度/悬赏/组织资源\n  2. Rust 逆向工具反复建设（repeated+generative+distinctive）；反馈=stars/forks + README 借鉴 Levin joker/vault13；alt=个人兴趣/语言偏好\n- tensions：保留 blog.secuinside.com vs marcograss.github.io 冲突、Keen Lab/Tencent 未核验、Black Hat/POC 未核验（403/404）、conversations 维度空、2017-2018 披露缺口、rank 幸存者偏差、CNN 画像误并入已澄清\n- transferable_practices / non_transferable_conditions 分开\n- open_questions：6 条待核验项\n- 不写 _run / verification（编排器职责）\n\n## 合规性自检\n- 顶层 required 齐全；additionalProperties:false 满足（不写 _run）\n- stages/mechanisms 每条 evidence_ids 均含 verified_in_run=true 来源\n- 未引用任何已作废 evidence id\n- 自撰字段使用专业书面语，无黑话/比喻/拟人/宣传性表达\n\n## 状态\n准备写入 output.json。\n"
+        },
+        "success": true,
+        "content_sha256": "0be1e058415c37d4738dce8ad9ca10f796d32ca8cdde1b1254f02235973b56a6",
+        "accessed_at": "2026-09-29T19:06:55.128565+00:00"
+      },
+      {
+        "tool_use_id": "call_u8grwj9ufh4yru29143b38yq",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/marco-grassi-synthesis-v5-20260930-030038-772/output.json",
+          "content": "{\n  \"person\": \"Marco Grassi\",\n  \"expertise\": [\n    \"iOS 与 OS X 内核漏洞发现与利用链构建（基于一手博客与 GitHub 仓库记录，2016-2019）\",\n    \"移动平台漏洞研究（iOS 沙箱逃逸、Qualcomm MSM 内核、Amazon Fire Phone 内核）\",\n    \"Rust 逆向与固件分析工具建设（PartialZip、iOS kernelcache 解压、KPP 提取、固件基址搜索、RouterOS 备份处理）\",\n    \"多类解析器与内核组件漏洞披露（CoreGraphics、IOHIDFamily、containermanagerd、Linux SCSI/tcp、ImageMagick、libtidy、MuPDF、expat）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2016-01 至 2016-11\",\n      \"stage\": \"公开漏洞披露节奏的建立与多目标覆盖\",\n      \"capability_change\": \"在 11 个月窗口内连续发布十余篇带日期与多数带 CVE 编号的 writeup，研究目标从单一内核信息泄漏扩展到 iOS 内核竞态、iOS 沙箱逃逸、OS X 内核空指针、Apple CoreGraphics、Qualcomm MSM 内核、Amazon Fire Phone 内核及多种解析器；形成按时间可排列、以完整漏洞对象为单位的公开产出习惯。\",\n      \"evidence_ids\": [\"MG-RR4-02\", \"MG-RR4-01\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2016 至 2019\",\n      \"stage\": \"Rust 逆向与固件分析工具建设的持续投入\",\n      \"capability_change\": \"在 GitHub 公开维护 4 个 Rust 工具仓库，覆盖 PartialZip 实现、iOS 64 位 kernelcache 解密解压与 KPP 提取、固件基址搜索、RouterOS 备份加解密与打包解包；其中 rust-kernelcache-extractor 累计 305 次 commit、44 个 star、7 个 fork。研究产出从单点漏洞扩展到可复用的逆向工具链。\",\n      \"evidence_ids\": [\"MG-RR4-03\", \"MG-RR4-04\", \"MG-RR4-01\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"公开 writeup 披露的反复练习\",\n      \"starting_conditions\": \"持有个人博客 marcograss.github.io（自述 'Personal blog with some sparse posts about Computer Security, Bugs, Electronics and whatelse'），同一 handle 同时持有 x.com/marcograss 与 github.com/marcograss，具备独立的公开发表渠道，无需依赖外部媒体即可发布技术细节。\",\n      \"repeated_practice\": \"2016-01 至 2019-09 间持续在博客发布带日期标注、多数带 CVE 编号的 writeup；2016 年内单年即覆盖 IOHIDFamily、containermanagerd、CoreGraphics、Qualcomm MSM、Fire Phone 内核、Linux kASLR 绕过等多个目标，研究方法在不同目标间重复应用（漏洞定位、可利用性判断、利用链构建、公开披露）。\",\n      \"feedback\": \"多条 writeup 附带 CVE 编号（如 CVE-2016-1824、CVE-2016-4673、CVE-2016-2443、CVE-2015-7292、CVE-2016-4794/6162），CVE 编号由 CNA 或厂商确认；博客公开形式本身使研究细节暴露于同行审视。Black Hat US/Asia 与 POC 的会议品牌记录（未核验到具体场次）亦可作为公开发表习惯的间接旁证，但场次与反馈效果未核验。\",\n      \"intermediate_capability\": \"形成跨目标的漏洞披露能力：能在 iOS/OS X 内核、Qualcomm 内核、Fire Phone 内核、多种用户态解析器上重复完成从发现到带 CVE 公开的完整流程，并区分可利用与不可利用情形（如 'Some unexploitable but unsandboxable OS X/iOS Kernel NULL pointers'）。\",\n      \"observed_outcomes\": [\n        \"2016-05-16 [CVE-2016-1824] Apple IOHIDFamily kernel race condition as root\",\n        \"2016-06-17 Remotely pwning iOS via WiFi and escaping the Sandbox\",\n        \"2016-06-17 iOS containermanagerd XPC array out of bound vulnerability\",\n        \"2016-11-21 [CVE-2016-4673] Apple CoreGraphics macOS/iOS JPEG memory corruption\",\n        \"2016-05-03 [CVE-2016-2443] Qualcomm MSM debug fs kernel arbitrary write\",\n        \"2016-01-15 [CVE-2015-7292] Amazon Fire Phone kernel stack based buffer overflow\",\n        \"2016-01-24 Exploiting a Linux Kernel Infoleak to bypass Linux kASLR\"\n      ],\n      \"evidence_ids\": [\"MG-RR4-02\", \"MG-RR4-01\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"高密度披露亦可由目标流行度、厂商悬赏计划、组织资源支持或 2016 年 iOS 越狱生态高峰期共同驱动，而非个人能力机制本身；此外 conversations 维度无任何一手访谈材料，无法核验其披露动机是个人习惯、组织任务还是经济激励，此为资料缺口而非已证因果。\"\n    },\n    {\n      \"name\": \"Rust 逆向工具的反复建设\",\n      \"starting_conditions\": \"具备 iOS 64 位 kernelcache 解密与 KPP 提取的逆向需求，并参考 Levin 的 joker 工具与外部仓库 vault13 的 LZSS decode 实现；GitHub 主页显示名为 Marco Grassi，具备公开代码托管渠道。\",\n      \"repeated_practice\": \"在 GitHub 公开维护多个 Rust 工具仓库，主题集中在安全/逆向/固件方向：PartialZip 的 Rust 实现、iOS 64 位 kernelcache 解压与 KPP 提取、固件基址搜索、RouterOS 备份加解密与打包解包；README 采用 KISS 风格，构建方式统一为 cargo build --release。工具建设与 writeup 披露方向一致，覆盖 iOS、固件、RouterOS 等多类目标。\",\n      \"feedback\": \"rust-kernelcache-extractor 累计 44 star、7 fork、305 commit，公开仓库的 star/fork 计数与 commit 历史构成可量化的使用反馈；README 中对 Levin joker 工具与 vault13 LZSS 实现的引用表明工具建设建立在对既有方法比较与借鉴之上。\",\n      \"intermediate_capability\": \"形成以 Rust 表达的逆向工具链能力：能在 kernelcache 解密解压、KPP 提取、固件基址定位、备份格式逆向等任务上重复产出可复用工具，而非仅完成单次漏洞利用。\",\n      \"observed_outcomes\": [\n        \"partialzip — Implementation of PartialZip in Rust\",\n        \"rust-kernelcache-extractor — Extract a decrypted iOS 64-bit kernelcache（305 commits, 44 stars, 7 forks）\",\n        \"rbasefind — A firmware base address search tool (forked from sgayou/rbasefind)\",\n        \"routerosbackuptools — Tools to encrypt/decrypt and pack/unpack RouterOS v6.13+ backup files\"\n      ],\n      \"evidence_ids\": [\"MG-RR4-03\", \"MG-RR4-04\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"工具集中选择 Rust 亦可由个人语言偏好、Rust 在系统/逆向工具生态中的可用性、或对 KISS 与 GPL 许可的个人取向驱动，与漏洞研究能力无必然因果；4 个 pinned 仓库均为同一方向可由个人兴趣一致性解释，不一定指向能力成长的内在机制。\"\n    }\n  ],\n  \"tensions\": [\n    \"writeup_evidence 字段指向 blog.secuinside.com，但该域名实测 ECONNREFUSED 不可达；一手 writeup 实际载于 marcograss.github.io。二者是否为同一人维护、或字段指向已失效旧域名，未核验（MG-RR4-01 与 MG-PUB-01 之间存在载体冲突）。\",\n    \"WebSearch 综述文本曾出现 iOS 内核/Tencent Keen Lab/意大利籍画像与 Frida/NowSecure/Android 应用静态动态分析画像；经 round 4 一手抓取，GitHub pinned 仓库否定 torchqrnn 同名冲突，且博客 2019-04-03 'Filetype Classifier with CNN' 标签为 reversing 属同一人附带项目，但 Keen Lab/Tencent 雇主关联仍未一手核验，画像归属冲突仅部分消解（mg-ext-id-001、mg-dec-01/02/03）。\",\n    \"conversations 维度（深度对话与自述）无任何一手材料：未取得访谈、播客、AMA 或演讲问答来源，入门路径、学习路径、失败经历、导师或同伴、转折与选择的自述全部缺失；因此成长机制中的反馈来源只能由 CVE 编号、star/fork 计数等间接信号推断，无法由本人自述佐证。\",\n    \"2017-2018 年披露缺口：一手 writeup 时间线集中在 2016 年与 2019 年，2017-2018 年的公开 writeup 节点未在博客索引中核验到，是否存在研究重心转移、内部研究或未公开披露，资料缺口无法判断。\",\n    \"rank 94 与 Black Hat US/Asia、POC 为可见性与声誉信号，不构成能力来源证据；不得以 Keen Lab/Tencent 等团队品牌替代能力来源解释；排名收录本身存在幸存者选择效应，倾向于覆盖已被公开渠道记录的研究员。\",\n    \"一手 writeup 与 GitHub 仓库均集中于 2016-2019 窗口，2020 年后的公开产出未核验；当前能力状态与近期研究方向无法从已有证据推断。\"\n  ],\n  \"transferable_practices\": [\n    \"维护独立的个人博客作为带日期与 CVE 编号的 writeup 载体，使研究产出按时间可排列、可被同行审视，便于建立可核验的披露节奏。\",\n    \"将重复出现的逆向需求（kernelcache 解压、KPP 提取、固件基址搜索、备份格式处理）抽象为可复用的开源工具，而非止步于单次漏洞利用；README 借鉴既有工具（如 Levin joker）并标注来源。\",\n    \"在 writeup 中区分可利用与不可利用情形（如 'unexploitable but unsandboxable'），保留对可利用性边界的判断而非仅报告漏洞存在。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"独立博客与 GitHub 渠道属个人持有条件，依赖个人长期维护；若研究者无独立发表渠道或受组织发布政策约束，披露节奏无法直接复制。\",\n    \"2016 年 iOS 越狱与移动安全生态高峰期为披露密度提供了目标流行度与外部激励背景，属时期外部条件，不可在当前时期直接复现。\",\n    \"Rust 工具链建设依赖个人对 Rust 语言与 KISS/GPL 取向的选择，亦依赖 Levin joker、vault13 等既有方法的存在；缺乏这些既有方法或不同语言偏好的研究者无法直接复用该工具链。\",\n    \"一手 writeup 与 GitHub 仓库集中于 2016-2019 窗口，且 conversations 维度无任何自述材料，反馈来源与学习路径只能由间接信号推断，属本案例的资料条件限制。\"\n  ],\n  \"open_questions\": [\n    \"blog.secuinside.com 与 marcograss.github.io 的关系：二者是否为同一人维护、或 person_json 的 writeup_evidence 字段指向已失效旧域名，未核验。\",\n    \"Black Hat US/Asia 与 POC 的具体场次、年份、讲题、共同作者未核验：blackhat.com 议程页返回 403 Forbidden，powerofcommunity.net 返回 404 Not Found，议程页一手正文未取得。\",\n    \"Keen Lab/Tencent 雇主或团队关联未一手核验：仅来自不可引用的 WebSearch 综述文本，未升级为 reported。\",\n    \"conversations 维度（深度对话与自述）无任何一手材料：未取得访谈、播客、AMA 或演讲问答来源，入门、学习路径、失败经历、导师或同伴、转折与选择的自述全部缺失。\",\n    \"2017-2018 年的公开披露节点未在博客索引中核验到，该时段的研究活动与产出状态无法判断。\",\n    \"2020 年后的公开产出与当前研究方向未核验，一手证据集中于 2016-2019 窗口，近期能力状态无法从已有证据推断。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "e93291f975e7ed486128652d84805a0a1d6f59f269b06be644d208f94187755c",
+        "accessed_at": "2026-09-29T19:06:55.128578+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790708815128597000-marco-grassi-synthesis-v5.json",
+    "label": "Marco Grassi:synthesis:v5",
+    "elapsed_seconds": 376.35,
+    "prompt_sha256": "0316b2574ffe166b23154da3526d2d3c1970cd81d597d75677eee61e4fe4d172",
+    "num_turns": 10,
+    "total_cost_usd": 1.233885,
+    "usage": {
+      "input_tokens": 131164,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 148480,
+      "output_tokens": 20153,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 131164,
+        "outputTokens": 20153,
+        "cacheReadInputTokens": 148480,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.233885,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

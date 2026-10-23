@@ -1,0 +1,297 @@
+{
+  "person": "Ben Hawkes",
+  "expertise": [
+    "移动 GPU/内核驱动的硬件状态机竞争窗口分析与手工 PoC 构造（一手依据：CVE-2020-11179 Qualcomm Adreno KGSL，BH-WORKS-01）",
+    "复杂数据解析器内存安全漏洞的根因分析与人工代码审计（基于单一案例 CVE-2023-4863 libwebp，BH-WORKS-03；不作为稳定领域专长标签）",
+    "漏洞可利用性与漏洞质量的系统化评估方法（Exploit Equivalence Classes 框架、'good Linux kernel bug' 评估，BH-WORKS-02、ben-timeline-002）",
+    "供应链/构建系统攻击的历史比较与最小权限沙箱防御设计（OpenSSH/xz-utils 后门比较、Landlock/SELinux/seccomp-bpf，BH-WORKS-04）",
+    "AI/LLM 辅助漏洞发现与修补方向的能力边界评估（AIxCC 语境，BH-R2-01）"
+  ],
+  "stages": [
+    {
+      "period": "约2014–2020（Project Zero 时期；阶段终点仅以 2020-09-08 BH-WORKS-01 一手署名为锚点，2019/2020 是否转 DeepMind 未证实、记为缺口）",
+      "stage": "加入 Google Project Zero，在持续零日研究与公开披露制度下开展移动平台内核/驱动安全研究",
+      "capability_change": "从一般漏洞研究转入专职零日研究团队，研究产出置于公开披露的团队制度下（90 天披露为 Project Zero 团队政策与组织资源，不表述为个人能力变化）。该阶段一手技术证据仅 BH-WORKS-01（2020-09-08 Adreno）一篇，其研究范围为 Qualcomm Adreno KGSL 移动 GPU/内核驱动场景的硬件状态机竞争窗口与 PoC 构造，并对前序补丁有效性进行差分再检验；bh-decisions-01 与 BH-EXT-01 为二手 reported（维基百科转述），无具体技术产出。本阶段无浏览器漏洞一手作品，'浏览器与图片解析'并非该阶段一手证据范围。能力变化受单一一手数据点限制。",
+      "evidence_ids": [
+        "BH-WORKS-01",
+        "bh-decisions-01",
+        "BH-EXT-01"
+      ],
+      "confidence": "low"
+    },
+    {
+      "period": "2023（2022-05-04 离开 Google 后约 15 个月去向无公开一手来源；2023-08-23 起恢复公开 writeup）",
+      "stage": "以 blog.isosceles.com 独立/小团队名义恢复公开 writeup，研究主题由个案漏洞挖掘向可复用方法论与在野 0day 根因分析并重",
+      "capability_change": "恢复稳定的公开 writeup 节奏，并出现两类同步能力：一是将具体漏洞抽象为可复用评估框架（Exploit Equivalence Classes 将新漏洞按平台条件与缓解降级产生的原语归入等价类，BH-WORKS-02；'good Linux kernel bug' 跨 Android/服务器/云/IoT 场景评估，ben-timeline-002）；二是对在野 0day（CVE-2023-4863 libwebp VP8L Huffman 堆溢出）进行全新根因分析（非补丁差分），与 @mistymntncop 协作并组合 Mark Adler 的 enough 工具复算缓冲区上限与 ASan，定位 ReplicateValue 越界写（BH-WORKS-03）。该阶段 evidence_ids 经去重约映射 7 个独立作品（多篇 Isosceles 博客文章被跨维度重复编码为不同 id）。",
+      "evidence_ids": [
+        "BH-WORKS-02",
+        "BH-WORKS-03",
+        "ben-timeline-001",
+        "ben-timeline-002",
+        "ben-timeline-003",
+        "ben-timeline-004",
+        "bh-conv-01",
+        "benhawkes-community-01-webp-mistymntncop",
+        "benhawkes-community-02-disclosure-asymmetry-feedback",
+        "benhawkes-community-03-sustained-public-output",
+        "bh-decisions-03",
+        "bh-decisions-04",
+        "BH-EXT-02",
+        "BH-EXT-03"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2024（独立研究主题扩展期）",
+      "stage": "研究主题从内存安全个案扩展至供应链/构建系统后门、AI/LLM 辅助漏洞发现与修补、最小权限沙箱防御设计",
+      "capability_change": "出现从单点漏洞挖掘向系统设计与防御架构反思的转向：以 2002 OpenBSD 与 2024 xz-utils/liblzma 两次供应链攻击的历史比较分析重构攻击面与检测手段（校验和差异、构建系统挂钩、性能回归分析），并主张在代码本身不可信的世界中以最小权限约束所有代码、以约 250 行 Landlock 沙箱为 make 提供隔离示范（BH-WORKS-04）；同年评估 AI/LLM 辅助漏洞发现与修补的能力边界，在 DARPA AIxCC 语境下比较 LLM 直接定位源码漏洞与 LLM 辅助 fuzzing harness/补丁构造两种路径，指出 2024 年 LLM 上下文窗口有限、transformer 扩展性存疑、直接发现漏洞效果尚弱，倾向混合方案（BH-R2-01）。",
+      "evidence_ids": [
+        "BH-WORKS-04",
+        "BH-R2-01",
+        "ben-timeline-006",
+        "bh-decisions-05"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "补丁有效性差分再检验与前置工作承接",
+      "starting_conditions": "在 Project Zero 专职零日研究岗位上接触公开 bug 报告与厂商补丁；具备将既有高质量 bug 报告视为后续挖掘洞察来源的工作取向。团队披露文化（90 天披露、在野 0-day 根因分析）构成可被外部证据观察的背景，但具体到补丁差分实践的个体重复性证据薄弱。",
+      "repeated_practice": "对前序补丁的有效性主动进行再检验而非假定其充分：BH-WORKS-01 明确研究建立于 Guang Gong 的 CVE-2019-10567 Black Hat 论文之上，原补丁随机化了 scratch buffer 的 GPU 地址并阻止用户性能分析命令直接出现在 ringbuffer，但作者检验发现 scratch buffer 仍可经 CP_MEM_WRITE 被用户命令写入，从而绕过补丁第一部分，在受保护模式关闭的 context 切换窗口插入受控间接跳转、改写 TTBR0 指向伪造页表，获得物理内存任意读写并改写 sys_call_table。该案为补丁差分/绕过单例；WebP（BH-WORKS-03）经一手正文复核为全新根因分析（作者确认补丁充分），非补丁差分，故两案方法性质不同、跨时期重复性证据薄弱。",
+      "feedback": "前置工作（Guang Gong Black Hat 论文、CVE-2019-10567 报告）与补丁本身构成外部参照；作者将'高质量 bug 报告作为后续挖掘洞察来源'并'对 GPU 安全关键组件提高透明度'写入正文，形成自我反馈。",
+      "intermediate_capability": "对补丁边界条件进行差分再检验并构造可验证 PoC 的能力（Adreno 单例），并据此判断哪些组件仍存在未闭合攻击面。",
+      "observed_outcomes": [
+        "CVE-2020-11179 Adreno PoC Adrenaline（P0 Issue 2052，经 P0 博客正文间接 documented，issue tracker 未直接核验）",
+        "对补丁有效性的系统性质疑方法被沿用至后续对 fuzzing 覆盖能力与披露不对称的批评（benhawkes-community-02-disclosure-asymmetry-feedback）"
+      ],
+      "evidence_ids": [
+        "BH-WORKS-01",
+        "BH-EXT-01",
+        "benhawkes-community-02-disclosure-asymmetry-feedback"
+      ],
+      "validation_tests": [
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "补丁差分实践的发生部分受 Project Zero 团队披露文化与'对前序补丁质疑'的研究取向塑造，难以仅凭 Adreno 单例完全归因于个人稳定能力；团队制度可能放大了'对补丁再检验'的可见度。"
+    },
+    {
+      "name": "复杂数据/状态路径的人工追踪与工具组合",
+      "starting_conditions": "面对 fuzzing（含 Google OSS-Fuzz）未能覆盖的复杂解析器漏洞类，具有以人工代码审计为主、定向工具为辅的方法取向。",
+      "repeated_practice": "对复杂数据/状态路径进行人工追踪并组合外部工具与同行协作：WebP 案中按 VP8L Huffman 表构造路径人工追踪，借助 Mark Adler 的 enough 工具复算有效且完整 Huffman 码的最大表大小（预计算缓冲区上限，非补丁差分），与 @mistymntncop 协作——后者提供构造任意 Huffman 编码数据 WebP 的 harness 与 Huffman 树可视化工具，作者随后构造四张最大有效表加一张特定无效表触发 ReplicateValue 越界写（最多约 400 字节），并自述耗费约三个完整工作日。Adreno 案中以 buddy allocator 喷射定位已知物理地址、原始 GPU 命令序列经 IOCTL_KGSL_GPU_COMMAND 提交，构造竞争窗口 PoC。",
+      "feedback": "@mistymntncop 提供的 harness 与可视化工具、Guang Gong 的前置 Black Hat 论文构成外部贡献与同伴反馈；作者将负面观察（fuzzing 失效、厂商扣留细节造成攻防不对称）转化为公开批评与方法主张，形成对外一侧的反馈回路。",
+      "intermediate_capability": "在协作与前置工作基础上完成根因定位与 PoC 构造（个人贡献：根因路径追踪、PoC 构造、enough 工具复算缓冲区上限；外部贡献：@mistymntncop 的 WebP 构造 harness 与 Huffman 树可视化工具、Guang Gong 的 Adreno 前置 Black Hat 论文），而非独立完成。",
+      "observed_outcomes": [
+        "CVE-2023-4863 libwebp VP8L Huffman 堆溢出的根因 writeup 与触发构造（BH-WORKS-03）",
+        "CVE-2020-11179 Adreno KGSL 竞争窗口 PoC（BH-WORKS-01）"
+      ],
+      "evidence_ids": [
+        "BH-WORKS-01",
+        "BH-WORKS-03",
+        "bh-conv-01",
+        "benhawkes-community-01-webp-mistymntncop",
+        "BH-EXT-02"
+      ],
+      "validation_tests": [
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "成功定位部分依赖偶然的同伴协作（@mistymntncop 同时尝试复现）与前置工具（enough）的可用性，并非纯个人方法论的稳定产出；若缺协作或工具，定位时间与可行性可能不同。"
+    },
+    {
+      "name": "将单点判断固化为公开可复用方法论与防御主张",
+      "starting_conditions": "具有持续公开 writeup 的输出习惯（blog.isosceles.com 为其唯一署名个人研究博客），并把个人对漏洞质量、可利用性与防御架构的判断整理为公共可复用材料。",
+      "repeated_practice": "以方法类文章与具体漏洞分析交替进行：将抽象概念映射到安全实践（Exploit Equivalence Classes 援引 Saelo 的 addrof/fakeobj 原语、Brandon Azad 的 PAC bypass、Microsoft 的 Exploitability Index 作为参照，BH-WORKS-02）；对现有可利用性标注体系（如 'high risk'/'exploitation less likely'）进行系统性质疑；对 'good Linux kernel bug' 给出跨部署场景的评估框架（ben-timeline-002）；在 OpenSSH Backdoors 中将沙箱设计理念从'仅适用于处理不可信数据的代码部分'修正为'代码本身不可信时应以最小权限约束所有代码'（BH-WORKS-04）。",
+      "feedback": "公开博客的读者与社区反馈回路（披露不对称批评影响后续防御者讨论，benhawkes-community-02-disclosure-asymmetry-feedback）；作者自述方法论映射的不完美，体现自我修正。",
+      "intermediate_capability": "把分散的技术判断结构化为可被他人复用的评估框架与防御主张，并随实践迭代修正原有立场（如沙箱适用范围）。",
+      "observed_outcomes": [
+        "Exploit Equivalence Classes 框架（BH-WORKS-02）",
+        "'good Linux kernel bug' 评估（ben-timeline-002）",
+        "OpenSSH/xz-utils 供应链比较与最小权限沙箱主张（BH-WORKS-04）",
+        "AI/LLM 辅助漏洞发现与修补的能力边界评估（BH-R2-01）"
+      ],
+      "evidence_ids": [
+        "BH-WORKS-02",
+        "BH-WORKS-04",
+        "BH-R2-01",
+        "ben-timeline-001",
+        "ben-timeline-002",
+        "ben-timeline-006",
+        "benhawkes-community-02-disclosure-asymmetry-feedback",
+        "benhawkes-community-03-sustained-public-output",
+        "BH-EXT-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "方法论化的密度与公开可见度部分受益于独立博客的低发表门槛与 Project Zero 时期积累的读者基础；若无既有声誉带来的关注，公开方法论化的产出动力与反馈强度可能减弱。"
+    }
+  ],
+  "tensions": [
+    "种子记录将 primary_focus 标注为'浏览器与图片解析漏洞'，但抓取到的最早一手作品（2020 Adreno GPU 内核驱动）属移动 GPU/内核攻击而非浏览器；图片解析确有其作（2023 WebP），但浏览器漏洞专门作品在本次抓取范围内未获一手来源（BH-WORKS-01 vs person_json primary_focus）。",
+    "维基百科二手归功（BH-EXT-04，Adobe Flash 2015、Office 2015、iOS 2019 等多平台披露）覆盖范围远大于一手作品范围；一手媒体原文（Wired、The Register、BleepingComputer）未抓取，二手归功不得作为一手专长支撑。",
+    "ben-timeline-008（约 2019/2020 转 DeepMind）与 BH-WORKS-01（2020-09-08 仍以 Project Zero 署名）存在时间冲突，前者 source 为 blog.isosceles.com 首页 lead_only，已作废；该转岗事实保留为未证实缺口。",
+    "WebP 案的个人贡献（根因路径追踪、PoC 构造、enough 工具复算）与外部贡献（@mistymntncop 的 harness 与可视化工具、Guang Gong 的前置论文）须分开，'独立完成'表述与所列证据冲突。",
+    "Project Zero 的全职零日研究岗位与 90 天公开披露实践是组织提供的资源与制度条件，非个人可复现；将其表述为个人能力变化会造成归属矛盾。"
+  ],
+  "transferable_practices": [
+    "对前序补丁有效性的主动再检验：将高质量公开 bug 报告与补丁作为后续挖掘的输入，检查补丁边界条件是否真正闭合攻击面（BH-WORKS-01）。",
+    "以人工代码审计为主、定向工具（如 enough 复算缓冲区上限）与 ASan 为辅的组合，用于 fuzzing 难以覆盖的复杂解析器路径（BH-WORKS-03）。",
+    "与同行建立非正式协作并整合对方工具（harness、可视化）与自己的分析工具链，在独立复现遇瓶颈时主动联络（benhawkes-community-01-webp-mistymntncop）。",
+    "将单点判断抽象为可复用评估框架（等价类、漏洞质量维度），对现有标注体系保持系统性质疑（BH-WORKS-02、ben-timeline-002）。",
+    "以可核验工作量（如约三个完整工作日）度量研究投入，而非诉诸天赋或热情类表述（bh-conv-01）。",
+    "对沙箱适用范围随实践修正：从'仅隔离处理不可信数据的代码'扩展为'代码本身不可信时对所有代码施加最小权限'（BH-WORKS-04）。"
+  ],
+  "non_transferable_conditions": [
+    "Google Project Zero 的全职零日研究岗位及其 90 天公开披露实践，是组织提供的资源与制度条件，非个人可复现（BH-EXT-01、bh-decisions-01）。",
+    "Project Zero 团队披露文化与既有声誉带来的博客读者基础，放大了方法论化产出的可见度与反馈强度（非个人可独立复制）。",
+    "@mistymntncop 同时尝试复现并提供 harness 与可视化工具的偶然协作，是 WebP 案定位的特定外部条件；Guang Gong 的前置 Black Hat 论文是 Adreno 案的前置依赖。",
+    "Ben Hawkes 加入 Project Zero 前的职业背景（疑似 NCC Group、Mozilla，仅来自 WebSearch 合成摘要、未抓取一手页面）与教育背景缺一手来源，相关早期条件不可据以推断。"
+  ],
+  "open_questions": [
+    "Ben Hawkes 是否约 2019/2020 从 Project Zero 转至 DeepMind：ben-timeline-008 已作废（source 为 blog.isosceles.com 首页 lead_only，与 BH-WORKS-01 一手署名冲突），无替代一手来源，保留为未证实缺口。",
+    "2022-05-04 辞职至 2023-08-23 首篇独立博客之间约 15 个月的去向：无公开一手来源。",
+    "浏览器漏洞专门作品（种子 primary_focus 之一）未在本次抓取中获一手来源；Project Zero 时期是否确有 Chrome/Skia 等浏览器相关一手作品待补。",
+    "Project Zero issue tracker 需认证无法抓取，BH-WORKS-01 提及的 Issue 2052 与 PoC Adrenaline 仅经 P0 博客正文间接 documented，issue 原始条目未直接核验。",
+    "Robots Dream of Root Shells 与 OpenSSH Backdoors 的正文技术细节仅在新增证据（BH-R2-01）与 BH-WORKS-04 中部分摘录，AI 自动化与供应链主题的更深技术演化路径未完全覆盖。",
+    "Project Zero 时期具体 blog 文章（如内核缓解/Mitigations 系列）的标题与日期未抓取到一手 URL，PZ 阶段个人产出归属无法从 archive 页（无作者署名）单独确认。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-synthesis-v3-20260928-055115-656",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790546178180069000-ben-hawkes-synthesis-v3.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "008ac3c3-eea6-46d3-b2e8-787bdaf23ed4",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_u0pj31kpoxkm3f8d75muktrq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-synthesis-v3-20260928-055115-656/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T21:56:18.216751+00:00"
+      },
+      {
+        "tool_use_id": "call_vxp0o5g9h13uuz2uowb0u8pw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-synthesis-v3-20260928-055115-656/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "059068d1e2e4f8caf0e7164232817da98857d4a8cd702a58d7c2d8a498fa5517",
+        "accessed_at": "2026-09-27T21:56:18.216782+00:00"
+      },
+      {
+        "tool_use_id": "call_gic041qc79d5d0tc3eagcg8n",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-synthesis-v3-20260928-055115-656/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "0e8cac335c3d05c21c1758415802c5d4849ca76c8683fb84ba02e7605eeb0f65",
+        "accessed_at": "2026-09-27T21:56:18.216799+00:00"
+      },
+      {
+        "tool_use_id": "call_vh6r7sd163qnke6880vpu5nb",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-synthesis-v3-20260928-055115-656/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "ad9a407578fbe97e2e4dc24daab6f077d612838e1028c56e23e644ada1cb5b82",
+        "accessed_at": "2026-09-27T21:56:18.216879+00:00"
+      },
+      {
+        "tool_use_id": "call_v4faq72k21l8i54ho4wxose8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-synthesis-v3-20260928-055115-656/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "72bd0c90f448b8bf67607779ecda64396eda639120319049086ce28931407a9b",
+        "accessed_at": "2026-09-27T21:56:18.216965+00:00"
+      },
+      {
+        "tool_use_id": "call_isb0u9fgwk903x36qndjf8tq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-synthesis-v3-20260928-055115-656/inputs/revision_context.json",
+          "offset": 377,
+          "limit": 149
+        },
+        "success": true,
+        "content_sha256": "a023a6241a4c77b2ce9f5aa6ba903947c7e6b2e413b6bc05ab28ad3558399df9",
+        "accessed_at": "2026-09-27T21:56:18.217009+00:00"
+      },
+      {
+        "tool_use_id": "call_lbhxvy6zcll8jcsiqk5is4ew",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-synthesis-v3-20260928-055115-656/checkpoint.md",
+          "content": "# Checkpoint — Ben Hawkes 综合 v3\n\n## 任务状态\n- 已读取 CLAUDE.md、task.md、output.schema.json、person_json.json、evidence_json.json（六维）、revision_context.json（含 round 1 + round 2 定向补证）。\n- 角色：综合分析师。重建 Ben Hawkes 领域能力成长过程，输出符合 output.schema.json 的 JSON。\n\n## 有效证据清单（verified_in_run=true，未被作废）\n一手 primary（documented）：\n- BH-WORKS-01（2020-09-08 Adreno GPU，CVE-2020-11179，补丁差分/绕过，PZ 署名）\n- BH-WORKS-02（2023-08-23 Exploit Equivalence Classes，方法论）\n- BH-WORKS-03（2023-09-21 WebP 0day，CVE-2023-4863，全新根因，@mistymntncop 协作，enough 工具，~3 工作日）\n- BH-WORKS-04（2024-08-23 OpenSSH Backdoors，供应链比较，Landlock 沙箱）\n- BH-R2-01（2024-03-11 Robots Dream of Root Shells，AI/LLM 辅助，AIxCC，替代 ben-timeline-005）\n- bh-conv-01（2023-09 WebP 3 工作日自述）\n- benhawkes-community-01-webp-mistymntncop（@mistymntncop 协作）\n- benhawkes-community-02-disclosure-asymmetry-feedback（披露不对称批评）\n- benhawkes-community-03-sustained-public-output（持续公开输出）\n- ben-timeline-001/002/003/004/006（Isosceles 博客文章）\n- bh-decisions-03/04/05（独立博客转折、WebP 转向、OpenSSH 转向）\n- BH-EXT-02/03（WebP 方法论交叉验证、博客索引）\n\n二手 reported/authoritative_secondary：\n- bh-decisions-01（2014 PZ 创始成员）、bh-decisions-02（2022-05-04 辞职）\n- BH-EXT-01（PZ 成员→manager→辞职，加入前负责 Google 产品上线安全审查）\n- BH-EXT-04（Adobe Flash 2015/Office 2015/iOS 2019 多平台归功，维基转述）\n\ninferred/lead_only：\n- ben-timeline-007（2014 PZ 创立，搜索引擎合成摘要）\n- benhawkes-community-04-pz-archive-output（PZ archive，inferred）\n\n## 作废证据（不得使用）\n- ben-timeline-008（约 2019/2020 转 DeepMind；source=blog.isosceles.com 首页 lead_only，与 BH-WORKS-01「2020-09-08 仍署名 PZ」冲突）— round 1 作废\n- ben-timeline-005（Robots Dream 仅标题，正文未摘录）— round 2 作废，由 BH-R2-01 替代\n\n## 已落实的 synthesis_instructions（round 1 + round 2）\n- 阶段1 删「浏览器」表述，收敛为移动 GPU/内核驱动硬件状态机+补丁差分；显式标注一手技术证据仅 BH-WORKS-01，bh-decisions-01/BH-EXT-01 二手；confidence=low。\n- 阶段1/阶段2 避免同 BH-WORKS-01 双重计数：阶段1 标单一数据点限制；阶段2 聚焦独立期方法抽象+全新根因。\n- 机制1 validation_tests=[distinctive]，confidence=medium；正文体现 PZ 团队披露文化 alternative_explanation。\n- 机制2 intermediate_capability 删「独立」，改为「在协作与前置工作基础上完成」，区分个人/外部贡献。\n- 阶段1 删披露实践=个人能力表述，non_transferable_conditions 维持 PZ 90 天披露=组织资源。\n- expertise 第2项限定为「基于单一案例（CVE-2023-4863 libwebp）」。\n- BH-EXT-04 二手归功分层，不写入 expertise/capability_change 一手支撑。\n- 阶段1 period 标注终点仅以 2020-09-08 BH-WORKS-01 为锚点、2019/2020 转岗缺口未证实。\n- 阶段2 capability_change「AI 自动化趋势」→「AI/LLM 辅助漏洞发现与修补方向（AIxCC）」，以 BH-R2-01 替代 ben-timeline-005。\n- 机制1 evidence_ids 移除 BH-WORKS-02，保留 BH-WORKS-01/BH-WORKS-03/bh-conv-01/benhawkes-community-01-webp-mistymntncop/BH-EXT-02。\n- 机制1 validation_tests=[generative]（round 2 进一步，或保留 repeated 须标注薄弱）。\n- 阶段2 evidence_ids 标注去重（14 id 映射约 7 独立作品）。\n- 阶段0/1 evidence_ids 标注一手/二手分层。\n- 全部 community id 使用完整带后缀 id。\n\n## 阶段划分\n- 阶段1（约2014–2020，PZ 时期）：BH-WORKS-01 为唯一一手技术证据；confidence=low\n- 阶段2（2023，独立/Isosceles 重启）：方法抽象 + 在野 0day 全新根因；confidence=high\n- 阶段3（2024，主题扩展）：供应链后门比较 + AI/LLM 辅助评估 + 最小权限沙箱主张；confidence=medium\n\n## 机制划分\n- 机制1：补丁有效性差分再检验与前置工作承接（[distinctive], medium）\n- 机制2：复杂数据/状态路径人工追踪与工具组合（[generative], medium）\n- 机制3：将单点判断固化为公开可复用方法论与防御主张（[repeated, generative], medium）\n\n## 下一步\n写 output.json，逐字段对照 schema；不填 _run/verification；evidence_ids 仅用有效 id（完整带后缀）。\n"
+        },
+        "success": true,
+        "content_sha256": "e1ebf0977593ca4a704d32d009337c6b4ce7445e192007640fff442209693c31",
+        "accessed_at": "2026-09-27T21:56:18.217449+00:00"
+      },
+      {
+        "tool_use_id": "call_ee5dmwjwzsr1rdqy708np9oe",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-synthesis-v3-20260928-055115-656/output.json",
+          "content": "{\n  \"person\": \"Ben Hawkes\",\n  \"expertise\": [\n    \"移动 GPU/内核驱动的硬件状态机竞争窗口分析与手工 PoC 构造（一手依据：CVE-2020-11179 Qualcomm Adreno KGSL，BH-WORKS-01）\",\n    \"复杂数据解析器内存安全漏洞的根因分析与人工代码审计（基于单一案例 CVE-2023-4863 libwebp，BH-WORKS-03；不作为稳定领域专长标签）\",\n    \"漏洞可利用性与漏洞质量的系统化评估方法（Exploit Equivalence Classes 框架、'good Linux kernel bug' 评估，BH-WORKS-02、ben-timeline-002）\",\n    \"供应链/构建系统攻击的历史比较与最小权限沙箱防御设计（OpenSSH/xz-utils 后门比较、Landlock/SELinux/seccomp-bpf，BH-WORKS-04）\",\n    \"AI/LLM 辅助漏洞发现与修补方向的能力边界评估（AIxCC 语境，BH-R2-01）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"约2014–2020（Project Zero 时期；阶段终点仅以 2020-09-08 BH-WORKS-01 一手署名为锚点，2019/2020 是否转 DeepMind 未证实、记为缺口）\",\n      \"stage\": \"加入 Google Project Zero，在持续零日研究与公开披露制度下开展移动平台内核/驱动安全研究\",\n      \"capability_change\": \"从一般漏洞研究转入专职零日研究团队，研究产出置于公开披露的团队制度下（90 天披露为 Project Zero 团队政策与组织资源，不表述为个人能力变化）。该阶段一手技术证据仅 BH-WORKS-01（2020-09-08 Adreno）一篇，其研究范围为 Qualcomm Adreno KGSL 移动 GPU/内核驱动场景的硬件状态机竞争窗口与 PoC 构造，并对前序补丁有效性进行差分再检验；bh-decisions-01 与 BH-EXT-01 为二手 reported（维基百科转述），无具体技术产出。本阶段无浏览器漏洞一手作品，'浏览器与图片解析'并非该阶段一手证据范围。能力变化受单一一手数据点限制。\",\n      \"evidence_ids\": [\"BH-WORKS-01\", \"bh-decisions-01\", \"BH-EXT-01\"],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2023（2022-05-04 离开 Google 后约 15 个月去向无公开一手来源；2023-08-23 起恢复公开 writeup）\",\n      \"stage\": \"以 blog.isosceles.com 独立/小团队名义恢复公开 writeup，研究主题由个案漏洞挖掘向可复用方法论与在野 0day 根因分析并重\",\n      \"capability_change\": \"恢复稳定的公开 writeup 节奏，并出现两类同步能力：一是将具体漏洞抽象为可复用评估框架（Exploit Equivalence Classes 将新漏洞按平台条件与缓解降级产生的原语归入等价类，BH-WORKS-02；'good Linux kernel bug' 跨 Android/服务器/云/IoT 场景评估，ben-timeline-002）；二是对在野 0day（CVE-2023-4863 libwebp VP8L Huffman 堆溢出）进行全新根因分析（非补丁差分），与 @mistymntncop 协作并组合 Mark Adler 的 enough 工具复算缓冲区上限与 ASan，定位 ReplicateValue 越界写（BH-WORKS-03）。该阶段 evidence_ids 经去重约映射 7 个独立作品（多篇 Isosceles 博客文章被跨维度重复编码为不同 id）。\",\n      \"evidence_ids\": [\"BH-WORKS-02\", \"BH-WORKS-03\", \"ben-timeline-001\", \"ben-timeline-002\", \"ben-timeline-003\", \"ben-timeline-004\", \"bh-conv-01\", \"benhawkes-community-01-webp-mistymntncop\", \"benhawkes-community-02-disclosure-asymmetry-feedback\", \"benhawkes-community-03-sustained-public-output\", \"bh-decisions-03\", \"bh-decisions-04\", \"BH-EXT-02\", \"BH-EXT-03\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2024（独立研究主题扩展期）\",\n      \"stage\": \"研究主题从内存安全个案扩展至供应链/构建系统后门、AI/LLM 辅助漏洞发现与修补、最小权限沙箱防御设计\",\n      \"capability_change\": \"出现从单点漏洞挖掘向系统设计与防御架构反思的转向：以 2002 OpenBSD 与 2024 xz-utils/liblzma 两次供应链攻击的历史比较分析重构攻击面与检测手段（校验和差异、构建系统挂钩、性能回归分析），并主张在代码本身不可信的世界中以最小权限约束所有代码、以约 250 行 Landlock 沙箱为 make 提供隔离示范（BH-WORKS-04）；同年评估 AI/LLM 辅助漏洞发现与修补的能力边界，在 DARPA AIxCC 语境下比较 LLM 直接定位源码漏洞与 LLM 辅助 fuzzing harness/补丁构造两种路径，指出 2024 年 LLM 上下文窗口有限、transformer 扩展性存疑、直接发现漏洞效果尚弱，倾向混合方案（BH-R2-01）。\",\n      \"evidence_ids\": [\"BH-WORKS-04\", \"BH-R2-01\", \"ben-timeline-006\", \"bh-decisions-05\"],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"补丁有效性差分再检验与前置工作承接\",\n      \"starting_conditions\": \"在 Project Zero 专职零日研究岗位上接触公开 bug 报告与厂商补丁；具备将既有高质量 bug 报告视为后续挖掘洞察来源的工作取向。团队披露文化（90 天披露、在野 0-day 根因分析）构成可被外部证据观察的背景，但具体到补丁差分实践的个体重复性证据薄弱。\",\n      \"repeated_practice\": \"对前序补丁的有效性主动进行再检验而非假定其充分：BH-WORKS-01 明确研究建立于 Guang Gong 的 CVE-2019-10567 Black Hat 论文之上，原补丁随机化了 scratch buffer 的 GPU 地址并阻止用户性能分析命令直接出现在 ringbuffer，但作者检验发现 scratch buffer 仍可经 CP_MEM_WRITE 被用户命令写入，从而绕过补丁第一部分，在受保护模式关闭的 context 切换窗口插入受控间接跳转、改写 TTBR0 指向伪造页表，获得物理内存任意读写并改写 sys_call_table。该案为补丁差分/绕过单例；WebP（BH-WORKS-03）经一手正文复核为全新根因分析（作者确认补丁充分），非补丁差分，故两案方法性质不同、跨时期重复性证据薄弱。\",\n      \"feedback\": \"前置工作（Guang Gong Black Hat 论文、CVE-2019-10567 报告）与补丁本身构成外部参照；作者将'高质量 bug 报告作为后续挖掘洞察来源'并'对 GPU 安全关键组件提高透明度'写入正文，形成自我反馈。\",\n      \"intermediate_capability\": \"对补丁边界条件进行差分再检验并构造可验证 PoC 的能力（Adreno 单例），并据此判断哪些组件仍存在未闭合攻击面。\",\n      \"observed_outcomes\": [\n        \"CVE-2020-11179 Adreno PoC Adrenaline（P0 Issue 2052，经 P0 博客正文间接 documented，issue tracker 未直接核验）\",\n        \"对补丁有效性的系统性质疑方法被沿用至后续对 fuzzing 覆盖能力与披露不对称的批评（benhawkes-community-02-disclosure-asymmetry-feedback）\"\n      ],\n      \"evidence_ids\": [\"BH-WORKS-01\", \"BH-EXT-01\", \"benhawkes-community-02-disclosure-asymmetry-feedback\"],\n      \"validation_tests\": [\"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"补丁差分实践的发生部分受 Project Zero 团队披露文化与'对前序补丁质疑'的研究取向塑造，难以仅凭 Adreno 单例完全归因于个人稳定能力；团队制度可能放大了'对补丁再检验'的可见度。\"\n    },\n    {\n      \"name\": \"复杂数据/状态路径的人工追踪与工具组合\",\n      \"starting_conditions\": \"面对 fuzzing（含 Google OSS-Fuzz）未能覆盖的复杂解析器漏洞类，具有以人工代码审计为主、定向工具为辅的方法取向。\",\n      \"repeated_practice\": \"对复杂数据/状态路径进行人工追踪并组合外部工具与同行协作：WebP 案中按 VP8L Huffman 表构造路径人工追踪，借助 Mark Adler 的 enough 工具复算有效且完整 Huffman 码的最大表大小（预计算缓冲区上限，非补丁差分），与 @mistymntncop 协作——后者提供构造任意 Huffman 编码数据 WebP 的 harness 与 Huffman 树可视化工具，作者随后构造四张最大有效表加一张特定无效表触发 ReplicateValue 越界写（最多约 400 字节），并自述耗费约三个完整工作日。Adreno 案中以 buddy allocator 喷射定位已知物理地址、原始 GPU 命令序列经 IOCTL_KGSL_GPU_COMMAND 提交，构造竞争窗口 PoC。\",\n      \"feedback\": \"@mistymntncop 提供的 harness 与可视化工具、Guang Gong 的前置 Black Hat 论文构成外部贡献与同伴反馈；作者将负面观察（fuzzing 失效、厂商扣留细节造成攻防不对称）转化为公开批评与方法主张，形成对外一侧的反馈回路。\",\n      \"intermediate_capability\": \"在协作与前置工作基础上完成根因定位与 PoC 构造（个人贡献：根因路径追踪、PoC 构造、enough 工具复算缓冲区上限；外部贡献：@mistymntncop 的 WebP 构造 harness 与 Huffman 树可视化工具、Guang Gong 的 Adreno 前置 Black Hat 论文），而非独立完成。\",\n      \"observed_outcomes\": [\n        \"CVE-2023-4863 libwebp VP8L Huffman 堆溢出的根因 writeup 与触发构造（BH-WORKS-03）\",\n        \"CVE-2020-11179 Adreno KGSL 竞争窗口 PoC（BH-WORKS-01）\"\n      ],\n      \"evidence_ids\": [\"BH-WORKS-01\", \"BH-WORKS-03\", \"bh-conv-01\", \"benhawkes-community-01-webp-mistymntncop\", \"BH-EXT-02\"],\n      \"validation_tests\": [\"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"成功定位部分依赖偶然的同伴协作（@mistymntncop 同时尝试复现）与前置工具（enough）的可用性，并非纯个人方法论的稳定产出；若缺协作或工具，定位时间与可行性可能不同。\"\n    },\n    {\n      \"name\": \"将单点判断固化为公开可复用方法论与防御主张\",\n      \"starting_conditions\": \"具有持续公开 writeup 的输出习惯（blog.isosceles.com 为其唯一署名个人研究博客），并把个人对漏洞质量、可利用性与防御架构的判断整理为公共可复用材料。\",\n      \"repeated_practice\": \"以方法类文章与具体漏洞分析交替进行：将抽象概念映射到安全实践（Exploit Equivalence Classes 援引 Saelo 的 addrof/fakeobj 原语、Brandon Azad 的 PAC bypass、Microsoft 的 Exploitability Index 作为参照，BH-WORKS-02）；对现有可利用性标注体系（如 'high risk'/'exploitation less likely'）进行系统性质疑；对 'good Linux kernel bug' 给出跨部署场景的评估框架（ben-timeline-002）；在 OpenSSH Backdoors 中将沙箱设计理念从'仅适用于处理不可信数据的代码部分'修正为'代码本身不可信时应以最小权限约束所有代码'（BH-WORKS-04）。\",\n      \"feedback\": \"公开博客的读者与社区反馈回路（披露不对称批评影响后续防御者讨论，benhawkes-community-02-disclosure-asymmetry-feedback）；作者自述方法论映射的不完美，体现自我修正。\",\n      \"intermediate_capability\": \"把分散的技术判断结构化为可被他人复用的评估框架与防御主张，并随实践迭代修正原有立场（如沙箱适用范围）。\",\n      \"observed_outcomes\": [\n        \"Exploit Equivalence Classes 框架（BH-WORKS-02）\",\n        \"'good Linux kernel bug' 评估（ben-timeline-002）\",\n        \"OpenSSH/xz-utils 供应链比较与最小权限沙箱主张（BH-WORKS-04）\",\n        \"AI/LLM 辅助漏洞发现与修补的能力边界评估（BH-R2-01）\"\n      ],\n      \"evidence_ids\": [\"BH-WORKS-02\", \"BH-WORKS-04\", \"BH-R2-01\", \"ben-timeline-001\", \"ben-timeline-002\", \"ben-timeline-006\", \"benhawkes-community-02-disclosure-asymmetry-feedback\", \"benhawkes-community-03-sustained-public-output\", \"BH-EXT-03\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"方法论化的密度与公开可见度部分受益于独立博客的低发表门槛与 Project Zero 时期积累的读者基础；若无既有声誉带来的关注，公开方法论化的产出动力与反馈强度可能减弱。\"\n    }\n  ],\n  \"tensions\": [\n    \"种子记录将 primary_focus 标注为'浏览器与图片解析漏洞'，但抓取到的最早一手作品（2020 Adreno GPU 内核驱动）属移动 GPU/内核攻击而非浏览器；图片解析确有其作（2023 WebP），但浏览器漏洞专门作品在本次抓取范围内未获一手来源（BH-WORKS-01 vs person_json primary_focus）。\",\n    \"维基百科二手归功（BH-EXT-04，Adobe Flash 2015、Office 2015、iOS 2019 等多平台披露）覆盖范围远大于一手作品范围；一手媒体原文（Wired、The Register、BleepingComputer）未抓取，二手归功不得作为一手专长支撑。\",\n    \"ben-timeline-008（约 2019/2020 转 DeepMind）与 BH-WORKS-01（2020-09-08 仍以 Project Zero 署名）存在时间冲突，前者 source 为 blog.isosceles.com 首页 lead_only，已作废；该转岗事实保留为未证实缺口。\",\n    \"WebP 案的个人贡献（根因路径追踪、PoC 构造、enough 工具复算）与外部贡献（@mistymntncop 的 harness 与可视化工具、Guang Gong 的前置论文）须分开，'独立完成'表述与所列证据冲突。\",\n    \"Project Zero 的全职零日研究岗位与 90 天公开披露实践是组织提供的资源与制度条件，非个人可复现；将其表述为个人能力变化会造成归属矛盾。\"\n  ],\n  \"transferable_practices\": [\n    \"对前序补丁有效性的主动再检验：将高质量公开 bug 报告与补丁作为后续挖掘的输入，检查补丁边界条件是否真正闭合攻击面（BH-WORKS-01）。\",\n    \"以人工代码审计为主、定向工具（如 enough 复算缓冲区上限）与 ASan 为辅的组合，用于 fuzzing 难以覆盖的复杂解析器路径（BH-WORKS-03）。\",\n    \"与同行建立非正式协作并整合对方工具（harness、可视化）与自己的分析工具链，在独立复现遇瓶颈时主动联络（benhawkes-community-01-webp-mistymntncop）。\",\n    \"将单点判断抽象为可复用评估框架（等价类、漏洞质量维度），对现有标注体系保持系统性质疑（BH-WORKS-02、ben-timeline-002）。\",\n    \"以可核验工作量（如约三个完整工作日）度量研究投入，而非诉诸天赋或热情类表述（bh-conv-01）。\",\n    \"对沙箱适用范围随实践修正：从'仅隔离处理不可信数据的代码'扩展为'代码本身不可信时对所有代码施加最小权限'（BH-WORKS-04）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Google Project Zero 的全职零日研究岗位及其 90 天公开披露实践，是组织提供的资源与制度条件，非个人可复现（BH-EXT-01、bh-decisions-01）。\",\n    \"Project Zero 团队披露文化与既有声誉带来的博客读者基础，放大了方法论化产出的可见度与反馈强度（非个人可独立复制）。\",\n    \"@mistymntncop 同时尝试复现并提供 harness 与可视化工具的偶然协作，是 WebP 案定位的特定外部条件；Guang Gong 的前置 Black Hat 论文是 Adreno 案的前置依赖。\",\n    \"Ben Hawkes 加入 Project Zero 前的职业背景（疑似 NCC Group、Mozilla，仅来自 WebSearch 合成摘要、未抓取一手页面）与教育背景缺一手来源，相关早期条件不可据以推断。\"\n  ],\n  \"open_questions\": [\n    \"Ben Hawkes 是否约 2019/2020 从 Project Zero 转至 DeepMind：ben-timeline-008 已作废（source 为 blog.isosceles.com 首页 lead_only，与 BH-WORKS-01 一手署名冲突），无替代一手来源，保留为未证实缺口。\",\n    \"2022-05-04 辞职至 2023-08-23 首篇独立博客之间约 15 个月的去向：无公开一手来源。\",\n    \"浏览器漏洞专门作品（种子 primary_focus 之一）未在本次抓取中获一手来源；Project Zero 时期是否确有 Chrome/Skia 等浏览器相关一手作品待补。\",\n    \"Project Zero issue tracker 需认证无法抓取，BH-WORKS-01 提及的 Issue 2052 与 PoC Adrenaline 仅经 P0 博客正文间接 documented，issue 原始条目未直接核验。\",\n    \"Robots Dream of Root Shells 与 OpenSSH Backdoors 的正文技术细节仅在新增证据（BH-R2-01）与 BH-WORKS-04 中部分摘录，AI 自动化与供应链主题的更深技术演化路径未完全覆盖。\",\n    \"Project Zero 时期具体 blog 文章（如内核缓解/Mitigations 系列）的标题与日期未抓取到一手 URL，PZ 阶段个人产出归属无法从 archive 页（无作者署名）单独确认。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "988b77867c4e9f2a86eb0d3f064a1788a8e2b84cdc8e28e9a7281dd0741bee10",
+        "accessed_at": "2026-09-27T21:56:18.217456+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790546178217508000-ben-hawkes-synthesis-v3.json",
+    "label": "Ben Hawkes:synthesis:v3",
+    "elapsed_seconds": 302.56,
+    "prompt_sha256": "9d152931efeb9baf5bc2f0542cdc30ed95c78f6bbbc3a05ea8002004427bd386",
+    "num_turns": 9,
+    "total_cost_usd": 0.803936,
+    "usage": {
+      "input_tokens": 59296,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 186112,
+      "output_tokens": 16576,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 59296,
+        "outputTokens": 16576,
+        "cacheReadInputTokens": 186112,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.803936,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

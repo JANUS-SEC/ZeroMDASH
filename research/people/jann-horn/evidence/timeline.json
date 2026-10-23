@@ -1,0 +1,675 @@
+{
+  "person": "Jann Horn",
+  "dimension": "可核验时间线",
+  "identity_check": "身份经多源交叉确认：person_json 指向 Project Zero 研究员 Jann Horn（GitHub thejh，关联 @google）。Wikipedia「Google Project Zero」词条将 Jann Horn 列为 notable 成员并明确“Independently discovered the Meltdown and Spectre CPU vulnerabilities in mid-2017”。P0 一手博客 9 篇文章 byline 均为“Jann Horn, Project Zero / Google Project Zero”。meltdownattack.com 官方页面把“Jann Horn (Google Project Zero)”列为 Meltdown 三组独立发现者之首、Spectre 两方独立发现者之一。无同名歧义。",
+  "items": [
+    {
+      "id": "jh-tl-01-p0-founded",
+      "date": "2014-07-15",
+      "claim": "Google Project Zero 团队公开成立。P0 官方 about 页记载“Formed in 2014”；Wikipedia 进一步精确为 2014-07-15 公开宣布。此为 Horn 加入的机构起点，但 Horn 当时尚无公开 P0 输出。",
+      "status": "documented",
+      "growth_signal": "阶段边界——机构成立 ≠ 个人加入。P0 成立日期为后续 Horn 职业时间线提供锚点，但 Horn 个人加入的精确月份未在公开一手来源中确认。",
+      "source": {
+        "title": "About Project Zero",
+        "url": "https://projectzero.google/about-pz.html",
+        "published": "2014",
+        "source_type": "团队官方介绍页",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_clfpddj2ldvmbxxh6ydwzyp6",
+        "accessed_at": "2026-09-26T13:46:32.917989+00:00",
+        "content_sha256": "38aaec9680f0ddd84972117b5e9d02f177d02926da0a5c8d15227d5530ea831b"
+      }
+    },
+    {
+      "id": "jh-tl-02-first-post",
+      "date": "2016-06-20",
+      "claim": "Horn 首篇已核实 P0 博文《Exploiting Recursion in the Linux Kernel》发布：ecryptfs 叠加 procfs 触发任意递归致内核栈溢出，含完整 root 利用，绕过 CONFIG_SCHED_STACK_END_CHECK canary，论证应加 guard page。P0 issue #836，无 CVE。byline: Jann Horn, Google Project Zero。该日期为 Horn 已加入 P0 的下界证据。",
+      "status": "documented",
+      "growth_signal": "首篇即确立其方法论签名：穷举排除可行路径后转向栈前分配溢出；以“Make zeroday hard.”文末格言收束；致谢 Andy Lutomirski 已先行开始的补丁工作（慷慨归因）。研究粒度停在 Linux 内核栈边界。",
+      "short_quote": "Make zeroday hard.",
+      "source": {
+        "title": "Exploiting Recursion in the Linux Kernel",
+        "url": "https://projectzero.google/2016/06/exploiting-recursion-in-linux-kernel_20.html",
+        "published": "2016-06-20",
+        "source_type": "P0 博客（作者亲笔）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_77j542hf08a1i93wl6ubzy39",
+        "accessed_at": "2026-09-26T13:46:32.918006+00:00",
+        "content_sha256": "5eb8c29a6f6ad1697cb53365743a1d65bfb657274af2f164e93071c0d52ef835"
+      }
+    },
+    {
+      "id": "jh-tl-03-xen-escape",
+      "date": "2017-04-07",
+      "claim": "《Pandavirtualization: Exploiting the Xen hypervisor》发布：PV guest 通过 HYPERVISOR_memory_op(XENMEM_exchange) 的 access_ok() 只校验起始地址而非整段范围，配合 hypercall 抢占/恢复机制以 nr_exchanged 为恢复偏移，向 hypervisor 任意地址写物理页号，逃逸并控制物理内存。关联 XSA-212；文中引用的 2012 年同类 bug 为 CVE-2012-5513/XSA-29。byline: Jann Horn, Project Zero。",
+      "status": "documented",
+      "growth_signal": "阶段转折——研究粒度从 Linux 内核栈升至 hypervisor/虚拟化边界；同时确立“半步修复”批判模式：XSA-29 只堵 offset 0 留下带偏移写入路径，成为其后续反复引用的案例。",
+      "source": {
+        "title": "Pandavirtualization: Exploiting the Xen hypervisor",
+        "url": "https://projectzero.google/2017/04/pandavirtualization-exploiting-xen.html",
+        "published": "2017-04-07",
+        "source_type": "P0 博客（作者亲笔）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_grw823xxakiega93imdxwwvm",
+        "accessed_at": "2026-09-26T13:46:32.918197+00:00",
+        "content_sha256": "e46470a42a62e4183c57c084697802b10a70d20b6baaca7b16bcaa84051435a7"
+      }
+    },
+    {
+      "id": "jh-tl-04-spectre-reported",
+      "date": "2017-06-01",
+      "claim": "Horn 与 P0 向 Intel、AMD、ARM 报告三个 CPU 侧信道变体（Variant 1 bounds check bypass、Variant 2 branch target injection、Variant 3 rogue data cache load），即 Spectre/Meltdown 类漏洞。一手原文：“We reported this issue to Intel, AMD and ARM on 2017-06-01.” P0 bug #1272。",
+      "status": "documented",
+      "growth_signal": "范式级跃迁起点——从软件漏洞利用转入 CPU 微架构侧信道；报告日期为后续 7 个月 embargo 协调披露的起算点，也是 P0 90 天硬立场面对系统性 CPU 漏洞时事实让位于个案协商的起点。",
+      "short_quote": "We reported this issue to Intel, AMD and ARM on 2017-06-01.",
+      "source": {
+        "title": "Reading privileged memory with a side-channel",
+        "url": "https://projectzero.google/2018/01/reading-privileged-memory-with-side.html",
+        "published": "2018-01-03",
+        "source_type": "P0 博客（作者亲笔，含报告日期陈述）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_ecvr7f3d73hccvd48f3mlcr6",
+        "accessed_at": "2026-09-26T13:46:32.917994+00:00",
+        "content_sha256": "5bcbec23b38ed883b2fc2cddd7ab3209b6440428c7137ad8f0bc99bd2f6a10fc"
+      }
+    },
+    {
+      "id": "jh-tl-05-spectre-disclosed",
+      "date": "2018-01-03",
+      "claim": "P0 公开披露 Spectre/Meltdown 博文《Reading privileged memory with a side-channel》发布（byline: Jann Horn, Project Zero），含 eBPF 读内核内存、KVM guest→host 内存泄漏、用户态直读内核内存等 PoC。报告(2017-06-01)→公开(2018-01-03)约 216 天，远超 P0 标准 90 天，为协调披露个案。Horn 在文中明确致谢并列出全部并行发现者（Gruss/Lipp/Yarom/Kocher/Genkin/Schwarz/Hamburg/Mangard/Prescher/Haas），并归功 Felix Wilhelm 提供 Variant 2 概念基础。",
+      "status": "documented",
+      "growth_signal": "职业生涯最高标志；责任框架确立——P0 定位为发现/演示者，缓解设计推给厂商；慷慨归因同事前期工作（Variant 2 概念来源让给 Wilhelm）与学术并行发现者。Horn 本人在文中完全不提及 90 天政策或披露决策，对该异常保持沉默。",
+      "source": {
+        "title": "Reading privileged memory with a side-channel",
+        "url": "https://projectzero.google/2018/01/reading-privileged-memory-with-side.html",
+        "published": "2018-01-03",
+        "source_type": "P0 博客（作者亲笔）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_ecvr7f3d73hccvd48f3mlcr6",
+        "accessed_at": "2026-09-26T13:46:32.917994+00:00",
+        "content_sha256": "5bcbec23b38ed883b2fc2cddd7ab3209b6440428c7137ad8f0bc99bd2f6a10fc"
+      }
+    },
+    {
+      "id": "jh-tl-06-meltdown-spectre-attribution",
+      "date": "2018-01-03",
+      "claim": "meltdownattack.com 官方页面确认 Meltdown 由三组独立发现：Jann Horn (Google Project Zero)、Werner Haas/Thomas Prescher (Cyberus)、Gruss/Lipp/Mangard/Schwarz (Graz)；Spectre 由两方独立发现：Jann Horn (Google Project Zero) 与 Paul Kocher（协作 Genkin/Hamburg/Lipp/Yarom）。Horn 是唯一同时独立发现 Meltdown 与 Spectre 的研究者，但非两篇学术论文联合作者。",
+      "status": "documented",
+      "growth_signal": "独立发现身份经论文官方页确认——学术圈以“独立发现者并列”方式承认工业研究员，而非纳入论文作者列。这是同行评价机制的硬证据，区别于媒体通常以集合称谓“Google researchers”淹没 Horn 个人。",
+      "source": {
+        "title": "Meltdown and Spectre — official paper page",
+        "url": "https://meltdownattack.com",
+        "published": "2018-01",
+        "source_type": "漏洞论文官方页",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_urdgoe2tiieqza198hxs41as",
+        "accessed_at": "2026-09-26T13:46:32.918009+00:00",
+        "content_sha256": "f5ba0446cb780034c3075f4fdb0737aa6d73812faaee4411ff74deffb9b2aa24"
+      }
+    },
+    {
+      "id": "jh-tl-07-cache-invalidation",
+      "date": "2018-09-26",
+      "claim": "《A cache invalidation bug in Linux memory management》发布：Linux 自 3.16 起 VMA 缓存序列号优化在单线程进程序列号回绕+恰在其后创建新线程时失效，致使用已释放 VMA 指针（UAF），可内核代码执行。CVE-2018-17182。byline: Jann Horn, Project Zero。",
+      "status": "documented",
+      "growth_signal": "从 CPU 微架构回归 Linux 内存管理；确立“质疑性能优化中隐含正确性假设”主入口的又一案例；文末映射 commit→稳定版→发行版 backport→用户安装的对手时间线管线，以“用户何时真正受保护”而非“补丁何时发布”为评估终点。",
+      "source": {
+        "title": "A cache invalidation bug in Linux memory management",
+        "url": "https://projectzero.google/2018/09/a-cache-invalidation-bug-in-linux.html",
+        "published": "2018-09-26",
+        "source_type": "P0 博客（作者亲笔）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_ktcrxvp1ej594o170wq93jra",
+        "accessed_at": "2026-09-26T13:46:32.918149+00:00",
+        "content_sha256": "68db3324091335cc0dc788b3945cb78fbf173a87a65523d1f053754024509833"
+      }
+    },
+    {
+      "id": "jh-tl-08-tlb-mremap",
+      "date": "2019-01-17",
+      "claim": "《Taking a page from the kernel's book: A TLB issue in mremap()》发布：mremap 与 ftruncate 竞争致陈旧 TLB，在 Google Pixel 2（4.4 内核）上注入 zygote 进程。CVE-2018-18281。一手披露完整时间线：报告 2018-10-12 → 修复 commit 2018-10-18 → 稳定版 4.9/4.14/4.18 于 2018-10-20 → P0 bug 报告公开 2018-10-29 → 4.4 backport 2018-11-10 → exploit 发布 2018-11-14。byline: Jann Horn, Project Zero。",
+      "status": "documented",
+      "growth_signal": "对手时间线思维最完整呈现：“It took more than two months for the upstream kernel change to make its way to user devices; writing an exploit for this bug took far less time.” 选择 Pixel 2（4.4 旧内核）正因缓解不存在；承认理论预测失效转重试循环——实验驱动经验性探测的标志。",
+      "source": {
+        "title": "Taking a page from the kernel's book: A TLB issue in mremap()",
+        "url": "https://projectzero.google/2019/01/taking-page-from-kernels-book-tlb-issue.html",
+        "published": "2019-01-17",
+        "source_type": "P0 博客（作者亲笔）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_eewcy7mglb8p3vi8gr40wj71",
+        "accessed_at": "2026-09-26T13:46:32.918145+00:00",
+        "content_sha256": "82abe4039e2effe9a3aa072187bb5d698e901268610090c0231ab09c4d06ab96"
+      }
+    },
+    {
+      "id": "jh-tl-09-gap-2019-2022",
+      "date": "2019-01-17/2022-03-24",
+      "claim": "2019-01 TLB 帖之后至 2022-03 race window 帖之前，约 3 年公开空窗：无已核实 Horn 署名 P0 博文（seed 据 P0 archive 全量核对）。空窗期间内部工作内容（内部 0day RCA、内核加固或转向非公开研究）未由一手来源核实。",
+      "status": "inferred",
+      "growth_signal": "阶段边界——公开输出显著减少。空窗属实（archive 全量核对的高可信度负面证据），但具体原因未核实，不应臆测为“转向内部项目”或“减少研究”。这是时间线上最大的未解释断点。",
+      "source": {
+        "title": "Project Zero Blog Archive（全量核对未见 Horn byline，2019-01 至 2022-03）",
+        "url": "https://projectzero.google/archive.html",
+        "published": "2019-2022",
+        "source_type": "P0 归档页（负面证据）",
+        "level": "lead_only"
+      },
+      "verification": {
+        "verified_in_run": false,
+        "retrieval_method": "unverified",
+        "tool_use_id": "",
+        "accessed_at": "",
+        "content_sha256": ""
+      }
+    },
+    {
+      "id": "jh-tl-10-race-window",
+      "date": "2022-03-24",
+      "claim": "《Racing against the clock -- hitting a tiny kernel race window》发布：UNIX 域套接字 SCM_RIGHTS 垃圾回收窄竞争，用 cache miss / 硬件定时器中断 / epoll waitqueue churn 扩窗，非抢占内核约 30% 命中。P0 issue crbug/2247，无独立 CVE（引用 CVE-2021-0920 为上下文）。byline: Jann Horn, Project Zero。",
+      "status": "documented",
+      "growth_signal": "时隔约 3 年复出；方向回到 Linux 内核竞争窗口；展现“复杂安全规则同时击败人和 fuzzer”论点与“用硬件行为扩窗”的实验驱动探测。",
+      "source": {
+        "title": "Racing against the clock -- hitting a tiny kernel race window",
+        "url": "https://projectzero.google/2022/03/racing-against-clock-hitting-tiny.html",
+        "published": "2022-03-24",
+        "source_type": "P0 博客（作者亲笔）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_0ch9vr25sftptd85y2if9ypp",
+        "accessed_at": "2026-09-26T13:46:32.918155+00:00",
+        "content_sha256": "b660616cff17d37540230942cceccf29fee6a2d58e6072d73b900be78539b09d"
+      }
+    },
+    {
+      "id": "jh-tl-11-gap-2022-2025",
+      "date": "2022-03-24/2025-08-08",
+      "claim": "2022-03 race window 帖之后至 2025-08 MSG_OOB 帖之前，又约 3 年公开空窗：无已核实 Horn 署名 P0 博文（seed 据 archive 全量核对，2024 年 P0 博文均经核实为 Fratric/Forshaw/Jenkins 等）。空窗期内部工作内容未核实。",
+      "status": "inferred",
+      "growth_signal": "第二个公开空窗，与第一个对称；连续两段 3 年空窗 + 2025 密集复出构成其公开输出的节律特征，但节律成因无公开解释。",
+      "source": {
+        "title": "Project Zero Blog Archive（全量核对未见 Horn byline，2022-03 至 2025-08）",
+        "url": "https://projectzero.google/archive.html",
+        "published": "2022-2025",
+        "source_type": "P0 归档页（负面证据）",
+        "level": "lead_only"
+      },
+      "verification": {
+        "verified_in_run": false,
+        "retrieval_method": "unverified",
+        "tool_use_id": "",
+        "accessed_at": "",
+        "content_sha256": ""
+      }
+    },
+    {
+      "id": "jh-tl-12-msg-oob",
+      "date": "2025-08-08",
+      "claim": "《From Chrome renderer code exec to kernel with MSG_OOB》发布：Linux ≥6.9 的 MSG_OOB（UNIX 域套接字带外数据）UAF，可从 Chrome renderer 沙箱达内核并完整利用。CVE-2025-38236。引入 bug 的 commit 为 93c99f21db36（2024 年中）。Horn 自述 2025 年 6 月初 review 新内核特性时发现。byline: Jann Horn。",
+      "status": "documented",
+      "growth_signal": "第二阶段密集输出开端；方向回归 Linux 内核利用 + Chrome 沙箱→内核链；确立“新技术特性 + 预期使用面 vs 实际暴露面错配”研究目标信号（MSG_OOB 几乎只在 Oracle 产品用，却在 Chrome renderer sandbox 暴露）。",
+      "source": {
+        "title": "From Chrome renderer code exec to kernel with MSG_OOB",
+        "url": "https://projectzero.google/2025/08/from-chrome-renderer-code-exec-to-kernel.html",
+        "published": "2025-08-08",
+        "source_type": "P0 博客（作者亲笔）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_95dnmfqrmfj3u4pykgjf3ml7",
+        "accessed_at": "2026-09-26T13:46:32.918103+00:00",
+        "content_sha256": "9f71d8e963437c9082b315aef6eab2b4f9f9dda69c04376ce934351bb40d60ac"
+      }
+    },
+    {
+      "id": "jh-tl-13-pointer-leaks",
+      "date": "2025-09-26",
+      "claim": "《Pointer leaks through pointer-keyed data structures》发布：无内存安全违规、无时序攻击下远程泄漏指针；攻击者数据被反序列化入指针键数据结构再序列化返回时泄漏。实测 macOS NSKeyedArchiver，用中国剩余定理（CRT）数学化推导完整 64-bit 指针恢复。无 CVE。Horn 自述因未证明 real-world impact 而未进 P0 bugtracker，私下报告 Apple；Apple 2025-03-31 安全发布修复。byline: Jann Horn。",
+      "status": "documented",
+      "growth_signal": "新型逻辑型信息泄漏范式，区别于 Spectre/Meltdown 侧信道；披露决策体现 impact-gating：未证明 impact 的 bug 不进 bugtracker，绕开 P0 90 天起算点——这是 P0 政策未明文授权的判断空间，言行一致性缺口。",
+      "source": {
+        "title": "Pointer leaks through pointer-keyed data structures",
+        "url": "https://projectzero.google/2025/09/pointer-leaks-through-pointer-keyed.html",
+        "published": "2025-09-26",
+        "source_type": "P0 博客（作者亲笔）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_p4q1halrscv6glfblhmeln5m",
+        "accessed_at": "2026-09-26T13:46:32.918114+00:00",
+        "content_sha256": "3a4522f7f1f73c00f0803b62d46b8f6cf032ddbc71dd17906793b93940e35307"
+      }
+    },
+    {
+      "id": "jh-tl-14-virtualbox-draft",
+      "date": "2025-12-16",
+      "claim": "《Thinking Outside The Box [dusted off draft from 2017]》发布：补发 2017 年初撰写的 VirtualBox VM→宿主用户态进程逃逸草稿（CVE-2017-3558，P0 issue #1086）。Slirp NAT 代码 ip_input() 用 IP 头不可信 ip_len 覆盖可信 m_len，致堆泄漏与堆破坏，逃逸 VM 经 system() 在宿主执行命令。Horn 自述从未写完下半部分（issue #1091，host userspace→host kernel），发布时仅“very lightly edited”。byline: Jann Horn。",
+      "status": "documented",
+      "growth_signal": "写作完成度优先于时间新鲜度的硬约束——宁可拖延 8 年也不发布半截技术故事；属补发历史研究非新方向，但确认其虚拟化逃逸研究脉络长期延续。漏洞修复(2017)与博文发布(2025)解耦，不构成披露违规因漏洞已 CVE 化。",
+      "source": {
+        "title": "Thinking Outside The Box [dusted off draft from 2017]",
+        "url": "https://projectzero.google/2025/12/thinking-outside-the-box.html",
+        "published": "2025-12-16",
+        "source_type": "P0 博客（作者亲笔）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_zan1wq67ewzl3qf2ntdv0o1b",
+        "accessed_at": "2026-09-26T13:46:32.918120+00:00",
+        "content_sha256": "bc271b22635b9b73cae688690dde0f0f49c92e1ff96dae48a3d0c60b5f4f64b9"
+      }
+    },
+    {
+      "id": "jh-tl-15-2026-no-new-post",
+      "date": "2026",
+      "claim": "截至 seed 调研时（2026-05-13 全量核对），P0 2026 已发布 9 篇博文（Pixel 10 利用链、Mutational Grammar Fuzzing、Windows GPHFH、Windows 管理员保护绕过、Sound Barrier Part II、Pixel 9 0-click 三部曲等）均无 Horn 署名。本节点未对 2026 archive 重新抓取核对，沿用 seed 结论。",
+      "status": "inferred",
+      "growth_signal": "2025 密集输出后再次进入观察期；是否进入第三个公开空窗尚需后续 archive 核对，不应据有限观察断言“研究停滞”。",
+      "source": {
+        "title": "Project Zero Blog Archive（2026 全量核对，seed）",
+        "url": "https://projectzero.google/archive.html",
+        "published": "2026",
+        "source_type": "P0 归档页（负面证据，seed）",
+        "level": "lead_only"
+      },
+      "verification": {
+        "verified_in_run": false,
+        "retrieval_method": "unverified",
+        "tool_use_id": "",
+        "accessed_at": "",
+        "content_sha256": ""
+      }
+    }
+  ],
+  "contradictions": [
+    "教育/CTF 背景两组说法互斥且均无一手 URL 证实：seed 04-external-views.md 记“Saarland University / ToastERS CTF”（自述来自 WebSearch 综合，未获一手 URL）；seed 05-decisions.md 另记 WebSearch 训练数据复述“TU Berlin / Shellphish CTF / 加入 P0 前在 Cure53 工作”。本节点 WebSearch 仅返回摘要复述，CTFtime 试探 URL 4049 命中无关队伍 EPICLYONS，未能以一手来源裁决任一说法。Wikipedia「Google Project Zero」词条对成员教育背景无任何记载。两条互斥说法均不写入 items。",
+    "CVE 归属在 seed 内部存在混淆：seed 06-timeline.md 年表脚注曾把 2019-01 TLB 帖标为 CVE-2018-17182，而一手抓取确认 2019-01 TLB 帖真实 CVE 为 CVE-2018-18281；CVE-2018-17182 实属 2018-09 cache invalidation 帖。两个独立 CVE 经一手正名，本输出按一手抓取为准。",
+    "Spectre/Meltdown 报告→公开间隔约 216 天，远超 P0 标准 90 天（2020 版为 90+14 上限 104 天）。P0 政策文本仅含“extreme circumstances”弹性条款与“mutual agreement”早披露通道，无明确条款解释 7 个月延期。Horn 本人在披露博文中完全不提及 90 天政策或披露决策，社区对此“沉默接受”——这是言行一致性最大未解冲突，非日期冲突。"
+  ],
+  "gaps": [
+    "pre-P0 教育背景 unverifiable：Saarland University / ToastERS CTF（04-external-views 综合）与 TU Berlin / Shellphish / Cure53（05-decisions 复述）互斥，均无一手 URL 证实，本节点 WebSearch/CTFtime 试探亦未获一手证据。不采信任何具体大学/战队/雇前雇主。",
+    "Horn 加入 P0 的精确月份未知；仅能确认不晚于 2016-06-20（首篇博文下界）。",
+    "2019-01 至 2022-03、2022-03 至 2025-08 两段约 3 年公开空窗期的内部工作内容（内部 0day RCA、内核加固倡议或转向非公开研究）均未由一手来源核实，不应臆测。",
+    "会议演讲年表整体缺失：Black Hat / USENIX Security 官网对自动化抓取返回 403，CCC media 搜索未扫完全部页码；seed 已记此缺口，本节点未再投入预算重抓，沿用为缺口。",
+    "2026 P0 archive 全量未由本节点重新抓取核对，“2026 无 Horn 署名新博文”沿用 seed 截至 2026-05-13 的全量核对结论，列为 lead_only/inferred，待后续一手 archive 核对。",
+    "Horn 个人 X/Twitter 账号（person_json.social 给出 https://x.com/tehjh）未由本节点抓取核实，仅作 lead。",
+    "seed 称 Horn GitHub 用户 thejh 关联 @google 并列 2025-2026 仓库更新（2025-07 linux fork 与 2025-08 MSG_OOB 时间吻合）；本节点未对 GitHub API 重新抓取核对，仅作 lead_only。",
+    "P0 issue tracker（bugs.chromium.org，issue 1272/836/1086/1091/2247 等）的原始披露时间线细节未由本节点逐条抓取核对；items 中 issue 编号引自一手博文内链接，但 tracker 条目本身未独立抓取。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jann-horn-timeline-20260926-214123-517",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790430392910840000-jann-horn-timeline.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "0668dae6-b6b2-48b4-b2f7-1e4e7fe41570",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_92e194wbxm5es282jb36ctlp",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jann-horn-timeline-20260926-214123-517/task.md"
+        },
+        "success": true,
+        "content_sha256": "452909103f08f6a1afef54dac0b9bc2c295af33bbfdc982b9ec8a88369f92493",
+        "accessed_at": "2026-09-26T13:46:32.917694+00:00"
+      },
+      {
+        "tool_use_id": "call_h5vtf1d3mnf7o3djryvx2cf4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jann-horn-timeline-20260926-214123-517/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "fe853101b49dbd82ecd5573be996e5acf3057fe843659a825046b9f627376ccb",
+        "accessed_at": "2026-09-26T13:46:32.917739+00:00"
+      },
+      {
+        "tool_use_id": "call_zj0voqm4528rsl5dybsvxg05",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jann-horn-timeline-20260926-214123-517/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "9a95eb6b66ed81de824351b541f4177492796710a5d57c779e83a847f5523969",
+        "accessed_at": "2026-09-26T13:46:32.917752+00:00"
+      },
+      {
+        "tool_use_id": "call_vy1p37t4xfhdp12oloufcq7m",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jann-horn-timeline-20260926-214123-517/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "9e8418e1a75193491db4204749b8209491f25a472416514c61e682981c173405",
+        "accessed_at": "2026-09-26T13:46:32.917757+00:00"
+      },
+      {
+        "tool_use_id": "call_j02eurindqtf8syr2lqll7mz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jann-horn-timeline-20260926-214123-517/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6578e71ef3e1c67e1ebb0c03b8158c64cec4937cdc032dfafe5513194a2b1f4e",
+        "accessed_at": "2026-09-26T13:46:32.917761+00:00"
+      },
+      {
+        "tool_use_id": "call_b4j3g2stjbngkiyducrq7a8j",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jann-horn-timeline-20260926-214123-517/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "f390bc8d711cc92bda7a90be1032d3c32880c1b31ce1ae74c867474e0f3b6b03",
+        "accessed_at": "2026-09-26T13:46:32.917767+00:00"
+      },
+      {
+        "tool_use_id": "call_lue3smw8emvov890r36mnf3l",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/jann-horn-perspective/references/research/06-timeline.md"
+        },
+        "success": true,
+        "content_sha256": "852171bf964d5953cd3412fd28068518f1bc04d4ad57f013494065eaa9fd4784",
+        "accessed_at": "2026-09-26T13:46:32.917807+00:00"
+      },
+      {
+        "tool_use_id": "call_1kdangw14h4zzliijomlahv8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/jann-horn-perspective/references/research/01-writings.md"
+        },
+        "success": true,
+        "content_sha256": "7ff8df71aac36f6ccc79912b26838ae873e74a82f91ed401e372881936928d89",
+        "accessed_at": "2026-09-26T13:46:32.917868+00:00"
+      },
+      {
+        "tool_use_id": "call_bcaxndbx6sxxo5622d9gljzq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/jann-horn-perspective/references/research/04-external-views.md"
+        },
+        "success": true,
+        "content_sha256": "d8871430d9612b34ec9b9449d663703fea5333d2f67d6852db5d9dd3ae61b6bd",
+        "accessed_at": "2026-09-26T13:46:32.917929+00:00"
+      },
+      {
+        "tool_use_id": "call_ea0n33avdybj1mxgecc0w6nd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/jann-horn-perspective/references/research/05-decisions.md"
+        },
+        "success": true,
+        "content_sha256": "cb218a6914e0552dda5f36569e6f8ccc1732f008b0d8ac6d4de1acfaf9970579",
+        "accessed_at": "2026-09-26T13:46:32.917983+00:00"
+      },
+      {
+        "tool_use_id": "call_ecvr7f3d73hccvd48f3mlcr6",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/2018/01/reading-privileged-memory-with-side.html",
+          "prompt": "Extract: author byline, publication date, the exact sentence stating when the issue was reported to Intel/AMD/ARM, the acknowledgment of concurrent discoverers, and any mention of the bug tracker issue number."
+        },
+        "success": true,
+        "content_sha256": "5bcbec23b38ed883b2fc2cddd7ab3209b6440428c7137ad8f0bc99bd2f6a10fc",
+        "accessed_at": "2026-09-26T13:46:32.917994+00:00"
+      },
+      {
+        "tool_use_id": "call_clfpddj2ldvmbxxh6ydwzyp6",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/about-pz.html",
+          "prompt": "Extract: any statement about when Project Zero was formed or founded, and whether Jann Horn is listed as a current or past member."
+        },
+        "success": true,
+        "content_sha256": "38aaec9680f0ddd84972117b5e9d02f177d02926da0a5c8d15227d5530ea831b",
+        "accessed_at": "2026-09-26T13:46:32.917989+00:00"
+      },
+      {
+        "tool_use_id": "call_77j542hf08a1i93wl6ubzy39",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: author byline, publication date, and the main topic/claim of this post, including any CVE number.",
+          "url": "https://projectzero.google/2016/06/exploiting-recursion-in-linux-kernel_20.html"
+        },
+        "success": true,
+        "content_sha256": "5eb8c29a6f6ad1697cb53365743a1d65bfb657274af2f164e93071c0d52ef835",
+        "accessed_at": "2026-09-26T13:46:32.918006+00:00"
+      },
+      {
+        "tool_use_id": "call_urdgoe2tiieqza198hxs41as",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: the exact list of independent discoverers of Meltdown and of Spectre. Is Jann Horn named? Who is listed as independent discoverer of each?",
+          "url": "https://meltdownattack.com"
+        },
+        "success": true,
+        "content_sha256": "f5ba0446cb780034c3075f4fdb0737aa6d73812faaee4411ff74deffb9b2aa24",
+        "accessed_at": "2026-09-26T13:46:32.918009+00:00"
+      },
+      {
+        "tool_use_id": "call_qfwi33tos5a7njh64lc5fvzi",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Jann Horn Saarland University ToastERS CTF team"
+        },
+        "success": true,
+        "content_sha256": "ff4b753e234a7a7e010bfea0e34370c9569c4fcd1d0c4f7a054613dd4de094eb",
+        "accessed_at": "2026-09-26T13:46:32.918015+00:00"
+      },
+      {
+        "tool_use_id": "call_rxq9lenr0uaym31zqjgw98el",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Does this CTFtime team page exist, and what team information does it show? List team name, country, and any member names if visible.",
+          "url": "https://ctftime.org/team/4049"
+        },
+        "success": true,
+        "content_sha256": "d542440da54c0992abd1faca48f96ef7dd2a423444f22c69ab3328c8075bd01b",
+        "accessed_at": "2026-09-26T13:46:32.918078+00:00"
+      },
+      {
+        "tool_use_id": "call_95dnmfqrmfj3u4pykgjf3ml7",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: author byline, publication date, the CVE number, and the reported-to-date if mentioned. What is the main vulnerability described?",
+          "url": "https://projectzero.google/2025/08/from-chrome-renderer-code-exec-to-kernel.html"
+        },
+        "success": true,
+        "content_sha256": "9f71d8e963437c9082b315aef6eab2b4f9f9dda69c04376ce934351bb40d60ac",
+        "accessed_at": "2026-09-26T13:46:32.918103+00:00"
+      },
+      {
+        "tool_use_id": "call_zan1wq67ewzl3qf2ntdv0o1b",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: author byline, publication date, the CVE number, and any statement about when the draft was originally written or when the bug was reported/fixed. What is the main vulnerability?",
+          "url": "https://projectzero.google/2025/12/thinking-outside-the-box.html"
+        },
+        "success": true,
+        "content_sha256": "bc271b22635b9b73cae688690dde0f0f49c92e1ff96dae48a3d0c60b5f4f64b9",
+        "accessed_at": "2026-09-26T13:46:32.918120+00:00"
+      },
+      {
+        "tool_use_id": "call_p4q1halrscv6glfblhmeln5m",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: author byline, publication date, any statement about when the issue was reported to Apple and when Apple fixed it, and any CVE number. What is the main technique described?",
+          "url": "https://projectzero.google/2025/09/pointer-leaks-through-pointer-keyed.html"
+        },
+        "success": true,
+        "content_sha256": "3a4522f7f1f73c00f0803b62d46b8f6cf032ddbc71dd17906793b93940e35307",
+        "accessed_at": "2026-09-26T13:46:32.918114+00:00"
+      },
+      {
+        "tool_use_id": "call_lyj2o32nmxi2odl925y6m01j",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List the notable members of Google Project Zero mentioned, including Jann Horn if present. Also note any founding date and any biographical/educational details about members.",
+          "url": "https://en.wikipedia.org/wiki/Google_Project_Zero"
+        },
+        "success": true,
+        "content_sha256": "78a8e47c4e44b40ab77129802e8f7cbd6bc1367964cdec4f8de4565129d3c358",
+        "accessed_at": "2026-09-26T13:46:32.918139+00:00"
+      },
+      {
+        "tool_use_id": "call_eewcy7mglb8p3vi8gr40wj71",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: author byline, publication date, and the bug report and fix timeline dates (when reported to kernel team, when fixed, when backported to 4.4, when exploit published). What CVE number?",
+          "url": "https://projectzero.google/2019/01/taking-page-from-kernels-book-tlb-issue.html"
+        },
+        "success": true,
+        "content_sha256": "82abe4039e2effe9a3aa072187bb5d698e901268610090c0231ab09c4d06ab96",
+        "accessed_at": "2026-09-26T13:46:32.918145+00:00"
+      },
+      {
+        "tool_use_id": "call_0ch9vr25sftptd85y2if9ypp",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: author byline, publication date, and the main vulnerability described. Any CVE number? What kernel subsystem?",
+          "url": "https://projectzero.google/2022/03/racing-against-clock-hitting-tiny.html"
+        },
+        "success": true,
+        "content_sha256": "b660616cff17d37540230942cceccf29fee6a2d58e6072d73b900be78539b09d",
+        "accessed_at": "2026-09-26T13:46:32.918155+00:00"
+      },
+      {
+        "tool_use_id": "call_ktcrxvp1ej594o170wq93jra",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: author byline, publication date, and the main vulnerability described. Any CVE number? What is the technical bug?",
+          "url": "https://projectzero.google/2018/09/a-cache-invalidation-bug-in-linux.html"
+        },
+        "success": true,
+        "content_sha256": "68db3324091335cc0dc788b3945cb78fbf173a87a65523d1f053754024509833",
+        "accessed_at": "2026-09-26T13:46:32.918149+00:00"
+      },
+      {
+        "tool_use_id": "call_grw823xxakiega93imdxwwvm",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: author byline, publication date, and the main vulnerability described. Any CVE number?",
+          "url": "https://projectzero.google/2017/04/pandavirtualization-exploiting-xen.html"
+        },
+        "success": true,
+        "content_sha256": "e46470a42a62e4183c57c084697802b10a70d20b6baaca7b16bcaa84051435a7",
+        "accessed_at": "2026-09-26T13:46:32.918197+00:00"
+      },
+      {
+        "tool_use_id": "call_ocef44n2goxd9wqrk3ig6cxz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/jann-horn-perspective/references/research/07-verification-tests.md"
+        },
+        "success": true,
+        "content_sha256": "60b00013c4e00ca2524575ae0bbce77473bebfb826fdf3ae7448c62564b0155d",
+        "accessed_at": "2026-09-26T13:46:32.918193+00:00"
+      },
+      {
+        "tool_use_id": "call_rkn0e9ddd6yv6npw1luh1on7",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jann-horn-timeline-20260926-214123-517/checkpoint.md",
+          "content": "# Checkpoint — Jann Horn 可核验时间线 (dimension)\n\n> 调研日期：2026-09-26\n> 任务：对教育/工作/项目/漏洞/工具/writeup/演讲做可核验时间线，标阶段边界、证据缺口、冲突日期。\n\n## 已用工具预算\n- WebFetch ×9（Spectre 披露、about-pz、2016 recursion、meltdownattack.com、CTFtime 4049、MSG_OOB、VirtualBox、pointer-leaks、Wikipedia P0、2019 TLB、2022 race、2018 cache invalidation、2017 Xen）\n- WebSearch ×1（Saarland/ToastERS — 仅返回摘要复述，未获一手 URL）\n- Read ×6（seed 06-timeline / 01-writings / 04-external-views / 05-decisions / 07-verification-tests + person/dim/seed）\n\n## 已核实一手来源（WebFetch 直读，byline + 日期确认）\n1. P0 团队 2014 年成立 — https://projectzero.google/about-pz.html（\"Formed in 2014\"）；Wikipedia 进一步精确为 2014-07-15 公开宣布\n2. Horn 首篇 P0 博文 2016-06-20 \"Exploiting Recursion in the Linux Kernel\"（byline: Jann Horn；P0 issue #836；无 CVE）— https://projectzero.google/2016/06/exploiting-recursion-in-linux-kernel_20.html\n3. 2017-04-07 \"Pandavirtualization: Exploiting the Xen hypervisor\"（byline: Jann Horn, Project Zero；关联 XSA-212；旧同类 bug CVE-2012-5513/XSA-29）— https://projectzero.google/2017/04/pandavirtualization-exploiting-xen.html\n4. 2017-06-01 Horn/P0 向 Intel/AMD/ARM 报告 Spectre/Meltdown 三变体 — 一手原文 \"We reported this issue to Intel, AMD and ARM on 2017-06-01\"；P0 bug #1272 — https://projectzero.google/2018/01/reading-privileged-memory-with-side.html\n5. 2018-01-03 \"Reading privileged memory with a side-channel\" 公开披露（byline: Jann Horn, Project Zero）；并列独立发现者名单确认 — 同上\n6. Meltdown/Spectre 独立发现者归属 — Meltdown 三组（Horn@P0 / Haas+Prescher@Cyberus / Gruss+Lipp+Mangard+Schwarz@Graz）；Spectre 两方（Horn@P0 / Kocher+Genkin+Hamburg+Lipp+Yarom）— https://meltdownattack.com\n7. 2018-09-26 \"A cache invalidation bug in Linux memory management\"（byline: Jann Horn, Project Zero；CVE-2018-17182；影响 3.16+）— https://projectzero.google/2018/09/a-cache-invalidation-bug-in-linux.html\n8. 2019-01-17 \"Taking a page from the kernel's book: A TLB issue in mremap()\"（byline: Jann Horn, Project Zero；CVE-2018-18281）。一手披露完整时间线：报告 2018-10-12 → 修复 commit 2018-10-18 → 稳定版 4.9/4.14/4.18 于 2018-10-20 → P0 bug 报告公开 2018-10-29 → 4.4 backport 2018-11-10 → exploit 发布 2018-11-14 — https://projectzero.google/2019/01/taking-page-from-kernels-book-tlb-issue.html\n9. 2022-03-24 \"Racing against the clock -- hitting a tiny kernel race window\"（byline: Jann Horn；UNIX 域套接字 GC UAF；P0 issue crbug/2247；无独立 CVE；引用 CVE-2021-0920 为上下文）— https://projectzero.google/2022/03/racing-against-clock-hitting-tiny.html\n10. 2025-08-08 \"From Chrome renderer code exec to kernel with MSG_OOB\"（byline: Jann Horn；CVE-2025-38236；引入 bug 的 commit 93c99f21db36，2024 年中；Horn 自述 2025 年 6 月初 review 新特性时发现）— https://projectzero.google/2025/08/from-chrome-renderer-code-exec-to-kernel.html\n11. 2025-09-26 \"Pointer leaks through pointer-keyed data structures\"（byline: Jann Horn；无 CVE；Horn 自述未进 P0 bugtracker，私下报告 Apple；Apple 2025-03-31 安全发布修复；CRT 数学推导）— https://projectzero.google/2025/09/pointer-leaks-through-pointer-keyed.html\n12. 2025-12-16 \"Thinking Outside The Box [dusted off draft from 2017]\"（byline: Jann Horn；CVE-2017-3558；P0 issue #1086；草稿 2017 年初撰写；issue #1091 未完成下半部分）— https://projectzero.google/2025/12/thinking-outside-the-box.html\n\n## 日期修正（相对 seed 06-timeline）\n- seed 在年表脚注把 2019 TLB 帖误标 CVE-2018-17182，实际 2019-01 帖为 **CVE-2018-18281**；CVE-2018-17182 属于 2018-09 cache invalidation 帖。两条独立 CVE，seed 年表注脚有混淆，本输出按一手抓取正名。\n- 2019 TLB 帖日期 2019-01-17 由一手 byline 确认（seed 此处正确）。\n- VirtualBox 2017 草稿对应 CVE-2017-3558（与 Xen XSA-212 是不同 bug，seed 在两处分别标注正确，无混淆）。\n\n## 阶段边界（documented）\n- 2014-07-15 P0 公开成立（Horn 尚无公开输出）\n- ≤2016-06-20 Horn 加入 P0（首篇博文为加入下界；精确月份未知）\n- 2016-06 → 2019-01：第一阶段公开输出密集期（Linux 内核栈/VMA/TLB + Xen 虚拟化 + Spectre/Meltdown CPU 微架构）\n- 2019-01 → 2022-03：约 3 年公开空窗（无已核实 Horn 署名 P0 博文；内部工作内容未核实）\n- 2022-03 单篇复出后 → 2025-08：又约 3 年空窗\n- 2025-08 → 2025-12：第二阶段密集输出（3 篇：MSG_OOB / pointer leaks / VirtualBox 草稿补发）\n- 2026（截至抓取时）：无 Horn 署名新博文（seed 据 archive 全量核对，本节点未对 2026 archive 重新抓取）\n\n## 未解决缺口（须如实留空，写入 output.gaps）\n1. pre-P0 教育：seed 04-external-views 给出 \"Saarland University / ToastERS CTF\"（自称来自 WebSearch 综合，未获一手 URL）；seed 05-decisions 另记 WebSearch 复述 \"TU Berlin / Shellphish / 加入 P0 前在 Cure53\"。两组说法互相冲突且均无一手 URL 证实。本节点 WebSearch 仅返回摘要复述，CTFtime 试探 URL 4049 命中无关队伍 EPICLYONS。**教育/CTF/雇前背景整体 unverifiable，不写入 items。**\n2. 加入 P0 精确月份：仅下界 ≤2016-06-20。\n3. 2019-01→2022-03 与 2022-03→2025-08 两段公开空窗的内部工作内容：未核实。\n4. 会议演讲年表（Black Hat / USENIX / CCC / OffensiveCon 等）：seed 已记 Black Hat/USENIX 官网 403、CCC media 未扫完；本节点未再投入预算重抓，整体缺失。\n5. 2026 archive 全量未由本节点重新抓取核对（沿用 seed 结论：截至 2026-05-13 无 Horn 署名新博文）。\n6. Horn 个人 X/Twitter handle（person_json.social 给出 https://x.com/tehjh）未由本节点抓取核实。\n\n## 冲突项（写入 output.contradictions）\n- 教育/CTF 背景：Saarland/ToastERS（04-external-views 综合）vs TU Berlin/Shellphish/Cure53（05-decisions 训练数据复述）—— 互斥且均无一手证实。\n- CVE 归属混淆（seed 内部）：2019-01 TLB 帖正确 CVE 为 CVE-2018-18281，非 CVE-2018-17182（后者属 2018-09 帖）。\n\n## 下一步\n预算已接近，停止抓取，进入 output.json 写入。\n"
+        },
+        "success": true,
+        "content_sha256": "405c79618690e335584837a30543d796d8d3d814b46b0659e4b69490486d4b75",
+        "accessed_at": "2026-09-26T13:46:32.918202+00:00"
+      },
+      {
+        "tool_use_id": "call_zecimnjky80r3ixqiyv0mkrn",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/jann-horn-timeline-20260926-214123-517/output.json",
+          "content": "{\n  \"person\": \"Jann Horn\",\n  \"dimension\": \"可核验时间线\",\n  \"identity_check\": \"身份经多源交叉确认：person_json 指向 Project Zero 研究员 Jann Horn（GitHub thejh，关联 @google）。Wikipedia「Google Project Zero」词条将 Jann Horn 列为 notable 成员并明确“Independently discovered the Meltdown and Spectre CPU vulnerabilities in mid-2017”。P0 一手博客 9 篇文章 byline 均为“Jann Horn, Project Zero / Google Project Zero”。meltdownattack.com 官方页面把“Jann Horn (Google Project Zero)”列为 Meltdown 三组独立发现者之首、Spectre 两方独立发现者之一。无同名歧义。\",\n  \"items\": [\n    {\n      \"id\": \"jh-tl-01-p0-founded\",\n      \"date\": \"2014-07-15\",\n      \"claim\": \"Google Project Zero 团队公开成立。P0 官方 about 页记载“Formed in 2014”；Wikipedia 进一步精确为 2014-07-15 公开宣布。此为 Horn 加入的机构起点，但 Horn 当时尚无公开 P0 输出。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"阶段边界——机构成立 ≠ 个人加入。P0 成立日期为后续 Horn 职业时间线提供锚点，但 Horn 个人加入的精确月份未在公开一手来源中确认。\",\n      \"source\": {\n        \"title\": \"About Project Zero\",\n        \"url\": \"https://projectzero.google/about-pz.html\",\n        \"published\": \"2014\",\n        \"source_type\": \"团队官方介绍页\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-02-first-post\",\n      \"date\": \"2016-06-20\",\n      \"claim\": \"Horn 首篇已核实 P0 博文《Exploiting Recursion in the Linux Kernel》发布：ecryptfs 叠加 procfs 触发任意递归致内核栈溢出，含完整 root 利用，绕过 CONFIG_SCHED_STACK_END_CHECK canary，论证应加 guard page。P0 issue #836，无 CVE。byline: Jann Horn, Google Project Zero。该日期为 Horn 已加入 P0 的下界证据。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"首篇即确立其方法论签名：穷举排除可行路径后转向栈前分配溢出；以“Make zeroday hard.”文末格言收束；致谢 Andy Lutomirski 已先行开始的补丁工作（慷慨归因）。研究粒度停在 Linux 内核栈边界。\",\n      \"short_quote\": \"Make zeroday hard.\",\n      \"source\": {\n        \"title\": \"Exploiting Recursion in the Linux Kernel\",\n        \"url\": \"https://projectzero.google/2016/06/exploiting-recursion-in-linux-kernel_20.html\",\n        \"published\": \"2016-06-20\",\n        \"source_type\": \"P0 博客（作者亲笔）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-03-xen-escape\",\n      \"date\": \"2017-04-07\",\n      \"claim\": \"《Pandavirtualization: Exploiting the Xen hypervisor》发布：PV guest 通过 HYPERVISOR_memory_op(XENMEM_exchange) 的 access_ok() 只校验起始地址而非整段范围，配合 hypercall 抢占/恢复机制以 nr_exchanged 为恢复偏移，向 hypervisor 任意地址写物理页号，逃逸并控制物理内存。关联 XSA-212；文中引用的 2012 年同类 bug 为 CVE-2012-5513/XSA-29。byline: Jann Horn, Project Zero。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"阶段转折——研究粒度从 Linux 内核栈升至 hypervisor/虚拟化边界；同时确立“半步修复”批判模式：XSA-29 只堵 offset 0 留下带偏移写入路径，成为其后续反复引用的案例。\",\n      \"source\": {\n        \"title\": \"Pandavirtualization: Exploiting the Xen hypervisor\",\n        \"url\": \"https://projectzero.google/2017/04/pandavirtualization-exploiting-xen.html\",\n        \"published\": \"2017-04-07\",\n        \"source_type\": \"P0 博客（作者亲笔）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-04-spectre-reported\",\n      \"date\": \"2017-06-01\",\n      \"claim\": \"Horn 与 P0 向 Intel、AMD、ARM 报告三个 CPU 侧信道变体（Variant 1 bounds check bypass、Variant 2 branch target injection、Variant 3 rogue data cache load），即 Spectre/Meltdown 类漏洞。一手原文：“We reported this issue to Intel, AMD and ARM on 2017-06-01.” P0 bug #1272。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"范式级跃迁起点——从软件漏洞利用转入 CPU 微架构侧信道；报告日期为后续 7 个月 embargo 协调披露的起算点，也是 P0 90 天硬立场面对系统性 CPU 漏洞时事实让位于个案协商的起点。\",\n      \"short_quote\": \"We reported this issue to Intel, AMD and ARM on 2017-06-01.\",\n      \"source\": {\n        \"title\": \"Reading privileged memory with a side-channel\",\n        \"url\": \"https://projectzero.google/2018/01/reading-privileged-memory-with-side.html\",\n        \"published\": \"2018-01-03\",\n        \"source_type\": \"P0 博客（作者亲笔，含报告日期陈述）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-05-spectre-disclosed\",\n      \"date\": \"2018-01-03\",\n      \"claim\": \"P0 公开披露 Spectre/Meltdown 博文《Reading privileged memory with a side-channel》发布（byline: Jann Horn, Project Zero），含 eBPF 读内核内存、KVM guest→host 内存泄漏、用户态直读内核内存等 PoC。报告(2017-06-01)→公开(2018-01-03)约 216 天，远超 P0 标准 90 天，为协调披露个案。Horn 在文中明确致谢并列出全部并行发现者（Gruss/Lipp/Yarom/Kocher/Genkin/Schwarz/Hamburg/Mangard/Prescher/Haas），并归功 Felix Wilhelm 提供 Variant 2 概念基础。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"职业生涯最高标志；责任框架确立——P0 定位为发现/演示者，缓解设计推给厂商；慷慨归因同事前期工作（Variant 2 概念来源让给 Wilhelm）与学术并行发现者。Horn 本人在文中完全不提及 90 天政策或披露决策，对该异常保持沉默。\",\n      \"source\": {\n        \"title\": \"Reading privileged memory with a side-channel\",\n        \"url\": \"https://projectzero.google/2018/01/reading-privileged-memory-with-side.html\",\n        \"published\": \"2018-01-03\",\n        \"source_type\": \"P0 博客（作者亲笔）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-06-meltdown-spectre-attribution\",\n      \"date\": \"2018-01-03\",\n      \"claim\": \"meltdownattack.com 官方页面确认 Meltdown 由三组独立发现：Jann Horn (Google Project Zero)、Werner Haas/Thomas Prescher (Cyberus)、Gruss/Lipp/Mangard/Schwarz (Graz)；Spectre 由两方独立发现：Jann Horn (Google Project Zero) 与 Paul Kocher（协作 Genkin/Hamburg/Lipp/Yarom）。Horn 是唯一同时独立发现 Meltdown 与 Spectre 的研究者，但非两篇学术论文联合作者。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"独立发现身份经论文官方页确认——学术圈以“独立发现者并列”方式承认工业研究员，而非纳入论文作者列。这是同行评价机制的硬证据，区别于媒体通常以集合称谓“Google researchers”淹没 Horn 个人。\",\n      \"source\": {\n        \"title\": \"Meltdown and Spectre — official paper page\",\n        \"url\": \"https://meltdownattack.com\",\n        \"published\": \"2018-01\",\n        \"source_type\": \"漏洞论文官方页\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-07-cache-invalidation\",\n      \"date\": \"2018-09-26\",\n      \"claim\": \"《A cache invalidation bug in Linux memory management》发布：Linux 自 3.16 起 VMA 缓存序列号优化在单线程进程序列号回绕+恰在其后创建新线程时失效，致使用已释放 VMA 指针（UAF），可内核代码执行。CVE-2018-17182。byline: Jann Horn, Project Zero。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"从 CPU 微架构回归 Linux 内存管理；确立“质疑性能优化中隐含正确性假设”主入口的又一案例；文末映射 commit→稳定版→发行版 backport→用户安装的对手时间线管线，以“用户何时真正受保护”而非“补丁何时发布”为评估终点。\",\n      \"source\": {\n        \"title\": \"A cache invalidation bug in Linux memory management\",\n        \"url\": \"https://projectzero.google/2018/09/a-cache-invalidation-bug-in-linux.html\",\n        \"published\": \"2018-09-26\",\n        \"source_type\": \"P0 博客（作者亲笔）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-08-tlb-mremap\",\n      \"date\": \"2019-01-17\",\n      \"claim\": \"《Taking a page from the kernel's book: A TLB issue in mremap()》发布：mremap 与 ftruncate 竞争致陈旧 TLB，在 Google Pixel 2（4.4 内核）上注入 zygote 进程。CVE-2018-18281。一手披露完整时间线：报告 2018-10-12 → 修复 commit 2018-10-18 → 稳定版 4.9/4.14/4.18 于 2018-10-20 → P0 bug 报告公开 2018-10-29 → 4.4 backport 2018-11-10 → exploit 发布 2018-11-14。byline: Jann Horn, Project Zero。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"对手时间线思维最完整呈现：“It took more than two months for the upstream kernel change to make its way to user devices; writing an exploit for this bug took far less time.” 选择 Pixel 2（4.4 旧内核）正因缓解不存在；承认理论预测失效转重试循环——实验驱动经验性探测的标志。\",\n      \"source\": {\n        \"title\": \"Taking a page from the kernel's book: A TLB issue in mremap()\",\n        \"url\": \"https://projectzero.google/2019/01/taking-page-from-kernels-book-tlb-issue.html\",\n        \"published\": \"2019-01-17\",\n        \"source_type\": \"P0 博客（作者亲笔）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-09-gap-2019-2022\",\n      \"date\": \"2019-01-17/2022-03-24\",\n      \"claim\": \"2019-01 TLB 帖之后至 2022-03 race window 帖之前，约 3 年公开空窗：无已核实 Horn 署名 P0 博文（seed 据 P0 archive 全量核对）。空窗期间内部工作内容（内部 0day RCA、内核加固或转向非公开研究）未由一手来源核实。\",\n      \"status\": \"inferred\",\n      \"growth_signal\": \"阶段边界——公开输出显著减少。空窗属实（archive 全量核对的高可信度负面证据），但具体原因未核实，不应臆测为“转向内部项目”或“减少研究”。这是时间线上最大的未解释断点。\",\n      \"source\": {\n        \"title\": \"Project Zero Blog Archive（全量核对未见 Horn byline，2019-01 至 2022-03）\",\n        \"url\": \"https://projectzero.google/archive.html\",\n        \"published\": \"2019-2022\",\n        \"source_type\": \"P0 归档页（负面证据）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-10-race-window\",\n      \"date\": \"2022-03-24\",\n      \"claim\": \"《Racing against the clock -- hitting a tiny kernel race window》发布：UNIX 域套接字 SCM_RIGHTS 垃圾回收窄竞争，用 cache miss / 硬件定时器中断 / epoll waitqueue churn 扩窗，非抢占内核约 30% 命中。P0 issue crbug/2247，无独立 CVE（引用 CVE-2021-0920 为上下文）。byline: Jann Horn, Project Zero。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"时隔约 3 年复出；方向回到 Linux 内核竞争窗口；展现“复杂安全规则同时击败人和 fuzzer”论点与“用硬件行为扩窗”的实验驱动探测。\",\n      \"source\": {\n        \"title\": \"Racing against the clock -- hitting a tiny kernel race window\",\n        \"url\": \"https://projectzero.google/2022/03/racing-against-clock-hitting-tiny.html\",\n        \"published\": \"2022-03-24\",\n        \"source_type\": \"P0 博客（作者亲笔）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-11-gap-2022-2025\",\n      \"date\": \"2022-03-24/2025-08-08\",\n      \"claim\": \"2022-03 race window 帖之后至 2025-08 MSG_OOB 帖之前，又约 3 年公开空窗：无已核实 Horn 署名 P0 博文（seed 据 archive 全量核对，2024 年 P0 博文均经核实为 Fratric/Forshaw/Jenkins 等）。空窗期内部工作内容未核实。\",\n      \"status\": \"inferred\",\n      \"growth_signal\": \"第二个公开空窗，与第一个对称；连续两段 3 年空窗 + 2025 密集复出构成其公开输出的节律特征，但节律成因无公开解释。\",\n      \"source\": {\n        \"title\": \"Project Zero Blog Archive（全量核对未见 Horn byline，2022-03 至 2025-08）\",\n        \"url\": \"https://projectzero.google/archive.html\",\n        \"published\": \"2022-2025\",\n        \"source_type\": \"P0 归档页（负面证据）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-12-msg-oob\",\n      \"date\": \"2025-08-08\",\n      \"claim\": \"《From Chrome renderer code exec to kernel with MSG_OOB》发布：Linux ≥6.9 的 MSG_OOB（UNIX 域套接字带外数据）UAF，可从 Chrome renderer 沙箱达内核并完整利用。CVE-2025-38236。引入 bug 的 commit 为 93c99f21db36（2024 年中）。Horn 自述 2025 年 6 月初 review 新内核特性时发现。byline: Jann Horn。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"第二阶段密集输出开端；方向回归 Linux 内核利用 + Chrome 沙箱→内核链；确立“新技术特性 + 预期使用面 vs 实际暴露面错配”研究目标信号（MSG_OOB 几乎只在 Oracle 产品用，却在 Chrome renderer sandbox 暴露）。\",\n      \"source\": {\n        \"title\": \"From Chrome renderer code exec to kernel with MSG_OOB\",\n        \"url\": \"https://projectzero.google/2025/08/from-chrome-renderer-code-exec-to-kernel.html\",\n        \"published\": \"2025-08-08\",\n        \"source_type\": \"P0 博客（作者亲笔）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-13-pointer-leaks\",\n      \"date\": \"2025-09-26\",\n      \"claim\": \"《Pointer leaks through pointer-keyed data structures》发布：无内存安全违规、无时序攻击下远程泄漏指针；攻击者数据被反序列化入指针键数据结构再序列化返回时泄漏。实测 macOS NSKeyedArchiver，用中国剩余定理（CRT）数学化推导完整 64-bit 指针恢复。无 CVE。Horn 自述因未证明 real-world impact 而未进 P0 bugtracker，私下报告 Apple；Apple 2025-03-31 安全发布修复。byline: Jann Horn。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"新型逻辑型信息泄漏范式，区别于 Spectre/Meltdown 侧信道；披露决策体现 impact-gating：未证明 impact 的 bug 不进 bugtracker，绕开 P0 90 天起算点——这是 P0 政策未明文授权的判断空间，言行一致性缺口。\",\n      \"source\": {\n        \"title\": \"Pointer leaks through pointer-keyed data structures\",\n        \"url\": \"https://projectzero.google/2025/09/pointer-leaks-through-pointer-keyed.html\",\n        \"published\": \"2025-09-26\",\n        \"source_type\": \"P0 博客（作者亲笔）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-14-virtualbox-draft\",\n      \"date\": \"2025-12-16\",\n      \"claim\": \"《Thinking Outside The Box [dusted off draft from 2017]》发布：补发 2017 年初撰写的 VirtualBox VM→宿主用户态进程逃逸草稿（CVE-2017-3558，P0 issue #1086）。Slirp NAT 代码 ip_input() 用 IP 头不可信 ip_len 覆盖可信 m_len，致堆泄漏与堆破坏，逃逸 VM 经 system() 在宿主执行命令。Horn 自述从未写完下半部分（issue #1091，host userspace→host kernel），发布时仅“very lightly edited”。byline: Jann Horn。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"写作完成度优先于时间新鲜度的硬约束——宁可拖延 8 年也不发布半截技术故事；属补发历史研究非新方向，但确认其虚拟化逃逸研究脉络长期延续。漏洞修复(2017)与博文发布(2025)解耦，不构成披露违规因漏洞已 CVE 化。\",\n      \"source\": {\n        \"title\": \"Thinking Outside The Box [dusted off draft from 2017]\",\n        \"url\": \"https://projectzero.google/2025/12/thinking-outside-the-box.html\",\n        \"published\": \"2025-12-16\",\n        \"source_type\": \"P0 博客（作者亲笔）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"jh-tl-15-2026-no-new-post\",\n      \"date\": \"2026\",\n      \"claim\": \"截至 seed 调研时（2026-05-13 全量核对），P0 2026 已发布 9 篇博文（Pixel 10 利用链、Mutational Grammar Fuzzing、Windows GPHFH、Windows 管理员保护绕过、Sound Barrier Part II、Pixel 9 0-click 三部曲等）均无 Horn 署名。本节点未对 2026 archive 重新抓取核对，沿用 seed 结论。\",\n      \"status\": \"inferred\",\n      \"growth_signal\": \"2025 密集输出后再次进入观察期；是否进入第三个公开空窗尚需后续 archive 核对，不应据有限观察断言“研究停滞”。\",\n      \"source\": {\n        \"title\": \"Project Zero Blog Archive（2026 全量核对，seed）\",\n        \"url\": \"https://projectzero.google/archive.html\",\n        \"published\": \"2026\",\n        \"source_type\": \"P0 归档页（负面证据，seed）\",\n        \"level\": \"lead_only\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"教育/CTF 背景两组说法互斥且均无一手 URL 证实：seed 04-external-views.md 记“Saarland University / ToastERS CTF”（自述来自 WebSearch 综合，未获一手 URL）；seed 05-decisions.md 另记 WebSearch 训练数据复述“TU Berlin / Shellphish CTF / 加入 P0 前在 Cure53 工作”。本节点 WebSearch 仅返回摘要复述，CTFtime 试探 URL 4049 命中无关队伍 EPICLYONS，未能以一手来源裁决任一说法。Wikipedia「Google Project Zero」词条对成员教育背景无任何记载。两条互斥说法均不写入 items。\",\n    \"CVE 归属在 seed 内部存在混淆：seed 06-timeline.md 年表脚注曾把 2019-01 TLB 帖标为 CVE-2018-17182，而一手抓取确认 2019-01 TLB 帖真实 CVE 为 CVE-2018-18281；CVE-2018-17182 实属 2018-09 cache invalidation 帖。两个独立 CVE 经一手正名，本输出按一手抓取为准。\",\n    \"Spectre/Meltdown 报告→公开间隔约 216 天，远超 P0 标准 90 天（2020 版为 90+14 上限 104 天）。P0 政策文本仅含“extreme circumstances”弹性条款与“mutual agreement”早披露通道，无明确条款解释 7 个月延期。Horn 本人在披露博文中完全不提及 90 天政策或披露决策，社区对此“沉默接受”——这是言行一致性最大未解冲突，非日期冲突。\"\n  ],\n  \"gaps\": [\n    \"pre-P0 教育背景 unverifiable：Saarland University / ToastERS CTF（04-external-views 综合）与 TU Berlin / Shellphish / Cure53（05-decisions 复述）互斥，均无一手 URL 证实，本节点 WebSearch/CTFtime 试探亦未获一手证据。不采信任何具体大学/战队/雇前雇主。\",\n    \"Horn 加入 P0 的精确月份未知；仅能确认不晚于 2016-06-20（首篇博文下界）。\",\n    \"2019-01 至 2022-03、2022-03 至 2025-08 两段约 3 年公开空窗期的内部工作内容（内部 0day RCA、内核加固倡议或转向非公开研究）均未由一手来源核实，不应臆测。\",\n    \"会议演讲年表整体缺失：Black Hat / USENIX Security 官网对自动化抓取返回 403，CCC media 搜索未扫完全部页码；seed 已记此缺口，本节点未再投入预算重抓，沿用为缺口。\",\n    \"2026 P0 archive 全量未由本节点重新抓取核对，“2026 无 Horn 署名新博文”沿用 seed 截至 2026-05-13 的全量核对结论，列为 lead_only/inferred，待后续一手 archive 核对。\",\n    \"Horn 个人 X/Twitter 账号（person_json.social 给出 https://x.com/tehjh）未由本节点抓取核实，仅作 lead。\",\n    \"seed 称 Horn GitHub 用户 thejh 关联 @google 并列 2025-2026 仓库更新（2025-07 linux fork 与 2025-08 MSG_OOB 时间吻合）；本节点未对 GitHub API 重新抓取核对，仅作 lead_only。\",\n    \"P0 issue tracker（bugs.chromium.org，issue 1272/836/1086/1091/2247 等）的原始披露时间线细节未由本节点逐条抓取核对；items 中 issue 编号引自一手博文内链接，但 tracker 条目本身未独立抓取。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "941bbe6d8d37783ac6289598bd524df5283b40bfd07ea590ea2c81776d9f326a",
+        "accessed_at": "2026-09-26T13:46:32.918206+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790430392918248000-jann-horn-timeline.json",
+    "label": "Jann Horn:timeline",
+    "elapsed_seconds": 309.4,
+    "prompt_sha256": "83638703b53f047aeba7ab02215e1d2037691b1125ded300f368c15ed1fb7f31",
+    "num_turns": 28,
+    "total_cost_usd": 1.127305,
+    "usage": {
+      "input_tokens": 66479,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 485248,
+      "output_tokens": 10726,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 73753,
+        "outputTokens": 17164,
+        "cacheReadInputTokens": 658880,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.127305,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

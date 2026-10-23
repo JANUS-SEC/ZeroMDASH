@@ -1,0 +1,283 @@
+{
+  "person": "Thijs Alkemade",
+  "expertise": [
+    "XMPP 协议安全审计（联邦认证、dialback、服务端存档与端到端加密协调）",
+    "消息客户端插件开发与协议扩展实现（Adium，Objective-C/C）",
+    "Apple 平台 TLS 库（SecureTransport）实现审计",
+    "Haskell 自建工具链（静态站点生成器 Hakyll、GHC 镜像）"
+  ],
+  "stages": [
+    {
+      "period": "范围声明：本轨迹仅覆盖 2011–2016 年 XMPP 时期前置阶段。person_json 声明的主方向『macOS 与消息应用漏洞』（2016 年后 macOS/iMessage）一手 writeup 未取得（sector7.computest.nl TLS 校验失败、DEFION 博客无本人署名、web.archive.org 抓取被拒），故 stages 不构成完整成长弧，2016 年后阶段为资料缺口。",
+      "stage": "范围声明（前置）",
+      "capability_change": "下述阶段均为 2016 年前可核验的 XMPP 时期前置，无法据一手材料延伸至主方向时期。",
+      "evidence_ids": [
+        "thijs-alkemade-ext-001",
+        "thijs-alkemade-ext-002",
+        "TA-TL-01",
+        "TA-TL-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2011–2012",
+      "stage": "消息客户端插件工程基线",
+      "capability_change": "在 Adium（OS X 多协议即时消息客户端）平台以 Objective-C/C 开发第三方插件（基于 Colloquy ChatCore 的 IRC 插件 IRC--、Steam 协议插件 Steamium），建立对消息客户端协议处理与扩展机制的工程经验，构成后续消息系统安全研究的领域知识基础。",
+      "evidence_ids": [
+        "ta-dec-04",
+        "ta-works-07",
+        "ta-community-01-github-messaging-contrib"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2014–2015（并发转折：约 2013–2015 由 Adium/xmpp.net 工程角色转入 Computest Sector 7 安全研究，推断区间，与本期写作期重叠，非晚于本期的后续阶段）",
+      "stage": "由客户端工程转向协议层安全写作",
+      "capability_change": "研究姿态由实现转为攻击/审计：研究对象仍为消息系统，但视角转向协议层缺陷。2014-06 针对苹果 SecureTransport（CVE-2014-1361）的 TLS 库实现缺陷写作；2014-08 将 CRIME/BREACH 类攻击迁移到 XMPP 场景；2015-04 指出 libcurl/glibc 在 locale 设置下的输入编码校验缺失。研究选题跨协议，但关注点始终为输入边界与协议层校验缺陷模式。约 2013–2015 年间由 Adium 首席开发者/xmpp.net 创建者转入 Computest Sector 7 安全研究，转折本身为推断（触发事件、具体年份、雇主更替流程无一手记载），其性质是以既有领域知识为基底的方向迁移而非断点跳转。",
+      "evidence_ids": [
+        "ta-works-01",
+        "ta-works-02",
+        "ta-works-04",
+        "ta-dec-01",
+        "ta-dec-03"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2015–2016",
+      "stage": "XMPP 协议层安全研究的串行产出期",
+      "capability_change": "围绕 XMPP/TLS/密码学实现形成连续公开写作：2015-01《Multi-end to multi-end encryption》分析服务端存档（XEP-0313 MAM）与端到端加密（OTR）的目标冲突并提出 Axolotl/TextSecure 方案；2015-12《Common DH groups》响应 Logjam 攻击编目常见 Diffie-Hellman 参数组以更新 xmpp.net 扫描项目；2016-01《The Wrong Number Attack》发现 Prosody/ejabberd/Openfire 三款 XMPP 服务端 dialback 密钥生成使用非密码学安全 PRNG，并逐实现给出修复版本。从单点 CVE 分析发展为对一个协议族的持续、递进式钻研。",
+      "evidence_ids": [
+        "ta-rr1-multi-end-encryption",
+        "ta-works-05",
+        "ta-community-02-blog-xmpp-standards",
+        "ta-community-03-blog-logjam-weakdh",
+        "ta-rr1-wrong-number-attack",
+        "ta-dec-03"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "以消息客户端协议实现经验为基底转入同领域安全审计",
+      "starting_conditions": "2011–2012 年以 Objective-C/C 维护 Adium 消息客户端插件（IRC--、Steamium），并以 GitHub 用户 xnyhps 向 luasec、ghc 贡献或 fork，置 Netherlands；具备消息客户端协议处理与扩展机制的工程经验。",
+      "repeated_practice": "在已熟悉的消息协议栈（XMPP/Adium）上由实现者视角转向攻击/审计者视角：研究对象不变，研究姿态由『实现协议扩展』转为『审计协议缺陷』。",
+      "feedback": "阶段反馈来源为公开写作与开源贡献的公开可核验痕迹（GitHub 仓库时间序列、Pull Shark x2 徽章、博客署名）；无显式导师或同伴反馈的一手记载（conversations 维度 items 为空）。",
+      "intermediate_capability": "形成对消息系统协议处理代码的结构性理解，使其能在消息应用与协议栈中定位解析器/认证机制缺陷而非停留于应用层使用。",
+      "observed_outcomes": [
+        "2015–2016 围绕 XMPP 协议层（联邦认证 dialback、服务端存档与端到端加密协调、DH 参数编目）形成串行公开写作。",
+        "由 Adium/xmpp.net 工程角色转入 Computest Sector 7 安全研究（转折本身为推断，与写作期重叠）。"
+      ],
+      "evidence_ids": [
+        "ta-dec-04",
+        "ta-works-07",
+        "ta-community-01-github-messaging-contrib",
+        "ta-dec-01",
+        "ta-dec-03",
+        "ta-rr1-multi-end-encryption",
+        "ta-rr1-wrong-number-attack"
+      ],
+      "validation_tests": [
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "方向迁移本身缺乏一手记载（约 2013–2015 推断区间，触发事件与雇主更替流程未记载），不排除是组织招聘路径自然引导而非个人能力驱动的可迁移机制；GitHub 工程经验与后续协议安全写作的因果关联为时间先后推断而非直接证据。"
+    },
+    {
+      "name": "单点发现外推为跨实现横向审计",
+      "starting_conditions": "在 XMPP 协议安全研究方向上已具备单实现 CVE/缺陷分析能力（2014 SecureTransport、2014 CRIME/BREACH→XMPP 迁移、2015 输入编码校验）。",
+      "repeated_practice": "在《The Wrong Number Attack》中，作者自述由 Prosody 单实现发现外推至其他实现：『After I reported this, I wondered how it would work in servers that support clustering, so I looked over the ejabberd source code.』与『But then I wondered about the other implementations out there, so I checked out Openfire.』，最终一次审计覆盖 Prosody、ejabberd、Openfire、Tigase 四个服务端并逐实现给出修复版本。",
+      "feedback": "反馈来源为各服务端的修复版本与是否遵循 XEP-0185 的对照结果（Prosody 0.9.9、ejabberd 16.01、Openfire 4.0.0 需修复；Tigase 使用 CSPRNG 并遵循 XEP-0185 无需修复）。",
+      "intermediate_capability": "形成『以一个实现的缺陷模式为假设，逐一审查同类实现是否复现该模式』的横向审计方法，而非孤立完成单点发现。",
+      "observed_outcomes": [
+        "《The Wrong Number Attack》一次审计覆盖四个 XMPP 服务端实现并给出逐实现修复版本。"
+      ],
+      "evidence_ids": [
+        "ta-rr1-wrong-number-attack"
+      ],
+      "validation_tests": [
+        "generative"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "跨实现横向审计的一手可核验实例仅此一次（一次审计覆盖四个服务端），无第二处确属横向审计的实例被一手抓取，故为单一可核验实例而非稳定可重复机制；ta-rr1-multi-end-encryption 为协议设计层张力分析（服务端存档 vs 端到端加密目标冲突），非跨实现横向审计方法的重复。"
+    },
+    {
+      "name": "以自建扫描/发布工具为仪器的事件响应式写作",
+      "starting_conditions": "维护 xmpp.net 扫描项目与个人博客发布渠道，并有 Haskell 工具栈偏好（GitHub fork luasec/ghc 镜像）。",
+      "repeated_practice": "在公开安全事件（Logjam）发生同年即产出呼应性实证写作（《Common DH groups》编目常见 DH 参数组），并以更新 xmpp.net 扫描项目为目的；同时自维护发布工具链（将博客由 Octopress/Ruby 迁移到 Hakyll/Haskell）。",
+      "feedback": "反馈来源为外部公开安全事件（Logjam/weakdh.org）的触发；发布工具链反馈为维护成本与语言偏好（作者自述 Ruby/gem 工具链反复破坏可维护性、不愿为此学习 Ruby 生态）。",
+      "intermediate_capability": "形成『外部新攻击出现→更新自有扫描能力→产出数据写作』的研究模式，以及以自维护、可审计工具链维护发布渠道的习惯。",
+      "observed_outcomes": [
+        "《Common DH groups》响应 Logjam 攻击并编目 DH 参数以更新 xmpp.net 扫描项目（事件响应式安全写作的一手可核验实例）。"
+      ],
+      "evidence_ids": [
+        "ta-works-05",
+        "ta-community-03-blog-logjam-weakdh"
+      ],
+      "validation_tests": [
+        "generative"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "事件响应式安全写作的一手可核验实例仅 Common DH groups 一例，为单一可核验实例而非稳定可重复机制；ta-works-08/ta-dec-02（Hakyll 迁移）为发布工具链变更，仅用于支撑『自维护发布工具链』子主张，不计入事件响应式安全写作 observed_outcomes，与该机制自身定位单一可核验实例不矛盾。"
+    }
+  ],
+  "tensions": [
+    "person_json 声明主方向为『macOS 与消息应用漏洞』，但一手可考证材料（blog.thijsalkema.de 2015-01 至 2016-01 全部博文）均围绕 XMPP 协议安全，未涉及 macOS/iMessage；二者并非必然矛盾，可能反映 Sector 7 时期（晚于 2016）焦点转移，但 sector7.computest.nl 因 TLS 证书校验失败未能抓取，无法用一手 writeup 证实 macOS/iMessage 焦点的存在与时点。",
+    "person_json 将 selected_conference_evidence 记为『Black Hat EU / POC』，但 WebSearch 摘要转述指向 Black Hat USA 2021/2022，合讲人表述亦不一致（Luca Moro 与 Daan Keuper/Gijs Besseling 两说），且一手议程页（blackhat.com 返回 403）缺失下无法裁决，存在会议地点与年份的潜在不一致。",
+    "SecureTransport CVE-2014-1361 为 Apple 平台 TLS 库实现缺陷，与 person_json 声明的『macOS 与消息应用漏洞』（iMessage 等）主方向非同一主题，不得据 SecureTransport 文覆盖主方向。",
+    "由 Adium/xmpp.net 工程角色转入 Computest Sector 7 安全研究的具体年份、触发事件与雇主更替流程无一手记载，仅能推断落在约 2013–2015 区间，转折性质为推断而非证实。"
+  ],
+  "transferable_practices": [
+    "将一个实现中确认的缺陷模式作为假设，逐一审查同类实现是否复现该模式，并为每个实现给出修复状态对照（如《The Wrong Number Attack》覆盖 Prosody/ejabberd/Openfire/Tigase 四服务端）。",
+    "在外部公开安全事件（如 Logjam）发生同年即产出呼应性实证写作，将事件响应转化为自有工具/扫描项目的数据更新。",
+    "以已熟悉的协议栈工程经验为基底，在同领域内由实现者视角转向审计者视角，而非跨入完全陌生的系统。"
+  ],
+  "non_transferable_conditions": [
+    "2011–2012 年 Adium 平台 Objective-C 插件开发经验为消息客户端协议处理的特定前置，非本研究方向外他人可径直复用的通用能力。",
+    "Computest Sector 7（后 DEFION Security）组织职位提供的研究员身份与披露渠道为组织资源，非个人可迁移条件；该组织博客当前已迁移至 defion.security 且未显示本人署名条目，渠道连续性中断。",
+    "xmpp.net 扫描项目的具体贡献角色（作者/维护者/参与者）与时间线未单独抓取确认，仅 2015-12-28 文章提及为更新该项目而编目 DH 参数，工具资产归属与协作关系不明。",
+    "Haskell/GHC 工具栈偏好为个人特有条件，其博客用 Hakyll 自建静态站点生成器而非沿用现成框架，属个人工程习惯不可径直迁移。"
+  ],
+  "open_questions": [
+    "iMessage/macOS 主方向（person_json primary_focus，2016 年后）一手 writeup 未取得：sector7.computest.nl TLS 校验失败、DEFION 博客无本人署名条目、web.archive.org 抓取被拒，2016 年后是否及如何由 XMPP 协议安全迁移到 macOS/iMessage 攻击面无一手材料。",
+    "Black Hat EU / POC 演讲的具体届次、年份、标题与合讲人未取到一手议程页（blackhat.com 返回 403），会议维度证据只能作 lead_only。",
+    "由 Adium 首席开发者/xmpp.net 创建者转入 Computest Sector 7 安全研究的具体年份、触发事件与雇主更替流程无一手记载。",
+    "教育背景、导师或同伴关系、重复练习机制、披露→修复反馈闭环在已取一手材料中无记载；conversations 维度 items 为空，缺少本人对入门、学习、失败与转折的自述。",
+    "handle xnyhps 与 Thijs Alkemade 本名的绑定未一手交叉验证，仅基于 person_json 与站点重定向/组织脉络间接自洽。",
+    "Pwn2Own / OBTS 协作（与 Daan Keuper、Gijs Besseling）及 Black Hat 合讲（与 Luca Moro）均无一手页面证实，参赛年份、项目、结果与合讲关系未确认。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thijs-alkemade-synthesis-v2-20260927-224701-363",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790520842483670000-thijs-alkemade-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "9b23139c-9d44-4ec3-9fe6-f40146266d92",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_3a6jsnrpfcwzf556089ukl5c",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thijs-alkemade-synthesis-v2-20260927-224701-363/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T14:54:02.538406+00:00"
+      },
+      {
+        "tool_use_id": "call_r8tq2qjnaqrp4epij7jllg2i",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thijs-alkemade-synthesis-v2-20260927-224701-363/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T14:54:02.538451+00:00"
+      },
+      {
+        "tool_use_id": "call_aylp45y5vluxh1mdkyfi1e6s",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thijs-alkemade-synthesis-v2-20260927-224701-363/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "ab5a0e1fbdeffc67c3d1269b5d51774b8566dc4701ddb8f0c1040ba9d2fe9c79",
+        "accessed_at": "2026-09-27T14:54:02.538461+00:00"
+      },
+      {
+        "tool_use_id": "call_ygw08ne4luhan8nj278co5n5",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thijs-alkemade-synthesis-v2-20260927-224701-363/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "8eb1c6439519c6a752e6e9f61f55315fb6f7a4887d78ca6fc5bd0a2e8c5eeee9",
+        "accessed_at": "2026-09-27T14:54:02.538470+00:00"
+      },
+      {
+        "tool_use_id": "call_l99dyov5xue2p11pmi28f7na",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thijs-alkemade-synthesis-v2-20260927-224701-363/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "392ae8298e6b4918e093f4e64d989abb915345db445b396ce61386524798db69",
+        "accessed_at": "2026-09-27T14:54:02.538535+00:00"
+      },
+      {
+        "tool_use_id": "call_o47ubobjiicyc2ibo4pqcvsh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thijs-alkemade-synthesis-v2-20260927-224701-363/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "52aae853cca52fc45d0a92ecf53fff93e72f107b2bc7171b25c4b394ecc3014a",
+        "accessed_at": "2026-09-27T14:54:02.538589+00:00"
+      },
+      {
+        "tool_use_id": "call_yjscqqx6vj80gnx2jzat4yg2",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thijs-alkemade-synthesis-v2-20260927-224701-363/checkpoint.md",
+          "content": "# Checkpoint — Thijs Alkemade 综合 v2\n\n## 已读取\n- task.md、output.schema.json、inputs/person_json.json、inputs/evidence_json.json、inputs/revision_context.json（round 1 定向补证）。\n\n## 有效证据盘点（按 verified_in_run 与 status）\n- verified=true（可作主支撑）：ta-works-07、ta-community-01、ta-community-02、ta-community-03、ta-dec-01、ta-dec-03、ta-dec-04、TA-TL-01、TA-TL-02、TA-TL-03、thijs-alkemade-ext-001/002/003、ta-rr1-wrong-number-attack、ta-rr1-multi-end-encryption\n- verified=false 但未作废（可作辅助，须对冲）：ta-works-01、ta-works-02、ta-works-04、ta-works-05、ta-works-08、ta-dec-02、TA-TL-04、ta-community-04、ta-community-05\n- 作废（禁用）：ta-works-06、ta-works-03\n\n## 已落实的修订指令（round 1）\n- 机制2 evidence_ids 用 ta-rr1-wrong-number-attack 取代 ta-works-06；validation_tests=[\"generative\"]。\n- 相关阶段/机制用 ta-rr1-multi-end-encryption 取代 ta-works-03。\n- 机制3 validation_tests 去除 \"repeated\"；Hakyll 迁移仅用于\"自维护发布工具链\"子主张，不计入 observed_outcomes；定位为单一可核验实例；confidence=low。\n- Sector 7 转入作为与 2014–2016 写作期重叠的并发推断转折（stage 排序前置且 period 显式标注重叠），非后续阶段。\n- expertise[2] 限缩为 SecureTransport 实现审计，显式声明 iMessage/macOS 主方向为 person_json 声明且未取得一手 writeup。\n- stages 起首增加范围声明：仅覆盖 2011–2016 XMPP 前置期，不构成完整成长弧。\n\n## 未闭合缺口（保留为 open_questions / tensions）\n- iMessage/macOS 主方向（person_json primary_focus，2016 年后）一手 writeup 未取得（sector7 TLS 失败、DEFION 博客无署名、web.archive.org 抓取被拒）。\n- Sector 7 转入具体年份/触发事件/雇主更替流程无一手记载。\n- Black Hat EU / POC 议程页 403，届次/年份/标题/合讲人未证实；person_json 与 WebSearch 摘要在会议地点与合讲人上不一致。\n- 教育背景、导师/同伴、重复练习与反馈机制在已取材料中无记载；conversations 维度 items 为空。\n- handle xnyhps 与本名绑定未一手交叉验证。\n\n## 状态\n准备写入 output.json。\n"
+        },
+        "success": true,
+        "content_sha256": "839fbbdcdab98330a723d21f256fbdff592f7753c91a985e3b38714575cedb20",
+        "accessed_at": "2026-09-27T14:54:02.539375+00:00"
+      },
+      {
+        "tool_use_id": "call_u1p6iqvhff4gu3z5g086kqb1",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/thijs-alkemade-synthesis-v2-20260927-224701-363/output.json",
+          "content": "{\n  \"person\": \"Thijs Alkemade\",\n  \"expertise\": [\n    \"XMPP 协议安全审计（联邦认证、dialback、服务端存档与端到端加密协调）\",\n    \"消息客户端插件开发与协议扩展实现（Adium，Objective-C/C）\",\n    \"Apple 平台 TLS 库（SecureTransport）实现审计\",\n    \"Haskell 自建工具链（静态站点生成器 Hakyll、GHC 镜像）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"范围声明：本轨迹仅覆盖 2011–2016 年 XMPP 时期前置阶段。person_json 声明的主方向『macOS 与消息应用漏洞』（2016 年后 macOS/iMessage）一手 writeup 未取得（sector7.computest.nl TLS 校验失败、DEFION 博客无本人署名、web.archive.org 抓取被拒），故 stages 不构成完整成长弧，2016 年后阶段为资料缺口。\",\n      \"stage\": \"范围声明（前置）\",\n      \"capability_change\": \"下述阶段均为 2016 年前可核验的 XMPP 时期前置，无法据一手材料延伸至主方向时期。\",\n      \"evidence_ids\": [\n        \"thijs-alkemade-ext-001\",\n        \"thijs-alkemade-ext-002\",\n        \"TA-TL-01\",\n        \"TA-TL-02\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2011–2012\",\n      \"stage\": \"消息客户端插件工程基线\",\n      \"capability_change\": \"在 Adium（OS X 多协议即时消息客户端）平台以 Objective-C/C 开发第三方插件（基于 Colloquy ChatCore 的 IRC 插件 IRC--、Steam 协议插件 Steamium），建立对消息客户端协议处理与扩展机制的工程经验，构成后续消息系统安全研究的领域知识基础。\",\n      \"evidence_ids\": [\n        \"ta-dec-04\",\n        \"ta-works-07\",\n        \"ta-community-01-github-messaging-contrib\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2014–2015（并发转折：约 2013–2015 由 Adium/xmpp.net 工程角色转入 Computest Sector 7 安全研究，推断区间，与本期写作期重叠，非晚于本期的后续阶段）\",\n      \"stage\": \"由客户端工程转向协议层安全写作\",\n      \"capability_change\": \"研究姿态由实现转为攻击/审计：研究对象仍为消息系统，但视角转向协议层缺陷。2014-06 针对苹果 SecureTransport（CVE-2014-1361）的 TLS 库实现缺陷写作；2014-08 将 CRIME/BREACH 类攻击迁移到 XMPP 场景；2015-04 指出 libcurl/glibc 在 locale 设置下的输入编码校验缺失。研究选题跨协议，但关注点始终为输入边界与协议层校验缺陷模式。约 2013–2015 年间由 Adium 首席开发者/xmpp.net 创建者转入 Computest Sector 7 安全研究，转折本身为推断（触发事件、具体年份、雇主更替流程无一手记载），其性质是以既有领域知识为基底的方向迁移而非断点跳转。\",\n      \"evidence_ids\": [\n        \"ta-works-01\",\n        \"ta-works-02\",\n        \"ta-works-04\",\n        \"ta-dec-01\",\n        \"ta-dec-03\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2015–2016\",\n      \"stage\": \"XMPP 协议层安全研究的串行产出期\",\n      \"capability_change\": \"围绕 XMPP/TLS/密码学实现形成连续公开写作：2015-01《Multi-end to multi-end encryption》分析服务端存档（XEP-0313 MAM）与端到端加密（OTR）的目标冲突并提出 Axolotl/TextSecure 方案；2015-12《Common DH groups》响应 Logjam 攻击编目常见 Diffie-Hellman 参数组以更新 xmpp.net 扫描项目；2016-01《The Wrong Number Attack》发现 Prosody/ejabberd/Openfire 三款 XMPP 服务端 dialback 密钥生成使用非密码学安全 PRNG，并逐实现给出修复版本。从单点 CVE 分析发展为对一个协议族的持续、递进式钻研。\",\n      \"evidence_ids\": [\n        \"ta-rr1-multi-end-encryption\",\n        \"ta-works-05\",\n        \"ta-community-02-blog-xmpp-standards\",\n        \"ta-community-03-blog-logjam-weakdh\",\n        \"ta-rr1-wrong-number-attack\",\n        \"ta-dec-03\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"以消息客户端协议实现经验为基底转入同领域安全审计\",\n      \"starting_conditions\": \"2011–2012 年以 Objective-C/C 维护 Adium 消息客户端插件（IRC--、Steamium），并以 GitHub 用户 xnyhps 向 luasec、ghc 贡献或 fork，置 Netherlands；具备消息客户端协议处理与扩展机制的工程经验。\",\n      \"repeated_practice\": \"在已熟悉的消息协议栈（XMPP/Adium）上由实现者视角转向攻击/审计者视角：研究对象不变，研究姿态由『实现协议扩展』转为『审计协议缺陷』。\",\n      \"feedback\": \"阶段反馈来源为公开写作与开源贡献的公开可核验痕迹（GitHub 仓库时间序列、Pull Shark x2 徽章、博客署名）；无显式导师或同伴反馈的一手记载（conversations 维度 items 为空）。\",\n      \"intermediate_capability\": \"形成对消息系统协议处理代码的结构性理解，使其能在消息应用与协议栈中定位解析器/认证机制缺陷而非停留于应用层使用。\",\n      \"observed_outcomes\": [\n        \"2015–2016 围绕 XMPP 协议层（联邦认证 dialback、服务端存档与端到端加密协调、DH 参数编目）形成串行公开写作。\",\n        \"由 Adium/xmpp.net 工程角色转入 Computest Sector 7 安全研究（转折本身为推断，与写作期重叠）。\"\n      ],\n      \"evidence_ids\": [\n        \"ta-dec-04\",\n        \"ta-works-07\",\n        \"ta-community-01-github-messaging-contrib\",\n        \"ta-dec-01\",\n        \"ta-dec-03\",\n        \"ta-rr1-multi-end-encryption\",\n        \"ta-rr1-wrong-number-attack\"\n      ],\n      \"validation_tests\": [\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"方向迁移本身缺乏一手记载（约 2013–2015 推断区间，触发事件与雇主更替流程未记载），不排除是组织招聘路径自然引导而非个人能力驱动的可迁移机制；GitHub 工程经验与后续协议安全写作的因果关联为时间先后推断而非直接证据。\"\n    },\n    {\n      \"name\": \"单点发现外推为跨实现横向审计\",\n      \"starting_conditions\": \"在 XMPP 协议安全研究方向上已具备单实现 CVE/缺陷分析能力（2014 SecureTransport、2014 CRIME/BREACH→XMPP 迁移、2015 输入编码校验）。\",\n      \"repeated_practice\": \"在《The Wrong Number Attack》中，作者自述由 Prosody 单实现发现外推至其他实现：『After I reported this, I wondered how it would work in servers that support clustering, so I looked over the ejabberd source code.』与『But then I wondered about the other implementations out there, so I checked out Openfire.』，最终一次审计覆盖 Prosody、ejabberd、Openfire、Tigase 四个服务端并逐实现给出修复版本。\",\n      \"feedback\": \"反馈来源为各服务端的修复版本与是否遵循 XEP-0185 的对照结果（Prosody 0.9.9、ejabberd 16.01、Openfire 4.0.0 需修复；Tigase 使用 CSPRNG 并遵循 XEP-0185 无需修复）。\",\n      \"intermediate_capability\": \"形成『以一个实现的缺陷模式为假设，逐一审查同类实现是否复现该模式』的横向审计方法，而非孤立完成单点发现。\",\n      \"observed_outcomes\": [\n        \"《The Wrong Number Attack》一次审计覆盖四个 XMPP 服务端实现并给出逐实现修复版本。\"\n      ],\n      \"evidence_ids\": [\n        \"ta-rr1-wrong-number-attack\"\n      ],\n      \"validation_tests\": [\n        \"generative\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"跨实现横向审计的一手可核验实例仅此一次（一次审计覆盖四个服务端），无第二处确属横向审计的实例被一手抓取，故为单一可核验实例而非稳定可重复机制；ta-rr1-multi-end-encryption 为协议设计层张力分析（服务端存档 vs 端到端加密目标冲突），非跨实现横向审计方法的重复。\"\n    },\n    {\n      \"name\": \"以自建扫描/发布工具为仪器的事件响应式写作\",\n      \"starting_conditions\": \"维护 xmpp.net 扫描项目与个人博客发布渠道，并有 Haskell 工具栈偏好（GitHub fork luasec/ghc 镜像）。\",\n      \"repeated_practice\": \"在公开安全事件（Logjam）发生同年即产出呼应性实证写作（《Common DH groups》编目常见 DH 参数组），并以更新 xmpp.net 扫描项目为目的；同时自维护发布工具链（将博客由 Octopress/Ruby 迁移到 Hakyll/Haskell）。\",\n      \"feedback\": \"反馈来源为外部公开安全事件（Logjam/weakdh.org）的触发；发布工具链反馈为维护成本与语言偏好（作者自述 Ruby/gem 工具链反复破坏可维护性、不愿为此学习 Ruby 生态）。\",\n      \"intermediate_capability\": \"形成『外部新攻击出现→更新自有扫描能力→产出数据写作』的研究模式，以及以自维护、可审计工具链维护发布渠道的习惯。\",\n      \"observed_outcomes\": [\n        \"《Common DH groups》响应 Logjam 攻击并编目 DH 参数以更新 xmpp.net 扫描项目（事件响应式安全写作的一手可核验实例）。\"\n      ],\n      \"evidence_ids\": [\n        \"ta-works-05\",\n        \"ta-community-03-blog-logjam-weakdh\"\n      ],\n      \"validation_tests\": [\n        \"generative\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"事件响应式安全写作的一手可核验实例仅 Common DH groups 一例，为单一可核验实例而非稳定可重复机制；ta-works-08/ta-dec-02（Hakyll 迁移）为发布工具链变更，仅用于支撑『自维护发布工具链』子主张，不计入事件响应式安全写作 observed_outcomes，与该机制自身定位单一可核验实例不矛盾。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 声明主方向为『macOS 与消息应用漏洞』，但一手可考证材料（blog.thijsalkema.de 2015-01 至 2016-01 全部博文）均围绕 XMPP 协议安全，未涉及 macOS/iMessage；二者并非必然矛盾，可能反映 Sector 7 时期（晚于 2016）焦点转移，但 sector7.computest.nl 因 TLS 证书校验失败未能抓取，无法用一手 writeup 证实 macOS/iMessage 焦点的存在与时点。\",\n    \"person_json 将 selected_conference_evidence 记为『Black Hat EU / POC』，但 WebSearch 摘要转述指向 Black Hat USA 2021/2022，合讲人表述亦不一致（Luca Moro 与 Daan Keuper/Gijs Besseling 两说），且一手议程页（blackhat.com 返回 403）缺失下无法裁决，存在会议地点与年份的潜在不一致。\",\n    \"SecureTransport CVE-2014-1361 为 Apple 平台 TLS 库实现缺陷，与 person_json 声明的『macOS 与消息应用漏洞』（iMessage 等）主方向非同一主题，不得据 SecureTransport 文覆盖主方向。\",\n    \"由 Adium/xmpp.net 工程角色转入 Computest Sector 7 安全研究的具体年份、触发事件与雇主更替流程无一手记载，仅能推断落在约 2013–2015 区间，转折性质为推断而非证实。\"\n  ],\n  \"transferable_practices\": [\n    \"将一个实现中确认的缺陷模式作为假设，逐一审查同类实现是否复现该模式，并为每个实现给出修复状态对照（如《The Wrong Number Attack》覆盖 Prosody/ejabberd/Openfire/Tigase 四服务端）。\",\n    \"在外部公开安全事件（如 Logjam）发生同年即产出呼应性实证写作，将事件响应转化为自有工具/扫描项目的数据更新。\",\n    \"以已熟悉的协议栈工程经验为基底，在同领域内由实现者视角转向审计者视角，而非跨入完全陌生的系统。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"2011–2012 年 Adium 平台 Objective-C 插件开发经验为消息客户端协议处理的特定前置，非本研究方向外他人可径直复用的通用能力。\",\n    \"Computest Sector 7（后 DEFION Security）组织职位提供的研究员身份与披露渠道为组织资源，非个人可迁移条件；该组织博客当前已迁移至 defion.security 且未显示本人署名条目，渠道连续性中断。\",\n    \"xmpp.net 扫描项目的具体贡献角色（作者/维护者/参与者）与时间线未单独抓取确认，仅 2015-12-28 文章提及为更新该项目而编目 DH 参数，工具资产归属与协作关系不明。\",\n    \"Haskell/GHC 工具栈偏好为个人特有条件，其博客用 Hakyll 自建静态站点生成器而非沿用现成框架，属个人工程习惯不可径直迁移。\"\n  ],\n  \"open_questions\": [\n    \"iMessage/macOS 主方向（person_json primary_focus，2016 年后）一手 writeup 未取得：sector7.computest.nl TLS 校验失败、DEFION 博客无本人署名条目、web.archive.org 抓取被拒，2016 年后是否及如何由 XMPP 协议安全迁移到 macOS/iMessage 攻击面无一手材料。\",\n    \"Black Hat EU / POC 演讲的具体届次、年份、标题与合讲人未取到一手议程页（blackhat.com 返回 403），会议维度证据只能作 lead_only。\",\n    \"由 Adium 首席开发者/xmpp.net 创建者转入 Computest Sector 7 安全研究的具体年份、触发事件与雇主更替流程无一手记载。\",\n    \"教育背景、导师或同伴关系、重复练习机制、披露→修复反馈闭环在已取一手材料中无记载；conversations 维度 items 为空，缺少本人对入门、学习、失败与转折的自述。\",\n    \"handle xnyhps 与 Thijs Alkemade 本名的绑定未一手交叉验证，仅基于 person_json 与站点重定向/组织脉络间接自洽。\",\n    \"Pwn2Own / OBTS 协作（与 Daan Keuper、Gijs Besseling）及 Black Hat 合讲（与 Luca Moro）均无一手页面证实，参赛年份、项目、结果与合讲关系未确认。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "22b91971e65dd6c416c0517c2ab3062a1469620a48354159304bab68afef4e34",
+        "accessed_at": "2026-09-27T14:54:02.539382+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790520842539410000-thijs-alkemade-synthesis-v2.json",
+    "label": "Thijs Alkemade:synthesis:v2",
+    "elapsed_seconds": 421.32,
+    "prompt_sha256": "6c606c4365be418e2f440a0453f959fda1968b79fdf7b32c7c3187791f866400",
+    "num_turns": 9,
+    "total_cost_usd": 0.833441,
+    "usage": {
+      "input_tokens": 43270,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 106432,
+      "output_tokens": 22555,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 43270,
+        "outputTokens": 22555,
+        "cacheReadInputTokens": 106432,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.833441,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

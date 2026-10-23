@@ -1,0 +1,356 @@
+{
+  "person": "Alex Ionescu",
+  "expertise": [
+    "Windows 内核与平台漏洞研究",
+    "Windows 内核子系统结构（线程调度器、调度器、锁与 IRQL、HAL、executive、对象管理器、进程管理器、I/O 管理器、VDM/8086）",
+    "x64 体系结构与描述符表、调用门、LDT、GDT 滥用",
+    "Intel VT-x hypervisor 与 Hyper-V hypercall、模糊测试桥接",
+    "Windows 缓解机制（KASLR、PatchGuard、侧信道缓解 Meltdown/Spectre v2/Foreshadow）",
+    "Windows 动态追踪（ETW 事件回调、系统调用钩子、tracepoint）",
+    "Windows 容器与隔离边界（WDAG、Hyper-V Containers、Docker）",
+    "低层固件与接口（UEFI、WSL/LXSS、Apple SMC、Surface SAM）",
+    "Windows GUI 子系统（win32k.sys）安全"
+  ],
+  "stages": [
+    {
+      "period": "约2004–2006",
+      "stage": "ReactOS 内核贡献与多子系统重写",
+      "capability_change": "据本人 2007 年自述，约 2004 年加入 ReactOS，在前任内核负责人 David Welch 离开后重写线程调度器、调度器、锁与 IRQL 机制、HAL、executive、对象管理器、进程管理器、I/O 管理器、基础 VDM 与 8086 支持等关键子系统，指导两名 Google Summer of Code 学生，并将项目目标从 NT4 提升至 NT 5.2；由此形成对 NT 内核多子系统结构的整体把握（此为基于自述的推断）。2006-01 syscall.S 中 BadStack 函数的代码审计争议（Wikipedia 转述邮件列表，Hartmut Birr 指控源自 Windows 反汇编，Ionescu 辩称重新实现）逼迫其形成『重新实现 vs 复制粘贴』的论辩框架。",
+      "evidence_ids": [
+        "r1-community-reactos-rewrite",
+        "aionescu-tl-2006-01-reactos-audit",
+        "aionescu-ext-005"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2006–2007",
+      "stage": "开源贡献转向商业培训讲师与独立研究输出",
+      "capability_change": "2006-11 起持续在 alex-ionescu.com 发文，建立稳定的公开技术写作习惯。据本人自述，受聘 David Solomon 的 Expert Seminars 担任 Windows Internals 讲师（Mark Russinovich 转 Microsoft 后由其接替），因与微软员工及资源接触增多、加之 Apple 实习，与 ReactOS 工作产生利益冲突而主动退出（documented，单一自述来源）。2007-08 发布 Purple Pill 工具，利用 ATI Vista x64 显卡驱动缺陷加载未签名驱动，发现 ATI 未被告知该缺陷后于 1 小时内主动下架工具与帖子，并以 responsible disclosure 为由允许 ATI 修复（documented，本人自述）。学生时期所在的 AMD/ATI Tech Team 获 CUTC 2007 Best Design Award（documented，本人博客）。",
+      "evidence_ids": [
+        "aionescu-tl-2006-11-blog-start",
+        "alex-community-08",
+        "r1-community-reactos-rewrite",
+        "r1-community-purple-pill",
+        "aionescu-ext-006",
+        "AI-conv-05"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2008–2015",
+      "stage": "权威参考书合著与原创漏洞研究产出",
+      "capability_change": "参与《Windows Internals》第六版（覆盖 Windows 7）写作，据自述该阶段同时兼顾大学、实习与个人关系造成严重延期与倦怠（documented，本人自述）。2008 Black Hat 演讲报告 win32k.sys 中四项缺陷，均为本地拒绝服务攻击，其中两项可从任意账户在 Vista SP0 及更早系统触发，另两项为需管理员权限的 NULL 指针解引用，并指出其中一项存在 user→kernel 提权风险（documented，本人自述）。2013 Recon 关于 Windows NT 内核 KASLR 信息泄露的演讲后，与若干微软同事分享幻灯片与演讲，被提示『expect some changes in Windows 8.1』，并评价微软内核安全团队工作；实际抓取正文引用同伴为 j00ru 与 wj32（documented，本人自述）。2015 Infiltrate 发表基于 AWE 的提权攻击，Recon 发表 HookingNirvana 议题并将幻灯片代码以同名 GitHub 仓库公开，形成『演讲—代码—可复现』输出闭环。",
+      "evidence_ids": [
+        "aionescu-tl-wininternals-6e-college",
+        "AI-conv-02",
+        "r1-community-blackhat2008-win32k",
+        "r1-community-kaslr-w81",
+        "aionescu-tl-2015-infiltrate-awe",
+        "aionescu-tl-2015-recon-hookingnirvana",
+        "aionescu-ext-003"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2016–2019 至今",
+      "stage": "版本化内核研究、工具建设与 hypervisor 模糊测试",
+      "capability_change": "重返《Windows Internals》第七版 Part 1 合著（覆盖 Windows 10），投入约 12 个月，使该版在系统发行后数周内出版（documented，本人自述与出版社页面）。写书副产物触发 call-gate 系列：审查 Windows 10 周年更新为支持 UMS 而强制 CR4[FSGSBASE] 时，重读 AMD 手册发现 x64 长模式下 FS/GS 数据段与 16 字节调用门描述符仍有效，且 PatchGuard 不监控 per-process LDT 条目，从而复活此前被认为已在 x64 移除的调用门 Ring0 执行技术（documented，本人自述）。公开输出由书籍写作转向会议演讲（reported，首页聚合自述）。2016 发布 SimpleVisor（最小可用 Intel VT-x hypervisor，显式声明非生产级），2017–2018 发布 SpecuCheck 检测 Meltdown/Spectre v2/Foreshadow 缓解状态，2018 分析 Windows 10 19H1 内核态 ETW 事件回调、系统调用钩子与 tracepoint 等动态追踪能力。2019 放弃近二十年 WDM 非 PnP 驱动写法，改用 WDF 构建 root-bus 枚举的 Hyper-V 模糊测试桥驱动。现任 CrowdStrike CTIO 与 Winsider Seminars & Solutions 总裁（reported，GitHub 自述，无雇主方独立确认）。",
+      "evidence_ids": [
+        "aionescu-decisions-001",
+        "aionescu-decisions-003",
+        "aionescu-decisions-004",
+        "aionescu-decisions-002",
+        "aionescu-decisions-005",
+        "aionescu-tl-2017-05-wininternals-7e-p1",
+        "aionescu-tl-2017-08-call-gates",
+        "aionescu-tl-2017-05-sysan360-containers",
+        "aionescu-tl-2017-06-recon-sam",
+        "ai-works-02",
+        "ai-works-06",
+        "ai-works-04",
+        "aionescu-tl-2017-2018-specucheck",
+        "aionescu-tl-2018-08-dynamic-tracing-19h1",
+        "aionescu-tl-2019-01-hyperv-bridge",
+        "r1-community-hyperv-part1",
+        "r1-community-hyperv-part2",
+        "aionescu-tl-present-ctio-crowdstrike",
+        "aionescu-ext-001",
+        "aionescu-ext-004",
+        "aionescu-ext-007",
+        "aionescu-ext-008",
+        "AI-conv-01",
+        "AI-conv-03"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "通过权威参考书合著的系统审阅产出技术发现",
+      "starting_conditions": "学生时期即获《Windows Internals》第六版合著席位，与 David Solomon（行业内部联系）、Mark Russinovich（逆向工程同伴）形成带教分工：据自述 Solomon 提供微软开发团队的内部联系与洞察，作者与 Russinovich 仅做逆向工程（documented，本人自述）。",
+      "repeated_practice": "跨第六版（覆盖 Windows 7）至第七版（覆盖 Windows 10）持续合著，第七版投入约 12 个月；写书过程中对系统结构进行连续审阅而非单点突破，并主动联系 Pavel Yosifovich 合作以承担单人难以完成的工作（documented，本人自述）。",
+      "feedback": "合著者变动反馈（Solomon 退休、Russinovich 转 Azure CTO）与发行时效压力；第七版被其他作者重组成 UWP/Kernel/Drivers 三部分后由其接管完成，需在 Windows 新版发行后数周内出版（documented，本人自述）。",
+      "intermediate_capability": "形成对 Windows 内核多子系统结构变化的系统化认知，使其能在写书副产物中识别遗留机制与新增强制功能。",
+      "observed_outcomes": [
+        "call-gate 系列源自第七版研究 UMS 时的副产物——审查 Windows 10 周年更新变化时注意到 CR4[FSGSBASE] 强制，重读 AMD 手册发现 x64 长模式下 LDT/call-gate 仍可用且 PatchGuard 不监控 per-process LDT（documented，本人自述）。",
+        "Windows 10 19H1 动态追踪机制（EtwRegisterEventCallback、KeSetSystemServiceCallback、KeSetTracepoint）的及时逆向记录（documented，本人自述）。"
+      ],
+      "evidence_ids": [
+        "AI-conv-01",
+        "AI-conv-03",
+        "aionescu-decisions-001",
+        "aionescu-decisions-003",
+        "aionescu-tl-2017-05-wininternals-7e-p1",
+        "aionescu-tl-2017-08-call-gates",
+        "ai-works-02",
+        "aionescu-tl-2018-08-dynamic-tracing-19h1",
+        "aionescu-tl-wininternals-6e-college"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "call-gate 发现可能更直接源于对 j00ru 与 Gynvael Coldwind 描述符表滥用论文的跟进，而非写书过程本身；但作者明确自述该发现来自第七版研究 UMS 的副产物（documented），故写书审阅作为能力来源成立，其与独立逆向研究的相对贡献无法分离。"
+    },
+    {
+      "name": "研究型工具的最小可用实现与公开发表",
+      "starting_conditions": "早期 ReactOS 多子系统重写形成从零实现内核子系统的工程能力（documented，本人自述）；2006-11 起持续公开博客输出的发表习惯（documented）。",
+      "repeated_practice": "跨 VT-x（SimpleVisor，2016，最小化汇编与最小 VMX 代码，显式声明非生产级）、侧信道缓解检测（SpecuCheck，2017–2018，针对 Meltdown/Spectre v2/Foreshadow）、Hyper-V 模糊测试桥（vtlbrdge.sys，2019，WDF root-enumerated 驱动）、Windows hooking（HookingNirvana，2015）等多技术栈自建配套工具并公开发表（documented）。",
+      "feedback": "同行引用与社区复用（SimpleVisor 约 2k stars，GitHub 2.2k followers）；Hyper-V 桥系列引用 hfiref0x 的 WinObjEx64 工具用于查看设备对象，并邀请 Azeria 协助制作图示，体现社区协作反馈；作者自述将在打磨完善后将完整工具发布到 GitHub，体现延迟-打磨的发表习惯（documented，本人自述）。",
+      "intermediate_capability": "形成『按需造工具→公开为可复用资产』的迭代能力，使其研究产出常以可发布工具形式固化，且工具栈随公开议题动态扩展。",
+      "observed_outcomes": [
+        "SimpleVisor 作为他人理解 VT-x 的最小基线，README 对比 HyperPlatform 的代码规模（documented）。",
+        "SpecuCheck 在侧信道漏洞爆发期快速放出缓解检测工具，覆盖 Meltdown/Spectre v2/Foreshadow（documented）。",
+        "Hyper-V 桥以系列教程形式把 hypervisor 内部接口暴露给模糊测试，并演示 HvlInvokeHypercall、HvCallGetVpIndexFromApicId 等 hypercall 用法（documented）。"
+      ],
+      "evidence_ids": [
+        "r1-community-reactos-rewrite",
+        "aionescu-tl-2006-11-blog-start",
+        "ai-works-06",
+        "ai-works-04",
+        "ai-works-07",
+        "aionescu-tl-2017-2018-specucheck",
+        "aionescu-tl-2019-01-hyperv-bridge",
+        "aionescu-tl-2015-recon-hookingnirvana",
+        "alex-community-08",
+        "r1-community-hyperv-part1",
+        "r1-community-hyperv-part2"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "工具建设可能源于商业培训（Winsider）与雇主（CrowdStrike）的产品化需求，而非纯粹研究取向；但 SimpleVisor、SpecuCheck 等仓库显式声明研究或教学用途且非生产级（documented），故研究型取向成立，商业需求的相对驱动无法分离。"
+    },
+    {
+      "name": "以负责任披露与厂商反馈为闭环的研究路径",
+      "starting_conditions": "2006 ReactOS 代码审计争议中形成的『重新实现 vs 复制粘贴』论辩框架（reported，Wikipedia 转述邮件列表）；早期持续公开输出习惯使其研究可见于厂商（documented）。",
+      "repeated_practice": "跨时期重复的负责任披露行为——2007 Purple Pill 发现 ATI 未被告知缺陷后于 1 小时内主动下架工具与帖子，并以 responsible disclosure 为由允许 ATI 修复，且指出该缺陷此前已在 Black Hat 公开披露（documented，本人自述）；2008 Black Hat 报告 win32k.sys 四项本地 DoS 缺陷（documented，本人自述）；2013 Recon KASLR 演讲后与微软同事分享幻灯片，被提示『expect some changes in Windows 8.1』（documented，本人自述）；2017 call-gates 明确声明非漏洞或 0day，而是 CPU、系统与 OS 内部结构的组合利用，并对照 j00ru 与 Gynvael Coldwind 的前置论文（documented，本人自述）。",
+      "feedback": "厂商修补对应关系主要为本人自述，缺少逐条 CVE 级可核验实体与 MSRC 端独立印证（资料缺口）；MSRC 在 Windows 10 周年更新堵住基于 LDT 的攻击向量为本人单向致谢，无 MSRC 端独立印证（documented，本人自述）。",
+      "intermediate_capability": "形成『研究→披露→厂商反馈→新机制研究』的闭环预期，使其能将厂商缓解演化作为后续研究输入。",
+      "observed_outcomes": [
+        "call-gates 将已被厂商缓解的旧机制（Windows 10 周年更新移除 LDT 支持、PatchGuard 在 LDTR 寄存器加检查）作为考古式研究对象，对照前置论文推进（documented，本人自述）。",
+        "KASLR Bypass Mitigations 评价微软内核安全团队工作（documented，本人自述）。注：round 1 已删除『Black Hat 2008 援引微软 Scott Field 2006 演讲』与『Protected Processes/KASLR 致谢 lilhoser/myriachan/msuiche』两项无法核证主张。"
+      ],
+      "evidence_ids": [
+        "aionescu-tl-2006-01-reactos-audit",
+        "aionescu-ext-005",
+        "r1-community-purple-pill",
+        "r1-community-blackhat2008-win32k",
+        "r1-community-kaslr-w81",
+        "aionescu-tl-2017-08-call-gates",
+        "ai-works-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "厂商反馈闭环可能是商业培训与雇主关系带来的副产品（受聘 Solomon Expert Seminars 后与微软员工接触增多，documented），而非刻意构建的研究方法；但 2007 Purple Pill 主动下架行为发生在该商业关系明确化之前，故负责任披露取向本身成立，商业关系对其闭环强度的放大无法分离。"
+    },
+    {
+      "name": "基于工程实践证据纠偏长期假设的方法论自省",
+      "starting_conditions": "第六版期间因同时兼顾大学、实习与人际关系而严重倦怠、造成延期，承认范围蔓延由自身所致（documented，本人自述）；近二十年 WDM 非 PnP 驱动写法形成的机械化技能（documented，本人自述）。",
+      "repeated_practice": "跨时期重复的自省与纠偏——第六版倦怠后第七版主动寻求 Pavel Yosifovich 合作并承认单人难以完成，把范围蔓延压缩到 12 个月以赶上 Windows 10 Redstone 2 发行窗口（documented，本人自述）；2019 一次周末驱动项目发现 WDF 可省 1500–4000 行 PnP 样板代码，从而纠正近二十年『WDM 优于 WDF』的错误假设（documented，本人自述）。",
+      "feedback": "自我承认会导致延期仍选择重返大型项目（documented，本人自述）；新工程证据（WDF 与 WDM 样板行数对比）推翻长期假设（documented，本人自述）。",
+      "intermediate_capability": "形成『以具体工程实践证据纠偏机械化技能与长期假设』的能力，使其方法不被既有路径锁定。",
+      "observed_outcomes": [
+        "第七版在 Windows 10 Redstone 2 发行后数周内出版（documented，本人自述与出版社页面）。",
+        "Hyper-V 桥采用 WDF root-enumerated 驱动，降低后续研究驱动的基础设施成本（documented，本人自述）。"
+      ],
+      "evidence_ids": [
+        "AI-conv-02",
+        "AI-conv-04",
+        "AI-conv-03",
+        "aionescu-decisions-001",
+        "aionescu-decisions-002",
+        "aionescu-tl-wininternals-6e-college",
+        "aionescu-tl-2019-01-hyperv-bridge",
+        "ai-works-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "方法论自省可能是事后叙事重构（博客为反思性写作），而非研究过程中的实时纠偏；但 WDF 迁移有具体工程证据（1500–4000 行样板对比）支撑，且第七版 12 个月周期可由出版时效核验，故纠偏行为本身成立，其过程中的实时性无法核证（资料缺口）。"
+    }
+  ],
+  "tensions": [
+    "ReactOS 2006 审计争议中涉案代码性质存在直接冲突：Ionescu 主张为重新实现、非复制粘贴，Hartmut Birr 主张源自 Windows 反汇编；Wikipedia 转述双方立场未裁定，原始邮件列表条目未在本次直接抓取（reported）。",
+    "person_json 将 ReactOS 列为其代表项目并隐含负责人色彩；维基 ReactOS 条目将项目协调人列为 Aleksey Bragin 与 Jason Filby，Ionescu 仅以代码贡献者出现，两份材料对其在 ReactOS 中地位表述不一致。",
+    "2019 年后博客公开输出显著减少甚至停滞（最后一条 2019-01-27），但 GitHub bio 显示其仍在 CrowdStrike 担任 CTIO，职业身份仍在演进，两者不能互相印证近 5 年的社区参与强度。",
+    "call-gates 作者明确声明『there is no 'vulnerability' or 'zero-day' presented here』（非漏洞或 0day），与其同时期向 infosec 会议圈转型、构思『Windows Design Flaw Garage Sale』历史缺陷披露演讲的取向存在张力——研究定位介于『内部结构组合利用』与『会议圈缺陷披露』之间。"
+  ],
+  "transferable_practices": [
+    "以权威参考书合著作为系统结构审阅的强制机制，将写书副产物转化为技术发现（M0）。",
+    "研究型工具采用最小可用实现并显式声明非生产级，与研究或教学用途绑定公开（M1）。",
+    "负责任披露行为标准化：发现厂商未被告知缺陷时主动下架工具并允许修复，以 Black Hat 等公开场合披露作为前置（M2）。",
+    "以具体工程实践证据（行数对比、周期数据）纠偏长期假设与机械化技能（M3）。",
+    "将演讲材料固化为公开代码仓库，形成『演讲—代码—可复现』输出闭环，便于同行复核与工具化复用。"
+  ],
+  "non_transferable_conditions": [
+    "学生时期即获《Windows Internals》合著席位及 Solomon/Russinovich 带教关系，依赖特定历史窗口与人际网络，不可复制（AI-conv-01）。",
+    "ReactOS 2004–2006 多子系统重写实践依赖项目当时缺乏内核负责人的空缺与 David Welch 离开的偶然机会（r1-community-reactos-rewrite）。",
+    "与微软员工及资源的接触增多源于受聘 David Solomon Expert Seminars 担任 Windows Internals 讲师这一特定商业关系，非一般研究者可复现（r1-community-reactos-rewrite）。",
+    "厂商反馈闭环的强度依赖其在 Windows 内核方向的长期公开足迹与培训业务，非一般研究者可复现。",
+    "近二十年 WDM 驱动写法积累是特定技术栈与时代的产物，其纠偏经验不可直接迁移至非 Windows 驱动栈。"
+  ],
+  "open_questions": [
+    "出生年份、国籍、学历（校名、专业、毕业年份）未见任何已抓取来源披露（unknown）。",
+    "ReactOS 加入与退出时间、具体提交数量未见公开记录；维基仅锁定 2006-01 单一争议事件，2007《A New Direction》自述退出但无项目方一手来源印证。",
+    "CrowdStrike 入职年份与 CTIO 晋升时间未见公开披露；GitHub bio 仅给出现任头衔；2019 年后近 5 年社区参与强度一手证据不足。",
+    "本人署名的具体 CVE 编号未见首页与 GitHub pinned 列出；厂商修补对应关系缺少逐条 CVE 级可核验实体与 MSRC 端独立印证。",
+    "Black Hat US/EU、BlueHat 演讲具体场次、年份、合讲者无主站一手列表与会议归档页可核证（person_json 列出但未落实为可核验条目）。",
+    "Scott Field 与 Black Hat 2006 交叉引用、lilhoser/myriachan/msuiche 在 Protected Processes 或 KASLR 文的致谢无法以一手来源核证（round 1 unresolved），已从主张中删除。",
+    "《Windows Internals》6e 精确出版日与 ISBN 级核对未完成；SimpleVisor、VisualUefi、lxss、vtlbrdge.sys、smctool 无确切首次发布日期。",
+    "早期入门年龄与最初学习路径无可核验一手叙述，现有自述覆盖职业中后期（conversations gap）。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-synthesis-v2-20260927-152158-735",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790494100864715000-alex-ionescu-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "f9930022-77ac-4f79-b73f-aeaaca4a8485",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_egqmtk38gddcaqtfauqew3jt",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-synthesis-v2-20260927-152158-735/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T07:28:20.924477+00:00"
+      },
+      {
+        "tool_use_id": "call_t10xs2tm1nujy4i9y6be3euk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-synthesis-v2-20260927-152158-735/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "d8f6e9459dff2d7f2b7ee3e1cbc81eeb9168eb9d0c7233704c824e6739e4f513",
+        "accessed_at": "2026-09-27T07:28:20.924520+00:00"
+      },
+      {
+        "tool_use_id": "call_8g2c5jqgjrgughnhvroz45p0",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-synthesis-v2-20260927-152158-735/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "14bcc223871484fdbfe070018c5ec7f339994c311f8e263baab4902cfa56ed0c",
+        "accessed_at": "2026-09-27T07:28:20.924529+00:00"
+      },
+      {
+        "tool_use_id": "call_d6bofn6irnbghjqlqj2znh66",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-synthesis-v2-20260927-152158-735/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "ee21b01acca53933b396bf6d23f21f9e5e6e10565c1484850ef7313efeac55c3",
+        "accessed_at": "2026-09-27T07:28:20.924614+00:00"
+      },
+      {
+        "tool_use_id": "call_wqnfqzxlgsdr0ioh2w3k1t7i",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-synthesis-v2-20260927-152158-735/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "d6e45fccab3cfc4ee54d9e3a3286c1ee99c21829044b887bf17119ac3f83dbb9",
+        "accessed_at": "2026-09-27T07:28:20.924683+00:00"
+      },
+      {
+        "tool_use_id": "call_q8fdmeofmqt7p32hqfzj1kqs",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-synthesis-v2-20260927-152158-735/checkpoint.md",
+          "content": "# Checkpoint — Alex Ionescu 综合分析 v2\n\n## 任务状态\n- 节点类型：综合分析（synthesis v2）。已读取 task.md、output.schema.json、inputs/person_json.json、inputs/evidence_json.json（六维全量）、inputs/revision_context.json（round 1 定向补证）。\n- 目标：重建领域能力成长过程（非成就罗列），每个主机制给出 起点条件→反复行为/练习→反馈来源→中间能力→后续可观察成果。\n\n## 证据有效性核对\n- invalid_evidence_ids（来自 revision_context，不得使用）：ai-works-03、ai-works-05、alex-community-01、alex-community-02、alex-community-03、alex-community-04、alex-community-05、alex-community-06、alex-community-07。\n- ai-works-01（verified_in_run=false，未作废但未抓取）：其\"Windows Internals 7th 合著过程\"主张已由 verified 的 AI-conv-01/02/03（同一博文，conversations 维度实际抓取）覆盖，故采用后者，不引用 ai-works-01。\n- 本次 output 中所有 stage/mechanism 的 evidence_ids 均为 verified_in_run=true 的有效条目（含 round 1 新增 r1-community-* 六条一手抓取）。\n\n## staging 设计（4 阶段）\n- Stage 0（约2004–2006）：ReactOS 内核多子系统重写。证据：r1-community-reactos-rewrite、aionescu-tl-2006-01-reactos-audit、aionescu-ext-005。\n- Stage 1（2006–2007）：从开源贡献转向商业培训讲师与独立研究。证据：aionescu-tl-2006-11-blog-start、alex-community-08、AI-conv-05、r1-community-reactos-rewrite、r1-community-purple-pill、aionescu-ext-006。\n- Stage 2（2008–2015）：权威参考书合著与原创漏洞研究产出。证据：AI-conv-02、aionescu-tl-wininternals-6e-college、r1-community-blackhat2008-win32k、r1-community-kaslr-w81、aionescu-tl-2015-infiltrate-awe、aionescu-tl-2015-recon-hookingnirvana、aionescu-ext-003。已按 round 1 指示将 2015 证据归入此阶段（非 stages[1]）。\n- Stage 3（2016–2019/至今）：版本化内核研究、工具建设与 hypervisor 接口模糊测试。证据：aionescu-decisions-001/002/003/004/005、AI-conv-01/03、aionescu-tl-2017-05-wininternals-7e-p1、aionescu-tl-2017-08-call-gates、ai-works-02、aionescu-tl-2017-05-sysan360-containers、aionescu-tl-2017-06-recon-sam、ai-works-06、aionescu-tl-2017-2018-specucheck、aionescu-tl-2018-08-dynamic-tracing-19h1、aionescu-tl-2019-01-hyperv-bridge、ai-works-04、r1-community-hyperv-part1/part2、aionescu-tl-present-ctio-crowdstrike、aionescu-ext-001/007/008。\n\n## mechanisms 设计（4 主机制，均满足\"跨材料/跨时期重复 + 解释多个结果 + 区分度\"中至少两项）\n- M0 通过权威参考书合著的系统审阅产出技术发现（按 round 1 去除\"引擎\"比喻）。validation: repeated/generative/distinctive。\n- M1 研究型工具的最小可用实现与公开发表。validation: repeated/distinctive。\n- M2 以负责任披露与厂商反馈为闭环的研究路径。validation: repeated/generative。已按 round 1 删除 Scott Field/Black Hat 2006 与 lilhoser/myriachan/msuiche 致谢两项无法核证主张；observed_outcomes 显式标注\"厂商修补对应关系主要为本人自述，缺少逐条 CVE 级可核验实体\"。\n- M3 基于工程实践证据纠偏长期假设的方法论自省。validation: repeated/distinctive。\n\n## 语言规范自检\n- 已去除\"引擎\"\"书箱\"\"重心迁移\"等比喻。\n- documented/reported/inferred/unknown 分开：ReactOS 多子系统重写=本人自述(documented)；2006 审计争议=Wikipedia 转述邮件列表(reported)；\"整体性把握\"等能力表述=(inferred)；早期入门年龄/学历等=(unknown，列入 open_questions)。\n- 无 anthropomorphism（不将工具/技术/组织写成有意志主体）。\n\n## 未解决项（写入 open_questions）\n- 出生年份、国籍、学历（校名/专业/毕业年份）缺失。\n- CrowdStrike 入职年份与 CTIO 晋升时间未见公开；2019 年后近 5 年社区参与强度一手证据不足。\n- 本人署名 CVE 编号未见；厂商修补对应关系缺少逐条 CVE 级可核验实体与 MSRC 端独立印证。\n- Black Hat US/EU、BlueHat 演讲具体场次/年份/合讲者无主站一手列表与会议归档页可核证。\n- Scott Field / Black Hat 2006 交叉引用与 lilhoser/myriachan/msuiche 致谢无法以一手来源核证，已从主张中删除。\n- 6e 精确出版日与 ISBN 级核对未完成；SimpleVisor/VisualUefi/lxss/vtlbrdge.sys/smctool 无确切首次发布日期。\n\n## 下一步\n完成 output.json（符合 output.schema.json，additionalProperties:false，不填写 _run/verification）。\n"
+        },
+        "success": true,
+        "content_sha256": "d95e61f4505bc69ff3930281a237c871f8825741213caa1c9880dc08bd0338f9",
+        "accessed_at": "2026-09-27T07:28:20.925174+00:00"
+      },
+      {
+        "tool_use_id": "call_1rzo9yxvaqp4mprov6i2zcfl",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-synthesis-v2-20260927-152158-735/output.json",
+          "content": "{\n  \"person\": \"Alex Ionescu\",\n  \"expertise\": [\n    \"Windows 内核与平台漏洞研究\",\n    \"Windows 内核子系统结构（线程调度器、调度器、锁与 IRQL、HAL、executive、对象管理器、进程管理器、I/O 管理器、VDM/8086）\",\n    \"x64 体系结构与描述符表、调用门、LDT、GDT 滥用\",\n    \"Intel VT-x hypervisor 与 Hyper-V hypercall、模糊测试桥接\",\n    \"Windows 缓解机制（KASLR、PatchGuard、侧信道缓解 Meltdown/Spectre v2/Foreshadow）\",\n    \"Windows 动态追踪（ETW 事件回调、系统调用钩子、tracepoint）\",\n    \"Windows 容器与隔离边界（WDAG、Hyper-V Containers、Docker）\",\n    \"低层固件与接口（UEFI、WSL/LXSS、Apple SMC、Surface SAM）\",\n    \"Windows GUI 子系统（win32k.sys）安全\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"约2004–2006\",\n      \"stage\": \"ReactOS 内核贡献与多子系统重写\",\n      \"capability_change\": \"据本人 2007 年自述，约 2004 年加入 ReactOS，在前任内核负责人 David Welch 离开后重写线程调度器、调度器、锁与 IRQL 机制、HAL、executive、对象管理器、进程管理器、I/O 管理器、基础 VDM 与 8086 支持等关键子系统，指导两名 Google Summer of Code 学生，并将项目目标从 NT4 提升至 NT 5.2；由此形成对 NT 内核多子系统结构的整体把握（此为基于自述的推断）。2006-01 syscall.S 中 BadStack 函数的代码审计争议（Wikipedia 转述邮件列表，Hartmut Birr 指控源自 Windows 反汇编，Ionescu 辩称重新实现）逼迫其形成『重新实现 vs 复制粘贴』的论辩框架。\",\n      \"evidence_ids\": [\n        \"r1-community-reactos-rewrite\",\n        \"aionescu-tl-2006-01-reactos-audit\",\n        \"aionescu-ext-005\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2006–2007\",\n      \"stage\": \"开源贡献转向商业培训讲师与独立研究输出\",\n      \"capability_change\": \"2006-11 起持续在 alex-ionescu.com 发文，建立稳定的公开技术写作习惯。据本人自述，受聘 David Solomon 的 Expert Seminars 担任 Windows Internals 讲师（Mark Russinovich 转 Microsoft 后由其接替），因与微软员工及资源接触增多、加之 Apple 实习，与 ReactOS 工作产生利益冲突而主动退出（documented，单一自述来源）。2007-08 发布 Purple Pill 工具，利用 ATI Vista x64 显卡驱动缺陷加载未签名驱动，发现 ATI 未被告知该缺陷后于 1 小时内主动下架工具与帖子，并以 responsible disclosure 为由允许 ATI 修复（documented，本人自述）。学生时期所在的 AMD/ATI Tech Team 获 CUTC 2007 Best Design Award（documented，本人博客）。\",\n      \"evidence_ids\": [\n        \"aionescu-tl-2006-11-blog-start\",\n        \"alex-community-08\",\n        \"r1-community-reactos-rewrite\",\n        \"r1-community-purple-pill\",\n        \"aionescu-ext-006\",\n        \"AI-conv-05\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2008–2015\",\n      \"stage\": \"权威参考书合著与原创漏洞研究产出\",\n      \"capability_change\": \"参与《Windows Internals》第六版（覆盖 Windows 7）写作，据自述该阶段同时兼顾大学、实习与个人关系造成严重延期与倦怠（documented，本人自述）。2008 Black Hat 演讲报告 win32k.sys 中四项缺陷，均为本地拒绝服务攻击，其中两项可从任意账户在 Vista SP0 及更早系统触发，另两项为需管理员权限的 NULL 指针解引用，并指出其中一项存在 user→kernel 提权风险（documented，本人自述）。2013 Recon 关于 Windows NT 内核 KASLR 信息泄露的演讲后，与若干微软同事分享幻灯片与演讲，被提示『expect some changes in Windows 8.1』，并评价微软内核安全团队工作；实际抓取正文引用同伴为 j00ru 与 wj32（documented，本人自述）。2015 Infiltrate 发表基于 AWE 的提权攻击，Recon 发表 HookingNirvana 议题并将幻灯片代码以同名 GitHub 仓库公开，形成『演讲—代码—可复现』输出闭环。\",\n      \"evidence_ids\": [\n        \"aionescu-tl-wininternals-6e-college\",\n        \"AI-conv-02\",\n        \"r1-community-blackhat2008-win32k\",\n        \"r1-community-kaslr-w81\",\n        \"aionescu-tl-2015-infiltrate-awe\",\n        \"aionescu-tl-2015-recon-hookingnirvana\",\n        \"aionescu-ext-003\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2016–2019 至今\",\n      \"stage\": \"版本化内核研究、工具建设与 hypervisor 模糊测试\",\n      \"capability_change\": \"重返《Windows Internals》第七版 Part 1 合著（覆盖 Windows 10），投入约 12 个月，使该版在系统发行后数周内出版（documented，本人自述与出版社页面）。写书副产物触发 call-gate 系列：审查 Windows 10 周年更新为支持 UMS 而强制 CR4[FSGSBASE] 时，重读 AMD 手册发现 x64 长模式下 FS/GS 数据段与 16 字节调用门描述符仍有效，且 PatchGuard 不监控 per-process LDT 条目，从而复活此前被认为已在 x64 移除的调用门 Ring0 执行技术（documented，本人自述）。公开输出由书籍写作转向会议演讲（reported，首页聚合自述）。2016 发布 SimpleVisor（最小可用 Intel VT-x hypervisor，显式声明非生产级），2017–2018 发布 SpecuCheck 检测 Meltdown/Spectre v2/Foreshadow 缓解状态，2018 分析 Windows 10 19H1 内核态 ETW 事件回调、系统调用钩子与 tracepoint 等动态追踪能力。2019 放弃近二十年 WDM 非 PnP 驱动写法，改用 WDF 构建 root-bus 枚举的 Hyper-V 模糊测试桥驱动。现任 CrowdStrike CTIO 与 Winsider Seminars & Solutions 总裁（reported，GitHub 自述，无雇主方独立确认）。\",\n      \"evidence_ids\": [\n        \"aionescu-decisions-001\",\n        \"aionescu-decisions-003\",\n        \"aionescu-decisions-004\",\n        \"aionescu-decisions-002\",\n        \"aionescu-decisions-005\",\n        \"aionescu-tl-2017-05-wininternals-7e-p1\",\n        \"aionescu-tl-2017-08-call-gates\",\n        \"aionescu-tl-2017-05-sysan360-containers\",\n        \"aionescu-tl-2017-06-recon-sam\",\n        \"ai-works-02\",\n        \"ai-works-06\",\n        \"ai-works-04\",\n        \"aionescu-tl-2017-2018-specucheck\",\n        \"aionescu-tl-2018-08-dynamic-tracing-19h1\",\n        \"aionescu-tl-2019-01-hyperv-bridge\",\n        \"r1-community-hyperv-part1\",\n        \"r1-community-hyperv-part2\",\n        \"aionescu-tl-present-ctio-crowdstrike\",\n        \"aionescu-ext-001\",\n        \"aionescu-ext-004\",\n        \"aionescu-ext-007\",\n        \"aionescu-ext-008\",\n        \"AI-conv-01\",\n        \"AI-conv-03\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"通过权威参考书合著的系统审阅产出技术发现\",\n      \"starting_conditions\": \"学生时期即获《Windows Internals》第六版合著席位，与 David Solomon（行业内部联系）、Mark Russinovich（逆向工程同伴）形成带教分工：据自述 Solomon 提供微软开发团队的内部联系与洞察，作者与 Russinovich 仅做逆向工程（documented，本人自述）。\",\n      \"repeated_practice\": \"跨第六版（覆盖 Windows 7）至第七版（覆盖 Windows 10）持续合著，第七版投入约 12 个月；写书过程中对系统结构进行连续审阅而非单点突破，并主动联系 Pavel Yosifovich 合作以承担单人难以完成的工作（documented，本人自述）。\",\n      \"feedback\": \"合著者变动反馈（Solomon 退休、Russinovich 转 Azure CTO）与发行时效压力；第七版被其他作者重组成 UWP/Kernel/Drivers 三部分后由其接管完成，需在 Windows 新版发行后数周内出版（documented，本人自述）。\",\n      \"intermediate_capability\": \"形成对 Windows 内核多子系统结构变化的系统化认知，使其能在写书副产物中识别遗留机制与新增强制功能。\",\n      \"observed_outcomes\": [\n        \"call-gate 系列源自第七版研究 UMS 时的副产物——审查 Windows 10 周年更新变化时注意到 CR4[FSGSBASE] 强制，重读 AMD 手册发现 x64 长模式下 LDT/call-gate 仍可用且 PatchGuard 不监控 per-process LDT（documented，本人自述）。\",\n        \"Windows 10 19H1 动态追踪机制（EtwRegisterEventCallback、KeSetSystemServiceCallback、KeSetTracepoint）的及时逆向记录（documented，本人自述）。\"\n      ],\n      \"evidence_ids\": [\n        \"AI-conv-01\",\n        \"AI-conv-03\",\n        \"aionescu-decisions-001\",\n        \"aionescu-decisions-003\",\n        \"aionescu-tl-2017-05-wininternals-7e-p1\",\n        \"aionescu-tl-2017-08-call-gates\",\n        \"ai-works-02\",\n        \"aionescu-tl-2018-08-dynamic-tracing-19h1\",\n        \"aionescu-tl-wininternals-6e-college\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"call-gate 发现可能更直接源于对 j00ru 与 Gynvael Coldwind 描述符表滥用论文的跟进，而非写书过程本身；但作者明确自述该发现来自第七版研究 UMS 的副产物（documented），故写书审阅作为能力来源成立，其与独立逆向研究的相对贡献无法分离。\"\n    },\n    {\n      \"name\": \"研究型工具的最小可用实现与公开发表\",\n      \"starting_conditions\": \"早期 ReactOS 多子系统重写形成从零实现内核子系统的工程能力（documented，本人自述）；2006-11 起持续公开博客输出的发表习惯（documented）。\",\n      \"repeated_practice\": \"跨 VT-x（SimpleVisor，2016，最小化汇编与最小 VMX 代码，显式声明非生产级）、侧信道缓解检测（SpecuCheck，2017–2018，针对 Meltdown/Spectre v2/Foreshadow）、Hyper-V 模糊测试桥（vtlbrdge.sys，2019，WDF root-enumerated 驱动）、Windows hooking（HookingNirvana，2015）等多技术栈自建配套工具并公开发表（documented）。\",\n      \"feedback\": \"同行引用与社区复用（SimpleVisor 约 2k stars，GitHub 2.2k followers）；Hyper-V 桥系列引用 hfiref0x 的 WinObjEx64 工具用于查看设备对象，并邀请 Azeria 协助制作图示，体现社区协作反馈；作者自述将在打磨完善后将完整工具发布到 GitHub，体现延迟-打磨的发表习惯（documented，本人自述）。\",\n      \"intermediate_capability\": \"形成『按需造工具→公开为可复用资产』的迭代能力，使其研究产出常以可发布工具形式固化，且工具栈随公开议题动态扩展。\",\n      \"observed_outcomes\": [\n        \"SimpleVisor 作为他人理解 VT-x 的最小基线，README 对比 HyperPlatform 的代码规模（documented）。\",\n        \"SpecuCheck 在侧信道漏洞爆发期快速放出缓解检测工具，覆盖 Meltdown/Spectre v2/Foreshadow（documented）。\",\n        \"Hyper-V 桥以系列教程形式把 hypervisor 内部接口暴露给模糊测试，并演示 HvlInvokeHypercall、HvCallGetVpIndexFromApicId 等 hypercall 用法（documented）。\"\n      ],\n      \"evidence_ids\": [\n        \"r1-community-reactos-rewrite\",\n        \"aionescu-tl-2006-11-blog-start\",\n        \"ai-works-06\",\n        \"ai-works-04\",\n        \"ai-works-07\",\n        \"aionescu-tl-2017-2018-specucheck\",\n        \"aionescu-tl-2019-01-hyperv-bridge\",\n        \"aionescu-tl-2015-recon-hookingnirvana\",\n        \"alex-community-08\",\n        \"r1-community-hyperv-part1\",\n        \"r1-community-hyperv-part2\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"工具建设可能源于商业培训（Winsider）与雇主（CrowdStrike）的产品化需求，而非纯粹研究取向；但 SimpleVisor、SpecuCheck 等仓库显式声明研究或教学用途且非生产级（documented），故研究型取向成立，商业需求的相对驱动无法分离。\"\n    },\n    {\n      \"name\": \"以负责任披露与厂商反馈为闭环的研究路径\",\n      \"starting_conditions\": \"2006 ReactOS 代码审计争议中形成的『重新实现 vs 复制粘贴』论辩框架（reported，Wikipedia 转述邮件列表）；早期持续公开输出习惯使其研究可见于厂商（documented）。\",\n      \"repeated_practice\": \"跨时期重复的负责任披露行为——2007 Purple Pill 发现 ATI 未被告知缺陷后于 1 小时内主动下架工具与帖子，并以 responsible disclosure 为由允许 ATI 修复，且指出该缺陷此前已在 Black Hat 公开披露（documented，本人自述）；2008 Black Hat 报告 win32k.sys 四项本地 DoS 缺陷（documented，本人自述）；2013 Recon KASLR 演讲后与微软同事分享幻灯片，被提示『expect some changes in Windows 8.1』（documented，本人自述）；2017 call-gates 明确声明非漏洞或 0day，而是 CPU、系统与 OS 内部结构的组合利用，并对照 j00ru 与 Gynvael Coldwind 的前置论文（documented，本人自述）。\",\n      \"feedback\": \"厂商修补对应关系主要为本人自述，缺少逐条 CVE 级可核验实体与 MSRC 端独立印证（资料缺口）；MSRC 在 Windows 10 周年更新堵住基于 LDT 的攻击向量为本人单向致谢，无 MSRC 端独立印证（documented，本人自述）。\",\n      \"intermediate_capability\": \"形成『研究→披露→厂商反馈→新机制研究』的闭环预期，使其能将厂商缓解演化作为后续研究输入。\",\n      \"observed_outcomes\": [\n        \"call-gates 将已被厂商缓解的旧机制（Windows 10 周年更新移除 LDT 支持、PatchGuard 在 LDTR 寄存器加检查）作为考古式研究对象，对照前置论文推进（documented，本人自述）。\",\n        \"KASLR Bypass Mitigations 评价微软内核安全团队工作（documented，本人自述）。注：round 1 已删除『Black Hat 2008 援引微软 Scott Field 2006 演讲』与『Protected Processes/KASLR 致谢 lilhoser/myriachan/msuiche』两项无法核证主张。\"\n      ],\n      \"evidence_ids\": [\n        \"aionescu-tl-2006-01-reactos-audit\",\n        \"aionescu-ext-005\",\n        \"r1-community-purple-pill\",\n        \"r1-community-blackhat2008-win32k\",\n        \"r1-community-kaslr-w81\",\n        \"aionescu-tl-2017-08-call-gates\",\n        \"ai-works-02\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"厂商反馈闭环可能是商业培训与雇主关系带来的副产品（受聘 Solomon Expert Seminars 后与微软员工接触增多，documented），而非刻意构建的研究方法；但 2007 Purple Pill 主动下架行为发生在该商业关系明确化之前，故负责任披露取向本身成立，商业关系对其闭环强度的放大无法分离。\"\n    },\n    {\n      \"name\": \"基于工程实践证据纠偏长期假设的方法论自省\",\n      \"starting_conditions\": \"第六版期间因同时兼顾大学、实习与人际关系而严重倦怠、造成延期，承认范围蔓延由自身所致（documented，本人自述）；近二十年 WDM 非 PnP 驱动写法形成的机械化技能（documented，本人自述）。\",\n      \"repeated_practice\": \"跨时期重复的自省与纠偏——第六版倦怠后第七版主动寻求 Pavel Yosifovich 合作并承认单人难以完成，把范围蔓延压缩到 12 个月以赶上 Windows 10 Redstone 2 发行窗口（documented，本人自述）；2019 一次周末驱动项目发现 WDF 可省 1500–4000 行 PnP 样板代码，从而纠正近二十年『WDM 优于 WDF』的错误假设（documented，本人自述）。\",\n      \"feedback\": \"自我承认会导致延期仍选择重返大型项目（documented，本人自述）；新工程证据（WDF 与 WDM 样板行数对比）推翻长期假设（documented，本人自述）。\",\n      \"intermediate_capability\": \"形成『以具体工程实践证据纠偏机械化技能与长期假设』的能力，使其方法不被既有路径锁定。\",\n      \"observed_outcomes\": [\n        \"第七版在 Windows 10 Redstone 2 发行后数周内出版（documented，本人自述与出版社页面）。\",\n        \"Hyper-V 桥采用 WDF root-enumerated 驱动，降低后续研究驱动的基础设施成本（documented，本人自述）。\"\n      ],\n      \"evidence_ids\": [\n        \"AI-conv-02\",\n        \"AI-conv-04\",\n        \"AI-conv-03\",\n        \"aionescu-decisions-001\",\n        \"aionescu-decisions-002\",\n        \"aionescu-tl-wininternals-6e-college\",\n        \"aionescu-tl-2019-01-hyperv-bridge\",\n        \"ai-works-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"方法论自省可能是事后叙事重构（博客为反思性写作），而非研究过程中的实时纠偏；但 WDF 迁移有具体工程证据（1500–4000 行样板对比）支撑，且第七版 12 个月周期可由出版时效核验，故纠偏行为本身成立，其过程中的实时性无法核证（资料缺口）。\"\n    }\n  ],\n  \"tensions\": [\n    \"ReactOS 2006 审计争议中涉案代码性质存在直接冲突：Ionescu 主张为重新实现、非复制粘贴，Hartmut Birr 主张源自 Windows 反汇编；Wikipedia 转述双方立场未裁定，原始邮件列表条目未在本次直接抓取（reported）。\",\n    \"person_json 将 ReactOS 列为其代表项目并隐含负责人色彩；维基 ReactOS 条目将项目协调人列为 Aleksey Bragin 与 Jason Filby，Ionescu 仅以代码贡献者出现，两份材料对其在 ReactOS 中地位表述不一致。\",\n    \"2019 年后博客公开输出显著减少甚至停滞（最后一条 2019-01-27），但 GitHub bio 显示其仍在 CrowdStrike 担任 CTIO，职业身份仍在演进，两者不能互相印证近 5 年的社区参与强度。\",\n    \"call-gates 作者明确声明『there is no 'vulnerability' or 'zero-day' presented here』（非漏洞或 0day），与其同时期向 infosec 会议圈转型、构思『Windows Design Flaw Garage Sale』历史缺陷披露演讲的取向存在张力——研究定位介于『内部结构组合利用』与『会议圈缺陷披露』之间。\"\n  ],\n  \"transferable_practices\": [\n    \"以权威参考书合著作为系统结构审阅的强制机制，将写书副产物转化为技术发现（M0）。\",\n    \"研究型工具采用最小可用实现并显式声明非生产级，与研究或教学用途绑定公开（M1）。\",\n    \"负责任披露行为标准化：发现厂商未被告知缺陷时主动下架工具并允许修复，以 Black Hat 等公开场合披露作为前置（M2）。\",\n    \"以具体工程实践证据（行数对比、周期数据）纠偏长期假设与机械化技能（M3）。\",\n    \"将演讲材料固化为公开代码仓库，形成『演讲—代码—可复现』输出闭环，便于同行复核与工具化复用。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"学生时期即获《Windows Internals》合著席位及 Solomon/Russinovich 带教关系，依赖特定历史窗口与人际网络，不可复制（AI-conv-01）。\",\n    \"ReactOS 2004–2006 多子系统重写实践依赖项目当时缺乏内核负责人的空缺与 David Welch 离开的偶然机会（r1-community-reactos-rewrite）。\",\n    \"与微软员工及资源的接触增多源于受聘 David Solomon Expert Seminars 担任 Windows Internals 讲师这一特定商业关系，非一般研究者可复现（r1-community-reactos-rewrite）。\",\n    \"厂商反馈闭环的强度依赖其在 Windows 内核方向的长期公开足迹与培训业务，非一般研究者可复现。\",\n    \"近二十年 WDM 驱动写法积累是特定技术栈与时代的产物，其纠偏经验不可直接迁移至非 Windows 驱动栈。\"\n  ],\n  \"open_questions\": [\n    \"出生年份、国籍、学历（校名、专业、毕业年份）未见任何已抓取来源披露（unknown）。\",\n    \"ReactOS 加入与退出时间、具体提交数量未见公开记录；维基仅锁定 2006-01 单一争议事件，2007《A New Direction》自述退出但无项目方一手来源印证。\",\n    \"CrowdStrike 入职年份与 CTIO 晋升时间未见公开披露；GitHub bio 仅给出现任头衔；2019 年后近 5 年社区参与强度一手证据不足。\",\n    \"本人署名的具体 CVE 编号未见首页与 GitHub pinned 列出；厂商修补对应关系缺少逐条 CVE 级可核验实体与 MSRC 端独立印证。\",\n    \"Black Hat US/EU、BlueHat 演讲具体场次、年份、合讲者无主站一手列表与会议归档页可核证（person_json 列出但未落实为可核验条目）。\",\n    \"Scott Field 与 Black Hat 2006 交叉引用、lilhoser/myriachan/msuiche 在 Protected Processes 或 KASLR 文的致谢无法以一手来源核证（round 1 unresolved），已从主张中删除。\",\n    \"《Windows Internals》6e 精确出版日与 ISBN 级核对未完成；SimpleVisor、VisualUefi、lxss、vtlbrdge.sys、smctool 无确切首次发布日期。\",\n    \"早期入门年龄与最初学习路径无可核验一手叙述，现有自述覆盖职业中后期（conversations gap）。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "4e1885b4d5e6f726527fadc368d460d69cb5e99cf16e916c4403fd2d0f6c3847",
+        "accessed_at": "2026-09-27T07:28:20.925452+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790494100925469000-alex-ionescu-synthesis-v2.json",
+    "label": "Alex Ionescu:synthesis:v2",
+    "elapsed_seconds": 382.19,
+    "prompt_sha256": "646a453afa6f602504daa818f505050398abd636c499fe3f369f0d068fdb3616",
+    "num_turns": 8,
+    "total_cost_usd": 0.9990309999999999,
+    "usage": {
+      "input_tokens": 59461,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 135552,
+      "output_tokens": 25358,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 59461,
+        "outputTokens": 25358,
+        "cacheReadInputTokens": 135552,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.9990309999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

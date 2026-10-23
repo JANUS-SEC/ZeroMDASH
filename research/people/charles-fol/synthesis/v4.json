@@ -1,0 +1,326 @@
+{
+  "person": "Charles Fol",
+  "expertise": [
+    "PHP 反序列化与 gadget chain 构造（unserialize 利用、PHPGGC 工具维护）",
+    "php://filter 链式利用与文件读/盲读原语工程化（wrapwrap、lightyear、cnext）",
+    "PHP 运行时内部机制分析（mt_rand 内部状态预测、PHP-FPM 共享内存提权、Zend 内存堆结构）",
+    "PHP 应用层与框架层漏洞利用（Symfony、Drupal、vBulletin、WordPress 等）",
+    "glibc 底层库内存破坏利用与协调披露（CVE-2024-2961 iconv 堆溢出）",
+    "服务端漏洞受限原语提升至 RCE：SQLi-to-RCE / 文件上传-to-RCE 跨目标应用（团队级产出方向，作者归属为推断，无法逐篇确认 Charles Fol 个人作者身份）"
+  ],
+  "stages": [
+    {
+      "period": "2017 年前后",
+      "stage": "PHP 反序列化通用工具建设起点",
+      "capability_change": "从对单一 PHP 应用做 unserialize() 漏洞分析，转为把反复手工构造 gadget chain 的经验沉淀为可复用、可程序化生成的通用工具 PHPGGC，并明确以 frohoff 的 ysoserial 的 PHP 对应物作为定位，建立以工具承载利用方法的研究产出形式。",
+      "evidence_ids": [
+        "cfol-tl-02",
+        "cf-dec-01-phpggc-ysoserial-for-php",
+        "cf-works-003",
+        "cf-ext-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2018-2023 年",
+      "stage": "PHP 框架层与运行时内部研究持续展开",
+      "capability_change": "在 PHP 反序列化工具的基础上持续公开写作，目标覆盖 Symfony secret fragment、mt_rand 内部状态预测、PHP-FPM 共享内存提权、vBulletin 反序列化可达性等，研究范围由应用层框架向 PHP 运行时内部机制展开；2023 年发布 wrapwrap，把 php://filter 链式前后缀附加固化为独立工具。该阶段研究产出构成前一项公开工具在模糊测试中触发崩溃、进而成为后一项漏洞研究入口的实例（该因果链来源为 iconv part1 作者第一人称转述，非 wrapwrap 正文自身记录）。",
+      "evidence_ids": [
+        "cf-rev2-006",
+        "cf-rev2-003",
+        "cf-rev2-004",
+        "cf-rev2-001",
+        "cf-dec-04-exploit-repo-per-vuln-pattern",
+        "cf-community-phpggc-tool-feedback"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2024 年",
+      "stage": "glibc 底层库扩展与盲利用工程化及协调披露",
+      "capability_change": "研究重心从 PHP 应用层向 glibc 底层库扩展，披露 iconv 转码至 ISO-2022-CN-EXT 时约 24 年的堆缓冲区溢出（CVE-2024-2961），并通过 php://filter 链、直接 iconv() 调用（以 Roundcube 为演示目标）、盲利用三条路径把文件读原语提升至 RCE；配套发布 cnext-exploits、lightyear 工具，并经 glibc 安全团队、Linux 发行版完成协调披露。",
+      "evidence_ids": [
+        "cfol-tl-10",
+        "cf-dec-02-glibc-iconv-cve-2024-2961-tech-shift",
+        "cf-rev2-005",
+        "cf-rev1-003",
+        "cf-rev2-002",
+        "cf-community-glibc-coordinated-disclosure",
+        "cf-community-cnext-prior-research-citation",
+        "cf-community-wrapwrap-feedback-to-discovery"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2025-2026 年",
+      "stage": "团队级服务端漏洞方法迁移与持续产出",
+      "capability_change": "Ambionics / Web Exploitation 分类下连续发布同结构 writeup，作者归属基于 @cfreal_ 在 CNEXT 署名与统一 Ambionics 分类的推断，无法逐篇确认 Charles Fol 个人作者身份；以下作为团队级产出方向的能力曲线描述，不作为逐篇个人作者证据。该阶段把未认证 SQL 注入或文件上传提升至 RCE 的方法论跨 WSO2、GLPI、Drupal、Ninja Forms、SPIP、Munge 等目标反复应用并公开发表，呈现方法论迁移与重复产出。",
+      "evidence_ids": [
+        "cf-community-method-reuse-series",
+        "cf-works-004",
+        "cf-works-005",
+        "cf-ext-05"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "工具建设与漏洞发现的双向反馈回路",
+      "starting_conditions": "PHP 反序列化利用中反复手工构造 gadget chain 的需求，以及以可复用工具承载利用方法的产出习惯（PHPGGC）。",
+      "repeated_practice": "围绕同一技术方向（php://filter 链、反序列化）持续建设并维护小型专用工具与配套 exploit 仓库（phpggc、wrapwrap、lightyear、cnext-exploits 等），并对自研工具做模糊测试。",
+      "feedback": "外部贡献经规范化 PR 流程并入工具框架覆盖；@s_n_t 在 Black Hat US 2018 发布 PHARGGC 作为 PHPGGC 的 fork，把攻击面扩展到 PHAR 生成，当前 PHPGGC mainline 已原生支持 PHAR 生成（-p phar/-o/-pj）（fork 并入主干的过程未由 README 明示）；wrapwrap 在模糊测试中触发崩溃，成为 CVE-2024-2961 研究入口（该因果链来源为 iconv part1 作者第一人称转述）。该迭代回路目前仅由 wrapwrap→CVE-2024-2961 单实例支撑，phpggc、lightyear 等其他工具是否同样在使用或模糊测试中产生新漏洞未由一手证据核证；不应由单实例归纳为普遍迭代机制。",
+      "intermediate_capability": "把零散利用知识固化为可复用、可测试的工程化工具，并形成工具产出与后续发现之间的可观察关联。",
+      "observed_outcomes": [
+        "PHPGGC 累积至约 725 次提交，覆盖 Laravel、Symfony、Drupal、Magento 等多框架 gadget 链，含跨版本兼容测试脚本",
+        "wrapwrap（PHP filter 前后缀附加）模糊测试触发崩溃，成为 CVE-2024-2961 研究入口",
+        "lightyear 以 error-based oracle 算法实现盲文件读 dump，配套 cnext-exploits 形成工具集"
+      ],
+      "evidence_ids": [
+        "cfol-tl-02",
+        "cf-dec-01-phpggc-ysoserial-for-php",
+        "cf-dec-04-exploit-repo-per-vuln-pattern",
+        "cf-community-phpggc-tool-feedback",
+        "cf-ext-03",
+        "cf-community-wrapwrap-feedback-to-discovery",
+        "cf-rev1-002",
+        "cf-rev2-001",
+        "cf-rev2-002"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "存在外部贡献主导而非个人独立积累的可能：PHPGGC 框架覆盖随社区 PR 扩展，且 @s_n_t 的 PHARGGC fork 扩展了攻击面；工具规模与框架覆盖的扩大未必全部源于个人反复练习，亦可能由社区贡献驱动。"
+    },
+    {
+      "name": "PHP 运行时通道桥接应用层与 C 库底层",
+      "starting_conditions": "长期 PHP 应用层与框架层漏洞研究积累，以及对 php://filter 链与 PHP 内部机制的熟悉（mt_rand 状态预测、PHP-FPM、Zend 内存堆）。",
+      "repeated_practice": "沿 PHP 应用 → PHP 运行时 → 原生 C 库的路径逐层下沉研究目标，并以多部分系列文章按难度递进（有输出、直接 iconv()/Roundcube、盲利用）公开复盘，同时发布配套 exploit 仓库。",
+      "feedback": "同行公开成果（Gynvael、loknop、DownUnderCTF、Synacktiv、PTswarm 等）被显式引用为方法基础；iconv 漏洞走 glibc 安全团队、Linux 发行版与公开 CVE 协调披露流程，作者评价上游响应迅速并在约一周内交付补丁；研究在 OffensiveCon 会议演示（part2 一手陈述）。",
+      "intermediate_capability": "把底层 C 库内存破坏缺陷经 PHP 运行时通道（php://filter、直接 iconv() 调用）桥接回应用层 RCE，并对受限盲原语做工程化处理。",
+      "observed_outcomes": [
+        "CVE-2024-2961（glibc iconv 堆溢出，约 24 年陈旧漏洞）发现与披露",
+        "经 php://filter 链、直接 iconv() 调用（Roundcube）、盲利用三路径实现文件读原语到 RCE",
+        "part3 盲利用涉及 php_stream_bucket、bucket brigade、zend_mm_heap、custom_heap._free 等内部结构"
+      ],
+      "evidence_ids": [
+        "cfol-tl-10",
+        "cf-dec-02-glibc-iconv-cve-2024-2961-tech-shift",
+        "cf-rev1-003",
+        "cf-rev2-001",
+        "cf-rev2-002",
+        "cf-rev2-003",
+        "cf-rev2-004",
+        "cf-rev2-005",
+        "cf-community-cnext-prior-research-citation"
+      ],
+      "validation_tests": [
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "CVE-2024-2961 发现存在偶然机会因素（作者自述 'stumbled upon'），其向多路径利用与盲利用工程化展开可部分归因于既有 PHP filter 工具栈的偶然触达，而非纯线性能力曲线推进。"
+    },
+    {
+      "name": "方法论迁移与重复产出模式",
+      "starting_conditions": "PHP 反序列化与受限原语提升至 RCE 的方法积累，以及配套可运行 exploit 仓库的产出习惯。",
+      "repeated_practice": "把未认证 SQL 注入或文件上传提升至 RCE 的同一方法论跨目标（WSO2、GLPI、Drupal、Ninja Forms、SPIP、Munge 等）反复应用并公开发表。",
+      "feedback": "Ambionics / Web Exploitation 分类下连续发布同结构 writeup，作者归属基于 @cfreal_ 在 CNEXT 署名与统一 Ambionics 分类的推断，无法逐篇确认 Charles Fol 个人作者身份；以下作为团队级产出方向的能力曲线描述，不作为逐篇个人作者证据。研究产出嵌入团队/机构协作与发布流程（Ambionics/Lexfo 品牌关联）。",
+      "intermediate_capability": "形成可识别的、可跨目标复用的服务端漏洞利用方法迁移能力，并以稳定节奏公开产出。",
+      "observed_outcomes": [
+        "WSO2、GLPI（CVE-2025-24799/24801）、Drupal PostgreSQL、Ninja Forms（CVE-2026-0740）、SPIP（CVE-2026-72708/-72709/-72710）、Munge 等目标的 SQLi-to-RCE / 上传-to-RCE / 堆溢出 writeup",
+        "2024-09 至 2026-09 间团队博客持续发布，目标覆盖 PHP 引擎、glibc、CMS、中间件、HPC 认证基础设施"
+      ],
+      "evidence_ids": [
+        "cf-community-method-reuse-series",
+        "cf-works-004",
+        "cf-works-005",
+        "cf-ext-04",
+        "cf-ext-05"
+      ],
+      "validation_tests": [
+        "repeated"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "该模式下的多篇 writeup 作者归属未逐篇确认 Charles Fol 本人，可能反映 Ambionics 团队整体产出方向而非个人能力曲线；方法迁移的可观察程度受作者归属推断强度限制。"
+    }
+  ],
+  "tensions": [
+    "一手 writeup 署名（@cfreal_）与 person_json 记录的 social（x.com/ambionics）存在账号标识差异，@ambionics 在一手页面不作为 Twitter handle 出现而仅作公司/分类名；x.com/ambionics 是否为团队/品牌账号、@cfreal_ 是否为个人账号未由 X 账号一手页面澄清。",
+    "Ambionics 与 Lexfo 的组织关系性质（收购/合并/品牌重塑/团队并入）及 Charles Fol 在其中的角色，仅由 ambionics.io/blog 301 重定向至 blog.lexfo.fr 与双 logo 共置推断，无一手文字陈述。",
+    "2025-2026 年多篇 writeup 作者归属为推断（列表页不显示个人署名），团队级产出与个人能力曲线的边界在论断层面需区分。",
+    "CVE-2024-2961 发现含偶然机会因素（作者自述 'stumbled upon'），与作为稳定能力成长的线性叙述存在张力。"
+  ],
+  "transferable_practices": [
+    "把反复手工构造的利用方法固化为可复用、可测试的通用工具与配套 exploit 仓库，而非只做单点漏洞披露。",
+    "沿应用层 → 运行时 → 原生库的路径逐层展开研究目标，并寻找运行时通道把底层缺陷桥接回应用层可利用原语。",
+    "对自研工具做模糊测试，观察工具行为异常作为新漏洞研究的入口（该回路目前仅单实例支撑（wrapwrap→CVE-2024-2961），作为可迁移做法的普遍性未由一手证据核证）。",
+    "以多部分系列文章按难度递进公开复盘，区分有输出、直接调用、盲利用等受限条件下的利用路径。",
+    "经上游维护者、发行版与公开 CVE 的协调披露流程发布漏洞，并完整记录披露时间线。",
+    "在 writeup 中显式引用同行前置研究作为方法基础，区分自有发现与对社区公开成果的吸收组合。"
+  ],
+  "non_transferable_conditions": [
+    "长期 PHP 生态（反序列化、php://filter、运行时内部）深耕形成的方向连续性与技术栈深度，依赖特定方向长期投入而非可短期复制的通用步骤。",
+    "Ambionics/Lexfo 团队品牌、协作与发布流程，以及 cfreal.github.io 个人博客作为公开身份锚点的机构与个人品牌条件。",
+    "外部研究者以 fork 形式扩展自有工具（如 PHARGGC）带来的攻击面扩展，属可遇不可求的外部贡献，非个人可复制做法。",
+    "工具→新漏洞的迭代回路目前仅由 wrapwrap→CVE-2024-2961 单实例支撑，作为可迁移做法的普遍性未由一手证据核证。"
+  ],
+  "open_questions": [
+    "深度对话与自述维度核心证据缺失：未取得长访谈、播客、AMA 或演讲问答的一手文本，关于入门路径、学习方式、失败经历、导师或同伴、重复练习动机、公开发表习惯的具体自述不可得。",
+    "x.com/ambionics 是否为团队/品牌账号、@cfreal_ 是否为个人账号未由 X 账号一手页面澄清；本分析身份同一性由 blog.lexfo.fr iconv part1 页面署名行 'Mon 27 May 2024 by Charles Fol' 与页末 'hit me up on Twitter [@cfreal_]' 同页出现核证。",
+    "Ambionics 与 Lexfo 的组织关系性质及 Charles Fol 在其中的角色无一手文字陈述。",
+    "Black Hat US/EU 演讲的具体年份、题目与演讲者条目未在 Black Hat 官网核实（页面返回 403）；iconv part2 提供 OffensiveCon 会议演示一手旁证，Black Hat 缺口保留。",
+    "PHP filter chains 首篇 writeup 精确 URL 与日期未抓取成功（候选 URL 返回 404），该技术作为 iconv 系列前置技术的资料缺口保留。",
+    "2018-2023 年间部分 writeup（如 Linux 内核 CVE-2017-11176 系列）正文未抓取（lead_only），该阶段作为 PHP 内核利用起点的资料缺口保留。",
+    "cf-works-004/005（WSO2、Munge、SPIP 等 2025-2026 团队级 writeup）正文未逐字抓取，技术机制细节为推断。",
+    "同伴网络的反向反馈（同行引用其成果、PHPGGC 被第三方实战案例）一手证据未获取；前向引用已核证，反向反馈不构成对等证据。",
+    "元层幸存者偏差：本分析所据证据以研究对象及其团队公开发布的成功案例为主，失败研究、未公开发现与被拒稿件不可见，区别于上述深度对话与自述维度核心证据缺失这一证据缺口。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-synthesis-v4-20260927-205830-416",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790514317286678000-charles-fol-synthesis-v4.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "a330e081-42fd-472a-9cee-d16ff4a7b978",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_p3ppgeftowxdln9hh8m77zai",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-synthesis-v4-20260927-205830-416/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T13:05:17.347027+00:00"
+      },
+      {
+        "tool_use_id": "call_q6gb3lgt69glpp3b9u2e193y",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-synthesis-v4-20260927-205830-416/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T13:05:17.347060+00:00"
+      },
+      {
+        "tool_use_id": "call_boj9fmbpw3l917mcr8pvgw4x",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-synthesis-v4-20260927-205830-416/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "ed266c1e94204eb9cc4d15cdc549b698eb20e10efb00f96ab3cbcbf9583e5e8c",
+        "accessed_at": "2026-09-27T13:05:17.347066+00:00"
+      },
+      {
+        "tool_use_id": "call_54zqqkd4stols73flw0fq1gh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-synthesis-v4-20260927-205830-416/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "8b94321e4ded59cfecc8d67c53313bd6ef3212cc12efcd3a12686c9c6285e739",
+        "accessed_at": "2026-09-27T13:05:17.347077+00:00"
+      },
+      {
+        "tool_use_id": "call_wirzyb5tkw74pf8ctcntfgft",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-synthesis-v4-20260927-205830-416/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "a831e19da48b4e8790ae9610bd9484acd5a9fe00399816dc5dce5c26f9fbb9c0",
+        "accessed_at": "2026-09-27T13:05:17.347166+00:00"
+      },
+      {
+        "tool_use_id": "call_8avk6ru825mnxy0hrfs7s7lk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-synthesis-v4-20260927-205830-416/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "8453eb3956ebe9868f32b2aca731ee57389689c89dc32ca77c0ae378fd5fc2f9",
+        "accessed_at": "2026-09-27T13:05:17.347240+00:00"
+      },
+      {
+        "tool_use_id": "call_gbkvmyfhvh16pigbywc17sw5",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-synthesis-v4-20260927-205830-416/inputs/revision_context.json",
+          "offset": 442,
+          "limit": 500
+        },
+        "success": true,
+        "content_sha256": "43e2947d7ff12c2bfd630168b985fff9bb96aedb1c702dfbba176b0d7e89372e",
+        "accessed_at": "2026-09-27T13:05:17.347331+00:00"
+      },
+      {
+        "tool_use_id": "call_ku6614lrgwcxadmrc7jxkc5d",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-synthesis-v4-20260927-205830-416/checkpoint.md",
+          "content": "# Checkpoint — Charles Fol 综合 v4\n\n## 任务\n综合分析师：基于六维材料 + 三轮定向补证（revision_context），重建 Charles Fol 领域能力成长过程，输出符合 output.schema.json 的 JSON。\n\n## 已确认的有效证据（verified_in_run=true，可作 evidence_ids）\n\n### works\n- cf-works-001（2024-09-30 part3，documented）— short_quote 经 cf-rev1-003 核证为 part3 原文逐字\n- cf-works-003（PHPGGC README，reported）\n- cf-works-004（2026-09-16 SPIP，reported，正文未抓）\n- cf-works-005（2026-02-12 Munge，reported，正文未抓）\n\n### conversations\n- cfreal_conv_001（blog index，inferred，成长信号弱）\n\n### community\n- cf-community-phpggc-tool-feedback（2024，documented）\n- cf-community-cnext-prior-research-citation（2024-05-27，documented）\n- cf-community-wrapwrap-feedback-to-discovery（2024-05-27，documented）— wrapwrap→CVE-2024-2961 因果链一手转述来源\n- cf-community-glibc-coordinated-disclosure（2024-05-27，documented）\n- cf-community-method-reuse-series（2025-09-11，inferred，团队级）\n\n### external\n- cf-ext-01（cfreal.github.io，documented）\n- cf-ext-02（PHPGGC repo，documented）\n- cf-ext-03（2018-08-09 PHARGGC History，documented）\n- cf-ext-04（Ambionics/Lexfo category，documented）\n- cf-ext-05（多 writeup，reported）\n\n### decisions（长形式 ID）\n- cf-dec-01-phpggc-ysoserial-for-php（2017，documented）\n- cf-dec-02-glibc-iconv-cve-2024-2961-tech-shift（2024-05-27，documented）\n- cf-dec-04-exploit-repo-per-vuln-pattern（inferred，verified=true）\n- cf-dec-03-lexfo-ambionics-brand-integration（verified_in_run=**false**，不引用）\n\n### timeline\n- cfol-tl-02（2017-07-04 PHPGGC，documented）\n- cfol-tl-10（2024-05-27 iconv p1，documented）\n- cfol-tl-15/tl-16（inferred，verified=true）\n- 其余 tl-01/03-09/11-14（verified_in_run=**false**，不引用）\n\n### targeted（rev1 + rev2）\n- cf-rev1-001（2024-05-27 part1，身份同页核证）\n- cf-rev1-002（2024 PHARGGC README 一手边界）\n- cf-rev1-003（2024-09-30 part3 盲利用逐字）\n- cf-rev2-001（2023-12-11 wrapwrap）\n- cf-rev2-002（2024-11-04 lightyear）\n- cf-rev2-003（2020-01-06 mt_rand）\n- cf-rev2-004（2021-10-21 PHP-FPM）\n- cf-rev2-005（2024-06-17 iconv p2 Roundcube + OffensiveCon）\n- cf-rev2-006（2020-10-19 Symfony secret fragment）\n\n## 作废/不可用\n- cf-works-002（rev1 作废，short_quote 为转述包装为引文）→ 以 cf-rev1-003 替代\n- cf-dec-03（verified_in_run=false）\n- timeline verified=false 条目（cfol-tl-01/03-09/11-14）\n\n## 已落实的修订指令\n- rev1：身份 documented（cf-rev1-001）；删除\"能力回灌主干\"（cf-rev1-002）；cf-works-002 替换为 cf-rev1-003\n- rev2：用语（反哺→触发崩溃成为入口 / 下沉→扩展 / 手造→手工构造 / 自驱沉淀→个人独立积累）；团队产出 vs 个人能力限定；证据升级（mt_rand/PHP-FPM/lightyear/Roundcube/wrapwrap/Symfony）；wrapwrap 因果链来源标注 part1 转述；OffensiveCon 一手旁证\n- rev3：expertise[4] 团队级限定；元层幸存者偏差入 open_questions；transferable_practices[3]/non_transferable_conditions 单实例限定；ID 长形式（cf-dec-01/02/04）\n\n## 未完成事项（open_questions 中记录）\n- 深度对话/自述维度核心证据缺失\n- x.com/ambionics vs @cfreal_ 账号定性未由 X 一手页面澄清\n- Ambionics/Lexfo 组织关系性质无一手文字\n- Black Hat US/EU 官网未核实（403）\n- PHP filter chains 首篇 writeup URL 404\n- cf-works-004/005 正文未逐字抓取\n- Linux 内核 CVE-2017-11176 系列正文未抓（lead_only）\n- 同伴网络反向反馈一手证据未获取\n\n## 待办\n- 写 output.json，逐字段对照 schema（additionalProperties=false；不填 _run/verification）\n"
+        },
+        "success": true,
+        "content_sha256": "92478ed429550d14d8ba8fa001a20b04aa19421b543ee66821911aea2db480e2",
+        "accessed_at": "2026-09-27T13:05:17.348057+00:00"
+      },
+      {
+        "tool_use_id": "call_73u0gpsbmr9a4rd7tgpajizi",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/charles-fol-synthesis-v4-20260927-205830-416/output.json",
+          "content": "{\n  \"person\": \"Charles Fol\",\n  \"expertise\": [\n    \"PHP 反序列化与 gadget chain 构造（unserialize 利用、PHPGGC 工具维护）\",\n    \"php://filter 链式利用与文件读/盲读原语工程化（wrapwrap、lightyear、cnext）\",\n    \"PHP 运行时内部机制分析（mt_rand 内部状态预测、PHP-FPM 共享内存提权、Zend 内存堆结构）\",\n    \"PHP 应用层与框架层漏洞利用（Symfony、Drupal、vBulletin、WordPress 等）\",\n    \"glibc 底层库内存破坏利用与协调披露（CVE-2024-2961 iconv 堆溢出）\",\n    \"服务端漏洞受限原语提升至 RCE：SQLi-to-RCE / 文件上传-to-RCE 跨目标应用（团队级产出方向，作者归属为推断，无法逐篇确认 Charles Fol 个人作者身份）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2017 年前后\",\n      \"stage\": \"PHP 反序列化通用工具建设起点\",\n      \"capability_change\": \"从对单一 PHP 应用做 unserialize() 漏洞分析，转为把反复手工构造 gadget chain 的经验沉淀为可复用、可程序化生成的通用工具 PHPGGC，并明确以 frohoff 的 ysoserial 的 PHP 对应物作为定位，建立以工具承载利用方法的研究产出形式。\",\n      \"evidence_ids\": [\n        \"cfol-tl-02\",\n        \"cf-dec-01-phpggc-ysoserial-for-php\",\n        \"cf-works-003\",\n        \"cf-ext-02\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2018-2023 年\",\n      \"stage\": \"PHP 框架层与运行时内部研究持续展开\",\n      \"capability_change\": \"在 PHP 反序列化工具的基础上持续公开写作，目标覆盖 Symfony secret fragment、mt_rand 内部状态预测、PHP-FPM 共享内存提权、vBulletin 反序列化可达性等，研究范围由应用层框架向 PHP 运行时内部机制展开；2023 年发布 wrapwrap，把 php://filter 链式前后缀附加固化为独立工具。该阶段研究产出构成前一项公开工具在模糊测试中触发崩溃、进而成为后一项漏洞研究入口的实例（该因果链来源为 iconv part1 作者第一人称转述，非 wrapwrap 正文自身记录）。\",\n      \"evidence_ids\": [\n        \"cf-rev2-006\",\n        \"cf-rev2-003\",\n        \"cf-rev2-004\",\n        \"cf-rev2-001\",\n        \"cf-dec-04-exploit-repo-per-vuln-pattern\",\n        \"cf-community-phpggc-tool-feedback\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2024 年\",\n      \"stage\": \"glibc 底层库扩展与盲利用工程化及协调披露\",\n      \"capability_change\": \"研究重心从 PHP 应用层向 glibc 底层库扩展，披露 iconv 转码至 ISO-2022-CN-EXT 时约 24 年的堆缓冲区溢出（CVE-2024-2961），并通过 php://filter 链、直接 iconv() 调用（以 Roundcube 为演示目标）、盲利用三条路径把文件读原语提升至 RCE；配套发布 cnext-exploits、lightyear 工具，并经 glibc 安全团队、Linux 发行版完成协调披露。\",\n      \"evidence_ids\": [\n        \"cfol-tl-10\",\n        \"cf-dec-02-glibc-iconv-cve-2024-2961-tech-shift\",\n        \"cf-rev2-005\",\n        \"cf-rev1-003\",\n        \"cf-rev2-002\",\n        \"cf-community-glibc-coordinated-disclosure\",\n        \"cf-community-cnext-prior-research-citation\",\n        \"cf-community-wrapwrap-feedback-to-discovery\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2025-2026 年\",\n      \"stage\": \"团队级服务端漏洞方法迁移与持续产出\",\n      \"capability_change\": \"Ambionics / Web Exploitation 分类下连续发布同结构 writeup，作者归属基于 @cfreal_ 在 CNEXT 署名与统一 Ambionics 分类的推断，无法逐篇确认 Charles Fol 个人作者身份；以下作为团队级产出方向的能力曲线描述，不作为逐篇个人作者证据。该阶段把未认证 SQL 注入或文件上传提升至 RCE 的方法论跨 WSO2、GLPI、Drupal、Ninja Forms、SPIP、Munge 等目标反复应用并公开发表，呈现方法论迁移与重复产出。\",\n      \"evidence_ids\": [\n        \"cf-community-method-reuse-series\",\n        \"cf-works-004\",\n        \"cf-works-005\",\n        \"cf-ext-05\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"工具建设与漏洞发现的双向反馈回路\",\n      \"starting_conditions\": \"PHP 反序列化利用中反复手工构造 gadget chain 的需求，以及以可复用工具承载利用方法的产出习惯（PHPGGC）。\",\n      \"repeated_practice\": \"围绕同一技术方向（php://filter 链、反序列化）持续建设并维护小型专用工具与配套 exploit 仓库（phpggc、wrapwrap、lightyear、cnext-exploits 等），并对自研工具做模糊测试。\",\n      \"feedback\": \"外部贡献经规范化 PR 流程并入工具框架覆盖；@s_n_t 在 Black Hat US 2018 发布 PHARGGC 作为 PHPGGC 的 fork，把攻击面扩展到 PHAR 生成，当前 PHPGGC mainline 已原生支持 PHAR 生成（-p phar/-o/-pj）（fork 并入主干的过程未由 README 明示）；wrapwrap 在模糊测试中触发崩溃，成为 CVE-2024-2961 研究入口（该因果链来源为 iconv part1 作者第一人称转述）。该迭代回路目前仅由 wrapwrap→CVE-2024-2961 单实例支撑，phpggc、lightyear 等其他工具是否同样在使用或模糊测试中产生新漏洞未由一手证据核证；不应由单实例归纳为普遍迭代机制。\",\n      \"intermediate_capability\": \"把零散利用知识固化为可复用、可测试的工程化工具，并形成工具产出与后续发现之间的可观察关联。\",\n      \"observed_outcomes\": [\n        \"PHPGGC 累积至约 725 次提交，覆盖 Laravel、Symfony、Drupal、Magento 等多框架 gadget 链，含跨版本兼容测试脚本\",\n        \"wrapwrap（PHP filter 前后缀附加）模糊测试触发崩溃，成为 CVE-2024-2961 研究入口\",\n        \"lightyear 以 error-based oracle 算法实现盲文件读 dump，配套 cnext-exploits 形成工具集\"\n      ],\n      \"evidence_ids\": [\n        \"cfol-tl-02\",\n        \"cf-dec-01-phpggc-ysoserial-for-php\",\n        \"cf-dec-04-exploit-repo-per-vuln-pattern\",\n        \"cf-community-phpggc-tool-feedback\",\n        \"cf-ext-03\",\n        \"cf-community-wrapwrap-feedback-to-discovery\",\n        \"cf-rev1-002\",\n        \"cf-rev2-001\",\n        \"cf-rev2-002\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"存在外部贡献主导而非个人独立积累的可能：PHPGGC 框架覆盖随社区 PR 扩展，且 @s_n_t 的 PHARGGC fork 扩展了攻击面；工具规模与框架覆盖的扩大未必全部源于个人反复练习，亦可能由社区贡献驱动。\"\n    },\n    {\n      \"name\": \"PHP 运行时通道桥接应用层与 C 库底层\",\n      \"starting_conditions\": \"长期 PHP 应用层与框架层漏洞研究积累，以及对 php://filter 链与 PHP 内部机制的熟悉（mt_rand 状态预测、PHP-FPM、Zend 内存堆）。\",\n      \"repeated_practice\": \"沿 PHP 应用 → PHP 运行时 → 原生 C 库的路径逐层下沉研究目标，并以多部分系列文章按难度递进（有输出、直接 iconv()/Roundcube、盲利用）公开复盘，同时发布配套 exploit 仓库。\",\n      \"feedback\": \"同行公开成果（Gynvael、loknop、DownUnderCTF、Synacktiv、PTswarm 等）被显式引用为方法基础；iconv 漏洞走 glibc 安全团队、Linux 发行版与公开 CVE 协调披露流程，作者评价上游响应迅速并在约一周内交付补丁；研究在 OffensiveCon 会议演示（part2 一手陈述）。\",\n      \"intermediate_capability\": \"把底层 C 库内存破坏缺陷经 PHP 运行时通道（php://filter、直接 iconv() 调用）桥接回应用层 RCE，并对受限盲原语做工程化处理。\",\n      \"observed_outcomes\": [\n        \"CVE-2024-2961（glibc iconv 堆溢出，约 24 年陈旧漏洞）发现与披露\",\n        \"经 php://filter 链、直接 iconv() 调用（Roundcube）、盲利用三路径实现文件读原语到 RCE\",\n        \"part3 盲利用涉及 php_stream_bucket、bucket brigade、zend_mm_heap、custom_heap._free 等内部结构\"\n      ],\n      \"evidence_ids\": [\n        \"cfol-tl-10\",\n        \"cf-dec-02-glibc-iconv-cve-2024-2961-tech-shift\",\n        \"cf-rev1-003\",\n        \"cf-rev2-001\",\n        \"cf-rev2-002\",\n        \"cf-rev2-003\",\n        \"cf-rev2-004\",\n        \"cf-rev2-005\",\n        \"cf-community-cnext-prior-research-citation\"\n      ],\n      \"validation_tests\": [\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"CVE-2024-2961 发现存在偶然机会因素（作者自述 'stumbled upon'），其向多路径利用与盲利用工程化展开可部分归因于既有 PHP filter 工具栈的偶然触达，而非纯线性能力曲线推进。\"\n    },\n    {\n      \"name\": \"方法论迁移与重复产出模式\",\n      \"starting_conditions\": \"PHP 反序列化与受限原语提升至 RCE 的方法积累，以及配套可运行 exploit 仓库的产出习惯。\",\n      \"repeated_practice\": \"把未认证 SQL 注入或文件上传提升至 RCE 的同一方法论跨目标（WSO2、GLPI、Drupal、Ninja Forms、SPIP、Munge 等）反复应用并公开发表。\",\n      \"feedback\": \"Ambionics / Web Exploitation 分类下连续发布同结构 writeup，作者归属基于 @cfreal_ 在 CNEXT 署名与统一 Ambionics 分类的推断，无法逐篇确认 Charles Fol 个人作者身份；以下作为团队级产出方向的能力曲线描述，不作为逐篇个人作者证据。研究产出嵌入团队/机构协作与发布流程（Ambionics/Lexfo 品牌关联）。\",\n      \"intermediate_capability\": \"形成可识别的、可跨目标复用的服务端漏洞利用方法迁移能力，并以稳定节奏公开产出。\",\n      \"observed_outcomes\": [\n        \"WSO2、GLPI（CVE-2025-24799/24801）、Drupal PostgreSQL、Ninja Forms（CVE-2026-0740）、SPIP（CVE-2026-72708/-72709/-72710）、Munge 等目标的 SQLi-to-RCE / 上传-to-RCE / 堆溢出 writeup\",\n        \"2024-09 至 2026-09 间团队博客持续发布，目标覆盖 PHP 引擎、glibc、CMS、中间件、HPC 认证基础设施\"\n      ],\n      \"evidence_ids\": [\n        \"cf-community-method-reuse-series\",\n        \"cf-works-004\",\n        \"cf-works-005\",\n        \"cf-ext-04\",\n        \"cf-ext-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"该模式下的多篇 writeup 作者归属未逐篇确认 Charles Fol 本人，可能反映 Ambionics 团队整体产出方向而非个人能力曲线；方法迁移的可观察程度受作者归属推断强度限制。\"\n    }\n  ],\n  \"tensions\": [\n    \"一手 writeup 署名（@cfreal_）与 person_json 记录的 social（x.com/ambionics）存在账号标识差异，@ambionics 在一手页面不作为 Twitter handle 出现而仅作公司/分类名；x.com/ambionics 是否为团队/品牌账号、@cfreal_ 是否为个人账号未由 X 账号一手页面澄清。\",\n    \"Ambionics 与 Lexfo 的组织关系性质（收购/合并/品牌重塑/团队并入）及 Charles Fol 在其中的角色，仅由 ambionics.io/blog 301 重定向至 blog.lexfo.fr 与双 logo 共置推断，无一手文字陈述。\",\n    \"2025-2026 年多篇 writeup 作者归属为推断（列表页不显示个人署名），团队级产出与个人能力曲线的边界在论断层面需区分。\",\n    \"CVE-2024-2961 发现含偶然机会因素（作者自述 'stumbled upon'），与作为稳定能力成长的线性叙述存在张力。\"\n  ],\n  \"transferable_practices\": [\n    \"把反复手工构造的利用方法固化为可复用、可测试的通用工具与配套 exploit 仓库，而非只做单点漏洞披露。\",\n    \"沿应用层 → 运行时 → 原生库的路径逐层展开研究目标，并寻找运行时通道把底层缺陷桥接回应用层可利用原语。\",\n    \"对自研工具做模糊测试，观察工具行为异常作为新漏洞研究的入口（该回路目前仅单实例支撑（wrapwrap→CVE-2024-2961），作为可迁移做法的普遍性未由一手证据核证）。\",\n    \"以多部分系列文章按难度递进公开复盘，区分有输出、直接调用、盲利用等受限条件下的利用路径。\",\n    \"经上游维护者、发行版与公开 CVE 的协调披露流程发布漏洞，并完整记录披露时间线。\",\n    \"在 writeup 中显式引用同行前置研究作为方法基础，区分自有发现与对社区公开成果的吸收组合。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"长期 PHP 生态（反序列化、php://filter、运行时内部）深耕形成的方向连续性与技术栈深度，依赖特定方向长期投入而非可短期复制的通用步骤。\",\n    \"Ambionics/Lexfo 团队品牌、协作与发布流程，以及 cfreal.github.io 个人博客作为公开身份锚点的机构与个人品牌条件。\",\n    \"外部研究者以 fork 形式扩展自有工具（如 PHARGGC）带来的攻击面扩展，属可遇不可求的外部贡献，非个人可复制做法。\",\n    \"工具→新漏洞的迭代回路目前仅由 wrapwrap→CVE-2024-2961 单实例支撑，作为可迁移做法的普遍性未由一手证据核证。\"\n  ],\n  \"open_questions\": [\n    \"深度对话与自述维度核心证据缺失：未取得长访谈、播客、AMA 或演讲问答的一手文本，关于入门路径、学习方式、失败经历、导师或同伴、重复练习动机、公开发表习惯的具体自述不可得。\",\n    \"x.com/ambionics 是否为团队/品牌账号、@cfreal_ 是否为个人账号未由 X 账号一手页面澄清；本分析身份同一性由 blog.lexfo.fr iconv part1 页面署名行 'Mon 27 May 2024 by Charles Fol' 与页末 'hit me up on Twitter [@cfreal_]' 同页出现核证。\",\n    \"Ambionics 与 Lexfo 的组织关系性质及 Charles Fol 在其中的角色无一手文字陈述。\",\n    \"Black Hat US/EU 演讲的具体年份、题目与演讲者条目未在 Black Hat 官网核实（页面返回 403）；iconv part2 提供 OffensiveCon 会议演示一手旁证，Black Hat 缺口保留。\",\n    \"PHP filter chains 首篇 writeup 精确 URL 与日期未抓取成功（候选 URL 返回 404），该技术作为 iconv 系列前置技术的资料缺口保留。\",\n    \"2018-2023 年间部分 writeup（如 Linux 内核 CVE-2017-11176 系列）正文未抓取（lead_only），该阶段作为 PHP 内核利用起点的资料缺口保留。\",\n    \"cf-works-004/005（WSO2、Munge、SPIP 等 2025-2026 团队级 writeup）正文未逐字抓取，技术机制细节为推断。\",\n    \"同伴网络的反向反馈（同行引用其成果、PHPGGC 被第三方实战案例）一手证据未获取；前向引用已核证，反向反馈不构成对等证据。\",\n    \"元层幸存者偏差：本分析所据证据以研究对象及其团队公开发布的成功案例为主，失败研究、未公开发现与被拒稿件不可见，区别于上述深度对话与自述维度核心证据缺失这一证据缺口。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "497c1c9f5dcb486ab33de5787a9bdd4c964ea48ec89244bdb2755949b1164a9e",
+        "accessed_at": "2026-09-27T13:05:17.348061+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790514317348138000-charles-fol-synthesis-v4.json",
+    "label": "Charles Fol:synthesis:v4",
+    "elapsed_seconds": 406.93,
+    "prompt_sha256": "db73af02aa6d7a7aec3630ac983f240f608650fef17bdd318e13f7d2be49e4d1",
+    "num_turns": 10,
+    "total_cost_usd": 1.132126,
+    "usage": {
+      "input_tokens": 83033,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 239872,
+      "output_tokens": 23881,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 83033,
+        "outputTokens": 23881,
+        "cacheReadInputTokens": 239872,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.132126,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

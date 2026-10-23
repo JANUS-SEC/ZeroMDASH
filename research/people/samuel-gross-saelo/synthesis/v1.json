@@ -1,0 +1,322 @@
+{
+  "person": "Samuel Groß (saelo)",
+  "expertise": [
+    "浏览器与 JavaScript 引擎（JavaScriptCore、SpiderMonkey、V8）漏洞发现与利用",
+    "操作系统内核与系统级本地提权（Linux、iOS、XNU）",
+    "解释型运行时（Lua）利用与 CFI 绕过",
+    "浏览器全链利用（渲染进程 RCE + 沙箱逃逸 + 内核 LPE）",
+    "自建漏洞挖掘与逆向辅助工具链（V8 fuzzer、IDA 脚本、ARM 内存破坏训练环境）"
+  ],
+  "stages": [
+    {
+      "period": "2014–2015",
+      "stage": "系统级/内核利用起步期：在 Linux 内核与移动内核上建立内存破坏利用的工程基础",
+      "capability_change": "以 Linux 本地提权（CVE-2014-0038，recvmmsg x86_x32 ABI 未校验用户态 timeout 指针，向 ptmx_fops 函数指针位置写入实现 root）为公开起点，并维护 iOS 内核工具（ios-kern-utils）。形成‘系统级指针覆盖 → 提权’的底层利用思路，为后续 JS 引擎中的 fakeobj/addrof 原语提供可迁移的技术谱系（内核 fops 函数指针劫持 ↔ JS 引擎伪造对象指针）。",
+      "evidence_ids": [
+        "saelo-tl-01",
+        "saelo-decisions-01",
+        "saelo-works-001",
+        "saelo-works-002"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2016",
+      "stage": "向 JavaScript 引擎迁移期：从 infoleak 切入，建立 JSC addrof/fakeobj 原语与系统化输出三件套",
+      "capability_change": "2016 年初发现 CVE-2016-4622（JavaScriptCore Array.slice 越界访问），系统梳理 NaN-boxing、butterfly、GC、JSObject/Structure，自建 addrof/fakeobj 原语与伪造 Float64Array 实现任意读写。同一攻击面先做 TypedArray.slice infoleak、再做 Array.slice OOB、再整理为 Phrack 综述，呈现‘小漏洞→大漏洞→系统综述’的递进输出。把内核期的‘单点研究→PoC 仓库→系统性论文’三件套输出习惯在 JS 引擎方向定型。",
+      "evidence_ids": [
+        "saelo-tl-02",
+        "saelo-tl-04",
+        "saelo-decisions-02",
+        "saelo-works-004",
+        "sg-self-02",
+        "sg-community-03",
+        "saelo-ext-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2016-2017",
+      "stage": "跨引擎练习与输出稳定期：把 OOB→伪造→任意读写 链路横向迁移到 Lua 与 SpiderMonkey",
+      "capability_change": "在主力 JSC 之外转向 Lua（33C3 CTF 'read-eval-pwn loop' 挑战，伪造 Lua 值、滥用 setjmp/longjmp 绕过 Clang CFI、借 yield 触发受控跳转）与 Firefox（CVE-2016-9066，nsScriptLoadHandler::TryDecodeRawData 的 uint32_t capacity 在 >4GB 输入下回绕，用 zlib 流式 flush 把触发载荷压到 ~18MB、利用 macOS mmap 连续分配承载零填充，>95% 可靠、约 1 分钟完成）。验证‘内存破坏原语 → 信息泄露 → 代码执行’链路的引擎通用性，并从纯漏洞报告进入‘为社区出题/造工具’的输出层级。",
+      "evidence_ids": [
+        "saelo-tl-05",
+        "saelo-tl-06",
+        "saelo-decisions-03",
+        "saelo-works-006",
+        "saelo-works-007",
+        "sg-community-01",
+        "sg-community-02",
+        "saelo-ext-03"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017–2018",
+      "stage": "工具化与全链化期：自建 fuzzer 稳定供给 bug，并把单引擎利用升级为竞赛级全链",
+      "capability_change": "据 Phrack《Smashing The Browser》（reported，正文未直接抓取）记录自建 V8 fuzzer 触发并利用 Turbofan 类型混淆漏洞，把‘找洞’从偶发事件工程化为可重复流程。2018-03 Pwn2Own 完成 Safari RCE + macOS 沙箱逃逸 + XNU 内核 LPE 全链（WebKit DFG JIT 类型混淆 CVE-2018-4233 + launchd 沙箱检查缺失 + XNU bootstrap port 覆盖，stage0..stage5 + libspc XPC 协议重实现）。技术栈回到 2014 年的内核利用根脉，体现跨子系统协同能力。",
+      "evidence_ids": [
+        "saelo-tl-07",
+        "saelo-decisions-04",
+        "saelo-decisions-06",
+        "saelo-works-010",
+        "saelo-works-011",
+        "sg-community-04"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "跨引擎/跨平台方法论迁移：把同一套‘原语→信息泄露→代码执行’链路抽象后反复应用到不同运行时",
+      "starting_conditions": "2014 年已在 Linux 内核（CVE-2014-0038，ptmx_fops 函数指针覆盖）建立‘指针覆盖 → 提权’的底层利用经验，具备跨平台内核利用基础（ios-kern-utils），尚未接触 JS 引擎。",
+      "repeated_practice": "2016 年切入 JSC 时先从边界原语（TypedArray.slice infoleak、Array.slice OOB）入手，构造 addrof/fakeobj 原语与伪造 Float64Array 实现任意读写；随后将同一‘OOB 索引 → 伪造对象 → 任意读写 → 代码执行’链路迁移到 Lua（伪造 Lua 值、CFI 绕过）与 SpiderMonkey（污染 firstFreeSpan、嵌套 ArrayBuffer），再在 Pwn2Own 2018 把 JIT 类型混淆与 launchd/XNU 系统原语串联成全链。",
+      "feedback": "Lua 研究先向 Lua 邮件列表投递并据回复整理 writeup（披露—回复—成文的反馈回路）；JSC 研究经 Phrack 审稿连续发表两篇（社区刊物接受信号）；Pwn2Own 实战在真实目标上检验全链可靠性。",
+      "intermediate_capability": "形成‘内存破坏原语 → 信息泄露 → 伪造对象 → 任意读写 → 代码执行’的通用利用链路抽象，并具备对 NaN-boxing、butterfly、GC、JIT 类型推断、CFI、沙箱等多层防护的逐层对抗能力。",
+      "observed_outcomes": [
+        "CVE-2016-4622（JSC Array.slice OOB）+ jscpwn + Phrack《Attacking JavaScript Engines》",
+        "33C3 CTF 'read-eval-pwn loop' Lua 利用挑战",
+        "CVE-2016-9066（Firefox 跨 mmap 溢出，>95% 可靠、约 1 分钟）",
+        "Pwn2Own 2018 Safari + macOS 沙箱逃逸 + 内核 LPE 全链"
+      ],
+      "evidence_ids": [
+        "saelo-tl-01",
+        "saelo-tl-02",
+        "saelo-tl-04",
+        "saelo-tl-05",
+        "saelo-tl-06",
+        "saelo-tl-07",
+        "saelo-decisions-01",
+        "saelo-decisions-02",
+        "saelo-decisions-03",
+        "sg-community-01",
+        "sg-community-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "跨引擎产出集中在 2016-2018 短窗口，亦可能反映该时段各引擎对 slice/load 类边界检查普遍薄弱（偶然机会而非方法通用性）；此外 Pwn2Own 全链涉及团队协作（据 sg-community-04 线索，Niklas Baumstark 组队），全链可靠性未必全部归因于个人跨引擎迁移能力。该组队线索未经一手页面核实，仅作 lead 处理。"
+    },
+    {
+      "name": "工程化三件套输出：PoC/exploit 仓库 + 博客 writeup + 系统论文/会议的标准化产出闭环",
+      "starting_conditions": "早期已有把练习固化为可复用仓库的习惯（armpwn 自述 'train/learn memory corruption on the ARM platform'），具备自建训练/工具环境的条件。",
+      "repeated_practice": "对每个研究对象同时产出：可复现的 exploit 仓库（jscpwn、pwn2own2018、cve-2018-4233）、配套博客 writeup（saelo.github.io）、以及系统化论文或会议材料（Phrack《Attacking JavaScript Engines》、Pwn2Own 链自述 README）。",
+      "feedback": "Phrack 审稿接受与社区刊物署名提供外部评审反馈；可复现代码仓库使研究可被同行复现与审视。",
+      "intermediate_capability": "把单点漏洞归纳为通用方法的能力，并把内部研究流程整理为可被社区复用/审视的方法论沉淀，而非仅发布 PoC。",
+      "observed_outcomes": [
+        "JSC Array.slice：post + Phrack 论文 + jscpwn 仓库三件套",
+        "Pwn2Own 2018：stage0..stage5 + libspc 结构化仓库 + README 自述",
+        "armpwn、ida_scripts 等配套训练/逆向工具沉淀"
+      ],
+      "evidence_ids": [
+        "saelo-tl-04",
+        "saelo-tl-07",
+        "saelo-works-004",
+        "saelo-works-008",
+        "saelo-works-009",
+        "saelo-works-011",
+        "sg-self-02",
+        "sg-community-02",
+        "sg-community-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "三件套输出在 2017-03 后 blog 停更（据 saelo-works-013），后续输出重心转移到代码仓库与会议材料，该机制在 2018 年后的延续性缺乏一手 writeup 证据，可能反映输出渠道变迁而非机制中断。"
+    },
+    {
+      "name": "工具/训练环境建设驱动稳定产出：自建 fuzzer 与练习环境把‘找洞’从偶发事件工程化",
+      "starting_conditions": "早期已建立 armpwn（自述 'train/learn memory corruption'）等结构化练习仓库，并沉淀 ida_scripts 等逆向辅助工具，研究依赖自建工具链而非纯手工分析。",
+      "repeated_practice": "据 Phrack《Smashing The Browser》（reported，正文未直接抓取）自建针对 V8 的 fuzzer 以稳定产生候选 bug，再投入手工利用；持续维护逆向与训练工具库。",
+      "feedback": "fuzzer 触发的候选 bug 经手工利用验证后转化为 CVE 与公开 exploit，形成‘工具产 bug → 手工利用 → 公开沉淀 → 反哺工具’的正反馈。",
+      "intermediate_capability": "把‘找洞’从依赖外部随机漏洞馈赠的偶发事件，工程化为可重复的 fuzzing → 候选 bug → 手工利用流程。",
+      "observed_outcomes": [
+        "Phrack《Smashing The Browser: From fuzzing to 0day exploit》（V8 Turbofan 类型混淆）",
+        "armpwn 训练环境、ida_scripts 逆向工具库"
+      ],
+      "evidence_ids": [
+        "saelo-decisions-04",
+        "saelo-works-008",
+        "saelo-works-009",
+        "saelo-decisions-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "支撑本机制的核心来源 saelo-decisions-04 与 saelo-works-008/009 多为 lead_only 或 verified_in_run=false，Phrack《Smashing The Browser》正文未直接抓取；'自建 fuzzer 驱动稳定产出'可能高估了工具建设在 2018 年后持续产出中的因果权重，缺乏一手自述确认 fuzzer 与具体 CVE 的直接对应。"
+    }
+  ],
+  "tensions": [
+    "person_json 标注 primary_focus 为‘浏览器与 V8 漏洞’，但一手可证作品集中在 JavaScriptCore 与 Firefox，V8 方向仅见于搜索摘要与 lead_only 来源（saelo-decisions-04/05、sg-community-04），未在一手正文中证实；‘V8’标签与个人账户可佐证的原创作品范围之间存在缺口，可能因后续工作归属雇主组织而非个人账户。",
+    "真名 ‘Samuel Groß’ 仅由 person_json 提供，抓取到的一手来源（GitHub、saelo.github.io、Phrack 正文）均仅出现 handle saelo，真名↔handle 绑定为 reported 级，未有一手来源独立佐证。",
+    "GitHub bio 写 location ‘Zürich, Switzerland’ 但组织为 kitctf（常关联卡尔斯鲁厄理工学院 KIT），二者地理位置不一致，无法据 bio 判定教育归属，需作为缺口处理。",
+    "Phrack #70 introduction 页返回 'Release date: 2021-10-05'，与社区记录的 2017 前后不符，推断为网站重构后的页面元数据/再版日期，但未找到能确证原始发布日期的一手页面，冲突未消解。",
+    "saelo.github.io 个人长文 writeup 在 2017-03 后停更（saelo-works-013），输出重心转移到代码仓库与会议材料；研究是否仍在继续及 2019 年后技术演化（是否转向 fuzzing、writeup 习惯是否变化）在可抓取范围内无法确认。",
+    "saelo-decisions-07（Black Hat USA 2018《Attacking JavaScript Engines in 2018》）verified_in_run=false，该演讲事实未在一手页面核实，相关方法论公开化结论仅作 lead 处理。"
+  ],
+  "transferable_practices": [
+    "进入新引擎/运行时时，从边界原语（infoleak、OOB）这类较轻量 bug 切入建立对内部数据结构的熟悉，再升级到完整利用，而非直接挑战 JIT 等高难度目标。",
+    "把‘内存破坏原语 → 信息泄露 → 伪造对象 → 任意读写 → 代码执行’链路抽象为可跨运行时复用的通用链路，验证方法通用性而非绑定单一引擎。",
+    "对每个研究对象同时维护可复现 exploit 仓库、博客 writeup、系统论文/会议材料的三件套输出，使研究可被同行复现与审视。",
+    "研究前先向上游官方邮件列表/社区刊物报告并据回复整理输出，形成‘披露—收到反馈—成文’的反馈回路而非孤立挖掘。",
+    "用结构化练习仓库（如 armpwn 式‘train/learn memory corruption’）固化底层利用经验，并把练习本身作为可公开、可复用的产出。",
+    "把单点漏洞归纳为通用方法并整理为对外可复现的方法论沉淀，而非仅发布 PoC。"
+  ],
+  "non_transferable_conditions": [
+    "2016-2018 年各主流浏览器引擎（JSC、SpiderMonkey、V8）对 slice/load 类边界检查普遍薄弱的历史窗口，属时代外部条件，难以在当下复现同等产出密度。",
+    "Pwn2Own 2018 全链涉及团队协作（据 sg-community-04 线索，Niklas Baumstark 组队），全链产出部分依赖组队资源，该线索未经一手页面核实。",
+    "加入 Google Project Zero（saelo-decisions-05，inferred）带来的稳定披露通道与上游协作，使 V8 fuzzer 与利用研究成为长期项目，属组织资源而非个人可迁移能力；该加入时间点依据 GitHub bio 与 2018 演讲署名反推，非直接一手日期。",
+    "macOS mmap 连续分配、内存压缩/页去重等 OS 级特性（CVE-2016-9066 利用所依赖）属特定平台外部条件。",
+    "Phrack 审稿接受与社区刊物署名属外部评审机会，非个人可单方面复制。",
+    "kitctf 组织归属与潜在的教育背景资源，属个人特有条件且无一手页面证实。"
+  ],
+  "open_questions": [
+    "saelo 加入 Google Project Zero / Chrome V8 安全团队的确切时间与团队角色：Project Zero about 页与 Black Hat 2018 schedule 页分别返回 404，当前仅以 GitHub bio 与演讲署名推断为 2018 年前后，缺一手确认。",
+    "V8 方向原创工作是否存在及归属：个人 GitHub 未发现原创 V8 exploit 或 Fuzzilli（JS 引擎 fuzzer），V8 相关仓库仅为 fork（v8.dev、clusterfuzz），可能归属雇主组织仓库，未核实。",
+    "2019 年后技术演化与输出习惯：saelo.github.io 自 2017-03 停更，后续是否转向 fuzzing、writeup 习惯是否改变、是否仍在 Project Zero / Google，均无 2018 之后的一手抓取证据。",
+    "Phrack《Attacking JavaScript Engines》与《Smashing The Browser》正文部分未能直接抓取，文章内 acknowledgments/greets 段及作者方法论原话未核实，无法据此提取本人关于学习路径、失败、导师的一手自述。",
+    "POC 2016 议程页与 Black Hat 2018 schedule 页返回 404，相关演讲事实与议程定位未能一手确认（saelo-ext-05、saelo-decisions-07）。",
+    "教育背景（本科/硕士学校、专业、起止年）与 kitctf 组织归属的真实关系：GitHub bio 仅给 location 与组织，无学校一手声明，KIT 关联仅为推断。",
+    "Niklas Baumstark 同伴关系及组队细节、OffensiveCon/Black Hat/POC 演讲正文均无一手页面核验，仅作 lead_only。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/samuel-gross-saelo-synthesis-v1-20260926-223835-188",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790433680400542000-samuel-gross-saelo-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "a1183bd8-71f8-4042-9ed5-9f342a5b9fcd",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_dmffbhrr63n8byiwkco9krb5",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/samuel-gross-saelo-synthesis-v1-20260926-223835-188/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-26T14:41:20.406282+00:00"
+      },
+      {
+        "tool_use_id": "call_mqofukqj60r05vo25ywrfd4m",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/samuel-gross-saelo-synthesis-v1-20260926-223835-188/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-26T14:41:20.406249+00:00"
+      },
+      {
+        "tool_use_id": "call_8260d83rchbfdt9unqz7ktgi",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/samuel-gross-saelo-synthesis-v1-20260926-223835-188/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "7cd740f139876a7b8c5611f83fb2aad09024c7272ddf174041f94583a3a07a3e",
+        "accessed_at": "2026-09-26T14:41:20.406296+00:00"
+      },
+      {
+        "tool_use_id": "call_s1u183gq6h98e8uu6e8ojq5c",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/samuel-gross-saelo-synthesis-v1-20260926-223835-188/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "ebbdd6324ae844dcf347a439f9a82deb83da81a2b871d4fc2948df807c87bc91",
+        "accessed_at": "2026-09-26T14:41:20.406310+00:00"
+      },
+      {
+        "tool_use_id": "call_rbnqojyqtxbmhcn4qj3wflk2",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/samuel-gross-saelo-synthesis-v1-20260926-223835-188/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-26T14:41:20.406304+00:00"
+      },
+      {
+        "tool_use_id": "call_zc0l1p0u4vou2ugt2j35frsx",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/samuel-gross-saelo-synthesis-v1-20260926-223835-188/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "d82341948293d2b7bc1d3637a52156ef5903e9a773d0ec199bcd5af65ba166db",
+        "accessed_at": "2026-09-26T14:41:20.406386+00:00"
+      },
+      {
+        "tool_use_id": "call_llt0idg09uca8awfnk0h4v7y",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/samuel-gross-saelo-synthesis-v1-20260926-223835-188/checkpoint.md",
+          "content": "# 检查点 — Samuel Groß (saelo) 综合\n\n## 已确认的有效证据（verified_in_run=true）\n\n### 可核验时间线维度（timeline）\n- saelo-tl-01 (2014-03): CVE-2014-0038 Linux LPE (recvmmsg x86_x32 ABI, ptmx_fops 指针覆盖) — documented, primary\n- saelo-tl-02 (2016-01): Phrack #70 自述 2016 初发现 CVE-2016-4622 (JSC Array.slice OOB, addrof/fakeobj) — documented, primary\n- saelo-tl-04 (2016-10-29): JSC Array.slice OOB writeup + Phrack + jscpwn 三件套 — documented, primary\n- saelo-tl-05 (2016-12): 33C3 CTF 'read-eval-pwn loop' Lua load 利用 (CFI 绕过) — documented, primary\n- saelo-tl-06 (2017-03-10): Firefox 跨 mmap 溢出 (CVE-2016-9066, SpiderMonkey, >95% 可靠) — documented, primary\n- saelo-tl-07 (2018-03): Pwn2Own 2018 Safari RCE+沙箱逃逸+内核 LPE 全链 (stage0..5) — documented, primary\n\n### 公开作品维度（works）\n- saelo-works-013 (2017-03): saelo.github.io 共 4 篇 blog，2017-03 后停更 — documented, primary（verified）\n\n### 深度对话维度（conversations）\n- sg-self-01: 4 篇 writeup 输出习惯 — documented, primary\n- sg-self-02: JSC Array.slice 配套 Phrack + jscpwn — documented, primary\n\n### 社区维度（community）\n- sg-community-01: Lua 邮件列表披露—回复—writeup 反馈回路 — documented, primary\n- sg-community-02: 2016-09~2017-03 跨引擎 writeup 稳定输出 — documented, primary\n- sg-community-03: Phrack #70 两篇署名 saelo — documented, primary\n- sg-community-04: Niklas Baumstark 组队 Pwn2Own / OffensiveCon / Google V8 线索 — inferred, lead_only\n\n### 外部视角维度（external）\n- saelo-ext-01/02/03: 三篇一手 writeup 作交叉验证基线 — documented, primary\n- saelo-ext-04: Google Project Zero 团队线索 — unknown, lead_only（官方页 404）\n- saelo-ext-05: POC 2016 演讲线索 — unknown, lead_only（议程页 404）\n\n### 关键决策维度（decisions）\n- saelo-decisions-01 (2014): 跨平台内核利用 + armpwn \"train/learn\" — documented\n- saelo-decisions-02 (2016-09): 转向 JSC，infoleak 先行 → OOB → Phrack — documented, primary\n- saelo-decisions-03 (2017-03): Lua + Firefox 跨引擎方法论迁移 — documented, primary\n- saelo-decisions-04 (2017): Phrack《Smashing The Browser》自建 V8 fuzzer→0day — reported, lead_only\n- saelo-decisions-05 (2018): 加入 Google Project Zero（推断，非一手日期） — inferred, lead_only\n- saelo-decisions-06 (2018): Pwn2Own 全链 — documented\n- saelo-decisions-07 (2018): Black Hat USA 2018《Attacking JS Engines in 2018》 — unknown, lead_only（verified=false）\n\n## 关键矛盾与缺口\n\n### 矛盾\n1. **V8 标签缺口**: person_json primary_focus 标\"浏览器与 V8 漏洞\"，但一手作品集中在 JSC/Firefox，V8 仅搜索摘要线索；可能归属雇主组织。\n2. **真名↔handle**: person_json 提供 \"Samuel Groß\"，一手来源仅见 handle saelo；真名→handle 为 reported 级。\n3. **Phrack #70 日期**: introduction 页显示 Release date 2021-10-05，与社区记录 2017 不符，推断为重排版元数据。\n4. **location/组织不一致**: bio 写 Zürich，但组织为 kitctf（关联 KIT），无法据 bio 判定教育归属。\n5. **saelo.github.io 输出渠道变迁**: 2017-03 后 blog 停更，后续转向代码仓库/会议材料。\n\n### 资料缺口\n1. 任何本人关于方法论/失败/转向/导师的一手访谈自述缺失。\n2. Project Zero 团队页 404，无法一手确认加入时间/团队角色。\n3. POC 2016 议程页 404，无法一手确认演讲事实。\n4. Black Hat 2018 schedule 页 404，saelo-decisions-07 verified=false。\n5. Phrack 论文正文（Attacking JavaScript Engines、Smashing The Browser）部分未能直接抓取。\n6. 2019 年后技术演化（是否转向 fuzzing、writeup 习惯变化）无法仅凭个人 GitHub 佐证。\n7. Niklas Baumstark 同伴关系、kitctf 教育背景均无一手页面。\n\n## 主机制候选（满足≥2项判据）\n\n1. **跨引擎/跨平台方法论迁移**（repeated + distinctive + 解释后续多个结果）\n   - 起点: 2014 内核 LPE → 2016 JSC → 2017 Lua/Firefox → 2018 全链\n   - 反复: OOB/原语→addrof/fakeobj→任意读写→代码执行 链路在 JSC/Lua/SpiderMonkey 重复\n   - 反馈: Lua 邮件列表；Phrack 审稿；Pwn2Own 实战\n   - 成果: CVE-2016-4622, CVE-2016-9066, Pwn2Own 2018 全链\n\n2. **工程化三件套输出（PoC repo + writeup + 系统论文/会议）**（repeated + distinctive）\n   - jscpwn + post + Phrack; pwn2own2018 + README; armpwn \"train/learn\"\n   - 起点条件: 自建训练/工具环境（armpwn, ida_scripts）\n\n3. **工具/训练环境建设驱动稳定产出**（repeated + 解释 fuzzing→0day）\n   - armpwn \"train/learn memory corruption\"; ida_scripts; Smashing The Browser 自建 V8 fuzzer\n   - 反馈: fuzzer 触发候选 bug → 手工利用\n\n## 待办\n- 对照 schema 构造 output.json\n- 区分 documented/reported/inferred/unknown，无效 id（saelo-decisions-07 verified=false 仍为 lead_only，需标注）不引用为已验证支撑\n"
+        },
+        "success": true,
+        "content_sha256": "e060ccbf8e41cf0b615ba90ad4bc22a7c81020a21b92ba432a34eeb02c2872cd",
+        "accessed_at": "2026-09-26T14:41:20.406394+00:00"
+      },
+      {
+        "tool_use_id": "call_pxs61q61yiuh02cq8j1dzc7f",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/samuel-gross-saelo-synthesis-v1-20260926-223835-188/output.json",
+          "content": "{\n  \"person\": \"Samuel Groß (saelo)\",\n  \"expertise\": [\n    \"浏览器与 JavaScript 引擎（JavaScriptCore、SpiderMonkey、V8）漏洞发现与利用\",\n    \"操作系统内核与系统级本地提权（Linux、iOS、XNU）\",\n    \"解释型运行时（Lua）利用与 CFI 绕过\",\n    \"浏览器全链利用（渲染进程 RCE + 沙箱逃逸 + 内核 LPE）\",\n    \"自建漏洞挖掘与逆向辅助工具链（V8 fuzzer、IDA 脚本、ARM 内存破坏训练环境）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2014–2015\",\n      \"stage\": \"系统级/内核利用起步期：在 Linux 内核与移动内核上建立内存破坏利用的工程基础\",\n      \"capability_change\": \"以 Linux 本地提权（CVE-2014-0038，recvmmsg x86_x32 ABI 未校验用户态 timeout 指针，向 ptmx_fops 函数指针位置写入实现 root）为公开起点，并维护 iOS 内核工具（ios-kern-utils）。形成‘系统级指针覆盖 → 提权’的底层利用思路，为后续 JS 引擎中的 fakeobj/addrof 原语提供可迁移的技术谱系（内核 fops 函数指针劫持 ↔ JS 引擎伪造对象指针）。\",\n      \"evidence_ids\": [\n        \"saelo-tl-01\",\n        \"saelo-decisions-01\",\n        \"saelo-works-001\",\n        \"saelo-works-002\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2016\",\n      \"stage\": \"向 JavaScript 引擎迁移期：从 infoleak 切入，建立 JSC addrof/fakeobj 原语与系统化输出三件套\",\n      \"capability_change\": \"2016 年初发现 CVE-2016-4622（JavaScriptCore Array.slice 越界访问），系统梳理 NaN-boxing、butterfly、GC、JSObject/Structure，自建 addrof/fakeobj 原语与伪造 Float64Array 实现任意读写。同一攻击面先做 TypedArray.slice infoleak、再做 Array.slice OOB、再整理为 Phrack 综述，呈现‘小漏洞→大漏洞→系统综述’的递进输出。把内核期的‘单点研究→PoC 仓库→系统性论文’三件套输出习惯在 JS 引擎方向定型。\",\n      \"evidence_ids\": [\n        \"saelo-tl-02\",\n        \"saelo-tl-04\",\n        \"saelo-decisions-02\",\n        \"saelo-works-004\",\n        \"sg-self-02\",\n        \"sg-community-03\",\n        \"saelo-ext-02\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2016-2017\",\n      \"stage\": \"跨引擎练习与输出稳定期：把 OOB→伪造→任意读写 链路横向迁移到 Lua 与 SpiderMonkey\",\n      \"capability_change\": \"在主力 JSC 之外转向 Lua（33C3 CTF 'read-eval-pwn loop' 挑战，伪造 Lua 值、滥用 setjmp/longjmp 绕过 Clang CFI、借 yield 触发受控跳转）与 Firefox（CVE-2016-9066，nsScriptLoadHandler::TryDecodeRawData 的 uint32_t capacity 在 >4GB 输入下回绕，用 zlib 流式 flush 把触发载荷压到 ~18MB、利用 macOS mmap 连续分配承载零填充，>95% 可靠、约 1 分钟完成）。验证‘内存破坏原语 → 信息泄露 → 代码执行’链路的引擎通用性，并从纯漏洞报告进入‘为社区出题/造工具’的输出层级。\",\n      \"evidence_ids\": [\n        \"saelo-tl-05\",\n        \"saelo-tl-06\",\n        \"saelo-decisions-03\",\n        \"saelo-works-006\",\n        \"saelo-works-007\",\n        \"sg-community-01\",\n        \"sg-community-02\",\n        \"saelo-ext-03\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017–2018\",\n      \"stage\": \"工具化与全链化期：自建 fuzzer 稳定供给 bug，并把单引擎利用升级为竞赛级全链\",\n      \"capability_change\": \"据 Phrack《Smashing The Browser》（reported，正文未直接抓取）记录自建 V8 fuzzer 触发并利用 Turbofan 类型混淆漏洞，把‘找洞’从偶发事件工程化为可重复流程。2018-03 Pwn2Own 完成 Safari RCE + macOS 沙箱逃逸 + XNU 内核 LPE 全链（WebKit DFG JIT 类型混淆 CVE-2018-4233 + launchd 沙箱检查缺失 + XNU bootstrap port 覆盖，stage0..stage5 + libspc XPC 协议重实现）。技术栈回到 2014 年的内核利用根脉，体现跨子系统协同能力。\",\n      \"evidence_ids\": [\n        \"saelo-tl-07\",\n        \"saelo-decisions-04\",\n        \"saelo-decisions-06\",\n        \"saelo-works-010\",\n        \"saelo-works-011\",\n        \"sg-community-04\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"跨引擎/跨平台方法论迁移：把同一套‘原语→信息泄露→代码执行’链路抽象后反复应用到不同运行时\",\n      \"starting_conditions\": \"2014 年已在 Linux 内核（CVE-2014-0038，ptmx_fops 函数指针覆盖）建立‘指针覆盖 → 提权’的底层利用经验，具备跨平台内核利用基础（ios-kern-utils），尚未接触 JS 引擎。\",\n      \"repeated_practice\": \"2016 年切入 JSC 时先从边界原语（TypedArray.slice infoleak、Array.slice OOB）入手，构造 addrof/fakeobj 原语与伪造 Float64Array 实现任意读写；随后将同一‘OOB 索引 → 伪造对象 → 任意读写 → 代码执行’链路迁移到 Lua（伪造 Lua 值、CFI 绕过）与 SpiderMonkey（污染 firstFreeSpan、嵌套 ArrayBuffer），再在 Pwn2Own 2018 把 JIT 类型混淆与 launchd/XNU 系统原语串联成全链。\",\n      \"feedback\": \"Lua 研究先向 Lua 邮件列表投递并据回复整理 writeup（披露—回复—成文的反馈回路）；JSC 研究经 Phrack 审稿连续发表两篇（社区刊物接受信号）；Pwn2Own 实战在真实目标上检验全链可靠性。\",\n      \"intermediate_capability\": \"形成‘内存破坏原语 → 信息泄露 → 伪造对象 → 任意读写 → 代码执行’的通用利用链路抽象，并具备对 NaN-boxing、butterfly、GC、JIT 类型推断、CFI、沙箱等多层防护的逐层对抗能力。\",\n      \"observed_outcomes\": [\n        \"CVE-2016-4622（JSC Array.slice OOB）+ jscpwn + Phrack《Attacking JavaScript Engines》\",\n        \"33C3 CTF 'read-eval-pwn loop' Lua 利用挑战\",\n        \"CVE-2016-9066（Firefox 跨 mmap 溢出，>95% 可靠、约 1 分钟）\",\n        \"Pwn2Own 2018 Safari + macOS 沙箱逃逸 + 内核 LPE 全链\"\n      ],\n      \"evidence_ids\": [\n        \"saelo-tl-01\",\n        \"saelo-tl-02\",\n        \"saelo-tl-04\",\n        \"saelo-tl-05\",\n        \"saelo-tl-06\",\n        \"saelo-tl-07\",\n        \"saelo-decisions-01\",\n        \"saelo-decisions-02\",\n        \"saelo-decisions-03\",\n        \"sg-community-01\",\n        \"sg-community-03\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"跨引擎产出集中在 2016-2018 短窗口，亦可能反映该时段各引擎对 slice/load 类边界检查普遍薄弱（偶然机会而非方法通用性）；此外 Pwn2Own 全链涉及团队协作（据 sg-community-04 线索，Niklas Baumstark 组队），全链可靠性未必全部归因于个人跨引擎迁移能力。该组队线索未经一手页面核实，仅作 lead 处理。\"\n    },\n    {\n      \"name\": \"工程化三件套输出：PoC/exploit 仓库 + 博客 writeup + 系统论文/会议的标准化产出闭环\",\n      \"starting_conditions\": \"早期已有把练习固化为可复用仓库的习惯（armpwn 自述 'train/learn memory corruption on the ARM platform'），具备自建训练/工具环境的条件。\",\n      \"repeated_practice\": \"对每个研究对象同时产出：可复现的 exploit 仓库（jscpwn、pwn2own2018、cve-2018-4233）、配套博客 writeup（saelo.github.io）、以及系统化论文或会议材料（Phrack《Attacking JavaScript Engines》、Pwn2Own 链自述 README）。\",\n      \"feedback\": \"Phrack 审稿接受与社区刊物署名提供外部评审反馈；可复现代码仓库使研究可被同行复现与审视。\",\n      \"intermediate_capability\": \"把单点漏洞归纳为通用方法的能力，并把内部研究流程整理为可被社区复用/审视的方法论沉淀，而非仅发布 PoC。\",\n      \"observed_outcomes\": [\n        \"JSC Array.slice：post + Phrack 论文 + jscpwn 仓库三件套\",\n        \"Pwn2Own 2018：stage0..stage5 + libspc 结构化仓库 + README 自述\",\n        \"armpwn、ida_scripts 等配套训练/逆向工具沉淀\"\n      ],\n      \"evidence_ids\": [\n        \"saelo-tl-04\",\n        \"saelo-tl-07\",\n        \"saelo-works-004\",\n        \"saelo-works-008\",\n        \"saelo-works-009\",\n        \"saelo-works-011\",\n        \"sg-self-02\",\n        \"sg-community-02\",\n        \"sg-community-03\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"三件套输出在 2017-03 后 blog 停更（据 saelo-works-013），后续输出重心转移到代码仓库与会议材料，该机制在 2018 年后的延续性缺乏一手 writeup 证据，可能反映输出渠道变迁而非机制中断。\"\n    },\n    {\n      \"name\": \"工具/训练环境建设驱动稳定产出：自建 fuzzer 与练习环境把‘找洞’从偶发事件工程化\",\n      \"starting_conditions\": \"早期已建立 armpwn（自述 'train/learn memory corruption'）等结构化练习仓库，并沉淀 ida_scripts 等逆向辅助工具，研究依赖自建工具链而非纯手工分析。\",\n      \"repeated_practice\": \"据 Phrack《Smashing The Browser》（reported，正文未直接抓取）自建针对 V8 的 fuzzer 以稳定产生候选 bug，再投入手工利用；持续维护逆向与训练工具库。\",\n      \"feedback\": \"fuzzer 触发的候选 bug 经手工利用验证后转化为 CVE 与公开 exploit，形成‘工具产 bug → 手工利用 → 公开沉淀 → 反哺工具’的正反馈。\",\n      \"intermediate_capability\": \"把‘找洞’从依赖外部随机漏洞馈赠的偶发事件，工程化为可重复的 fuzzing → 候选 bug → 手工利用流程。\",\n      \"observed_outcomes\": [\n        \"Phrack《Smashing The Browser: From fuzzing to 0day exploit》（V8 Turbofan 类型混淆）\",\n        \"armpwn 训练环境、ida_scripts 逆向工具库\"\n      ],\n      \"evidence_ids\": [\n        \"saelo-decisions-04\",\n        \"saelo-works-008\",\n        \"saelo-works-009\",\n        \"saelo-decisions-01\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"支撑本机制的核心来源 saelo-decisions-04 与 saelo-works-008/009 多为 lead_only 或 verified_in_run=false，Phrack《Smashing The Browser》正文未直接抓取；'自建 fuzzer 驱动稳定产出'可能高估了工具建设在 2018 年后持续产出中的因果权重，缺乏一手自述确认 fuzzer 与具体 CVE 的直接对应。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 标注 primary_focus 为‘浏览器与 V8 漏洞’，但一手可证作品集中在 JavaScriptCore 与 Firefox，V8 方向仅见于搜索摘要与 lead_only 来源（saelo-decisions-04/05、sg-community-04），未在一手正文中证实；‘V8’标签与个人账户可佐证的原创作品范围之间存在缺口，可能因后续工作归属雇主组织而非个人账户。\",\n    \"真名 ‘Samuel Groß’ 仅由 person_json 提供，抓取到的一手来源（GitHub、saelo.github.io、Phrack 正文）均仅出现 handle saelo，真名↔handle 绑定为 reported 级，未有一手来源独立佐证。\",\n    \"GitHub bio 写 location ‘Zürich, Switzerland’ 但组织为 kitctf（常关联卡尔斯鲁厄理工学院 KIT），二者地理位置不一致，无法据 bio 判定教育归属，需作为缺口处理。\",\n    \"Phrack #70 introduction 页返回 'Release date: 2021-10-05'，与社区记录的 2017 前后不符，推断为网站重构后的页面元数据/再版日期，但未找到能确证原始发布日期的一手页面，冲突未消解。\",\n    \"saelo.github.io 个人长文 writeup 在 2017-03 后停更（saelo-works-013），输出重心转移到代码仓库与会议材料；研究是否仍在继续及 2019 年后技术演化（是否转向 fuzzing、writeup 习惯是否变化）在可抓取范围内无法确认。\",\n    \"saelo-decisions-07（Black Hat USA 2018《Attacking JavaScript Engines in 2018》）verified_in_run=false，该演讲事实未在一手页面核实，相关方法论公开化结论仅作 lead 处理。\"\n  ],\n  \"transferable_practices\": [\n    \"进入新引擎/运行时时，从边界原语（infoleak、OOB）这类较轻量 bug 切入建立对内部数据结构的熟悉，再升级到完整利用，而非直接挑战 JIT 等高难度目标。\",\n    \"把‘内存破坏原语 → 信息泄露 → 伪造对象 → 任意读写 → 代码执行’链路抽象为可跨运行时复用的通用链路，验证方法通用性而非绑定单一引擎。\",\n    \"对每个研究对象同时维护可复现 exploit 仓库、博客 writeup、系统论文/会议材料的三件套输出，使研究可被同行复现与审视。\",\n    \"研究前先向上游官方邮件列表/社区刊物报告并据回复整理输出，形成‘披露—收到反馈—成文’的反馈回路而非孤立挖掘。\",\n    \"用结构化练习仓库（如 armpwn 式‘train/learn memory corruption’）固化底层利用经验，并把练习本身作为可公开、可复用的产出。\",\n    \"把单点漏洞归纳为通用方法并整理为对外可复现的方法论沉淀，而非仅发布 PoC。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"2016-2018 年各主流浏览器引擎（JSC、SpiderMonkey、V8）对 slice/load 类边界检查普遍薄弱的历史窗口，属时代外部条件，难以在当下复现同等产出密度。\",\n    \"Pwn2Own 2018 全链涉及团队协作（据 sg-community-04 线索，Niklas Baumstark 组队），全链产出部分依赖组队资源，该线索未经一手页面核实。\",\n    \"加入 Google Project Zero（saelo-decisions-05，inferred）带来的稳定披露通道与上游协作，使 V8 fuzzer 与利用研究成为长期项目，属组织资源而非个人可迁移能力；该加入时间点依据 GitHub bio 与 2018 演讲署名反推，非直接一手日期。\",\n    \"macOS mmap 连续分配、内存压缩/页去重等 OS 级特性（CVE-2016-9066 利用所依赖）属特定平台外部条件。\",\n    \"Phrack 审稿接受与社区刊物署名属外部评审机会，非个人可单方面复制。\",\n    \"kitctf 组织归属与潜在的教育背景资源，属个人特有条件且无一手页面证实。\"\n  ],\n  \"open_questions\": [\n    \"saelo 加入 Google Project Zero / Chrome V8 安全团队的确切时间与团队角色：Project Zero about 页与 Black Hat 2018 schedule 页分别返回 404，当前仅以 GitHub bio 与演讲署名推断为 2018 年前后，缺一手确认。\",\n    \"V8 方向原创工作是否存在及归属：个人 GitHub 未发现原创 V8 exploit 或 Fuzzilli（JS 引擎 fuzzer），V8 相关仓库仅为 fork（v8.dev、clusterfuzz），可能归属雇主组织仓库，未核实。\",\n    \"2019 年后技术演化与输出习惯：saelo.github.io 自 2017-03 停更，后续是否转向 fuzzing、writeup 习惯是否改变、是否仍在 Project Zero / Google，均无 2018 之后的一手抓取证据。\",\n    \"Phrack《Attacking JavaScript Engines》与《Smashing The Browser》正文部分未能直接抓取，文章内 acknowledgments/greets 段及作者方法论原话未核实，无法据此提取本人关于学习路径、失败、导师的一手自述。\",\n    \"POC 2016 议程页与 Black Hat 2018 schedule 页返回 404，相关演讲事实与议程定位未能一手确认（saelo-ext-05、saelo-decisions-07）。\",\n    \"教育背景（本科/硕士学校、专业、起止年）与 kitctf 组织归属的真实关系：GitHub bio 仅给 location 与组织，无学校一手声明，KIT 关联仅为推断。\",\n    \"Niklas Baumstark 同伴关系及组队细节、OffensiveCon/Black Hat/POC 演讲正文均无一手页面核验，仅作 lead_only。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "1aec2a9f1ae8848a252e698f5ad2078e4d8cc9f5ef6f7d5af4c46ee8d4c9e274",
+        "accessed_at": "2026-09-26T14:41:20.406402+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790433680406431000-samuel-gross-saelo-synthesis-v1.json",
+    "label": "Samuel Groß (saelo):synthesis:v1",
+    "elapsed_seconds": 165.21,
+    "prompt_sha256": "09111e84191af8a9f3279f3c31d217a200ae81d0635113fc49b8c0364b1381ad",
+    "num_turns": 9,
+    "total_cost_usd": 0.43979399999999996,
+    "usage": {
+      "input_tokens": 38675,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 106688,
+      "output_tokens": 7723,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 38675,
+        "outputTokens": 7723,
+        "cacheReadInputTokens": 106688,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.43979399999999996,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

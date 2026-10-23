@@ -1,0 +1,319 @@
+{
+  "person": "Eduardo Vela Nava",
+  "expertise": [
+    "浏览器与 Web 平台漏洞研究，覆盖 XSS、CSS 侧信道与跨站信息泄露（XS-Leaks）",
+    "Web 安全缓解机制的对抗性评估与替代方案设计（CSP nonce、Isolated Scripts、XSS 过滤器）",
+    "漏洞披露流程与漏洞奖励经济学的机制设计与公共论述",
+    "可复用安全研究与 CTF 基础设施的工具化建设（tamperchrome、google-ctf、kctf）"
+  ],
+  "stages": [
+    {
+      "period": "2007–2009",
+      "stage": "公开写作起步与 XSS/客户端防护对抗练习",
+      "capability_change": "从 2007 年中以 JavaScript/Web 主题开始公开写作，进入对单点 XSS 向量的发掘练习；经 2007 年 PHP-IDS call-for-hacking 公测前预先测试、2008 年针对 NoScript、2009 年横向比较多种 XSS 过滤器，逐步形成对客户端防护机制的系统性攻击方法，而非孤立寻找单个缺陷。",
+      "evidence_ids": [
+        "evn-tl-01",
+        "evn-tl-02",
+        "evn-tl-03",
+        "evn-tl-04",
+        "evn-self-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2009–2016",
+      "stage": "CSP 投入与失败反馈触发的方向再评估",
+      "capability_change": "2009 年前后曾自行用 JavaScript 实现 CSP 原型（ACS 项目）并对 CSP 持正面态度；2016 年底因外部研究者演示 DOM XSS 对 nonce 的绕过而转为怀疑，开始系统质疑单一防御机制的有效性。这一阶段建立了以具体绕过反馈驱动机制再评估的工作模式。",
+      "evidence_ids": [
+        "evn-001",
+        "evn-works-11",
+        "evn-self-05"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2017-01 至 2017-02",
+      "stage": "从绕过转向度量框架与替代缓解方案",
+      "capability_change": "在短窗口内同时产出度量框架（Moderation/Minimization/Substitution/Simplification）、可运行替代缓解原型（Isolated Scripts 及配套 Chrome 扩展与含漏洞演示站点）和披露经济学反思，研究链从单一发现扩展到评估、建设与披露三线并行，并以自建框架对自身方案做结构化自评。",
+      "evidence_ids": [
+        "evn-002",
+        "evn-003",
+        "evn-tl-08",
+        "evn-self-02",
+        "evn-comm-02",
+        "evn-comm-03",
+        "evn-comm-05"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2019",
+      "stage": "向 XS-Leaks 协作研究项目迁移",
+      "capability_change": "研究重心由 XSS 缓解迁移到跨站信息泄露（XS-Leaks），将个人发现纳入多名研究者共同维护的 XSLeaks wiki，并以基于 HTTP 缓存的可靠查询机制作为具体技术贡献；产出形式由个人博客 writeup 演化为具名协作的长期项目。",
+      "evidence_ids": [
+        "evn-004",
+        "evn-comm-01",
+        "evn-comm-08",
+        "evn-self-03",
+        "evn-ext-xsleaks-editor"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "以攻击反推防御有效性，并据此建设替代方案",
+      "starting_conditions": "具备对 XSS 与客户端防护（NoScript、XSS 过滤器、CSP）的攻击能力，且 2009 年前后曾高度认可 CSP 并自建原型（ACS）。",
+      "repeated_practice": "反复以构造绕过的方式检验防御机制：从 PHP-IDS 公测前预先测试、横向攻击多种 XSS 过滤器，到用 CSS 属性选择器逐字符外泄 CSP nonce 演示 DOM XSS 绕过；每当绕过成立，即转入对机制本身有效性的再评估。",
+      "feedback": "外部研究者的具体绕过演示构成触发反馈：2016 年底 Sebastian Lekies 的 DOM XSS 对 nonce 的绕过演示，使其从认可 CSP 转为系统怀疑；同伴（Mario Heiderich 的 CSP 挑战、Devdatta 的运行时 CSP 锁定建议）进一步校准其判断。",
+      "intermediate_capability": "形成以'能否被绕过'反向标定防御价值的工作方式，并将绕过结果抽象为可比较的评估语言，而非停留在个案 PoC。",
+      "observed_outcomes": [
+        "2017-01-23 提出 Moderation/Minimization/Substitution/Simplification 四维缓解评估框架",
+        "2017-01-25 提出 Isolated Scripts 替代缓解方案并发布 Chrome 扩展原型与含故意漏洞的演示站点，沿用四维框架自评",
+        "研究链由破坏（绕过 CSP）扩展到建设（替代缓解原型）与评估（度量框架）并行"
+      ],
+      "evidence_ids": [
+        "evn-001",
+        "evn-002",
+        "evn-003",
+        "evn-tl-02",
+        "evn-tl-04",
+        "evn-self-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "也可解释为个人对单一机制（CSP）投入过久后的自然倦怠，而非可迁移的方法论；但 2017 年短窗口内同时产出度量框架、替代原型与披露反思，且后续在 XS-Leaks 方向延续同样的'攻击—评估—建设'结构，支持其为一贯机制而非一次性转向。"
+    },
+    {
+      "name": "公开写作与公开原型配合的反馈征求循环",
+      "starting_conditions": "2007 年中起即以个人博客持续公开写作，主题为 JavaScript 与 Web 安全，具备稳定的公开发布通道。",
+      "repeated_practice": "把每次研究以公开 writeup 发布，并在文末固定征求 Twitter 反馈；对建设性工作（如 Isolated Scripts）额外发布可安装原型与含漏洞演示站点，邀请研究者尝试绕过，把发布本身作为新一轮反馈的入口。",
+      "feedback": "同伴与读者通过 Twitter、PR 与绕过挑战反馈：PHP-IDS 维护者 Mario Heiderich 在数分钟内修补并随后访谈；Isolated Scripts 方案收到 Devdatta 的 cookie 前缀建议、Malte 的开发者体验顾虑、Mario 的钓鱼残留指出。",
+      "intermediate_capability": "形成稳定的'发布—征求反馈—迭代'循环，使公开输出同时承担传播与同行检验两重功能，而非写完即止。",
+      "observed_outcomes": [
+        "十余年跨度（2007–2019）的持续公开发表，早期高密度、后期主题更聚焦",
+        "Isolated Scripts 提案因同伴反馈而具体化（cookie 前缀、开发者体验、钓鱼残留均被纳入）",
+        "多篇博文以固定的 'DMs are open' 反馈征求结尾，构成结构性发布习惯"
+      ],
+      "evidence_ids": [
+        "evn-tl-01",
+        "evn-tl-02",
+        "evn-003",
+        "evn-works-09",
+        "evn-works-10",
+        "evn-comm-05",
+        "evn-comm-09"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "持续写作也可能仅是个人表达习惯而非能力建设机制；但其写作反复以可被同行检验的技术内容（绕过、原型、度量框架）为载体，并伴随可观察的方案迭代，提示反馈循环对方案成形存在贡献，而非纯表达。"
+    },
+    {
+      "name": "同伴协作网络对研究方向与产出的塑形",
+      "starting_conditions": "早期即与固定同伴（Gareth Heyes、David Lindsay）合作公开议题；身处 elhacker.net、Google、xsleaks 等组织网络中，可接触多名同领域研究者。",
+      "repeated_practice": "在 writeup 中密集标注前驱工作与同行贡献，并把个人发现归入协作维护的知识库：CSP nonce 绕过文致谢 WHK、Sebastian Lekies、Mario Heiderich、Gareth Heyes、David Lindsay 与 Devdatta；HTTP Cache XS-Leaks 文将 XSLeaks wiki 描述为 terjanq、lbherrera_、ronmasas、_tsuro、arthursaftnes、kkotowicz 与本人的联合成果。",
+      "feedback": "同伴直接提供技术构件与方向校准：terjanq 搭建演示、WHK 发现 JSONP 绕过、Devdatta 提出运行时 CSP 锁定、Mario 提出 CSP 挑战；研究方向因此由个人 XSS 研究扩展到集体的 XS-Leaks 类别。",
+      "intermediate_capability": "形成把孤立发现纳入协作知识库、并以前驱工作定位自身贡献的工作方式，使个人产出向可传承的社区资产转化。",
+      "observed_outcomes": [
+        "XSLeaks wiki 由多人贡献并随后由新一代维护者（terjanq 等）接续，而非随个人停止而消亡",
+        "研究主题由 XSS 缓解扩展到 XS-Leaks 这一更广类别",
+        "GitHub 组织成员身份（google、xsleaks、AppSecVillage、CTF-Organizers、elhacker-net）与多个 google/* 公共仓库维护，显示协作网络覆盖工具与 CTF 基础设施"
+      ],
+      "evidence_ids": [
+        "evn-004",
+        "evn-comm-01",
+        "evn-comm-05",
+        "evn-comm-06",
+        "evn-comm-07",
+        "evn-comm-08",
+        "evn-self-01",
+        "evn-self-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "密集致谢可能是学术规范式的引用习惯而非真实协作塑形；但部分致谢伴随可核验的具体技术构件（terjanq 搭建演示、WHK 发现 JSONP 绕过、Devdatta 提出运行时 CSP 锁定），且 wiki 由多人接续维护，支持协作网络对方向与产出存在实质贡献。"
+    }
+  ],
+  "tensions": [
+    "person_json 中 social 字段为 https://x.com/evn，而一手 GitHub 与博客均使用 handle @sirdarckcat；x.com/evn 返回 HTTP 402 未能核验，二者是否为同一账号未在抓取范围内证实，存在 handle 不一致且无法合理化合并。",
+    "2009 年博文自述居住于中国，GitHub 资料页 location 为 Zürich；两者时间跨度大，可能为不同阶段居住地，但缺乏中间迁移的公开一手时间线，作为已记录冲突保留。",
+    "对 CSP 的态度在 2009 年前后高度认可（自建 ACS 原型）与 2016 年底转为系统怀疑之间存在内在张力；这一转变由外部绕过反馈触发，并非单纯的立场反复，但长期投入与最终怀疑之间的沉没成本构成其研究路径上的持续性张力。",
+    "在与 jQuery Mobile 维护者的公开分歧中，对方认定问题属于 open redirect 而拒绝修补 location.hash 经 innerHTML 注入的缺陷；作者选择保留可复核技术材料并开放文档 PR，形成披露伦理与厂商判定之间的张力。",
+    "首页抓取摘要曾叙述 ACS/CSP 原型、WHK 发现 JSONP 绕过及作者情绪反应，但对 2017-01-25 帖正文单独抓取时工具否认该帖包含上述内容；该细节可能位于其他未单独抓取的早期帖子，或为摘要级转述，未逐帖核实，相关失败叙述以 reported 形式处理而非 documented。"
+  ],
+  "transferable_practices": [
+    "以构造绕过的结果反向标定防御机制的有效性，而非仅以是否存在漏洞为终判；绕过成立后转入对机制本身的再评估。",
+    "为所研究的缓解类别建立可比较的评估语言（如 Moderation/Minimization/Substitution/Simplification 加 Impact/Difficulty），使不同机制可在统一框架下比较而非逐案争论。",
+    "把建设性方案以可运行原型加含故意漏洞的演示站点形式公开，并主动邀请绕过，把发布转为同行检验入口。",
+    "在 writeup 中显式标注前驱工作与同行具体贡献，把孤立发现定位到协作知识库中，使个人产出可被他人接续。",
+    "在公开披露第三方缺陷时主动声明雇主身份并切割个人与雇主立场，对披露伦理与利益冲突做自觉处理。"
+  ],
+  "non_transferable_conditions": [
+    "Google 组织成员身份与 google/security-research、google/tamperchrome、google/kctf、google/google-ctf 等官方仓库的维护权限，为其工具建设与 CTF 基础设施提供组织化支撑；该资源不可由个人背景直接复制。",
+    "2007 年即进入公开写作的早期时间窗口，使其在 CSP 标准化早期即可构建可用原型并进入学术引用渠道；该时间红利不可由后来者复制。",
+    "与 Gareth Heyes、David Lindsay、Mario Heiderich、Sebastian Lekies、terjanq 等同领域研究者的长期协作网络，是特定时期与社区位置的产物，并非纯个人可迁移技能。",
+    "入职 Google 的具体时间与在 VRP/披露流程中的内部角色未获一手证据，组织资源对其能力主线是放大还是来源尚不可核验，相关组织条件不应被简单等同于个人方法。"
+  ],
+  "open_questions": [
+    "Black Hat US / OffByOne 演讲因 blackhat.com 归档页返回 403 未能一手核验，其演讲标题、年份与合著者均未确认。",
+    "Project Zero 成员身份与加入时间缺乏一手成员名单；团队博客作者列表不含其姓名，但'是否曾为 P0 成员'仍为缺口。",
+    "入职 Google 的具体时间无可核验一手来源；2017-02-08 文仅证明当时已在 Google，此前雇主与转职路径未知。",
+    "ACS 项目（CSP-in-JavaScript 原型）与 Chrome 内置 XSS Auditor 的工程关系未一手核实；其与 2008 Bluehat 'CSS - The Sexy Assassin' 演讲均仅在博客中被引用，原始材料未抓取。",
+    "2007–2016 年间更早的博客归档仅首页列出部分标题，逐篇正文未抓取，可能遗漏早期研究方向转折与入门经历的一手叙述。",
+    "https://x.com/evn 与 @sirdarckcat 的 handle 关系未在一手页面证实；x.com/evn 返回 HTTP 402，相关社交媒体互动内容未能以一手来源记录。",
+    "教育背景无公开一手来源；未发现学位、院校与起止年份的可核验材料。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/eduardo-vela-nava-synthesis-v1-20260927-143005-650",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790490947998639000-eduardo-vela-nava-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "ebf9bcd4-2978-4fda-8f3a-802542f90432",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_1g9nz358luov81fswt6822ho",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/eduardo-vela-nava-synthesis-v1-20260927-143005-650/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T06:35:48.054246+00:00"
+      },
+      {
+        "tool_use_id": "call_nn9jm9tr8j5d6u6dlr75kz45",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/eduardo-vela-nava-synthesis-v1-20260927-143005-650/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T06:35:48.054282+00:00"
+      },
+      {
+        "tool_use_id": "call_guei1ld752hq1g1wunutgmh8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/eduardo-vela-nava-synthesis-v1-20260927-143005-650/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "8f2805351f9be266c31e1d231180a212e5e5a73f3f41b04a878098fba7541b89",
+        "accessed_at": "2026-09-27T06:35:48.054297+00:00"
+      },
+      {
+        "tool_use_id": "call_1478fpzoygl4sz411jggpuej",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/eduardo-vela-nava-synthesis-v1-20260927-143005-650/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "1c379226b5734fccee68e80333e3858ff4d7002dd845227f34911dd31ee9c554",
+        "accessed_at": "2026-09-27T06:35:48.054308+00:00"
+      },
+      {
+        "tool_use_id": "call_glrtte2mn9zzhhgfgfbjse0i",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/eduardo-vela-nava-synthesis-v1-20260927-143005-650/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "7a5342bd538b2932228bc7adfc6a7cba7f0997af10936dcb536ffd5e7bf363a9",
+        "accessed_at": "2026-09-27T06:35:48.054440+00:00"
+      },
+      {
+        "tool_use_id": "call_3mraevcp9jlrgzft8i2urgnh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/eduardo-vela-nava-synthesis-v1-20260927-143005-650/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-27T06:35:48.054445+00:00"
+      },
+      {
+        "tool_use_id": "call_44k3gn3wkd7iefukjpjgrgg6",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/eduardo-vela-nava-synthesis-v1-20260927-143005-650/checkpoint.md"
+        },
+        "success": false,
+        "content_sha256": "d4148dd3771b6663d50c4d7ad5533c3fa256baba773137aa42714e58f6eb6802",
+        "accessed_at": "2026-09-27T06:35:48.055047+00:00"
+      },
+      {
+        "tool_use_id": "call_qcsr1m2ibn8wrayml6cnfyo1",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/eduardo-vela-nava-synthesis-v1-20260927-143005-650/checkpoint.md",
+          "content": "# Eduardo Vela Nava 综合 — 检查点\n\n## 身份确认\n- GitHub sirdarckcat 显示名 \"Eduardo' Vela\" <Nava>，employer=elgooG，location=Zürich，组织 google/xsleaks/googlers；与博客 sirdarckcat.blogspot.com 同 handle 同署名。两处一手交叉确认。\n- person_json.social 为 https://x.com/evn，与 @sirdarckcat 不一致；x.com/evn 返回 HTTP 402，未能核验。作为资料缺口与矛盾保留，不影响身份主线。\n- Project Zero 团队博客作者列表不含其姓名 → 排除 P0 团队归属（evn-ext-pz-author-absence）。\n\n## 有效证据（verified_in_run=true，主用）\n时间线/转折：evn-tl-01..04,08,09,10,11；evn-001,002,003,004,005；evn-self-01..05\n社区：evn-comm-01..09（comm-10 为 unknown 缺口）\n外部：evn-ext-xsleaks-editor, evn-ext-github-identity, evn-ext-pz-author-absence\n作品：evn-works-09,10,11（works-01..08 verified_in_run=false）\n\n## 被标记 unknown / 未核实（不作为 documented 因果使用，仅作缺口或辅助）\n- evn-works-01..08（verified_in_run=false）\n- evn-005（jQuery Mobile 文，verified_in_run=false）\n- evn-tl-05,06,07（Matryoshka/Service Workers/Rewards，verified_in_run=false，仅作 lead）\n- evn-tl-12（Black Hat，抓取受限）\n- evn-comm-10（Bug Hunters Blog 缺口）\n\n## 机制（候选，跨期重复+解释多结果+区分度三选二）\n1. 攻击反推防御有效性 → 缓解评估/替代方案建设（evn-tl-02,04; evn-001,002,003）— repeated + distinctive\n2. 公开写作+公开原型+反馈征求循环（evn-tl-01,02; evn-003; evn-comm-09; evn-works-09,10）— repeated + generative\n3. 同伴协作网络塑形研究方向与产出（evn-tl-02; evn-001,003,004; evn-comm-01,05,06,08）— repeated + distinctive\n4. 缓解机制有效性再评估驱动的方法论抽象（evn-001,002; evn-self-02,05）— distinctive\n\n## 张力 / 矛盾（保留）\n- @evn vs @sirdarckcat handle 不一致\n- 2009 中国 vs Zürich 地点\n- 首页摘要 \"heart broken\" / ACS / WHK / JSONP 与逐帖抓取不符（已降级处理）\n- jQuery 团队拒绝修补的披露冲突（evn-comm-04）\n- CSP 投入长期后转为怀疑（evn-001）— 内在张力\n\n## 竞争性解释\n- Google 组织资源是否为能力主线来源：GitHub 组织成员与 bughunters 入口仅证明现时归属，不证明成长机制来自组织；个人博客写作早于可核验 Google 关系（2007 vs 2017 首次自述）。保留“组织资源放大但非来源”。\n\n## 待办\n- [x] 读取全部输入\n- [x] 区分 documented/reported/inferred/unknown\n- [x] 起草阶段与机制，标注 evidence_ids\n- [ ] 写 output.json 并对照 schema\n"
+        },
+        "success": true,
+        "content_sha256": "b11dd43ec796fc5076f2d989e3359f4109bdd30430da5b3d85d567a5d006dcee",
+        "accessed_at": "2026-09-27T06:35:48.055054+00:00"
+      },
+      {
+        "tool_use_id": "call_wxxa6os9mlox546d5178j9pb",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/eduardo-vela-nava-synthesis-v1-20260927-143005-650/output.json",
+          "content": "{\n  \"person\": \"Eduardo Vela Nava\",\n  \"expertise\": [\n    \"浏览器与 Web 平台漏洞研究，覆盖 XSS、CSS 侧信道与跨站信息泄露（XS-Leaks）\",\n    \"Web 安全缓解机制的对抗性评估与替代方案设计（CSP nonce、Isolated Scripts、XSS 过滤器）\",\n    \"漏洞披露流程与漏洞奖励经济学的机制设计与公共论述\",\n    \"可复用安全研究与 CTF 基础设施的工具化建设（tamperchrome、google-ctf、kctf）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2007–2009\",\n      \"stage\": \"公开写作起步与 XSS/客户端防护对抗练习\",\n      \"capability_change\": \"从 2007 年中以 JavaScript/Web 主题开始公开写作，进入对单点 XSS 向量的发掘练习；经 2007 年 PHP-IDS call-for-hacking 公测前预先测试、2008 年针对 NoScript、2009 年横向比较多种 XSS 过滤器，逐步形成对客户端防护机制的系统性攻击方法，而非孤立寻找单个缺陷。\",\n      \"evidence_ids\": [\n        \"evn-tl-01\",\n        \"evn-tl-02\",\n        \"evn-tl-03\",\n        \"evn-tl-04\",\n        \"evn-self-01\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2009–2016\",\n      \"stage\": \"CSP 投入与失败反馈触发的方向再评估\",\n      \"capability_change\": \"2009 年前后曾自行用 JavaScript 实现 CSP 原型（ACS 项目）并对 CSP 持正面态度；2016 年底因外部研究者演示 DOM XSS 对 nonce 的绕过而转为怀疑，开始系统质疑单一防御机制的有效性。这一阶段建立了以具体绕过反馈驱动机制再评估的工作模式。\",\n      \"evidence_ids\": [\n        \"evn-001\",\n        \"evn-works-11\",\n        \"evn-self-05\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2017-01 至 2017-02\",\n      \"stage\": \"从绕过转向度量框架与替代缓解方案\",\n      \"capability_change\": \"在短窗口内同时产出度量框架（Moderation/Minimization/Substitution/Simplification）、可运行替代缓解原型（Isolated Scripts 及配套 Chrome 扩展与含漏洞演示站点）和披露经济学反思，研究链从单一发现扩展到评估、建设与披露三线并行，并以自建框架对自身方案做结构化自评。\",\n      \"evidence_ids\": [\n        \"evn-002\",\n        \"evn-003\",\n        \"evn-tl-08\",\n        \"evn-self-02\",\n        \"evn-comm-02\",\n        \"evn-comm-03\",\n        \"evn-comm-05\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2019\",\n      \"stage\": \"向 XS-Leaks 协作研究项目迁移\",\n      \"capability_change\": \"研究重心由 XSS 缓解迁移到跨站信息泄露（XS-Leaks），将个人发现纳入多名研究者共同维护的 XSLeaks wiki，并以基于 HTTP 缓存的可靠查询机制作为具体技术贡献；产出形式由个人博客 writeup 演化为具名协作的长期项目。\",\n      \"evidence_ids\": [\n        \"evn-004\",\n        \"evn-comm-01\",\n        \"evn-comm-08\",\n        \"evn-self-03\",\n        \"evn-ext-xsleaks-editor\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"以攻击反推防御有效性，并据此建设替代方案\",\n      \"starting_conditions\": \"具备对 XSS 与客户端防护（NoScript、XSS 过滤器、CSP）的攻击能力，且 2009 年前后曾高度认可 CSP 并自建原型（ACS）。\",\n      \"repeated_practice\": \"反复以构造绕过的方式检验防御机制：从 PHP-IDS 公测前预先测试、横向攻击多种 XSS 过滤器，到用 CSS 属性选择器逐字符外泄 CSP nonce 演示 DOM XSS 绕过；每当绕过成立，即转入对机制本身有效性的再评估。\",\n      \"feedback\": \"外部研究者的具体绕过演示构成触发反馈：2016 年底 Sebastian Lekies 的 DOM XSS 对 nonce 的绕过演示，使其从认可 CSP 转为系统怀疑；同伴（Mario Heiderich 的 CSP 挑战、Devdatta 的运行时 CSP 锁定建议）进一步校准其判断。\",\n      \"intermediate_capability\": \"形成以'能否被绕过'反向标定防御价值的工作方式，并将绕过结果抽象为可比较的评估语言，而非停留在个案 PoC。\",\n      \"observed_outcomes\": [\n        \"2017-01-23 提出 Moderation/Minimization/Substitution/Simplification 四维缓解评估框架\",\n        \"2017-01-25 提出 Isolated Scripts 替代缓解方案并发布 Chrome 扩展原型与含故意漏洞的演示站点，沿用四维框架自评\",\n        \"研究链由破坏（绕过 CSP）扩展到建设（替代缓解原型）与评估（度量框架）并行\"\n      ],\n      \"evidence_ids\": [\n        \"evn-001\",\n        \"evn-002\",\n        \"evn-003\",\n        \"evn-tl-02\",\n        \"evn-tl-04\",\n        \"evn-self-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"也可解释为个人对单一机制（CSP）投入过久后的自然倦怠，而非可迁移的方法论；但 2017 年短窗口内同时产出度量框架、替代原型与披露反思，且后续在 XS-Leaks 方向延续同样的'攻击—评估—建设'结构，支持其为一贯机制而非一次性转向。\"\n    },\n    {\n      \"name\": \"公开写作与公开原型配合的反馈征求循环\",\n      \"starting_conditions\": \"2007 年中起即以个人博客持续公开写作，主题为 JavaScript 与 Web 安全，具备稳定的公开发布通道。\",\n      \"repeated_practice\": \"把每次研究以公开 writeup 发布，并在文末固定征求 Twitter 反馈；对建设性工作（如 Isolated Scripts）额外发布可安装原型与含漏洞演示站点，邀请研究者尝试绕过，把发布本身作为新一轮反馈的入口。\",\n      \"feedback\": \"同伴与读者通过 Twitter、PR 与绕过挑战反馈：PHP-IDS 维护者 Mario Heiderich 在数分钟内修补并随后访谈；Isolated Scripts 方案收到 Devdatta 的 cookie 前缀建议、Malte 的开发者体验顾虑、Mario 的钓鱼残留指出。\",\n      \"intermediate_capability\": \"形成稳定的'发布—征求反馈—迭代'循环，使公开输出同时承担传播与同行检验两重功能，而非写完即止。\",\n      \"observed_outcomes\": [\n        \"十余年跨度（2007–2019）的持续公开发表，早期高密度、后期主题更聚焦\",\n        \"Isolated Scripts 提案因同伴反馈而具体化（cookie 前缀、开发者体验、钓鱼残留均被纳入）\",\n        \"多篇博文以固定的 'DMs are open' 反馈征求结尾，构成结构性发布习惯\"\n      ],\n      \"evidence_ids\": [\n        \"evn-tl-01\",\n        \"evn-tl-02\",\n        \"evn-003\",\n        \"evn-works-09\",\n        \"evn-works-10\",\n        \"evn-comm-05\",\n        \"evn-comm-09\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"持续写作也可能仅是个人表达习惯而非能力建设机制；但其写作反复以可被同行检验的技术内容（绕过、原型、度量框架）为载体，并伴随可观察的方案迭代，提示反馈循环对方案成形存在贡献，而非纯表达。\"\n    },\n    {\n      \"name\": \"同伴协作网络对研究方向与产出的塑形\",\n      \"starting_conditions\": \"早期即与固定同伴（Gareth Heyes、David Lindsay）合作公开议题；身处 elhacker.net、Google、xsleaks 等组织网络中，可接触多名同领域研究者。\",\n      \"repeated_practice\": \"在 writeup 中密集标注前驱工作与同行贡献，并把个人发现归入协作维护的知识库：CSP nonce 绕过文致谢 WHK、Sebastian Lekies、Mario Heiderich、Gareth Heyes、David Lindsay 与 Devdatta；HTTP Cache XS-Leaks 文将 XSLeaks wiki 描述为 terjanq、lbherrera_、ronmasas、_tsuro、arthursaftnes、kkotowicz 与本人的联合成果。\",\n      \"feedback\": \"同伴直接提供技术构件与方向校准：terjanq 搭建演示、WHK 发现 JSONP 绕过、Devdatta 提出运行时 CSP 锁定、Mario 提出 CSP 挑战；研究方向因此由个人 XSS 研究扩展到集体的 XS-Leaks 类别。\",\n      \"intermediate_capability\": \"形成把孤立发现纳入协作知识库、并以前驱工作定位自身贡献的工作方式，使个人产出向可传承的社区资产转化。\",\n      \"observed_outcomes\": [\n        \"XSLeaks wiki 由多人贡献并随后由新一代维护者（terjanq 等）接续，而非随个人停止而消亡\",\n        \"研究主题由 XSS 缓解扩展到 XS-Leaks 这一更广类别\",\n        \"GitHub 组织成员身份（google、xsleaks、AppSecVillage、CTF-Organizers、elhacker-net）与多个 google/* 公共仓库维护，显示协作网络覆盖工具与 CTF 基础设施\"\n      ],\n      \"evidence_ids\": [\n        \"evn-004\",\n        \"evn-comm-01\",\n        \"evn-comm-05\",\n        \"evn-comm-06\",\n        \"evn-comm-07\",\n        \"evn-comm-08\",\n        \"evn-self-01\",\n        \"evn-self-03\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"密集致谢可能是学术规范式的引用习惯而非真实协作塑形；但部分致谢伴随可核验的具体技术构件（terjanq 搭建演示、WHK 发现 JSONP 绕过、Devdatta 提出运行时 CSP 锁定），且 wiki 由多人接续维护，支持协作网络对方向与产出存在实质贡献。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 中 social 字段为 https://x.com/evn，而一手 GitHub 与博客均使用 handle @sirdarckcat；x.com/evn 返回 HTTP 402 未能核验，二者是否为同一账号未在抓取范围内证实，存在 handle 不一致且无法合理化合并。\",\n    \"2009 年博文自述居住于中国，GitHub 资料页 location 为 Zürich；两者时间跨度大，可能为不同阶段居住地，但缺乏中间迁移的公开一手时间线，作为已记录冲突保留。\",\n    \"对 CSP 的态度在 2009 年前后高度认可（自建 ACS 原型）与 2016 年底转为系统怀疑之间存在内在张力；这一转变由外部绕过反馈触发，并非单纯的立场反复，但长期投入与最终怀疑之间的沉没成本构成其研究路径上的持续性张力。\",\n    \"在与 jQuery Mobile 维护者的公开分歧中，对方认定问题属于 open redirect 而拒绝修补 location.hash 经 innerHTML 注入的缺陷；作者选择保留可复核技术材料并开放文档 PR，形成披露伦理与厂商判定之间的张力。\",\n    \"首页抓取摘要曾叙述 ACS/CSP 原型、WHK 发现 JSONP 绕过及作者情绪反应，但对 2017-01-25 帖正文单独抓取时工具否认该帖包含上述内容；该细节可能位于其他未单独抓取的早期帖子，或为摘要级转述，未逐帖核实，相关失败叙述以 reported 形式处理而非 documented。\"\n  ],\n  \"transferable_practices\": [\n    \"以构造绕过的结果反向标定防御机制的有效性，而非仅以是否存在漏洞为终判；绕过成立后转入对机制本身的再评估。\",\n    \"为所研究的缓解类别建立可比较的评估语言（如 Moderation/Minimization/Substitution/Simplification 加 Impact/Difficulty），使不同机制可在统一框架下比较而非逐案争论。\",\n    \"把建设性方案以可运行原型加含故意漏洞的演示站点形式公开，并主动邀请绕过，把发布转为同行检验入口。\",\n    \"在 writeup 中显式标注前驱工作与同行具体贡献，把孤立发现定位到协作知识库中，使个人产出可被他人接续。\",\n    \"在公开披露第三方缺陷时主动声明雇主身份并切割个人与雇主立场，对披露伦理与利益冲突做自觉处理。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Google 组织成员身份与 google/security-research、google/tamperchrome、google/kctf、google/google-ctf 等官方仓库的维护权限，为其工具建设与 CTF 基础设施提供组织化支撑；该资源不可由个人背景直接复制。\",\n    \"2007 年即进入公开写作的早期时间窗口，使其在 CSP 标准化早期即可构建可用原型并进入学术引用渠道；该时间红利不可由后来者复制。\",\n    \"与 Gareth Heyes、David Lindsay、Mario Heiderich、Sebastian Lekies、terjanq 等同领域研究者的长期协作网络，是特定时期与社区位置的产物，并非纯个人可迁移技能。\",\n    \"入职 Google 的具体时间与在 VRP/披露流程中的内部角色未获一手证据，组织资源对其能力主线是放大还是来源尚不可核验，相关组织条件不应被简单等同于个人方法。\"\n  ],\n  \"open_questions\": [\n    \"Black Hat US / OffByOne 演讲因 blackhat.com 归档页返回 403 未能一手核验，其演讲标题、年份与合著者均未确认。\",\n    \"Project Zero 成员身份与加入时间缺乏一手成员名单；团队博客作者列表不含其姓名，但'是否曾为 P0 成员'仍为缺口。\",\n    \"入职 Google 的具体时间无可核验一手来源；2017-02-08 文仅证明当时已在 Google，此前雇主与转职路径未知。\",\n    \"ACS 项目（CSP-in-JavaScript 原型）与 Chrome 内置 XSS Auditor 的工程关系未一手核实；其与 2008 Bluehat 'CSS - The Sexy Assassin' 演讲均仅在博客中被引用，原始材料未抓取。\",\n    \"2007–2016 年间更早的博客归档仅首页列出部分标题，逐篇正文未抓取，可能遗漏早期研究方向转折与入门经历的一手叙述。\",\n    \"https://x.com/evn 与 @sirdarckcat 的 handle 关系未在一手页面证实；x.com/evn 返回 HTTP 402，相关社交媒体互动内容未能以一手来源记录。\",\n    \"教育背景无公开一手来源；未发现学位、院校与起止年份的可核验材料。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "f30f768992ce9c2defeb201690f66b5659d2498fd86b216209e6938565c13bce",
+        "accessed_at": "2026-09-27T06:35:48.055063+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790490948055081000-eduardo-vela-nava-synthesis-v1.json",
+    "label": "Eduardo Vela Nava:synthesis:v1",
+    "elapsed_seconds": 342.4,
+    "prompt_sha256": "c4f87aa5eac349323418b0aa57d1b1568f6c64f7948d9531151d19934c400ba8",
+    "num_turns": 10,
+    "total_cost_usd": 0.7767900000000001,
+    "usage": {
+      "input_tokens": 38907,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 135360,
+      "output_tokens": 20583,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 38907,
+        "outputTokens": 20583,
+        "cacheReadInputTokens": 135360,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.7767900000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

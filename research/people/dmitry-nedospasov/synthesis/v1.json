@@ -1,0 +1,334 @@
+{
+  "person": "Dmitry Nedospasov",
+  "expertise": [
+    "硬件与故障注入漏洞挖掘",
+    "侧信道分析（光子发射分析、差分光子发射分析）",
+    "硬件钱包攻击面（固件/软件/硬件/物理/架构类漏洞）",
+    "FPGA/Verilog 与嵌入式 MCU（AVR/XMEGA、ARM Cortex-M、NXP LPC17xx）工具链建设",
+    "故障注入（glitching）与硬件植入物构建",
+    "AI/LLM 安全与 agent 自动化工具建设",
+    "安全研究方法的产品化与商业化训练"
+  ],
+  "stages": [
+    {
+      "period": "2010-2014",
+      "stage": "开源工具建设与本地硬件社区起步",
+      "capability_change": "以 fork 与自建嵌入式/虚拟化工具（xen-tools 2010、dfu-programmer、USB-XMEGA、lpcflash、libopencm3）为公开技术活动的起点；2013 年起通过柏林 Die Datenkrake（@ddk）组织获得同伴与项目载体，方向从通用开源软件转向 ARM Cortex-M 微控制器与 FPGA 硬件，确立'因工具缺口而自建/分叉'的工程习惯与硬件工作主线。",
+      "evidence_ids": [
+        "nedos-works-002",
+        "dn-dec-001",
+        "dn-dec-002",
+        "dn-dec-003",
+        "nedos-community-002"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2012-2015",
+      "stage": "学术侧信道研究期：实现→论文→专著的闭环",
+      "capability_change": "在 pda_aes（Photon-DA AES 实现，AVR-Crypto-Lib 基础上自建侧信道采集工具，ROUNDS/DELAY/STARTUP 宏用于侧信道采集）之上产出方法学论文，从实现推进到论文再到独立完成的学位论文/专著《Security of the IC Backside》，方法聚焦芯片光子发射对 AES 的侧信道分析；建立'公开实验代码与论文所用实现同步发布'的可复现工具链习惯。",
+      "evidence_ids": [
+        "nedos-works-001",
+        "nedos-works-003",
+        "nedos-works-004"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2018-2019",
+      "stage": "硬件钱包漏洞公开披露期：从分析型研究转向构造型攻击与团队协作",
+      "capability_change": "与 Thomas Roth、Josh Datko 结成稳定的三人协作，在 35C3（2018-12-27）公开披露主流硬件钱包的固件/软件/硬件/物理/架构类漏洞及 glitching 物理攻击；将 glitch 方法固化为可复现的开源硬件植入物 bloomburgular（RF 触发、'Requires zero firmware'、'Bypasses a core security function'，可在供应链环节植入），并 fork 厂商侧信道分析框架 lascar 与目标设备固件 keepkey-firmware 作为研究基础；目标难度从 AES 实现分析提升到对量产安全产品的整体攻击面展示。",
+      "evidence_ids": [
+        "nedos-works-006",
+        "nedos-community-003",
+        "nedos-community-004",
+        "dn-conv-01",
+        "dn-dec-004",
+        "dn-dec-005",
+        "timeline-01-35c3-walletfail",
+        "timeline-02-walletfail-project"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2025-2026",
+      "stage": "AI/LLM 方向扩展与硬件安全方法的产品化、商业化",
+      "capability_change": "GitHub 自述更新为 'AI/Hardware security expert'，个人仓库出现 winuse/linuse（agent 自动化 API/CLI）、qwen3-tts-service、tamashii-backend、SageAttention fork、ComfyUI-CSM-Nodes fork 等 AI/LLM 工具；创立 @comput3ai，并在 advancedsecurity.training 作为 trainer 提供 'Glitching and Fault Injection'、'FPGAs and Verilog in 1 Day'、'AI and LLMs for Security Professionals' 三门课程，将既有硬件故障注入/FPGA 能力与 AI 能力整合为商业化训练而非放弃前者。",
+      "evidence_ids": [
+        "nedos-works-008",
+        "nedos-community-001-github-profile",
+        "dn-ext-01",
+        "dn-dec-006",
+        "dn-dec-007",
+        "timeline-03-github-profile",
+        "timeline-04-advancedsecurity-training",
+        "timeline-06-comput3ai-founder"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "因工具缺口而 fork/自建工具链，并以公开仓库承载研究产出",
+      "starting_conditions": "早期面对缺失或停滞的嵌入式/硬件工具（dfu-programmer 标注原项目 'dead'），技术栈集中在 AVR/XMEGA 与 ARM Cortex-M、FPGA，缺乏可直接复用的侧信道/glitch 研究工具链。",
+      "repeated_practice": "在多个时期重复 fork 与自建目标硬件相关工具：dfu-programmer/USB-XMEGA/lpcflash/libopencm3（2012-2013 嵌入式烧录与 USB 栈）、arty-passthrough/ddk-fpga/litex-boards（FPGA）、lascar（厂商侧信道分析框架）、keepkey-firmware（目标设备固件），至 2025-2026 年仍以 fork（SageAttention、ComfyUI-CSM-Nodes）与自建（winuse/linuse）延续同一模式。",
+      "feedback": "公开仓库本身既是发布渠道也是协作入口（walletfail 组织公开成员与仓库），GitHub 社区徽章（Pull Shark x2、Arctic Code Vault Contributor）构成可见的同行网络反馈；但 issue/PR 讨论原文与厂商响应记录未见，接收端反馈证据不足。",
+      "intermediate_capability": "形成'站在既有工具之上迭代而非重复造轮子'与'因缺口而自建'并行的工程能力，能快速对一类目标硬件建立可复现的研究与攻击工具链。",
+      "observed_outcomes": [
+        "pda_aes（侧信道采集实现，支撑 2013 年光子发射论文）",
+        "bloomburgular（glitch 方法固化为可复现的 RF 触发硬件植入物并开源）",
+        "fork lascar 与 keepkey-firmware 构成硬件钱包研究的工具基础",
+        "advancedsecurity.training 三门课程中 FPGA/Verilog 与故障注入课程可视为该工具链积累的产品化"
+      ],
+      "evidence_ids": [
+        "nedos-works-001",
+        "nedos-works-002",
+        "nedos-works-006",
+        "nedos-community-002",
+        "nedos-community-003",
+        "dn-dec-001",
+        "dn-dec-003",
+        "dn-dec-005",
+        "dn-dec-006"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "公开 fork 量大也可能反映个人维护兴趣或简历展示动机，而非研究驱动的工具缺口；缺乏 issue/PR 讨论与厂商响应原文，'缺口驱动'的接收端证据偏弱，故不排除部分仓库仅为技术栈跟踪而非研究用工具。"
+    },
+    {
+      "name": "研究产出与公开材料同步发布（代码、论文、会议、项目站点）",
+      "starting_conditions": "学术阶段即有公开实验代码与论文所用实现并存的环境（pda_aes 仓库 README 说明用于 CHES 论文及后续工作）。",
+      "repeated_practice": "在侧信道研究、硬件钱包披露、AI 工具建设等阶段持续同步公开多种材料：pda_aes 代码与 2013 年论文、bloomburgular 植入物开源、35C3 媒体库演讲、wallet.fail 项目站点（关联 Keylabs 与 Advanced Security Training）、GitHub profile 自述定位与组织成员身份。",
+      "feedback": "35C3 演讲媒体页记录观看 32.7k 与多语字幕，构成公开传播与社区反馈；wallet.fail 项目站点提供 35C3 录像链接与预警订阅机制，构成对外发布回路。",
+      "intermediate_capability": "形成把单次研究产出组织为可复现材料集（代码 + 演讲 + 项目站点）并公开发布的发布能力，使研究产出具备可复现性与可传播性。",
+      "observed_outcomes": [
+        "pda_aes 代码与光子发射论文形成实现→论文闭环",
+        "wallet.fail 以独立项目站点组织漏洞披露并关联培训实体",
+        "advancedsecurity.training 课程页将研究方法产品化为可重复练习的教学材料"
+      ],
+      "evidence_ids": [
+        "nedos-works-001",
+        "nedos-works-003",
+        "nedos-works-006",
+        "nedos-community-004",
+        "dn-dec-004",
+        "timeline-01-35c3-walletfail",
+        "timeline-02-walletfail-project",
+        "timeline-04-advancedsecurity-training"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "公开发布习惯也可能是所在社区（CCC、GitHub 开源生态）的常规做法而非个人特有机制；同期硬件安全研究者普遍公开工具与演讲，区分度需更多对照样本。"
+    },
+    {
+      "name": "在目标硬件类别上的重复拆解与纵深投入",
+      "starting_conditions": "具备 AVR/XMEGA 与 ARM Cortex-M 嵌入式工具链基础，并通过柏林 DDK 社区接触 FPGA 硬件。",
+      "repeated_practice": "沿 AVR/XMEGA→ARM Cortex-M（lpcflash/ddk-arm）→FPGA（ddk-fpga/arty-passthrough/litex-boards）→硬件钱包 SoC（keepkey-firmware/bloomburgular/lascar）的路径逐类深入，对硬件钱包在披露后仍持续 fork keepkey-firmware 推进同一目标。",
+      "feedback": "公开披露后以会议（35C3）与项目站点承接传播；GitHub 组织 walletfail 关联 35C3 活动并公开仓库，构成跨团队工具借用回路（fork 上游厂商 Ledger-Donjon 的 lascar）。",
+      "intermediate_capability": "形成对一类目标硬件从工具建设→侧信道/glitch 方法→公开披露→持续跟进的纵深能力，而非浅尝辄止。",
+      "observed_outcomes": [
+        "从 AES 实现侧信道分析推进到量产硬件钱包的整体攻击面（五类漏洞）",
+        "披露后仍 fork keepkey-firmware 表明对硬件钱包方向的持续投入",
+        "若 Black Hat 2019 Tegra Boot ROM 报告属实，则攻击对象由钱包 SoC 扩展至游戏主机安全引导链（lead_only，未一手核实）"
+      ],
+      "evidence_ids": [
+        "nedos-works-001",
+        "nedos-works-002",
+        "nedos-works-006",
+        "nedos-community-002",
+        "nedos-community-003",
+        "dn-dec-003",
+        "dn-dec-005",
+        "timeline-05-blackhat-2019-tegra"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "目标硬件的演进部分可能由市场热点（加密货币钱包、AI）驱动而非纯能力驱动；Tegra Boot ROM 一项为 reported/lead_only，未一手核实，纳入此机制时区分度存疑。"
+    },
+    {
+      "name": "研究产出→教学产品化的反馈回路",
+      "starting_conditions": "长期积累 FPGA/Verilog、glitching/fault injection 与近期 AI/LLM 工具建设的可复现材料。",
+      "repeated_practice": "将既有研究能力转化为 advancedsecurity.training 的结构化课程：'FPGAs and Verilog in 1 Day'（对应 ddk-fpga/arty-passthrough/litex-boards 长期工具建设）、'Glitching and Fault Injection'（对应 bloomburgular/35C3 披露）、'AI and LLMs for Security Professionals'（对应 winuse/linuse/qwen3-tts 等 AI 工具）。",
+      "feedback": "课程页为 trainer 与课程组合的一手页面，构成对外提供教学服务的反馈回路；但学员评价、课程迭代记录与招生规模未见一手材料，回路接收端证据有限。",
+      "intermediate_capability": "形成将研究方法抽象为可重复练习与商业化训练的能力，使研究产出在披露之外获得第二条价值出口。",
+      "observed_outcomes": [
+        "advancedsecurity.training 三门课程同时覆盖硬件故障注入与 AI 安全，与 GitHub 自述方向一致",
+        "通过创办 @comput3ai 与训练平台完成从研究者到训练提供者的角色转变，整合而非放弃既有硬件能力"
+      ],
+      "evidence_ids": [
+        "nedos-works-008",
+        "dn-dec-006",
+        "dn-dec-007",
+        "timeline-04-advancedsecurity-training",
+        "timeline-06-comput3ai-founder"
+      ],
+      "validation_tests": [
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "课程与公司可能主要由商业机会与个人职业阶段驱动，而非研究能力自然产品化的必然结果；缺乏课程迭代、学员反馈与创办时间一手证据，因果链偏弱。"
+    }
+  ],
+  "tensions": [
+    "GitHub 自述 'AI/Hardware security expert' 与输入记录 primary_focus='硬件与故障注入漏洞'、qualification='硬件漏洞发现与利用' 存在表述侧重差异：该差异可能源于简介更新或方向扩展，但在未抓取 nedos.net 正文前无法判断是方向变化还是措辞差异。",
+    "从纯硬件安全向 AI/LLM 转型的具体触发事件、时间点与决策叙述缺失，仅有仓库时间线的推断（status=inferred）；AI 转向究竟是'方向转移'还是'工具扩展+商业化'无一手材料判定。",
+    "person_json 将 selected_conference_evidence 记为 'Black Hat EU / POC'，但可一手抓取的会议证据仅 35C3（2018-12-27）media.ccc.de；Black Hat EU 与 POC 的具体演讲页面未能一手抓取，二者是否真实发生尚无一手材料支持。",
+    "nedos.net（person_json 的 writeup_evidence）与 nedos.me 均因 TLS 证书 SAN 不匹配（ERR_TLS_CERT_ALTNAME_INVALID）无法抓取，多个维度的本人自述、完整 writeup 清单与演讲年表缺口无法闭合。",
+    "WebSearch 摘要多次将研究对象姓名误写为 'Andrey Nedospasov' 或 'Vasily Nedospasov'，且曾误报其为《The Hardware Hacking Handbook》合著者（实际作者为 Jasper van Woudenberg 与 Colin O'Flynn）；搜索摘要不可采信，身份与作品以一手页面为准。",
+    "timeline-05（Black Hat 2019 Tegra Boot ROM）为 reported/lead_only，blackhat.com 返回 403 未一手核实；若纳入机制会引入未证实成果的张力。"
+  ],
+  "transferable_practices": [
+    "在目标硬件研究中优先 fork/复用既有厂商或社区工具（如 lascar），仅在工具缺口处自建，避免重复造轮子。",
+    "将单次研究产出组织为可复现材料集（实验代码 + 论文 + 演讲 + 项目站点）同步公开发布，提升可复现性与可传播性。",
+    "对一类目标硬件沿工具建设→侧信道/glitch 方法→公开披露→持续跟进的路径纵深投入，披露后仍 fork 目标固件推进同一方向。",
+    "将长期积累的研究方法抽象为结构化训练课程，使研究产出获得披露之外的第二条价值出口。"
+  ],
+  "non_transferable_conditions": [
+    "柏林 Die Datenkrake（@ddk）本地硬件社区提供的同伴与项目载体，以及 CCC 生态（35C3/media.ccc.de）提供的公开披露与传播渠道，属特定时期与地域的外部条件。",
+    "与 Thomas Roth、Josh Datko 的稳定三人协作及 walletfail 组织的跨团队工具借用回路（fork Ledger-Donjon/lascar），属特定合作网络。",
+    "学术阶段（pda_aes/光子发射论文/IC Backside 专著）形成的物理层侧信道方法学基础，非短期可复制的训练起点。",
+    "nedos.net 一手站点不可达导致的证据缺口，使部分判断无法交叉验证；任何复用本结论的研究需自行补抓一手材料。"
+  ],
+  "open_questions": [
+    "教育背景（如是否于 TU Berlin 攻读博士、是否由 Christof Paar 指导）来自工具合成叙述而非一手抓取，DBLP 被 Anubis 反爬、Google Scholar 需登录，教育经历无一手证据。",
+    "Black Hat EU / POC 会议演讲的具体年份、题目与摘要未取得一手来源确认；Black Hat 2019 Tegra Boot ROM 报告未一手核实。",
+    "@comput3ai 创立时间、公司定位与商业模式细节仅来自 GitHub bio 自述，无独立一手来源。",
+    "从硬件安全向 AI/LLM 转型的具体触发事件、时间点与决策叙述缺失，AI 工具是否用于硬件安全研究（而非纯方向转移）无一手材料。",
+    "35C3 议程页（events.ccc.de / fahrplan 9694）重定向后 404，完整议程摘要缺失；被攻击钱包品牌（Trezor/Ledger/KeepKey）未由抓取正文逐字核对，仅作 lead_only。",
+    "学员评价、课程迭代记录与招生规模未见一手材料，'研究产出→教学产品化'回路的接收端反馈未闭合。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/dmitry-nedospasov-synthesis-v1-20260928-021748-062",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790533186359366000-dmitry-nedospasov-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "7040e8cc-4bc8-40e6-9bb6-ba0e71c202fe",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_b3e5mgvu57xdl6ey2u11rmgy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/dmitry-nedospasov-synthesis-v1-20260928-021748-062/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T18:19:46.363127+00:00"
+      },
+      {
+        "tool_use_id": "call_zbjxb08bo2q3xv74ayzf7drk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/dmitry-nedospasov-synthesis-v1-20260928-021748-062/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "1d0779c24d4ba0c647def8ad3a07d78faf88602a20c8881b62e847ad1b96b989",
+        "accessed_at": "2026-09-27T18:19:46.363147+00:00"
+      },
+      {
+        "tool_use_id": "call_e5fuee2cqmjltfxn4nm9fko7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/dmitry-nedospasov-synthesis-v1-20260928-021748-062/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "9aac5641ff49074205a91f8ec751ad1f21ba7d473e27220491f10df85bdaeeea",
+        "accessed_at": "2026-09-27T18:19:46.363158+00:00"
+      },
+      {
+        "tool_use_id": "call_zh2qvru7e9wb5p93ghqqctyo",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/dmitry-nedospasov-synthesis-v1-20260928-021748-062/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "1f0bfe36aede5b49569ecbb2301c03461fc6d0e0872bb019a1e399ca95b28312",
+        "accessed_at": "2026-09-27T18:19:46.363233+00:00"
+      },
+      {
+        "tool_use_id": "call_vek081hokzbkxkzjo3i9gljs",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/dmitry-nedospasov-synthesis-v1-20260928-021748-062/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-27T18:19:46.363236+00:00"
+      },
+      {
+        "tool_use_id": "call_0x04cftgvpjimw6bpxqvr9ei",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/dmitry-nedospasov-synthesis-v1-20260928-021748-062/checkpoint.md",
+          "content": "# Checkpoint — Dmitry Nedospasov 综合分析\n\n## 输入核验\n- person_json：身份=Dmitry Nedospasov，handle=nedos，social=x.com/nedos，writeup=nedos.net，primary_focus=硬件与故障注入漏洞，qualification=硬件漏洞发现与利用，selected_conference_evidence=Black Hat EU / POC。\n- evidence_json：6 维材料（works/conversations/community/external/decisions/timeline），targeted 为空（首次综合）。\n- revision_context：空数组（首次综合）。\n\n## 证据有效性盘点\nverified_in_run=true 且可用作成长机制的 item id（按维度）：\n- works：nedos-works-001(2012 pda_aes)、nedos-works-002(2012 工具链 fork)、nedos-works-003(2013 光子发射论文)、nedos-works-004(2015 IC backside 专著)、nedos-works-006(2018 bloomburgular)、nedos-works-008(2025-2026 AI 转向)。\n  - nedos-works-005(status=unknown, verified=false)、nedos-works-007(status=unknown, verified=false) 不可作为机制证据。\n- conversations：dn-conv-01(35C3 wallet.fail)，仅作身份锚点。\n- community：nedos-community-001(profile)、002(repos)、003(walletfail org)、004(35C3 talk)。\n- external：dn-ext-01(GitHub profile 自述)；dn-ext-02(status=unknown) 不可用。\n- decisions：dn-dec-001..007(均 verified)，dn-dec-008(inferred 俄语播客 fork)、dn-dec-009(reported)。\n- timeline：timeline-01..04,06(documented)；timeline-05(reported Tegra Boot ROM, lead_only)；timeline-06(inferred comput3ai)。\n\n## 阶段划分（草拟）\n1. 2010-2014：开源工具建设起点（xen-tools fork 2010、ddk 柏林社区 2013、FPGA 2014）。\n2. 2012-2015：学术侧信道研究期（pda_aes 2012、光子发射论文 2013、IC backside 2015）。\n3. 2018-2019：硬件钱包漏洞披露期（35C3 wallet.fail、bloomburgular、lascar fork、keepkey-firmware fork）。\n4. 2025-2026：AI/LLM 方向扩展与商业化训练（qwen3-tts、winuse/linuse、@comput3ai、advancedsecurity.training 三门课程）。\n\n## 主机制（草拟，需通过三选二筛选）\n- M1：因工具缺口而 fork/自建工具链（dfu-programmer/lpcflash/lascar/keepkey-firmware/arty-passthrough/...）。跨时期(2012→2026)、可解释后续多个成果(bloomburgular、培训课程)、区分度高。validation=repeated+generative+distinctive。\n- M2：公开发表习惯（代码 + 论文 + 会议 + 项目站点同时发布）。nedos-works-001(代码+论文闭环)、bloomburgular 开源、35C3 披露、wallet.fail 站点。\n- M3：在目标硬件类别上的重复拆解与深度投入（AVR/XMEGA→ARM Cortex-M→FPGA→硬件钱包 SoC→Tegra）。\n- M4：研究产出→教学产品化的反馈回路（FPGA/Verilog 仓库→FPGAs and Verilog in 1 Day 课程；glitching 披露→Glitching and Fault Injection 课程；AI 工具→AI and LLMs for Security Professionals 课程）。\n\n## 待决\n- 竞争性解释：AI 转向是“方向转移”还是“工具扩展+商业化”？evidence 不足以下定论，需作为 tension/open_question。\n- Black Hat EU / POC 议会未一手核实 → open_question。\n- nedos.net 不可达 → 多维 gap，写入 tensions。\n- 教育背景(TU Berlin/Christof Paar)来自合成搜索叙述，不可采信 → open_question。\n\n## 下一步\n撰写 output.json，逐字段填充，对照 schema 检查。\n"
+        },
+        "success": true,
+        "content_sha256": "cd1fa08b332567c3a652ba77c7730e4ecaeed9c1f8069d2c2b73b982f61a3495",
+        "accessed_at": "2026-09-27T18:19:46.363242+00:00"
+      },
+      {
+        "tool_use_id": "call_aihp633foow9riz4vt2a1inm",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/dmitry-nedospasov-synthesis-v1-20260928-021748-062/output.json",
+          "content": "{\n  \"person\": \"Dmitry Nedospasov\",\n  \"expertise\": [\n    \"硬件与故障注入漏洞挖掘\",\n    \"侧信道分析（光子发射分析、差分光子发射分析）\",\n    \"硬件钱包攻击面（固件/软件/硬件/物理/架构类漏洞）\",\n    \"FPGA/Verilog 与嵌入式 MCU（AVR/XMEGA、ARM Cortex-M、NXP LPC17xx）工具链建设\",\n    \"故障注入（glitching）与硬件植入物构建\",\n    \"AI/LLM 安全与 agent 自动化工具建设\",\n    \"安全研究方法的产品化与商业化训练\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2010-2014\",\n      \"stage\": \"开源工具建设与本地硬件社区起步\",\n      \"capability_change\": \"以 fork 与自建嵌入式/虚拟化工具（xen-tools 2010、dfu-programmer、USB-XMEGA、lpcflash、libopencm3）为公开技术活动的起点；2013 年起通过柏林 Die Datenkrake（@ddk）组织获得同伴与项目载体，方向从通用开源软件转向 ARM Cortex-M 微控制器与 FPGA 硬件，确立'因工具缺口而自建/分叉'的工程习惯与硬件工作主线。\",\n      \"evidence_ids\": [\n        \"nedos-works-002\",\n        \"dn-dec-001\",\n        \"dn-dec-002\",\n        \"dn-dec-003\",\n        \"nedos-community-002\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2012-2015\",\n      \"stage\": \"学术侧信道研究期：实现→论文→专著的闭环\",\n      \"capability_change\": \"在 pda_aes（Photon-DA AES 实现，AVR-Crypto-Lib 基础上自建侧信道采集工具，ROUNDS/DELAY/STARTUP 宏用于侧信道采集）之上产出方法学论文，从实现推进到论文再到独立完成的学位论文/专著《Security of the IC Backside》，方法聚焦芯片光子发射对 AES 的侧信道分析；建立'公开实验代码与论文所用实现同步发布'的可复现工具链习惯。\",\n      \"evidence_ids\": [\n        \"nedos-works-001\",\n        \"nedos-works-003\",\n        \"nedos-works-004\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2018-2019\",\n      \"stage\": \"硬件钱包漏洞公开披露期：从分析型研究转向构造型攻击与团队协作\",\n      \"capability_change\": \"与 Thomas Roth、Josh Datko 结成稳定的三人协作，在 35C3（2018-12-27）公开披露主流硬件钱包的固件/软件/硬件/物理/架构类漏洞及 glitching 物理攻击；将 glitch 方法固化为可复现的开源硬件植入物 bloomburgular（RF 触发、'Requires zero firmware'、'Bypasses a core security function'，可在供应链环节植入），并 fork 厂商侧信道分析框架 lascar 与目标设备固件 keepkey-firmware 作为研究基础；目标难度从 AES 实现分析提升到对量产安全产品的整体攻击面展示。\",\n      \"evidence_ids\": [\n        \"nedos-works-006\",\n        \"nedos-community-003\",\n        \"nedos-community-004\",\n        \"dn-conv-01\",\n        \"dn-dec-004\",\n        \"dn-dec-005\",\n        \"timeline-01-35c3-walletfail\",\n        \"timeline-02-walletfail-project\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2025-2026\",\n      \"stage\": \"AI/LLM 方向扩展与硬件安全方法的产品化、商业化\",\n      \"capability_change\": \"GitHub 自述更新为 'AI/Hardware security expert'，个人仓库出现 winuse/linuse（agent 自动化 API/CLI）、qwen3-tts-service、tamashii-backend、SageAttention fork、ComfyUI-CSM-Nodes fork 等 AI/LLM 工具；创立 @comput3ai，并在 advancedsecurity.training 作为 trainer 提供 'Glitching and Fault Injection'、'FPGAs and Verilog in 1 Day'、'AI and LLMs for Security Professionals' 三门课程，将既有硬件故障注入/FPGA 能力与 AI 能力整合为商业化训练而非放弃前者。\",\n      \"evidence_ids\": [\n        \"nedos-works-008\",\n        \"nedos-community-001-github-profile\",\n        \"dn-ext-01\",\n        \"dn-dec-006\",\n        \"dn-dec-007\",\n        \"timeline-03-github-profile\",\n        \"timeline-04-advancedsecurity-training\",\n        \"timeline-06-comput3ai-founder\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"因工具缺口而 fork/自建工具链，并以公开仓库承载研究产出\",\n      \"starting_conditions\": \"早期面对缺失或停滞的嵌入式/硬件工具（dfu-programmer 标注原项目 'dead'），技术栈集中在 AVR/XMEGA 与 ARM Cortex-M、FPGA，缺乏可直接复用的侧信道/glitch 研究工具链。\",\n      \"repeated_practice\": \"在多个时期重复 fork 与自建目标硬件相关工具：dfu-programmer/USB-XMEGA/lpcflash/libopencm3（2012-2013 嵌入式烧录与 USB 栈）、arty-passthrough/ddk-fpga/litex-boards（FPGA）、lascar（厂商侧信道分析框架）、keepkey-firmware（目标设备固件），至 2025-2026 年仍以 fork（SageAttention、ComfyUI-CSM-Nodes）与自建（winuse/linuse）延续同一模式。\",\n      \"feedback\": \"公开仓库本身既是发布渠道也是协作入口（walletfail 组织公开成员与仓库），GitHub 社区徽章（Pull Shark x2、Arctic Code Vault Contributor）构成可见的同行网络反馈；但 issue/PR 讨论原文与厂商响应记录未见，接收端反馈证据不足。\",\n      \"intermediate_capability\": \"形成'站在既有工具之上迭代而非重复造轮子'与'因缺口而自建'并行的工程能力，能快速对一类目标硬件建立可复现的研究与攻击工具链。\",\n      \"observed_outcomes\": [\n        \"pda_aes（侧信道采集实现，支撑 2013 年光子发射论文）\",\n        \"bloomburgular（glitch 方法固化为可复现的 RF 触发硬件植入物并开源）\",\n        \"fork lascar 与 keepkey-firmware 构成硬件钱包研究的工具基础\",\n        \"advancedsecurity.training 三门课程中 FPGA/Verilog 与故障注入课程可视为该工具链积累的产品化\"\n      ],\n      \"evidence_ids\": [\n        \"nedos-works-001\",\n        \"nedos-works-002\",\n        \"nedos-works-006\",\n        \"nedos-community-002\",\n        \"nedos-community-003\",\n        \"dn-dec-001\",\n        \"dn-dec-003\",\n        \"dn-dec-005\",\n        \"dn-dec-006\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"公开 fork 量大也可能反映个人维护兴趣或简历展示动机，而非研究驱动的工具缺口；缺乏 issue/PR 讨论与厂商响应原文，'缺口驱动'的接收端证据偏弱，故不排除部分仓库仅为技术栈跟踪而非研究用工具。\"\n    },\n    {\n      \"name\": \"研究产出与公开材料同步发布（代码、论文、会议、项目站点）\",\n      \"starting_conditions\": \"学术阶段即有公开实验代码与论文所用实现并存的环境（pda_aes 仓库 README 说明用于 CHES 论文及后续工作）。\",\n      \"repeated_practice\": \"在侧信道研究、硬件钱包披露、AI 工具建设等阶段持续同步公开多种材料：pda_aes 代码与 2013 年论文、bloomburgular 植入物开源、35C3 媒体库演讲、wallet.fail 项目站点（关联 Keylabs 与 Advanced Security Training）、GitHub profile 自述定位与组织成员身份。\",\n      \"feedback\": \"35C3 演讲媒体页记录观看 32.7k 与多语字幕，构成公开传播与社区反馈；wallet.fail 项目站点提供 35C3 录像链接与预警订阅机制，构成对外发布回路。\",\n      \"intermediate_capability\": \"形成把单次研究产出组织为可复现材料集（代码 + 演讲 + 项目站点）并公开发布的发布能力，使研究产出具备可复现性与可传播性。\",\n      \"observed_outcomes\": [\n        \"pda_aes 代码与光子发射论文形成实现→论文闭环\",\n        \"wallet.fail 以独立项目站点组织漏洞披露并关联培训实体\",\n        \"advancedsecurity.training 课程页将研究方法产品化为可重复练习的教学材料\"\n      ],\n      \"evidence_ids\": [\n        \"nedos-works-001\",\n        \"nedos-works-003\",\n        \"nedos-works-006\",\n        \"nedos-community-004\",\n        \"dn-dec-004\",\n        \"timeline-01-35c3-walletfail\",\n        \"timeline-02-walletfail-project\",\n        \"timeline-04-advancedsecurity-training\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"公开发布习惯也可能是所在社区（CCC、GitHub 开源生态）的常规做法而非个人特有机制；同期硬件安全研究者普遍公开工具与演讲，区分度需更多对照样本。\"\n    },\n    {\n      \"name\": \"在目标硬件类别上的重复拆解与纵深投入\",\n      \"starting_conditions\": \"具备 AVR/XMEGA 与 ARM Cortex-M 嵌入式工具链基础，并通过柏林 DDK 社区接触 FPGA 硬件。\",\n      \"repeated_practice\": \"沿 AVR/XMEGA→ARM Cortex-M（lpcflash/ddk-arm）→FPGA（ddk-fpga/arty-passthrough/litex-boards）→硬件钱包 SoC（keepkey-firmware/bloomburgular/lascar）的路径逐类深入，对硬件钱包在披露后仍持续 fork keepkey-firmware 推进同一目标。\",\n      \"feedback\": \"公开披露后以会议（35C3）与项目站点承接传播；GitHub 组织 walletfail 关联 35C3 活动并公开仓库，构成跨团队工具借用回路（fork 上游厂商 Ledger-Donjon 的 lascar）。\",\n      \"intermediate_capability\": \"形成对一类目标硬件从工具建设→侧信道/glitch 方法→公开披露→持续跟进的纵深能力，而非浅尝辄止。\",\n      \"observed_outcomes\": [\n        \"从 AES 实现侧信道分析推进到量产硬件钱包的整体攻击面（五类漏洞）\",\n        \"披露后仍 fork keepkey-firmware 表明对硬件钱包方向的持续投入\",\n        \"若 Black Hat 2019 Tegra Boot ROM 报告属实，则攻击对象由钱包 SoC 扩展至游戏主机安全引导链（lead_only，未一手核实）\"\n      ],\n      \"evidence_ids\": [\n        \"nedos-works-001\",\n        \"nedos-works-002\",\n        \"nedos-works-006\",\n        \"nedos-community-002\",\n        \"nedos-community-003\",\n        \"dn-dec-003\",\n        \"dn-dec-005\",\n        \"timeline-05-blackhat-2019-tegra\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"目标硬件的演进部分可能由市场热点（加密货币钱包、AI）驱动而非纯能力驱动；Tegra Boot ROM 一项为 reported/lead_only，未一手核实，纳入此机制时区分度存疑。\"\n    },\n    {\n      \"name\": \"研究产出→教学产品化的反馈回路\",\n      \"starting_conditions\": \"长期积累 FPGA/Verilog、glitching/fault injection 与近期 AI/LLM 工具建设的可复现材料。\",\n      \"repeated_practice\": \"将既有研究能力转化为 advancedsecurity.training 的结构化课程：'FPGAs and Verilog in 1 Day'（对应 ddk-fpga/arty-passthrough/litex-boards 长期工具建设）、'Glitching and Fault Injection'（对应 bloomburgular/35C3 披露）、'AI and LLMs for Security Professionals'（对应 winuse/linuse/qwen3-tts 等 AI 工具）。\",\n      \"feedback\": \"课程页为 trainer 与课程组合的一手页面，构成对外提供教学服务的反馈回路；但学员评价、课程迭代记录与招生规模未见一手材料，回路接收端证据有限。\",\n      \"intermediate_capability\": \"形成将研究方法抽象为可重复练习与商业化训练的能力，使研究产出在披露之外获得第二条价值出口。\",\n      \"observed_outcomes\": [\n        \"advancedsecurity.training 三门课程同时覆盖硬件故障注入与 AI 安全，与 GitHub 自述方向一致\",\n        \"通过创办 @comput3ai 与训练平台完成从研究者到训练提供者的角色转变，整合而非放弃既有硬件能力\"\n      ],\n      \"evidence_ids\": [\n        \"nedos-works-008\",\n        \"dn-dec-006\",\n        \"dn-dec-007\",\n        \"timeline-04-advancedsecurity-training\",\n        \"timeline-06-comput3ai-founder\"\n      ],\n      \"validation_tests\": [\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"课程与公司可能主要由商业机会与个人职业阶段驱动，而非研究能力自然产品化的必然结果；缺乏课程迭代、学员反馈与创办时间一手证据，因果链偏弱。\"\n    }\n  ],\n  \"tensions\": [\n    \"GitHub 自述 'AI/Hardware security expert' 与输入记录 primary_focus='硬件与故障注入漏洞'、qualification='硬件漏洞发现与利用' 存在表述侧重差异：该差异可能源于简介更新或方向扩展，但在未抓取 nedos.net 正文前无法判断是方向变化还是措辞差异。\",\n    \"从纯硬件安全向 AI/LLM 转型的具体触发事件、时间点与决策叙述缺失，仅有仓库时间线的推断（status=inferred）；AI 转向究竟是'方向转移'还是'工具扩展+商业化'无一手材料判定。\",\n    \"person_json 将 selected_conference_evidence 记为 'Black Hat EU / POC'，但可一手抓取的会议证据仅 35C3（2018-12-27）media.ccc.de；Black Hat EU 与 POC 的具体演讲页面未能一手抓取，二者是否真实发生尚无一手材料支持。\",\n    \"nedos.net（person_json 的 writeup_evidence）与 nedos.me 均因 TLS 证书 SAN 不匹配（ERR_TLS_CERT_ALTNAME_INVALID）无法抓取，多个维度的本人自述、完整 writeup 清单与演讲年表缺口无法闭合。\",\n    \"WebSearch 摘要多次将研究对象姓名误写为 'Andrey Nedospasov' 或 'Vasily Nedospasov'，且曾误报其为《The Hardware Hacking Handbook》合著者（实际作者为 Jasper van Woudenberg 与 Colin O'Flynn）；搜索摘要不可采信，身份与作品以一手页面为准。\",\n    \"timeline-05（Black Hat 2019 Tegra Boot ROM）为 reported/lead_only，blackhat.com 返回 403 未一手核实；若纳入机制会引入未证实成果的张力。\"\n  ],\n  \"transferable_practices\": [\n    \"在目标硬件研究中优先 fork/复用既有厂商或社区工具（如 lascar），仅在工具缺口处自建，避免重复造轮子。\",\n    \"将单次研究产出组织为可复现材料集（实验代码 + 论文 + 演讲 + 项目站点）同步公开发布，提升可复现性与可传播性。\",\n    \"对一类目标硬件沿工具建设→侧信道/glitch 方法→公开披露→持续跟进的路径纵深投入，披露后仍 fork 目标固件推进同一方向。\",\n    \"将长期积累的研究方法抽象为结构化训练课程，使研究产出获得披露之外的第二条价值出口。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"柏林 Die Datenkrake（@ddk）本地硬件社区提供的同伴与项目载体，以及 CCC 生态（35C3/media.ccc.de）提供的公开披露与传播渠道，属特定时期与地域的外部条件。\",\n    \"与 Thomas Roth、Josh Datko 的稳定三人协作及 walletfail 组织的跨团队工具借用回路（fork Ledger-Donjon/lascar），属特定合作网络。\",\n    \"学术阶段（pda_aes/光子发射论文/IC Backside 专著）形成的物理层侧信道方法学基础，非短期可复制的训练起点。\",\n    \"nedos.net 一手站点不可达导致的证据缺口，使部分判断无法交叉验证；任何复用本结论的研究需自行补抓一手材料。\"\n  ],\n  \"open_questions\": [\n    \"教育背景（如是否于 TU Berlin 攻读博士、是否由 Christof Paar 指导）来自工具合成叙述而非一手抓取，DBLP 被 Anubis 反爬、Google Scholar 需登录，教育经历无一手证据。\",\n    \"Black Hat EU / POC 会议演讲的具体年份、题目与摘要未取得一手来源确认；Black Hat 2019 Tegra Boot ROM 报告未一手核实。\",\n    \"@comput3ai 创立时间、公司定位与商业模式细节仅来自 GitHub bio 自述，无独立一手来源。\",\n    \"从硬件安全向 AI/LLM 转型的具体触发事件、时间点与决策叙述缺失，AI 工具是否用于硬件安全研究（而非纯方向转移）无一手材料。\",\n    \"35C3 议程页（events.ccc.de / fahrplan 9694）重定向后 404，完整议程摘要缺失；被攻击钱包品牌（Trezor/Ledger/KeepKey）未由抓取正文逐字核对，仅作 lead_only。\",\n    \"学员评价、课程迭代记录与招生规模未见一手材料，'研究产出→教学产品化'回路的接收端反馈未闭合。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "65033e17152412a9c406f0ae84583904d9a70ab23daa092ee6c97aacdb70a2a0",
+        "accessed_at": "2026-09-27T18:19:46.363246+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790533186363262000-dmitry-nedospasov-synthesis-v1.json",
+    "label": "Dmitry Nedospasov:synthesis:v1",
+    "elapsed_seconds": 118.3,
+    "prompt_sha256": "99d3bf75079427a7e7eb2ff334ee92e47366c359721977894a1f29f4a210c084",
+    "num_turns": 8,
+    "total_cost_usd": 0.35890099999999997,
+    "usage": {
+      "input_tokens": 32953,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 86272,
+      "output_tokens": 6040,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 32953,
+        "outputTokens": 6040,
+        "cacheReadInputTokens": 86272,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.35890099999999997,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

@@ -1,0 +1,719 @@
+{
+  "person": "Gal Beniamini",
+  "dimension": "关键决策与转折",
+  "identity_check": "经一手来源确认身份: Project Zero 博客四篇文章署名均为 'Posted by Gal Beniamini, Project Zero'（2017-04-04、2017-07-24、2017-09-28、2017-10-11）。与 person_json 记录一致：primary_focus 为 Android/基带/TrustZone 漏洞，writeup_evidence 指向 Project Zero 博客。同名歧义已排除——搜索摘要曾出现 NVIDIA、Bluetooth/BLE、BootStomp 等不一致归属，均未在抓取页面中得到证实，已弃用。Project Zero 博客已从 googleprojectzero.blogspot.com 迁移至 projectzero.google，旧 URL 返回 404，故 person_json 中的 writeup_evidence 链接不可直接抓取；经新站 archive.html 取得完整历史索引并定位 2017 年单篇。",
+  "items": [
+    {
+      "id": "gb-dec-01",
+      "date": "2017-04-04",
+      "claim": "Gal Beniamini 选择 Broadcom 的 Wi-Fi SoC 栈作为首个 Project Zero 深度研究对象，并选择 Android 生态作为演示平台。其决策依据是：移动应用处理器（AP）的防御持续加固后，攻击者会转向受审视较少的组件（least-resistance 路径）；Broadcom Wi-Fi 芯片是移动设备上部署最广的 Wi-Fi 芯片组（Nexus、三星旗舰及自 iPhone 4 以来的全部 iPhone 均采用），且 FullMAC SoC 引入了运行在独立低功耗处理器上的专有、复杂代码库，构成未被同等审视的攻击面。Android 被选为演示平台，但结论适用于任何采用相同芯片组的系统。",
+      "status": "documented",
+      "growth_signal": "目标选择体现了可复用的研究方法论：在攻击面分析阶段，按'防御加固程度反向迁移''部署广度''专有代码复杂度与受审视程度之差'三项可核验标准筛选研究对象，而非凭主题偏好。这是漏洞挖掘方向的结构化选题机制，可用于解释其后续连续选题。",
+      "short_quote": "the code running on the application processor (AP) has been the subject of much research, other components have seldom received the same scrutiny",
+      "source": {
+        "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)",
+        "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html",
+        "published": "2017-04-04",
+        "source_type": "一手 writeup（Project Zero 博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_frztpcm1rwp6c7vfnfia5t2l",
+        "accessed_at": "2026-09-26T17:42:05.550954+00:00",
+        "content_sha256": "e5a07d2fcd15e0a8bdd0478c317873b43755f286c2108dc458a8a20dddc64d14"
+      }
+    },
+    {
+      "id": "gb-dec-02",
+      "date": "2017-07-24",
+      "claim": "Beniamini 在完成 Broadcom Wi-Fi 栈研究后转向 Android TrustZone 可信执行环境（TEE），覆盖 Qualcomm QSEE 与 Trustonic Kinibi 两类主流实现。该转向的动机为：TEE 处理生物特征、支付、DRM 与全盘加密密钥等高价值数据，但其安全缓解措施（ASLR、栈 cookie、守护页）显著滞后于常规操作系统，使其成为日益有吸引力的目标；同时厂商几乎不撤销已签名 trustlet（版本计数器普遍停留在零），使已修补漏洞可通过加载旧的仍签名二进制绕过。研究在 Galaxy S7 Edge 上以 Samsung OTP trustlet 已知栈溢出达成 Kinibi 内任意代码执行。",
+      "status": "documented",
+      "growth_signal": "从 Wi-Fi 固件转向 TrustZone 是同一'高价值数据所在 + 防御滞后 + 可签名组件撤销机制失效'选题框架的二次应用，显示选题标准可跨子系统迁移；研究同时构造了跨厂商（Qualcomm/Trustonic）的对比分析，说明其方法包含可推广的抽象层而非单点漏洞。",
+      "short_quote": "virtually no manufacturer actually revokes vulnerable trustlets",
+      "source": {
+        "title": "Trust Issues: Exploiting TrustZone TEEs",
+        "url": "https://projectzero.google/2017/07/trust-issues-exploiting-trustzone-tees.html",
+        "published": "2017-07-24",
+        "source_type": "一手 writeup（Project Zero 博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_jm6i69iq86rgyjkdc50ote0b",
+        "accessed_at": "2026-09-26T17:42:05.550948+00:00",
+        "content_sha256": "f1e914f8927585ac5c63dbf849ba0402fc90e9c9aa1f205b4f8b9110651298d3"
+      }
+    },
+    {
+      "id": "gb-dec-03",
+      "date": "2017-09-28",
+      "claim": "Beniamini 决定将 Wi-Fi 栈研究从 Android 生态迁移至 Apple 生态，以'更完整描绘移动生态 Wi-Fi 安全状态'。为克服 iOS 闭源与缺少研究平台的约束，他复用同伴 Ian Beer 的内核漏洞获取内存读写原语，逆向 Apple 专有 Wi-Fi 驱动（AppleBCMWLANCore、AppleBCMWLANBusInterfacePCIe），通过 kalloc zone 分析定位 Wi-Fi 芯片 TCM 在内核地址空间的映射，并以基于 RAM 的钩子提取固件 ROM、自建 Wi-Fi 固件调试器，从而把在 Android 上建立的研究能力迁移到 Apple 平台。",
+      "status": "documented",
+      "growth_signal": "平台迁移决策展示了工具建设与同伴成果复用的成长机制：以 Ian Beer 的内核 exploit 为基础设施搭建 iOS 研究平台（固件提取、调试器），把已验证的 Broadcom 研究方法跨平台复用。这表明其研究能力包含'自建可复用底层工具链'而非仅产出单点漏洞，且明确记录了对同伴工作（Ian Beer）的依赖。",
+      "short_quote": "we've chosen to revisit the topic - this time through the lens of Apple devices",
+      "source": {
+        "title": "Over The Air - Vol. 2, Pt. 1: Exploiting The Wi-Fi Stack on Apple Devices",
+        "url": "https://projectzero.google/2017/09/over-air-vol-2-pt-1-exploiting-wi-fi.html",
+        "published": "2017-09-28",
+        "source_type": "一手 writeup（Project Zero 博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_dqd1xozahw3s1p2c1yg91ys1",
+        "accessed_at": "2026-09-26T17:42:05.550943+00:00",
+        "content_sha256": "64545fa3a4fbd2c117b7cd8e85d750d436ca42a24a3a6d00ca032495271a3b28"
+      }
+    },
+    {
+      "id": "gb-dec-04",
+      "date": "2017-10-11",
+      "claim": "Beniamini 完成 Vol.2 系列的端到端空中利用链，在 iPhone 7（iOS 10.2）上由 Wi-Fi 固件代码执行经 PCIe/DART IOMMU 达到主机内核任意代码执行。关键技术转折包括：逆向 Apple 专有 DART（3 级转换机制，32 位 IO-Space 映射主机物理地址），发现主机以固定上界 0x10000 校验共享环索引而非实际环容量导致可靠越界写；通过固件发送未请求的 flow ring 删除响应泄露 flow ring 以塑形 IO-Space，使新建 flow ring 与 DART L2 转换表落入同一内核 zone；继而覆写 DART 描述符引入任意物理地址映射，并构造自指映射（'Inception'）使 Wi-Fi 芯片获得对全部主机物理内存的永久 DMA 访问；最后将 KTRR 硬件寄存器映射入 IO-Space 直接读取，以 KTRR 作预言机击败 KASLR。研究共向 Apple 报告 7 个漏洞，在 iOS 11 中修复。",
+      "status": "documented",
+      "growth_signal": "全链完成记录了从单组件漏洞到端到端利用链的工程化能力，并显示公开发表习惯：以多部分博客系列逐步披露研究过程与最终利用链，并将漏洞按 Project Zero 流程报告厂商。KTRR-as-KASLR-oracle 的反思显示其方法包含对硬件保护机制本身作为攻击面/信息侧信道的二次审视。",
+      "short_quote": "allowing complete control over the target device",
+      "source": {
+        "title": "Over The Air - Vol. 2, Pt. 3: Exploiting The Wi-Fi Stack on Apple Devices",
+        "url": "https://projectzero.google/2017/10/over-air-vol-2-pt-3-exploiting-wi-fi.html",
+        "published": "2017-10-11",
+        "source_type": "一手 writeup（Project Zero 博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_31ins7hagwa83bezondufuen",
+        "accessed_at": "2026-09-26T17:42:05.550960+00:00",
+        "content_sha256": "83df266f0ab4c614c22538b1fa1d9251dc64e39649c761c60a746e24552b6341"
+      }
+    },
+    {
+      "id": "gb-dec-05",
+      "date": "2017",
+      "claim": "2017 年 4 月至 10 月间，Beniamini 在约半年内完成了一条清晰的研究路径：Broadcom Wi-Fi 栈（Android，4 月）→ TrustZone TEE（7 月）→ Broadcom Wi-Fi 栈（Apple，Vol.2 三部曲，9-10 月），并在 Vol.2 末尾以端到端 iOS 内核利用链收尾。这条路径呈现'按攻击面防御滞后程度选题 + 跨平台复用方法 + 逐步逼近完整利用链'的连续决策模式。",
+      "status": "inferred",
+      "growth_signal": "该时间序列本身（同一作者、连续主题、由组件到全链）可作为'连续、有规划的研究推进'的推断依据，但其作为成长机制的内部动因（如是否受 Project Zero 团队选题机制、同行反馈或厂商响应驱动）未在一手来源中直接陈述，故标 inferred。",
+      "source": {
+        "title": "Project Zero 博客 2017 年归档（archive.html，多篇 2017 年文章索引）",
+        "url": "https://projectzero.google/archive.html",
+        "published": "2017",
+        "source_type": "Project Zero 博客归档索引",
+        "level": "first_hand_other"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_atxdhnit9eujkpmfjq5hp9fk",
+        "accessed_at": "2026-09-26T17:42:05.550938+00:00",
+        "content_sha256": "298d2cba7176e45de3728a2352dad2061179bd88fee7a7a9e15abc72283536a2"
+      }
+    }
+  ],
+  "contradictions": [
+    "WebSearch 摘要多次给出相互不一致且未经抓取证实的归属：部分摘要称 Beniamini 在 Black Hat 2017 所属机构为 NVIDIA，另一部分称其为 Project Zero；一手博客署名'Posted by Gal Beniamini, Project Zero'与后者一致，NVIDIA 归属未获任何抓取页面支持，疑为搜索引擎幻觉，已不作为证据。",
+    "搜索摘要曾将该研究者主题错误关联至 Bluetooth/BLE（'Bonding Time'为 BLE）与 BootStomp，与一手抓取证实的 Broadcom Wi-Fi + TrustZone 主题不符；'Bonding Time'标题未在任何抓取页面中出现，故不采信。"
+  ],
+  "gaps": [
+    "加入 Project Zero 的具体日期未取得一手来源；person_json 仅记 primary_focus，未记雇佣起止时间。",
+    "离开 Project Zero 的去向未证实；person_json 仅记 primary_focus 与 social 链接，未提供离职或后续职位信息。",
+    "Black Hat US 2017 议程页（blackhat.com/us-17/briefings.html）返回 403 未能抓取，故 Black Hat 演讲事实不列为 documented；搜索摘要提及的演讲标题（'TrustZone: The Security Backbone of Android'等）因未抓取证实而不采信。",
+    "2017-04 Broadcom Part 2 及更早（2016 及以前）是否有 Beniamini 撰写的 PZ 文章未逐篇抓取确证：归档页无作者字段，受工具调用预算限制未对 2016 年文章逐篇抓取。",
+    "研究转向的内部驱动（团队选题机制、同伴反馈、厂商响应、90 天披露政策对选题的影响）未在一手 writeup 中直接陈述，无法 documented。",
+    "person_json 中 writeup_evidence 链接（googleprojectzero.blogspot.com label 页）在新站已失效（标签页返回无结果），旧 blogspot URL 全部 404；该链接作为原始索引已不可用。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790444170141632000-gal-beniamini-decisions.json",
+    "resume_response_paths": [
+      "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790444525536415000-gal-beniamini-decisions-resume-1.json"
+    ],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "1134b16f-9888-477f-afbc-49433df94007",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_r5s2zprbbs7sey4j7y5b28tu",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-26T17:42:05.550403+00:00"
+      },
+      {
+        "tool_use_id": "call_uzt5zb9uugye5zguczsfh53f",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-26T17:42:05.550445+00:00"
+      },
+      {
+        "tool_use_id": "call_06p5k0pcahrt7b7ngm9plq2p",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "01321c795aeb0563f479cf99949b629a4fdc220ae92dd8b5d5bf32f3c77f6a06",
+        "accessed_at": "2026-09-26T17:42:05.550466+00:00"
+      },
+      {
+        "tool_use_id": "call_skd96w88523keewv4ljy5u4o",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "14beb476b80e6039b3508b7cd68ed19fbd066960aac6b3afc4280c8c2948401b",
+        "accessed_at": "2026-09-26T17:42:05.550473+00:00"
+      },
+      {
+        "tool_use_id": "call_hdtejvvpafagfjkoaig7vycj",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "e22779ebfe7d5b49ded04b7dd8eea061c886b28b0ef96ff5ac6a83dd37d9ffcb",
+        "accessed_at": "2026-09-26T17:42:05.550481+00:00"
+      },
+      {
+        "tool_use_id": "call_ou54iug0kqp06pl1u7j9bp6c",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "a6ede7b3f3853b6c792b73d1dfa23cf053f07280a0fc2bcf2453d7c28705a45e",
+        "accessed_at": "2026-09-26T17:42:05.550485+00:00"
+      },
+      {
+        "tool_use_id": "call_heql8f76hskpgjmb1ofd2ujv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-26T17:42:05.550489+00:00"
+      },
+      {
+        "tool_use_id": "call_i2o7ol9xjw41telbtosnhrnu",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://googleprojectzero.blogspot.com/search/label/Gal%20Beniamini",
+          "prompt": "List every blog post by Gal Beniamini with its exact title, publication date, and URL. Also note the full URL of the page itself. Quote the titles verbatim. I need a complete chronological list of his published research posts."
+        },
+        "success": true,
+        "content_sha256": "6237f93a2b4bfd38d6fac228e8b0404daea88b0c3665130d5c5ae53bb6975252",
+        "accessed_at": "2026-09-26T17:42:05.550573+00:00"
+      },
+      {
+        "tool_use_id": "call_0876p0syniuwx2zsca6gh6ja",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Gal Beniamini Project Zero researcher Android TrustZone Qualcomm background"
+        },
+        "success": true,
+        "content_sha256": "0844b73e43c4b3b158702092668fb6e93821b8555f03ba98d18e8c0055dc7987",
+        "accessed_at": "2026-09-26T17:42:05.550565+00:00"
+      },
+      {
+        "tool_use_id": "call_fhjv13kos592wjcbt4gdnpq7",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Gal Beniamini\" Project Zero blog TrustZone QSEE post site:googleprojectzero.blogspot.com"
+        },
+        "success": true,
+        "content_sha256": "4d9280fe7b892d311eba82ea3edb6c1f44832d37c59a9a5affe7aa6dae5fe6e7",
+        "accessed_at": "2026-09-26T17:42:05.550587+00:00"
+      },
+      {
+        "tool_use_id": "call_8d221ehzicphvvlv9ujscodh",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Gal Beniamini\" Black Hat presentation 2017 2018 Android TrustZone"
+        },
+        "success": true,
+        "content_sha256": "58445a03a981006ed3734e238f464ea9dbad53fd90dc8cf66fb16e74ae42814a",
+        "accessed_at": "2026-09-26T17:42:05.550593+00:00"
+      },
+      {
+        "tool_use_id": "call_1ovvwncvcoqdu3mg9pdda758",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog post titles, authors, and publication dates visible on this page. I'm specifically looking for posts authored by Gal Beniamini. Provide exact URLs for each post.",
+          "url": "https://googleprojectzero.blogspot.com/"
+        },
+        "success": true,
+        "content_sha256": "7939daf2361de128b4ac3de057eaa10290bff7e2ac55859e89ec5ec28f9a4b4d",
+        "accessed_at": "2026-09-26T17:42:05.550609+00:00"
+      },
+      {
+        "tool_use_id": "call_bbkawnu6ya9du1segrwpmwrd",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Gal Beniamini\" \"Bonding Time\" OR \"TrustZone\" Qualcomm blog post URL 2016 2017"
+        },
+        "success": true,
+        "content_sha256": "b15e554c16f4df2bee50345e65a99e6cb7ca2b4ac3809e292512034464095493",
+        "accessed_at": "2026-09-26T17:42:05.550620+00:00"
+      },
+      {
+        "tool_use_id": "call_h8etol7tdfvptmuf93qoo63f",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog post titles, authors, and publication dates visible on this page. I'm specifically looking for posts authored by Gal Beniamini. Provide exact URLs for each post.",
+          "url": "https://projectzero.google/"
+        },
+        "success": true,
+        "content_sha256": "43811f2387a4e849d193b2c03a8c8b02243c5a651de06dff0ac2dcc617032799",
+        "accessed_at": "2026-09-26T17:42:05.550627+00:00"
+      },
+      {
+        "tool_use_id": "call_qxppxg0l4xdtwyk2mxf31ovy",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List ALL blog post titles, authors, and publication dates with their full URLs visible on this archive page. I need every post from 2016, 2017, 2018, and 2019, especially any authored by Gal Beniamini.",
+          "url": "https://projectzero.google/blog/archive/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:05.550635+00:00"
+      },
+      {
+        "tool_use_id": "call_n77qyilazzxova61i1tvzrsn",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Beniamini\" \"Bonding Time\" Qualcomm TrustZone Project Zero"
+        },
+        "success": true,
+        "content_sha256": "6082f761f6492b47407cd11df114d48118b644ee097107ebdef1ab6ef4616df6",
+        "accessed_at": "2026-09-26T17:42:05.550644+00:00"
+      },
+      {
+        "tool_use_id": "call_sa1hrnxnope4l5zdyvb47yel",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the title of this post, who is the author, and what is the publication date? Quote the first paragraph verbatim and summarize the technical content. Also list any other Gal Beniamini posts linked from this page with their URLs.",
+          "url": "https://projectzero.google/blog/bonding-time/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:05.550650+00:00"
+      },
+      {
+        "tool_use_id": "call_lnoa02og0io4gywm97d3dh34",
+        "tool": "WebSearch",
+        "input": {
+          "query": "site:projectzero.google Gal Beniamini"
+        },
+        "success": true,
+        "content_sha256": "94a8e0368ef4a06ba59aede8df3ee130a0d149d4548a77412c76d97b77db213a",
+        "accessed_at": "2026-09-26T17:42:05.550655+00:00"
+      },
+      {
+        "tool_use_id": "call_hjddwsvtrlleqi8arbvp2mpj",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List ALL blog post titles, authors, publication dates, and full URLs on this page. I need to find posts by Gal Beniamini from 2016-2018, especially about TrustZone, Broadcom Wi-Fi, or Qualcomm.",
+          "url": "https://projectzero.google/blog/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:05.550659+00:00"
+      },
+      {
+        "tool_use_id": "call_e24ptjn54wyndrwzyevv4ejg",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"over the air\" \"broadcom\" \"beniamini\" project zero blog exploit wifi"
+        },
+        "success": true,
+        "content_sha256": "70752710d4adcbbb3d3c3da52b8f717a68433df780fe7a818be26e9d75e73644",
+        "accessed_at": "2026-09-26T17:42:05.550677+00:00"
+      },
+      {
+        "tool_use_id": "call_v7puzfc822l4nr2rbj2h9as2",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Gal Beniamini\" Black Hat 2017 \"TrustZone\" presentation slides abstract"
+        },
+        "success": true,
+        "content_sha256": "343a2c7d3b2da9ceb0284221455dc76f1a17ae23d6d7e7aea8ffd02cf6968da4",
+        "accessed_at": "2026-09-26T17:42:05.550666+00:00"
+      },
+      {
+        "tool_use_id": "call_o3t9g77lrbswbtkgto5wzof4",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who presented at Black Hat USA 2017 on Qualcomm TrustZone? Was it Gal Beniamini? What is the exact talk title, the speaker's employer/affiliation, and the abstract? Quote the abstract verbatim.",
+          "url": "https://www.blackhat.com/us-17/briefings.html"
+        },
+        "success": true,
+        "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47",
+        "accessed_at": "2026-09-26T17:42:05.550683+00:00"
+      },
+      {
+        "tool_use_id": "call_spksmgsa3sw1yzgdx2iy0zvd",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Gal Beniamini\" \"Bonding Time\" OR \"Over The Air\" site:projectzero.googlesource.com OR site:googleprojectzero.blogspot.com"
+        },
+        "success": true,
+        "content_sha256": "ee477633e547bf74ea9778b6164a00c775833d28254f6052b2cf4ff620e2f4ca",
+        "accessed_at": "2026-09-26T17:42:05.550687+00:00"
+      },
+      {
+        "tool_use_id": "call_19fgi7ropzvmti2is7rhbb65",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the exact title, author, and publication date of this blog post? Quote the first paragraph verbatim. Summarize the technical content in one paragraph. List any author attribution shown.",
+          "url": "https://googleprojectzero.blogspot.com/2017/04/over-the-air-exploiting-broadcoms-wi-fi.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:05.550691+00:00"
+      },
+      {
+        "tool_use_id": "call_bt5tleoxex2q34712tre71qd",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the exact title, author, and publication date of this blog post? Quote the first paragraph verbatim and summarize the technical content.",
+          "url": "https://googleprojectzero.blogspot.com/2017/08/bonding-time.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:05.550695+00:00"
+      },
+      {
+        "tool_use_id": "call_jzyyr66as6zn19nzqem7gm0r",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/checkpoint.md",
+          "content": "# Checkpoint — Gal Beniamini / 关键决策与转折\n\n## 身份与一手来源定位\n- person_json: rank=15, primary_focus=\"Android/基带/TrustZone 漏洞\", social X=laginimaineb, PZ 博客 label URL 在新站无结果(标签页返回 \"No posts with label Gal Beniamini\")。\n- Project Zero 博客已迁移: googleprojectzero.blogspot.com → projectzero.google (301)。首页可见 18 篇(2025-2026)无 Beniamini。需找 2016-2018 归档/单篇。\n- 已知主题线索(搜索摘要, 未抓取证实, 矛盾): \"Bonding Time\", \"Over The Air\" (Broadcom Wi-Fi), Qualcomm TrustZone/QSEE, Black Hat US 2017。\n- 搜索摘要存在幻觉风险: 出现 \"NVIDIA\"、\"Bluetooth/BLE\"、\"BootStomp\" 等不一致归属, 必须以实际抓取页面为准。\n\n## 未完成\n- 抓取 projectzero.google 单篇 Beniamini 旧文(尝试 /blog/bonding-time/ 404; blogspot 旧 URL 404)。需新站归档路径或单篇新 URL。\n- 抓取 Black Hat 2017 议程页确认 talk title/employer (blackhat.com us-17 briefings 返回 403)。\n- 确认加入/离开 Project Zero 时间、是否 Qualcomm 背景、转 iOS 还是 Wi-Fi。\n- 已用 ~7 次工具调用。保留最后回合提交 output.json。\n\n## 候选证据(待证实, 暂不可 documented)\n- BH US 2017 TrustZone talk (title 待确认: \"TrustZone: The Security Backbone of Android\"? 摘要未抓取证实)\n- PZ \"Over The Air\" Broadcom Wi-Fi 系列 (2017-04 前后, URL 404, 需新站链接)\n- PZ \"Bonding Time\" (URL 404, 需新站链接)\n"
+        },
+        "success": true,
+        "content_sha256": "29af79f3aa3559989792d7c68d1ef8641abe13addb6796405216d949bb559187",
+        "accessed_at": "2026-09-26T17:42:05.550703+00:00"
+      },
+      {
+        "tool_use_id": "call_0bzqywwz2bvxbmkwyedo34jq",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List ALL blog post links with their full URLs, titles, authors, and dates visible on this page. I need the complete list, including older posts from 2016-2018 by Gal Beniamini.",
+          "url": "https://projectzero.google/blog/archive/2017/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:05.550706+00:00"
+      },
+      {
+        "tool_use_id": "call_4bgnmzlfvlck4tfzzryl3k8x",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Gal Beniamini\" Broadcom BCM43xx Wi-Fi exploit \"Over The Air\" 2017 April Project Zero"
+        },
+        "success": true,
+        "content_sha256": "6eb5570d96328794601ffc0df3dc8d5a496f9c2c7748708a25346a48dbec7c35",
+        "accessed_at": "2026-09-26T17:42:05.550712+00:00"
+      },
+      {
+        "tool_use_id": "call_dvvnnlyodmsrt05jx96er3e1",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog post titles, authors, dates, and URLs captured on this archived Project Zero blog page. I'm specifically looking for posts by Gal Beniamini from 2016-2018.",
+          "url": "https://web.archive.org/web/2018*/googleprojectzero.blogspot.com"
+        },
+        "success": false,
+        "content_sha256": "491f5ee7f6fd51953c3b9c02cd3158d6909c8e6ba5db8ab8a01db94764d7362c",
+        "accessed_at": "2026-09-26T17:42:05.550716+00:00"
+      },
+      {
+        "tool_use_id": "call_i47vuxyv43iqkqp78n0xuzjp",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Gal Beniamini project zero bugs.chromium.org issue tracker Broadcom Qualcomm"
+        },
+        "success": true,
+        "content_sha256": "d2cb8cd384864de693baa06ae402e6803fe06e0294393adb898848835cd86cb1",
+        "accessed_at": "2026-09-26T17:42:05.550721+00:00"
+      },
+      {
+        "tool_use_id": "call_uays35hfa217y28rziwg1jg2",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What are the most recent captured snapshots of this blog? List the snapshot timestamps and URLs.",
+          "url": "http://timetravel.mementoweb.org/api/json/20180101000000/https://googleprojectzero.blogspot.com/"
+        },
+        "success": false,
+        "content_sha256": "415e894063094cf47adb4abf7c6d433a373fccbea3415ec86d5cf3fc73acee80",
+        "accessed_at": "2026-09-26T17:42:05.550724+00:00"
+      },
+      {
+        "tool_use_id": "call_1s7ookg0bvfn73yxs312eyej",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Search results for Gal Beniamini. List each issue: its ID, title, reporter, status, and the date it was reported.",
+          "url": "https://bugs.chromium.org/p/project-zero/issues/list?q=Gal%20Beniamini&can=1"
+        },
+        "success": true,
+        "content_sha256": "ee9ee45ce44561e82d08ae0a24eb0c92ee394deeb02f052105cd23136895dc04",
+        "accessed_at": "2026-09-26T17:42:05.550728+00:00"
+      },
+      {
+        "tool_use_id": "call_z8a4a443cp77q33llmamsyhn",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Search results for Gal Beniamini. List each issue: its ID, title, reporter, status, and the date it was reported. Quote titles verbatim.",
+          "url": "https://project-zero.issues.chromium.org/issues?q=Gal%20Beniamini"
+        },
+        "success": true,
+        "content_sha256": "7e6f74ef59d516c17563d4ae2c638661c687aeb981f7b437ba54f74e4d4b31ce",
+        "accessed_at": "2026-09-26T17:42:05.550740+00:00"
+      },
+      {
+        "tool_use_id": "call_xaraufjjqwqe3tv8igegglpr",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Search results for Beniamini. List each issue: its ID, title, reporter/commenter, status, and the date. Quote titles verbatim.",
+          "url": "https://issuetracker.google.com/issues?q=Beniamini"
+        },
+        "success": true,
+        "content_sha256": "992cef8183a065178ded1d164ace26680e5b3f3e67d31c8a1c51db3eabc9f901",
+        "accessed_at": "2026-09-26T17:42:05.550736+00:00"
+      },
+      {
+        "tool_use_id": "call_uuzzy1k9n1fp82qhk4mwaqyq",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the JSON list of captured snapshots (urlkey, timestamp, original, mimetype, statuscode, digest, length) for googleprojectzero.blogspot.com pages authored by Gal Beniamini around 2017-2018.",
+          "url": "http://web.archive.org/cdx/search/cdx?url=googleprojectzero.blogspot.com/*&from=2017&to=2018&output=json&limit=50"
+        },
+        "success": false,
+        "content_sha256": "491f5ee7f6fd51953c3b9c02cd3158d6909c8e6ba5db8ab8a01db94764d7362c",
+        "accessed_at": "2026-09-26T17:42:05.550745+00:00"
+      },
+      {
+        "tool_use_id": "call_k24ab9kex7nn01xg61bxq909",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Beniamini\" Black Hat 2017 briefings \"TrustZone\" talk abstract blackhat.com"
+        },
+        "success": true,
+        "content_sha256": "a2a4c8c74f924dc8ee4519ead89781b3d5c4b95b3ec6f009092e0723ed607e49",
+        "accessed_at": "2026-09-26T17:42:05.550748+00:00"
+      },
+      {
+        "tool_use_id": "call_wtmhji4tyulr3w8jsl0wx6jw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/checkpoint.md"
+        },
+        "success": true,
+        "content_sha256": "0b1f855606871a837a04f28abfc9d195dc14e22ba50eb5352cdc3c28204fd0a9",
+        "accessed_at": "2026-09-26T17:42:05.550755+00:00"
+      },
+      {
+        "tool_use_id": "call_eygoctphnu1dh3kpmf7czj8u",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/recovery-errors.json"
+        },
+        "success": true,
+        "content_sha256": "1bfda1911ef281af31243f7709ed1e5b445c849356d4077b8c1ba52b1788f755",
+        "accessed_at": "2026-09-26T17:42:05.550763+00:00"
+      },
+      {
+        "tool_use_id": "call_5x85pjm2ube5rk8mcng3u20r",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "01321c795aeb0563f479cf99949b629a4fdc220ae92dd8b5d5bf32f3c77f6a06",
+        "accessed_at": "2026-09-26T17:42:05.550772+00:00"
+      },
+      {
+        "tool_use_id": "call_s1m51r2pszijm82mv6f0sbw2",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List ALL blog post titles, authors, publication dates, and full URLs on this page. I need the complete list including any older posts, especially any by Gal Beniamini from 2016-2018.",
+          "url": "https://projectzero.google/blog/page/2/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:05.550884+00:00"
+      },
+      {
+        "tool_use_id": "call_7pixau59dna115ef7jipcamf",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the feed content. List each post's title, author, publication date, and URL. I'm looking for posts by Gal Beniamini.",
+          "url": "https://projectzero.google/feeds/posts/default?alt=json"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:05.550886+00:00"
+      },
+      {
+        "tool_use_id": "call_41s3aib392qqeo6r9cbfv7rv",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List ALL blog post titles, authors, publication dates, and full URLs visible on this page, including any older posts. I'm specifically looking for posts by Gal Beniamini from 2016-2018 about Broadcom Wi-Fi, Qualcomm TrustZone, or Android.",
+          "url": "https://projectzero.google/?updated-max=2018-01-01T00:00:00Z&max-results=40"
+        },
+        "success": true,
+        "content_sha256": "d4cfd996d01aada8d5ac7381446b2ba94e05766945db519e1c93ef56a1367dbc",
+        "accessed_at": "2026-09-26T17:42:05.550901+00:00"
+      },
+      {
+        "tool_use_id": "call_embw54i4bmil7qmbwttkb61y",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List the site's archive, blog post listing, or sitemap links. I need to find blog post URLs by Gal Beniamini from 2016-2018.",
+          "url": "https://projectzero.google/sitemap.xml"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:05.550890+00:00"
+      },
+      {
+        "tool_use_id": "call_atxdhnit9eujkpmfjq5hp9fk",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List ALL blog post titles, authors, publication dates, and full URLs in this archive. I need the complete historical archive, especially posts by Gal Beniamini from 2016-2018 about Broadcom Wi-Fi, Qualcomm TrustZone, or Android.",
+          "url": "https://projectzero.google/archive.html"
+        },
+        "success": true,
+        "content_sha256": "298d2cba7176e45de3728a2352dad2061179bd88fee7a7a9e15abc72283536a2",
+        "accessed_at": "2026-09-26T17:42:05.550938+00:00"
+      },
+      {
+        "tool_use_id": "call_dqd1xozahw3s1p2c1yg91ys1",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is the author of this post? What is the exact title and publication date? Quote the author byline and date verbatim. Then quote the first paragraph verbatim and summarize in one paragraph what the post covers technically (the decision/transition: e.g., moving from Broadcom to Apple Wi-Fi, scope of research).",
+          "url": "https://projectzero.google/2017/09/over-air-vol-2-pt-1-exploiting-wi-fi.html"
+        },
+        "success": true,
+        "content_sha256": "64545fa3a4fbd2c117b7cd8e85d750d436ca42a24a3a6d00ca032495271a3b28",
+        "accessed_at": "2026-09-26T17:42:05.550943+00:00"
+      },
+      {
+        "tool_use_id": "call_jm6i69iq86rgyjkdc50ote0b",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is the author of this post? What is the exact title and publication date? Quote the author byline and date verbatim. Then quote the first paragraph verbatim and summarize in one paragraph the technical content and any motivation/decision for the research direction.",
+          "url": "https://projectzero.google/2017/07/trust-issues-exploiting-trustzone-tees.html"
+        },
+        "success": true,
+        "content_sha256": "f1e914f8927585ac5c63dbf849ba0402fc90e9c9aa1f205b4f8b9110651298d3",
+        "accessed_at": "2026-09-26T17:42:05.550948+00:00"
+      },
+      {
+        "tool_use_id": "call_frztpcm1rwp6c7vfnfia5t2l",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is the author? Exact title and publication date, quoted verbatim. Quote the first paragraph verbatim. Summarize the motivation for choosing Broadcom's Wi-Fi stack and the Android ecosystem as the research target — what decision/criteria drove the target selection.",
+          "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html"
+        },
+        "success": true,
+        "content_sha256": "e5a07d2fcd15e0a8bdd0478c317873b43755f286c2108dc458a8a20dddc64d14",
+        "accessed_at": "2026-09-26T17:42:05.550954+00:00"
+      },
+      {
+        "tool_use_id": "call_31ins7hagwa83bezondufuen",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is the author? Exact title and publication date, quoted verbatim. Quote the conclusion paragraph verbatim if present. Summarize how the full over-the-air exploit chain against iPhone was completed and any reflection on the research outcome or next direction.",
+          "url": "https://projectzero.google/2017/10/over-air-vol-2-pt-3-exploiting-wi-fi.html"
+        },
+        "success": true,
+        "content_sha256": "83df266f0ab4c614c22538b1fa1d9251dc64e39649c761c60a746e24552b6341",
+        "accessed_at": "2026-09-26T17:42:05.550960+00:00"
+      },
+      {
+        "tool_use_id": "call_igvfx9vacrdibzgrsbmb8r8v",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/checkpoint.md",
+          "content": "# Checkpoint — Gal Beniamini / 关键决策与转折\n\n## 身份确认(一手, web_fetch 证实)\n- Project Zero 博客作者 byline: \"Posted by Gal Beniamini, Project Zero\"(四篇均证)。\n- 与 person_json 一致(primary_focus 含 Android/TrustZone;writeup_evidence 指向 PZ 博客)。\n- 排除同名歧义: 无 NVIDIA/Bluetooth 混淆材料进入证据(搜索摘要幻觉已弃用)。\n\n## 已抓取一手来源(web_fetch 证实, byline+日期+首段)\n1. \"Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)\" — 2017-Apr-04 — PZ\n   - 决策: 选 Broadcom Wi-Fi SoC(部署最广、AP 防御加固后攻击者转 least-resistance 组件);选 Android 为演示平台。\n2. \"Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 2)\" — 2017-Apr-11 — PZ(归档确认, 未单独抓取首段;与 Pt.1 同系列)\n3. \"Trust Issues: Exploiting TrustZone TEEs\" — 2017-Jul-24 — PZ\n   - 转折: 从 Wi-Fi 转向 TrustZone TEE(QSEE/Kinibi);动机=TEE 防御滞后、trustlet 撤销缺失。\n4. \"Over The Air - Vol. 2, Pt. 1: Exploiting The Wi-Fi Stack on Apple Devices\" — 2017-Sep-28 — PZ\n   - 决策: 从 Android 转向 Apple 生态;复用 Ian Beer 内核 exploit 作研究平台。\n5. \"Over The Air - Vol. 2, Pt. 3: ...\" — 2017-Oct-11 — PZ\n   - 完成: 端到端 OAT iPhone 7 内核 RCE 链;7 漏洞报 Apple, iOS 11 修复。\n\n## 维度覆盖(关键决策与转折)\n- 目标选择决策: Broadcom Wi-Fi(部署广+AP 加固后 least-resistance) — item1\n- 平台迁移决策: Android→Apple(Vol.2) — item2\n- 领域转向决策: Wi-Fi→TrustZone TEE(Trust Issues) — item3\n- 方法工具建设: 复用同伴(Ian Beer)内核原语搭建 iOS 研究平台 — item2 含\n- 全链完成/披露: 7 漏洞→iOS 11 修复 — item4\n\n## 未解决资料缺口(诚实记录)\n- 加入/离开 Project Zero 的具体日期未抓取到一手来源。\n- 2017 年 4 月 Broadcom 研究之前是否有更早的 PZ 文章或其加入背景,未在 2016 归档中确证(归档无作者字段,需逐篇抓取;预算所限未做)。\n- Black Hat 议程页 403,未抓取;故 BH talk 不列为 documented。\n- 离开 PZ 后的去向(person_json 仅记 primary_focus)未证实。\n- 是否有官方 CV/雇主声明(如 Qualcomm 背景)未找到一手来源。\n\n## 工具调用预算\n- 本回合抓取: Vol2Pt1/TrustIssues/Pt1/Vol2Pt3 + archive(均 web_fetch 成功)。\n- 搜索工具输出不可靠(幻觉 NVIDIA/Bluetooth/CVE), 已弃用, 仅作 lead。\n"
+        },
+        "success": true,
+        "content_sha256": "5318a8cf03ad9b54b446675ec1ff6ae6ee6b39e0c0ef81c1d6059e7448010c60",
+        "accessed_at": "2026-09-26T17:42:05.550964+00:00"
+      },
+      {
+        "tool_use_id": "call_emtahw0mlwjz9zumzs0ad5j0",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/output.json",
+          "content": "{\n  \"person\": \"Gal Beniamini\",\n  \"dimension\": \"关键决策与转折\",\n  \"identity_check\": \"经一手来源确认身份: Project Zero 博客四篇文章署名均为 'Posted by Gal Beniamini, Project Zero'（2017-04-04、2017-07-24、2017-09-28、2017-10-11）。与 person_json 记录一致：primary_focus 为 Android/基带/TrustZone 漏洞，writeup_evidence 指向 Project Zero 博客。同名歧义已排除——搜索摘要曾出现 NVIDIA、Bluetooth/BLE、BootStomp 等不一致归属，均未在抓取页面中得到证实，已弃用。Project Zero 博客已从 googleprojectzero.blogspot.com 迁移至 projectzero.google，旧 URL 返回 404，故 person_json 中的 writeup_evidence 链接不可直接抓取；经新站 archive.html 取得完整历史索引并定位 2017 年单篇。\",\n  \"items\": [\n    {\n      \"id\": \"gb-dec-01\",\n      \"date\": \"2017-04-04\",\n      \"claim\": \"Gal Beniamini 选择 Broadcom 的 Wi-Fi SoC 栈作为首个 Project Zero 深度研究对象，并选择 Android 生态作为演示平台。其决策依据是：移动应用处理器（AP）的防御持续加固后，攻击者会转向受审视较少的组件（least-resistance 路径）；Broadcom Wi-Fi 芯片是移动设备上部署最广的 Wi-Fi 芯片组（Nexus、三星旗舰及自 iPhone 4 以来的全部 iPhone 均采用），且 FullMAC SoC 引入了运行在独立低功耗处理器上的专有、复杂代码库，构成未被同等审视的攻击面。Android 被选为演示平台，但结论适用于任何采用相同芯片组的系统。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"目标选择体现了可复用的研究方法论：在攻击面分析阶段，按'防御加固程度反向迁移''部署广度''专有代码复杂度与受审视程度之差'三项可核验标准筛选研究对象，而非凭主题偏好。这是漏洞挖掘方向的结构化选题机制，可用于解释其后续连续选题。\",\n      \"short_quote\": \"the code running on the application processor (AP) has been the subject of much research, other components have seldom received the same scrutiny\",\n      \"source\": {\n        \"title\": \"Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)\",\n        \"url\": \"https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html\",\n        \"published\": \"2017-04-04\",\n        \"source_type\": \"一手 writeup（Project Zero 博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"gb-dec-02\",\n      \"date\": \"2017-07-24\",\n      \"claim\": \"Beniamini 在完成 Broadcom Wi-Fi 栈研究后转向 Android TrustZone 可信执行环境（TEE），覆盖 Qualcomm QSEE 与 Trustonic Kinibi 两类主流实现。该转向的动机为：TEE 处理生物特征、支付、DRM 与全盘加密密钥等高价值数据，但其安全缓解措施（ASLR、栈 cookie、守护页）显著滞后于常规操作系统，使其成为日益有吸引力的目标；同时厂商几乎不撤销已签名 trustlet（版本计数器普遍停留在零），使已修补漏洞可通过加载旧的仍签名二进制绕过。研究在 Galaxy S7 Edge 上以 Samsung OTP trustlet 已知栈溢出达成 Kinibi 内任意代码执行。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"从 Wi-Fi 固件转向 TrustZone 是同一'高价值数据所在 + 防御滞后 + 可签名组件撤销机制失效'选题框架的二次应用，显示选题标准可跨子系统迁移；研究同时构造了跨厂商（Qualcomm/Trustonic）的对比分析，说明其方法包含可推广的抽象层而非单点漏洞。\",\n      \"short_quote\": \"virtually no manufacturer actually revokes vulnerable trustlets\",\n      \"source\": {\n        \"title\": \"Trust Issues: Exploiting TrustZone TEEs\",\n        \"url\": \"https://projectzero.google/2017/07/trust-issues-exploiting-trustzone-tees.html\",\n        \"published\": \"2017-07-24\",\n        \"source_type\": \"一手 writeup（Project Zero 博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"gb-dec-03\",\n      \"date\": \"2017-09-28\",\n      \"claim\": \"Beniamini 决定将 Wi-Fi 栈研究从 Android 生态迁移至 Apple 生态，以'更完整描绘移动生态 Wi-Fi 安全状态'。为克服 iOS 闭源与缺少研究平台的约束，他复用同伴 Ian Beer 的内核漏洞获取内存读写原语，逆向 Apple 专有 Wi-Fi 驱动（AppleBCMWLANCore、AppleBCMWLANBusInterfacePCIe），通过 kalloc zone 分析定位 Wi-Fi 芯片 TCM 在内核地址空间的映射，并以基于 RAM 的钩子提取固件 ROM、自建 Wi-Fi 固件调试器，从而把在 Android 上建立的研究能力迁移到 Apple 平台。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"平台迁移决策展示了工具建设与同伴成果复用的成长机制：以 Ian Beer 的内核 exploit 为基础设施搭建 iOS 研究平台（固件提取、调试器），把已验证的 Broadcom 研究方法跨平台复用。这表明其研究能力包含'自建可复用底层工具链'而非仅产出单点漏洞，且明确记录了对同伴工作（Ian Beer）的依赖。\",\n      \"short_quote\": \"we've chosen to revisit the topic - this time through the lens of Apple devices\",\n      \"source\": {\n        \"title\": \"Over The Air - Vol. 2, Pt. 1: Exploiting The Wi-Fi Stack on Apple Devices\",\n        \"url\": \"https://projectzero.google/2017/09/over-air-vol-2-pt-1-exploiting-wi-fi.html\",\n        \"published\": \"2017-09-28\",\n        \"source_type\": \"一手 writeup（Project Zero 博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"gb-dec-04\",\n      \"date\": \"2017-10-11\",\n      \"claim\": \"Beniamini 完成 Vol.2 系列的端到端空中利用链，在 iPhone 7（iOS 10.2）上由 Wi-Fi 固件代码执行经 PCIe/DART IOMMU 达到主机内核任意代码执行。关键技术转折包括：逆向 Apple 专有 DART（3 级转换机制，32 位 IO-Space 映射主机物理地址），发现主机以固定上界 0x10000 校验共享环索引而非实际环容量导致可靠越界写；通过固件发送未请求的 flow ring 删除响应泄露 flow ring 以塑形 IO-Space，使新建 flow ring 与 DART L2 转换表落入同一内核 zone；继而覆写 DART 描述符引入任意物理地址映射，并构造自指映射（'Inception'）使 Wi-Fi 芯片获得对全部主机物理内存的永久 DMA 访问；最后将 KTRR 硬件寄存器映射入 IO-Space 直接读取，以 KTRR 作预言机击败 KASLR。研究共向 Apple 报告 7 个漏洞，在 iOS 11 中修复。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"全链完成记录了从单组件漏洞到端到端利用链的工程化能力，并显示公开发表习惯：以多部分博客系列逐步披露研究过程与最终利用链，并将漏洞按 Project Zero 流程报告厂商。KTRR-as-KASLR-oracle 的反思显示其方法包含对硬件保护机制本身作为攻击面/信息侧信道的二次审视。\",\n      \"short_quote\": \"allowing complete control over the target device\",\n      \"source\": {\n        \"title\": \"Over The Air - Vol. 2, Pt. 3: Exploiting The Wi-Fi Stack on Apple Devices\",\n        \"url\": \"https://projectzero.google/2017/10/over-air-vol-2-pt-3-exploiting-wi-fi.html\",\n        \"published\": \"2017-10-11\",\n        \"source_type\": \"一手 writeup（Project Zero 博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"gb-dec-05\",\n      \"date\": \"2017\",\n      \"claim\": \"2017 年 4 月至 10 月间，Beniamini 在约半年内完成了一条清晰的研究路径：Broadcom Wi-Fi 栈（Android，4 月）→ TrustZone TEE（7 月）→ Broadcom Wi-Fi 栈（Apple，Vol.2 三部曲，9-10 月），并在 Vol.2 末尾以端到端 iOS 内核利用链收尾。这条路径呈现'按攻击面防御滞后程度选题 + 跨平台复用方法 + 逐步逼近完整利用链'的连续决策模式。\",\n      \"status\": \"inferred\",\n      \"growth_signal\": \"该时间序列本身（同一作者、连续主题、由组件到全链）可作为'连续、有规划的研究推进'的推断依据，但其作为成长机制的内部动因（如是否受 Project Zero 团队选题机制、同行反馈或厂商响应驱动）未在一手来源中直接陈述，故标 inferred。\",\n      \"source\": {\n        \"title\": \"Project Zero 博客 2017 年归档（archive.html，多篇 2017 年文章索引）\",\n        \"url\": \"https://projectzero.google/archive.html\",\n        \"published\": \"2017\",\n        \"source_type\": \"Project Zero 博客归档索引\",\n        \"level\": \"first_hand_other\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"WebSearch 摘要多次给出相互不一致且未经抓取证实的归属：部分摘要称 Beniamini 在 Black Hat 2017 所属机构为 NVIDIA，另一部分称其为 Project Zero；一手博客署名'Posted by Gal Beniamini, Project Zero'与后者一致，NVIDIA 归属未获任何抓取页面支持，疑为搜索引擎幻觉，已不作为证据。\",\n    \"搜索摘要曾将该研究者主题错误关联至 Bluetooth/BLE（'Bonding Time'为 BLE）与 BootStomp，与一手抓取证实的 Broadcom Wi-Fi + TrustZone 主题不符；'Bonding Time'标题未在任何抓取页面中出现，故不采信。\"\n  ],\n  \"gaps\": [\n    \"加入 Project Zero 的具体日期未取得一手来源；person_json 仅记 primary_focus，未记雇佣起止时间。\",\n    \"离开 Project Zero 的去向未证实；person_json 仅记 primary_focus 与 social 链接，未提供离职或后续职位信息。\",\n    \"Black Hat US 2017 议程页（blackhat.com/us-17/briefings.html）返回 403 未能抓取，故 Black Hat 演讲事实不列为 documented；搜索摘要提及的演讲标题（'TrustZone: The Security Backbone of Android'等）因未抓取证实而不采信。\",\n    \"2017-04 Broadcom Part 2 及更早（2016 及以前）是否有 Beniamini 撰写的 PZ 文章未逐篇抓取确证：归档页无作者字段，受工具调用预算限制未对 2016 年文章逐篇抓取。\",\n    \"研究转向的内部驱动（团队选题机制、同伴反馈、厂商响应、90 天披露政策对选题的影响）未在一手 writeup 中直接陈述，无法 documented。\",\n    \"person_json 中 writeup_evidence 链接（googleprojectzero.blogspot.com label 页）在新站已失效（标签页返回无结果），旧 blogspot URL 全部 404；该链接作为原始索引已不可用。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "d1ba6fe558ecdc5ce3a834ca0d9389452334957347ad6ade0510ad291de8a98f",
+        "accessed_at": "2026-09-26T17:42:05.550968+00:00"
+      },
+      {
+        "tool_use_id": "call_gsspgz4sl6gm4t4hxd13azgg",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-decisions-20260927-013142-383/output.json"
+        },
+        "success": true,
+        "content_sha256": "a60e6a04a6d86cc5847b0d742b3feae898b653d945dbc7c14365e93ad811acfe",
+        "accessed_at": "2026-09-26T17:42:05.550989+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790444525551006000-gal-beniamini-decisions.json",
+    "label": "Gal Beniamini:decisions",
+    "elapsed_seconds": 623.18,
+    "prompt_sha256": "3cbac47523f8e75d9ac91bdcac455b14ff80218ffde9e208a6b3763ca54936c1",
+    "num_turns": 35,
+    "total_cost_usd": 1.560658,
+    "usage": {
+      "input_tokens": 24346,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 323584,
+      "output_tokens": 7397,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 28187,
+        "outputTokens": 24676,
+        "cacheReadInputTokens": 419776,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.9677230000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": true,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

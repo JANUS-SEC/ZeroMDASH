@@ -1,0 +1,398 @@
+{
+  "person": "Alex Ionescu",
+  "dimension": "关键决策与转折",
+  "identity_check": "身份确认：GitHub 用户 ionescu007 的 bio 自述为 \"CTIO at CrowdStrike\" 与 \"President of Winsider Seminars & Solutions, Inc.\"，并链接 windows-internals.com；其个人站 alex-ionescu.com 标题为 \"Windows Internals, Thoughts on Security, and Reverse Engineering\"，方向与人物记录 \"Windows 内核与平台漏洞 / 系统底层漏洞与缓解机制研究\" 一致。@aionescu 的 X 主页因 402 Payment Required 与 Anubis 反爬未能抓取正文。ReactOS/TinyKRNL 早期角色：reactos.org/wiki 抓取因 TLS 证书错误失败，仅 alex-ionescu.com 首页 Blogroll 与分类 \"TinyKRNL and ReactOS\" 间接佐证历史关联，无退出时点。",
+  "items": [
+    {
+      "id": "aionescu-decisions-001",
+      "date": "2017-05-11",
+      "claim": "Alex Ionescu 在第6版《Windows Internals》(覆盖 Windows 7) 后因倦怠放弃续写，且认为微软 Windows as a Service (WaaS) 节奏过快使书籍无法及时跟进；当 Pavel Yosifovich 接手该书、前两位候选作者中途放弃后，Ionescu 决定重返，与 Pavel 合著第7版，投入约12个月，并力争覆盖 Redstone 2 (1703)，使该版得以在系统发行后数周内出版。",
+      "status": "documented",
+      "growth_signal": "在自我承认会导致延期的情况下仍选择重返一个曾导致倦怠的大型项目；约束为 WaaS 节奏与个人倦怠，可选项为继续放弃或与接手者合作，选择合作并把工作压缩到12个月以赶上发行窗口，后果是恢复作者身份并刷新发行时效记录。",
+      "short_quote": "It seemed obvious that I should jump into the deep abyss of Windows Internals once again.",
+      "source": {
+        "title": "Windows Internals, 7th Edition!",
+        "url": "https://www.alex-ionescu.com/windows-internals-7th-edition/",
+        "published": "2017-05-11",
+        "source_type": "本人博客（一手 writeup）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_wgaak7bhf8n4c6tx65c1f7wa",
+        "accessed_at": "2026-09-27T06:47:47.317063+00:00",
+        "content_sha256": "db11cb1be4b20e3c7a8db9ba2d1b7dec4a8da47efdd6447e6fc994d467d80045"
+      }
+    },
+    {
+      "id": "aionescu-decisions-002",
+      "date": "2019-01-14",
+      "claim": "Ionescu 在构建用户态与 Hyper-V / Secure Kernel 通信的模糊测试驱动时，放弃其使用近二十年的传统 WDM 非 PnP 驱动写法，改用 WDF。理由是 WDF 将简单 IOCTL 处理驱动编写复杂度显著降低，且根总线枚举 PnP 驱动在 WDM 下需 1500-4000 行样板代码，而 WDF 下零额外工作（无需 IRP_MJ_PNP、WMI、电源管理处理）。",
+      "status": "documented",
+      "growth_signal": "方法转型：基于工具复杂度与可维护性证据推翻二十年习惯；约束是需要用户态↔hypervisor 通信的研究驱动，可选项为继续 WDM 或迁移 WDF，选择迁移并公开记录动机与对比，后果是降低后续研究驱动的基础设施成本。",
+      "short_quote": "I had wrongly assumed that for writing Non-PnP research/academic drivers... WDM was still the better, and easier choice.",
+      "source": {
+        "title": "Writing a Hyper-V \"Bridge\" for Fuzzing — Part 1: WDF",
+        "url": "https://www.alex-ionescu.com/writing-a-hyper-v-bridge-for-fuzzing-part-1-wdf/",
+        "published": "2019-01-14",
+        "source_type": "本人博客（一手 writeup）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_n0rzo9md1a76fwlo4h0geyed",
+        "accessed_at": "2026-09-27T06:47:47.317076+00:00",
+        "content_sha256": "d3d40a06129c526c1edaca8d384dea4a38d2799c5cdaeaf24059670bb449ac7e"
+      }
+    },
+    {
+      "id": "aionescu-decisions-003",
+      "date": "2017-08-07",
+      "claim": "Ionescu 在为第7版审查 Windows 10 周年更新变化时，注意到内核为支持 User Mode Scheduling (UMS) 开始强制 CR4[FSGSBASE]；由此重读 AMD 手册，发现 x64 长模式下 FS/GS 数据段与 16 字节调用门描述符仍有效，且 PatchGuard 不监控 per-process LDT 条目，从而复活了此前被认为已在 x64 移除的调用门 Ring0 执行技术。",
+      "status": "documented",
+      "growth_signal": "由写书副产物触发的研究转向：约束是写书过程中的强制功能观察，可选项为忽略或深挖架构手册，选择深挖并交叉引用 j00ru/Gynvael Coldwind 的描述符表论文与自身 Infiltrate 2015 AWE 攻击，后果是产出一项被同行（含 j00ru 本人）此前未察觉的 x64 攻击面。",
+      "short_quote": "most people (myself included) assumed that AMD had simply removed this oft-unused feature completely from the x64 architecture.",
+      "source": {
+        "title": "Bringing Call Gates Back",
+        "url": "https://www.alex-ionescu.com/bringing-call-gates-back/",
+        "published": "2017-08-07",
+        "source_type": "本人博客（一手 writeup）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_0lqjmn9byyfvkdgya4ie4b60",
+        "accessed_at": "2026-09-27T06:47:47.317093+00:00",
+        "content_sha256": "f544aa7e2939037fa2741aa5480e664b14ded9892389e49bbd682925beb1ac09"
+      }
+    },
+    {
+      "id": "aionescu-decisions-004",
+      "date": "2017",
+      "claim": "Ionescu 自述近年将公开研究重心迁移至 infosec 会议圈，并曾构思一档名为 \"Windows Design Flaw Garage Sale\" 的演讲，模仿 Stefan Esser (i0nic) 的格式，覆盖历史已修与未修缺陷。",
+      "status": "reported",
+      "growth_signal": "发表渠道与演讲格式的主动转型：从书籍/长文写作为主转向会议圈与系列化历史缺陷披露；约束为 WaaS 节奏使书籍难以及时跟进，可选项为继续纯书籍或转向会议，选择会议圈并借鉴既有前辈 (Esser) 的格式。",
+      "source": {
+        "title": "Alex Ionescu's Blog (首页聚合自述)",
+        "url": "https://www.alex-ionescu.com/",
+        "published": "2017",
+        "source_type": "本人博客（一手 writeup）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_o4v3i7b86n7tld2setl9w6u1",
+        "accessed_at": "2026-09-27T06:47:47.317047+00:00",
+        "content_sha256": "fc46533a7f8a8279e91c5dee4426a862121b7a486b92f712c43bff9e54e28fbb"
+      }
+    },
+    {
+      "id": "aionescu-decisions-005",
+      "date": "2018",
+      "claim": "GitHub bio 自述 Ionescu 担任 CrowdStrike CTIO 与 Winsider Seminars & Solutions, Inc. 总裁；可见仓库包括 SimpleVisor（精简 Intel VT-x hypervisor）、SpecuCheck（检测 Meltdown/Spectre v2/Foreshadow 等缓解状态的工具）、HookingNirvana (Recon 2015 演示) 等，体现其从研究向可复用工具建设的产出习惯。",
+      "status": "reported",
+      "growth_signal": "雇主与角色转型佐证（CrowdStrike CTIO / Winsider 总裁）叠加公开工具建设习惯；因 bio 无转型时点、各仓库无本人 writeup 抓取佐证其决策动机，仅作身份与产出习惯支撑，转型时点缺口见 gaps。",
+      "source": {
+        "title": "GitHub user ionescu007 profile",
+        "url": "https://github.com/ionescu007",
+        "published": "2018",
+        "source_type": "GitHub 用户主页（自述 bio）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_mvz2n1fu4j4x840ssuhb43xv",
+        "accessed_at": "2026-09-27T06:47:47.317107+00:00",
+        "content_sha256": "67497add1827d788b6238b5535be0df80fce289be78b076eb209c15dc6c95f37"
+      }
+    }
+  ],
+  "contradictions": [
+    "未发现互相冲突的材料。需注意：item aionescu-decisions-004 中首页对 2017 年前后会议圈转型的自述未给出精确月份，且页面为聚合首页而非单篇带明确日期的文章，published 字段以年份占位，精确度低于其他单篇文章。"
+  ],
+  "gaps": [
+    "ReactOS / TinyKRNL 早期角色与退出时点：reactos.org/wiki 抓取因 TLS 证书错误 (ERR_TLS_CERT_ALTNAME_INVALID) 失败，X 主页因 402/反爬失败；仅靠 alex-ionescu.com 首页 Blogroll 与 \"TinyKRNL and ReactOS\" 分类间接佐证历史关联，无法标记 documented。",
+    "加入 CrowdStrike 及担任 CTIO 的精确日期：GitHub bio 仅陈述现任职务，无入职或晋升时点。",
+    "离开 ReactOS 进入商业安全的迁移路径与动机：缺乏一手 writeup 抓取。",
+    "SpecuCheck (2018 侧信道缓解潮) 作为公开工具建设的决策动机：GitHub 确认 repo 存在，但未抓取到本人 writeup 说明其构建决策，未纳入 items。",
+    "受 8 次工具调用预算限制，未对 Black Hat/BlueHat 演讲页面与 windows-internals.com 做进一步抓取；会议层面的具体披露事件转折未能逐项取证。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-decisions-20260927-144403-647",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790491667312344000-alex-ionescu-decisions.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "58149805-640b-4510-a5d7-7b594c9688cf",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_tl632sbno0bikjqjasvbpgxu",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-decisions-20260927-144403-647/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T06:47:47.316923+00:00"
+      },
+      {
+        "tool_use_id": "call_ptw145mxelkujp12ia8i51dg",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-decisions-20260927-144403-647/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-27T06:47:47.316960+00:00"
+      },
+      {
+        "tool_use_id": "call_4uuht3sqtqyxedwmb3b3j47f",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-decisions-20260927-144403-647/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "691e9a3fc2b466ae830c9f49f6d4dba02273e1141b23bd1b06780dd28f5c6475",
+        "accessed_at": "2026-09-27T06:47:47.316974+00:00"
+      },
+      {
+        "tool_use_id": "call_a1g3rqgyf8839e2ii44xsdnd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-decisions-20260927-144403-647/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "14bcc223871484fdbfe070018c5ec7f339994c311f8e263baab4902cfa56ed0c",
+        "accessed_at": "2026-09-27T06:47:47.316985+00:00"
+      },
+      {
+        "tool_use_id": "call_db9aa4lm4969qxux0z25n6mm",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-decisions-20260927-144403-647/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "e22779ebfe7d5b49ded04b7dd8eea061c886b28b0ef96ff5ac6a83dd37d9ffcb",
+        "accessed_at": "2026-09-27T06:47:47.316989+00:00"
+      },
+      {
+        "tool_use_id": "call_u83uppaiylbz7j5tbaadnbsy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-decisions-20260927-144403-647/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "a6ede7b3f3853b6c792b73d1dfa23cf053f07280a0fc2bcf2453d7c28705a45e",
+        "accessed_at": "2026-09-27T06:47:47.316998+00:00"
+      },
+      {
+        "tool_use_id": "call_ephf8n48uksr2z05wz6kn9tz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-decisions-20260927-144403-647/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-27T06:47:47.317006+00:00"
+      },
+      {
+        "tool_use_id": "call_zrsnzzuwd3vil0weee2hpbqi",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Alex Ionescu ReactOS Windows kernel researcher career background"
+        },
+        "success": true,
+        "content_sha256": "8cb43426c8f96f983a2665f5916780a2633103da42e38222714b836deaa916b8",
+        "accessed_at": "2026-09-27T06:47:47.317017+00:00"
+      },
+      {
+        "tool_use_id": "call_d87g1ko850jqhxtefj8ykaqb",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Alex Ionescu interview Windows internals KVM patches VMware"
+        },
+        "success": true,
+        "content_sha256": "319999c9eceec97b2511c93a0709dab8d953e14bdc6bfc7c047f0c0160dad3bb",
+        "accessed_at": "2026-09-27T06:47:47.317027+00:00"
+      },
+      {
+        "tool_use_id": "call_o4v3i7b86n7tld2setl9w6u1",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://www.alex-ionescu.com/",
+          "prompt": "Extract Alex Ionescu's biography, career history, talks, projects, employment (including CrowdStrike, ReactOS), and any statements about career decisions, transitions, or focus areas. List page titles, dates, and URLs of articles/talks visible on the page."
+        },
+        "success": true,
+        "content_sha256": "fc46533a7f8a8279e91c5dee4426a862121b7a486b92f712c43bff9e54e28fbb",
+        "accessed_at": "2026-09-27T06:47:47.317047+00:00"
+      },
+      {
+        "tool_use_id": "call_lx6fu8olgsw5bupge2dm6wyk",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://en.wikipedia.org/wiki/Alex_Ionescu",
+          "prompt": "Extract biographical facts about Alex Ionescu: birth year, nationality, ReactOS role, employment (CrowdStrike, others), notable CVEs/vulnerabilities, conference talks, co-authorship of Windows Internals, and any dated career transitions or decisions."
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T06:47:47.317034+00:00"
+      },
+      {
+        "tool_use_id": "call_wgaak7bhf8n4c6tx65c1f7wa",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the full text discussing the decision to return for the 7th edition, burnout, the 6th edition delays, co-authors leaving, Windows as a Service, and the 12-month effort. Provide exact short quotes about his decision-making and career state. Include publication date.",
+          "url": "https://www.alex-ionescu.com/windows-internals-7th-edition/"
+        },
+        "success": true,
+        "content_sha256": "db11cb1be4b20e3c7a8db9ba2d1b7dec4a8da47efdd6447e6fc994d467d80045",
+        "accessed_at": "2026-09-27T06:47:47.317063+00:00"
+      },
+      {
+        "tool_use_id": "call_jyoyj3365cy4e7hfxot2me0f",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract any biographical introduction: does this page mention Alex Ionescu's role at ReactOS, employment at CrowdStrike, university, or early career? List all talks with venue and year. List all publications with dates and URLs.",
+          "url": "https://www.alex-ionescu.com/publications/"
+        },
+        "success": true,
+        "content_sha256": "63e0609ad00845b112fa09759ef3a96bfcedd474fb3dbddf13c5fb7d7bc1a6b3",
+        "accessed_at": "2026-09-27T06:47:47.317053+00:00"
+      },
+      {
+        "tool_use_id": "call_jh12ydy3cbg8ptpssvojtt48",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract all biographical facts about Alex Ionescu: his role in ReactOS (lead kernel developer?), the TinyKRNL project, dates of involvement, why he left or transitioned, any employment mentioned (CrowdStrike, others), awards, and notable talks. Provide exact short quotes where possible.",
+          "url": "https://reactos.com/wiki/Alex_Ionescu"
+        },
+        "success": false,
+        "content_sha256": "a88155e3492fbfb8d945f22de15af35f74e46f28ae852fa67dd32859e2da56d7",
+        "accessed_at": "2026-09-27T06:47:47.317068+00:00"
+      },
+      {
+        "tool_use_id": "call_n0rzo9md1a76fwlo4h0geyed",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the motivation and decision-making behind building the Hyper-V fuzzing bridge. Why did he choose WDF and MDLs? What problem was he solving? Was there a previous approach that failed? Provide exact short quotes about his reasoning and any mentioned past work it builds on. Include publication date.",
+          "url": "https://www.alex-ionescu.com/writing-a-hyper-v-bridge-for-fuzzing-part-1-wdf/"
+        },
+        "success": true,
+        "content_sha256": "d3d40a06129c526c1edaca8d384dea4a38d2799c5cdaeaf24059670bb449ac7e",
+        "accessed_at": "2026-09-27T06:47:47.317076+00:00"
+      },
+      {
+        "tool_use_id": "call_stmctcc8oyqgj3kr6o4xrppd",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract biographical facts about Alex Ionescu: ReactOS lead kernel developer role, dates, TinyKRNL project, reasons for leaving, employment history (CrowdStrike, others), education. Provide exact short quotes.",
+          "url": "https://reactos.org/wiki/Alex_Ionescu"
+        },
+        "success": true,
+        "content_sha256": "607524269bec6dc8b6338577e6da8cbd2a0604350c4933df53a1ba2170642695",
+        "accessed_at": "2026-09-27T06:47:47.317084+00:00"
+      },
+      {
+        "tool_use_id": "call_a0xn7ap84v9qk0fcx656fhxf",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract Alex Ionescu's self-description, biography, current employer, role, and any career history or links. List pinned posts or bio text.",
+          "url": "https://x.com/aionescu"
+        },
+        "success": true,
+        "content_sha256": "8ced59a07c6da6e7c0c0269f5d6b660bb374bf9f396f7c48c4ea1b37bdbb0191",
+        "accessed_at": "2026-09-27T06:47:47.317081+00:00"
+      },
+      {
+        "tool_use_id": "call_0lqjmn9byyfvkdgya4ie4b60",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the motivation: why did he revisit call gates on x64? Was this considered abandoned/obsolete? What did he discover that others missed? Provide exact short quotes about his reasoning and any past work referenced. Include publication date.",
+          "url": "https://www.alex-ionescu.com/bringing-call-gates-back/"
+        },
+        "success": true,
+        "content_sha256": "f544aa7e2939037fa2741aa5480e664b14ded9892389e49bbd682925beb1ac09",
+        "accessed_at": "2026-09-27T06:47:47.317093+00:00"
+      },
+      {
+        "tool_use_id": "call_mvz2n1fu4j4x840ssuhb43xv",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract from the GitHub user profile: bio, name, employer, location, repositories related to ReactOS, TinyKRNL, Windows Internals, Hyper-V. List notable repos and descriptions.",
+          "url": "https://github.com/ionescu007"
+        },
+        "success": true,
+        "content_sha256": "67497add1827d788b6238b5535be0df80fce289be78b076eb209c15dc6c95f37",
+        "accessed_at": "2026-09-27T06:47:47.317107+00:00"
+      },
+      {
+        "tool_use_id": "call_ud1zkg1jyfs4q3au20mxf9wa",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-decisions-20260927-144403-647/checkpoint.md",
+          "content": "# Checkpoint — Alex Ionescu / 关键决策与转折\n\n## 身份确认\n- GitHub bio (ionescu007): \"CTIO at CrowdStrike, President of Winsider Seminars & Solutions, Inc.\" → 与 person_json 的 Windows 内核方向一致。\n- 个人站 alex-ionescu.com 标题 \"Windows Internals, Thoughts on Security, and Reverse Engineering\"，指向 windows-internals.com → 一手本人来源。\n- 维度问题: 研究\"换领域、换团队、重要项目、披露事件和方法转型\"，重建约束/选项/选择/后果。\n\n## 已确认来源（WebFetch 实抓，URL 与调用一致）\n1. https://www.alex-ionescu.com/ — 首页聚合，确认转向 infosec 会议圈、Hyper-V 模糊测试桥、Windows Internals 7e。\n2. https://www.alex-ionescu.com/windows-internals-7th-edition/ (2017-05-11) — 第7版回归决策、倦怠、WaaS、与 Pavel Yosifovich 合作。一手。\n3. https://www.alex-ionescu.com/writing-a-hyper-v-bridge-for-fuzzing-part-1-wdf/ (2019-01-14) — 方法转型：WDM→WDF。一手。\n4. https://www.alex-ionescu.com/bringing-call-gates-back/ (2017-08-07) — 调用门 x64 复活，源于写书时的 CR4[FSGSBASE]/UMS 观察。一手。\n5. https://github.com/ionescu007 — 身份/雇主确认 + SimpleVisor/SpecuCheck 等工具建设。\n\n## 关键决策条目（draft）\n- ID1 (2017-05) 回归 Windows Internals 第7版：约束(倦怠/WaaS节奏/前合作者放弃) → 选择(Pavel 接手后加入) → 后果(12个月工作，赶上 Redstone2 发行窗口)。status=documented（本人叙述）。\n- ID2 (2019-01) WDM→WDF 模糊测试驱动转型：约束(需要用户态↔Hyper-V/Secure Kernel 通信) → 选择(放弃二十年的 WDM 习惯改用 WDF) → 后果(根总线 PnP 驱动从 1500-4000 行样板降至零额外工作)。status=documented。\n- ID3 (2017-08) 调用门 x64 复活研究：约束(写第7版时发现 CR4[FSGSBASE]/UMS 强制) → 选择(重读 AMD 手册，挖掘 LDT 调用门) → 后果(发现 PatchGuard 不监控 per-process LDT，复活一种 Ring0 执行技术)。status=documented。\n- ID4 (2017 前后) 研究重心从\"写书/文档\"向\"infosec 会议圈\"迁移：本人首页自述\"shifting much of my public research to the Infosec Conference Circuit\"。status=reported（转述，无精确日期）。source_type=primary。\n- ID5 (身份/雇主) CrowdStrike CTIO + Winsider 总裁：仅 GitHub bio 一手陈述，无转型时点。status=reported。作为 identity_check 支撑，非\"决策\"主体。\n\n## 未完成 / 缺口\n- ReactOS/TinyKRNL 早期角色与退出时点：reactos.org/wiki 与 x.com 均抓取失败（TLS/402），仅有首页 Blogroll 间接提及。不标注 documented。\n- 离开 ReactOS 进入商业安全/雇主迁移的精确日期：缺。\n- SpecuCheck (2018 侧信道缓解潮) 作为公开工具建设习惯：GitHub 确认存在 repo，但无本人 writeup 抓取佐证其决策动机 → 仅作 lead_only 候选，未纳入 items。\n\n## 工具调用计数\n8 次（2 搜索 + 6 抓取）。已接近上限，停止进一步搜索，提交结构化输出。\n"
+        },
+        "success": true,
+        "content_sha256": "2911bd48c84c9ff4d4a5181c57b60b7fa541f9f46cd736137e5c30d70d661c50",
+        "accessed_at": "2026-09-27T06:47:47.317113+00:00"
+      },
+      {
+        "tool_use_id": "call_7w4445ki0qh6tjurwy52llhf",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/alex-ionescu-decisions-20260927-144403-647/output.json",
+          "content": "{\n  \"person\": \"Alex Ionescu\",\n  \"dimension\": \"关键决策与转折\",\n  \"identity_check\": \"身份确认：GitHub 用户 ionescu007 的 bio 自述为 \\\"CTIO at CrowdStrike\\\" 与 \\\"President of Winsider Seminars & Solutions, Inc.\\\"，并链接 windows-internals.com；其个人站 alex-ionescu.com 标题为 \\\"Windows Internals, Thoughts on Security, and Reverse Engineering\\\"，方向与人物记录 \\\"Windows 内核与平台漏洞 / 系统底层漏洞与缓解机制研究\\\" 一致。@aionescu 的 X 主页因 402 Payment Required 与 Anubis 反爬未能抓取正文。ReactOS/TinyKRNL 早期角色：reactos.org/wiki 抓取因 TLS 证书错误失败，仅 alex-ionescu.com 首页 Blogroll 与分类 \\\"TinyKRNL and ReactOS\\\" 间接佐证历史关联，无退出时点。\",\n  \"items\": [\n    {\n      \"id\": \"aionescu-decisions-001\",\n      \"date\": \"2017-05-11\",\n      \"claim\": \"Alex Ionescu 在第6版《Windows Internals》(覆盖 Windows 7) 后因倦怠放弃续写，且认为微软 Windows as a Service (WaaS) 节奏过快使书籍无法及时跟进；当 Pavel Yosifovich 接手该书、前两位候选作者中途放弃后，Ionescu 决定重返，与 Pavel 合著第7版，投入约12个月，并力争覆盖 Redstone 2 (1703)，使该版得以在系统发行后数周内出版。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"在自我承认会导致延期的情况下仍选择重返一个曾导致倦怠的大型项目；约束为 WaaS 节奏与个人倦怠，可选项为继续放弃或与接手者合作，选择合作并把工作压缩到12个月以赶上发行窗口，后果是恢复作者身份并刷新发行时效记录。\",\n      \"short_quote\": \"It seemed obvious that I should jump into the deep abyss of Windows Internals once again.\",\n      \"source\": {\n        \"title\": \"Windows Internals, 7th Edition!\",\n        \"url\": \"https://www.alex-ionescu.com/windows-internals-7th-edition/\",\n        \"published\": \"2017-05-11\",\n        \"source_type\": \"本人博客（一手 writeup）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"aionescu-decisions-002\",\n      \"date\": \"2019-01-14\",\n      \"claim\": \"Ionescu 在构建用户态与 Hyper-V / Secure Kernel 通信的模糊测试驱动时，放弃其使用近二十年的传统 WDM 非 PnP 驱动写法，改用 WDF。理由是 WDF 将简单 IOCTL 处理驱动编写复杂度显著降低，且根总线枚举 PnP 驱动在 WDM 下需 1500-4000 行样板代码，而 WDF 下零额外工作（无需 IRP_MJ_PNP、WMI、电源管理处理）。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"方法转型：基于工具复杂度与可维护性证据推翻二十年习惯；约束是需要用户态↔hypervisor 通信的研究驱动，可选项为继续 WDM 或迁移 WDF，选择迁移并公开记录动机与对比，后果是降低后续研究驱动的基础设施成本。\",\n      \"short_quote\": \"I had wrongly assumed that for writing Non-PnP research/academic drivers... WDM was still the better, and easier choice.\",\n      \"source\": {\n        \"title\": \"Writing a Hyper-V \\\"Bridge\\\" for Fuzzing — Part 1: WDF\",\n        \"url\": \"https://www.alex-ionescu.com/writing-a-hyper-v-bridge-for-fuzzing-part-1-wdf/\",\n        \"published\": \"2019-01-14\",\n        \"source_type\": \"本人博客（一手 writeup）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"aionescu-decisions-003\",\n      \"date\": \"2017-08-07\",\n      \"claim\": \"Ionescu 在为第7版审查 Windows 10 周年更新变化时，注意到内核为支持 User Mode Scheduling (UMS) 开始强制 CR4[FSGSBASE]；由此重读 AMD 手册，发现 x64 长模式下 FS/GS 数据段与 16 字节调用门描述符仍有效，且 PatchGuard 不监控 per-process LDT 条目，从而复活了此前被认为已在 x64 移除的调用门 Ring0 执行技术。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"由写书副产物触发的研究转向：约束是写书过程中的强制功能观察，可选项为忽略或深挖架构手册，选择深挖并交叉引用 j00ru/Gynvael Coldwind 的描述符表论文与自身 Infiltrate 2015 AWE 攻击，后果是产出一项被同行（含 j00ru 本人）此前未察觉的 x64 攻击面。\",\n      \"short_quote\": \"most people (myself included) assumed that AMD had simply removed this oft-unused feature completely from the x64 architecture.\",\n      \"source\": {\n        \"title\": \"Bringing Call Gates Back\",\n        \"url\": \"https://www.alex-ionescu.com/bringing-call-gates-back/\",\n        \"published\": \"2017-08-07\",\n        \"source_type\": \"本人博客（一手 writeup）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"aionescu-decisions-004\",\n      \"date\": \"2017\",\n      \"claim\": \"Ionescu 自述近年将公开研究重心迁移至 infosec 会议圈，并曾构思一档名为 \\\"Windows Design Flaw Garage Sale\\\" 的演讲，模仿 Stefan Esser (i0nic) 的格式，覆盖历史已修与未修缺陷。\",\n      \"status\": \"reported\",\n      \"growth_signal\": \"发表渠道与演讲格式的主动转型：从书籍/长文写作为主转向会议圈与系列化历史缺陷披露；约束为 WaaS 节奏使书籍难以及时跟进，可选项为继续纯书籍或转向会议，选择会议圈并借鉴既有前辈 (Esser) 的格式。\",\n      \"source\": {\n        \"title\": \"Alex Ionescu's Blog (首页聚合自述)\",\n        \"url\": \"https://www.alex-ionescu.com/\",\n        \"published\": \"2017\",\n        \"source_type\": \"本人博客（一手 writeup）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"aionescu-decisions-005\",\n      \"date\": \"2018\",\n      \"claim\": \"GitHub bio 自述 Ionescu 担任 CrowdStrike CTIO 与 Winsider Seminars & Solutions, Inc. 总裁；可见仓库包括 SimpleVisor（精简 Intel VT-x hypervisor）、SpecuCheck（检测 Meltdown/Spectre v2/Foreshadow 等缓解状态的工具）、HookingNirvana (Recon 2015 演示) 等，体现其从研究向可复用工具建设的产出习惯。\",\n      \"status\": \"reported\",\n      \"growth_signal\": \"雇主与角色转型佐证（CrowdStrike CTIO / Winsider 总裁）叠加公开工具建设习惯；因 bio 无转型时点、各仓库无本人 writeup 抓取佐证其决策动机，仅作身份与产出习惯支撑，转型时点缺口见 gaps。\",\n      \"source\": {\n        \"title\": \"GitHub user ionescu007 profile\",\n        \"url\": \"https://github.com/ionescu007\",\n        \"published\": \"2018\",\n        \"source_type\": \"GitHub 用户主页（自述 bio）\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"未发现互相冲突的材料。需注意：item aionescu-decisions-004 中首页对 2017 年前后会议圈转型的自述未给出精确月份，且页面为聚合首页而非单篇带明确日期的文章，published 字段以年份占位，精确度低于其他单篇文章。\"\n  ],\n  \"gaps\": [\n    \"ReactOS / TinyKRNL 早期角色与退出时点：reactos.org/wiki 抓取因 TLS 证书错误 (ERR_TLS_CERT_ALTNAME_INVALID) 失败，X 主页因 402/反爬失败；仅靠 alex-ionescu.com 首页 Blogroll 与 \\\"TinyKRNL and ReactOS\\\" 分类间接佐证历史关联，无法标记 documented。\",\n    \"加入 CrowdStrike 及担任 CTIO 的精确日期：GitHub bio 仅陈述现任职务，无入职或晋升时点。\",\n    \"离开 ReactOS 进入商业安全的迁移路径与动机：缺乏一手 writeup 抓取。\",\n    \"SpecuCheck (2018 侧信道缓解潮) 作为公开工具建设的决策动机：GitHub 确认 repo 存在，但未抓取到本人 writeup 说明其构建决策，未纳入 items。\",\n    \"受 8 次工具调用预算限制，未对 Black Hat/BlueHat 演讲页面与 windows-internals.com 做进一步抓取；会议层面的具体披露事件转折未能逐项取证。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "ddbd6742ebdb27eb7a87dbc9f3bf5b2a6e5ac99fb953ab702e19f3097ae6aabd",
+        "accessed_at": "2026-09-27T06:47:47.317119+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790491667317136000-alex-ionescu-decisions.json",
+    "label": "Alex Ionescu:decisions",
+    "elapsed_seconds": 223.67,
+    "prompt_sha256": "717f7b889e07653ff90558ec8c191023d0d2acf474cbca500ce73ae1a154b02f",
+    "num_turns": 22,
+    "total_cost_usd": 0.6448480000000001,
+    "usage": {
+      "input_tokens": 20998,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 163904,
+      "output_tokens": 5081,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 44609,
+        "outputTokens": 13027,
+        "cacheReadInputTokens": 192256,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.6448480000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

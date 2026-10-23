@@ -1,0 +1,415 @@
+{
+  "person": "Steven Seeley (mr_me)",
+  "expertise": [
+    "桌面端文档格式解析与内存破坏漏洞的逆向分析及利用（Microsoft Office、Foxit Reader、Adobe Acrobat）",
+    "企业 Web 应用预认证远程代码执行链的构造，覆盖反序列化、表达式语言注入、JNDI 注入与认证绕过",
+    "Web 应用源代码审计与黑盒交互并重的发现方法（从 web.xml/配置/代码模式追溯数据流，并辅以 GUI 交互覆盖静态分析盲区）",
+    "补丁审查与未修补变体识别，跨版本/跨产品同代码模式迁移与跨组件多原语链构造",
+    "Windows 内核池对象利用与内核态/用户态利用能力补齐",
+    "研究方法的产品化教学（Full Stack Web Attack 训练课），并经学员回流漏洞形成协作合著"
+  ],
+  "stages": [
+    {
+      "period": "2016-09 至 2017-09",
+      "stage": "桌面文档格式/内存破坏起点与向 Web 反序列化及内核利用的初次迁移",
+      "capability_change": "以 Microsoft Excel 类型混淆（CVE-2016-3363/MS16-107）与 Word OneTableDocumentStream 下溢（CVE-2016-7290/MS16-148）为公开输出起点，形成对文档格式解析与内存布局的逆向分析能力；2017-04-27 发布《From Serialized to Shell :: Auditing Google Web Toolkit》转向 Web 应用反序列化与表达式语言注入，并于 2017-05-22 发布同期配对的另一篇《Exploiting Google Web Toolkit with EL Injection》，建立审计与利用两段式 writeup 习惯；2017-09-06 发布《Sharks in the Pool》从用户态利用向 Windows 内核池迁移。早期 Office 三篇的具体方法学细节未逐字核对，方向由标题与 CVE 推断，对应 ss-pub-001 与 timeline 项标记为 inferred。",
+      "evidence_ids": [
+        "ss-pub-001",
+        "timeline-2016-09-earliest-writeup",
+        "timeline-2016-12-word-cve-2016-7290",
+        "timeline-2017-04-gwt-serialization-pivot",
+        "dec-01"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2018-01 至 2018-12",
+      "stage": "客户端阅读器方向成熟与定制工具及补丁绕过的首次出现",
+      "capability_change": "在 Foxit Reader 方向判定信息泄露类漏洞无法被传统 fuzzing 发现，自建 WinDbg JavaScript 桥接插件 bridgit 辅助检测，并在利用阶段以泄露的堆指针替代堆喷射，在 Windows 7 与 10 上达到 100% 成功率；接受 Ke Liu（腾讯玄武实验室）将 CVE-2018-4990 根因由 double free 更正为两个 arbitrary free 条件的修正；同期出现首次补丁绕过实践——WebExec Reloaded（CVE-2018-15442）以对 Ron Bowes 原 WebExec 补丁的 re-discovery 与绕过形式发布。CVE-2018-4990 的 Ke Liu 修正正文未逐字核验，对应 ss-pub-004 标记为 unknown。",
+      "evidence_ids": [
+        "ss-pub-002",
+        "ss-pub-003",
+        "ss-pub-004",
+        "ss-community-005",
+        "r1-ss-webexec-ronbowes"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2019-01 至 2020-12",
+      "stage": "企业 Web 预认证 RCE 的方向确立与系统化枚举产出",
+      "capability_change": "2019-05-17 发布《Panic! at the Cisco》将公开作品重心转向企业 Web 应用预认证 RCE 链，采用 web.xml servlet 映射追溯数据流的静态审计结合补丁 diffing，发现 Cisco 将单个 CVE 分配给两个不同漏洞且仅修补其一，并指出该漏洞因仅在配置高可用后可达而躲过多轮代码审计；2019-08-07 发布《Attacking Unmarshallers》以 Doyensec 此前 jackson gadgets 工作为起点开展跨版本迭代；2020 年针对 Cisco DCNM、HPE IMC、Cisco UCS Director 等企业网络管理产品做系统性枚举式挖掘，advisory 量级由个位数跃升至百级；2020-01 与 Chris Anastasio 组成 Team Incite 参加 Pwn2Own Miami 2020 攻克 Schneider EcoStruxure Operator Terminal Expert，赛后公开复盘赛前静默补丁对利用链的破坏。Pwn2Own Miami 2020 的 Team Incite 参赛事实由 Wikipedia 二手条目支撑，具体攻破产品名存在缺口。",
+      "evidence_ids": [
+        "ss-pub-005",
+        "r1-ss-pub-011-doyensec",
+        "timeline-2019-cisco-prime-advisory-volume",
+        "timeline-2020-cisco-dcnm-hpe-imc-volume",
+        "timeline-2020-01-pwn2own-miami-team-incite",
+        "dec-03",
+        "ss-pub-006",
+        "ss-deep-02",
+        "ss-deep-03",
+        "ss-community-006"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2021-01 至 2021-12",
+      "stage": "云与 .NET 方向的选定与研究方法产品化教学",
+      "capability_change": "加入奇虎 360 Vulcan Team（360 Vulcan Team 归属仅由本人博客自述，未获独立确证）后获得研究方向选择权，因自身 .NET 知识有限而选定微软云网络作为补足该技术能力的方向，以既有的 Web 安全能力作为切入云与 .NET 方向的依托；2021-01-12 发布《Making Clouds Rain》并确立递减披露时间线规则（首 bug 90 天、首个补丁绕过 60 天、第二个补丁绕过 30 天，每出现一次绕过缩短 30 天，不对任何厂商改规则）；2021-07-13 起 Full Stack Web Attack 训练课产品化，并在挑战题中植入隐藏 0day 以检验学员发现能力；2021-08-25 以 Source Incite 队名参加 Pwn2Own Vancouver 2021，目标 Microsoft Exchange Server，结合约 12 年前的 MiTM 经验并以代码模式检索定位新攻击面。Pwn2Own Vancouver 2021 的 Source Incite 队名与成功结果由 Wikipedia 二手条目支撑；ZDI/Trend Micro 官方结果页返回 403/404，获奖名次与奖金未由官方页面证实。",
+      "evidence_ids": [
+        "ss-deep-01",
+        "dec-02",
+        "ss-deep-04",
+        "ss-pub-007",
+        "ss-deep-05",
+        "ss-deep-06",
+        "timeline-2021-04-pwn2own-vancouver-source-incite",
+        "timeline-2021-exchange-sharepoint-pwn2own-writeup",
+        "dec-04",
+        "ext-pwn2own-06"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2022-01 至 2022-12",
+      "stage": "VMware 产品族链式挖掘与教学反馈流程的扩展",
+      "capability_change": "2022 年研究重心转向 VMware 产品族，于 8 月 9 日发布 vRealize Operations Manager 预认证 RCE、8 月 11 日发布 Workspace ONE Access 0-click 利用链、10 月 25 日发布 NSX Manager 预认证 RCE；NSX Manager 研究由 Full Stack Web Attack 过往学员 Sina Kheirkhah主笔、与 Steven Seeley 合著发布，形成教学输出—学员带回目标—协作合著的长期带教协作流程。同期 2022-01-20 发布 ZohOwned（CVE-2021-44515），由 FBI 2021-12-17 flash alert、William Vu 在 AttackerKB 的静态分析、作者比对 IOCs 后判定为同源零日，以及 Zoho 2021-12-03 自家 advisory 共同印证，作为第三方对研究有效性的外部印证。VMware NSX 学员合著关系以 ss-community-003（documented）为主锚点；ss-pub-008（NSX，unknown）仅作辅证，不与 documented 项等量齐观。",
+      "evidence_ids": [
+        "timeline-2022-vmware-product-family",
+        "ss-community-003",
+        "ext-student-04",
+        "r1-ss-comm-009-fbi-vu"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2023-01 至 2026-01",
+      "stage": "跨厂商定点研究与补丁变体审计方法的成熟",
+      "capability_change": "advisory 产出量较 2020-2022 高峰下降，由单厂商高频枚举转向跨厂商定点研究，方向覆盖 Apache Struts、TP-Link Archer、PTC Thingworx、Cacti、NETGEAR ProSAFE NMS、Inductive Automation Ignition、KeySight N6841A、Trackplus Allegra 等；2024-07-21 博客自述退役 Full Stack Web Attack 训练课的部分内容并预告下一期课程在罗马开设，该退役具体内容即 JNDI Injection via Path Manipulation in MemoryUserDatabaseFactory 系由博客主题推断，原文仅称 some of the content，仅作辅证；2024-11-25 发布 Spring Properties RCE，以 Process Monitor 观察 Tomcat 加载 application.xml 的行为定位配置加载顺序，经 logback JNDI 注入实现未授权 RCE，并公开复盘方法选择的妥协与未走通方向；2026-01-28 发布 Samsung MagicINFO 9 Server 系列研究，采用补丁审查—识别 CVE-2025-54438 的 FTP 变体 downloadChangedFiles 未修补—TOCTOU/SQL/FTP 写入多原语链方法，并主动联系 Shielder 共享 CIFS 绕过报告以协作完成利用。Spring Properties 前学员带回关系以 ss-pub-009（documented）为主锚点；ss-community-004（Spring 前学员，unknown）仅作辅证，不与 documented 项等量齐观。",
+      "evidence_ids": [
+        "timeline-2023-2024-zdi-collaboration-pivot",
+        "rr2-ss-dec-05a",
+        "ss-pub-009",
+        "ss-pub-010",
+        "timeline-2026-01-samsung-magicinfo-latest",
+        "ext-github-08"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "补丁审计驱动的未修补变体与跨组件多原语链发现",
+      "starting_conditions": "2018-12-03 WebExec Reloaded（CVE-2018-15442）作为对 Ron Bowes 原 WebExec 补丁的 re-discovery 与绕过，时间早于 2019-05-17《Panic! at the Cisco》中对 Cisco 将单个 CVE 分配给两个不同漏洞且仅修补其一的发现，构成补丁审计实践的起点；2018-12-03 厂商补丁被自述为 wasn't so good 的外部反馈亦同期出现。",
+      "repeated_practice": "对补丁做 diffing 并追问补丁是否覆盖完整攻击面：从 Cisco 单 CVE 双漏洞仅修其一、Schneider EcoStruxure 赛前静默补丁（无 CVE），到 2026 年 CVE-2025-54438 的 FTP 变体 downloadChangedFiles 未被修补；在识别未修补变体后，以 TOCTOU、SQL 注入、文件写入、认证绕过等多原语组合构造跨组件利用链。",
+      "feedback": "厂商补丁质量与披露行为的公开复盘（WebExec 补丁 wasn't so good、Schneider 静默补丁、Vanilla Forums 对厂商信息披露的批评）作为研究反馈循环的一部分；递减披露时间线规则（每出现一次绕过缩短 30 天、不对任何厂商改规则）将补丁绕过经验固化为可重复规则。",
+      "intermediate_capability": "形成由补丁审查定位未修补变体、再以跨组件多原语链完成利用的研究方法，并据此对 Cisco、VMware、Samsung 等厂商产品族做链式挖掘。",
+      "observed_outcomes": [
+        "2019-05-17《Panic! at the Cisco》识别 Cisco 单 CVE 双漏洞仅修其一（CVE 关联与高可达性配置分析）",
+        "2020-02-18《Silent Schneider》公开复盘 Schneider EcoStruxure 赛前静默补丁对利用链的破坏",
+        "2026-01-28《Samstung Part 2》识别 CVE-2025-54438 的 FTP 变体 downloadChangedFiles 未修补并主动联系 Shielder 协作完成利用",
+        "2018-12-03 WebExec Reloaded 作为对 Ron Bowes 原 WebExec 补丁的绕过，构成该机制的时间起点"
+      ],
+      "evidence_ids": [
+        "r1-ss-webexec-ronbowes",
+        "ss-pub-005",
+        "ext-feedback-07",
+        "dec-03",
+        "ss-pub-010",
+        "ss-deep-04",
+        "ss-community-007"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "补丁变体的发现亦可能源于同一厂商产品族在代码模式上的复用而非专门的补丁审计流程；Cisco 单 CVE 双漏洞、Schneider 静默补丁、Samsung FTP 变体三例的时间跨度较大，且 Schneider 一例属赛事前置条件而非主动补丁审计，跨时期的因果连续性为推断而非一手自述的统一方法。"
+    },
+    {
+      "name": "以同行公开研究为起点的跨版本迭代",
+      "starting_conditions": "2020-08-19 Horde Groupware 利用链构建中复用并改造 EgiX 于 CVE-2014-1691 使用的旧 POP 链，以适配 PHP 7+ 的 Serializable 接口变化与 5 年间类定义演进，显示其倾向于以既有公开研究为起点再按当前环境迭代适配。",
+      "repeated_practice": "在公开 writeup 中显式声明研究所继起的同行工作，并对其成果做跨版本改造或补丁绕过：2019-08-07《Attacking Unmarshallers》明确 based upon the excellent work perform by Doyensec 并引 doyensec 2019-07-22 jackson-gadgets 博文；2018-12-03 WebExec Reloaded 接续 Ron Bowes 原 WebExec 发现并对其补丁做绕过。",
+      "feedback": "同行公开 writeup 作为可迭代的输入，新版本的环境差异（PHP 7+ 接口变化、厂商补丁）作为迭代适配的反馈信号；2018-05-21 CVE-2018-4990 接受 Ke Liu 修正 double free 为 arbitrary free 亦体现对同行纠错的开放态度。",
+      "intermediate_capability": "形成以公开研究为知识资产、按当前环境做针对性改造与补丁绕过的跨版本迁移能力，而非将历史研究视作一次性参考。",
+      "observed_outcomes": [
+        "2019-08-07《Attacking Unmarshallers》JNDI via getter 明确继 Doyensec jackson gadgets 工作展开",
+        "2018-12-03 WebExec Reloaded 接续 Ron Bowes 原 WebExec 并做 CVE-2018-15442 补丁绕过",
+        "2020-08-19 Horde 复用并改造 EgiX 于 CVE-2014-1691 的旧 POP 链以适配 PHP 7+"
+      ],
+      "evidence_ids": [
+        "ss-deep-03",
+        "r1-ss-pub-011-doyensec",
+        "r1-ss-webexec-ronbowes",
+        "ss-community-005"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "同行公开研究作为起点是 Web 安全研究社区的常见实践，并非该研究员特有；三例的同行来源（EgiX、Doyensec、Ron Bowes）分散于不同技术子领域，跨版本迭代作为统一方法的归纳属推断，缺乏其本人对方法统一性的一手自述。"
+    },
+    {
+      "name": "以可识别技能缺口为依据的真实目标领域迁移",
+      "starting_conditions": "2017-09-06《Sharks in the Pool》自述长期研究 Web 相关漏洞、用户态利用较为熟练但常遇未针对的内核设备驱动，因知识缺口未下手，遂决定补齐 ring 0 能力，并选择真实应用漏洞而非练习驱动 HEVD 为学习载体。",
+      "repeated_practice": "以可识别的技能缺口作为方向迁移依据并选定真实目标：2017 年由用户态迁移至 Windows 内核池；2021-01-12 加入奇虎 360 Vulcan Team（360 Vulcan Team 归属仅由本人博客自述，未获独立确证）后因 .NET 理解有限而选定微软云网络，以既有的 Web 安全能力作为切入新方向的依托。",
+      "feedback": "真实应用漏洞作为练习载体，其可达性与利用稳定性提供对能力补齐进展的反馈；2020-08-19 Horde 审计中因过度依赖白盒而漏掉 Horde_Core_Block 子类攻击面，由 Andrea Cardaci 以偏黑盒/GUI 交互的风格补上，反馈为复杂应用需白盒与黑盒并重的方法论修正。",
+      "intermediate_capability": "形成以技能缺口定位方向、以真实目标为练习载体、以方法论修正收尾的方向迁移能力，并据此从桌面文档、Web 反序列化、内核池逐步迁移至云与企业网络管理产品。",
+      "observed_outcomes": [
+        "2017-09-06《Sharks in the Pool》由用户态迁移至 Windows 内核池并选用真实应用漏洞",
+        "2021-01-12《Making Clouds Rain》因 .NET 知识有限选定微软云网络",
+        "2020-08-19 Horde 审计因白盒盲区漏报并据此修正为白盒与黑盒并重"
+      ],
+      "evidence_ids": [
+        "dec-01",
+        "dec-02",
+        "ss-deep-01",
+        "ss-deep-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "技能缺口作为迁移依据的表述来自其本人自述，外部观察到的仅是产出方向的客观变化；方向迁移亦可能由厂商 bounty 金额、ZDI 协调渠道可达性、组织研究方向分配等外部条件驱动，.NET 方向的选定与 360 Vulcan Team 的研究方向自由度之间的因果为自述而非独立证实。"
+    },
+    {
+      "name": "白盒与黑盒并重的审计方法",
+      "starting_conditions": "2019-05-17《Panic! at the Cisco》以 web.xml servlet 映射追溯数据流的静态代码审计结合补丁 diffing 发现漏洞；2020-08-19 Horde Groupware 审计中因过度依赖白盒而漏掉 Horde_Core_Block 子类攻击面。",
+      "repeated_practice": "同时执行白盒与黑盒两条审计路径以覆盖单一路径的遗漏：白盒从配置文件与代码模式追溯数据流，黑盒以 GUI 交互与运行时行为观察（如 Process Monitor 观察 Tomcat 加载 application.xml）覆盖静态分析盲区。",
+      "feedback": "Andrea Cardaci 以偏黑盒/GUI 交互的风格补上 Horde_Core_Block 子类缺口，反馈为 Complex applications need both a white-box review and a black-box review 的方法论修正；该方法论修正由作者本人发起并叙述，未获对方独立确认。",
+      "intermediate_capability": "形成对复杂应用同时执行白盒与黑盒两条审计路径的稳定方法，以单一路径的遗漏作为另一路径的输入。",
+      "observed_outcomes": [
+        "2020-08-19 Horde 审计以白盒黑盒风格差异对照识别自身盲区",
+        "2024-11-25 Spring Properties 以 Process Monitor 观察 Tomcat 加载 application.xml 定位配置加载顺序",
+        "2019-05-17 Cisco Prime 以 web.xml servlet 映射静态审计结合补丁 diffing"
+      ],
+      "evidence_ids": [
+        "ss-deep-02",
+        "ss-community-006",
+        "ss-pub-005",
+        "ss-pub-009"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "白盒与黑盒并重为业界通用方法论，且该方法论修正的主要来源为 2020 年 Horde 单一案例，并由其本人发起叙述、未获 Andrea Cardaci 独立确认；将其升格为独立机制的依据相对单薄，存在以一般化方法充当个人特有机制的风险。"
+    },
+    {
+      "name": "教学输出—学员带回目标—协作合著的反馈流程",
+      "starting_conditions": "2021-07-13 Full Stack Web Attack 训练课产品化，并在挑战题中植入隐藏 0day 检验学员发现能力，以公开 writeup 完成从教学到披露的流程；课程页面将方法学表述为覆盖漏洞发现与利用开发完整阶段、使用补丁 diffing 复现 n-day，并以 Leave your OWASP Top Ten and CSP bypasses at the door 划定方向。",
+      "repeated_practice": "以训练课为入口，过往学员在多年后将新目标带回，并以合著形式完成发布：2022-10-25 VMware NSX Manager 预认证 RCE 由 Full Stack Web Attack 过往学员 Sina Kheirkhah 主笔、与 Steven Seeley 合著；2024-11-25 Spring Properties 的初始漏洞由一名前学员带回。",
+      "feedback": "学员带回的目标作为新的研究线索输入，扩展研究覆盖面；作者在 Spring Properties 中公开复盘方法选择的妥协与未走通方向（JDBC、un-marshaller 直接滥用），并将该流程显性化为可被他人继续的公开记录。",
+      "intermediate_capability": "形成由教学输出驱动学员成长、再由学员带回目标形成长期带教协作关系的流程，使教学成为研究线索与合著者的稳定入口。",
+      "observed_outcomes": [
+        "2022-10-25 VMware NSX Manager 预认证 RCE 由过往学员 Sina Kheirkhah 主笔并合著（以 ss-community-003 documented 为主锚点）",
+        "2024-11-25 Spring Properties 初始漏洞由前学员带回（以 ss-pub-009 documented 为主锚点）",
+        "2021-07-13 FSWA 挑战题植入隐藏 0day 检验学员发现能力并以公开 writeup 完成披露"
+      ],
+      "evidence_ids": [
+        "ss-pub-007",
+        "ss-deep-05",
+        "ss-community-003",
+        "ext-student-04",
+        "ss-pub-009"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "学员带回目标与合著关系均由其本人博客单向叙述，未获 Sina Kheirkhah 及 Spring 前学员的独立渠道证实；学员产出可发布漏洞研究是否可归因于该课程内容本身亦未被独立证实，故该流程作为个人特有机制的依据存在自述来源偏差，不宜以 distinctive 归因。"
+    }
+  ],
+  "tensions": [
+    "六维证据几乎全部来自 srcincite.io 本人一手 writeup/advisory 与 bio，合著/学员关系（Sina Kheirkhah、Justin Kennedy、Brandon Perry、Andrea Cardaci、Matthias Kaiser、Chris Anastasio）均由其本人博客单向叙述，未获合著方独立渠道证实，存在以本人自述替代多方印证的残余风险。",
+    "幸存者偏差：可见证据均为已公开、已披露、已成功的 writeup/advisory 与已发布 writeup 的赛事案例，研究中的失败案例、未披露漏洞、未完成利用链、未公开的尝试均不可见，对机制有效性的归因存在系统性高估倾向；本报告不要求补取不可考的失败材料，仅显式标注该偏差对归因的影响。",
+    "360 Vulcan Team 归属仅由本人博客自述，Pwn2Own Miami 2020 与 Vancouver 2021 可核验参赛队名分别为 Team Incite 与 Source Incite，未见其以 360 Vulcan 成员身份参赛的独立确证；组织声誉与个人能力之间的归因需保持区分。",
+    "Pwn2Own Vancouver 2021 Microsoft Exchange 的成功结果存在表述张力：WebSearch 早期结果曾称成功团队为 DEVCORE 并提及 Steven Seeley 参与，该结果来自 WebSearch 模型自述而非可抓取权威页面；ZDI/Trend Micro 官方结果页返回 403/404，无法裁定两者是否指向同一目标的不同子项或不同年份赛事，记录为待解冲突。",
+    "CVE-2018-4990 的 Ke Liu 修正正文、2016 年 Office 三篇的方法学细节、Black Hat US / POC 的 speaker 页面等关键一手材料未逐字核验，对应 ss-pub-004、ss-pub-001 等项维持 unknown/inferred，相关结论的证据等级受限。"
+  ],
+  "transferable_practices": [
+    "对补丁做 diffing 并追问补丁是否覆盖完整攻击面，以识别未修补变体并据此构造跨组件多原语链（参见 Cisco 单 CVE 双漏洞、Samsung FTP 变体）。",
+    "以可识别的技能缺口作为方向迁移依据，并选用真实应用漏洞而非通用靶机作为练习载体，使能力补齐与可发布产出同向累积。",
+    "同时执行白盒与黑盒两条审计路径，以单一路径的遗漏作为另一路径的输入，覆盖复杂应用中纯静态分析的盲区。",
+    "将披露伦理固化为可重复的固定规则（如递减时间线、无差别适用），并通过公开复盘厂商补丁质量与披露行为校准后续披露策略。",
+    "以公开研究为起点做跨版本迭代适配，对同行既有成果的接口/类演进与补丁做针对性改造或绕过，而非视作一次性参考。"
+  ],
+  "non_transferable_conditions": [
+    "Full Stack Web Attack 训练课作为学员网络的入口为该研究员个人产品，学员带回目标并合著的反馈流程依赖其长期教学积累与个人信誉，他人难以直接复制；且该流程中合著/学员关系未获合著方独立渠道证实，仅作自述来源保留。",
+    "360 Vulcan Team 归属与由此获得的研究方向选择权为组织条件，仅由本人博客自述、未获独立确证，且 Pwn2Own 参赛队名为 Team Incite / Source Incite 而非 360 Vulcan，组织归属与个人能力之间的因果不可直接迁移。",
+    "Pwn2Own Miami 2020 与 Vancouver 2021 的参赛资格与目标选定受赛事邀请、组队关系与时间窗口等外部条件制约，竞赛反馈作为能力验证的机制不可在无赛事环境下复制；具体名次、奖金与官方 Master of Pwn 归属未由官方页面证实。",
+    "srcincite.io 个人博客与 sourceincite GitHub 组织作为长期公开输出与代码发布渠道，构成其可被同行追溯引用的可见性基础，该渠道的十年积累与命名一致性不可由后来者短期复制。",
+    "北美与中美约十年工作经历及其对应雇主未在一手来源中给出，该跨国经验作为企业软件漏洞挖掘方法论基础的地理/职业条件无法独立核验亦不可直接迁移。"
+  ],
+  "open_questions": [
+    "Full Stack Web Attack 训练课首次授课年份、历次迭代内容与学员规模无独立材料，课程起始年份仅以 2021-07-13 的 FSWA 挑战文章证明该年课程已在办；学员产出可发布漏洞研究是否可归因于课程内容本身未被独立证实。",
+    "加入与离开奇虎 360 Vulcan Team 的确切时间、是否仍在职未在一手来源中说明，仅 inferred 自 2021-01-12 博客的过去时陈述，无法与 Pwn2Own 参赛时间线精确对齐。",
+    "从 Foxit/Adobe 客户端研究（2018）转向 Cisco 企业软件（2019）、再转向 SharePoint/Microsoft 云（2020-2021）、2022 年转向 VMware 系列、2023 年后转向跨厂商定点研究的逐阶段触发因素无一手叙述，只能由 writeup 时间线推断。",
+    "回澳大利亚的具体年份、北美/中美十年对应的具体雇主未披露；2021 年微软云/.NET 方向在 2022 年转向 VMware 系列的回归性转折动机无一手说明。",
+    "Black Hat US / POC 的具体场次、年份与议题未抓取到 speaker 页正文，会议参与仅由 person_json 列出与本人 writeup 自述，缺乏第三方议程佐证；GitHub sourceincite 仓库未直接署名 Steven Seeley / mr_me，组织账号与个人身份的强关联仍为推断。",
+    "Mastodon (infosec.exchange/@stevenseeley) 与 X/Twitter @mr_me 账号正文未抓取，社交平台上的公开反馈与即时方法讨论未纳入；社交 handle 三源（mr_me / @stevenseeley / @srcincite）不一致，无法在不直接抓取各账号的情况下判定主用账号。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790504951344705000-steven-seeley-mr-me-synthesis-v3.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "0f77a369-5313-4982-801d-14b11cfbd4b2",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_usnzedro9jvl0qo11rikuwni",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T10:29:11.397942+00:00"
+      },
+      {
+        "tool_use_id": "call_pk7p981vigte1sipo4aht38b",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T10:29:11.397973+00:00"
+      },
+      {
+        "tool_use_id": "call_rnhtle6v6ue9nz94g23u2wko",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "bfb4353dc12386e269a48c57f61e7f64ca0a58de71a4e38f52ce57f92f174112",
+        "accessed_at": "2026-09-27T10:29:11.397981+00:00"
+      },
+      {
+        "tool_use_id": "call_9y96l4n32qt6qwzpf7bj4zoq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "0514842ae7ad40e4a45685332d80bc23f09315a29bf9fb8f468659ebd09081db",
+        "accessed_at": "2026-09-27T10:29:11.397989+00:00"
+      },
+      {
+        "tool_use_id": "call_dj6zw4kugc0o5dtseatvfxil",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "7ad003cf476b2c5452766f9366a5e8e71d16dad1f8c58e404f0bbc01083d118d",
+        "accessed_at": "2026-09-27T10:29:11.398072+00:00"
+      },
+      {
+        "tool_use_id": "call_n6korkkksrsgtfit6r5h2ngh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975/inputs/revision_context.json",
+          "offset": 464,
+          "limit": 124
+        },
+        "success": true,
+        "content_sha256": "3609a23db57308814ffdfb382184629227607ca377874eb9dbd99027ecb2cc17",
+        "accessed_at": "2026-09-27T10:29:11.398119+00:00"
+      },
+      {
+        "tool_use_id": "call_teeo1mkmece6asli7vg05i1m",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "1a705811e33ecd94a45d4a50711419d3eada258831cee886b7b70e103cc91d26",
+        "accessed_at": "2026-09-27T10:29:11.398228+00:00"
+      },
+      {
+        "tool_use_id": "call_uz9gxu14agf8asubdtfufioy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975/inputs/evidence_json.json",
+          "limit": 400,
+          "offset": 946
+        },
+        "success": true,
+        "content_sha256": "d9c44d46d469bbe087153832ee692df404588c22a5f93f4e25f838724f1357f8",
+        "accessed_at": "2026-09-27T10:29:11.398269+00:00"
+      },
+      {
+        "tool_use_id": "call_n69z7cpljzxsrdwlhvt45qg8",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975/checkpoint.md",
+          "content": "# Checkpoint — Steven Seeley (mr_me) 综合 v3\n\n## 任务与范围\n- 角色：综合分析师（synthesis v3）。输入：person_json、evidence_json（六维 + targeted）、revision_context（round 1 + round 2 定向补证纠错记录）。\n- 输出契约：output.schema.json（person const、expertise[]、stages[]、mechanisms[]、tensions[]、transferable_practices[]、non_transferable_conditions[]、open_questions[]；additionalProperties=false，不写 _run/verification）。\n\n## 作废证据（不得使用）\n- ss-community-009 → 由 r1-ss-comm-009-fbi-vu 取代\n- ss-pub-011 → 由 r1-ss-pub-011-doyensec + r1-ss-webexec-ronbowes 取代\n- dec-05 → 由 rr2-ss-dec-05a 取代\n\n## RR6 降级为辅证（不单列）\n- ss-pub-008（VMware NSX，unknown）：主锚点 ss-community-003（documented）\n- ss-community-004（Spring 前学员，unknown）：主锚点 ss-pub-009（documented）\n\n## 语言规范改写（round 1 + round 2）\n- 杠杆 → 依托\n- 单兵/师徒式 → 个人独立研究/长期带教协作关系\n- 双轨/单轨 → 并重/两条审计路径/单一路径\n- 姊妹篇 → 同期发布的另一篇\n- 闭环 → 流程（避免）\n- RR3：360 Vulcan Team 归属就近加注\"仅由本人博客自述，未获独立确证\"\n- RR4：tensions 显式标注幸存者偏差\n\n## 已核验证据清单（verified_in_run=true，用于 stages/mechanisms 主支撑）\n- works: ss-pub-002/003/005/007/009/010\n- conversations: ss-deep-01/02/03/04/05/06/07\n- community: ss-community-001/002/003/005/006/007/008\n- external: ext-identity-01/org-02/collab-03/student-04/peer-05/pwn2own-06/feedback-07/github-08\n- decisions: dec-01/02/03/04/06\n- timeline: 全部 14 项\n- targeted: r1-ss-comm-009-fbi-vu, r1-ss-pub-011-doyensec, r1-ss-webexec-ronbowes, rr2-ss-dec-05a\n\n## 阶段划分（6 阶段）\n1. 2016-09 至 2017-09：桌面文档格式/内存破坏 → Web 反序列化/EL 注入 + 内核迁移\n2. 2018-01 至 2018-12：客户端阅读器成熟 + 定制工具 + 首次补丁绕过\n3. 2019-01 至 2020-12：企业 Web 预认证 RCE + 系统化枚举 + Pwn2Own 进入\n4. 2021-01 至 2021-12：云/.NET 选定 + FSWA 产品化 + Pwn2Own Vancouver\n5. 2022-01 至 2022-12：VMware 产品族链式 + 教学反馈流程 + Zoho 第三方印证\n6. 2023-01 至 2026-01：跨厂商定点 + 补丁变体审计成熟 + 课程迭代\n\n## 机制划分（5 主机制）\n- M1 补丁审计驱动的未修补变体与跨组件原语链发现（high，RR7 回填+升级）\n- M2 以同行公开研究为起点的跨版本迭代（high，RR7 升级）\n- M3 以可识别技能缺口为依据的真实目标领域迁移（high，distinctive）\n- M4 白盒与黑盒并重的审计方法（medium，单例一般化风险）\n- M5 教学输出—学员带回—协作合著的反馈流程（medium，合著/学员未独立证实；不保留 distinctive）\n\n## 待办\n- 写 output.json（符合 schema，逐字段检查语言规范与证据等级）。\n"
+        },
+        "success": true,
+        "content_sha256": "e6910708445eecc2a557314634e7ab703adc437864021bb94fbb4d8b066ae271",
+        "accessed_at": "2026-09-27T10:29:11.398906+00:00"
+      },
+      {
+        "tool_use_id": "call_t9sacrd1irkxyvjl9swiaqab",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/steven-seeley-mr-me-synthesis-v3-20260927-182221-975/output.json",
+          "content": "{\n  \"person\": \"Steven Seeley (mr_me)\",\n  \"expertise\": [\n    \"桌面端文档格式解析与内存破坏漏洞的逆向分析及利用（Microsoft Office、Foxit Reader、Adobe Acrobat）\",\n    \"企业 Web 应用预认证远程代码执行链的构造，覆盖反序列化、表达式语言注入、JNDI 注入与认证绕过\",\n    \"Web 应用源代码审计与黑盒交互并重的发现方法（从 web.xml/配置/代码模式追溯数据流，并辅以 GUI 交互覆盖静态分析盲区）\",\n    \"补丁审查与未修补变体识别，跨版本/跨产品同代码模式迁移与跨组件多原语链构造\",\n    \"Windows 内核池对象利用与内核态/用户态利用能力补齐\",\n    \"研究方法的产品化教学（Full Stack Web Attack 训练课），并经学员回流漏洞形成协作合著\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2016-09 至 2017-09\",\n      \"stage\": \"桌面文档格式/内存破坏起点与向 Web 反序列化及内核利用的初次迁移\",\n      \"capability_change\": \"以 Microsoft Excel 类型混淆（CVE-2016-3363/MS16-107）与 Word OneTableDocumentStream 下溢（CVE-2016-7290/MS16-148）为公开输出起点，形成对文档格式解析与内存布局的逆向分析能力；2017-04-27 发布《From Serialized to Shell :: Auditing Google Web Toolkit》转向 Web 应用反序列化与表达式语言注入，并于 2017-05-22 发布同期配对的另一篇《Exploiting Google Web Toolkit with EL Injection》，建立审计与利用两段式 writeup 习惯；2017-09-06 发布《Sharks in the Pool》从用户态利用向 Windows 内核池迁移。早期 Office 三篇的具体方法学细节未逐字核对，方向由标题与 CVE 推断，对应 ss-pub-001 与 timeline 项标记为 inferred。\",\n      \"evidence_ids\": [\"ss-pub-001\", \"timeline-2016-09-earliest-writeup\", \"timeline-2016-12-word-cve-2016-7290\", \"timeline-2017-04-gwt-serialization-pivot\", \"dec-01\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2018-01 至 2018-12\",\n      \"stage\": \"客户端阅读器方向成熟与定制工具及补丁绕过的首次出现\",\n      \"capability_change\": \"在 Foxit Reader 方向判定信息泄露类漏洞无法被传统 fuzzing 发现，自建 WinDbg JavaScript 桥接插件 bridgit 辅助检测，并在利用阶段以泄露的堆指针替代堆喷射，在 Windows 7 与 10 上达到 100% 成功率；接受 Ke Liu（腾讯玄武实验室）将 CVE-2018-4990 根因由 double free 更正为两个 arbitrary free 条件的修正；同期出现首次补丁绕过实践——WebExec Reloaded（CVE-2018-15442）以对 Ron Bowes 原 WebExec 补丁的 re-discovery 与绕过形式发布。CVE-2018-4990 的 Ke Liu 修正正文未逐字核验，对应 ss-pub-004 标记为 unknown。\",\n      \"evidence_ids\": [\"ss-pub-002\", \"ss-pub-003\", \"ss-pub-004\", \"ss-community-005\", \"r1-ss-webexec-ronbowes\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2019-01 至 2020-12\",\n      \"stage\": \"企业 Web 预认证 RCE 的方向确立与系统化枚举产出\",\n      \"capability_change\": \"2019-05-17 发布《Panic! at the Cisco》将公开作品重心转向企业 Web 应用预认证 RCE 链，采用 web.xml servlet 映射追溯数据流的静态审计结合补丁 diffing，发现 Cisco 将单个 CVE 分配给两个不同漏洞且仅修补其一，并指出该漏洞因仅在配置高可用后可达而躲过多轮代码审计；2019-08-07 发布《Attacking Unmarshallers》以 Doyensec 此前 jackson gadgets 工作为起点开展跨版本迭代；2020 年针对 Cisco DCNM、HPE IMC、Cisco UCS Director 等企业网络管理产品做系统性枚举式挖掘，advisory 量级由个位数跃升至百级；2020-01 与 Chris Anastasio 组成 Team Incite 参加 Pwn2Own Miami 2020 攻克 Schneider EcoStruxure Operator Terminal Expert，赛后公开复盘赛前静默补丁对利用链的破坏。Pwn2Own Miami 2020 的 Team Incite 参赛事实由 Wikipedia 二手条目支撑，具体攻破产品名存在缺口。\",\n      \"evidence_ids\": [\"ss-pub-005\", \"r1-ss-pub-011-doyensec\", \"timeline-2019-cisco-prime-advisory-volume\", \"timeline-2020-cisco-dcnm-hpe-imc-volume\", \"timeline-2020-01-pwn2own-miami-team-incite\", \"dec-03\", \"ss-pub-006\", \"ss-deep-02\", \"ss-deep-03\", \"ss-community-006\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2021-01 至 2021-12\",\n      \"stage\": \"云与 .NET 方向的选定与研究方法产品化教学\",\n      \"capability_change\": \"加入奇虎 360 Vulcan Team（360 Vulcan Team 归属仅由本人博客自述，未获独立确证）后获得研究方向选择权，因自身 .NET 知识有限而选定微软云网络作为补足该技术能力的方向，以既有的 Web 安全能力作为切入云与 .NET 方向的依托；2021-01-12 发布《Making Clouds Rain》并确立递减披露时间线规则（首 bug 90 天、首个补丁绕过 60 天、第二个补丁绕过 30 天，每出现一次绕过缩短 30 天，不对任何厂商改规则）；2021-07-13 起 Full Stack Web Attack 训练课产品化，并在挑战题中植入隐藏 0day 以检验学员发现能力；2021-08-25 以 Source Incite 队名参加 Pwn2Own Vancouver 2021，目标 Microsoft Exchange Server，结合约 12 年前的 MiTM 经验并以代码模式检索定位新攻击面。Pwn2Own Vancouver 2021 的 Source Incite 队名与成功结果由 Wikipedia 二手条目支撑；ZDI/Trend Micro 官方结果页返回 403/404，获奖名次与奖金未由官方页面证实。\",\n      \"evidence_ids\": [\"ss-deep-01\", \"dec-02\", \"ss-deep-04\", \"ss-pub-007\", \"ss-deep-05\", \"ss-deep-06\", \"timeline-2021-04-pwn2own-vancouver-source-incite\", \"timeline-2021-exchange-sharepoint-pwn2own-writeup\", \"dec-04\", \"ext-pwn2own-06\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2022-01 至 2022-12\",\n      \"stage\": \"VMware 产品族链式挖掘与教学反馈流程的扩展\",\n      \"capability_change\": \"2022 年研究重心转向 VMware 产品族，于 8 月 9 日发布 vRealize Operations Manager 预认证 RCE、8 月 11 日发布 Workspace ONE Access 0-click 利用链、10 月 25 日发布 NSX Manager 预认证 RCE；NSX Manager 研究由 Full Stack Web Attack 过往学员 Sina Kheirkhah主笔、与 Steven Seeley 合著发布，形成教学输出—学员带回目标—协作合著的长期带教协作流程。同期 2022-01-20 发布 ZohOwned（CVE-2021-44515），由 FBI 2021-12-17 flash alert、William Vu 在 AttackerKB 的静态分析、作者比对 IOCs 后判定为同源零日，以及 Zoho 2021-12-03 自家 advisory 共同印证，作为第三方对研究有效性的外部印证。VMware NSX 学员合著关系以 ss-community-003（documented）为主锚点；ss-pub-008（NSX，unknown）仅作辅证，不与 documented 项等量齐观。\",\n      \"evidence_ids\": [\"timeline-2022-vmware-product-family\", \"ss-community-003\", \"ext-student-04\", \"r1-ss-comm-009-fbi-vu\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2023-01 至 2026-01\",\n      \"stage\": \"跨厂商定点研究与补丁变体审计方法的成熟\",\n      \"capability_change\": \"advisory 产出量较 2020-2022 高峰下降，由单厂商高频枚举转向跨厂商定点研究，方向覆盖 Apache Struts、TP-Link Archer、PTC Thingworx、Cacti、NETGEAR ProSAFE NMS、Inductive Automation Ignition、KeySight N6841A、Trackplus Allegra 等；2024-07-21 博客自述退役 Full Stack Web Attack 训练课的部分内容并预告下一期课程在罗马开设，该退役具体内容即 JNDI Injection via Path Manipulation in MemoryUserDatabaseFactory 系由博客主题推断，原文仅称 some of the content，仅作辅证；2024-11-25 发布 Spring Properties RCE，以 Process Monitor 观察 Tomcat 加载 application.xml 的行为定位配置加载顺序，经 logback JNDI 注入实现未授权 RCE，并公开复盘方法选择的妥协与未走通方向；2026-01-28 发布 Samsung MagicINFO 9 Server 系列研究，采用补丁审查—识别 CVE-2025-54438 的 FTP 变体 downloadChangedFiles 未修补—TOCTOU/SQL/FTP 写入多原语链方法，并主动联系 Shielder 共享 CIFS 绕过报告以协作完成利用。Spring Properties 前学员带回关系以 ss-pub-009（documented）为主锚点；ss-community-004（Spring 前学员，unknown）仅作辅证，不与 documented 项等量齐观。\",\n      \"evidence_ids\": [\"timeline-2023-2024-zdi-collaboration-pivot\", \"rr2-ss-dec-05a\", \"ss-pub-009\", \"ss-pub-010\", \"timeline-2026-01-samsung-magicinfo-latest\", \"ext-github-08\"],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"补丁审计驱动的未修补变体与跨组件多原语链发现\",\n      \"starting_conditions\": \"2018-12-03 WebExec Reloaded（CVE-2018-15442）作为对 Ron Bowes 原 WebExec 补丁的 re-discovery 与绕过，时间早于 2019-05-17《Panic! at the Cisco》中对 Cisco 将单个 CVE 分配给两个不同漏洞且仅修补其一的发现，构成补丁审计实践的起点；2018-12-03 厂商补丁被自述为 wasn't so good 的外部反馈亦同期出现。\",\n      \"repeated_practice\": \"对补丁做 diffing 并追问补丁是否覆盖完整攻击面：从 Cisco 单 CVE 双漏洞仅修其一、Schneider EcoStruxure 赛前静默补丁（无 CVE），到 2026 年 CVE-2025-54438 的 FTP 变体 downloadChangedFiles 未被修补；在识别未修补变体后，以 TOCTOU、SQL 注入、文件写入、认证绕过等多原语组合构造跨组件利用链。\",\n      \"feedback\": \"厂商补丁质量与披露行为的公开复盘（WebExec 补丁 wasn't so good、Schneider 静默补丁、Vanilla Forums 对厂商信息披露的批评）作为研究反馈循环的一部分；递减披露时间线规则（每出现一次绕过缩短 30 天、不对任何厂商改规则）将补丁绕过经验固化为可重复规则。\",\n      \"intermediate_capability\": \"形成由补丁审查定位未修补变体、再以跨组件多原语链完成利用的研究方法，并据此对 Cisco、VMware、Samsung 等厂商产品族做链式挖掘。\",\n      \"observed_outcomes\": [\n        \"2019-05-17《Panic! at the Cisco》识别 Cisco 单 CVE 双漏洞仅修其一（CVE 关联与高可达性配置分析）\",\n        \"2020-02-18《Silent Schneider》公开复盘 Schneider EcoStruxure 赛前静默补丁对利用链的破坏\",\n        \"2026-01-28《Samstung Part 2》识别 CVE-2025-54438 的 FTP 变体 downloadChangedFiles 未修补并主动联系 Shielder 协作完成利用\",\n        \"2018-12-03 WebExec Reloaded 作为对 Ron Bowes 原 WebExec 补丁的绕过，构成该机制的时间起点\"\n      ],\n      \"evidence_ids\": [\"r1-ss-webexec-ronbowes\", \"ss-pub-005\", \"ext-feedback-07\", \"dec-03\", \"ss-pub-010\", \"ss-deep-04\", \"ss-community-007\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"补丁变体的发现亦可能源于同一厂商产品族在代码模式上的复用而非专门的补丁审计流程；Cisco 单 CVE 双漏洞、Schneider 静默补丁、Samsung FTP 变体三例的时间跨度较大，且 Schneider 一例属赛事前置条件而非主动补丁审计，跨时期的因果连续性为推断而非一手自述的统一方法。\"\n    },\n    {\n      \"name\": \"以同行公开研究为起点的跨版本迭代\",\n      \"starting_conditions\": \"2020-08-19 Horde Groupware 利用链构建中复用并改造 EgiX 于 CVE-2014-1691 使用的旧 POP 链，以适配 PHP 7+ 的 Serializable 接口变化与 5 年间类定义演进，显示其倾向于以既有公开研究为起点再按当前环境迭代适配。\",\n      \"repeated_practice\": \"在公开 writeup 中显式声明研究所继起的同行工作，并对其成果做跨版本改造或补丁绕过：2019-08-07《Attacking Unmarshallers》明确 based upon the excellent work perform by Doyensec 并引 doyensec 2019-07-22 jackson-gadgets 博文；2018-12-03 WebExec Reloaded 接续 Ron Bowes 原 WebExec 发现并对其补丁做绕过。\",\n      \"feedback\": \"同行公开 writeup 作为可迭代的输入，新版本的环境差异（PHP 7+ 接口变化、厂商补丁）作为迭代适配的反馈信号；2018-05-21 CVE-2018-4990 接受 Ke Liu 修正 double free 为 arbitrary free 亦体现对同行纠错的开放态度。\",\n      \"intermediate_capability\": \"形成以公开研究为知识资产、按当前环境做针对性改造与补丁绕过的跨版本迁移能力，而非将历史研究视作一次性参考。\",\n      \"observed_outcomes\": [\n        \"2019-08-07《Attacking Unmarshallers》JNDI via getter 明确继 Doyensec jackson gadgets 工作展开\",\n        \"2018-12-03 WebExec Reloaded 接续 Ron Bowes 原 WebExec 并做 CVE-2018-15442 补丁绕过\",\n        \"2020-08-19 Horde 复用并改造 EgiX 于 CVE-2014-1691 的旧 POP 链以适配 PHP 7+\"\n      ],\n      \"evidence_ids\": [\"ss-deep-03\", \"r1-ss-pub-011-doyensec\", \"r1-ss-webexec-ronbowes\", \"ss-community-005\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"同行公开研究作为起点是 Web 安全研究社区的常见实践，并非该研究员特有；三例的同行来源（EgiX、Doyensec、Ron Bowes）分散于不同技术子领域，跨版本迭代作为统一方法的归纳属推断，缺乏其本人对方法统一性的一手自述。\"\n    },\n    {\n      \"name\": \"以可识别技能缺口为依据的真实目标领域迁移\",\n      \"starting_conditions\": \"2017-09-06《Sharks in the Pool》自述长期研究 Web 相关漏洞、用户态利用较为熟练但常遇未针对的内核设备驱动，因知识缺口未下手，遂决定补齐 ring 0 能力，并选择真实应用漏洞而非练习驱动 HEVD 为学习载体。\",\n      \"repeated_practice\": \"以可识别的技能缺口作为方向迁移依据并选定真实目标：2017 年由用户态迁移至 Windows 内核池；2021-01-12 加入奇虎 360 Vulcan Team（360 Vulcan Team 归属仅由本人博客自述，未获独立确证）后因 .NET 理解有限而选定微软云网络，以既有的 Web 安全能力作为切入新方向的依托。\",\n      \"feedback\": \"真实应用漏洞作为练习载体，其可达性与利用稳定性提供对能力补齐进展的反馈；2020-08-19 Horde 审计中因过度依赖白盒而漏掉 Horde_Core_Block 子类攻击面，由 Andrea Cardaci 以偏黑盒/GUI 交互的风格补上，反馈为复杂应用需白盒与黑盒并重的方法论修正。\",\n      \"intermediate_capability\": \"形成以技能缺口定位方向、以真实目标为练习载体、以方法论修正收尾的方向迁移能力，并据此从桌面文档、Web 反序列化、内核池逐步迁移至云与企业网络管理产品。\",\n      \"observed_outcomes\": [\n        \"2017-09-06《Sharks in the Pool》由用户态迁移至 Windows 内核池并选用真实应用漏洞\",\n        \"2021-01-12《Making Clouds Rain》因 .NET 知识有限选定微软云网络\",\n        \"2020-08-19 Horde 审计因白盒盲区漏报并据此修正为白盒与黑盒并重\"\n      ],\n      \"evidence_ids\": [\"dec-01\", \"dec-02\", \"ss-deep-01\", \"ss-deep-02\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"技能缺口作为迁移依据的表述来自其本人自述，外部观察到的仅是产出方向的客观变化；方向迁移亦可能由厂商 bounty 金额、ZDI 协调渠道可达性、组织研究方向分配等外部条件驱动，.NET 方向的选定与 360 Vulcan Team 的研究方向自由度之间的因果为自述而非独立证实。\"\n    },\n    {\n      \"name\": \"白盒与黑盒并重的审计方法\",\n      \"starting_conditions\": \"2019-05-17《Panic! at the Cisco》以 web.xml servlet 映射追溯数据流的静态代码审计结合补丁 diffing 发现漏洞；2020-08-19 Horde Groupware 审计中因过度依赖白盒而漏掉 Horde_Core_Block 子类攻击面。\",\n      \"repeated_practice\": \"同时执行白盒与黑盒两条审计路径以覆盖单一路径的遗漏：白盒从配置文件与代码模式追溯数据流，黑盒以 GUI 交互与运行时行为观察（如 Process Monitor 观察 Tomcat 加载 application.xml）覆盖静态分析盲区。\",\n      \"feedback\": \"Andrea Cardaci 以偏黑盒/GUI 交互的风格补上 Horde_Core_Block 子类缺口，反馈为 Complex applications need both a white-box review and a black-box review 的方法论修正；该方法论修正由作者本人发起并叙述，未获对方独立确认。\",\n      \"intermediate_capability\": \"形成对复杂应用同时执行白盒与黑盒两条审计路径的稳定方法，以单一路径的遗漏作为另一路径的输入。\",\n      \"observed_outcomes\": [\n        \"2020-08-19 Horde 审计以白盒黑盒风格差异对照识别自身盲区\",\n        \"2024-11-25 Spring Properties 以 Process Monitor 观察 Tomcat 加载 application.xml 定位配置加载顺序\",\n        \"2019-05-17 Cisco Prime 以 web.xml servlet 映射静态审计结合补丁 diffing\"\n      ],\n      \"evidence_ids\": [\"ss-deep-02\", \"ss-community-006\", \"ss-pub-005\", \"ss-pub-009\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"白盒与黑盒并重为业界通用方法论，且该方法论修正的主要来源为 2020 年 Horde 单一案例，并由其本人发起叙述、未获 Andrea Cardaci 独立确认；将其升格为独立机制的依据相对单薄，存在以一般化方法充当个人特有机制的风险。\"\n    },\n    {\n      \"name\": \"教学输出—学员带回目标—协作合著的反馈流程\",\n      \"starting_conditions\": \"2021-07-13 Full Stack Web Attack 训练课产品化，并在挑战题中植入隐藏 0day 检验学员发现能力，以公开 writeup 完成从教学到披露的流程；课程页面将方法学表述为覆盖漏洞发现与利用开发完整阶段、使用补丁 diffing 复现 n-day，并以 Leave your OWASP Top Ten and CSP bypasses at the door 划定方向。\",\n      \"repeated_practice\": \"以训练课为入口，过往学员在多年后将新目标带回，并以合著形式完成发布：2022-10-25 VMware NSX Manager 预认证 RCE 由 Full Stack Web Attack 过往学员 Sina Kheirkhah 主笔、与 Steven Seeley 合著；2024-11-25 Spring Properties 的初始漏洞由一名前学员带回。\",\n      \"feedback\": \"学员带回的目标作为新的研究线索输入，扩展研究覆盖面；作者在 Spring Properties 中公开复盘方法选择的妥协与未走通方向（JDBC、un-marshaller 直接滥用），并将该流程显性化为可被他人继续的公开记录。\",\n      \"intermediate_capability\": \"形成由教学输出驱动学员成长、再由学员带回目标形成长期带教协作关系的流程，使教学成为研究线索与合著者的稳定入口。\",\n      \"observed_outcomes\": [\n        \"2022-10-25 VMware NSX Manager 预认证 RCE 由过往学员 Sina Kheirkhah 主笔并合著（以 ss-community-003 documented 为主锚点）\",\n        \"2024-11-25 Spring Properties 初始漏洞由前学员带回（以 ss-pub-009 documented 为主锚点）\",\n        \"2021-07-13 FSWA 挑战题植入隐藏 0day 检验学员发现能力并以公开 writeup 完成披露\"\n      ],\n      \"evidence_ids\": [\"ss-pub-007\", \"ss-deep-05\", \"ss-community-003\", \"ext-student-04\", \"ss-pub-009\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"学员带回目标与合著关系均由其本人博客单向叙述，未获 Sina Kheirkhah 及 Spring 前学员的独立渠道证实；学员产出可发布漏洞研究是否可归因于该课程内容本身亦未被独立证实，故该流程作为个人特有机制的依据存在自述来源偏差，不宜以 distinctive 归因。\"\n    }\n  ],\n  \"tensions\": [\n    \"六维证据几乎全部来自 srcincite.io 本人一手 writeup/advisory 与 bio，合著/学员关系（Sina Kheirkhah、Justin Kennedy、Brandon Perry、Andrea Cardaci、Matthias Kaiser、Chris Anastasio）均由其本人博客单向叙述，未获合著方独立渠道证实，存在以本人自述替代多方印证的残余风险。\",\n    \"幸存者偏差：可见证据均为已公开、已披露、已成功的 writeup/advisory 与已发布 writeup 的赛事案例，研究中的失败案例、未披露漏洞、未完成利用链、未公开的尝试均不可见，对机制有效性的归因存在系统性高估倾向；本报告不要求补取不可考的失败材料，仅显式标注该偏差对归因的影响。\",\n    \"360 Vulcan Team 归属仅由本人博客自述，Pwn2Own Miami 2020 与 Vancouver 2021 可核验参赛队名分别为 Team Incite 与 Source Incite，未见其以 360 Vulcan 成员身份参赛的独立确证；组织声誉与个人能力之间的归因需保持区分。\",\n    \"Pwn2Own Vancouver 2021 Microsoft Exchange 的成功结果存在表述张力：WebSearch 早期结果曾称成功团队为 DEVCORE 并提及 Steven Seeley 参与，该结果来自 WebSearch 模型自述而非可抓取权威页面；ZDI/Trend Micro 官方结果页返回 403/404，无法裁定两者是否指向同一目标的不同子项或不同年份赛事，记录为待解冲突。\",\n    \"CVE-2018-4990 的 Ke Liu 修正正文、2016 年 Office 三篇的方法学细节、Black Hat US / POC 的 speaker 页面等关键一手材料未逐字核验，对应 ss-pub-004、ss-pub-001 等项维持 unknown/inferred，相关结论的证据等级受限。\"\n  ],\n  \"transferable_practices\": [\n    \"对补丁做 diffing 并追问补丁是否覆盖完整攻击面，以识别未修补变体并据此构造跨组件多原语链（参见 Cisco 单 CVE 双漏洞、Samsung FTP 变体）。\",\n    \"以可识别的技能缺口作为方向迁移依据，并选用真实应用漏洞而非通用靶机作为练习载体，使能力补齐与可发布产出同向累积。\",\n    \"同时执行白盒与黑盒两条审计路径，以单一路径的遗漏作为另一路径的输入，覆盖复杂应用中纯静态分析的盲区。\",\n    \"将披露伦理固化为可重复的固定规则（如递减时间线、无差别适用），并通过公开复盘厂商补丁质量与披露行为校准后续披露策略。\",\n    \"以公开研究为起点做跨版本迭代适配，对同行既有成果的接口/类演进与补丁做针对性改造或绕过，而非视作一次性参考。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Full Stack Web Attack 训练课作为学员网络的入口为该研究员个人产品，学员带回目标并合著的反馈流程依赖其长期教学积累与个人信誉，他人难以直接复制；且该流程中合著/学员关系未获合著方独立渠道证实，仅作自述来源保留。\",\n    \"360 Vulcan Team 归属与由此获得的研究方向选择权为组织条件，仅由本人博客自述、未获独立确证，且 Pwn2Own 参赛队名为 Team Incite / Source Incite 而非 360 Vulcan，组织归属与个人能力之间的因果不可直接迁移。\",\n    \"Pwn2Own Miami 2020 与 Vancouver 2021 的参赛资格与目标选定受赛事邀请、组队关系与时间窗口等外部条件制约，竞赛反馈作为能力验证的机制不可在无赛事环境下复制；具体名次、奖金与官方 Master of Pwn 归属未由官方页面证实。\",\n    \"srcincite.io 个人博客与 sourceincite GitHub 组织作为长期公开输出与代码发布渠道，构成其可被同行追溯引用的可见性基础，该渠道的十年积累与命名一致性不可由后来者短期复制。\",\n    \"北美与中美约十年工作经历及其对应雇主未在一手来源中给出，该跨国经验作为企业软件漏洞挖掘方法论基础的地理/职业条件无法独立核验亦不可直接迁移。\"\n  ],\n  \"open_questions\": [\n    \"Full Stack Web Attack 训练课首次授课年份、历次迭代内容与学员规模无独立材料，课程起始年份仅以 2021-07-13 的 FSWA 挑战文章证明该年课程已在办；学员产出可发布漏洞研究是否可归因于课程内容本身未被独立证实。\",\n    \"加入与离开奇虎 360 Vulcan Team 的确切时间、是否仍在职未在一手来源中说明，仅 inferred 自 2021-01-12 博客的过去时陈述，无法与 Pwn2Own 参赛时间线精确对齐。\",\n    \"从 Foxit/Adobe 客户端研究（2018）转向 Cisco 企业软件（2019）、再转向 SharePoint/Microsoft 云（2020-2021）、2022 年转向 VMware 系列、2023 年后转向跨厂商定点研究的逐阶段触发因素无一手叙述，只能由 writeup 时间线推断。\",\n    \"回澳大利亚的具体年份、北美/中美十年对应的具体雇主未披露；2021 年微软云/.NET 方向在 2022 年转向 VMware 系列的回归性转折动机无一手说明。\",\n    \"Black Hat US / POC 的具体场次、年份与议题未抓取到 speaker 页正文，会议参与仅由 person_json 列出与本人 writeup 自述，缺乏第三方议程佐证；GitHub sourceincite 仓库未直接署名 Steven Seeley / mr_me，组织账号与个人身份的强关联仍为推断。\",\n    \"Mastodon (infosec.exchange/@stevenseeley) 与 X/Twitter @mr_me 账号正文未抓取，社交平台上的公开反馈与即时方法讨论未纳入；社交 handle 三源（mr_me / @stevenseeley / @srcincite）不一致，无法在不直接抓取各账号的情况下判定主用账号。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "456aa5a51fc179e3a8fb70f5e7b70da3b9e877c17f43c66744e7ee57a8dcf389",
+        "accessed_at": "2026-09-27T10:29:11.398910+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790504951398925000-steven-seeley-mr-me-synthesis-v3.json",
+    "label": "Steven Seeley (mr_me):synthesis:v3",
+    "elapsed_seconds": 409.41,
+    "prompt_sha256": "4d6c1ccb755bfc639264b1f3248ea10b046e6759f1d861c2b78d0ffa84554a24",
+    "num_turns": 11,
+    "total_cost_usd": 1.1445210000000001,
+    "usage": {
+      "input_tokens": 72343,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 286912,
+      "output_tokens": 25574,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 72343,
+        "outputTokens": 25574,
+        "cacheReadInputTokens": 286912,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.1445210000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

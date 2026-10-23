@@ -1,0 +1,412 @@
+{
+  "person": "Felix Wilhelm",
+  "expertise": [
+    "x86 虚拟化安全（Xen PV 设备、KVM AMD 嵌套虚拟化 guest-to-host 逃逸、AMD SEV/SNP 与 Intel TDX 隔离边界）",
+    "共享内存接口的 TOCTOU/double-fetch 漏洞挖掘",
+    "云与容器隔离原语安全（dnsmasq、容器管理、HashiCorp Vault 认证）",
+    "内存安全语言中的逻辑漏洞与整数截断类问题（Java XSLT/BCEL 常量池）",
+    "硬件侧信道（BTB 碰撞绕过 ASLR/hypervisor ASLR）",
+    "Solana/DeFi 智能合约安全（flash loan、签名验证、p-token）",
+    "C/C++ 代码库语义搜索工具构建（weggli，基于 tree-sitter）",
+    "内存访问追踪工具构建（xenpwn，基于硬件辅助虚拟化）"
+  ],
+  "stages": [
+    {
+      "period": "约 2013–2015",
+      "stage": "KIT 硕士论文与 ERNW 并行：把学位研究对接上游 Xen 真实 CVE",
+      "capability_change": "在卡尔斯鲁厄理工学院完成硕士论文《Tracing Privileged Memory Accesses to Discover Software Vulnerabilities》，产出 xenpwn 工具，受 j00ru/gynvael 的 Bochspwn 启发而适配到 Xen inter-domain 通信页，以选择性追踪控制开销。该工具直接导致 Xen XSA-155（CVE-2015-8550，paravirtualized 驱动 double-fetch）的发现，并于同期 XSA-123（CVE-2015-2151，x86 仿真器内存损坏）被官方致谢。advisory 同时刻注 ERNW Research 与 KIT / Operating Systems Group 双重机构归属，形成 学术研究→工具→上游漏洞→厂商致谢 的可核验闭环。这一阶段确立把学位研究做成可产出真实漏洞工具的工程化路径，而非纯学术练习。",
+      "evidence_ids": [
+        "fw-works-001",
+        "fw-community-01",
+        "fw-community-02",
+        "felix-external-01",
+        "felix-external-02",
+        "fw-dec-001"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "约 2016–2018",
+      "stage": "从 Xen 仿真层到 BTB 侧信道：学术论文到虚拟化边界的迁移",
+      "capability_change": "发布 mario_baslr（BTB 碰撞绕过 hypervisor ASLR 的 PoC），README 自述其基于学术论文《Jump Over ASLR》并指出原论文作者未意识到该技术可跨越虚拟化边界，把 BTB 碰撞从 KASLR 扩展到 hypervisor ASLR。其后被同伴 Jann Horn 在 Spectre Variant 2 披露中致谢引用（'Felix Wilhelm's research based on this provided the basic idea behind variant 2'）。约 2018 年 Red Hat CVE-2018-1111（DynoRoot）公告以 Critical 级别致谢 'Felix Wilhelm (Google Security Team)'，外部记录其机构归属已由 ERNW 切换为 Google，确切的 ERNW→Google 过渡时间无本人一手声明（dnsmasq 2017-10 团队名单未一手核实，列为推断）。这一阶段确立把学术论文中未被作者察觉的实际攻击场景扩展到安全研究的决策路径；2016 年前后公开 PV 设备 double-fetch 挖掘方法论（Infiltrate/SyScan 360/Black Hat 2016 演讲未经一手核实，列为推断）。",
+      "evidence_ids": [
+        "r1-fw-tl-06-mario-baslr",
+        "fw-community-03",
+        "felix-external-03",
+        "fw-community-09"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "约 2017–2022",
+      "stage": "Google Project Zero 时期：方法论成熟、工具建设与机构化协作",
+      "capability_change": "以 P0 身份系统覆盖云/虚拟化/认证/Java 等目标，把目标选择、挫折触发的假设重审、务实利用路径固化为一套可叙述的研究流程。2021-06 发布 KVM AMD 嵌套虚拟化 guest-to-host 逃逸（CVE-2021-29657），自述耗时约两个月、仅远程访问 AMD 系统独立完成；记录因利用策略停滞两周而改变方向、并主动承认对 host save area 字段的假设有误。2020-10 Vault 博文（CVE-2020-16250/16251）提出外部接口交互处即逻辑漏洞高发区、人工审查不可替代。2022-11 Gregor Samsa 博文（CVE-2022-34169）把内存安全语言中的整数截断归为等效内存腐败，与后续 DeFi 期审计过的代码仍有 subtle 漏洞的观察在方法论上一致。同阶段构建开源工具 weggli（C/C++ 语义搜索，2.5k stars），把工具辅助人工审计的信念编码为可复用产品。",
+      "evidence_ids": [
+        "fw-works-002",
+        "fw-works-005",
+        "fw-conv-001",
+        "fw-conv-002",
+        "fw-conv-003",
+        "fw-conv-004",
+        "fw-conv-005",
+        "r2-fw-conv-011-vault",
+        "r2-fw-works-008-gregor-samsa",
+        "fw-tl-11",
+        "r1-fw-community-06-weggli-stars",
+        "fw-dec-002"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "约 2022–2026",
+      "stage": "Asymmetric Research 时期：DeFi 安全与机构化持续协作",
+      "capability_change": "约 2022 年离开 Google Project Zero 转向 DeFi/区块链安全，作为 Asymmetric Research 成员连续发布 Solana/DeFi 研究：2025-09-17 marginfi flash loan 漏洞（约 160M USD 风险）、2025-09-22 Relay 签名验证绕过、2026-04-15 Solana p-token（提出 individually safe optimizations can become vulnerabilities when composed with new functionality）。研究流程从一次性披露扩展为与 Anza 团队的持续 review + fuzzing 协作；输出人称由 'I' 转向 'We'，研究输出由个人独立完成转向机构协作。方法论延续：把 P0 时期外部依赖即攻击面、审计代码仍有 subtle bugs 的观察迁移到智能合约生态。",
+      "evidence_ids": [
+        "fw-works-003",
+        "fw-works-004",
+        "fw-conv-006",
+        "fw-conv-007",
+        "fw-conv-008",
+        "fw-conv-009",
+        "r1-fw-works-003-marginfi-160m",
+        "fw-community-08",
+        "fw-tl-15",
+        "fw-tl-16",
+        "fw-tl-17",
+        "fw-dec-004",
+        "felix-external-05"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "组件组合破坏不变量的漏洞模式",
+      "starting_conditions": "KIT 硕士论文时期以硬件辅助虚拟化追踪 Xen inter-domain 通信页的共享内存访问，原生面对 guest 与 backend 之间共享内存这一天然难于保护的接口。",
+      "repeated_practice": "跨十余年反复在同一类模式下定位漏洞：Xen PV 设备 double-fetch（XSA-155，编译器优化暴露的 TOCTOU）、KVM AMD 嵌套虚拟化 nested_vmcb_checks 的 TOCTOU 竞态（CVE-2021-29657）、HashiCorp Vault 在与 AWS STS/GCP JWT 外部系统交互处的认证绕过（CVE-2020-16250/16251）、Java XSLTC 常量池整数截断绕过 XML 签名验证（CVE-2022-34169）、Solana p-token 延迟所有权检查与运行时回滚的组合（individually safe optimizations can become vulnerabilities when composed with new functionality）。每一案例均把具体 bug 上升为对组件组合破坏不变量的归纳。",
+      "feedback": "Vault 博文一手引文：'Even with memory-safe languages, strong cryptography primitives, static analysis and large fuzzing infrastructure, some issues can only be discovered by manual code review and an attacker mindset' 与 'tricky vulnerabilities like this often exist where developers have to interact with external systems and services'。marginfi 博文一手引文：'a small and seemingly harmless change in a well-audited, carefully designed codebase can introduce a critical vulnerability'。p-token 博文一手引文：'individually safe optimizations can become vulnerabilities when combined with new functionality'。Gregor Samsa 博文一手引文：'an example of an integer truncation issue in a memory-safe language, with an exploit that feels very much like a memory corruption'。多厂商 advisory（XSA-123/XSA-155、Red Hat CVE-2018-1111 Critical、HashiCorp Vault 修复、Linux 内核 ChangeLog 5.11.12 修复 CVE-2021-29657）与 Anza 团队的持续合作构成外部验证。",
+      "intermediate_capability": "把组件组合破坏不变量这一模式作为跨领域（虚拟化、认证、Java 运行时、智能合约）可迁移的漏洞分类框架，而非孤立的个案发现。",
+      "observed_outcomes": [
+        "XSA-155 与 XSA-123 双重官方致谢 Felix Wilhelm（ERNW Research, KIT / Operating Systems Group 与 ERNW GmbH）",
+        "KVM AMD 嵌套虚拟化 guest-to-host 逃逸 CVE-2021-29657，自述独立两月完成",
+        "HashiCorp Vault 认证绕过 CVE-2020-16250/16251",
+        "Java XSLTC 常量池整数截断绕过 XML 签名验证 CVE-2022-34169",
+        "Solana p-token write-then-restore 逃逸路径，Anza 已修复",
+        "marginfi flash loan 漏洞（约 160M USD 风险，经 marginfi bug bounty 私下披露、快速修复、无资金损失）"
+      ],
+      "evidence_ids": [
+        "fw-works-001",
+        "fw-works-002",
+        "fw-works-003",
+        "fw-works-004",
+        "fw-conv-007",
+        "r2-fw-conv-011-vault",
+        "r2-fw-works-008-gregor-samsa",
+        "r1-fw-works-003-marginfi-160m",
+        "fw-community-01",
+        "fw-community-02",
+        "felix-external-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "公开 writeup 仅记录成功产出的研究方向与漏洞发现，未产出公开成果的研究方向（如 ERNW 时期其他未导致 CVE 的审计目标、P0 时期未公开的失败研究）未被纳入机制重建，可能高估组件组合破坏不变量作为研究者主动选择模式的解释力。另一竞争性解释是：共享内存与外部接口天然是漏洞高发区，反复命中该模式部分来自攻击面本身的分布，而非研究者主动选择。"
+    },
+    {
+      "name": "在既有工具谱系上扩展的工具建设",
+      "starting_conditions": "KIT 硕士论文阶段明确受 j00ru/gynvael 的 Bochspwn 启发，选择把已有内存访问追踪方法适配到 Xen PV 设备这一具体问题，而非发明全新方法。",
+      "repeated_practice": "跨阶段反复在既有工具/学术成果基础上扩展而非宣称独创：Bochspwn→xenpwn（选择性追踪 inter-domain 通信页以控制开销）；学术论文《Jump Over ASLR》→mario_baslr（扩展到 hypervisor ASLR）；AMD IBS Toolkit→KVM AMD 逃逸的信息泄露原语；Semgrep/Coccinelle/joern/CodeQL→weggli（声明 inspired by great tools but makes some different design decisions）。weggli 设计四原则（C++ support、Minimal setup、Interactive、Greedy）反映工具辅助而非替代人工审计的稳定信念。",
+      "feedback": "weggli 在 GitHub 获得 2.5k stars、145 forks 的社区采用，构成工具建设型社区贡献的反馈回路。KVM 逃逸博文中显式归功开源 AMD IBS Toolkit 提供了 working code, a readable high level description of IBS and a lot of useful references。xenpwn README 与 weggli README 均明确声明其前置工具来源。ERNW 早期（2014 31C3）对 Fabian Yamaguchi 图数据库挖掘的评价反映其长期一致的自动化辅助人工审计价值观（该会议回顾为本地种子转述，未一手核实，列为推断）。",
+      "intermediate_capability": "把工具辅助人工审计的信念转化为可复用的开源产品与可迁移的方法论，而非一次性研究副产品。",
+      "observed_outcomes": [
+        "xenpwn 直接导致 XSA-155 发现，并被 XSA-155 advisory 标注为学术机构产出",
+        "mario_baslr 被 Jann Horn 在 Spectre Variant 2 披露中致谢为提供基础概念",
+        "weggli 在 GitHub 获 2.5k stars、145 forks，开源供社区使用",
+        "mario_baslr README 一手指明其基于《Jump Over ASLR》并扩展到虚拟化边界"
+      ],
+      "evidence_ids": [
+        "fw-works-001",
+        "fw-works-005",
+        "r1-fw-tl-06-mario-baslr",
+        "r1-fw-community-06-weggli-stars",
+        "fw-community-05",
+        "fw-community-03",
+        "fw-dec-001"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "在既有工具上扩展是安全研究领域的常见做法，并非该研究者特有；但其反复把扩展结果开源并以工具 README 明示前置工具来源的行为相对有区分度。公开 writeup 仅记录成功产出的工具建设方向，未公开化的工具尝试未被纳入，可能高估该模式的普适性。"
+    },
+    {
+      "name": "学术论文到虚拟化边界的迁移",
+      "starting_conditions": "mario_baslr 阶段已确立读学术论文→发现作者忽略的实际攻击场景→扩展到安全研究的决策路径：其 README 自述基于《Jump Over ASLR》并指出原论文作者未意识到该技术可跨越虚拟化边界。",
+      "repeated_practice": "把学术论文中针对通用场景的攻击技术迁移到虚拟化/hypervisor 边界：BTB 碰撞从 KASLR 扩展到 hypervisor ASLR（mario_baslr）；把 Bochspwn 式内存访问追踪迁移到 Xen inter-domain 通信页（xenpwn）；把可证明安全 TEE 的实证不安全作为研究对象（Black Hat 2022 Mind The Gap，议程未一手核实，列为推断）。",
+      "feedback": "其 BTB 研究经同伴 Jann Horn 在 Spectre Variant 2 披露中致谢引用（'Felix Wilhelm's research based on this provided the basic idea behind variant 2'），构成跨研究者引用的后置正向反馈。mario_baslr 仓库 README 一手内容直接支撑该迁移路径的技术描述。",
+      "intermediate_capability": "把学术攻击技术的虚拟化边界适用性作为选题来源，形成可重复的研究方向迁移路径。",
+      "observed_outcomes": [
+        "mario_baslr 作为 BTB 碰撞绕过 hypervisor ASLR 的 PoC 公开",
+        "其 BTB 研究被 Jann Horn 在 Spectre Variant 2 披露中致谢为基础概念",
+        "xenpwn 把 Bochspwn 路线迁移到 Xen PV 设备并产出 XSA-155"
+      ],
+      "evidence_ids": [
+        "r1-fw-tl-06-mario-baslr",
+        "fw-community-03",
+        "fw-works-001"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "公开 writeup 仅记录成功产出的学术迁移方向，未产出公开成果的迁移尝试（如 mario_baslr 之外未导致引用的学术迁移尝试）未被纳入，可能高估学术论文→虚拟化边界→PoC 迁移路径的普适性。Spectre V2 致谢本身也可能源于同队研究者的独立整合，迁移路径的因果归因应保持克制。"
+    },
+    {
+      "name": "由目标选择、挫折触发的假设重审、务实利用路径三部分构成的研究流程",
+      "starting_conditions": "P0 时期面对 KVM AMD 嵌套虚拟化这一被较少研究者关注的代码区域，同时 AMD 服务器市场份额上升使其成为更高价值目标。",
+      "repeated_practice": "在 KVM AMD 逃逸研究中显式编码三部分研究流程：(1) 目标选择基于攻击面经济学——审查不足的代码与市场份额上升的目标（'a large potential for complex logic flaws, making it a perfect target for manual code review'）；(2) 挫折作为重审底层假设的信号——利用策略停滞两周后意识到自己对 host save area 字段的假设有误（'I realized that I made an important mistake'）；(3) 务实接受 boring but easy-to-implement 利用路径而非追求优雅方案，并以 slow trial and error 作为正常研究过程。Vault 博文同样记录挫折触发的转向（'At this point I was slowly getting frustrated and decided to take a look at Vault's response parsing code'）。影响评估上主动记录初始过度自信的事后修正。",
+      "feedback": "KVM 逃逸博文以 'Make zeroday hard.' 签名式结尾，构成跨博文的稳定品牌输出；自述把完整 writeup 作为向社区论证 hypervisor 攻击现实性的载体。marginfi 博文以机构口吻公开致谢被审计方，反馈回路从厂商 advisory 闭环扩展到 DeFi bug bounty 协同披露闭环。Red Hat CVE-2018-1111 以 Critical 级别致谢 Google Security Team，外部验证其报告质量与机构归属。",
+      "intermediate_capability": "把研究过程（目标选择、挫折转向、务实利用、影响校准）作为可叙述的方法论，而非只呈现最终漏洞，形成过程透明度。",
+      "observed_outcomes": [
+        "KVM AMD 嵌套虚拟化 guest-to-host 逃逸 CVE-2021-29657，自述独立两月、仅远程访问完成",
+        "Red Hat CVE-2018-1111（DynoRoot）以 Critical 级别致谢 Felix Wilhelm (Google Security Team)",
+        "marginfi flash loan 漏洞经 bug bounty 私下披露、快速修复、无资金损失",
+        "Asymmetric Research 与 Anza 团队持续 review + fuzzing 协作下于主网上线前捕获 p-token 漏洞"
+      ],
+      "evidence_ids": [
+        "fw-works-002",
+        "fw-conv-001",
+        "fw-conv-002",
+        "fw-conv-003",
+        "fw-conv-004",
+        "fw-conv-005",
+        "fw-conv-006",
+        "r2-fw-conv-011-vault",
+        "fw-community-04",
+        "fw-community-08",
+        "fw-community-09",
+        "felix-external-03",
+        "fw-dec-002",
+        "fw-tl-11"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "挫折触发的转向与务实利用路径在 KVM 一案中记录最完整，可能因该 writeup 本身篇幅与披露风格而显得突出；其他研究是否同样遵循该三部分流程缺乏可比的过程自述。公开 writeup 仅记录成功产出，未产出公开成果的方向未被纳入，可能高估该流程作为研究者主动选择的解释力。"
+    }
+  ],
+  "tensions": [
+    "学术机构与工业咨询的并行：XSA-155 advisory 同时标注 ERNW Research 与 KIT / Operating Systems Group，显示其早期同时利用学术与企业两条反馈渠道放大研究影响，但这一条件依赖特定学术导师组与企业研究环境的并行支持（导师姓名未一手核实，不得作为事实陈述）。",
+    "工具建设的维护断档：weggli 早期（2021–2022）由作者积极维护、回复 issue 并自我批评（如承认应补 Python API 测试），但 2023-09 issue #85 'Is the project still alive?' 无维护者回复，反映转入 Asymmetric Research 后社区维护参与度出现断档；工具社区的存续依赖持续维护投入，与作者精力分配强相关。",
+    "研究输出由个人独立完成转向机构协作：KVM 逃逸时期自述 working as an individual、仅远程访问 AMD 系统独立两月完成；Asymmetric Research 时期人称由 'I' 转向 'We'，研究流程扩展为与 Anza 团队的持续 review + fuzzing 协作。这一转变带来机构化协作的稳定性，同时也使个人独立深度研究的可见度下降。",
+    "后置引用与即时引用的不对称：mario_baslr（2016）在 2018 年才被 Jann Horn 在 Spectre Variant 2 披露中致谢引用，构成后置引用；而 KVM 逃逸、marginfi 等研究则在被审计方修复后即获 advisory/bounty 致谢，构成即时引用。后置引用的不可预期性使早期研究方向的价值评估在发布时难以判断。",
+    "厂商分歧与专业合作的并存：IBM GPFS 一案记录 IBM disagrees with our assessment 的厂商分歧（本地种子转述，未一手核实），而 Palo Alto Networks、marginfi 等案例显示其对厂商响应的评价以专业合作为主；该分歧记录未一手核实，列为资料缺口。"
+  ],
+  "transferable_practices": [
+    "把学位研究或学术成果对接上游真实漏洞：以可产出真实 CVE 的工具承载研究，而非纯学术练习（xenpwn→XSA-155）。",
+    "在既有工具谱系上扩展并开源：明确声明前置工具来源（Bochspwn、Semgrep/Coccinelle/joern/CodeQL、《Jump Over ASLR》、AMD IBS Toolkit），把扩展结果回馈社区。",
+    "目标选择编码攻击面经济学：优先审查不足的代码与市场份额上升的目标，而非凭空选题。",
+    "挫折作为重审底层假设的信号：在利用策略停滞时主动重审对目标字段/结构的假设，而非继续在原路径上推进。",
+    "务实接受 boring but easy-to-implement 利用路径：在优雅方案受阻时选择可实现的路径，并以 slow trial and error 作为正常研究过程。",
+    "把具体 bug 上升为可复用的漏洞分类框架：归纳组件组合破坏不变量、外部接口即攻击面等跨领域适用的模式。",
+    "过程透明度：主动披露研究耗时、资源约束、误判与影响评估的过度自信修正，把研究置于真实劳动投入语境中。",
+    "负责任披露闭环：通过厂商 advisory、bug bounty、私下披露等渠道形成闭环，并公开致谢被审计方。"
+  ],
+  "non_transferable_conditions": [
+    "学术导师组与企业研究环境的并行支持：KIT 操作系统组与 ERNW 的并行结构使硕士论文可直接对接上游 Xen 漏洞披露，这一条件依赖特定学术导师组与企业研究环境的并行支持（导师姓名未一手核实，不得作为事实陈述，列为资料缺口）。",
+    "Google Project Zero 平台的机构归属与披露渠道：P0 时期的署名、Google Security Team 机构身份、以及与同队顶级研究者（如 Jann Horn）的同伴网络，是 mario_baslr 被 Spectre V2 致谢引用与 KVM 逃逸高规格发布的结构性条件，不可由个人复制。",
+    "Asymmetric Research 时期与 Anza 团队的机构化持续协作：p-token 案例的 review + fuzzing 持续协作依赖 Asymmetric Research 与 Solana 生态团队的长期整合合作关系，非个人研究者可复制。",
+    "DeFi 时期锁定数十亿美元资产的高价值攻击面：marginfi 约 160M USD 风险等目标的价值基础来自 DeFi 生态本身的资金规模，而非研究者主动选择所能创造。"
+  ],
+  "open_questions": [
+    "约 2017 年由 ERNW 转入 Google、约 2022 年离开 P0 的确切日期无本人一手声明，仅由最后 ERNW 博客约 2016-04、首个 Google credit 2018-05 Red Hat 致谢、最后 P0 博客 2022-11、Asymmetric 首篇 2025-09 等时间夹断推断。",
+    "约 2022 年是否经过 Jump Crypto 过渡期、Asymmetric Research 联合创始人/CTO 头衔、是否保护 $5B+ 数字资产：仅本地种子转述，Asymmetric /about 页面 404 未一手核实，列为资料缺口。",
+    "ERNW 时期各 CVE/XSA（XSA-105/110/123/155、IBM GPFS、PAN-OS、Hyper-V MS13-092、FireEye MPS）正文未逐一抓取厂商公告核验，方法论表述与漏洞归因未独立确认。",
+    "Infiltrate/SyScan 360/Black Hat 2016 'Xenpwn' 演讲、Black Hat 2018/2022、Breakpoint 2025 等会议议程未一手核实（Black Hat us-16 议程页 403、WebSearch 无真实结果），相关会议断言不得作事实陈述。",
+    "dnsmasq（2017-10）Google Security Blog 'Behind the Masq' 页面 404，6 人团队作者名单（Fermin Serna、Gabriel Campana、Kevin Hamacher、Ron Bowes、Gynvael Coldwind、Felix Wilhelm）未一手核实。",
+    "IBM GPFS 'IBM disagrees with our assessment' 厂商分歧、Palo Alto Networks PAN-OS 致谢、Hacker News 'highly capable individual' 评价均未一手核实。",
+    "CVE-2019-5736（runC 容器逃逸）与 XSA-110 的归因冲突：官方发现者分别为 Adam Iwaniuk/Borys Poplawski 与 Jan Beulich，部分二手资料误归于 Felix Wilhelm，不应据二手归因列入个人能力。",
+    "AMD SEV/SNP 与 Intel TDX 安全评估的具体参与程度本地种子标注为可能，无一手证据。",
+    "Asymmetric Research 从一次性披露到主网上线前防御性审计的角色转变，其机构化协作的具体流程（review + fuzzing 的分工、与 Anza 团队的协作边界）无公开深度自述。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790436808242926000-felix-wilhelm-synthesis-v3.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "50cc9f76-efdc-4e5f-85d9-bfb10c1a8f79",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_oq007zi61rl109b2fqssboau",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-26T15:33:28.302135+00:00"
+      },
+      {
+        "tool_use_id": "call_xbm5oqhrowa2me3ov7bodl4x",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "af575e0ff774c7ad2cacca241dba04302493c5959eca81fe2ac4b072dda350a9",
+        "accessed_at": "2026-09-26T15:33:28.302161+00:00"
+      },
+      {
+        "tool_use_id": "call_2cxis7hmthm9kt8s2na9w2w2",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "a9b7e44252b6031bb7b483621e88aab3060a0d9c637cdba6a193af04a7956aad",
+        "accessed_at": "2026-09-26T15:33:28.302172+00:00"
+      },
+      {
+        "tool_use_id": "call_pfwhd3vgua3om8k06uga7xe8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "cecfb1acc0f0a7668bf8e64fdd72d10d81ce459f01131770c068ca0762483009",
+        "accessed_at": "2026-09-26T15:33:28.302240+00:00"
+      },
+      {
+        "tool_use_id": "call_fza51trbmahj2w6c7a0wf1nk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/inputs/revision_context.json",
+          "offset": 500,
+          "limit": 338
+        },
+        "success": true,
+        "content_sha256": "1c66c1783337381145fd0ebee3d0517bec8835a36ba89c3df39cf623d55d6eab",
+        "accessed_at": "2026-09-26T15:33:28.302302+00:00"
+      },
+      {
+        "tool_use_id": "call_cpmvblqv06ou9y2ufzowgywy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "b391c84450bc8325c3e78b43dba4fc5c074dde9f33c249b229c4223e6aa55e7d",
+        "accessed_at": "2026-09-26T15:33:28.302376+00:00"
+      },
+      {
+        "tool_use_id": "call_q9mllihrepm03t601q3yni9s",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/inputs/evidence_json.json",
+          "offset": 866,
+          "limit": 527
+        },
+        "success": true,
+        "content_sha256": "1ac7bd4e6627de243d26ca8813f334841a3199a888674e4cca3f3da5dc28ad72",
+        "accessed_at": "2026-09-26T15:33:28.302430+00:00"
+      },
+      {
+        "tool_use_id": "call_vpek32i5mo2zxii3fpg6p3ve",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/checkpoint.md",
+          "content": "# Checkpoint — Felix Wilhelm 综合 (synthesis v3)\n\n## 任务状态\n- 角色：综合分析师节点。已读 CLAUDE.md、task.md、output.schema.json、person_json.json、evidence_json.json（含续读 866-1392）、revision_context.json（含 round 1 + round 2）。\n- 本节点为首次综合 + 两轮定向补证后的第三版综合，须落实 revision_context 的 synthesis_instructions。\n\n## 有效证据清单（verified_in_run=true，可作主支撑）\n- works: fw-works-001/002/003/004/005（006 inferred、007 inferred 不可作主支撑）\n- conversations: fw-conv-001~009（010 unknown 不可作主支撑）\n- community: fw-community-01~09（均 verified_in_run=true；05 status=inferred 但 verified）\n- external: felix-external-01~05（06/07 unknown 不可作主支撑）\n- decisions: fw-dec-001/002/004（003 unknown 不可作主支撑）\n- timeline: fw-tl-11/15/16/17（其余多 unknown；fw-tl-06 经 r1 升级）\n- targeted: r1-fw-tl-06-mario-baslr、r1-fw-works-003-marginfi-160m、r1-fw-community-06-weggli-stars、r2-fw-works-008-gregor-samsa、r2-fw-conv-011-vault\n\n## 作废证据（严禁使用）\n- fw-works-008（Gregor Samsa，由 r2-fw-works-008-gregor-samsa 替代）\n- fw-conv-011（Vault，URL slug 错误 404 + 引文种子转述失实，由 r2-fw-conv-011-vault 替代）\n\n## 须落实的 synthesis_instructions\n- RR-1: stages[1]（~2016–2017）删除 fw-works-005（weggli 2020-2022 时间错配），weggli 仅留 stages[2]。\n- RR-2: stages[1].capability_change 不得陈述具体会议（Infiltrate/SyScan 360/Black Hat 2016 未一手核实），改概括或标注推断。\n- RR-3: stages[2] Gregor Samsa 由 r2-fw-works-008-gregor-samsa 支撑；删除\"做铺垫\"比喻，改\"在方法论上一致\"。\n- RR-5: 删除\"埋下种子\"比喻，改\"其后被 Jann Horn 在 Spectre Variant 2 披露中致谢引用\"。\n- RR-6: mechanisms[0].repeated_practice 补 r2-fw-works-008-gregor-samsa，删 fw-works-008。\n- RR-7: \"母题\"→\"模式\"或\"主题\"（mechanisms[0].name/intermediate_capability、tensions[0]）。\n- RR-8: \"三位一体\"→\"由目标选择、挫折触发的假设重审、务实利用路径三部分构成的研究流程\"。\n- RR-9: tensions[2]\"个人英雄式叙事让位于机构协同\"→\"研究输出由个人独立完成转向机构协作\"。\n- RR-10: tensions[3]\"延迟回报/即时回报\"→\"后置引用/即时引用\"。\n- RR-11: mechanisms[0].feedback 删\"even well-audited codebases 含 subtle bugs\"（种子转述失实），改用 r2-fw-conv-011-vault 真实引文，证据由 fw-conv-011 改为 r2-fw-conv-011-vault。\n- RR-12: mechanisms[2].alternative_explanation 补幸存者偏差维度。\n- 全局: Gregor Samsa/Vault 引用统一用 r2- 证据替代作废证据。\n- round1: non_transferable_conditions 删除未核实导师姓名 (Bellosa/Karl)，改概括表述。\n\n## 阶段划分\n- Stage 0 (2013–2015): KIT 硕士 + ERNW 并行，学术成果对接 Xen 真实 CVE。\n- Stage 1 (2016–2018): mario_baslr 学术→虚拟化边界迁移，Spectre V2 后置致谢。\n- Stage 2 (2017–2022): P0 方法论成熟 + weggli 工具建设。\n- Stage 3 (2022–2026): Asymmetric Research DeFi + 机构协作。\n\n## 机制划分\n- M0: \"组件组合破坏不变量\"模式（跨 Xen/KVM/Vault/Gregor Samsa/DeFi）\n- M1: 在既有工具谱系上扩展的工具建设\n- M2: 学术论文到虚拟化边界的迁移\n- M3: 目标选择+挫折重审+务实利用三部分研究流程\n\n## 输出准备\n- 逐字段对照 schema；_run 与 verification 不填。\n- 所有叙述用专业书面语，无比喻/拟人/黑话/宣传。\n- evidence_ids 仅用有效证据，每阶段/机制至少一条 verified_in_run=true。\n"
+        },
+        "success": true,
+        "content_sha256": "345c7533d5c34475b48a07fa6c53c136d21748c277909bbecfc2eb4441abf130",
+        "accessed_at": "2026-09-26T15:33:28.303054+00:00"
+      },
+      {
+        "tool_use_id": "call_xtwlrqzyc7f2l7970i5wjdle",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/output.json",
+          "content": "{\n  \"person\": \"Felix Wilhelm\",\n  \"expertise\": [\n    \"x86 虚拟化安全（Xen PV 设备、KVM AMD 嵌套虚拟化 guest-to-host 逃逸、AMD SEV/SNP 与 Intel TDX 隔离边界）\",\n    \"共享内存接口的 TOCTOU/double-fetch 漏洞挖掘\",\n    \"云与容器隔离原语安全（dnsmasq、容器管理、HashiCorp Vault 认证）\",\n    \"内存安全语言中的逻辑漏洞与整数截断类问题（Java XSLT/BCEL 常量池）\",\n    \"硬件侧信道（BTB 碰撞绕过 ASLR/hypervisor ASLR）\",\n    \"Solana/DeFi 智能合约安全（flash loan、签名验证、p-token）\",\n    \"C/C++ 代码库语义搜索工具构建（weggli，基于 tree-sitter）\",\n    \"内存访问追踪工具构建（xenpwn，基于硬件辅助虚拟化）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"约 2013–2015\",\n      \"stage\": \"KIT 硕士论文与 ERNW 并行：把学位研究对接上游 Xen 真实 CVE\",\n      \"capability_change\": \"在卡尔斯鲁厄理工学院完成硕士论文《Tracing Privileged Memory Accesses to Discover Software Vulnerabilities》，产出 xenpwn 工具，受 j00ru/gynvael 的 Bochspwn 启发而适配到 Xen inter-domain 通信页，以选择性追踪控制开销。该工具直接导致 Xen XSA-155（CVE-2015-8550，paravirtualized 驱动 double-fetch）的发现，并于同期 XSA-123（CVE-2015-2151，x86 仿真器内存损坏）被官方致谢。advisory 同时刻注 ERNW Research 与 KIT / Operating Systems Group 双重机构归属，形成 学术研究→工具→上游漏洞→厂商致谢 的可核验闭环。这一阶段确立把学位研究做成可产出真实漏洞工具的工程化路径，而非纯学术练习。\",\n      \"evidence_ids\": [\"fw-works-001\", \"fw-community-01\", \"fw-community-02\", \"felix-external-01\", \"felix-external-02\", \"fw-dec-001\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"约 2016–2018\",\n      \"stage\": \"从 Xen 仿真层到 BTB 侧信道：学术论文到虚拟化边界的迁移\",\n      \"capability_change\": \"发布 mario_baslr（BTB 碰撞绕过 hypervisor ASLR 的 PoC），README 自述其基于学术论文《Jump Over ASLR》并指出原论文作者未意识到该技术可跨越虚拟化边界，把 BTB 碰撞从 KASLR 扩展到 hypervisor ASLR。其后被同伴 Jann Horn 在 Spectre Variant 2 披露中致谢引用（'Felix Wilhelm's research based on this provided the basic idea behind variant 2'）。同期约 2017 年由 ERNW 转入 Google，首个公开 credit 为 2017-10 dnsmasq 团队披露。这一阶段确立把学术论文中未被作者察觉的实际攻击场景扩展到安全研究的决策路径；2016 年前后公开 PV 设备 double-fetch 挖掘方法论（Infiltrate/SyScan 360/Black Hat 2016 演讲未经一手核实，列为推断）。\",\n      \"evidence_ids\": [\"r1-fw-tl-06-mario-baslr\", \"fw-community-03\", \"fw-tl-07\", \"fw-tl-08\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"约 2017–2022\",\n      \"stage\": \"Google Project Zero 时期：方法论成熟、工具建设与机构化协作\",\n      \"capability_change\": \"以 P0 身份系统覆盖云/虚拟化/认证/Java 等目标，把目标选择、挫折触发的假设重审、务实利用路径固化为一套可叙述的研究流程。2021-06 发布 KVM AMD 嵌套虚拟化 guest-to-host 逃逸（CVE-2021-29657），自述耗时约两个月、仅远程访问 AMD 系统独立完成；记录因利用策略停滞两周而改变方向、并主动承认对 host save area 字段的假设有误。2020-10 Vault 博文（CVE-2020-16250/16251）提出外部接口交互处即逻辑漏洞高发区、人工审查不可替代。2022-11 Gregor Samsa 博文（CVE-2022-34169）把内存安全语言中的整数截断归为等效内存腐败，与后续 DeFi 期审计过的代码仍有 subtle 漏洞的观察在方法论上一致。同阶段构建开源工具 weggli（C/C++ 语义搜索，2.5k stars），把工具辅助人工审计的信念编码为可复用产品。\",\n      \"evidence_ids\": [\"fw-works-002\", \"fw-works-005\", \"fw-conv-001\", \"fw-conv-002\", \"fw-conv-003\", \"fw-conv-004\", \"fw-conv-005\", \"r2-fw-conv-011-vault\", \"r2-fw-works-008-gregor-samsa\", \"fw-tl-11\", \"r1-fw-community-06-weggli-stars\", \"fw-dec-002\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"约 2022–2026\",\n      \"stage\": \"Asymmetric Research 时期：DeFi 安全与机构化持续协作\",\n      \"capability_change\": \"约 2022 年离开 Google Project Zero 转向 DeFi/区块链安全，作为 Asymmetric Research 成员连续发布 Solana/DeFi 研究：2025-09-17 marginfi flash loan 漏洞（约 160M USD 风险）、2025-09-22 Relay 签名验证绕过、2026-04-15 Solana p-token（提出 individually safe optimizations can become vulnerabilities when composed with new functionality）。研究流程从一次性披露扩展为与 Anza 团队的持续 review + fuzzing 协作；输出人称由 'I' 转向 'We'，研究输出由个人独立完成转向机构协作。方法论延续：把 P0 时期外部依赖即攻击面、审计代码仍有 subtle bugs 的观察迁移到智能合约生态。\",\n      \"evidence_ids\": [\"fw-works-003\", \"fw-works-004\", \"fw-conv-006\", \"fw-conv-007\", \"fw-conv-008\", \"fw-conv-009\", \"r1-fw-works-003-marginfi-160m\", \"fw-community-08\", \"fw-tl-15\", \"fw-tl-16\", \"fw-tl-17\", \"fw-dec-004\", \"felix-external-05\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"组件组合破坏不变量的漏洞模式\",\n      \"starting_conditions\": \"KIT 硕士论文时期以硬件辅助虚拟化追踪 Xen inter-domain 通信页的共享内存访问，原生面对 guest 与 backend 之间共享内存这一天然难于保护的接口。\",\n      \"repeated_practice\": \"跨十余年反复在同一类模式下定位漏洞：Xen PV 设备 double-fetch（XSA-155，编译器优化暴露的 TOCTOU）、KVM AMD 嵌套虚拟化 nested_vmcb_checks 的 TOCTOU 竞态（CVE-2021-29657）、HashiCorp Vault 在与 AWS STS/GCP JWT 外部系统交互处的认证绕过（CVE-2020-16250/16251）、Java XSLTC 常量池整数截断绕过 XML 签名验证（CVE-2022-34169）、Solana p-token 延迟所有权检查与运行时回滚的组合（individually safe optimizations can become vulnerabilities when composed with new functionality）。每一案例均把具体 bug 上升为对组件组合破坏不变量的归纳。\",\n      \"feedback\": \"Vault 博文一手引文：'Even with memory-safe languages, strong cryptography primitives, static analysis and large fuzzing infrastructure, some issues can only be discovered by manual code review and an attacker mindset' 与 'tricky vulnerabilities like this often exist where developers have to interact with external systems and services'。marginfi 博文一手引文：'a small and seemingly harmless change in a well-audited, carefully designed codebase can introduce a critical vulnerability'。p-token 博文一手引文：'individually safe optimizations can become vulnerabilities when combined with new functionality'。Gregor Samsa 博文一手引文：'an example of an integer truncation issue in a memory-safe language, with an exploit that feels very much like a memory corruption'。多厂商 advisory（XSA-123/XSA-155、Red Hat CVE-2018-1111 Critical、HashiCorp Vault 修复、Linux 内核 ChangeLog 5.11.12 修复 CVE-2021-29657）与 Anza 团队的持续合作构成外部验证。\",\n      \"intermediate_capability\": \"把组件组合破坏不变量这一模式作为跨领域（虚拟化、认证、Java 运行时、智能合约）可迁移的漏洞分类框架，而非孤立的个案发现。\",\n      \"observed_outcomes\": [\n        \"XSA-155 与 XSA-123 双重官方致谢 Felix Wilhelm（ERNW Research, KIT / Operating Systems Group 与 ERNW GmbH）\",\n        \"KVM AMD 嵌套虚拟化 guest-to-host 逃逸 CVE-2021-29657，自述独立两月完成\",\n        \"HashiCorp Vault 认证绕过 CVE-2020-16250/16251\",\n        \"Java XSLTC 常量池整数截断绕过 XML 签名验证 CVE-2022-34169\",\n        \"Solana p-token write-then-restore 逃逸路径，Anza 已修复\",\n        \"marginfi flash loan 漏洞（约 160M USD 风险，经 marginfi bug bounty 私下披露、快速修复、无资金损失）\"\n      ],\n      \"evidence_ids\": [\"fw-works-001\", \"fw-works-002\", \"fw-works-003\", \"fw-works-004\", \"fw-conv-007\", \"r2-fw-conv-011-vault\", \"r2-fw-works-008-gregor-samsa\", \"r1-fw-works-003-marginfi-160m\", \"fw-community-01\", \"fw-community-02\", \"felix-external-03\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"公开 writeup 仅记录成功产出的研究方向与漏洞发现，未产出公开成果的研究方向（如 ERNW 时期其他未导致 CVE 的审计目标、P0 时期未公开的失败研究）未被纳入机制重建，可能高估组件组合破坏不变量作为研究者主动选择模式的解释力。另一竞争性解释是：共享内存与外部接口天然是漏洞高发区，反复命中该模式部分来自攻击面本身的分布，而非研究者主动选择。\"\n    },\n    {\n      \"name\": \"在既有工具谱系上扩展的工具建设\",\n      \"starting_conditions\": \"KIT 硕士论文阶段明确受 j00ru/gynvael 的 Bochspwn 启发，选择把已有内存访问追踪方法适配到 Xen PV 设备这一具体问题，而非发明全新方法。\",\n      \"repeated_practice\": \"跨阶段反复在既有工具/学术成果基础上扩展而非宣称独创：Bochspwn→xenpwn（选择性追踪 inter-domain 通信页以控制开销）；学术论文《Jump Over ASLR》→mario_baslr（扩展到 hypervisor ASLR）；AMD IBS Toolkit→KVM AMD 逃逸的信息泄露原语；Semgrep/Coccinelle/joern/CodeQL→weggli（声明 inspired by great tools but makes some different design decisions）。weggli 设计四原则（C++ support、Minimal setup、Interactive、Greedy）反映工具辅助而非替代人工审计的稳定信念。\",\n      \"feedback\": \"weggli 在 GitHub 获得 2.5k stars、145 forks 的社区采用，构成工具建设型社区贡献的反馈回路。KVM 逃逸博文中显式归功开源 AMD IBS Toolkit 提供了 working code, a readable high level description of IBS and a lot of useful references。xenpwn README 与 weggli README 均明确声明其前置工具来源。ERNW 早期（2014 31C3）对 Fabian Yamaguchi 图数据库挖掘的评价反映其长期一致的自动化辅助人工审计价值观（该会议回顾为本地种子转述，未一手核实，列为推断）。\",\n      \"intermediate_capability\": \"把工具辅助人工审计的信念转化为可复用的开源产品与可迁移的方法论，而非一次性研究副产品。\",\n      \"observed_outcomes\": [\n        \"xenpwn 直接导致 XSA-155 发现，并被 XSA-155 advisory 标注为学术机构产出\",\n        \"mario_baslr 被 Jann Horn 在 Spectre Variant 2 披露中致谢为提供基础概念\",\n        \"weggli 在 GitHub 获 2.5k stars、145 forks，开源供社区使用\",\n        \"mario_baslr README 一手指明其基于《Jump Over ASLR》并扩展到虚拟化边界\"\n      ],\n      \"evidence_ids\": [\"fw-works-001\", \"fw-works-005\", \"r1-fw-tl-06-mario-baslr\", \"r1-fw-community-06-weggli-stars\", \"fw-community-05\", \"fw-community-03\", \"fw-dec-001\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"在既有工具上扩展是安全研究领域的常见做法，并非该研究者特有；但其反复把扩展结果开源并以工具 README 明示前置工具来源的行为相对有区分度。公开 writeup 仅记录成功产出的工具建设方向，未公开化的工具尝试未被纳入，可能高估该模式的普适性。\"\n    },\n    {\n      \"name\": \"学术论文到虚拟化边界的迁移\",\n      \"starting_conditions\": \"mario_baslr 阶段已确立读学术论文→发现作者忽略的实际攻击场景→扩展到安全研究的决策路径：其 README 自述基于《Jump Over ASLR》并指出原论文作者未意识到该技术可跨越虚拟化边界。\",\n      \"repeated_practice\": \"把学术论文中针对通用场景的攻击技术迁移到虚拟化/hypervisor 边界：BTB 碰撞从 KASLR 扩展到 hypervisor ASLR（mario_baslr）；把 Bochspwn 式内存访问追踪迁移到 Xen inter-domain 通信页（xenpwn）；把可证明安全 TEE 的实证不安全作为研究对象（Black Hat 2022 Mind The Gap，议程未一手核实，列为推断）。\",\n      \"feedback\": \"其 BTB 研究经同伴 Jann Horn 在 Spectre Variant 2 披露中致谢引用（'Felix Wilhelm's research based on this provided the basic idea behind variant 2'），构成跨研究者引用的后置正向反馈。mario_baslr 仓库 README 一手内容直接支撑该迁移路径的技术描述。\",\n      \"intermediate_capability\": \"把学术攻击技术的虚拟化边界适用性作为选题来源，形成可重复的研究方向迁移路径。\",\n      \"observed_outcomes\": [\n        \"mario_baslr 作为 BTB 碰撞绕过 hypervisor ASLR 的 PoC 公开\",\n        \"其 BTB 研究被 Jann Horn 在 Spectre Variant 2 披露中致谢为基础概念\",\n        \"xenpwn 把 Bochspwn 路线迁移到 Xen PV 设备并产出 XSA-155\"\n      ],\n      \"evidence_ids\": [\"r1-fw-tl-06-mario-baslr\", \"fw-community-03\", \"fw-works-001\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"公开 writeup 仅记录成功产出的学术迁移方向，未产出公开成果的迁移尝试（如 mario_baslr 之外未导致引用的学术迁移尝试）未被纳入，可能高估学术论文→虚拟化边界→PoC 迁移路径的普适性。Spectre V2 致谢本身也可能源于同队研究者的独立整合，迁移路径的因果归因应保持克制。\"\n    },\n    {\n      \"name\": \"由目标选择、挫折触发的假设重审、务实利用路径三部分构成的研究流程\",\n      \"starting_conditions\": \"P0 时期面对 KVM AMD 嵌套虚拟化这一被较少研究者关注的代码区域，同时 AMD 服务器市场份额上升使其成为更高价值目标。\",\n      \"repeated_practice\": \"在 KVM AMD 逃逸研究中显式编码三部分研究流程：(1) 目标选择基于攻击面经济学——审查不足的代码与市场份额上升的目标（'a large potential for complex logic flaws, making it a perfect target for manual code review'）；(2) 挫折作为重审底层假设的信号——利用策略停滞两周后意识到自己对 host save area 字段的假设有误（'I realized that I made an important mistake'）；(3) 务实接受 boring but easy-to-implement 利用路径而非追求优雅方案，并以 slow trial and error 作为正常研究过程。Vault 博文同样记录挫折触发的转向（'At this point I was slowly getting frustrated and decided to take a look at Vault's response parsing code'）。影响评估上主动记录初始过度自信的事后修正。\",\n      \"feedback\": \"KVM 逃逸博文以 'Make zeroday hard.' 签名式结尾，构成跨博文的稳定品牌输出；自述把完整 writeup 作为向社区论证 hypervisor 攻击现实性的载体。marginfi 博文以机构口吻公开致谢被审计方，反馈回路从厂商 advisory 闭环扩展到 DeFi bug bounty 协同披露闭环。Red Hat CVE-2018-1111 以 Critical 级别致谢 Google Security Team，外部验证其报告质量与机构归属。\",\n      \"intermediate_capability\": \"把研究过程（目标选择、挫折转向、务实利用、影响校准）作为可叙述的方法论，而非只呈现最终漏洞，形成过程透明度。\",\n      \"observed_outcomes\": [\n        \"KVM AMD 嵌套虚拟化 guest-to-host 逃逸 CVE-2021-29657，自述独立两月、仅远程访问完成\",\n        \"Red Hat CVE-2018-1111（DynoRoot）以 Critical 级别致谢 Felix Wilhelm (Google Security Team)\",\n        \"marginfi flash loan 漏洞经 bug bounty 私下披露、快速修复、无资金损失\",\n        \"Asymmetric Research 与 Anza 团队持续 review + fuzzing 协作下于主网上线前捕获 p-token 漏洞\"\n      ],\n      \"evidence_ids\": [\"fw-works-002\", \"fw-conv-001\", \"fw-conv-002\", \"fw-conv-003\", \"fw-conv-004\", \"fw-conv-005\", \"fw-conv-006\", \"r2-fw-conv-011-vault\", \"fw-community-04\", \"fw-community-08\", \"fw-community-09\", \"felix-external-03\", \"fw-dec-002\", \"fw-tl-11\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"挫折触发的转向与务实利用路径在 KVM 一案中记录最完整，可能因该 writeup 本身篇幅与披露风格而显得突出；其他研究是否同样遵循该三部分流程缺乏可比的过程自述。公开 writeup 仅记录成功产出，未产出公开成果的方向未被纳入，可能高估该流程作为研究者主动选择的解释力。\"\n    }\n  ],\n  \"tensions\": [\n    \"学术机构与工业咨询的并行：XSA-155 advisory 同时标注 ERNW Research 与 KIT / Operating Systems Group，显示其早期同时利用学术与企业两条反馈渠道放大研究影响，但这一条件依赖特定学术导师组与企业研究环境的并行支持（导师姓名未一手核实，不得作为事实陈述）。\",\n    \"工具建设的维护断档：weggli 早期（2021–2022）由作者积极维护、回复 issue 并自我批评（如承认应补 Python API 测试），但 2023-09 issue #85 'Is the project still alive?' 无维护者回复，反映转入 Asymmetric Research 后社区维护参与度出现断档；工具社区的存续依赖持续维护投入，与作者精力分配强相关。\",\n    \"研究输出由个人独立完成转向机构协作：KVM 逃逸时期自述 working as an individual、仅远程访问 AMD 系统独立两月完成；Asymmetric Research 时期人称由 'I' 转向 'We'，研究流程扩展为与 Anza 团队的持续 review + fuzzing 协作。这一转变带来机构化协作的稳定性，同时也使个人独立深度研究的可见度下降。\",\n    \"后置引用与即时引用的不对称：mario_baslr（2016）在 2018 年才被 Jann Horn 在 Spectre Variant 2 披露中致谢引用，构成后置引用；而 KVM 逃逸、marginfi 等研究则在被审计方修复后即获 advisory/bounty 致谢，构成即时引用。后置引用的不可预期性使早期研究方向的价值评估在发布时难以判断。\",\n    \"厂商分歧与专业合作的并存：IBM GPFS 一案记录 IBM disagrees with our assessment 的厂商分歧（本地种子转述，未一手核实），而 Palo Alto Networks、marginfi 等案例显示其对厂商响应的评价以专业合作为主；该分歧记录未一手核实，列为资料缺口。\"\n  ],\n  \"transferable_practices\": [\n    \"把学位研究或学术成果对接上游真实漏洞：以可产出真实 CVE 的工具承载研究，而非纯学术练习（xenpwn→XSA-155）。\",\n    \"在既有工具谱系上扩展并开源：明确声明前置工具来源（Bochspwn、Semgrep/Coccinelle/joern/CodeQL、《Jump Over ASLR》、AMD IBS Toolkit），把扩展结果回馈社区。\",\n    \"目标选择编码攻击面经济学：优先审查不足的代码与市场份额上升的目标，而非凭空选题。\",\n    \"挫折作为重审底层假设的信号：在利用策略停滞时主动重审对目标字段/结构的假设，而非继续在原路径上推进。\",\n    \"务实接受 boring but easy-to-implement 利用路径：在优雅方案受阻时选择可实现的路径，并以 slow trial and error 作为正常研究过程。\",\n    \"把具体 bug 上升为可复用的漏洞分类框架：归纳组件组合破坏不变量、外部接口即攻击面等跨领域适用的模式。\",\n    \"过程透明度：主动披露研究耗时、资源约束、误判与影响评估的过度自信修正，把研究置于真实劳动投入语境中。\",\n    \"负责任披露闭环：通过厂商 advisory、bug bounty、私下披露等渠道形成闭环，并公开致谢被审计方。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"学术导师组与企业研究环境的并行支持：KIT 操作系统组与 ERNW 的并行结构使硕士论文可直接对接上游 Xen 漏洞披露，这一条件依赖特定学术导师组与企业研究环境的并行支持（导师姓名未一手核实，不得作为事实陈述，列为资料缺口）。\",\n    \"Google Project Zero 平台的机构归属与披露渠道：P0 时期的署名、Google Security Team 机构身份、以及与同队顶级研究者（如 Jann Horn）的同伴网络，是 mario_baslr 被 Spectre V2 致谢引用与 KVM 逃逸高规格发布的结构性条件，不可由个人复制。\",\n    \"Asymmetric Research 时期与 Anza 团队的机构化持续协作：p-token 案例的 review + fuzzing 持续协作依赖 Asymmetric Research 与 Solana 生态团队的长期整合合作关系，非个人研究者可复制。\",\n    \"DeFi 时期锁定数十亿美元资产的高价值攻击面：marginfi 约 160M USD 风险等目标的价值基础来自 DeFi 生态本身的资金规模，而非研究者主动选择所能创造。\"\n  ],\n  \"open_questions\": [\n    \"约 2017 年由 ERNW 转入 Google、约 2022 年离开 P0 的确切日期无本人一手声明，仅由最后 ERNW 博客约 2016-04、首个 Google credit 2017-10、最后 P0 博客 2022-11、Asymmetric 首篇 2025-09 等时间夹断推断。\",\n    \"约 2022 年是否经过 Jump Crypto 过渡期、Asymmetric Research 联合创始人/CTO 头衔、是否保护 $5B+ 数字资产：仅本地种子转述，Asymmetric /about 页面 404 未一手核实，列为资料缺口。\",\n    \"ERNW 时期各 CVE/XSA（XSA-105/110/123/155、IBM GPFS、PAN-OS、Hyper-V MS13-092、FireEye MPS）正文未逐一抓取厂商公告核验，方法论表述与漏洞归因未独立确认。\",\n    \"Infiltrate/SyScan 360/Black Hat 2016 'Xenpwn' 演讲、Black Hat 2018/2022、Breakpoint 2025 等会议议程未一手核实（Black Hat us-16 议程页 403、WebSearch 无真实结果），相关会议断言不得作事实陈述。\",\n    \"dnsmasq（2017-10）Google Security Blog 'Behind the Masq' 页面 404，6 人团队作者名单（Fermin Serna、Gabriel Campana、Kevin Hamacher、Ron Bowes、Gynvael Coldwind、Felix Wilhelm）未一手核实。\",\n    \"IBM GPFS 'IBM disagrees with our assessment' 厂商分歧、Palo Alto Networks PAN-OS 致谢、Hacker News 'highly capable individual' 评价均未一手核实。\",\n    \"CVE-2019-5736（runC 容器逃逸）与 XSA-110 的归因冲突：官方发现者分别为 Adam Iwaniuk/Borys Poplawski 与 Jan Beulich，部分二手资料误归于 Felix Wilhelm，不应据二手归因列入个人能力。\",\n    \"AMD SEV/SNP 与 Intel TDX 安全评估的具体参与程度本地种子标注为可能，无一手证据。\",\n    \"Asymmetric Research 从一次性披露到主网上线前防御性审计的角色转变，其机构化协作的具体流程（review + fuzzing 的分工、与 Anza 团队的协作边界）无公开深度自述。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "a2ae6821ef073a61c2a594f13842bde5d42ea45d9cfd6b67f85b0cadb9dd273c",
+        "accessed_at": "2026-09-26T15:33:28.303059+00:00"
+      },
+      {
+        "tool_use_id": "call_hr4w3sfmhsqaotn37a3jyjc7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/output.json",
+          "offset": 25,
+          "limit": 12
+        },
+        "success": true,
+        "content_sha256": "68cadd2a7be40e3d40ba74666dd94c86074be7efe149fcb0e23c33af4073a6e8",
+        "accessed_at": "2026-09-26T15:33:28.303152+00:00"
+      },
+      {
+        "tool_use_id": "call_8uw901kaelzrs10ybjkq07zi",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-synthesis-v3-20260926-232338-281/output.json",
+          "content": "{\n  \"person\": \"Felix Wilhelm\",\n  \"expertise\": [\n    \"x86 虚拟化安全（Xen PV 设备、KVM AMD 嵌套虚拟化 guest-to-host 逃逸、AMD SEV/SNP 与 Intel TDX 隔离边界）\",\n    \"共享内存接口的 TOCTOU/double-fetch 漏洞挖掘\",\n    \"云与容器隔离原语安全（dnsmasq、容器管理、HashiCorp Vault 认证）\",\n    \"内存安全语言中的逻辑漏洞与整数截断类问题（Java XSLT/BCEL 常量池）\",\n    \"硬件侧信道（BTB 碰撞绕过 ASLR/hypervisor ASLR）\",\n    \"Solana/DeFi 智能合约安全（flash loan、签名验证、p-token）\",\n    \"C/C++ 代码库语义搜索工具构建（weggli，基于 tree-sitter）\",\n    \"内存访问追踪工具构建（xenpwn，基于硬件辅助虚拟化）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"约 2013–2015\",\n      \"stage\": \"KIT 硕士论文与 ERNW 并行：把学位研究对接上游 Xen 真实 CVE\",\n      \"capability_change\": \"在卡尔斯鲁厄理工学院完成硕士论文《Tracing Privileged Memory Accesses to Discover Software Vulnerabilities》，产出 xenpwn 工具，受 j00ru/gynvael 的 Bochspwn 启发而适配到 Xen inter-domain 通信页，以选择性追踪控制开销。该工具直接导致 Xen XSA-155（CVE-2015-8550，paravirtualized 驱动 double-fetch）的发现，并于同期 XSA-123（CVE-2015-2151，x86 仿真器内存损坏）被官方致谢。advisory 同时刻注 ERNW Research 与 KIT / Operating Systems Group 双重机构归属，形成 学术研究→工具→上游漏洞→厂商致谢 的可核验闭环。这一阶段确立把学位研究做成可产出真实漏洞工具的工程化路径，而非纯学术练习。\",\n      \"evidence_ids\": [\"fw-works-001\", \"fw-community-01\", \"fw-community-02\", \"felix-external-01\", \"felix-external-02\", \"fw-dec-001\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"约 2016–2018\",\n      \"stage\": \"从 Xen 仿真层到 BTB 侧信道：学术论文到虚拟化边界的迁移\",\n      \"capability_change\": \"发布 mario_baslr（BTB 碰撞绕过 hypervisor ASLR 的 PoC），README 自述其基于学术论文《Jump Over ASLR》并指出原论文作者未意识到该技术可跨越虚拟化边界，把 BTB 碰撞从 KASLR 扩展到 hypervisor ASLR。其后被同伴 Jann Horn 在 Spectre Variant 2 披露中致谢引用（'Felix Wilhelm's research based on this provided the basic idea behind variant 2'）。约 2018 年 Red Hat CVE-2018-1111（DynoRoot）公告以 Critical 级别致谢 'Felix Wilhelm (Google Security Team)'，外部记录其机构归属已由 ERNW 切换为 Google，确切的 ERNW→Google 过渡时间无本人一手声明（dnsmasq 2017-10 团队名单未一手核实，列为推断）。这一阶段确立把学术论文中未被作者察觉的实际攻击场景扩展到安全研究的决策路径；2016 年前后公开 PV 设备 double-fetch 挖掘方法论（Infiltrate/SyScan 360/Black Hat 2016 演讲未经一手核实，列为推断）。\",\n      \"evidence_ids\": [\"r1-fw-tl-06-mario-baslr\", \"fw-community-03\", \"felix-external-03\", \"fw-community-09\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"约 2017–2022\",\n      \"stage\": \"Google Project Zero 时期：方法论成熟、工具建设与机构化协作\",\n      \"capability_change\": \"以 P0 身份系统覆盖云/虚拟化/认证/Java 等目标，把目标选择、挫折触发的假设重审、务实利用路径固化为一套可叙述的研究流程。2021-06 发布 KVM AMD 嵌套虚拟化 guest-to-host 逃逸（CVE-2021-29657），自述耗时约两个月、仅远程访问 AMD 系统独立完成；记录因利用策略停滞两周而改变方向、并主动承认对 host save area 字段的假设有误。2020-10 Vault 博文（CVE-2020-16250/16251）提出外部接口交互处即逻辑漏洞高发区、人工审查不可替代。2022-11 Gregor Samsa 博文（CVE-2022-34169）把内存安全语言中的整数截断归为等效内存腐败，与后续 DeFi 期审计过的代码仍有 subtle 漏洞的观察在方法论上一致。同阶段构建开源工具 weggli（C/C++ 语义搜索，2.5k stars），把工具辅助人工审计的信念编码为可复用产品。\",\n      \"evidence_ids\": [\"fw-works-002\", \"fw-works-005\", \"fw-conv-001\", \"fw-conv-002\", \"fw-conv-003\", \"fw-conv-004\", \"fw-conv-005\", \"r2-fw-conv-011-vault\", \"r2-fw-works-008-gregor-samsa\", \"fw-tl-11\", \"r1-fw-community-06-weggli-stars\", \"fw-dec-002\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"约 2022–2026\",\n      \"stage\": \"Asymmetric Research 时期：DeFi 安全与机构化持续协作\",\n      \"capability_change\": \"约 2022 年离开 Google Project Zero 转向 DeFi/区块链安全，作为 Asymmetric Research 成员连续发布 Solana/DeFi 研究：2025-09-17 marginfi flash loan 漏洞（约 160M USD 风险）、2025-09-22 Relay 签名验证绕过、2026-04-15 Solana p-token（提出 individually safe optimizations can become vulnerabilities when composed with new functionality）。研究流程从一次性披露扩展为与 Anza 团队的持续 review + fuzzing 协作；输出人称由 'I' 转向 'We'，研究输出由个人独立完成转向机构协作。方法论延续：把 P0 时期外部依赖即攻击面、审计代码仍有 subtle bugs 的观察迁移到智能合约生态。\",\n      \"evidence_ids\": [\"fw-works-003\", \"fw-works-004\", \"fw-conv-006\", \"fw-conv-007\", \"fw-conv-008\", \"fw-conv-009\", \"r1-fw-works-003-marginfi-160m\", \"fw-community-08\", \"fw-tl-15\", \"fw-tl-16\", \"fw-tl-17\", \"fw-dec-004\", \"felix-external-05\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"组件组合破坏不变量的漏洞模式\",\n      \"starting_conditions\": \"KIT 硕士论文时期以硬件辅助虚拟化追踪 Xen inter-domain 通信页的共享内存访问，原生面对 guest 与 backend 之间共享内存这一天然难于保护的接口。\",\n      \"repeated_practice\": \"跨十余年反复在同一类模式下定位漏洞：Xen PV 设备 double-fetch（XSA-155，编译器优化暴露的 TOCTOU）、KVM AMD 嵌套虚拟化 nested_vmcb_checks 的 TOCTOU 竞态（CVE-2021-29657）、HashiCorp Vault 在与 AWS STS/GCP JWT 外部系统交互处的认证绕过（CVE-2020-16250/16251）、Java XSLTC 常量池整数截断绕过 XML 签名验证（CVE-2022-34169）、Solana p-token 延迟所有权检查与运行时回滚的组合（individually safe optimizations can become vulnerabilities when composed with new functionality）。每一案例均把具体 bug 上升为对组件组合破坏不变量的归纳。\",\n      \"feedback\": \"Vault 博文一手引文：'Even with memory-safe languages, strong cryptography primitives, static analysis and large fuzzing infrastructure, some issues can only be discovered by manual code review and an attacker mindset' 与 'tricky vulnerabilities like this often exist where developers have to interact with external systems and services'。marginfi 博文一手引文：'a small and seemingly harmless change in a well-audited, carefully designed codebase can introduce a critical vulnerability'。p-token 博文一手引文：'individually safe optimizations can become vulnerabilities when combined with new functionality'。Gregor Samsa 博文一手引文：'an example of an integer truncation issue in a memory-safe language, with an exploit that feels very much like a memory corruption'。多厂商 advisory（XSA-123/XSA-155、Red Hat CVE-2018-1111 Critical、HashiCorp Vault 修复、Linux 内核 ChangeLog 5.11.12 修复 CVE-2021-29657）与 Anza 团队的持续合作构成外部验证。\",\n      \"intermediate_capability\": \"把组件组合破坏不变量这一模式作为跨领域（虚拟化、认证、Java 运行时、智能合约）可迁移的漏洞分类框架，而非孤立的个案发现。\",\n      \"observed_outcomes\": [\n        \"XSA-155 与 XSA-123 双重官方致谢 Felix Wilhelm（ERNW Research, KIT / Operating Systems Group 与 ERNW GmbH）\",\n        \"KVM AMD 嵌套虚拟化 guest-to-host 逃逸 CVE-2021-29657，自述独立两月完成\",\n        \"HashiCorp Vault 认证绕过 CVE-2020-16250/16251\",\n        \"Java XSLTC 常量池整数截断绕过 XML 签名验证 CVE-2022-34169\",\n        \"Solana p-token write-then-restore 逃逸路径，Anza 已修复\",\n        \"marginfi flash loan 漏洞（约 160M USD 风险，经 marginfi bug bounty 私下披露、快速修复、无资金损失）\"\n      ],\n      \"evidence_ids\": [\"fw-works-001\", \"fw-works-002\", \"fw-works-003\", \"fw-works-004\", \"fw-conv-007\", \"r2-fw-conv-011-vault\", \"r2-fw-works-008-gregor-samsa\", \"r1-fw-works-003-marginfi-160m\", \"fw-community-01\", \"fw-community-02\", \"felix-external-03\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"公开 writeup 仅记录成功产出的研究方向与漏洞发现，未产出公开成果的研究方向（如 ERNW 时期其他未导致 CVE 的审计目标、P0 时期未公开的失败研究）未被纳入机制重建，可能高估组件组合破坏不变量作为研究者主动选择模式的解释力。另一竞争性解释是：共享内存与外部接口天然是漏洞高发区，反复命中该模式部分来自攻击面本身的分布，而非研究者主动选择。\"\n    },\n    {\n      \"name\": \"在既有工具谱系上扩展的工具建设\",\n      \"starting_conditions\": \"KIT 硕士论文阶段明确受 j00ru/gynvael 的 Bochspwn 启发，选择把已有内存访问追踪方法适配到 Xen PV 设备这一具体问题，而非发明全新方法。\",\n      \"repeated_practice\": \"跨阶段反复在既有工具/学术成果基础上扩展而非宣称独创：Bochspwn→xenpwn（选择性追踪 inter-domain 通信页以控制开销）；学术论文《Jump Over ASLR》→mario_baslr（扩展到 hypervisor ASLR）；AMD IBS Toolkit→KVM AMD 逃逸的信息泄露原语；Semgrep/Coccinelle/joern/CodeQL→weggli（声明 inspired by great tools but makes some different design decisions）。weggli 设计四原则（C++ support、Minimal setup、Interactive、Greedy）反映工具辅助而非替代人工审计的稳定信念。\",\n      \"feedback\": \"weggli 在 GitHub 获得 2.5k stars、145 forks 的社区采用，构成工具建设型社区贡献的反馈回路。KVM 逃逸博文中显式归功开源 AMD IBS Toolkit 提供了 working code, a readable high level description of IBS and a lot of useful references。xenpwn README 与 weggli README 均明确声明其前置工具来源。ERNW 早期（2014 31C3）对 Fabian Yamaguchi 图数据库挖掘的评价反映其长期一致的自动化辅助人工审计价值观（该会议回顾为本地种子转述，未一手核实，列为推断）。\",\n      \"intermediate_capability\": \"把工具辅助人工审计的信念转化为可复用的开源产品与可迁移的方法论，而非一次性研究副产品。\",\n      \"observed_outcomes\": [\n        \"xenpwn 直接导致 XSA-155 发现，并被 XSA-155 advisory 标注为学术机构产出\",\n        \"mario_baslr 被 Jann Horn 在 Spectre Variant 2 披露中致谢为提供基础概念\",\n        \"weggli 在 GitHub 获 2.5k stars、145 forks，开源供社区使用\",\n        \"mario_baslr README 一手指明其基于《Jump Over ASLR》并扩展到虚拟化边界\"\n      ],\n      \"evidence_ids\": [\"fw-works-001\", \"fw-works-005\", \"r1-fw-tl-06-mario-baslr\", \"r1-fw-community-06-weggli-stars\", \"fw-community-05\", \"fw-community-03\", \"fw-dec-001\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"在既有工具上扩展是安全研究领域的常见做法，并非该研究者特有；但其反复把扩展结果开源并以工具 README 明示前置工具来源的行为相对有区分度。公开 writeup 仅记录成功产出的工具建设方向，未公开化的工具尝试未被纳入，可能高估该模式的普适性。\"\n    },\n    {\n      \"name\": \"学术论文到虚拟化边界的迁移\",\n      \"starting_conditions\": \"mario_baslr 阶段已确立读学术论文→发现作者忽略的实际攻击场景→扩展到安全研究的决策路径：其 README 自述基于《Jump Over ASLR》并指出原论文作者未意识到该技术可跨越虚拟化边界。\",\n      \"repeated_practice\": \"把学术论文中针对通用场景的攻击技术迁移到虚拟化/hypervisor 边界：BTB 碰撞从 KASLR 扩展到 hypervisor ASLR（mario_baslr）；把 Bochspwn 式内存访问追踪迁移到 Xen inter-domain 通信页（xenpwn）；把可证明安全 TEE 的实证不安全作为研究对象（Black Hat 2022 Mind The Gap，议程未一手核实，列为推断）。\",\n      \"feedback\": \"其 BTB 研究经同伴 Jann Horn 在 Spectre Variant 2 披露中致谢引用（'Felix Wilhelm's research based on this provided the basic idea behind variant 2'），构成跨研究者引用的后置正向反馈。mario_baslr 仓库 README 一手内容直接支撑该迁移路径的技术描述。\",\n      \"intermediate_capability\": \"把学术攻击技术的虚拟化边界适用性作为选题来源，形成可重复的研究方向迁移路径。\",\n      \"observed_outcomes\": [\n        \"mario_baslr 作为 BTB 碰撞绕过 hypervisor ASLR 的 PoC 公开\",\n        \"其 BTB 研究被 Jann Horn 在 Spectre Variant 2 披露中致谢为基础概念\",\n        \"xenpwn 把 Bochspwn 路线迁移到 Xen PV 设备并产出 XSA-155\"\n      ],\n      \"evidence_ids\": [\"r1-fw-tl-06-mario-baslr\", \"fw-community-03\", \"fw-works-001\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"公开 writeup 仅记录成功产出的学术迁移方向，未产出公开成果的迁移尝试（如 mario_baslr 之外未导致引用的学术迁移尝试）未被纳入，可能高估学术论文→虚拟化边界→PoC 迁移路径的普适性。Spectre V2 致谢本身也可能源于同队研究者的独立整合，迁移路径的因果归因应保持克制。\"\n    },\n    {\n      \"name\": \"由目标选择、挫折触发的假设重审、务实利用路径三部分构成的研究流程\",\n      \"starting_conditions\": \"P0 时期面对 KVM AMD 嵌套虚拟化这一被较少研究者关注的代码区域，同时 AMD 服务器市场份额上升使其成为更高价值目标。\",\n      \"repeated_practice\": \"在 KVM AMD 逃逸研究中显式编码三部分研究流程：(1) 目标选择基于攻击面经济学——审查不足的代码与市场份额上升的目标（'a large potential for complex logic flaws, making it a perfect target for manual code review'）；(2) 挫折作为重审底层假设的信号——利用策略停滞两周后意识到自己对 host save area 字段的假设有误（'I realized that I made an important mistake'）；(3) 务实接受 boring but easy-to-implement 利用路径而非追求优雅方案，并以 slow trial and error 作为正常研究过程。Vault 博文同样记录挫折触发的转向（'At this point I was slowly getting frustrated and decided to take a look at Vault's response parsing code'）。影响评估上主动记录初始过度自信的事后修正。\",\n      \"feedback\": \"KVM 逃逸博文以 'Make zeroday hard.' 签名式结尾，构成跨博文的稳定品牌输出；自述把完整 writeup 作为向社区论证 hypervisor 攻击现实性的载体。marginfi 博文以机构口吻公开致谢被审计方，反馈回路从厂商 advisory 闭环扩展到 DeFi bug bounty 协同披露闭环。Red Hat CVE-2018-1111 以 Critical 级别致谢 Google Security Team，外部验证其报告质量与机构归属。\",\n      \"intermediate_capability\": \"把研究过程（目标选择、挫折转向、务实利用、影响校准）作为可叙述的方法论，而非只呈现最终漏洞，形成过程透明度。\",\n      \"observed_outcomes\": [\n        \"KVM AMD 嵌套虚拟化 guest-to-host 逃逸 CVE-2021-29657，自述独立两月、仅远程访问完成\",\n        \"Red Hat CVE-2018-1111（DynoRoot）以 Critical 级别致谢 Felix Wilhelm (Google Security Team)\",\n        \"marginfi flash loan 漏洞经 bug bounty 私下披露、快速修复、无资金损失\",\n        \"Asymmetric Research 与 Anza 团队持续 review + fuzzing 协作下于主网上线前捕获 p-token 漏洞\"\n      ],\n      \"evidence_ids\": [\"fw-works-002\", \"fw-conv-001\", \"fw-conv-002\", \"fw-conv-003\", \"fw-conv-004\", \"fw-conv-005\", \"fw-conv-006\", \"r2-fw-conv-011-vault\", \"fw-community-04\", \"fw-community-08\", \"fw-community-09\", \"felix-external-03\", \"fw-dec-002\", \"fw-tl-11\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"挫折触发的转向与务实利用路径在 KVM 一案中记录最完整，可能因该 writeup 本身篇幅与披露风格而显得突出；其他研究是否同样遵循该三部分流程缺乏可比的过程自述。公开 writeup 仅记录成功产出，未产出公开成果的方向未被纳入，可能高估该流程作为研究者主动选择的解释力。\"\n    }\n  ],\n  \"tensions\": [\n    \"学术机构与工业咨询的并行：XSA-155 advisory 同时标注 ERNW Research 与 KIT / Operating Systems Group，显示其早期同时利用学术与企业两条反馈渠道放大研究影响，但这一条件依赖特定学术导师组与企业研究环境的并行支持（导师姓名未一手核实，不得作为事实陈述）。\",\n    \"工具建设的维护断档：weggli 早期（2021–2022）由作者积极维护、回复 issue 并自我批评（如承认应补 Python API 测试），但 2023-09 issue #85 'Is the project still alive?' 无维护者回复，反映转入 Asymmetric Research 后社区维护参与度出现断档；工具社区的存续依赖持续维护投入，与作者精力分配强相关。\",\n    \"研究输出由个人独立完成转向机构协作：KVM 逃逸时期自述 working as an individual、仅远程访问 AMD 系统独立两月完成；Asymmetric Research 时期人称由 'I' 转向 'We'，研究流程扩展为与 Anza 团队的持续 review + fuzzing 协作。这一转变带来机构化协作的稳定性，同时也使个人独立深度研究的可见度下降。\",\n    \"后置引用与即时引用的不对称：mario_baslr（2016）在 2018 年才被 Jann Horn 在 Spectre Variant 2 披露中致谢引用，构成后置引用；而 KVM 逃逸、marginfi 等研究则在被审计方修复后即获 advisory/bounty 致谢，构成即时引用。后置引用的不可预期性使早期研究方向的价值评估在发布时难以判断。\",\n    \"厂商分歧与专业合作的并存：IBM GPFS 一案记录 IBM disagrees with our assessment 的厂商分歧（本地种子转述，未一手核实），而 Palo Alto Networks、marginfi 等案例显示其对厂商响应的评价以专业合作为主；该分歧记录未一手核实，列为资料缺口。\"\n  ],\n  \"transferable_practices\": [\n    \"把学位研究或学术成果对接上游真实漏洞：以可产出真实 CVE 的工具承载研究，而非纯学术练习（xenpwn→XSA-155）。\",\n    \"在既有工具谱系上扩展并开源：明确声明前置工具来源（Bochspwn、Semgrep/Coccinelle/joern/CodeQL、《Jump Over ASLR》、AMD IBS Toolkit），把扩展结果回馈社区。\",\n    \"目标选择编码攻击面经济学：优先审查不足的代码与市场份额上升的目标，而非凭空选题。\",\n    \"挫折作为重审底层假设的信号：在利用策略停滞时主动重审对目标字段/结构的假设，而非继续在原路径上推进。\",\n    \"务实接受 boring but easy-to-implement 利用路径：在优雅方案受阻时选择可实现的路径，并以 slow trial and error 作为正常研究过程。\",\n    \"把具体 bug 上升为可复用的漏洞分类框架：归纳组件组合破坏不变量、外部接口即攻击面等跨领域适用的模式。\",\n    \"过程透明度：主动披露研究耗时、资源约束、误判与影响评估的过度自信修正，把研究置于真实劳动投入语境中。\",\n    \"负责任披露闭环：通过厂商 advisory、bug bounty、私下披露等渠道形成闭环，并公开致谢被审计方。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"学术导师组与企业研究环境的并行支持：KIT 操作系统组与 ERNW 的并行结构使硕士论文可直接对接上游 Xen 漏洞披露，这一条件依赖特定学术导师组与企业研究环境的并行支持（导师姓名未一手核实，不得作为事实陈述，列为资料缺口）。\",\n    \"Google Project Zero 平台的机构归属与披露渠道：P0 时期的署名、Google Security Team 机构身份、以及与同队顶级研究者（如 Jann Horn）的同伴网络，是 mario_baslr 被 Spectre V2 致谢引用与 KVM 逃逸高规格发布的结构性条件，不可由个人复制。\",\n    \"Asymmetric Research 时期与 Anza 团队的机构化持续协作：p-token 案例的 review + fuzzing 持续协作依赖 Asymmetric Research 与 Solana 生态团队的长期整合合作关系，非个人研究者可复制。\",\n    \"DeFi 时期锁定数十亿美元资产的高价值攻击面：marginfi 约 160M USD 风险等目标的价值基础来自 DeFi 生态本身的资金规模，而非研究者主动选择所能创造。\"\n  ],\n  \"open_questions\": [\n    \"约 2017 年由 ERNW 转入 Google、约 2022 年离开 P0 的确切日期无本人一手声明，仅由最后 ERNW 博客约 2016-04、首个 Google credit 2018-05 Red Hat 致谢、最后 P0 博客 2022-11、Asymmetric 首篇 2025-09 等时间夹断推断。\",\n    \"约 2022 年是否经过 Jump Crypto 过渡期、Asymmetric Research 联合创始人/CTO 头衔、是否保护 $5B+ 数字资产：仅本地种子转述，Asymmetric /about 页面 404 未一手核实，列为资料缺口。\",\n    \"ERNW 时期各 CVE/XSA（XSA-105/110/123/155、IBM GPFS、PAN-OS、Hyper-V MS13-092、FireEye MPS）正文未逐一抓取厂商公告核验，方法论表述与漏洞归因未独立确认。\",\n    \"Infiltrate/SyScan 360/Black Hat 2016 'Xenpwn' 演讲、Black Hat 2018/2022、Breakpoint 2025 等会议议程未一手核实（Black Hat us-16 议程页 403、WebSearch 无真实结果），相关会议断言不得作事实陈述。\",\n    \"dnsmasq（2017-10）Google Security Blog 'Behind the Masq' 页面 404，6 人团队作者名单（Fermin Serna、Gabriel Campana、Kevin Hamacher、Ron Bowes、Gynvael Coldwind、Felix Wilhelm）未一手核实。\",\n    \"IBM GPFS 'IBM disagrees with our assessment' 厂商分歧、Palo Alto Networks PAN-OS 致谢、Hacker News 'highly capable individual' 评价均未一手核实。\",\n    \"CVE-2019-5736（runC 容器逃逸）与 XSA-110 的归因冲突：官方发现者分别为 Adam Iwaniuk/Borys Poplawski 与 Jan Beulich，部分二手资料误归于 Felix Wilhelm，不应据二手归因列入个人能力。\",\n    \"AMD SEV/SNP 与 Intel TDX 安全评估的具体参与程度本地种子标注为可能，无一手证据。\",\n    \"Asymmetric Research 从一次性披露到主网上线前防御性审计的角色转变，其机构化协作的具体流程（review + fuzzing 的分工、与 Anza 团队的协作边界）无公开深度自述。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "4127941bb98dc507ff9ed0ff25a86404883237cd2c4b1a494997f793fc4a3a29",
+        "accessed_at": "2026-09-26T15:33:28.303188+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790436808303203000-felix-wilhelm-synthesis-v3.json",
+    "label": "Felix Wilhelm:synthesis:v3",
+    "elapsed_seconds": 590.01,
+    "prompt_sha256": "bc4b1013421c7d24d62c7f10fcd9373a9195477b5a564c16945d601da2efb408",
+    "num_turns": 12,
+    "total_cost_usd": 1.5306890000000002,
+    "usage": {
+      "input_tokens": 92248,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 496448,
+      "output_tokens": 32849,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 92248,
+        "outputTokens": 32849,
+        "cacheReadInputTokens": 496448,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.5306890000000002,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

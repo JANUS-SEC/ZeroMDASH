@@ -1,0 +1,405 @@
+{
+  "person": "Lukas Maar",
+  "expertise": [
+    "Linux 与 Android 内核漏洞利用（堆/页级原语构造、跨缓存重用、page UAF 提权链）",
+    "内核侧信道分析（分配器/内核数据结构时序侧信道、TLB 侧信道、调度器争用侧信道）",
+    "内核防御机制评估与反向利用（PKS、CET/HEK-CFI、KFENCE、slab 加固、内存标记）",
+    "移动端 OEM 驱动与子系统漏洞研究（Android OEM 内核、Qualcomm AI 加速器、IOMMU、DualDAR、数据迁移工具）",
+    "可复现 PoC 与利用工具建设（GitHub artifact 仓库、Zenodo 归档、QEMU 驱动虚拟化实验环境）",
+    "结构化漏洞披露与工业/学术双轨发表"
+  ],
+  "stages": [
+    {
+      "period": "2018-2022",
+      "stage": "学术训练基础",
+      "capability_change": "在 Graz University of Technology 先后取得 BSc Electrical Engineering（2018）与 BSc Computer Science、MSc Electrical Engineering（2022，同年双学位存在主页表述冲突，未独立核验），形成硬件与系统层面的训练基础，为后续低层安全研究提供工程与系统知识前提。其 ISEC（TU Graz）归属最早可核验记录为 2023 年 DOPE 合著；2018-2022 期间是否已加入 ISEC 无来源支撑。",
+      "evidence_ids": [
+        "lm-timeline-2018-bsc-ee",
+        "lm-timeline-2022-bsc-cs-msc-ee",
+        "lm-works-001"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2023",
+      "stage": "防御侧起步与一作发表起点",
+      "capability_change": "以一作在 ACSAC 2023 发表 DOPE，提出基于 Intel PKS 的内核域保护机制，覆盖 8 个敏感内核数据对象，实测运行时开销 2.3%。研究起点落在主动防御设计，为后续以防御机制理解反推攻击路径提供前置知识。与 Stefan Mangard、Daniel Gruss、Martin Schwarzl、Fabian Rauscher 形成固定合著网络起点。",
+      "evidence_ids": [
+        "lm-works-001",
+        "lm-timeline-2023-dope-acsac",
+        "LM-community-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2024",
+      "stage": "攻击侧突破与可复现 artifact 发布方式确立",
+      "capability_change": "以一作在 USENIX Security 2024 发表 SLUBStick，提出利用 SLUB 分配器时序侧信道可靠执行交叉缓存攻击，将受限堆漏洞升级为通过页表操作实现的任意读写原语，在 v5.19/v6.2 评估 9 个真实 CVE 完成提权与容器逃逸。同年发表 Defects-in-Depth、HEK-CFI、Remote Scheduler Contention Attacks 等多子主题，单年内多会议并发。形成 writeup、会议演讲与 GitHub PoC 配套的固定发表方式，首次以 isec-tugraz 组织仓库发布可复现 artifact（Ubuntu 22.04/kernel v6.2 VM 镜像）并经 Zenodo DOI 永久归档。",
+      "evidence_ids": [
+        "lm-works-002",
+        "lm-works-003",
+        "lm-works-004",
+        "lm-timeline-2024-slubstick-usenix",
+        "LM-community-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2025",
+      "stage": "技术主题泛化与阶段性体系整合",
+      "capability_change": "在 NDSS 2025 发表 KernelSnitch，将 SLUBStick 的分配器时序侧信道泛化为针对哈希表、红黑树等通用内核数据结构的硬件无关时序侧信道，演示隐蔽信道（最高 580 kbit/s）、内核堆指针泄漏与网站指纹（F1 >89%）。同年 USENIX Security 2025 发表 When Good Kernel Defenses Go Bad（防御放大 TLB 侧信道）、The Doom of Device Drivers、ChoiceJacking，并完成博士论文 Kernel Security in the Wild 对内核利用、防御与侧信道进行体系化整合。研究方向从单一原语扩展到防御反向利用、n-day 评估与移动端物理接口攻击多线并行。",
+      "evidence_ids": [
+        "lm-works-005",
+        "lm-works-006",
+        "lm-works-007",
+        "lm-timeline-2025-kernelsnitch-ndss",
+        "lm-timeline-2025-kernelsnitch-github",
+        "lm-timeline-2025-tlb-choicejacking-usenix",
+        "lm-timeline-2025-phd-thesis"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2026",
+      "stage": "学术与工业双轨产出与利用链迁移",
+      "capability_change": "2026 年同时在 Calif 与 TU Graz ISEC 担任研究职务。在 Calif 平台发布 OEMpocalypse Now（CVE-2026-21102，针对 Samsung/Xiaomi/Oppo/OnePlus/Realme 的通用 page-UAF root 利用策略）与 Qualcomm QAIC AI 加速器驱动 page UAF（CVE-2026-57551）writeup，复用 SLUBStick 的 cross-cache 与 pipe_buffer 重定向链条并迁移到 page 级 UAF 原语；同年发表 LeakyTree（CCS 2026）、Clone2Pwn（ESORICS 2026）、Fence2Pwn（USENIX Security 2026）、Eviction Notice（NDSS 2026），并在 Nullcon Berlin、Hexacon、PraSec 演讲 DMA-After-Free、Samsung DualDAR、QAIC page UAF 等主题。技术主题从单驱动 UAF 扩展到 OEM 驱动链、IOMMU/DualDAR 子系统与跨 VM 页共享，方法学仍以侧信道与内存生命周期 bug 为主轴。",
+      "evidence_ids": [
+        "lm-works-009",
+        "lm-works-010",
+        "lm-timeline-2026-industrial-cves",
+        "lm-timeline-2026-conference-papers",
+        "lm-timeline-current-positions",
+        "lm-dec-06",
+        "lm-dec-02"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "内核数据结构与分配器时序侧信道技术主题的反复练习与泛化",
+      "starting_conditions": "2023 年与 Daniel Gruss 的一次讨论将以内核类比为硬件的视角引入，将共享内核资源重新框定为潜在时序信道；该讨论为后续多年项目的方向起点，表明方向重塑来自资深研究者输入而非内在既定方向。",
+      "repeated_practice": "围绕内核时序侧信道反复练习并横向扩展：2024 年 SLUBStick 以 SLUB 分配器时序侧信道可靠执行交叉缓存攻击（频繁使用的通用缓存成功率 >99%）；2025 年 KernelSnitch 扩展到 POSIX timer/futex/IPC 哈希表、IPC radix 树、hrtimer 红黑树等通用内核数据结构（结构规模随占用率变化产生可观测时序差）；2025 年 When Good Kernel Defenses Go Bad 转向防御放大的 TLB 侧信道；2026 年 From KernelSnitch to Practical msg_msg/pipe_buffer Heap KASLR Leaks 进一步把数据结构侧信道产物用于堆 KASLR 泄漏。",
+      "feedback": "反馈来源包括 USENIX Security、NDSS 评审与录用（lm-timeline-2024-slubstick-usenix、lm-timeline-2025-kernelsnitch-ndss、lm-timeline-2025-tlb-choicejacking-usenix）、NDSS accepted-papers 页确认 KernelSnitch 作者全部来自 TU Graz 且提供录屏演讲、Pwnie Award Most Underhyped Research 提名（本人自述，官方页面未核验）、CSAW'24 Europe ARC Finalist 提名（本人自述，官方页面未核验），以及跨平台复现反馈（Linux、KernelCTF、Android）。",
+      "intermediate_capability": "形成把单点分配器侧信道逐步抽象为面向通用内核数据结构的、硬件无关的、跨系统可复用的时序侧信道方法学，并以通用性为显式项目目标（minimize system-specific dependencies，as universal as possible）。",
+      "observed_outcomes": [
+        "SLUBStick 将受限堆漏洞升级为通过页表操作实现的任意读写原语，在 v5.19/v6.2 评估 9 个真实 CVE 完成提权与容器逃逸（lm-works-002）。",
+        "KernelSnitch 演示隐蔽信道（最高 580 kbit/s）、内核堆指针泄漏（65 秒内）与网站指纹（F1 >89%）（lm-works-005）。",
+        "OEMpocalypse 选取 page 级 UAF 作为对 slab 加固（CONFIG_SLAB_BUCKETS、CONFIG_RANDOM_KMALLOC_CACHES 等）不敏感的通用原语，使单一漏洞在原则上覆盖该 OEM 全部出货机型（lm-dec-06）。",
+        "KernelSnitch 覆盖的具体数据结构清单（POSIX timer/futex/IPC 哈希表、radix 树、hrtimer 红黑树）由 isec-tugraz/KernelSnitch README 一手核验（lm-works-006）。"
+      ],
+      "evidence_ids": [
+        "lm-works-002",
+        "lm-works-005",
+        "lm-works-006",
+        "lm-works-009",
+        "lm-dec-06",
+        "LM-SC-01",
+        "LM-SC-03",
+        "lm-timeline-2024-slubstick-usenix",
+        "lm-timeline-2025-kernelsnitch-ndss",
+        "lm-timeline-2025-tlb-choicejacking-usenix"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "该技术主题的反复出现亦可能由 TU Graz IAIK/isec-tugraz 团队既有的侧信道研究谱系（Daniel Gruss、Stefan Mangard 等）与团队选题路径所驱动，而非完全由个人内在方向选择；2023 年与 Gruss 的讨论作为方向起点的陈述本身来自本人自述，无独立旁证。"
+    },
+    {
+      "name": "防御-攻击双视角的反复交叉练习",
+      "starting_conditions": "2023 年 DOPE 与 2024 年 HEK-CFI 为防御性工作起点，提供对内核保护机制（PKS、CET 控制流防护）内部结构的理解，构成后续反向利用的前置知识。",
+      "repeated_practice": "反复在防御构造与攻击反向利用之间切换：防御侧 DOPE（PKS 域保护，2023）、HEK-CFI（CET 控制流防护扩展，2024）、Defects-in-Depth（Android 下游内核防御有效性测量，2024）；攻击与评估侧 When Good Kernel Defenses Go Bad（2025，防御放大的 TLB 侧信道反向利用）、Fence2Pwn（2026，绕过 KFENCE、slab 加固与内存标记）、The Doom of Device Drivers（Android 内核驱动 n-day 可达性评估）。",
+      "feedback": "四篇载体（When Good Kernel Defenses Go Bad、Defects-in-Depth、HEK-CFI、Fence2Pwn）的标题、venue、年份与合著者已由个人一手出版物索引核验（r1-001），但其 USENIX Security 2024/2025/2026 与 AsiaCCS 2024 会议官方议程页本次抓取截断未返回条目，证据强度为 primary 一手核验而非会议官方页面 documented。反馈亦来自 USENIX Security 录用（lm-timeline-2024-slubstick-usenix、lm-timeline-2025-tlb-choicejacking-usenix、lm-timeline-2026-conference-papers）。",
+      "intermediate_capability": "形成以防御机制内部结构理解为基础、反向寻找防御盲区或防御放大效应作为攻击面的双视角方法学，使防御性工作与攻击性工作互相供给技术前提。",
+      "observed_outcomes": [
+        "DOPE 提出 8 个敏感内核数据对象的 PKS 域保护，运行时开销 2.3%（lm-works-001）。",
+        "When Good Kernel Defenses Go Bad 揭示防御放大导致内核对象位置泄漏，并据此构造可靠稳定的内核利用（r1-001、lm-works-007）。",
+        "Fence2Pwn 绕过 KFENCE 时序侧信道与 slab 硬化、内存标记，复用防御侧对 KFENCE 内部结构的理解（r1-001、lm-works-010）。"
+      ],
+      "evidence_ids": [
+        "lm-works-001",
+        "lm-works-002",
+        "lm-works-004",
+        "lm-works-007",
+        "lm-works-010",
+        "lm-dec-03",
+        "r1-001",
+        "lm-timeline-2024-slubstick-usenix",
+        "lm-timeline-2025-tlb-choicejacking-usenix",
+        "lm-timeline-2026-conference-papers"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "双视角并进可能反映团队研究组合的产出策略（防御与攻击项目并行推进以覆盖不同会议），而非个人刻意建立的交叉练习机制；DOPE/HEK-CFI 与后续攻击工作之间的因果链接由时间线与主题相关性推断，无本人对该转型动机的直接陈述。"
+    },
+    {
+      "name": "可复现 PoC 与利用工具建设的固定发布流程",
+      "starting_conditions": "2024 年 SLUBStick 配套发布可复现 artifact，形成研究产出配 GitHub 仓库与 Zenodo DOI 的发布习惯起点。",
+      "repeated_practice": "每项主要研究产出配套发布可复现代码仓库：学术 artifact 仓库发布于 isec-tugraz 组织（isec-tugraz/SLUBStick，2024；isec-tugraz/KernelSnitch，2025；isec-tugraz/TLBSideChannel，2025），个人 writeup 仓库发布于 lukasmaar 个人账号（lukasmaar/qaic-page-uaf，2026；lukasmaar/kernelsnitch 实验工作区，43 stars/3 forks/9 commits）。",
+      "feedback": "GitHub issue 与星标/分叉构成外部反馈入口（SLUBStick 仓库含 2 个 open issue；KernelSnitch 个人仓库 43 stars/3 forks）；NDSS/USENIX artifact 评审与同行复现构成可被逐项核验的公开输出。",
+      "intermediate_capability": "形成从单点 PoC 到跨平台可复现工具的方法学积累，使他人可在 Linux、KernelCTF、Android 上复现并衍生后续研究（如 msg_msg/pipe_buffer heap KASLR leak）。",
+      "observed_outcomes": [
+        "SLUBStick 发布 Ubuntu 22.04/kernel v6.2 VM 镜像与端到端利用代码，并经 Zenodo DOI 永久归档（LM-community-02、lm-works-003）。",
+        "学术 artifact 仓库（isec-tugraz/SLUBStick、isec-tugraz/KernelSnitch、isec-tugraz/TLBSideChannel）与个人 writeup 仓库（lukasmaar/qaic-page-uaf、lukasmaar/kernelsnitch）按发布目的区分；isec-tugraz/KernelSnitch 的统计未在语料中给出，不与 lukasmaar/kernelsnitch 的 9 commits/43 stars/3 forks（LM-community-03）拼接。",
+        "SLUBStick 获 CSAW'24 Europe ARC Finalist 提名（本人自述，官方页面未核验）（LM-community-02）。",
+        "KernelSnitch 个人仓库 lukasmaar/kernelsnitch 跨 Linux/KernelCTF/Android 提供可复现 PoC（LM-community-03）。"
+      ],
+      "evidence_ids": [
+        "lm-works-003",
+        "lm-works-006",
+        "lm-works-009",
+        "lm-timeline-2025-kernelsnitch-github",
+        "lm-timeline-2026-industrial-cves",
+        "LM-community-02",
+        "LM-community-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "工具建设习惯可能部分受 isec-tugraz 组织既有的可复现 artifact 规范约束，而非完全由个人主动选择；GitHub 星标数与社区采用指标亦受团队既有影响力加成，不能完全归因于个人。"
+    },
+    {
+      "name": "手工源码审计与工具辅助定位、约束下工具自建的方法学闭环",
+      "starting_conditions": "2024 年在寻找内核数据结构侧信道候选目标时，以 Bootlin 与 CodeQL 辅助手工审计 Linux 内核哈希表，自述为 \"old-school code archaeology\"（引文，原文保留）；该过程成为 KernelSnitch 目标发现的起点。",
+      "repeated_practice": "以工具辅助的手工源码审计作为候选目标发现方法，并在跨内核版本与跨系统上迭代寻找时序差异更小、更难归因于具体系统的分配路径；显式项目目标为 minimize system-specific dependencies，as universal as possible（LM-SC-03 原文）。在硬件资源约束下（如不具备昂贵的 AI 加速器硬件）自建替代工具（将 QAIC 驱动路径在 QEMU 中虚拟化）以维持内核利用实验连续性，并把可机械化的实验脚手架（构建脚本、测试环境、硬件虚拟化桩）委托给 Codex 等 AI 辅助工具，漏洞定位与利用原语构造保留为人工判断。",
+      "feedback": "跨版本（Ubuntu v5.15/v6.5/v6.8）与跨平台（Linux、KernelCTF、Android）复现结果作为内部反馈；GitHub issue 作为外部反馈入口；本人对工具边界的主动标注（区分本人漏洞发现与利用构造、AI 工具仅用于辅助脚手架）构成自我归因约束。",
+      "intermediate_capability": "形成源码审计定位目标 + 工具辅助检索 + 约束下自建实验环境 + 跨版本迭代泛化的方法学闭环，使研究可在缺乏目标硬件时仍持续推进，并以通用性为优化目标。",
+      "observed_outcomes": [
+        "KernelSnitch 经手工审计定位候选哈希表目标后，跨 Linux/KernelCTF/Android 验证通用时序侧信道（lm-works-006、LM-SC-02）。",
+        "QAIC page UAF 在 QEMU 虚拟化驱动路径下于 Linux v6.18 完成利用实验，构造 pipe_buffer slab 页重定向原语获得物理任意读写并清零 UID/GID 提权（lm-works-009、LM-SC-06）。",
+        "heap KASLR leak 项目以 minimize system-specific dependencies 为显式目标跨版本迭代（LM-SC-03）。"
+      ],
+      "evidence_ids": [
+        "LM-SC-02",
+        "LM-SC-03",
+        "LM-SC-06",
+        "LM-SC-07",
+        "lm-works-006",
+        "lm-works-009"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "手工审计与工具辅助并用的方法可能反映该团队既有研究方法（isec-tugraz 谱系）的传承，而非个人独创；QEMU 虚拟化驱动路径的选择以对漏洞位于内存管理逻辑而非硬件执行的判断为前提，该判断本身依赖前置内核能力，因此该做法不能直接作为可迁移方法。"
+    },
+    {
+      "name": "结构化披露与学术-工业双轨发表的传播回路",
+      "starting_conditions": "2025 年起维持密集多会议公开演讲节奏，并就同一研究在学术（USENIX/NDSS）与产业（Black Hat/Nullcon/Hexacon/PraSec）渠道重复输出，形成传播回路起点。",
+      "repeated_practice": "对同一技术成果在学术与工业会议反复演讲以放大影响（2025 年 Black Hat USA 演讲 Derandomizing the Location of Security-Critical Kernel Objects，Black Hat Asia 演讲 KernelSnitch 与 Watch Your Phone，Nullcon Berlin 演讲 Derandomizing Kernel Object Locations；2026 年扩展到 Hexacon、PraSec）；对单一发现执行结构化披露时序（QAIC：2026-04-08 报告 Qualcomm，2026-04-23 补丁合入，2026-04-27 获赏金，收到赏金 30 天后公开 writeup 以留出补丁分发时间），并对 OEMpocalypse 采用分部发布。",
+      "feedback": "Black Hat/Nullcon 议程评审（部分页面 403/404 未独立核验，仅依本人主页）、厂商响应与赏金（Qualcomm 产品安全团队响应、补丁合入、赏金）构成外部反馈；本人 writeup 引用上游 lore.kernel.org Qualcomm 补丁线程（抓取被 Anubis 拦截，仅推断链接存在而非补丁内容）显示披露推进到上游修复阶段。",
+      "intermediate_capability": "形成将学术成果系统转换为产业社区讲解内容、并将漏洞发现推进到可被社区采纳的修复阶段的传播与披露能力，跨受众迭代呈现方式。",
+      "observed_outcomes": [
+        "2025 年单年覆盖 USENIX Security（两篇）、NDSS（两篇）、HOST、Black Hat USA、Black Hat Asia（两篇）、Nullcon Berlin；2026 年扩展到 CCS、ESORICS、Hexacon、PraSec（LM-community-06、lm-timeline-2025-blackhat-nullcon）。",
+        "QAIC page UAF 遵循报告-补丁-赏金-延迟公开的结构化披露时序，并公开致谢 Qualcomm 产品安全团队（lm-dec-07）。",
+        "OEMpocalypse 分部发布，并按 One bug per OEM 覆盖全机型的策略选择目标与原语（lm-dec-06）。"
+      ],
+      "evidence_ids": [
+        "lm-works-008",
+        "lm-dec-06",
+        "lm-dec-07",
+        "LM-community-06",
+        "LM-community-07",
+        "lm-timeline-2025-blackhat-nullcon",
+        "lm-timeline-2026-conference-papers"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "双轨发表可能部分由 Calif（进攻性安全公司）与 TU Graz ISEC 双重身份共同促成，而非完全由个人传播策略驱动；Black Hat/Nullcon 议程页未独立核验，演讲事实仅以本人主页为据；上游补丁与 Maar 的直接关系因 lore 抓取被拦截无法核验。"
+    }
+  ],
+  "tensions": [
+    "防御侧起点（DOPE、HEK-CFI）与攻击侧主线（SLUBStick、KernelSnitch、OEMpocalypse）之间存在视角张力：防御性工作提供对内核保护机制内部结构的理解，构成反向利用前提，但两者之间的转型动机未在抓取到的一手材料中由本人直接陈述，仅由发表时间线推断。",
+    "通用性目标与目标硬件可得性之间存在张力：heap KASLR leak 以 minimize system-specific dependencies 为显式目标，但 QAIC 研究因不具备昂贵的 AI 加速器硬件而需在 QEMU 中虚拟化驱动路径，通用性追求与具体硬件约束并存。",
+    "可复现 artifact 发布与披露时序之间存在张力：QAIC writeup 延迟公开 30 天以留出补丁分发时间，OEMpocalypse 分部发布，表明可复现工具的公开发布需与厂商补丁分发节奏协调。",
+    "AI 辅助工具使用与本人研究边界标注之间存在张力：Codex 被用于构建脚本、测试环境与硬件虚拟化桩，漏洞发现与利用构造保留为人工判断，本人主动标注工具适用范围与该情形的反讽（用 AI 工具协助利用一个 AI 加速器驱动）。",
+    "学术合著网络高度集中于 TU Graz 同一谱系（Stefan Mangard、Daniel Gruss、Jonas Juffinger、Florian Draschbacher、Martin Unterguggenberger、Mathias Oberhuber 等）与个人独立 writeup 产出（QAIC、OEMpocalypse）并存：协作网络提供反馈与重复练习环境，个人 writeup 体现独立漏洞发现与利用构造能力，两者构成互补而非替代。",
+    "受硬件资源约束时判断漏洞位于内存管理逻辑还是硬件执行，再决定是否以虚拟化驱动路径替代物理硬件实验，这一做法本身依赖前置内核能力，不能直接作为可迁移方法：能做出该判断的前提是已具备区分漏洞位置的能力，因此该做法同时具有可迁移外观与不可迁移前提。",
+    "本人自述的认可（CSAW'24 Europe ARC Finalist、Pwnie Award Most Underhyped Research、ChoiceJacking Best Mobile Bug、GI Dissertation Award 提名）与官方页面未核验之间存在张力：相关官方页面本次未抓取成功，认可事实仅以本人自述为旁证，未升级到 documented。"
+  ],
+  "transferable_practices": [
+    "以工具辅助的手工源码审计作为候选目标发现方法（Bootlin、CodeQL 检索 + 人工阅读内核数据结构实现），并以跨内核版本迭代寻找时序差异更小、更难归因于具体系统的分配路径，以通用性为显式项目目标。",
+    "每项主要研究产出配套发布可复现 artifact 仓库（GitHub + Zenodo DOI），并提供端到端 VM 镜像与利用代码，降低他人复现门槛并引入外部反馈入口。",
+    "对同一技术成果在学术会议（USENIX/NDSS）与产业会议（Black Hat/Nullcon/Hexacon）重复输出，根据不同受众迭代呈现方式。",
+    "对单一发现执行结构化披露时序（报告-补丁合入-赏金-延迟公开），并按补丁分发需要延迟 writeup 公开（如 30 天）。",
+    "把可机械化的实验脚手架（构建脚本、测试环境、虚拟化桩）委托给 AI 辅助工具，漏洞定位与利用原语构造保留为人工判断，并主动标注工具边界。",
+    "在已具备判断漏洞位于内存管理逻辑还是硬件执行能力的前提下，当目标硬件不可得时，以对漏洞位置的判断为依据决定是否以 QEMU 虚拟化驱动路径替代物理硬件实验；该做法的可迁移性以研究者已具备相应内核判断能力为前提条件，不具备该前提时不可直接迁移。"
+  ],
+  "non_transferable_conditions": [
+    "TU Graz ISEC 与 isec-tugraz 团队的既有侧信道研究谱系（Stefan Mangard、Daniel Gruss 等资深合作者）及固定合著网络，提供长期反馈回路与重复练习环境，属个人特有组织条件。",
+    "2023 年与 Daniel Gruss 的讨论作为研究方向起点的偶然机会，属个人特有时机条件，无法由他者复制。",
+    "ISEC 机构归属与 Postdoc 职位提供的学术发表渠道与合著机会，属个人特有组织资源。",
+    "Calif（进攻性安全公司）Security Researcher 身份提供的工业漏洞研究产出渠道与 OEMpocalypse 等工业研究博客发布平台，属个人特有职业条件。",
+    "受硬件资源约束时判断漏洞位于内存管理逻辑还是硬件执行，再决定是否以虚拟化驱动路径替代物理硬件实验，这一做法本身依赖前置内核能力，不能直接作为可迁移方法：能做出该判断的前提是已具备区分漏洞位置的能力。",
+    "本人主页自述的学位路径（BSc EE 2018、BSc CS 与 MSc EE 2022 同年、PhD CS 2025）所反映的具体教育轨迹与时间安排，属个人特有条件；2022 同年双学位存在主页表述冲突，未经独立核验。"
+  ],
+  "open_questions": [
+    "Calif 加入的精确时点未在一手材料中写明；目前仅能由 OEMpocalypse 发布日期（2026-08-31）与本人主页 bio 推知 2026 年已在 Calif，LinkedIn 因认证墙未抓取。",
+    "由防御性研究（DOPE、HEK-CFI）转向攻击性侧信道与利用链（KernelSnitch、TLB、OEMpocalypse）的第一人称动机陈述缺失；转型仅由发表时间线推断。",
+    "Stefan Mangard 与 Lukas Maar 的指导关系未在 ISEC 机构页直接写明；under Stefan Mangard 的表述来自本人主页 bio，机构页仅显示共同作者关系，指导关系为推断。",
+    "CSAW'24 Europe ARC Finalist、Pwnie Award（Most Underhyped Research、ChoiceJacking Best Mobile Bug）、GI Dissertation Award 提名仅见于本人自述，相关官方页面本次未抓取核验。",
+    "USENIX Security 2024/2025/2026 与 AsiaCCS 2024 会议官方议程/技术会议页面本次抓取截断未返回条目，四篇双视角载体（Defects-in-Depth、HEK-CFI、When Good Kernel Defenses Go Bad、Fence2Pwn）仅以个人一手出版物索引核验，未升级到会议官方页面 documented。",
+    "QAIC writeup 引用的上游 lore.kernel.org Qualcomm 补丁线程被 Anubis 拦截，无法核验补丁标题、正文与 Reviewed-by/Acked-by 反馈及与 Maar 的直接关系。",
+    "2022 同年授予 BSc Computer Science 与 MSc Electrical Engineering 在学制上不寻常，可能为主页表述压缩或笔误；2018 BSc EE 与 2022 BSc CS 是否为两段独立本科或同一学位更名未明确，需 LinkedIn 或学位记录核实。",
+    "Black Hat USA/Asia 2025、Nullcon Berlin 2025 议程页匿名抓取失败（403/404），具体演讲日期与 co-speaker 列表未独立核验，仅依本人主页。",
+    "2023 年之前的早期训练、转向内核安全的最初决策与导师/同伴影响未在抓取到的一手材料中体现；无可用长访谈或导师书面评价文本可直接引述其成长机制叙述。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/lukas-maar-synthesis-v3-20260928-212222-601",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790602083966883000-lukas-maar-synthesis-v3.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "6e429638-40bc-4168-9ae0-b32efe98dadc",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_6jvmrbs3u55ikspsspmwipmq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/lukas-maar-synthesis-v3-20260928-212222-601/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-28T13:28:04.001963+00:00"
+      },
+      {
+        "tool_use_id": "call_m6ls42wi7w2h707inbupu3mu",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/lukas-maar-synthesis-v3-20260928-212222-601/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T13:28:04.002001+00:00"
+      },
+      {
+        "tool_use_id": "call_olcu4phh6cajbuftplqk76d5",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/lukas-maar-synthesis-v3-20260928-212222-601/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "10bbd8c2241353ead870dea24f9eac268f7934de245ab3aaba06e317feba5971",
+        "accessed_at": "2026-09-28T13:28:04.002007+00:00"
+      },
+      {
+        "tool_use_id": "call_vks08ztmvfj7gsd9uhp8uqq1",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/lukas-maar-synthesis-v3-20260928-212222-601/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "f75fb98925da0f9e69e48e2564001ddb152314bf24474c4b7a4cb130ba8579b2",
+        "accessed_at": "2026-09-28T13:28:04.002014+00:00"
+      },
+      {
+        "tool_use_id": "call_7s22d1us4w83zvcba1jgprnw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/lukas-maar-synthesis-v3-20260928-212222-601/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "76774b47ccb85af7e1415aa90919d4e9d5e5437a95b3afcaaa62fc03358f4941",
+        "accessed_at": "2026-09-28T13:28:04.002090+00:00"
+      },
+      {
+        "tool_use_id": "call_bi4kj0stbmxj82lqqedxjgeh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/lukas-maar-synthesis-v3-20260928-212222-601/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "f80dbb7da2bb5846b460315358e428f95ac28b2f5dd8b794dcc938c520471e5d",
+        "accessed_at": "2026-09-28T13:28:04.002169+00:00"
+      },
+      {
+        "tool_use_id": "call_cfnkfnuyuemhv8vzia7r5ukt",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/lukas-maar-synthesis-v3-20260928-212222-601/inputs/evidence_json.json",
+          "offset": 934,
+          "limit": 319
+        },
+        "success": true,
+        "content_sha256": "93f05451f54302b64e46aa34ddfa7f6edbb46f6dbdc714a58663d94294e5c876",
+        "accessed_at": "2026-09-28T13:28:04.002201+00:00"
+      },
+      {
+        "tool_use_id": "call_rgy9si5vmnr2mge2ok5d2fgi",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/lukas-maar-synthesis-v3-20260928-212222-601/checkpoint.md",
+          "content": "# Checkpoint — Lukas Maar 综合分析 v3\n\n## 输入状态\n- person_json.json：已读。person=Lukas Maar；primary_focus=内核侧信道与移动端漏洞；qualification=直接漏洞发现与利用。\n- evidence_json.json：已读全文（works/conversations/community/external/decisions/timeline/targeted，1252 行）。\n- revision_context.json：已读，含 round 1（8 条 RR）与 round 2（5 条 RR）的 actions/new_evidence/invalid_evidence_ids/synthesis_instructions/unresolved。\n\n## 有效证据清单（均为 verified_in_run=true，无作废 id）\n- works: lm-works-001..011\n- conversations: LM-SC-01..08\n- community: LM-community-01..07\n- external: lukas-ext-01..07\n- decisions: lm-dec-01..07\n- timeline: lm-timeline-2018-bsc-ee, lm-timeline-2022-bsc-cs-msc-ee, lm-timeline-2023-dope-acsac, lm-timeline-2024-slubstick-usenix, lm-timeline-2025-kernelsnitch-ndss, lm-timeline-2025-kernelsnitch-github, lm-timeline-2025-tlb-choicejacking-usenix, lm-timeline-2025-blackhat-nullcon, lm-timeline-2025-phd-thesis, lm-timeline-2026-industrial-cves, lm-timeline-2026-conference-papers, lm-timeline-current-positions\n- targeted: r1-001\n\n## 两轮纠错 synthesis_instructions 落实清单\n- RR1（语言）：机制A 名称、stages[2]/[3] 中\"母题\"→\"技术主题\"。已落实。\n- RR2（语言）：机制D 名称、transferable[0] 中\"源码考古\"→\"手工源码审计\"；LM-SC-02 原文 \"old-school code archaeology\" 作引文标注。已落实。\n- RR3（语言）：机制D repeated_practice \"更安静的分配路径\"→\"时序差异更小、更难归因于具体系统的分配路径\"。已落实。\n- RR4（逻辑）：transferable_practices 第6项改写为以\"已具备判断漏洞位于内存管理逻辑还是硬件执行能力的研究者\"为前提，与 non_transferable_conditions 第5项/ tensions 第6条一致。已落实。\n- RR5（引用锚点）：机制A evidence_ids 补 lm-dec-06、lm-works-006；机制E evidence_ids 补 lm-dec-06。已落实。\n- RR6（证据强度）：机制B evidence_ids 补 r1-001 与 lm-timeline-2024-slubstick-usenix、lm-timeline-2025-tlb-choicejacking-usenix、lm-timeline-2026-conference-papers；feedback 注明四篇载体由一手页面核验但会议官方议程页未抓取成功。已落实。\n- RR7（时序）：stages[4] 改为\"2026 年同时在 Calif 与 TU Graz ISEC 担任研究职务\"，删除\"完成 PhD 后\"时序因果；Calif 加入时点列入 open_questions。已落实。\n- RR8（语言）：\"训练底色\"→\"训练基础\"、\"体系收束\"→\"体系整合\"、\"实战 root 链\"→\"可利用的 root 提权链\"。已落实。\n- Round2-1（机制C observed_outcomes）：删除\"统一发布于 isec-tugraz\"，区分学术 artifact 仓库与个人 writeup 仓库。已落实。\n- Round2-2（机制C observed_outcomes）：9 commits/43 stars/3 forks 归 lukasmaar/kernelsnitch（LM-community-03），不与 isec-tugraz/KernelSnitch 拼接。已落实。\n- Round2-3（机制C observed_outcomes）：CSAW'24 提名加限定语\"（本人自述，官方页面未核验）\"。已落实。\n- Round2-4（stages[0]）：删除\"同期进入 ISEC\"时点断言，改为\"ISEC 归属最早可核验为 2023 DOPE 合著\"。已落实。\n- Round2-5（stages[2]）：\"三件套\"→\"配套的固定发表方式\"。已落实。\n\n## 待写 output.json\n- 5 阶段 + 5 主机制 + tensions + transferable + non_transferable + open_questions。\n- 语言：专业书面语，禁比喻/拟人/黑话/宣传。\n- 不填 _run/verification。\n"
+        },
+        "success": true,
+        "content_sha256": "660afc8de3ee80a744c751f26eeeff28e58ec3db62a9c555a9cda59fae8163cc",
+        "accessed_at": "2026-09-28T13:28:04.002566+00:00"
+      },
+      {
+        "tool_use_id": "call_tfd3c153v1bv917r8ra2rj74",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/lukas-maar-synthesis-v3-20260928-212222-601/output.json",
+          "content": "{\n  \"person\": \"Lukas Maar\",\n  \"expertise\": [\n    \"Linux 与 Android 内核漏洞利用（堆/页级原语构造、跨缓存重用、page UAF 提权链）\",\n    \"内核侧信道分析（分配器/内核数据结构时序侧信道、TLB 侧信道、调度器争用侧信道）\",\n    \"内核防御机制评估与反向利用（PKS、CET/HEK-CFI、KFENCE、slab 加固、内存标记）\",\n    \"移动端 OEM 驱动与子系统漏洞研究（Android OEM 内核、Qualcomm AI 加速器、IOMMU、DualDAR、数据迁移工具）\",\n    \"可复现 PoC 与利用工具建设（GitHub artifact 仓库、Zenodo 归档、QEMU 驱动虚拟化实验环境）\",\n    \"结构化漏洞披露与工业/学术双轨发表\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2018-2022\",\n      \"stage\": \"学术训练基础\",\n      \"capability_change\": \"在 Graz University of Technology 先后取得 BSc Electrical Engineering（2018）与 BSc Computer Science、MSc Electrical Engineering（2022，同年双学位存在主页表述冲突，未独立核验），形成硬件与系统层面的训练基础，为后续低层安全研究提供工程与系统知识前提。其 ISEC（TU Graz）归属最早可核验记录为 2023 年 DOPE 合著；2018-2022 期间是否已加入 ISEC 无来源支撑。\",\n      \"evidence_ids\": [\n        \"lm-timeline-2018-bsc-ee\",\n        \"lm-timeline-2022-bsc-cs-msc-ee\",\n        \"lm-works-001\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2023\",\n      \"stage\": \"防御侧起步与一作发表起点\",\n      \"capability_change\": \"以一作在 ACSAC 2023 发表 DOPE，提出基于 Intel PKS 的内核域保护机制，覆盖 8 个敏感内核数据对象，实测运行时开销 2.3%。研究起点落在主动防御设计，为后续以防御机制理解反推攻击路径提供前置知识。与 Stefan Mangard、Daniel Gruss、Martin Schwarzl、Fabian Rauscher 形成固定合著网络起点。\",\n      \"evidence_ids\": [\n        \"lm-works-001\",\n        \"lm-timeline-2023-dope-acsac\",\n        \"LM-community-01\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2024\",\n      \"stage\": \"攻击侧突破与可复现 artifact 发布方式确立\",\n      \"capability_change\": \"以一作在 USENIX Security 2024 发表 SLUBStick，提出利用 SLUB 分配器时序侧信道可靠执行交叉缓存攻击，将受限堆漏洞升级为通过页表操作实现的任意读写原语，在 v5.19/v6.2 评估 9 个真实 CVE 完成提权与容器逃逸。同年发表 Defects-in-Depth、HEK-CFI、Remote Scheduler Contention Attacks 等多子主题，单年内多会议并发。形成 writeup、会议演讲与 GitHub PoC 配套的固定发表方式，首次以 isec-tugraz 组织仓库发布可复现 artifact（Ubuntu 22.04/kernel v6.2 VM 镜像）并经 Zenodo DOI 永久归档。\",\n      \"evidence_ids\": [\n        \"lm-works-002\",\n        \"lm-works-003\",\n        \"lm-works-004\",\n        \"lm-timeline-2024-slubstick-usenix\",\n        \"LM-community-02\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2025\",\n      \"stage\": \"技术主题泛化与阶段性体系整合\",\n      \"capability_change\": \"在 NDSS 2025 发表 KernelSnitch，将 SLUBStick 的分配器时序侧信道泛化为针对哈希表、红黑树等通用内核数据结构的硬件无关时序侧信道，演示隐蔽信道（最高 580 kbit/s）、内核堆指针泄漏与网站指纹（F1 >89%）。同年 USENIX Security 2025 发表 When Good Kernel Defenses Go Bad（防御放大 TLB 侧信道）、The Doom of Device Drivers、ChoiceJacking，并完成博士论文 Kernel Security in the Wild 对内核利用、防御与侧信道进行体系化整合。研究方向从单一原语扩展到防御反向利用、n-day 评估与移动端物理接口攻击多线并行。\",\n      \"evidence_ids\": [\n        \"lm-works-005\",\n        \"lm-works-006\",\n        \"lm-works-007\",\n        \"lm-timeline-2025-kernelsnitch-ndss\",\n        \"lm-timeline-2025-kernelsnitch-github\",\n        \"lm-timeline-2025-tlb-choicejacking-usenix\",\n        \"lm-timeline-2025-phd-thesis\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2026\",\n      \"stage\": \"学术与工业双轨产出与利用链迁移\",\n      \"capability_change\": \"2026 年同时在 Calif 与 TU Graz ISEC 担任研究职务。在 Calif 平台发布 OEMpocalypse Now（CVE-2026-21102，针对 Samsung/Xiaomi/Oppo/OnePlus/Realme 的通用 page-UAF root 利用策略）与 Qualcomm QAIC AI 加速器驱动 page UAF（CVE-2026-57551）writeup，复用 SLUBStick 的 cross-cache 与 pipe_buffer 重定向链条并迁移到 page 级 UAF 原语；同年发表 LeakyTree（CCS 2026）、Clone2Pwn（ESORICS 2026）、Fence2Pwn（USENIX Security 2026）、Eviction Notice（NDSS 2026），并在 Nullcon Berlin、Hexacon、PraSec 演讲 DMA-After-Free、Samsung DualDAR、QAIC page UAF 等主题。技术主题从单驱动 UAF 扩展到 OEM 驱动链、IOMMU/DualDAR 子系统与跨 VM 页共享，方法学仍以侧信道与内存生命周期 bug 为主轴。\",\n      \"evidence_ids\": [\n        \"lm-works-009\",\n        \"lm-works-010\",\n        \"lm-timeline-2026-industrial-cves\",\n        \"lm-timeline-2026-conference-papers\",\n        \"lm-timeline-current-positions\",\n        \"lm-dec-06\",\n        \"lm-dec-02\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"内核数据结构与分配器时序侧信道技术主题的反复练习与泛化\",\n      \"starting_conditions\": \"2023 年与 Daniel Gruss 的一次讨论将以内核类比为硬件的视角引入，将共享内核资源重新框定为潜在时序信道；该讨论为后续多年项目的方向起点，表明方向重塑来自资深研究者输入而非内在既定方向。\",\n      \"repeated_practice\": \"围绕内核时序侧信道反复练习并横向扩展：2024 年 SLUBStick 以 SLUB 分配器时序侧信道可靠执行交叉缓存攻击（频繁使用的通用缓存成功率 >99%）；2025 年 KernelSnitch 扩展到 POSIX timer/futex/IPC 哈希表、IPC radix 树、hrtimer 红黑树等通用内核数据结构（结构规模随占用率变化产生可观测时序差）；2025 年 When Good Kernel Defenses Go Bad 转向防御放大的 TLB 侧信道；2026 年 From KernelSnitch to Practical msg_msg/pipe_buffer Heap KASLR Leaks 进一步把数据结构侧信道产物用于堆 KASLR 泄漏。\",\n      \"feedback\": \"反馈来源包括 USENIX Security、NDSS 评审与录用（lm-timeline-2024-slubstick-usenix、lm-timeline-2025-kernelsnitch-ndss、lm-timeline-2025-tlb-choicejacking-usenix）、NDSS accepted-papers 页确认 KernelSnitch 作者全部来自 TU Graz 且提供录屏演讲、Pwnie Award Most Underhyped Research 提名（本人自述，官方页面未核验）、CSAW'24 Europe ARC Finalist 提名（本人自述，官方页面未核验），以及跨平台复现反馈（Linux、KernelCTF、Android）。\",\n      \"intermediate_capability\": \"形成把单点分配器侧信道逐步抽象为面向通用内核数据结构的、硬件无关的、跨系统可复用的时序侧信道方法学，并以通用性为显式项目目标（minimize system-specific dependencies，as universal as possible）。\",\n      \"observed_outcomes\": [\n        \"SLUBStick 将受限堆漏洞升级为通过页表操作实现的任意读写原语，在 v5.19/v6.2 评估 9 个真实 CVE 完成提权与容器逃逸（lm-works-002）。\",\n        \"KernelSnitch 演示隐蔽信道（最高 580 kbit/s）、内核堆指针泄漏（65 秒内）与网站指纹（F1 >89%）（lm-works-005）。\",\n        \"OEMpocalypse 选取 page 级 UAF 作为对 slab 加固（CONFIG_SLAB_BUCKETS、CONFIG_RANDOM_KMALLOC_CACHES 等）不敏感的通用原语，使单一漏洞在原则上覆盖该 OEM 全部出货机型（lm-dec-06）。\",\n        \"KernelSnitch 覆盖的具体数据结构清单（POSIX timer/futex/IPC 哈希表、radix 树、hrtimer 红黑树）由 isec-tugraz/KernelSnitch README 一手核验（lm-works-006）。\"\n      ],\n      \"evidence_ids\": [\n        \"lm-works-002\",\n        \"lm-works-005\",\n        \"lm-works-006\",\n        \"lm-works-009\",\n        \"lm-dec-06\",\n        \"LM-SC-01\",\n        \"LM-SC-03\",\n        \"lm-timeline-2024-slubstick-usenix\",\n        \"lm-timeline-2025-kernelsnitch-ndss\",\n        \"lm-timeline-2025-tlb-choicejacking-usenix\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"该技术主题的反复出现亦可能由 TU Graz IAIK/isec-tugraz 团队既有的侧信道研究谱系（Daniel Gruss、Stefan Mangard 等）与团队选题路径所驱动，而非完全由个人内在方向选择；2023 年与 Gruss 的讨论作为方向起点的陈述本身来自本人自述，无独立旁证。\"\n    },\n    {\n      \"name\": \"防御-攻击双视角的反复交叉练习\",\n      \"starting_conditions\": \"2023 年 DOPE 与 2024 年 HEK-CFI 为防御性工作起点，提供对内核保护机制（PKS、CET 控制流防护）内部结构的理解，构成后续反向利用的前置知识。\",\n      \"repeated_practice\": \"反复在防御构造与攻击反向利用之间切换：防御侧 DOPE（PKS 域保护，2023）、HEK-CFI（CET 控制流防护扩展，2024）、Defects-in-Depth（Android 下游内核防御有效性测量，2024）；攻击与评估侧 When Good Kernel Defenses Go Bad（2025，防御放大的 TLB 侧信道反向利用）、Fence2Pwn（2026，绕过 KFENCE、slab 加固与内存标记）、The Doom of Device Drivers（Android 内核驱动 n-day 可达性评估）。\",\n      \"feedback\": \"四篇载体（When Good Kernel Defenses Go Bad、Defects-in-Depth、HEK-CFI、Fence2Pwn）的标题、venue、年份与合著者已由个人一手出版物索引核验（r1-001），但其 USENIX Security 2024/2025/2026 与 AsiaCCS 2024 会议官方议程页本次抓取截断未返回条目，证据强度为 primary 一手核验而非会议官方页面 documented。反馈亦来自 USENIX Security 录用（lm-timeline-2024-slubstick-usenix、lm-timeline-2025-tlb-choicejacking-usenix、lm-timeline-2026-conference-papers）。\",\n      \"intermediate_capability\": \"形成以防御机制内部结构理解为基础、反向寻找防御盲区或防御放大效应作为攻击面的双视角方法学，使防御性工作与攻击性工作互相供给技术前提。\",\n      \"observed_outcomes\": [\n        \"DOPE 提出 8 个敏感内核数据对象的 PKS 域保护，运行时开销 2.3%（lm-works-001）。\",\n        \"When Good Kernel Defenses Go Bad 揭示防御放大导致内核对象位置泄漏，并据此构造可靠稳定的内核利用（r1-001、lm-works-007）。\",\n        \"Fence2Pwn 绕过 KFENCE 时序侧信道与 slab 硬化、内存标记，复用防御侧对 KFENCE 内部结构的理解（r1-001、lm-works-010）。\"\n      ],\n      \"evidence_ids\": [\n        \"lm-works-001\",\n        \"lm-works-002\",\n        \"lm-works-004\",\n        \"lm-works-007\",\n        \"lm-works-010\",\n        \"lm-dec-03\",\n        \"r1-001\",\n        \"lm-timeline-2024-slubstick-usenix\",\n        \"lm-timeline-2025-tlb-choicejacking-usenix\",\n        \"lm-timeline-2026-conference-papers\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"双视角并进可能反映团队研究组合的产出策略（防御与攻击项目并行推进以覆盖不同会议），而非个人刻意建立的交叉练习机制；DOPE/HEK-CFI 与后续攻击工作之间的因果链接由时间线与主题相关性推断，无本人对该转型动机的直接陈述。\"\n    },\n    {\n      \"name\": \"可复现 PoC 与利用工具建设的固定发布流程\",\n      \"starting_conditions\": \"2024 年 SLUBStick 配套发布可复现 artifact，形成研究产出配 GitHub 仓库与 Zenodo DOI 的发布习惯起点。\",\n      \"repeated_practice\": \"每项主要研究产出配套发布可复现代码仓库：学术 artifact 仓库发布于 isec-tugraz 组织（isec-tugraz/SLUBStick，2024；isec-tugraz/KernelSnitch，2025；isec-tugraz/TLBSideChannel，2025），个人 writeup 仓库发布于 lukasmaar 个人账号（lukasmaar/qaic-page-uaf，2026；lukasmaar/kernelsnitch 实验工作区，43 stars/3 forks/9 commits）。\",\n      \"feedback\": \"GitHub issue 与星标/分叉构成外部反馈入口（SLUBStick 仓库含 2 个 open issue；KernelSnitch 个人仓库 43 stars/3 forks）；NDSS/USENIX artifact 评审与同行复现构成可被逐项核验的公开输出。\",\n      \"intermediate_capability\": \"形成从单点 PoC 到跨平台可复现工具的方法学积累，使他人可在 Linux、KernelCTF、Android 上复现并衍生后续研究（如 msg_msg/pipe_buffer heap KASLR leak）。\",\n      \"observed_outcomes\": [\n        \"SLUBStick 发布 Ubuntu 22.04/kernel v6.2 VM 镜像与端到端利用代码，并经 Zenodo DOI 永久归档（LM-community-02、lm-works-003）。\",\n        \"学术 artifact 仓库（isec-tugraz/SLUBStick、isec-tugraz/KernelSnitch、isec-tugraz/TLBSideChannel）与个人 writeup 仓库（lukasmaar/qaic-page-uaf、lukasmaar/kernelsnitch）按发布目的区分；isec-tugraz/KernelSnitch 的统计未在语料中给出，不与 lukasmaar/kernelsnitch 的 9 commits/43 stars/3 forks（LM-community-03）拼接。\",\n        \"SLUBStick 获 CSAW'24 Europe ARC Finalist 提名（本人自述，官方页面未核验）（LM-community-02）。\",\n        \"KernelSnitch 个人仓库 lukasmaar/kernelsnitch 跨 Linux/KernelCTF/Android 提供可复现 PoC（LM-community-03）。\"\n      ],\n      \"evidence_ids\": [\n        \"lm-works-003\",\n        \"lm-works-006\",\n        \"lm-works-009\",\n        \"lm-timeline-2025-kernelsnitch-github\",\n        \"lm-timeline-2026-industrial-cves\",\n        \"LM-community-02\",\n        \"LM-community-03\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"工具建设习惯可能部分受 isec-tugraz 组织既有的可复现 artifact 规范约束，而非完全由个人主动选择；GitHub 星标数与社区采用指标亦受团队既有影响力加成，不能完全归因于个人。\"\n    },\n    {\n      \"name\": \"手工源码审计与工具辅助定位、约束下工具自建的方法学闭环\",\n      \"starting_conditions\": \"2024 年在寻找内核数据结构侧信道候选目标时，以 Bootlin 与 CodeQL 辅助手工审计 Linux 内核哈希表，自述为 \\\"old-school code archaeology\\\"（引文，原文保留）；该过程成为 KernelSnitch 目标发现的起点。\",\n      \"repeated_practice\": \"以工具辅助的手工源码审计作为候选目标发现方法，并在跨内核版本与跨系统上迭代寻找时序差异更小、更难归因于具体系统的分配路径；显式项目目标为 minimize system-specific dependencies，as universal as possible（LM-SC-03 原文）。在硬件资源约束下（如不具备昂贵的 AI 加速器硬件）自建替代工具（将 QAIC 驱动路径在 QEMU 中虚拟化）以维持内核利用实验连续性，并把可机械化的实验脚手架（构建脚本、测试环境、硬件虚拟化桩）委托给 Codex 等 AI 辅助工具，漏洞定位与利用原语构造保留为人工判断。\",\n      \"feedback\": \"跨版本（Ubuntu v5.15/v6.5/v6.8）与跨平台（Linux、KernelCTF、Android）复现结果作为内部反馈；GitHub issue 作为外部反馈入口；本人对工具边界的主动标注（区分本人漏洞发现与利用构造、AI 工具仅用于辅助脚手架）构成自我归因约束。\",\n      \"intermediate_capability\": \"形成源码审计定位目标 + 工具辅助检索 + 约束下自建实验环境 + 跨版本迭代泛化的方法学闭环，使研究可在缺乏目标硬件时仍持续推进，并以通用性为优化目标。\",\n      \"observed_outcomes\": [\n        \"KernelSnitch 经手工审计定位候选哈希表目标后，跨 Linux/KernelCTF/Android 验证通用时序侧信道（lm-works-006、LM-SC-02）。\",\n        \"QAIC page UAF 在 QEMU 虚拟化驱动路径下于 Linux v6.18 完成利用实验，构造 pipe_buffer slab 页重定向原语获得物理任意读写并清零 UID/GID 提权（lm-works-009、LM-SC-06）。\",\n        \"heap KASLR leak 项目以 minimize system-specific dependencies 为显式目标跨版本迭代（LM-SC-03）。\"\n      ],\n      \"evidence_ids\": [\n        \"LM-SC-02\",\n        \"LM-SC-03\",\n        \"LM-SC-06\",\n        \"LM-SC-07\",\n        \"lm-works-006\",\n        \"lm-works-009\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"手工审计与工具辅助并用的方法可能反映该团队既有研究方法（isec-tugraz 谱系）的传承，而非个人独创；QEMU 虚拟化驱动路径的选择以对漏洞位于内存管理逻辑而非硬件执行的判断为前提，该判断本身依赖前置内核能力，因此该做法不能直接作为可迁移方法。\"\n    },\n    {\n      \"name\": \"结构化披露与学术-工业双轨发表的传播回路\",\n      \"starting_conditions\": \"2025 年起维持密集多会议公开演讲节奏，并就同一研究在学术（USENIX/NDSS）与产业（Black Hat/Nullcon/Hexacon/PraSec）渠道重复输出，形成传播回路起点。\",\n      \"repeated_practice\": \"对同一技术成果在学术与工业会议反复演讲以放大影响（2025 年 Black Hat USA 演讲 Derandomizing the Location of Security-Critical Kernel Objects，Black Hat Asia 演讲 KernelSnitch 与 Watch Your Phone，Nullcon Berlin 演讲 Derandomizing Kernel Object Locations；2026 年扩展到 Hexacon、PraSec）；对单一发现执行结构化披露时序（QAIC：2026-04-08 报告 Qualcomm，2026-04-23 补丁合入，2026-04-27 获赏金，收到赏金 30 天后公开 writeup 以留出补丁分发时间），并对 OEMpocalypse 采用分部发布。\",\n      \"feedback\": \"Black Hat/Nullcon 议程评审（部分页面 403/404 未独立核验，仅依本人主页）、厂商响应与赏金（Qualcomm 产品安全团队响应、补丁合入、赏金）构成外部反馈；本人 writeup 引用上游 lore.kernel.org Qualcomm 补丁线程（抓取被 Anubis 拦截，仅推断链接存在而非补丁内容）显示披露推进到上游修复阶段。\",\n      \"intermediate_capability\": \"形成将学术成果系统转换为产业社区讲解内容、并将漏洞发现推进到可被社区采纳的修复阶段的传播与披露能力，跨受众迭代呈现方式。\",\n      \"observed_outcomes\": [\n        \"2025 年单年覆盖 USENIX Security（两篇）、NDSS（两篇）、HOST、Black Hat USA、Black Hat Asia（两篇）、Nullcon Berlin；2026 年扩展到 CCS、ESORICS、Hexacon、PraSec（LM-community-06、lm-timeline-2025-blackhat-nullcon）。\",\n        \"QAIC page UAF 遵循报告-补丁-赏金-延迟公开的结构化披露时序，并公开致谢 Qualcomm 产品安全团队（lm-dec-07）。\",\n        \"OEMpocalypse 分部发布，并按 One bug per OEM 覆盖全机型的策略选择目标与原语（lm-dec-06）。\"\n      ],\n      \"evidence_ids\": [\n        \"lm-works-008\",\n        \"lm-dec-06\",\n        \"lm-dec-07\",\n        \"LM-community-06\",\n        \"LM-community-07\",\n        \"lm-timeline-2025-blackhat-nullcon\",\n        \"lm-timeline-2026-conference-papers\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"双轨发表可能部分由 Calif（进攻性安全公司）与 TU Graz ISEC 双重身份共同促成，而非完全由个人传播策略驱动；Black Hat/Nullcon 议程页未独立核验，演讲事实仅以本人主页为据；上游补丁与 Maar 的直接关系因 lore 抓取被拦截无法核验。\"\n    }\n  ],\n  \"tensions\": [\n    \"防御侧起点（DOPE、HEK-CFI）与攻击侧主线（SLUBStick、KernelSnitch、OEMpocalypse）之间存在视角张力：防御性工作提供对内核保护机制内部结构的理解，构成反向利用前提，但两者之间的转型动机未在抓取到的一手材料中由本人直接陈述，仅由发表时间线推断。\",\n    \"通用性目标与目标硬件可得性之间存在张力：heap KASLR leak 以 minimize system-specific dependencies 为显式目标，但 QAIC 研究因不具备昂贵的 AI 加速器硬件而需在 QEMU 中虚拟化驱动路径，通用性追求与具体硬件约束并存。\",\n    \"可复现 artifact 发布与披露时序之间存在张力：QAIC writeup 延迟公开 30 天以留出补丁分发时间，OEMpocalypse 分部发布，表明可复现工具的公开发布需与厂商补丁分发节奏协调。\",\n    \"AI 辅助工具使用与本人研究边界标注之间存在张力：Codex 被用于构建脚本、测试环境与硬件虚拟化桩，漏洞发现与利用构造保留为人工判断，本人主动标注工具适用范围与该情形的反讽（用 AI 工具协助利用一个 AI 加速器驱动）。\",\n    \"学术合著网络高度集中于 TU Graz 同一谱系（Stefan Mangard、Daniel Gruss、Jonas Juffinger、Florian Draschbacher、Martin Unterguggenberger、Mathias Oberhuber 等）与个人独立 writeup 产出（QAIC、OEMpocalypse）并存：协作网络提供反馈与重复练习环境，个人 writeup 体现独立漏洞发现与利用构造能力，两者构成互补而非替代。\",\n    \"受硬件资源约束时判断漏洞位于内存管理逻辑还是硬件执行，再决定是否以虚拟化驱动路径替代物理硬件实验，这一做法本身依赖前置内核能力，不能直接作为可迁移方法：能做出该判断的前提是已具备区分漏洞位置的能力，因此该做法同时具有可迁移外观与不可迁移前提。\",\n    \"本人自述的认可（CSAW'24 Europe ARC Finalist、Pwnie Award Most Underhyped Research、ChoiceJacking Best Mobile Bug、GI Dissertation Award 提名）与官方页面未核验之间存在张力：相关官方页面本次未抓取成功，认可事实仅以本人自述为旁证，未升级到 documented。\"\n  ],\n  \"transferable_practices\": [\n    \"以工具辅助的手工源码审计作为候选目标发现方法（Bootlin、CodeQL 检索 + 人工阅读内核数据结构实现），并以跨内核版本迭代寻找时序差异更小、更难归因于具体系统的分配路径，以通用性为显式项目目标。\",\n    \"每项主要研究产出配套发布可复现 artifact 仓库（GitHub + Zenodo DOI），并提供端到端 VM 镜像与利用代码，降低他人复现门槛并引入外部反馈入口。\",\n    \"对同一技术成果在学术会议（USENIX/NDSS）与产业会议（Black Hat/Nullcon/Hexacon）重复输出，根据不同受众迭代呈现方式。\",\n    \"对单一发现执行结构化披露时序（报告-补丁合入-赏金-延迟公开），并按补丁分发需要延迟 writeup 公开（如 30 天）。\",\n    \"把可机械化的实验脚手架（构建脚本、测试环境、虚拟化桩）委托给 AI 辅助工具，漏洞定位与利用原语构造保留为人工判断，并主动标注工具边界。\",\n    \"在已具备判断漏洞位于内存管理逻辑还是硬件执行能力的前提下，当目标硬件不可得时，以对漏洞位置的判断为依据决定是否以 QEMU 虚拟化驱动路径替代物理硬件实验；该做法的可迁移性以研究者已具备相应内核判断能力为前提条件，不具备该前提时不可直接迁移。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"TU Graz ISEC 与 isec-tugraz 团队的既有侧信道研究谱系（Stefan Mangard、Daniel Gruss 等资深合作者）及固定合著网络，提供长期反馈回路与重复练习环境，属个人特有组织条件。\",\n    \"2023 年与 Daniel Gruss 的讨论作为研究方向起点的偶然机会，属个人特有时机条件，无法由他者复制。\",\n    \"ISEC 机构归属与 Postdoc 职位提供的学术发表渠道与合著机会，属个人特有组织资源。\",\n    \"Calif（进攻性安全公司）Security Researcher 身份提供的工业漏洞研究产出渠道与 OEMpocalypse 等工业研究博客发布平台，属个人特有职业条件。\",\n    \"受硬件资源约束时判断漏洞位于内存管理逻辑还是硬件执行，再决定是否以虚拟化驱动路径替代物理硬件实验，这一做法本身依赖前置内核能力，不能直接作为可迁移方法：能做出该判断的前提是已具备区分漏洞位置的能力。\",\n    \"本人主页自述的学位路径（BSc EE 2018、BSc CS 与 MSc EE 2022 同年、PhD CS 2025）所反映的具体教育轨迹与时间安排，属个人特有条件；2022 同年双学位存在主页表述冲突，未经独立核验。\"\n  ],\n  \"open_questions\": [\n    \"Calif 加入的精确时点未在一手材料中写明；目前仅能由 OEMpocalypse 发布日期（2026-08-31）与本人主页 bio 推知 2026 年已在 Calif，LinkedIn 因认证墙未抓取。\",\n    \"由防御性研究（DOPE、HEK-CFI）转向攻击性侧信道与利用链（KernelSnitch、TLB、OEMpocalypse）的第一人称动机陈述缺失；转型仅由发表时间线推断。\",\n    \"Stefan Mangard 与 Lukas Maar 的指导关系未在 ISEC 机构页直接写明；under Stefan Mangard 的表述来自本人主页 bio，机构页仅显示共同作者关系，指导关系为推断。\",\n    \"CSAW'24 Europe ARC Finalist、Pwnie Award（Most Underhyped Research、ChoiceJacking Best Mobile Bug）、GI Dissertation Award 提名仅见于本人自述，相关官方页面本次未抓取核验。\",\n    \"USENIX Security 2024/2025/2026 与 AsiaCCS 2024 会议官方议程/技术会议页面本次抓取截断未返回条目，四篇双视角载体（Defects-in-Depth、HEK-CFI、When Good Kernel Defenses Go Bad、Fence2Pwn）仅以个人一手出版物索引核验，未升级到会议官方页面 documented。\",\n    \"QAIC writeup 引用的上游 lore.kernel.org Qualcomm 补丁线程被 Anubis 拦截，无法核验补丁标题、正文与 Reviewed-by/Acked-by 反馈及与 Maar 的直接关系。\",\n    \"2022 同年授予 BSc Computer Science 与 MSc Electrical Engineering 在学制上不寻常，可能为主页表述压缩或笔误；2018 BSc EE 与 2022 BSc CS 是否为两段独立本科或同一学位更名未明确，需 LinkedIn 或学位记录核实。\",\n    \"Black Hat USA/Asia 2025、Nullcon Berlin 2025 议程页匿名抓取失败（403/404），具体演讲日期与 co-speaker 列表未独立核验，仅依本人主页。\",\n    \"2023 年之前的早期训练、转向内核安全的最初决策与导师/同伴影响未在抓取到的一手材料中体现；无可用长访谈或导师书面评价文本可直接引述其成长机制叙述。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "9d48bcac7a172d6c021a86d1812846697c2942e6b56bc7690fcc7ceac70646cb",
+        "accessed_at": "2026-09-28T13:28:04.002574+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790602084002586000-lukas-maar-synthesis-v3.json",
+    "label": "Lukas Maar:synthesis:v3",
+    "elapsed_seconds": 341.44,
+    "prompt_sha256": "d6f6577c6ee78f9437c5fcf07442407a09404ef83c21815c9c936ff5de37af1a",
+    "num_turns": 10,
+    "total_cost_usd": 0.8632360000000001,
+    "usage": {
+      "input_tokens": 64841,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 194112,
+      "output_tokens": 17679,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 64841,
+        "outputTokens": 17679,
+        "cacheReadInputTokens": 194112,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.8632360000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

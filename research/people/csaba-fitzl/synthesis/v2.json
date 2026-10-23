@@ -1,0 +1,401 @@
+{
+  "person": "Csaba Fitzl",
+  "expertise": [
+    "macOS 漏洞发现与利用（GateKeeper/App Store 信任机制、XPC、TCC/隐私绕过、Endpoint Security Framework、AMFI Launch Constraints、DiskArbitration/storagekitd 守护进程、Crash Reporter 目录路径解析）",
+    "macOS 控制机制绕过方法论（SIP、TCC、签名与启动约束、LaunchAgents/LaunchConstraints 系统化研究）",
+    "系统守护进程的系统性代码审计（以 Audit Story 连载形式输出）",
+    "规模化 Apple 软件包漏洞挖掘（Finding Vulnerabilities in Apple Packages at Scale）",
+    "Windows 早期方向：WinDBG 漏洞利用自动化、PDF/反逆向分析、Driver Signing Enforcement Bypass（2018 DSE Workshop 平台归属未一手核验，见 tensions）",
+    "可复现教学材料建设（workshop workbook/VM/练习文件、OffSec EXP-312 课程开发）",
+    "厂商反馈循环与披露协调（Apple Security Bounty、CVE 协调、多会议复用同一漏洞叙事）"
+  ],
+  "stages": [
+    {
+      "period": "2006–2018",
+      "stage": "跨域技能积累与 Windows/通用方向公开输出起步",
+      "capability_change": "按本人 About 页自述，2006 年以计算机工程师身份毕业后先任网络工程师约 6 年、再任蓝/红队约 8 年，方向覆盖网络取证、恶意软件分析、对手模拟与防御绕过。按 6+8 年自 2006 起算，红队阶段概算至约 2020 年结束，与 2019–2020 年的 macOS 议题（fitzl-tl-09、fitzl-tl-10、fitzl-tl-11）时间上重叠；本文不以雇佣记录而以公开输出作为分阶段依据，故此窗口的红队结束年份标为概算。该阶段产出的公开材料为非 macOS 方向：2014 Hello PDF、2015 Hello Anti-Disassembly、2016 Exploit Generation and Automation with WinDBG（合著 Miklos Desbordes-Korcsev 并附白皮书）、2018 DEF CON 26 / hack.lu Driver Signing Enforcement Bypass Workshop。2018 DSE Workshop 的目标平台（Windows 驱动签名强制 vs macOS kext 签名）未能从可抓取的一手材料确认：演示稿 PDF 正文为 FlateDecode 压缩流不可读、DEF CON 媒体服务器返回 403、defcon.org 议程页与 hack.lu 归档页返回 404；术语 DSE 在通用语境中多指 Windows 驱动签名强制，但本节点不以术语推断作为平台归属定论。此阶段形成的核心可迁移能力是防御绕过方法论与 workshop 形式的可复现教学输出，而非 macOS 专项知识。",
+      "evidence_ids": [
+        "cf-works-01",
+        "cf-works-02",
+        "cf-works-03",
+        "cf-works-04",
+        "csaba-fitzl-ext-01",
+        "csaba-fitzl-ext-02",
+        "csaba-fitzl-deepconv-01-career-timeline",
+        "csaba-fitzl-deepconv-04-2006-graduation-and-network-engineer-start",
+        "dec-01-2006",
+        "dec-02-redteam",
+        "dec-03-mac-os-pivot",
+        "fitzl-tl-01",
+        "fitzl-tl-02",
+        "fitzl-tl-03",
+        "fitzl-tl-04",
+        "fitzl-tl-05",
+        "fitzl-tl-06",
+        "fitzl-tl-07"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2018–2020",
+      "stage": "macOS 平台转向与两条研究线并行启动",
+      "capability_change": "可核验的 macOS 平台转向点落在 2019 年：同年 6 月博客记录 TALK — macOS — Getting root with benign AppStore apps，并在 Troopers、SecurityFest、Objective By The Sea v2.0 发表；同期在 Hacktivity 发表 GateKeeper: Bypass or not Bypass?，分别面向利用类（AppStore 应用提权）与防御机制类（GateKeeper 信任）问题，构成 macOS 上利用与机制两条并行研究线的起点。2019 年 3 月发布的 CVE-2019-5514（VMware Fusion 11 Guest VM RCE）为博客可核验的最早一篇 post，表明博客作为公开披露渠道先于 macOS 议题建立。2020 年研究重心由信任机制推进至 XPC 进程间通信与目录权限利用（Hacktivity XPC Exploitation on macOS、HackInTheBox/BSidesBudapest Exploiting Directory Permissions on macOS）。若 2018 DSE Workshop 议题确为 Windows 驱动签名绕过，则存在签名验证绕过思维的平台迁移；由于该前提未能一手核验，此迁移论断作为条件式陈述保留，stage 2 的承重证据改为已核验的 2019 年 macOS 议题。研究者进入 macOS 后的转向体现为议题平台切换与防御绕过方法论的延续，而非旧专长的丢弃。",
+      "evidence_ids": [
+        "cf-works-04",
+        "dec-03-mac-os-pivot",
+        "dec-04-offsec-exp312",
+        "fitzl-tl-08",
+        "fitzl-tl-09",
+        "fitzl-tl-10",
+        "fitzl-tl-11",
+        "csaba-fitzl-ext-03",
+        "csaba-fitzl-deepconv-02-exp312-course-development"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2021–2024",
+      "stage": "macOS 纵深化、系列化与方法论层级上移",
+      "capability_change": "研究进入系统化深化阶段，表现为三条主线并行外推。其一，隐私/TCC 绕过与 Wojciech Regula 跨 4 年合著系列：2021 BlackHat US '20+ Ways to Bypass Your macOS Privacy Mechanisms' → 2022 BlackHat EU '20+ New Ways…' → 2024 BlackHat Asia 'The Final Chapter: Unlimited ways…'，标题由 'Ways' 递进至 'New Ways' 再至 'Final Chapter'，体现对同一漏洞类的系统化扩展而非一次性发现。其二，研究对象由具体漏洞上移至 Apple Endpoint Security 框架本身：2021 Virus Bulletin 'Mitigating Exploits using Apple's Endpoint Security Framework'（白皮书）、2022 OBTS/MacSysAdmin 'The Achilles Heel of Endpoint Security'。其三，DiskArbitration 类研究跨 4 年三阶跃迁：2021 Mount(ain) of Bugs → 2024 History of macOS DiskArbitration Vulnerabilities → 2024 POC/BlackHat EU/BSidesBud Apple Disk-O Party → 2024 年 Audit Story 两部曲。同年 2021–09 发表 Getting started in macOS security 入门指南并自述源于他人反复提问，把外部协作网络固化为可公开复用的研究者索引。2022 年 BlackHat Asia 'macOS Vulnerabilities Hiding in Plain Sight' 附白皮书并跨 Black Hat Asia/Troopers/Zer0Con 三场复用，为本人 Talks 索引中唯一显式标注白皮书的议题。2022–2023 年 LaunchConstraints/Launch and Environment Constraints 由速览（2022-06-14）到深度解析（2023-10-09）相隔约 16 个月，体现对单一机制由浅入深的重复打磨。",
+      "evidence_ids": [
+        "cf-works-05",
+        "cf-works-06",
+        "cf-works-08",
+        "cf-works-09",
+        "cf-works-11",
+        "csaba-fitzl-ext-06",
+        "csaba-fitzl-ext-07",
+        "csaba-fitzl-ext-09",
+        "cf-comm-01",
+        "cf-comm-03",
+        "cf-comm-08",
+        "dec-06-collaborators",
+        "fitzl-tl-14",
+        "fitzl-tl-15",
+        "fitzl-tl-16",
+        "fitzl-tl-17",
+        "fitzl-tl-18",
+        "fitzl-tl-19"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2024–2026",
+      "stage": "成熟披露-发表工作流、规模化审计与长期失败复盘",
+      "capability_change": "研究方法由单点漏洞发现升级为规模化 Apple 软件包漏洞挖掘（2025 Finding Vulnerabilities in Apple Packages at Scale，SecurityFest/MacDevOpsYVR）与 macOS 安全演进综述（The Evolution of macOS Security from the Desert to the Lake，MacSysAdmin/IT Defense 2026/University of Utah MacAdmins）。CVE-2025-24277（Apple macOS Crash Reporter 组件目录路径解析漏洞，NVD 与 Apple 安全公告 HT122373 独立佐证，发布于 2025-03-31，署名报告者为 Csaba Fitzl of Kandji 与 Gergely Kalman）配合 Gergely Kalman 在 Hexacon/Objective By The Sea/BSidesBud 多场复用同一漏洞叙事，2026 年另在 Zer0Con 合著 macOS Exploit Mixtape，构成稳定的披露-多会议发表工作流。2025-12-05 发表 macOS LPE via the .localized directory，记录同一 installer 目录操纵类问题向 Apple 报告达 7 年仍未获 CVE 或赏金、3 个 ticket（含 OE110192294822）被以无法识别安全问题为由关闭，并显式标注其思路来源为 @p1tsist1p 博客与 Arjen 2017（rdar://33005768）、Mickey Jin CVE-2025-24099 前序工作，区分自创与转述。合著网络由 Regula 扩展至 Gergely Kalman 与 Brandon Dalton（2024 Mac, Where's My Bootstrap?），协作对象进一步多元。该阶段同时呈现成熟的规模化审计方法与对失败反馈的长期追踪。",
+      "evidence_ids": [
+        "cf-works-10",
+        "cf-works-11",
+        "csaba-fitzl-ext-08",
+        "csaba-fitzl-ext-09",
+        "cf-comm-06",
+        "cf-r1-e01",
+        "cf-r1-e02",
+        "dec-05-kandji",
+        "dec-07-disclosure-cve-2025-24277",
+        "fitzl-tl-20",
+        "fitzl-tl-21"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "可复现实验环境的教学化输出",
+      "starting_conditions": "2014–2018 年 Windows/通用方向阶段已形成以 workshop 形式产出非 macOS 内容的习惯（2014 Hello PDF、2015 Hello Anti-Disassembly，均附 workbook 与练习文件），此后转入 macOS 专项时该习惯已存在且可作为方法论载体迁移。",
+      "repeated_practice": "反复以 workbook + exercise files + VM setup guide 四件套构建可重复执行的研究教学材料：2018 DSE Workshop 含 VM 安装指南与练习文件；转入 OffSec 后将 macOS 控制绕过知识形式化为 EXP-312: Advanced macOS Control Bypasses 课程；博客阶段延续为分部连载的教学化 writeup（2024 Audit Story Part 1/Part 2）与系列化深度分析（Beyond good ol' LaunchAgents 系列、LaunchConstraints 速览→深度解析）。",
+      "feedback": "反馈来源为外部教学需求与社区提问：Getting started in macOS security 自述源于 'many people used to ask me where to start learning about macOS security'，把研究方向整理为可公开复用的入门指南并邀请补充（'probably far from being complete'）；workshop 与课程形态要求把研究方法拆解为可被他人重复执行的步骤，构成教学驱动的方法外化校准。",
+      "intermediate_capability": "形成把个人研究方法外化为可被他人重复执行、可被社区校准的公共材料链的能力，使每次研究既产出漏洞结论也产出可复用的方法资产，而非孤立发现。",
+      "observed_outcomes": [
+        "2014–2018 年 Windows/通用方向阶段以 workshop 四件套形式稳定输出（cf-works-02、cf-comm-07）",
+        "OffSec EXP-312: Advanced macOS Control Bypasses 课程开发，把 macOS 控制绕过系统化为教学内容（dec-04-offsec-exp312、csaba-fitzl-ext-03）",
+        "2024 Audit Story 两部曲以连载 writeup 公开完整守护进程审计过程（cf-works-09、fitzl-tl-19）",
+        "LaunchConstraints 由速览（2022-06-14）到深度解析（2023-10-09）的由浅入深重复打磨（fitzl-tl-16）"
+      ],
+      "evidence_ids": [
+        "cf-works-02",
+        "cf-works-03",
+        "cf-works-09",
+        "cf-comm-03",
+        "cf-comm-07",
+        "cf-comm-08",
+        "csaba-fitzl-ext-03",
+        "csaba-fitzl-deepconv-02-exp312-course-development",
+        "csaba-fitzl-deepconv-05-beyond-good-ol-launchagents-series",
+        "dec-04-offsec-exp312",
+        "fitzl-tl-16",
+        "fitzl-tl-19"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "教学化输出的高频也可能是 workshop 讲师职业角色的产物，而非纯粹的个人方法偏好；EXP-312 课程开发与 Kandji/OffSec 雇佣关系相关，其课程作者身份除 About 页自述外未独立抓取课程页证实（见 csaba-fitzl-ext-03 gap），机构约束可能放大了材料化输出频率。"
+    },
+    {
+      "name": "单一漏洞类的跨年系列化外推",
+      "starting_conditions": "2019 年 macOS 平台转向后即同时启动利用类（Getting root with benign AppStore apps）与机制类（GateKeeper: Bypass or not Bypass?）两条研究线，提供了以同一漏洞类跨年深化而非一次性发现的初始结构。",
+      "repeated_practice": "对单一子系统/漏洞类跨多年重复打磨并以递进标题系列化发表：隐私/TCC 绕过线 '20+ Ways'(2021) → '20+ New Ways'(2022) → 'The Final Chapter: Unlimited ways'(2024)；DiskArbitration 线 Mount(ain) of Bugs(2021) → History of DiskArbitration(2024) → Apple Disk-O Party(2024) → Audit Story(2024)；LaunchConstraints 线速览(2022) → 深度解析(2023)。同一研究跨 Black Hat US/EU/Asia 多区域与 Troopers/Zer0Con/OBTS 多会议复用（2022 Hiding in Plain Sight 跨三场并附白皮书）。",
+      "feedback": "反馈来源为会议接收与合著互审：同一议题跨年、跨区域被多个国际会议接收（Black Hat US/EU/Asia、Troopers、Zer0Con、OBTS），会议接收构成对研究方向的外部校准；与 Regula 的固定合著构成同伴互审。",
+      "intermediate_capability": "形成以系列化结构维持长期研究方向、把单点发现外推为系统化方法论的能力；系列化结构（prologue→正文、part1→part2、Ways→New Ways→Final Chapter）使每篇研究自动成为下一阶段的基线，降低方向放弃概率。",
+      "observed_outcomes": [
+        "隐私绕过系列跨 2021–2024 四年三阶递进标题（cf-works-05、csaba-fitzl-ext-06、fitzl-tl-14/15/18）",
+        "DiskArbitration 研究跨 4 年完成单点 bug→历史综述→系统审计三阶跃迁（cf-works-11、fitzl-tl-18/19）",
+        "2022 Hiding in Plain Sight 跨 Black Hat Asia/Troopers/Zer0Con 三场复用并附白皮书（csaba-fitzl-ext-07、fitzl-tl-15）",
+        "博客 2020-12 起持续输出至 2025-12，形成 Lord of The Rules、Audit Story、Beyond good ol' LaunchAgents 等多部连贯系列（cf-comm-08）"
+      ],
+      "evidence_ids": [
+        "cf-works-04",
+        "cf-works-05",
+        "cf-works-08",
+        "cf-works-09",
+        "cf-works-11",
+        "csaba-fitzl-ext-06",
+        "csaba-fitzl-ext-07",
+        "cf-comm-01",
+        "cf-comm-08",
+        "dec-03-mac-os-pivot",
+        "fitzl-tl-09",
+        "fitzl-tl-10",
+        "fitzl-tl-14",
+        "fitzl-tl-15",
+        "fitzl-tl-16",
+        "fitzl-tl-18",
+        "fitzl-tl-19"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "系列化外推也可能部分由会议投稿机制与合著节奏驱动：同一议题跨区域复用是会议生态常见做法，未必反映个人方法论的独特性；递进标题亦可能是营销式命名。但跨三个独立子系统（隐私/DiskArbitration/LaunchConstraints）均出现同构的跨年系列化模式，相对有区分度。"
+    },
+    {
+      "name": "失败与反馈的公开复盘",
+      "starting_conditions": "2021 年起系统化披露 macOS 本地漏洞并开始与 Apple 安全赏金项目交互，由此产生与厂商反馈机制的直接接触（CVE-2020-9900/CVE-2021-1786 Abusing macOS Crash Reporter、Experiences with Apple Security Bounty）。",
+      "repeated_practice": "反复把被拒绝、被漏接、不确定的反馈过程纳入公开记录：Experiences with Apple Security Bounty 自述两年内提交约 50 例漏洞、沟通稀少如发往黑洞（'black hole'），总评为 bittersweet 并给出 'follow up frequently' 的可操作经验；CVE-2020-9900 分析中标注对旧漏洞技术细节不确定并显式邀请原作者纠错（'Maybe CX01 will correct me'）；TeamViewer LPE 使用第三方中介 VCP/iDefense 致使错过厂商修复发布；.localized 目录操纵类问题向 Apple 报告 7 年未获 CVE 或赏金、3 个 ticket 被关闭。",
+      "feedback": "反馈来源为厂商低质量反馈与渠道选择的后果：模板化自动回复、资格争议、中介管道与厂商通知缺失导致研究者与自身漏洞修复进程脱钩；与同侪共享的普遍经验（'we share the same experiences'）上升为对赏金程序的集体批评。",
+      "intermediate_capability": "形成把失败与反馈本身作为可发表研究产出的能力，并将渠道选择经验（高频追问、避免依赖中介通知）固化为披露流程策略；同时以公开标注不确定 + 邀请更正的方式处理同侪工作重叠，把公开发表作为接受外部校准的接口。",
+      "observed_outcomes": [
+        "Experiences with Apple Security Bounty 公开复盘厂商反馈回路（cf-comm-02、fitzl-tl-12）",
+        "CVE-2020-9900/CVE-2021-1786 公开标注不确定并邀请原作者更正（cf-comm-04、fitzl-tl-12）",
+        "TeamViewer LPE 记录中介管道导致反馈中断（cf-comm-05）",
+        ".localized 7 年报告未果的长期失败复盘，并显式标注思路来源与他人前序工作（cf-works-10、fitzl-tl 不适用，由 cf-works-10 承重）"
+      ],
+      "evidence_ids": [
+        "cf-works-10",
+        "cf-comm-02",
+        "cf-comm-04",
+        "cf-comm-05",
+        "fitzl-tl-12"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "失败与反馈公开复盘机制仅覆盖本人选择公开发表的失败子集（Apple Security Bounty、CVE-2020-9900 不确定标注、TeamViewer 漏接、.localized 七年被拒）；未公开发表的拒绝与未被采纳且未记录的提交不可见；公开复盘频率不等同于失败复盘习惯的强度。公开失败亦可能兼具自我宣传功能（建立对厂商施压的公共记录），并非纯粹的复盘习惯。"
+    },
+    {
+      "name": "基于合著的同伴互审",
+      "starting_conditions": "2016 年与 Miklos Desbordes-Korcsev 合著 WinDBG 利用自动化白皮书为可核验的最早同行合作产出；2021 年转入 macOS 隐私绕过议题后与 Wojciech Regula 形成固定合著关系。",
+      "repeated_practice": "以稳定合著关系对单一主题跨年联合再发表：与 Regula 跨 2021–2024 合著隐私绕过系列（BlackHat US/EU/Asia、NullCon）；与 Brandon Dalton 合著 2024 Mac, Where's My Bootstrap?；与 Gergely Kalman 合著 2025–2026 Crash One (CVE-2025-24277) 与 macOS Exploit Mixtape。同一技术线由 '20+' 到 '20+ New' 再到 'Unlimited' 的标题演进显示通过反复协作将研究持续外推。",
+      "feedback": "反馈来源为合著同伴的方向选择与技术深度互审；CVE-2025-24277 的 Kalman 合著线由 Apple 官方公告 HT122373 独立佐证（署名 'Csaba Fitzl (@theevilbit) of Kandji and Gergely Kalman (@gergely_kalman), and an anonymous researcher'），构成对 Kalman 线合著关系的非自列第三方印证。Regula 合著线仍仅由本人 Talks 索引自列，未抓取到独立同行评价。",
+      "intermediate_capability": "形成基于合著的同伴互审渠道（Kalman 线由 Apple 官方公告 HT122373 独立佐证，Regula 线仍仅由本人 Talks 索引自列），以稳定协作网络对方向选择与技术深度进行外部校准。",
+      "observed_outcomes": [
+        "2016 WinDBG 利用自动化合著白皮书（cf-works-01、fitzl-tl-05）",
+        "Regula 线跨 2021–2024 隐私绕过系列合著（cf-comm-01、cf-works-05、dec-06-collaborators）",
+        "Kalman 线 2025–2026 Crash One/CVE-2025-24277 与 Exploit Mixtape 合著，Kalman 线经 HT122373 独立佐证（cf-comm-06、csaba-fitzl-ext-08、cf-r1-e02、dec-07-disclosure-cve-2025-24277）",
+        "Dalton 线 2024 Mac, Where's My Bootstrap? 合著（fitzl-tl-18）"
+      ],
+      "evidence_ids": [
+        "cf-works-01",
+        "cf-works-05",
+        "cf-comm-01",
+        "cf-comm-06",
+        "csaba-fitzl-ext-06",
+        "csaba-fitzl-ext-08",
+        "cf-r1-e02",
+        "dec-06-collaborators",
+        "dec-07-disclosure-cve-2025-24277",
+        "fitzl-tl-05",
+        "fitzl-tl-14",
+        "fitzl-tl-18"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "合著关系仍以自列为主，Regula 线与 Dalton 线缺少独立同行背书（csaba-fitzl-ext-10：未抓取到独立同行评价）；合著也可能是会议投稿对双人署名的偏好或主题分工的产物，而非真正的互审回路。Apple HT122373 仅独立佐证 Kalman 线的 CVE-2025-24277 共同报告关系，不等同于对该线研究质量的同行评价。"
+    }
+  ],
+  "tensions": [
+    "2018 DEF CON 26 / hack.lu Driver Signing Enforcement Bypass Workshop 的目标平台无法一手核验：术语 DSE 在通用语境中指向 Windows 驱动签名强制（macOS 对应物为 kext 签名），但演示稿 PDF 正文为 FlateDecode 压缩流不可读、DEF CON 媒体服务器返回 403、defcon.org 议程页与 hack.lu 归档页返回 404；原 ext-05（已作废）曾断言 Apple driver signing，与术语推断冲突。本节点将平台归属降级为不可确认，相应地把签名验证绕过思维的平台迁移论断改为条件式陈述。",
+    "About 页以 6 年网络工程师 + 8 年红蓝队的相对时长描述早期经历，自 2006 毕业起算红队阶段概算至约 2020 年结束，与 2019–2020 年已出现的 macOS 议题时间上重叠；About 表述为相对时长而非日历年份，红队结束与 macOS 转向的具体重叠期无法按月核验，本节点以公开输出（而非雇佣记录）作为分阶段依据。",
+    "Experiences with Apple Security Bounty（2021-04-23）正文仅取到标题与索引页定位，正文反馈细节未抓取；其厂商反馈复盘性质由 cf-comm-02 单独抓取的同源博文正文承重，但 cf-works-07（lead_only）不作为承重证据。",
+    "自陈偏差未受第三方来源约束（CVE-2025-24277 归属经 NVD 与 Apple 公告 HT122373 独立佐证，署名 Csaba Fitzl of Kandji 与 Gergely Kalman，为该偏差的部分例外）；多数阶段与机制证据来自本人 About/Talks/Posts 索引自列，csaba-fitzl-ext-10 记录未抓取到独立同行评价，同侪视角单向。",
+    "OffSec EXP-312 课程作者身份与起止时间、Kandji 入职时间均仅由 About 页自述，未独立抓取 OffSec 课程页或 Kandji 团队页证实，列为资料缺口而非已核验事实。",
+    "一处未抓取的搜索摘要（lead_only，未作为证据）曾混淆 Csaba Fitzl 与 'The DFIR Report/Microsoft' 关联、并称其任职 Cisco Talos/Jamf，与 About 页明确的现职 Kandji 不一致；该摘要未写入任何 item。"
+  ],
+  "transferable_practices": [
+    "以 workbook + exercise files + VM setup guide 四件套构建可重复执行的研究/教学材料，把个人方法外化为可被他人校准的公共资产。",
+    "对单一漏洞类以递进标题系列化跨年深化（单点 bug → 历史综述 → 系统审计），以系列结构维持长期研究方向、降低放弃概率。",
+    "把失败与反馈（被拒绝、被漏接、不确定）纳入公开记录，把公开发表本身作为接受外部校准的接口（公开标注不确定 + 邀请更正）。",
+    "以稳定合著关系对单一主题跨年联合再发表，借助同伴互审对方向选择与技术深度进行外部校准。",
+    "以入门指南形式盘点同侪网络并显式邀请补充，把外部协作网络固化为可公开复用的研究者索引。",
+    "对厂商反馈采取可操作策略（高频追问、避免依赖中介通知），并把渠道选择经验固化为披露流程策略。"
+  ],
+  "non_transferable_conditions": [
+    "现职 Kandji Principal macOS Security Researcher 的机构支持使研究直接对接 Apple 设备管理产品与客户场景，研究-产品反馈闭环依赖特定雇主而非普遍可得。",
+    "OffSec EXP-312 课程开发机会是雇佣关系与机构平台产物，非纯个人方法偏好可复制。",
+    "与 Wojciech Regula、Gergely Kalman、Brandon Dalton 的稳定合著关系依赖既有的 macOS 研究者协作网络与个人信任，非普遍可迁移条件。",
+    "持续被 Black Hat US/EU/Asia、Troopers、Zer0Con、Objective By The Sea 等国际会议接收的记录依赖会议投稿生态与 macOS 专项社区（OBTS）的存在，非个人能力单独决定。",
+    "6 年网络工程师 + 8 年红蓝队的跨域技能积累为特定职业路径产物，其向 macOS 防御绕过方法论迁移依赖个人既有红队背景而非通用前提。"
+  ],
+  "open_questions": [
+    "2018 DEF CON 26 / hack.lu Driver Signing Enforcement Bypass Workshop 的目标平台（Windows 驱动签名强制 vs macOS kext 签名）始终未能由权威一手来源确认，签名验证绕过思维的平台迁移论断因此只能作为条件式陈述保留。",
+    "红队阶段的具体雇主/团队、毕业院校、2006–2014 间的职位变动均不可核验；红队结束（约 2020）与 macOS 转向（2019–2020）的重叠期无法按月对齐。",
+    "OffSec EXP-312 课程的上线时间与担任讲师/作者的起止时间未知，Kandji 入职时间与此前雇主演变不可核验，两条均仅由 About 页自述、缺第二来源交叉验证。",
+    "从网络工程/红蓝队转入 macOS 安全研究的具体触发事件或动机未由本人公开说明，About 页未描述单一转折点，当前转向窗口为依据演讲记录的推断。",
+    "多篇 CVE writeup（CVE-2017-2533、CVE-2020-9900/CVE-2021-1786、CVE-2021-30808/1784、CVE-2022-32929、CVE-2022-22655、CVE-2023-40424）仅由 Posts 索引页确认标题/日期/CVE 编号，正文技术机制未抓取，无法用于技术深度判断；CVE-2025-24277 归属经 NVD 与 Apple 公告 HT122373 独立佐证（署名 Csaba Fitzl of Kandji 与 Gergely Kalman），但 writeup 正文技术机制仍未抓取。",
+    "未检索到任何一手来源指名正式导师或师承关系；是否有导师或同伴影响其转入 macOS 未知，About 页未提及任何导师或合作者姓名（合著关系为后来形成）。",
+    "csaba-fitzl-ext-10 记录未抓取到独立第三方评价（会议主办方描述、雇主/团队 bio、同行引述），'外部视角'评价主要依赖从自列索引推断的会议接收信号，而非直接第三方评估；Regula 与 Dalton 合著线均缺独立同行背书。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/csaba-fitzl-synthesis-v2-20260927-211324-958",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790515239711484000-csaba-fitzl-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "723af151-5460-4bcc-83a1-a081506514e8",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_oakugxwmxm7dt9d15yena0lb",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/csaba-fitzl-synthesis-v2-20260927-211324-958/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T13:20:39.759848+00:00"
+      },
+      {
+        "tool_use_id": "call_59knz1r6fpgrm4yb5wc3tsnw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/csaba-fitzl-synthesis-v2-20260927-211324-958/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "6e51a17a4eca479acb1cf65f083886033d236a074540a6bff9a5c55143b0adc0",
+        "accessed_at": "2026-09-27T13:20:39.759884+00:00"
+      },
+      {
+        "tool_use_id": "call_1x57vsalzskg1ohvfesauin9",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/csaba-fitzl-synthesis-v2-20260927-211324-958/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "4e7b8613b6745fd2d174318ded865aeaba55d95e4d1d7f9b19f5543fde4cee41",
+        "accessed_at": "2026-09-27T13:20:39.759895+00:00"
+      },
+      {
+        "tool_use_id": "call_q3f69jx892sej6hpabbioaa7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/csaba-fitzl-synthesis-v2-20260927-211324-958/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "9b94f86a2216067e41c045d197bc0c1b01bf5e66332684d6ef9cc05f5ca2c64d",
+        "accessed_at": "2026-09-27T13:20:39.759969+00:00"
+      },
+      {
+        "tool_use_id": "call_wea0niespwxhw2mpedl0glk3",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/csaba-fitzl-synthesis-v2-20260927-211324-958/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "7b10811829760fd4f5707e4c23f7e8982e7eacf41512ede8a3431c8f4405d992",
+        "accessed_at": "2026-09-27T13:20:39.760047+00:00"
+      },
+      {
+        "tool_use_id": "call_gbyai8tlv7de61uly0thnslb",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/csaba-fitzl-synthesis-v2-20260927-211324-958/inputs/evidence_json.json",
+          "offset": 1021,
+          "limit": 470
+        },
+        "success": true,
+        "content_sha256": "4c3f706c53286f9726a5427e71b43b191cfdf6949548837e71f9bcbac0ddcfd2",
+        "accessed_at": "2026-09-27T13:20:39.760093+00:00"
+      },
+      {
+        "tool_use_id": "call_x2x9bm40yyktib5gg7ydwjjq",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/csaba-fitzl-synthesis-v2-20260927-211324-958/checkpoint.md",
+          "content": "# Synthesis checkpoint — Csaba Fitzl (v2, post-revision)\n\n## Inputs read\n- task.md: 综合分析节点，重建领域能力成长过程；6 维材料 + revision_context；约束=主机制≥2 项判据、documented/reported/inferred/unknown 分开、保留矛盾/失败/竞争性解释、可迁移与个人特有分开、引用 evidence item id、无效 id 不用、专业书面语。\n- output.schema.json: required = person(expertise/stages/mechanisms/tensions/transferable_practices/non_transferable_conditions/open_questions); stages{period,stage,capability_change,evidence_ids,confidence}; mechanisms{name,starting_conditions,repeated_practice,feedback,intermediate_capability,observed_outcomes[],evidence_ids[],validation_tests[repeated|generative|distinctive],confidence,alternative_explanation}. additionalProperties=false.\n- person_json.json: rank 47, Csaba Fitzl, macOS 漏洞, @theevilbit, theevilbit.github.io, Black Hat US/Asia.\n- evidence_json.json: 6 维全读（1490 行）；works/conversations/community/external/decisions/timeline + targeted(cf-r1-e01/e02)。全部 verified_in_run=true，除 cf-works-07（lead_only）。\n- revision_context.json: RR1（2018 DSE 平台不可核验，ext-05 作废）、RR2（迁移机制条件化）、RR3/RR4（CVE-2025-24277 经 NVD+Apple HT122373 独立佐证）、RR5（mechanisms[1] 降格为合著同伴互审）、RR6（tensions 去\"压低\"）、RR7（红队结束~2020 与 macOS 转向重叠）、RR8（mechanisms[2] 幸存者偏差边界）。\n\n## 关键裁决\n- invalid: csaba-fitzl-ext-05（不使用）。dec-03 仍有效但其\"Windows\"断言受 RR1 质疑 → 仅用于\"2018→2019 转向窗口\"观察，平台以条件式陈述。\n- cf-works-07（verified_in_run=false）不作为承重证据；其内容由 cf-comm-02（verified）覆盖。\n- 每个 stage/mechanism 至少 1 个 verified_in_run=true 来源。\n\n## 主机制（均满足 ≥2 判据：跨期重复 + 解释多结果 + 区分度）\n1. 可复现实验环境的教学化输出（2014 workshop→EXP-312→博客系列）\n2. 单一漏洞类的跨年系列化外推（隐私绕过/DiskArbitration/LaunchConstraints 三线）\n3. 失败与反馈的公开复盘（ASB/CVE-2020-9900/TeamViewer/.localized）\n4. 基于合著的同伴互审（Regula/Dalton/Kalman；Kalman 线经 HT122373 独立佐证）\n\n## 阶段\n- S1 2006–2018 跨域技能积累与 Windows/通用方向起步（红队结束~2020，与 macOS 转向重叠）\n- S2 2018–2020 平台转向与 macOS 两条研究线并行（迁移论断条件化，承重于 2019 macOS 议题）\n- S3 2021–2024 macOS 纵深化/系列化/方法论上移（隐私系列+ESF+DiskArbitration 三阶+LaunchConstraints）\n- S4 2024–2026 成熟披露-发表工作流与规模化审计（CVE-2025-24277 多场复用、Packages at Scale、.localized 7 年复盘）\n\n## 状态\n- 全部字段已落定；将写入 output.json。\n"
+        },
+        "success": true,
+        "content_sha256": "fea665dd79d3aef7c5f9d4a8ffcd4cb0a6f2e30e3efc65f9b72b8fd044a1fdf4",
+        "accessed_at": "2026-09-27T13:20:39.760664+00:00"
+      },
+      {
+        "tool_use_id": "call_2lkjm1pna8sfjhcthazvfll6",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/csaba-fitzl-synthesis-v2-20260927-211324-958/output.json",
+          "content": "{\n  \"person\": \"Csaba Fitzl\",\n  \"expertise\": [\n    \"macOS 漏洞发现与利用（GateKeeper/App Store 信任机制、XPC、TCC/隐私绕过、Endpoint Security Framework、AMFI Launch Constraints、DiskArbitration/storagekitd 守护进程、Crash Reporter 目录路径解析）\",\n    \"macOS 控制机制绕过方法论（SIP、TCC、签名与启动约束、LaunchAgents/LaunchConstraints 系统化研究）\",\n    \"系统守护进程的系统性代码审计（以 Audit Story 连载形式输出）\",\n    \"规模化 Apple 软件包漏洞挖掘（Finding Vulnerabilities in Apple Packages at Scale）\",\n    \"Windows 早期方向：WinDBG 漏洞利用自动化、PDF/反逆向分析、Driver Signing Enforcement Bypass（2018 DSE Workshop 平台归属未一手核验，见 tensions）\",\n    \"可复现教学材料建设（workshop workbook/VM/练习文件、OffSec EXP-312 课程开发）\",\n    \"厂商反馈循环与披露协调（Apple Security Bounty、CVE 协调、多会议复用同一漏洞叙事）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2006–2018\",\n      \"stage\": \"跨域技能积累与 Windows/通用方向公开输出起步\",\n      \"capability_change\": \"按本人 About 页自述，2006 年以计算机工程师身份毕业后先任网络工程师约 6 年、再任蓝/红队约 8 年，方向覆盖网络取证、恶意软件分析、对手模拟与防御绕过。按 6+8 年自 2006 起算，红队阶段概算至约 2020 年结束，与 2019–2020 年的 macOS 议题（fitzl-tl-09、fitzl-tl-10、fitzl-tl-11）时间上重叠；本文不以雇佣记录而以公开输出作为分阶段依据，故此窗口的红队结束年份标为概算。该阶段产出的公开材料为非 macOS 方向：2014 Hello PDF、2015 Hello Anti-Disassembly、2016 Exploit Generation and Automation with WinDBG（合著 Miklos Desbordes-Korcsev 并附白皮书）、2018 DEF CON 26 / hack.lu Driver Signing Enforcement Bypass Workshop。2018 DSE Workshop 的目标平台（Windows 驱动签名强制 vs macOS kext 签名）未能从可抓取的一手材料确认：演示稿 PDF 正文为 FlateDecode 压缩流不可读、DEF CON 媒体服务器返回 403、defcon.org 议程页与 hack.lu 归档页返回 404；术语 DSE 在通用语境中多指 Windows 驱动签名强制，但本节点不以术语推断作为平台归属定论。此阶段形成的核心可迁移能力是防御绕过方法论与 workshop 形式的可复现教学输出，而非 macOS 专项知识。\",\n      \"evidence_ids\": [\n        \"cf-works-01\",\n        \"cf-works-02\",\n        \"cf-works-03\",\n        \"cf-works-04\",\n        \"csaba-fitzl-ext-01\",\n        \"csaba-fitzl-ext-02\",\n        \"csaba-fitzl-deepconv-01-career-timeline\",\n        \"csaba-fitzl-deepconv-04-2006-graduation-and-network-engineer-start\",\n        \"dec-01-2006\",\n        \"dec-02-redteam\",\n        \"dec-03-mac-os-pivot\",\n        \"fitzl-tl-01\",\n        \"fitzl-tl-02\",\n        \"fitzl-tl-03\",\n        \"fitzl-tl-04\",\n        \"fitzl-tl-05\",\n        \"fitzl-tl-06\",\n        \"fitzl-tl-07\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2018–2020\",\n      \"stage\": \"macOS 平台转向与两条研究线并行启动\",\n      \"capability_change\": \"可核验的 macOS 平台转向点落在 2019 年：同年 6 月博客记录 TALK — macOS — Getting root with benign AppStore apps，并在 Troopers、SecurityFest、Objective By The Sea v2.0 发表；同期在 Hacktivity 发表 GateKeeper: Bypass or not Bypass?，分别面向利用类（AppStore 应用提权）与防御机制类（GateKeeper 信任）问题，构成 macOS 上利用与机制两条并行研究线的起点。2019 年 3 月发布的 CVE-2019-5514（VMware Fusion 11 Guest VM RCE）为博客可核验的最早一篇 post，表明博客作为公开披露渠道先于 macOS 议题建立。2020 年研究重心由信任机制推进至 XPC 进程间通信与目录权限利用（Hacktivity XPC Exploitation on macOS、HackInTheBox/BSidesBudapest Exploiting Directory Permissions on macOS）。若 2018 DSE Workshop 议题确为 Windows 驱动签名绕过，则存在签名验证绕过思维的平台迁移；由于该前提未能一手核验，此迁移论断作为条件式陈述保留，stage 2 的承重证据改为已核验的 2019 年 macOS 议题。研究者进入 macOS 后的转向体现为议题平台切换与防御绕过方法论的延续，而非旧专长的丢弃。\",\n      \"evidence_ids\": [\n        \"cf-works-04\",\n        \"dec-03-mac-os-pivot\",\n        \"dec-04-offsec-exp312\",\n        \"fitzl-tl-08\",\n        \"fitzl-tl-09\",\n        \"fitzl-tl-10\",\n        \"fitzl-tl-11\",\n        \"csaba-fitzl-ext-03\",\n        \"csaba-fitzl-deepconv-02-exp312-course-development\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2021–2024\",\n      \"stage\": \"macOS 纵深化、系列化与方法论层级上移\",\n      \"capability_change\": \"研究进入系统化深化阶段，表现为三条主线并行外推。其一，隐私/TCC 绕过与 Wojciech Regula 跨 4 年合著系列：2021 BlackHat US '20+ Ways to Bypass Your macOS Privacy Mechanisms' → 2022 BlackHat EU '20+ New Ways…' → 2024 BlackHat Asia 'The Final Chapter: Unlimited ways…'，标题由 'Ways' 递进至 'New Ways' 再至 'Final Chapter'，体现对同一漏洞类的系统化扩展而非一次性发现。其二，研究对象由具体漏洞上移至 Apple Endpoint Security 框架本身：2021 Virus Bulletin 'Mitigating Exploits using Apple's Endpoint Security Framework'（白皮书）、2022 OBTS/MacSysAdmin 'The Achilles Heel of Endpoint Security'。其三，DiskArbitration 类研究跨 4 年三阶跃迁：2021 Mount(ain) of Bugs → 2024 History of macOS DiskArbitration Vulnerabilities → 2024 POC/BlackHat EU/BSidesBud Apple Disk-O Party → 2024 年 Audit Story 两部曲。同年 2021–09 发表 Getting started in macOS security 入门指南并自述源于他人反复提问，把外部协作网络固化为可公开复用的研究者索引。2022 年 BlackHat Asia 'macOS Vulnerabilities Hiding in Plain Sight' 附白皮书并跨 Black Hat Asia/Troopers/Zer0Con 三场复用，为本人 Talks 索引中唯一显式标注白皮书的议题。2022–2023 年 LaunchConstraints/Launch and Environment Constraints 由速览（2022-06-14）到深度解析（2023-10-09）相隔约 16 个月，体现对单一机制由浅入深的重复打磨。\",\n      \"evidence_ids\": [\n        \"cf-works-05\",\n        \"cf-works-06\",\n        \"cf-works-08\",\n        \"cf-works-09\",\n        \"cf-works-11\",\n        \"csaba-fitzl-ext-06\",\n        \"csaba-fitzl-ext-07\",\n        \"csaba-fitzl-ext-09\",\n        \"cf-comm-01\",\n        \"cf-comm-03\",\n        \"cf-comm-08\",\n        \"dec-06-collaborators\",\n        \"fitzl-tl-14\",\n        \"fitzl-tl-15\",\n        \"fitzl-tl-16\",\n        \"fitzl-tl-17\",\n        \"fitzl-tl-18\",\n        \"fitzl-tl-19\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2024–2026\",\n      \"stage\": \"成熟披露-发表工作流、规模化审计与长期失败复盘\",\n      \"capability_change\": \"研究方法由单点漏洞发现升级为规模化 Apple 软件包漏洞挖掘（2025 Finding Vulnerabilities in Apple Packages at Scale，SecurityFest/MacDevOpsYVR）与 macOS 安全演进综述（The Evolution of macOS Security from the Desert to the Lake，MacSysAdmin/IT Defense 2026/University of Utah MacAdmins）。CVE-2025-24277（Apple macOS Crash Reporter 组件目录路径解析漏洞，NVD 与 Apple 安全公告 HT122373 独立佐证，发布于 2025-03-31，署名报告者为 Csaba Fitzl of Kandji 与 Gergely Kalman）配合 Gergely Kalman 在 Hexacon/Objective By The Sea/BSidesBud 多场复用同一漏洞叙事，2026 年另在 Zer0Con 合著 macOS Exploit Mixtape，构成稳定的披露-多会议发表工作流。2025-12-05 发表 macOS LPE via the .localized directory，记录同一 installer 目录操纵类问题向 Apple 报告达 7 年仍未获 CVE 或赏金、3 个 ticket（含 OE110192294822）被以无法识别安全问题为由关闭，并显式标注其思路来源为 @p1tsist1p 博客与 Arjen 2017（rdar://33005768）、Mickey Jin CVE-2025-24099 前序工作，区分自创与转述。合著网络由 Regula 扩展至 Gergely Kalman 与 Brandon Dalton（2024 Mac, Where's My Bootstrap?），协作对象进一步多元。该阶段同时呈现成熟的规模化审计方法与对失败反馈的长期追踪。\",\n      \"evidence_ids\": [\n        \"cf-works-10\",\n        \"cf-works-11\",\n        \"csaba-fitzl-ext-08\",\n        \"csaba-fitzl-ext-09\",\n        \"cf-comm-06\",\n        \"cf-r1-e01\",\n        \"cf-r1-e02\",\n        \"dec-05-kandji\",\n        \"dec-07-disclosure-cve-2025-24277\",\n        \"fitzl-tl-20\",\n        \"fitzl-tl-21\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"可复现实验环境的教学化输出\",\n      \"starting_conditions\": \"2014–2018 年 Windows/通用方向阶段已形成以 workshop 形式产出非 macOS 内容的习惯（2014 Hello PDF、2015 Hello Anti-Disassembly，均附 workbook 与练习文件），此后转入 macOS 专项时该习惯已存在且可作为方法论载体迁移。\",\n      \"repeated_practice\": \"反复以 workbook + exercise files + VM setup guide 四件套构建可重复执行的研究教学材料：2018 DSE Workshop 含 VM 安装指南与练习文件；转入 OffSec 后将 macOS 控制绕过知识形式化为 EXP-312: Advanced macOS Control Bypasses 课程；博客阶段延续为分部连载的教学化 writeup（2024 Audit Story Part 1/Part 2）与系列化深度分析（Beyond good ol' LaunchAgents 系列、LaunchConstraints 速览→深度解析）。\",\n      \"feedback\": \"反馈来源为外部教学需求与社区提问：Getting started in macOS security 自述源于 'many people used to ask me where to start learning about macOS security'，把研究方向整理为可公开复用的入门指南并邀请补充（'probably far from being complete'）；workshop 与课程形态要求把研究方法拆解为可被他人重复执行的步骤，构成教学驱动的方法外化校准。\",\n      \"intermediate_capability\": \"形成把个人研究方法外化为可被他人重复执行、可被社区校准的公共材料链的能力，使每次研究既产出漏洞结论也产出可复用的方法资产，而非孤立发现。\",\n      \"observed_outcomes\": [\n        \"2014–2018 年 Windows/通用方向阶段以 workshop 四件套形式稳定输出（cf-works-02、cf-comm-07）\",\n        \"OffSec EXP-312: Advanced macOS Control Bypasses 课程开发，把 macOS 控制绕过系统化为教学内容（dec-04-offsec-exp312、csaba-fitzl-ext-03）\",\n        \"2024 Audit Story 两部曲以连载 writeup 公开完整守护进程审计过程（cf-works-09、fitzl-tl-19）\",\n        \"LaunchConstraints 由速览（2022-06-14）到深度解析（2023-10-09）的由浅入深重复打磨（fitzl-tl-16）\"\n      ],\n      \"evidence_ids\": [\n        \"cf-works-02\",\n        \"cf-works-03\",\n        \"cf-works-09\",\n        \"cf-comm-03\",\n        \"cf-comm-07\",\n        \"cf-comm-08\",\n        \"csaba-fitzl-ext-03\",\n        \"csaba-fitzl-deepconv-02-exp312-course-development\",\n        \"csaba-fitzl-deepconv-05-beyond-good-ol-launchagents-series\",\n        \"dec-04-offsec-exp312\",\n        \"fitzl-tl-16\",\n        \"fitzl-tl-19\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"教学化输出的高频也可能是 workshop 讲师职业角色的产物，而非纯粹的个人方法偏好；EXP-312 课程开发与 Kandji/OffSec 雇佣关系相关，其课程作者身份除 About 页自述外未独立抓取课程页证实（见 csaba-fitzl-ext-03 gap），机构约束可能放大了材料化输出频率。\"\n    },\n    {\n      \"name\": \"单一漏洞类的跨年系列化外推\",\n      \"starting_conditions\": \"2019 年 macOS 平台转向后即同时启动利用类（Getting root with benign AppStore apps）与机制类（GateKeeper: Bypass or not Bypass?）两条研究线，提供了以同一漏洞类跨年深化而非一次性发现的初始结构。\",\n      \"repeated_practice\": \"对单一子系统/漏洞类跨多年重复打磨并以递进标题系列化发表：隐私/TCC 绕过线 '20+ Ways'(2021) → '20+ New Ways'(2022) → 'The Final Chapter: Unlimited ways'(2024)；DiskArbitration 线 Mount(ain) of Bugs(2021) → History of DiskArbitration(2024) → Apple Disk-O Party(2024) → Audit Story(2024)；LaunchConstraints 线速览(2022) → 深度解析(2023)。同一研究跨 Black Hat US/EU/Asia 多区域与 Troopers/Zer0Con/OBTS 多会议复用（2022 Hiding in Plain Sight 跨三场并附白皮书）。\",\n      \"feedback\": \"反馈来源为会议接收与合著互审：同一议题跨年、跨区域被多个国际会议接收（Black Hat US/EU/Asia、Troopers、Zer0Con、OBTS），会议接收构成对研究方向的外部校准；与 Regula 的固定合著构成同伴互审。\",\n      \"intermediate_capability\": \"形成以系列化结构维持长期研究方向、把单点发现外推为系统化方法论的能力；系列化结构（prologue→正文、part1→part2、Ways→New Ways→Final Chapter）使每篇研究自动成为下一阶段的基线，降低方向放弃概率。\",\n      \"observed_outcomes\": [\n        \"隐私绕过系列跨 2021–2024 四年三阶递进标题（cf-works-05、csaba-fitzl-ext-06、fitzl-tl-14/15/18）\",\n        \"DiskArbitration 研究跨 4 年完成单点 bug→历史综述→系统审计三阶跃迁（cf-works-11、fitzl-tl-18/19）\",\n        \"2022 Hiding in Plain Sight 跨 Black Hat Asia/Troopers/Zer0Con 三场复用并附白皮书（csaba-fitzl-ext-07、fitzl-tl-15）\",\n        \"博客 2020-12 起持续输出至 2025-12，形成 Lord of The Rules、Audit Story、Beyond good ol' LaunchAgents 等多部连贯系列（cf-comm-08）\"\n      ],\n      \"evidence_ids\": [\n        \"cf-works-04\",\n        \"cf-works-05\",\n        \"cf-works-08\",\n        \"cf-works-09\",\n        \"cf-works-11\",\n        \"csaba-fitzl-ext-06\",\n        \"csaba-fitzl-ext-07\",\n        \"cf-comm-01\",\n        \"cf-comm-08\",\n        \"dec-03-mac-os-pivot\",\n        \"fitzl-tl-09\",\n        \"fitzl-tl-10\",\n        \"fitzl-tl-14\",\n        \"fitzl-tl-15\",\n        \"fitzl-tl-16\",\n        \"fitzl-tl-18\",\n        \"fitzl-tl-19\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"系列化外推也可能部分由会议投稿机制与合著节奏驱动：同一议题跨区域复用是会议生态常见做法，未必反映个人方法论的独特性；递进标题亦可能是营销式命名。但跨三个独立子系统（隐私/DiskArbitration/LaunchConstraints）均出现同构的跨年系列化模式，相对有区分度。\"\n    },\n    {\n      \"name\": \"失败与反馈的公开复盘\",\n      \"starting_conditions\": \"2021 年起系统化披露 macOS 本地漏洞并开始与 Apple 安全赏金项目交互，由此产生与厂商反馈机制的直接接触（CVE-2020-9900/CVE-2021-1786 Abusing macOS Crash Reporter、Experiences with Apple Security Bounty）。\",\n      \"repeated_practice\": \"反复把被拒绝、被漏接、不确定的反馈过程纳入公开记录：Experiences with Apple Security Bounty 自述两年内提交约 50 例漏洞、沟通稀少如发往黑洞（'black hole'），总评为 bittersweet 并给出 'follow up frequently' 的可操作经验；CVE-2020-9900 分析中标注对旧漏洞技术细节不确定并显式邀请原作者纠错（'Maybe CX01 will correct me'）；TeamViewer LPE 使用第三方中介 VCP/iDefense 致使错过厂商修复发布；.localized 目录操纵类问题向 Apple 报告 7 年未获 CVE 或赏金、3 个 ticket 被关闭。\",\n      \"feedback\": \"反馈来源为厂商低质量反馈与渠道选择的后果：模板化自动回复、资格争议、中介管道与厂商通知缺失导致研究者与自身漏洞修复进程脱钩；与同侪共享的普遍经验（'we share the same experiences'）上升为对赏金程序的集体批评。\",\n      \"intermediate_capability\": \"形成把失败与反馈本身作为可发表研究产出的能力，并将渠道选择经验（高频追问、避免依赖中介通知）固化为披露流程策略；同时以公开标注不确定 + 邀请更正的方式处理同侪工作重叠，把公开发表作为接受外部校准的接口。\",\n      \"observed_outcomes\": [\n        \"Experiences with Apple Security Bounty 公开复盘厂商反馈回路（cf-comm-02、fitzl-tl-12）\",\n        \"CVE-2020-9900/CVE-2021-1786 公开标注不确定并邀请原作者更正（cf-comm-04、fitzl-tl-12）\",\n        \"TeamViewer LPE 记录中介管道导致反馈中断（cf-comm-05）\",\n        \".localized 7 年报告未果的长期失败复盘，并显式标注思路来源与他人前序工作（cf-works-10、fitzl-tl 不适用，由 cf-works-10 承重）\"\n      ],\n      \"evidence_ids\": [\n        \"cf-works-10\",\n        \"cf-comm-02\",\n        \"cf-comm-04\",\n        \"cf-comm-05\",\n        \"fitzl-tl-12\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"失败与反馈公开复盘机制仅覆盖本人选择公开发表的失败子集（Apple Security Bounty、CVE-2020-9900 不确定标注、TeamViewer 漏接、.localized 七年被拒）；未公开发表的拒绝与未被采纳且未记录的提交不可见；公开复盘频率不等同于失败复盘习惯的强度。公开失败亦可能兼具自我宣传功能（建立对厂商施压的公共记录），并非纯粹的复盘习惯。\"\n    },\n    {\n      \"name\": \"基于合著的同伴互审\",\n      \"starting_conditions\": \"2016 年与 Miklos Desbordes-Korcsev 合著 WinDBG 利用自动化白皮书为可核验的最早同行合作产出；2021 年转入 macOS 隐私绕过议题后与 Wojciech Regula 形成固定合著关系。\",\n      \"repeated_practice\": \"以稳定合著关系对单一主题跨年联合再发表：与 Regula 跨 2021–2024 合著隐私绕过系列（BlackHat US/EU/Asia、NullCon）；与 Brandon Dalton 合著 2024 Mac, Where's My Bootstrap?；与 Gergely Kalman 合著 2025–2026 Crash One (CVE-2025-24277) 与 macOS Exploit Mixtape。同一技术线由 '20+' 到 '20+ New' 再到 'Unlimited' 的标题演进显示通过反复协作将研究持续外推。\",\n      \"feedback\": \"反馈来源为合著同伴的方向选择与技术深度互审；CVE-2025-24277 的 Kalman 合著线由 Apple 官方公告 HT122373 独立佐证（署名 'Csaba Fitzl (@theevilbit) of Kandji and Gergely Kalman (@gergely_kalman), and an anonymous researcher'），构成对 Kalman 线合著关系的非自列第三方印证。Regula 合著线仍仅由本人 Talks 索引自列，未抓取到独立同行评价。\",\n      \"intermediate_capability\": \"形成基于合著的同伴互审渠道（Kalman 线由 Apple 官方公告 HT122373 独立佐证，Regula 线仍仅由本人 Talks 索引自列），以稳定协作网络对方向选择与技术深度进行外部校准。\",\n      \"observed_outcomes\": [\n        \"2016 WinDBG 利用自动化合著白皮书（cf-works-01、fitzl-tl-05）\",\n        \"Regula 线跨 2021–2024 隐私绕过系列合著（cf-comm-01、cf-works-05、dec-06-collaborators）\",\n        \"Kalman 线 2025–2026 Crash One/CVE-2025-24277 与 Exploit Mixtape 合著，Kalman 线经 HT122373 独立佐证（cf-comm-06、csaba-fitzl-ext-08、cf-r1-e02、dec-07-disclosure-cve-2025-24277）\",\n        \"Dalton 线 2024 Mac, Where's My Bootstrap? 合著（fitzl-tl-18）\"\n      ],\n      \"evidence_ids\": [\n        \"cf-works-01\",\n        \"cf-works-05\",\n        \"cf-comm-01\",\n        \"cf-comm-06\",\n        \"csaba-fitzl-ext-06\",\n        \"csaba-fitzl-ext-08\",\n        \"cf-r1-e02\",\n        \"dec-06-collaborators\",\n        \"dec-07-disclosure-cve-2025-24277\",\n        \"fitzl-tl-05\",\n        \"fitzl-tl-14\",\n        \"fitzl-tl-18\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"合著关系仍以自列为主，Regula 线与 Dalton 线缺少独立同行背书（csaba-fitzl-ext-10：未抓取到独立同行评价）；合著也可能是会议投稿对双人署名的偏好或主题分工的产物，而非真正的互审回路。Apple HT122373 仅独立佐证 Kalman 线的 CVE-2025-24277 共同报告关系，不等同于对该线研究质量的同行评价。\"\n    }\n  ],\n  \"tensions\": [\n    \"2018 DEF CON 26 / hack.lu Driver Signing Enforcement Bypass Workshop 的目标平台无法一手核验：术语 DSE 在通用语境中指向 Windows 驱动签名强制（macOS 对应物为 kext 签名），但演示稿 PDF 正文为 FlateDecode 压缩流不可读、DEF CON 媒体服务器返回 403、defcon.org 议程页与 hack.lu 归档页返回 404；原 ext-05（已作废）曾断言 Apple driver signing，与术语推断冲突。本节点将平台归属降级为不可确认，相应地把签名验证绕过思维的平台迁移论断改为条件式陈述。\",\n    \"About 页以 6 年网络工程师 + 8 年红蓝队的相对时长描述早期经历，自 2006 毕业起算红队阶段概算至约 2020 年结束，与 2019–2020 年已出现的 macOS 议题时间上重叠；About 表述为相对时长而非日历年份，红队结束与 macOS 转向的具体重叠期无法按月核验，本节点以公开输出（而非雇佣记录）作为分阶段依据。\",\n    \"Experiences with Apple Security Bounty（2021-04-23）正文仅取到标题与索引页定位，正文反馈细节未抓取；其厂商反馈复盘性质由 cf-comm-02 单独抓取的同源博文正文承重，但 cf-works-07（lead_only）不作为承重证据。\",\n    \"自陈偏差未受第三方来源约束（CVE-2025-24277 归属经 NVD 与 Apple 公告 HT122373 独立佐证，署名 Csaba Fitzl of Kandji 与 Gergely Kalman，为该偏差的部分例外）；多数阶段与机制证据来自本人 About/Talks/Posts 索引自列，csaba-fitzl-ext-10 记录未抓取到独立同行评价，同侪视角单向。\",\n    \"OffSec EXP-312 课程作者身份与起止时间、Kandji 入职时间均仅由 About 页自述，未独立抓取 OffSec 课程页或 Kandji 团队页证实，列为资料缺口而非已核验事实。\",\n    \"一处未抓取的搜索摘要（lead_only，未作为证据）曾混淆 Csaba Fitzl 与 'The DFIR Report/Microsoft' 关联、并称其任职 Cisco Talos/Jamf，与 About 页明确的现职 Kandji 不一致；该摘要未写入任何 item。\"\n  ],\n  \"transferable_practices\": [\n    \"以 workbook + exercise files + VM setup guide 四件套构建可重复执行的研究/教学材料，把个人方法外化为可被他人校准的公共资产。\",\n    \"对单一漏洞类以递进标题系列化跨年深化（单点 bug → 历史综述 → 系统审计），以系列结构维持长期研究方向、降低放弃概率。\",\n    \"把失败与反馈（被拒绝、被漏接、不确定）纳入公开记录，把公开发表本身作为接受外部校准的接口（公开标注不确定 + 邀请更正）。\",\n    \"以稳定合著关系对单一主题跨年联合再发表，借助同伴互审对方向选择与技术深度进行外部校准。\",\n    \"以入门指南形式盘点同侪网络并显式邀请补充，把外部协作网络固化为可公开复用的研究者索引。\",\n    \"对厂商反馈采取可操作策略（高频追问、避免依赖中介通知），并把渠道选择经验固化为披露流程策略。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"现职 Kandji Principal macOS Security Researcher 的机构支持使研究直接对接 Apple 设备管理产品与客户场景，研究-产品反馈闭环依赖特定雇主而非普遍可得。\",\n    \"OffSec EXP-312 课程开发机会是雇佣关系与机构平台产物，非纯个人方法偏好可复制。\",\n    \"与 Wojciech Regula、Gergely Kalman、Brandon Dalton 的稳定合著关系依赖既有的 macOS 研究者协作网络与个人信任，非普遍可迁移条件。\",\n    \"持续被 Black Hat US/EU/Asia、Troopers、Zer0Con、Objective By The Sea 等国际会议接收的记录依赖会议投稿生态与 macOS 专项社区（OBTS）的存在，非个人能力单独决定。\",\n    \"6 年网络工程师 + 8 年红蓝队的跨域技能积累为特定职业路径产物，其向 macOS 防御绕过方法论迁移依赖个人既有红队背景而非通用前提。\"\n  ],\n  \"open_questions\": [\n    \"2018 DEF CON 26 / hack.lu Driver Signing Enforcement Bypass Workshop 的目标平台（Windows 驱动签名强制 vs macOS kext 签名）始终未能由权威一手来源确认，签名验证绕过思维的平台迁移论断因此只能作为条件式陈述保留。\",\n    \"红队阶段的具体雇主/团队、毕业院校、2006–2014 间的职位变动均不可核验；红队结束（约 2020）与 macOS 转向（2019–2020）的重叠期无法按月对齐。\",\n    \"OffSec EXP-312 课程的上线时间与担任讲师/作者的起止时间未知，Kandji 入职时间与此前雇主演变不可核验，两条均仅由 About 页自述、缺第二来源交叉验证。\",\n    \"从网络工程/红蓝队转入 macOS 安全研究的具体触发事件或动机未由本人公开说明，About 页未描述单一转折点，当前转向窗口为依据演讲记录的推断。\",\n    \"多篇 CVE writeup（CVE-2017-2533、CVE-2020-9900/CVE-2021-1786、CVE-2021-30808/1784、CVE-2022-32929、CVE-2022-22655、CVE-2023-40424）仅由 Posts 索引页确认标题/日期/CVE 编号，正文技术机制未抓取，无法用于技术深度判断；CVE-2025-24277 归属经 NVD 与 Apple 公告 HT122373 独立佐证（署名 Csaba Fitzl of Kandji 与 Gergely Kalman），但 writeup 正文技术机制仍未抓取。\",\n    \"未检索到任何一手来源指名正式导师或师承关系；是否有导师或同伴影响其转入 macOS 未知，About 页未提及任何导师或合作者姓名（合著关系为后来形成）。\",\n    \"csaba-fitzl-ext-10 记录未抓取到独立第三方评价（会议主办方描述、雇主/团队 bio、同行引述），'外部视角'评价主要依赖从自列索引推断的会议接收信号，而非直接第三方评估；Regula 与 Dalton 合著线均缺独立同行背书。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "d397335e02252c65eb959cf0a6f64b4b2665cb5949cf6d2e7a67657ce0e234db",
+        "accessed_at": "2026-09-27T13:20:39.760668+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790515239760684000-csaba-fitzl-synthesis-v2.json",
+    "label": "Csaba Fitzl:synthesis:v2",
+    "elapsed_seconds": 434.79,
+    "prompt_sha256": "4ec2e93fca154a416e4f5a393d975b0b85e16980851c3080a1c1c9818a18811b",
+    "num_turns": 9,
+    "total_cost_usd": 1.043567,
+    "usage": {
+      "input_tokens": 70981,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 241024,
+      "output_tokens": 22726,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 70981,
+        "outputTokens": 22726,
+        "cacheReadInputTokens": 241024,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.043567,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

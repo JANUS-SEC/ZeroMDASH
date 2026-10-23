@@ -1,0 +1,713 @@
+{
+  "person": "HeeChan Kim",
+  "dimension": "公开作品与技术演化",
+  "identity_check": "GitHub 用户 heegong 的 profile 页面显示显示名为 '김희찬 (heegong)'，bio 为 '0-day Researcher'，所属 'TeamH4C'，所在地 Seoul，并链接个人站点 https://heegong.github.io 与 X 账号 @heegong123；博客页脚署名为 'HeeChan Kim'。该 handle 与 person_json 中的 name_or_handle、social、writeup_evidence 三项一致，身份对应得到一手来源确认。未发现同名歧义证据，但未核验真实姓名拼写以外的身份背景（学历、雇主等）。",
+  "items": [
+    {
+      "id": "hc-publication-2022-4956",
+      "date": "2022-06-12",
+      "claim": "HeeChan Kim 公开发布 CVE-2022-4956，针对 Advanced Installer（<=19.7）及使用该框架的 Proton VPN 安装器的 DLL 劫持本地提权漏洞。root cause 为安装器从相邻 .Local 目录加载 WinSxS 的 GdiPlus.dll，而该目录普通用户可写。PoC 以 SeDebugPrivilege 打开 winlogon.exe、复制其 token 并经 CreateProcessWithTokenW 提升至 SYSTEM。研究者描述发现路径为在审查 Proton VPN 安装器时偶然发现，Proton 将报告转交 Advanced Installer，后者在 v19.7.1 修复并赠送 license key。",
+      "status": "documented",
+      "growth_signal": "早期（2022 年中）作品以 WinSxS/.Local 目录 DLL 劫持为方法，依赖 Process Monitor 观察安装器文件搜索顺序；披露渠道为厂商直接沟通，附带完整 timeline；首次显示其通过供应链依赖（安装器框架）从下游产品回溯到上游根因的研究习惯。",
+      "short_quote": "I found this vulnerability through Proton VPN.",
+      "source": {
+        "title": "CVE-2022-4956: Advaned Installer Local Privilege Escalation Vulnerability (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/Advaned-Installer-Local-Privilege-Escalation-Vulnerability/",
+        "published": "2022-06-12",
+        "source_type": "personal_blog_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_m1oilyzmelge6rjr6wgvg1np",
+        "accessed_at": "2026-09-28T07:04:17.608067+00:00",
+        "content_sha256": "3a11017d78b28174d813d0f3c0f51ceeeb35a8c52b73fc94b23cad8c046c684b"
+      }
+    },
+    {
+      "id": "hc-publication-2022-39846",
+      "date": "2022-09-11",
+      "claim": "HeeChan Kim 发布 CVE-2022-4956 之后的 Samsung Smart Switch PC DLL 劫持漏洞（CVE-2022-39846，vendor id SVE-2022-1841）。root cause 为管理员权限安装器将日志写入用户可写 temp 目录，其中记录了包含随机 GUID 的子目录路径，随后从该目录加载 MSSetupAddinDllLOC.dll。PoC 用 Python 脚本轮询日志、解析 GUID 目录、在安装器加载前植入恶意 DLL，再以 winlogon token 复制提权到 SYSTEM。厂商 Samsung Mobile Security 在约 5 周内完成分级与修复。",
+      "status": "documented",
+      "growth_signal": "方法从静态 DLL 搜索顺序劫持进化到 race condition：引入 Python 监控脚本解析安装器日志以预测随机路径，体现重复练习中的工具建设（自动化 PoC）。同一厂商（Samsung）被系统性追踪，显示目标选择的延续性。",
+      "source": {
+        "title": "CVE-2022-39846: DLL hijacking vulnerability in Smart Switch PC (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/CVE-2022-39846-DLL-hijacking-vulnerability-in-Smart-Switch-PC/",
+        "published": "2022-09-11",
+        "source_type": "personal_blog_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_qe6myhhksuakqiwbc2b9xpwr",
+        "accessed_at": "2026-09-28T07:04:17.608081+00:00",
+        "content_sha256": "b1b4ac8d4b6ed96df4b1225e423d35014ad7e41e845949008a94ef89ec5945ce"
+      }
+    },
+    {
+      "id": "hc-publication-2022-44898-kernel",
+      "date": "2022-11-01",
+      "claim": "HeeChan Kim 发布 CVE-2022-44898，针对 ASUS AuraSync 捆绑的内核驱动 MsIo64.sys（<=1.07.79_V2.2）的栈缓冲区溢出本地提权。IOCTL 分发例程（0x80102040）调用 memmove 将用户输入 lpInBuffer 拷入 16 字节栈缓冲 Src 而 Options（源自 nInBufferSize）控制拷贝长度，未校验。PoC 构造 136 字节缓冲（72 字节 NOP + ROP 链），先 pop 精心构造的 CR4 值（0x250ef8）经 mov cr4,rcx;ret 关闭 SMEP，wbinvd;ret 后跳转到用户态 shellcode，通过遍历 ActiveProcessLinks 找 PID 4 的 EPROCESS、复制 +70h 偏移的 token 实现行窃，再恢复 SMEP 与栈。ASUS 于 2022-08-09 提供补丁并授予 Hall of Fame；MITRE 于 2023-02-07 分配 CVE。",
+      "status": "documented",
+      "growth_signal": "技术栈从 user-mode installer DLL 劫持跃迁到内核态 exploit：首次（也是所抓取作品中唯一一次）使用 ROP、SMEP bypass 与 EPROCESS token stealing。这是公开作品中难度最高的单点，显示其能力从逻辑漏洞扩展到内核内存破坏类漏洞。披露后获得厂商致谢（ASUS Hall of Fame）。",
+      "short_quote": "Since lpInBuffer is moved to Src, and the length is not checked, a rop attack is possible by changing the dispatch function return address.",
+      "source": {
+        "title": "CVE-2022-44898: ASUS AuraSync Kernel Stack Based Buffer Overflow Local Privilege Escalation (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/ASUS-AuraSync-Kernel-Stack-Based-Buffer-Overflow-Local-Privilege-Escalation/",
+        "published": "2022-11-01",
+        "source_type": "personal_blog_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_28yuewjmdt8z3ynqpzpff8je",
+        "accessed_at": "2026-09-28T07:04:17.608062+00:00",
+        "content_sha256": "d06d6234905fffef360ace18846c2e4ea84c11b52c3d7ef1a746043c90dd69ba"
+      }
+    },
+    {
+      "id": "hc-publication-2022-45422",
+      "date": "2022-11-24",
+      "claim": "HeeChan Kim 发布 CVE-2022-45422，针对 LG Smart Share（<=2.3.1712.1201）的 DLL 劫持 LPE。安装器加载名为 '!.DLL' 的 DLL，其路径取自用户/系统环境变量目录（普通用户可写，如 %USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps）。PoC 经 Process Monitor 发现加载顺序，植入 DLL 后以 winlogon token 复制提权。",
+      "status": "documented",
+      "growth_signal": "回到 user-mode DLL 劫持但变化加载源（环境变量目录、特殊文件名 '!.DLL'）；明确以 Process Monitor 为发现工具并复用同一 token impersonation 模板（OpenProcessToken/DuplicateTokenEx/CreateProcessWithTokenW），显示工具链与代码模板的跨漏洞复用。",
+      "short_quote": "I discovered this vulnerability through Process Monitor.",
+      "source": {
+        "title": "CVE-2022-45422: LG Smart Share Local Privilege Escalation Vulnerability (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/CVE-2022-45422-LG-Smart-Share-Local-Privilege-Escalation-Vulnerability/",
+        "published": "2022-11-24",
+        "source_type": "personal_blog_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_4re8ies84wiywwsffmkk7h8g",
+        "accessed_at": "2026-09-28T07:04:17.608107+00:00",
+        "content_sha256": "7859c34b92f16a02231a568b1a32568ab91e5a30e69cb737aa37c5dd64f458c6"
+      }
+    },
+    {
+      "id": "hc-publication-2022-39909-junction",
+      "date": "2022-12-06",
+      "claim": "HeeChan Kim 发布 CVE-2022-39909，针对 Samsung Gear IconX PC Manager（<2.1.221019.51）的逻辑漏洞。管理员权限安装器在用户可写 Quick Launch 目录创建 'Gear IconX.lnk'。PoC 删除 Quick Launch 目录、建立到 \\RPC Control 的 junction、再用 native symbolic link 将 'Gear IconX.lnk' 映射到 C:\\Windows\\System32\\cng.sys，使安装器经 reparse 点链写入覆盖 cng.sys，造成永久 DoS。使用 NtCreateFile/NtCreateSymbolicLinkObject 等 NT API。",
+      "status": "documented",
+      "growth_signal": "方法转向点：从 DLL 劫持切换到 junction + native symbolic link（NT API）的逻辑漏洞，目标效果从提权扩展到任意文件创建/永久 DoS。该手法在其后多份 Samsung 系列 writeup 中重复出现，成为可识别的个人技术特征。",
+      "source": {
+        "title": "CVE-2022-39909: Insufficient verification of data authenticity vulnerability in Samsung Gear IconX PC Manager (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/CVE-2022-39909-Insufficient-verification-of-data-authenticity-vulnerability-in-Samsung-Gear-IconX-PC-Manager/",
+        "published": "2022-12-06",
+        "source_type": "personal_blog_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_y4h1sugp1zd61sz3fjbtu767",
+        "accessed_at": "2026-09-28T07:04:17.608113+00:00",
+        "content_sha256": "615a05d17441741f8e44df28cf9579873f65203f883421c145c05f91b0766e97"
+      }
+    },
+    {
+      "id": "hc-publication-2023-37849",
+      "date": "2023-07-09",
+      "claim": "HeeChan Kim 发布 CVE-2023-37849（CVSS 6.5），针对 Panda Dome VPN 安装器（PANDAVPN.exe <15.14.8）的 DLL 劫持 LPE。安装器从自身目录加载多个 DLL，未找到时回落到 C:\\Windows\\SysWOW64；关键 DLL 为 TextShaping.dll。普通用户在安装器目录放置恶意 TextShaping.dll 即可在管理员上下文执行，PoC 经 winlogon token 复制提权到 SYSTEM。首次联系 2022-08-01，9 天后收到补丁文件，但公开披露延至约一年后（2023-07-05），随后才向 MITRE 请求 CVE。",
+      "status": "documented",
+      "growth_signal": "披露时间管理出现延迟模式：补丁早已就绪但延后约一年公开，CVE 在披露后才申请，显示其公开作品发布节奏与厂商修复节奏脱钩。技术方法继续沿用 DLL 搜索顺序劫持 + 同一 token impersonation 模板。",
+      "source": {
+        "title": "CVE-2023-37849: Local privilege escalation in Panda Dome VPN for Windows Installer (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/Local-privilege-escalation-in-Panda-Dome-VPN-for-Windows-Installer/",
+        "published": "2023-07-09",
+        "source_type": "personal_blog_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_xjx3je7pgpymxbrbsw0s7tbe",
+        "accessed_at": "2026-09-28T07:04:17.608119+00:00",
+        "content_sha256": "af138fda9569f1beceb2c8902f0050c2a91072cca04769105aa16d8a10a90be8"
+      }
+    },
+    {
+      "id": "hc-publication-2023-30672",
+      "date": "2023-07-27",
+      "claim": "HeeChan Kim 发布 CVE-2023-30672（vendor id SVE-2023-0310），针对 Samsung Smart Switch for Windows Installer（<4.3.23043_3）。管理员权限安装器在用户可写 Quick Launch 目录创建 'Smart Switch.lnk'。PoC 建立 Quick Launch 到 \\RPC Control 的 junction 并以 native symbolic link 将 'Smart Switch.lnk' 指向 C:\\Windows\\System32\\cng.sys，安装器经 reparse 点链覆盖 cng.sys 造成永久 DoS。Samsung 于 2023-03-17 评级 high，2023-07-06 出补丁与 CVE。",
+      "status": "documented",
+      "growth_signal": "junction+symlink 手法在同一厂商（Samsung Smart Switch）上重复应用，与 CVE-2022-39909、CVE-2023-30673 形成同一产品的逻辑漏洞系列，显示对单一目标产品线系统性扫描的重复练习。",
+      "source": {
+        "title": "CVE-2023-30672: Improper privilege management vulnerability in Samsung Smart Switch for Windows Installer (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/CVE-2023-30672-Improper-privilege-management-vulnerability-in-Samsung-Smart-Switch-for-Windows-Installer/",
+        "published": "2023-07-27",
+        "source_type": "personal_blog_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_hb2za2oecnupyy7nlgeruof0",
+        "accessed_at": "2026-09-28T07:04:17.608130+00:00",
+        "content_sha256": "124b2a9c84ce78b9cf04ef76ebe6c52f74fd4b65b44a4be5ca5034e6425ff3ef"
+      }
+    },
+    {
+      "id": "hc-publication-2023-30673",
+      "date": "2023-07-28",
+      "claim": "HeeChan Kim 发布 CVE-2023-30673（vendor id SVE-2023-0312），针对 Samsung Smart Switch PC（<4.3.23052_1）。管理员权限安装器删除位于用户可写路径的特定文件。PoC 建立 C:\\Users\\%Username%\\AppData\\Roaming\\Samsung\\Smart Switch PC 到 \\RPC Control 的 junction，并以 native symbolic link 将 CRMData.db 指向任意目标（如 C:\\Windows\\system.ini），安装器删除 CRMData.db 时经 reparse 点链删除目标文件，实现任意目录/文件删除。补丁为在安装过程使用的目录中阻止 directory junction。首次联系 2023-02-23，2023-07-06 出补丁与 CVE。",
+      "status": "documented",
+      "growth_signal": "同一 junction+symlink 原语被改造为不同效果（从任意文件创建/DoS 扩展到任意删除），显示对单一技术原语的多用途探索。披露 timeline 规范记录。",
+      "source": {
+        "title": "CVE-2023-30673: Possible to delete arbitrary directory vulnerability in Smart Switch PC (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/CVE-2023-30673-Possible-to-delete-arbitrary-directory-vulnerability-in-Smart-Switch-PC/",
+        "published": "2023-07-28",
+        "source_type": "personal_blog_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_13weq7on73jwu298ggpz1zpw",
+        "accessed_at": "2026-09-28T07:04:17.608098+00:00",
+        "content_sha256": "90c1572bd644152c3aed6c3bb1e86bc87a9f397893b023772c4ba1cf7da2fac3"
+      }
+    },
+    {
+      "id": "hc-publication-2022-4894",
+      "date": "2023-09-24",
+      "claim": "HeeChan Kim 发布 CVE-2022-4894（vendor id PSR-2022-0147，CVSS 8.2），覆盖四款 Samsung/HP 打印机软件（Samsung Printer Diagnostics v1.0.4.29、Samsung Printer Setup Program v1.0.0.32、Samsung Universal Print Driver3 v3.00.13.00、Samsung Scan To PC Lite v1.2.14.0）的 DLL 劫持 LPE。前三款以日志记录的随机 temp 目录路径加载 cscapi.dll/DPAPI.DLL/TextShaping.dll，PoC 用 Python 轮询日志、解析路径并竞态植入 DLL；第四款从环境变量目录加载 ${MUI_HELPER}.DLL。首次联系 2022-09-01，Samsung 称由 HP 管理，2022-09-18 报告 HP，约一年后（2023-08-02）出补丁与 CVE。",
+      "status": "documented",
+      "growth_signal": "单篇 writeup 覆盖多款同厂商产品，将同一 DLL 劫持+race 方法批量化应用，显示从单漏洞到产品线扫描的方法演化；vendor 转交（Samsung→HP）处理体现跨厂商协调经验。",
+      "source": {
+        "title": "CVE-2022-4894: Certain HP and Samsung printer software - Potential elevation of privileges (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/CVE-2022-4894-Certain-HP-and-Samsung-printer-software-Potential-elevation-of-privileges/",
+        "published": "2023-09-24",
+        "source_type": "personal_blog_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_fz6je3stgycefe9u5w2yth9j",
+        "accessed_at": "2026-09-28T07:04:17.608124+00:00",
+        "content_sha256": "f1c1e3ae112f495c096fdfde03c197e9f878815370f11cd8941c3a9d17a679c5"
+      }
+    },
+    {
+      "id": "hc-publication-2023-41929",
+      "date": "2023-09-24",
+      "claim": "HeeChan Kim 发布 CVE-2023-41929（CVSS 7.3），针对 Samsung Memory Card & UFD Authentication Utility PC Software（<1.0.2）。管理员权限安装器从所在目录加载 DLL；直接在安装器目录植入 SspiCli.DLL 会触发安装器完整性检查并报错中止。PoC 转用 junction + native symbolic link：建立 %USERPROFILE%\\AppData\\Roaming\\Samsung\\Smart Switch PC 到 \\RPC Control 的 junction，以 native symbolic link 将 CRMData.db 指向 C:\\Windows\\system.ini，安装器经 reparse 点链读取/写入目标文件，绕过 DLL 完整性检查。",
+      "status": "documented",
+      "growth_signal": "在厂商已部署 DLL 完整性检查的情况下，方法从直接 DLL 劫持切换到 junction+symlink 绕过，显示对防御机制的反馈式适应；技术原语（junction+native symlink）再次复用，证实其已将该手法固化为常用工具。",
+      "source": {
+        "title": "CVE-2023-41929: Samsung Card-UFD Authentication Utility for Windows Installer Local Privilege Escalation (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/CVE-2023-41929-Samsung-Card-UFD-Authentication-Utility-for-Windows-Installer-Local-Privilege-Escalation/",
+        "published": "2023-09-24",
+        "source_type": "personal_blog_writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_idyvjbfwdzudl8gae50itkj4",
+        "accessed_at": "2026-09-28T07:04:17.608086+00:00",
+        "content_sha256": "c117491ca0f35b1b7ef1bd5149739c557974d17ad78ab511a9d496c632a14bad"
+      }
+    },
+    {
+      "id": "hc-publication-2022-24924-android",
+      "date": "2021-11-30",
+      "claim": "HeeChan Kim 最早的公开 CVE writeup 为 CVE-2022-24924，针对 Android LiveWallpaperService（<3.0.9.9）的不当访问控制，允许无权限创建特定命名系统目录，而非 Windows 内核/LPE 漏洞。GitHub 上对应仓库 heegong/CVE 仅含此一个 CVE 条目。",
+      "status": "unknown",
+      "growth_signal": "作品起点为 Android 应用层访问控制漏洞，与后续 Windows installer LPE 方向不同；显示其研究方向在 2021-2022 间发生转向，转向后集中在 Windows 第三方软件提权。该条目用于界定其公开作品的最早时间与初始技术栈。",
+      "source": {
+        "title": "CVE-2022-24924: Improper access control vulnerability in LiveWallpaperService (heegong.github.io)",
+        "url": "https://heegong.github.io/posts/CVE-2022-24924-Improper-access-control-vulnerability-in-LiveWallpaperService/",
+        "published": "2021-11-30",
+        "source_type": "personal_blog_writeup",
+        "level": "lead_only"
+      },
+      "verification": {
+        "verified_in_run": false,
+        "retrieval_method": "unverified",
+        "tool_use_id": "",
+        "accessed_at": "",
+        "content_sha256": ""
+      }
+    },
+    {
+      "id": "hc-identity-github",
+      "date": "2020-06-17",
+      "claim": "GitHub 用户 heegong 共有 23 个公开仓库，最早 auto_mouse_python（2020-06-17）与 socket_python_backdoor（2020-07-12）为 Python 学习/工具类项目；2020-09 起出现 universal_shell_code（C）、reversing-problems（C）、study_note_heegong 等与逆向/安全学习相关仓库；安全相关仓库仅 CVE-2022-24924（Android）与 CVE 索引仓库 heegong/CVE。未发现任何 Windows 内核 LPE 代码仓库。profile 显示名为 '김희찬 (heegong)'，bio '0-day Researcher'，TeamH4C，Seoul。",
+      "status": "documented",
+      "growth_signal": "GitHub 仓库时间线显示其从 2020 年中 Python/通用编程起步，2020 年底转向 C 与逆向/安全学习，2022 年起公开 CVE 仓库；代码侧的学习曲线（Python→C→exploit 材料）与博客 writeup 的技术演化一致。但仓库中缺乏内核 exploit 代码，与 person_json 标注的 'Windows 内核' primary_focus 仅在博客 writeup 层面有单一第三方驱动案例（CVE-2022-44898）支撑。",
+      "source": {
+        "title": "heegong - GitHub profile and repositories",
+        "url": "https://github.com/heegong?tab=repositories",
+        "published": "2020-06-17",
+        "source_type": "developer_profile_and_repos",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_rszmhcd8e5rgctu13jax8qbg",
+        "accessed_at": "2026-09-28T07:04:17.607943+00:00",
+        "content_sha256": "9e66c905659693938b8df33ca7670910897e414e129327f1078f5a4c4e5a02bc"
+      }
+    },
+    {
+      "id": "hc-conference-offbyone-poc",
+      "date": "2026",
+      "claim": "人物记录（person_json）的 selected_conference_evidence 字段标注为 'OffByOne 2026 / POC'，提示该研究者 2026 年在 OffByOne 或 POC（Power of Community）会议有演讲事实。未能抓取到任何会议 speaker 页面、议程或演讲材料以独立确认该事实。",
+      "status": "unknown",
+      "growth_signal": "本地种子提及 2026 会议演讲，若成立则代表其从 writeup 发布向公开演讲输出的转化；但在未抓取到一手/权威会议页面之前不能据以判定成长机制。",
+      "source": {
+        "title": "person_json.selected_conference_evidence (本地种子，未抓取验证)",
+        "url": "local-seed://person_json/selected_conference_evidence",
+        "published": "2026",
+        "source_type": "local_seed_note",
+        "level": "lead_only"
+      },
+      "verification": {
+        "verified_in_run": false,
+        "retrieval_method": "unverified",
+        "tool_use_id": "",
+        "accessed_at": "",
+        "content_sha256": ""
+      }
+    }
+  ],
+  "contradictions": [
+    "person_json 将 primary_focus 标注为 'Windows 内核与 LPE 漏洞'，但其抓取到的公开作品集中为第三方软件安装器/驱动的 user-mode LPE 与逻辑漏洞；唯一内核态 exploit 为第三方驱动 ASUS MsIo64.sys 的栈溢出（CVE-2022-44898），未发现 Windows 内核本身（ntoskrnl/win32k 等）的 LPE writeup，GitHub 仓库亦无内核 LPE 代码。该标注与公开作品证据存在范围上的张力。"
+  ],
+  "gaps": [
+    "OffByOne 2026 / POC 会议演讲未能抓取验证：X 个人资料返回 402 不可抓取，针对 OffByOne/POC 2026 speaker 的 WebSearch 多次返回工具不可用说明而非结果，会议官方网站未抓取。该事实仅以本地种子形式存在，不能标记为 documented/reported。",
+    "2024-2026 年的公开作品缺失：博客 archives 止于 2023-09-24，GitHub 仓库最新更新为 2025-11（ssu_p5js_pages，非安全研究），无法判断 2023 年后其研究方向是否仍为 Windows LPE 或已转向内核/其他方向。",
+    "导师、团队协作与同行反馈机制未见证据：TeamH4C 仅以 affiliation 形式出现在 profile 与 writeup 署名，未见团队内部协作、code review 或 mentorship 的一手材料。",
+    "重复练习/训练的内部记录缺失：可见的是工具建设产物（Python 监控脚本、C++ PoC DLL 模板）与方法在多漏洞上的复用，但无学习笔记内容（study_note_heegong 仓库无描述细节未抓取）可佐证其刻意练习过程。",
+    "未抓取 study_note_heegong 仓库内容，无法判断其中是否含研究方法论/复盘记录。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-works-20260928-145048-955",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790579057594239000-heechan-kim-works.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "fff22180-d9c3-4cf3-93b6-6ad338457405",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_2npghglf1qw50dpih6zcrh2g",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-works-20260928-145048-955/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-28T07:04:17.607823+00:00"
+      },
+      {
+        "tool_use_id": "call_93s4zsmlvk10qazgeicefvpv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-works-20260928-145048-955/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-28T07:04:17.607852+00:00"
+      },
+      {
+        "tool_use_id": "call_dobgwksa5aqhd8ihb6xdsui4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-works-20260928-145048-955/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "91ecbfcc7751d1a1ea9f1322be48e022826f2f04b160cdf81ef90a505d9d9296",
+        "accessed_at": "2026-09-28T07:04:17.607863+00:00"
+      },
+      {
+        "tool_use_id": "call_32p6n1ur8lr1j1rfohpe89iz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-works-20260928-145048-955/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "5e80dd43bfa3debe6dec6cf287369d016ad2b4ec408e5c13e2cb1a12b5457864",
+        "accessed_at": "2026-09-28T07:04:17.607870+00:00"
+      },
+      {
+        "tool_use_id": "call_c09sezqugivlc2s5l7m3qh9s",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-works-20260928-145048-955/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "98d6159955e4031db24639369d116819220986aa8ec32370f8ce25cc7e814219",
+        "accessed_at": "2026-09-28T07:04:17.607881+00:00"
+      },
+      {
+        "tool_use_id": "call_97iolcnu6qk1uzu13ta96w2w",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-works-20260928-145048-955/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6e5034a8a6d972f492d2b08811243633e8b01984efe14e10fad4de7367634388",
+        "accessed_at": "2026-09-28T07:04:17.607888+00:00"
+      },
+      {
+        "tool_use_id": "call_mshbqfbqlairuosx3ttesq2x",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-works-20260928-145048-955/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-28T07:04:17.607896+00:00"
+      },
+      {
+        "tool_use_id": "call_yo83qf5klccv3l7wbw1e762k",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://github.com/heegong",
+          "prompt": "List all public repositories, their descriptions, languages, and any pinned repos. Also capture the user's bio, name, and any linked profile details. Look for writeups, exploit code, or tools related to Windows kernel or LPE vulnerabilities."
+        },
+        "success": true,
+        "content_sha256": "a4e8a7a91b984b36ed410263b356a97921e8b699bd94fe6409506372f5d22a33",
+        "accessed_at": "2026-09-28T07:04:17.607924+00:00"
+      },
+      {
+        "tool_use_id": "call_ouboaybrnqjf8vwkzhcegjxo",
+        "tool": "WebSearch",
+        "input": {
+          "query": "HeeChan Kim heegong Windows kernel LPE POC OffByOne"
+        },
+        "success": true,
+        "content_sha256": "e24dce323dad080872325bb43815816df09b466298ad34488e9b1fe04a3d876a",
+        "accessed_at": "2026-09-28T07:04:17.607919+00:00"
+      },
+      {
+        "tool_use_id": "call_rszmhcd8e5rgctu13jax8qbg",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all repositories on this page with their names, descriptions, languages, and topics. I'm looking for any Windows kernel, LPE, exploit, or vulnerability research repos. Also note any CVE-related repos and their dates.",
+          "url": "https://github.com/heegong?tab=repositories"
+        },
+        "success": true,
+        "content_sha256": "9e66c905659693938b8df33ca7670910897e414e129327f1078f5a4c4e5a02bc",
+        "accessed_at": "2026-09-28T07:04:17.607943+00:00"
+      },
+      {
+        "tool_use_id": "call_2gtmoilurd77ji0qssr3apnf",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is on this personal website? List any blog posts, writeups, CVE research, talks, or biography content. Capture titles, dates, and topics.",
+          "url": "https://heegong.github.io"
+        },
+        "success": true,
+        "content_sha256": "09059b910725d811ec9540c9299ffe2cc32720c8d643e00e422de25bf0098759",
+        "accessed_at": "2026-09-28T07:04:17.607936+00:00"
+      },
+      {
+        "tool_use_id": "call_u2yhr0sey9csd5f5brrqw3g2",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog posts on this page including page 2. For each post capture the exact title, the date posted, and the CVE or topic. Focus on Windows kernel LPE, privilege escalation, and any conference talks. Also note if there are posts about research methodology or writeup habits.",
+          "url": "https://heegong.github.io/posts/page-2/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-28T07:04:17.607947+00:00"
+      },
+      {
+        "tool_use_id": "call_fm6x2zylvvgtx03a93uz2goq",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all CVE entries documented here with their CVE IDs, affected vendors/products, dates, and any credit/acknowledgement text. I'm trying to understand the researcher's publication timeline and target types.",
+          "url": "https://github.com/heegong/CVE"
+        },
+        "success": true,
+        "content_sha256": "33171533d1b747442d5e59cd58d2183543ca154906982228ef664b84413b10f2",
+        "accessed_at": "2026-09-28T07:04:17.607954+00:00"
+      },
+      {
+        "tool_use_id": "call_u9tub8rq7b5yfesatx91nb8n",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog post titles with their exact URLs and publication dates shown on this page. Capture the full archive list including older posts.",
+          "url": "https://heegong.github.io/archives/"
+        },
+        "success": true,
+        "content_sha256": "ff2c7603515435b4278e6ccb6ca54d63cdfe59815c13c46acf61d333b90dad78",
+        "accessed_at": "2026-09-28T07:04:17.607963+00:00"
+      },
+      {
+        "tool_use_id": "call_nh7euuzp0s22t9hl3kqp596o",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"heegong\" TeamH4C OffByOne 2026 POC speaker Windows kernel"
+        },
+        "success": true,
+        "content_sha256": "cc6b63725a15309971d66d7a5ce592c3464d52c9fa267c743915eca4ac656870",
+        "accessed_at": "2026-09-28T07:04:17.607968+00:00"
+      },
+      {
+        "tool_use_id": "call_0sowy3hxlwnfc3eley4x8mym",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/.claude/projects/-Users-c0ss4ck-Projects-C0ss4ck-ZeroMDASH-research-runs-sub-workspace-heechan-kim-works-20260928-145048-955/fff22180-d9c3-4cf3-93b6-6ad338457405/tool-results/call_nh7euuzp0s22t9hl3kqp596o.txt"
+        },
+        "success": true,
+        "content_sha256": "841c873f5ff3a1f3fa7fc512bbc9333d370b1a342250dc0a5bcda1af59121ec8",
+        "accessed_at": "2026-09-28T07:04:17.608050+00:00"
+      },
+      {
+        "tool_use_id": "call_28yuewjmdt8z3ynqpzpff8je",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Read the full content of this blog post. Capture the author's name, the date, the CVE ID, the affected component, the vulnerability type, the root-cause analysis, the exploitation technique, and any reflection on the research process or methodology. Quote short verbatim phrases where they explain the bug class or technique.",
+          "url": "https://heegong.github.io/posts/ASUS-AuraSync-Kernel-Stack-Based-Buffer-Overflow-Local-Privilege-Escalation/"
+        },
+        "success": true,
+        "content_sha256": "d06d6234905fffef360ace18846c2e4ea84c11b52c3d7ef1a746043c90dd69ba",
+        "accessed_at": "2026-09-28T07:04:17.608062+00:00"
+      },
+      {
+        "tool_use_id": "call_m1oilyzmelge6rjr6wgvg1np",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Read the full content of this blog post. Capture the CVE ID, date, affected component, vulnerability type, root cause, exploitation technique, and any reflection on the research process. Quote short verbatim phrases where they explain the bug class or technique.",
+          "url": "https://heegong.github.io/posts/Advaned-Installer-Local-Privilege-Escalation-Vulnerability/"
+        },
+        "success": true,
+        "content_sha256": "3a11017d78b28174d813d0f3c0f51ceeeb35a8c52b73fc94b23cad8c046c684b",
+        "accessed_at": "2026-09-28T07:04:17.608067+00:00"
+      },
+      {
+        "tool_use_id": "call_idyvjbfwdzudl8gae50itkj4",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Read the full content of this blog post. Capture the CVE ID, posted date, affected component, vulnerability type, root cause, exploitation technique, and any reflection on the research process. Quote short verbatim phrases where they explain the bug class or technique. Note if it discusses Windows kernel LPE.",
+          "url": "https://heegong.github.io/posts/CVE-2023-41929-Samsung-Card-UFD-Authentication-Utility-for-Windows-Installer-Local-Privilege-Escalation/"
+        },
+        "success": true,
+        "content_sha256": "c117491ca0f35b1b7ef1bd5149739c557974d17ad78ab511a9d496c632a14bad",
+        "accessed_at": "2026-09-28T07:04:17.608086+00:00"
+      },
+      {
+        "tool_use_id": "call_qe6myhhksuakqiwbc2b9xpwr",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Read the full content of this blog post. Capture the CVE ID, posted date, affected component, vulnerability type, root cause, exploitation technique, and any reflection on the research process. Quote short verbatim phrases where they explain the bug class or technique.",
+          "url": "https://heegong.github.io/posts/CVE-2022-39846-DLL-hijacking-vulnerability-in-Smart-Switch-PC/"
+        },
+        "success": true,
+        "content_sha256": "b1b4ac8d4b6ed96df4b1225e423d35014ad7e41e845949008a94ef89ec5945ce",
+        "accessed_at": "2026-09-28T07:04:17.608081+00:00"
+      },
+      {
+        "tool_use_id": "call_13weq7on73jwu298ggpz1zpw",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Read the full content of this blog post. Capture the CVE ID, posted date, affected component, vulnerability type, root cause, exploitation technique, and any reflection on the research process. Note if it involves arbitrary directory deletion via privileged service. Quote short verbatim phrases where they explain the bug class or technique.",
+          "url": "https://heegong.github.io/posts/CVE-2023-30673-Possible-to-delete-arbitrary-directory-vulnerability-in-Smart-Switch-PC/"
+        },
+        "success": true,
+        "content_sha256": "90c1572bd644152c3aed6c3bb1e86bc87a9f397893b023772c4ba1cf7da2fac3",
+        "accessed_at": "2026-09-28T07:04:17.608098+00:00"
+      },
+      {
+        "tool_use_id": "call_4re8ies84wiywwsffmkk7h8g",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Read the full content of this blog post. Capture the CVE ID, posted date, affected component, vulnerability type, root cause, exploitation technique, and any reflection on the research process. Quote short verbatim phrases where they explain the bug class or technique.",
+          "url": "https://heegong.github.io/posts/CVE-2022-45422-LG-Smart-Share-Local-Privilege-Escalation-Vulnerability/"
+        },
+        "success": true,
+        "content_sha256": "7859c34b92f16a02231a568b1a32568ab91e5a30e69cb737aa37c5dd64f458c6",
+        "accessed_at": "2026-09-28T07:04:17.608107+00:00"
+      },
+      {
+        "tool_use_id": "call_y4h1sugp1zd61sz3fjbtu767",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Read the full content of this blog post. Capture the CVE ID, posted date, affected component, vulnerability type, root cause, exploitation technique, and any reflection on the research process. Quote short verbatim phrases where they explain the bug class or technique.",
+          "url": "https://heegong.github.io/posts/CVE-2022-39909-Insufficient-verification-of-data-authenticity-vulnerability-in-Samsung-Gear-IconX-PC-Manager/"
+        },
+        "success": true,
+        "content_sha256": "615a05d17441741f8e44df28cf9579873f65203f883421c145c05f91b0766e97",
+        "accessed_at": "2026-09-28T07:04:17.608113+00:00"
+      },
+      {
+        "tool_use_id": "call_xjx3je7pgpymxbrbsw0s7tbe",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Read the full content of this blog post. Capture the CVE ID, posted date, affected component, vulnerability type, root cause, exploitation technique, and any reflection on the research process. Quote short verbatim phrases where they explain the bug class or technique.",
+          "url": "https://heegong.github.io/posts/Local-privilege-escalation-in-Panda-Dome-VPN-for-Windows-Installer/"
+        },
+        "success": true,
+        "content_sha256": "af138fda9569f1beceb2c8902f0050c2a91072cca04769105aa16d8a10a90be8",
+        "accessed_at": "2026-09-28T07:04:17.608119+00:00"
+      },
+      {
+        "tool_use_id": "call_fz6je3stgycefe9u5w2yth9j",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Read the full content of this blog post. Capture the CVE ID, posted date, affected component, vulnerability type, root cause, exploitation technique, and any reflection on the research process. Quote short verbatim phrases where they explain the bug class or technique.",
+          "url": "https://heegong.github.io/posts/CVE-2022-4894-Certain-HP-and-Samsung-printer-software-Potential-elevation-of-privileges/"
+        },
+        "success": true,
+        "content_sha256": "f1c1e3ae112f495c096fdfde03c197e9f878815370f11cd8941c3a9d17a679c5",
+        "accessed_at": "2026-09-28T07:04:17.608124+00:00"
+      },
+      {
+        "tool_use_id": "call_hb2za2oecnupyy7nlgeruof0",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Read the full content of this blog post. Capture the CVE ID, posted date, affected component, vulnerability type, root cause, exploitation technique, and any reflection on the research process. Quote short verbatim phrases where they explain the bug class or technique.",
+          "url": "https://heegong.github.io/posts/CVE-2023-30672-Improper-privilege-management-vulnerability-in-Samsung-Smart-Switch-for-Windows-Installer/"
+        },
+        "success": true,
+        "content_sha256": "124b2a9c84ce78b9cf04ef76ebe6c52f74fd4b65b44a4be5ca5034e6425ff3ef",
+        "accessed_at": "2026-09-28T07:04:17.608130+00:00"
+      },
+      {
+        "tool_use_id": "call_vabtzce9fd9eqswfs3up4a8i",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"heegong\" \"HeeChan Kim\" POC 2024 OR 2025 OR 2026 conference speaker presentation"
+        },
+        "success": true,
+        "content_sha256": "9786e0a34a607a44b2fe7c905d0346379fcbecfdc5562d05b978b50d6c2f748d",
+        "accessed_at": "2026-09-28T07:04:17.608139+00:00"
+      },
+      {
+        "tool_use_id": "call_emiel88wnu5wgtvqigq7ft6m",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"heegong\" \"TeamH4C\" CVE writeup Windows privilege escalation 2024"
+        },
+        "success": true,
+        "content_sha256": "02503e80e474e614a6c2962b73360ee4b18785f9f8fbbaf683bc2db9095ae24f",
+        "accessed_at": "2026-09-28T07:04:17.608141+00:00"
+      },
+      {
+        "tool_use_id": "call_kjddkpuyoy8tqoxm9l8v5ncg",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"heegong123\" twitter OffByOne 2026 TeamH4C presentation"
+        },
+        "success": true,
+        "content_sha256": "52cb986286ee4cd5bbf2391fa4f4fdfcb0e3bcb1c06a16a97b26192293ce6988",
+        "accessed_at": "2026-09-28T07:04:17.608146+00:00"
+      },
+      {
+        "tool_use_id": "call_9dqglfrwvfyevqol5og52wly",
+        "tool": "WebSearch",
+        "input": {
+          "query": "POC 2026 powerofcommunity speaker list heegong Kim HeeChan"
+        },
+        "success": true,
+        "content_sha256": "437fbc8c8a2a785888bbeb38a1199448aa46631259112d2ce0474dafc635ba7a",
+        "accessed_at": "2026-09-28T07:04:17.608149+00:00"
+      },
+      {
+        "tool_use_id": "call_o8bpyie2o459yprns4f4uxxx",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Power of Community POC 2026 speakers schedule Korea security conference"
+        },
+        "success": true,
+        "content_sha256": "f79c7c5f99fff36bc54574b6c847e65f6f501bf3310a7534c0de60bb532ab997",
+        "accessed_at": "2026-09-28T07:04:17.608157+00:00"
+      },
+      {
+        "tool_use_id": "call_zgkt4pw1uib0b5ry8bx1iuc4",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What does this X/Twitter profile say? Capture the user's display name, bio, any pinned posts, and references to talks, conferences (especially OffByOne 2026 or POC), TeamH4C, or Windows kernel research. Note any dates.",
+          "url": "https://x.com/heegong123"
+        },
+        "success": true,
+        "content_sha256": "8ced59a07c6da6e7c0c0269f5d6b660bb374bf9f396f7c48c4ea1b37bdbb0191",
+        "accessed_at": "2026-09-28T07:04:17.608152+00:00"
+      },
+      {
+        "tool_use_id": "call_wctv37vania5d3nuptndsqat",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"OffByOne\" 2026 conference speaker schedule security"
+        },
+        "success": true,
+        "content_sha256": "36c61301fec5932d8d1d5ea2f05d3a36b74d407dd3e625b16fc19f5838a82068",
+        "accessed_at": "2026-09-28T07:04:17.608162+00:00"
+      },
+      {
+        "tool_use_id": "call_qao63xqvot4sbpe02jehl3d3",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-works-20260928-145048-955/checkpoint.md",
+          "content": "# Checkpoint — HeeChan Kim / 公开作品与技术演化\n\n## 身份确认\n- GitHub heegong 主页：\"0-day Researcher\"，TeamH4C，Seoul（UTC+09:00），站点 heegong.github.io，X @heegong123，邮箱 zaqw13440@gmail.com。\n- 博客页脚署名 \"HeeChan Kim\"，与 person_json 的 name_or_handle 一致。身份与 handle 对应确认。\n\n## 已确认的一手来源（本人博客 heegong.github.io + GitHub）\n抓取了 8 篇博客正文 + archives 完整列表（11 篇，2021-11 至 2023-09）+ GitHub 主页/仓库列表（23 个仓库）。\n\n### 11 篇博客（archives 确认）\n1. 2021-11-30 CVE-2022-24924 LiveWallpaperService（Android，非 Windows）\n2. 2022-06-12 CVE-2022-4956 Advanced Installer DLL 劫持（Proton VPN）— Process Monitor 发现，.Local 目录\n3. 2022-09-11 CVE-2022-39846 Samsung Smart Switch DLL 劫持 — race + Python 监控日志提取 GUID\n4. 2022-11-01 CVE-2022-44898 ASUS AuraSync MsIo64.sys 内核栈溢出 — IOCTL + ROP + SMEP bypass + token stealing（唯一内核态 exploit）\n5. 2022-11-24 CVE-2022-45422 LG Smart Share DLL 劫持 — Process Monitor 发现\n6. 2022-12-06 CVE-2022-39909 Samsung Gear IconX — junction + native symlink，cng.sys 永久 DoS\n7. 2023-07-09 CVE-2023-37849 Panda Dome VPN DLL 劫持 — TextShaping.dll\n8. 2023-07-27 CVE-2023-30672 Samsung Smart Switch — junction + native symlink，cng.sys\n9. 2023-07-28 CVE-2023-30673 Samsung Smart Switch — junction + native symlink 任意目录删除\n10. 2023-09-24 CVE-2022-4894 Samsung/HP 打印机软件 DLL 劫持 — race，4 产品\n11. 2023-09-24 CVE-2023-41929 Samsung Card-UFD — junction + native symlink，绕过 DLL 完整性检查\n\n## 技术演化（documented）\n- 2022-06：WinSxS .Local 目录 DLL 劫持，Admin→SYSTEM（SeDebugPrivilege + winlogon token）\n- 2022-09：DLL 劫持 + race condition（Python 监控日志提取随机 GUID 目录）\n- 2022-11：唯一内核态 exploit — 内核驱动 IOCTL 栈溢出，ROP 绕 SMEP，token stealing（ActiveProcessLinks 找 PID 4）\n- 2022-12 起：转向 junction + native symbolic link（NtCreateFile/NtCreateSymbolicLinkObject）逻辑漏洞，反复应用于 Samsung 系列（cng.sys DoS、任意目录删除、绕 DLL 完整性检查）\n- 工具建设：Python 日志监控/竞态脚本、x86 C++ PoC DLL（VS2019/2022），token impersonation 模板代码（OpenProcessToken/ImpersonateLoggedOnUser/DuplicateTokenEx/CreateProcessWithTokenW）\n\n## 复盘习惯（documented）\n- 每篇博客含 disclosure timeline（首次联系日期、vendor 分级、patch 日期、CVE 分配日期）。\n- CVE-2022-44898 引用 ASUS Hall of Fame（厂商致谢证据）。\n- CVE-2022-4956 描述发现路径：\"I found this vulnerability through Proton VPN\"（供应链发现模式）。\n- CVE-2022-45422 描述方法：\"I discovered this vulnerability through Process Monitor.\"\n- CVE-2023-41929 描述绕过：installer 有 DLL 完整性检查会报错，转向 junction+symlink。\n\n## 未完成 / 缺口\n- OffByOne 2026 / POC 会议演讲：person_json 标注 selected_conference_evidence，但 X 个人资料 402 不可抓取，WebSearch 反复返回工具不可用说明，未能抓取到会议 speaker 页面或演讲材料 → 只能 lead_only。\n- 2024-2026 新作品：博客 archives 止于 2023-09，未见 2024+ 公开 writeup；GitHub 仓库列表最新更新 2025-11（ssu_p5js_pages，非安全研究）。\n- 真实姓名/学历/导师/团队归属细节：GitHub 仅 TeamH4C + Seoul，无更多背景。\n- Windows 内核 LPE：person_json primary_focus 为 \"Windows 内核与 LPE\"，但 GitHub 仓库无 Windows 内核 LPE 代码；唯一内核态 exploit 是第三方驱动 ASUS MsIo64.sys（CVE-2022-44898）。多数 LPE 为 installer 权限提升（user-mode）。\n"
+        },
+        "success": true,
+        "content_sha256": "117d3ad28045123638c208244950e9117d37402135500b5db4c4cf33160f3824",
+        "accessed_at": "2026-09-28T07:04:17.608167+00:00"
+      },
+      {
+        "tool_use_id": "call_z52zwwrgzqdocrlkmnqs2i2l",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-works-20260928-145048-955/output.json",
+          "content": "{\n  \"person\": \"HeeChan Kim\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"GitHub 用户 heegong 的 profile 页面显示显示名为 '김희찬 (heegong)'，bio 为 '0-day Researcher'，所属 'TeamH4C'，所在地 Seoul，并链接个人站点 https://heegong.github.io 与 X 账号 @heegong123；博客页脚署名为 'HeeChan Kim'。该 handle 与 person_json 中的 name_or_handle、social、writeup_evidence 三项一致，身份对应得到一手来源确认。未发现同名歧义证据，但未核验真实姓名拼写以外的身份背景（学历、雇主等）。\",\n  \"items\": [\n    {\n      \"id\": \"hc-publication-2022-4956\",\n      \"date\": \"2022-06-12\",\n      \"claim\": \"HeeChan Kim 公开发布 CVE-2022-4956，针对 Advanced Installer（<=19.7）及使用该框架的 Proton VPN 安装器的 DLL 劫持本地提权漏洞。root cause 为安装器从相邻 .Local 目录加载 WinSxS 的 GdiPlus.dll，而该目录普通用户可写。PoC 以 SeDebugPrivilege 打开 winlogon.exe、复制其 token 并经 CreateProcessWithTokenW 提升至 SYSTEM。研究者描述发现路径为在审查 Proton VPN 安装器时偶然发现，Proton 将报告转交 Advanced Installer，后者在 v19.7.1 修复并赠送 license key。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"早期（2022 年中）作品以 WinSxS/.Local 目录 DLL 劫持为方法，依赖 Process Monitor 观察安装器文件搜索顺序；披露渠道为厂商直接沟通，附带完整 timeline；首次显示其通过供应链依赖（安装器框架）从下游产品回溯到上游根因的研究习惯。\",\n      \"short_quote\": \"I found this vulnerability through Proton VPN.\",\n      \"source\": {\n        \"title\": \"CVE-2022-4956: Advaned Installer Local Privilege Escalation Vulnerability (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/Advaned-Installer-Local-Privilege-Escalation-Vulnerability/\",\n        \"published\": \"2022-06-12\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-publication-2022-39846\",\n      \"date\": \"2022-09-11\",\n      \"claim\": \"HeeChan Kim 发布 CVE-2022-4956 之后的 Samsung Smart Switch PC DLL 劫持漏洞（CVE-2022-39846，vendor id SVE-2022-1841）。root cause 为管理员权限安装器将日志写入用户可写 temp 目录，其中记录了包含随机 GUID 的子目录路径，随后从该目录加载 MSSetupAddinDllLOC.dll。PoC 用 Python 脚本轮询日志、解析 GUID 目录、在安装器加载前植入恶意 DLL，再以 winlogon token 复制提权到 SYSTEM。厂商 Samsung Mobile Security 在约 5 周内完成分级与修复。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"方法从静态 DLL 搜索顺序劫持进化到 race condition：引入 Python 监控脚本解析安装器日志以预测随机路径，体现重复练习中的工具建设（自动化 PoC）。同一厂商（Samsung）被系统性追踪，显示目标选择的延续性。\",\n      \"source\": {\n        \"title\": \"CVE-2022-39846: DLL hijacking vulnerability in Smart Switch PC (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/CVE-2022-39846-DLL-hijacking-vulnerability-in-Smart-Switch-PC/\",\n        \"published\": \"2022-09-11\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-publication-2022-44898-kernel\",\n      \"date\": \"2022-11-01\",\n      \"claim\": \"HeeChan Kim 发布 CVE-2022-44898，针对 ASUS AuraSync 捆绑的内核驱动 MsIo64.sys（<=1.07.79_V2.2）的栈缓冲区溢出本地提权。IOCTL 分发例程（0x80102040）调用 memmove 将用户输入 lpInBuffer 拷入 16 字节栈缓冲 Src 而 Options（源自 nInBufferSize）控制拷贝长度，未校验。PoC 构造 136 字节缓冲（72 字节 NOP + ROP 链），先 pop 精心构造的 CR4 值（0x250ef8）经 mov cr4,rcx;ret 关闭 SMEP，wbinvd;ret 后跳转到用户态 shellcode，通过遍历 ActiveProcessLinks 找 PID 4 的 EPROCESS、复制 +70h 偏移的 token 实现行窃，再恢复 SMEP 与栈。ASUS 于 2022-08-09 提供补丁并授予 Hall of Fame；MITRE 于 2023-02-07 分配 CVE。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"技术栈从 user-mode installer DLL 劫持跃迁到内核态 exploit：首次（也是所抓取作品中唯一一次）使用 ROP、SMEP bypass 与 EPROCESS token stealing。这是公开作品中难度最高的单点，显示其能力从逻辑漏洞扩展到内核内存破坏类漏洞。披露后获得厂商致谢（ASUS Hall of Fame）。\",\n      \"short_quote\": \"Since lpInBuffer is moved to Src, and the length is not checked, a rop attack is possible by changing the dispatch function return address.\",\n      \"source\": {\n        \"title\": \"CVE-2022-44898: ASUS AuraSync Kernel Stack Based Buffer Overflow Local Privilege Escalation (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/ASUS-AuraSync-Kernel-Stack-Based-Buffer-Overflow-Local-Privilege-Escalation/\",\n        \"published\": \"2022-11-01\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-publication-2022-45422\",\n      \"date\": \"2022-11-24\",\n      \"claim\": \"HeeChan Kim 发布 CVE-2022-45422，针对 LG Smart Share（<=2.3.1712.1201）的 DLL 劫持 LPE。安装器加载名为 '!.DLL' 的 DLL，其路径取自用户/系统环境变量目录（普通用户可写，如 %USERPROFILE%\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps）。PoC 经 Process Monitor 发现加载顺序，植入 DLL 后以 winlogon token 复制提权。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"回到 user-mode DLL 劫持但变化加载源（环境变量目录、特殊文件名 '!.DLL'）；明确以 Process Monitor 为发现工具并复用同一 token impersonation 模板（OpenProcessToken/DuplicateTokenEx/CreateProcessWithTokenW），显示工具链与代码模板的跨漏洞复用。\",\n      \"short_quote\": \"I discovered this vulnerability through Process Monitor.\",\n      \"source\": {\n        \"title\": \"CVE-2022-45422: LG Smart Share Local Privilege Escalation Vulnerability (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/CVE-2022-45422-LG-Smart-Share-Local-Privilege-Escalation-Vulnerability/\",\n        \"published\": \"2022-11-24\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-publication-2022-39909-junction\",\n      \"date\": \"2022-12-06\",\n      \"claim\": \"HeeChan Kim 发布 CVE-2022-39909，针对 Samsung Gear IconX PC Manager（<2.1.221019.51）的逻辑漏洞。管理员权限安装器在用户可写 Quick Launch 目录创建 'Gear IconX.lnk'。PoC 删除 Quick Launch 目录、建立到 \\\\RPC Control 的 junction、再用 native symbolic link 将 'Gear IconX.lnk' 映射到 C:\\\\Windows\\\\System32\\\\cng.sys，使安装器经 reparse 点链写入覆盖 cng.sys，造成永久 DoS。使用 NtCreateFile/NtCreateSymbolicLinkObject 等 NT API。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"方法转向点：从 DLL 劫持切换到 junction + native symbolic link（NT API）的逻辑漏洞，目标效果从提权扩展到任意文件创建/永久 DoS。该手法在其后多份 Samsung 系列 writeup 中重复出现，成为可识别的个人技术特征。\",\n      \"source\": {\n        \"title\": \"CVE-2022-39909: Insufficient verification of data authenticity vulnerability in Samsung Gear IconX PC Manager (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/CVE-2022-39909-Insufficient-verification-of-data-authenticity-vulnerability-in-Samsung-Gear-IconX-PC-Manager/\",\n        \"published\": \"2022-12-06\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-publication-2023-37849\",\n      \"date\": \"2023-07-09\",\n      \"claim\": \"HeeChan Kim 发布 CVE-2023-37849（CVSS 6.5），针对 Panda Dome VPN 安装器（PANDAVPN.exe <15.14.8）的 DLL 劫持 LPE。安装器从自身目录加载多个 DLL，未找到时回落到 C:\\\\Windows\\\\SysWOW64；关键 DLL 为 TextShaping.dll。普通用户在安装器目录放置恶意 TextShaping.dll 即可在管理员上下文执行，PoC 经 winlogon token 复制提权到 SYSTEM。首次联系 2022-08-01，9 天后收到补丁文件，但公开披露延至约一年后（2023-07-05），随后才向 MITRE 请求 CVE。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"披露时间管理出现延迟模式：补丁早已就绪但延后约一年公开，CVE 在披露后才申请，显示其公开作品发布节奏与厂商修复节奏脱钩。技术方法继续沿用 DLL 搜索顺序劫持 + 同一 token impersonation 模板。\",\n      \"source\": {\n        \"title\": \"CVE-2023-37849: Local privilege escalation in Panda Dome VPN for Windows Installer (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/Local-privilege-escalation-in-Panda-Dome-VPN-for-Windows-Installer/\",\n        \"published\": \"2023-07-09\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-publication-2023-30672\",\n      \"date\": \"2023-07-27\",\n      \"claim\": \"HeeChan Kim 发布 CVE-2023-30672（vendor id SVE-2023-0310），针对 Samsung Smart Switch for Windows Installer（<4.3.23043_3）。管理员权限安装器在用户可写 Quick Launch 目录创建 'Smart Switch.lnk'。PoC 建立 Quick Launch 到 \\\\RPC Control 的 junction 并以 native symbolic link 将 'Smart Switch.lnk' 指向 C:\\\\Windows\\\\System32\\\\cng.sys，安装器经 reparse 点链覆盖 cng.sys 造成永久 DoS。Samsung 于 2023-03-17 评级 high，2023-07-06 出补丁与 CVE。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"junction+symlink 手法在同一厂商（Samsung Smart Switch）上重复应用，与 CVE-2022-39909、CVE-2023-30673 形成同一产品的逻辑漏洞系列，显示对单一目标产品线系统性扫描的重复练习。\",\n      \"source\": {\n        \"title\": \"CVE-2023-30672: Improper privilege management vulnerability in Samsung Smart Switch for Windows Installer (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/CVE-2023-30672-Improper-privilege-management-vulnerability-in-Samsung-Smart-Switch-for-Windows-Installer/\",\n        \"published\": \"2023-07-27\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-publication-2023-30673\",\n      \"date\": \"2023-07-28\",\n      \"claim\": \"HeeChan Kim 发布 CVE-2023-30673（vendor id SVE-2023-0312），针对 Samsung Smart Switch PC（<4.3.23052_1）。管理员权限安装器删除位于用户可写路径的特定文件。PoC 建立 C:\\\\Users\\\\%Username%\\\\AppData\\\\Roaming\\\\Samsung\\\\Smart Switch PC 到 \\\\RPC Control 的 junction，并以 native symbolic link 将 CRMData.db 指向任意目标（如 C:\\\\Windows\\\\system.ini），安装器删除 CRMData.db 时经 reparse 点链删除目标文件，实现任意目录/文件删除。补丁为在安装过程使用的目录中阻止 directory junction。首次联系 2023-02-23，2023-07-06 出补丁与 CVE。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"同一 junction+symlink 原语被改造为不同效果（从任意文件创建/DoS 扩展到任意删除），显示对单一技术原语的多用途探索。披露 timeline 规范记录。\",\n      \"source\": {\n        \"title\": \"CVE-2023-30673: Possible to delete arbitrary directory vulnerability in Smart Switch PC (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/CVE-2023-30673-Possible-to-delete-arbitrary-directory-vulnerability-in-Smart-Switch-PC/\",\n        \"published\": \"2023-07-28\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-publication-2022-4894\",\n      \"date\": \"2023-09-24\",\n      \"claim\": \"HeeChan Kim 发布 CVE-2022-4894（vendor id PSR-2022-0147，CVSS 8.2），覆盖四款 Samsung/HP 打印机软件（Samsung Printer Diagnostics v1.0.4.29、Samsung Printer Setup Program v1.0.0.32、Samsung Universal Print Driver3 v3.00.13.00、Samsung Scan To PC Lite v1.2.14.0）的 DLL 劫持 LPE。前三款以日志记录的随机 temp 目录路径加载 cscapi.dll/DPAPI.DLL/TextShaping.dll，PoC 用 Python 轮询日志、解析路径并竞态植入 DLL；第四款从环境变量目录加载 ${MUI_HELPER}.DLL。首次联系 2022-09-01，Samsung 称由 HP 管理，2022-09-18 报告 HP，约一年后（2023-08-02）出补丁与 CVE。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"单篇 writeup 覆盖多款同厂商产品，将同一 DLL 劫持+race 方法批量化应用，显示从单漏洞到产品线扫描的方法演化；vendor 转交（Samsung→HP）处理体现跨厂商协调经验。\",\n      \"source\": {\n        \"title\": \"CVE-2022-4894: Certain HP and Samsung printer software - Potential elevation of privileges (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/CVE-2022-4894-Certain-HP-and-Samsung-printer-software-Potential-elevation-of-privileges/\",\n        \"published\": \"2023-09-24\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-publication-2023-41929\",\n      \"date\": \"2023-09-24\",\n      \"claim\": \"HeeChan Kim 发布 CVE-2023-41929（CVSS 7.3），针对 Samsung Memory Card & UFD Authentication Utility PC Software（<1.0.2）。管理员权限安装器从所在目录加载 DLL；直接在安装器目录植入 SspiCli.DLL 会触发安装器完整性检查并报错中止。PoC 转用 junction + native symbolic link：建立 %USERPROFILE%\\\\AppData\\\\Roaming\\\\Samsung\\\\Smart Switch PC 到 \\\\RPC Control 的 junction，以 native symbolic link 将 CRMData.db 指向 C:\\\\Windows\\\\system.ini，安装器经 reparse 点链读取/写入目标文件，绕过 DLL 完整性检查。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"在厂商已部署 DLL 完整性检查的情况下，方法从直接 DLL 劫持切换到 junction+symlink 绕过，显示对防御机制的反馈式适应；技术原语（junction+native symlink）再次复用，证实其已将该手法固化为常用工具。\",\n      \"source\": {\n        \"title\": \"CVE-2023-41929: Samsung Card-UFD Authentication Utility for Windows Installer Local Privilege Escalation (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/CVE-2023-41929-Samsung-Card-UFD-Authentication-Utility-for-Windows-Installer-Local-Privilege-Escalation/\",\n        \"published\": \"2023-09-24\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-publication-2022-24924-android\",\n      \"date\": \"2021-11-30\",\n      \"claim\": \"HeeChan Kim 最早的公开 CVE writeup 为 CVE-2022-24924，针对 Android LiveWallpaperService（<3.0.9.9）的不当访问控制，允许无权限创建特定命名系统目录，而非 Windows 内核/LPE 漏洞。GitHub 上对应仓库 heegong/CVE 仅含此一个 CVE 条目。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"作品起点为 Android 应用层访问控制漏洞，与后续 Windows installer LPE 方向不同；显示其研究方向在 2021-2022 间发生转向，转向后集中在 Windows 第三方软件提权。该条目用于界定其公开作品的最早时间与初始技术栈。\",\n      \"source\": {\n        \"title\": \"CVE-2022-24924: Improper access control vulnerability in LiveWallpaperService (heegong.github.io)\",\n        \"url\": \"https://heegong.github.io/posts/CVE-2022-24924-Improper-access-control-vulnerability-in-LiveWallpaperService/\",\n        \"published\": \"2021-11-30\",\n        \"source_type\": \"personal_blog_writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-identity-github\",\n      \"date\": \"2020-06-17\",\n      \"claim\": \"GitHub 用户 heegong 共有 23 个公开仓库，最早 auto_mouse_python（2020-06-17）与 socket_python_backdoor（2020-07-12）为 Python 学习/工具类项目；2020-09 起出现 universal_shell_code（C）、reversing-problems（C）、study_note_heegong 等与逆向/安全学习相关仓库；安全相关仓库仅 CVE-2022-24924（Android）与 CVE 索引仓库 heegong/CVE。未发现任何 Windows 内核 LPE 代码仓库。profile 显示名为 '김희찬 (heegong)'，bio '0-day Researcher'，TeamH4C，Seoul。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"GitHub 仓库时间线显示其从 2020 年中 Python/通用编程起步，2020 年底转向 C 与逆向/安全学习，2022 年起公开 CVE 仓库；代码侧的学习曲线（Python→C→exploit 材料）与博客 writeup 的技术演化一致。但仓库中缺乏内核 exploit 代码，与 person_json 标注的 'Windows 内核' primary_focus 仅在博客 writeup 层面有单一第三方驱动案例（CVE-2022-44898）支撑。\",\n      \"source\": {\n        \"title\": \"heegong - GitHub profile and repositories\",\n        \"url\": \"https://github.com/heegong?tab=repositories\",\n        \"published\": \"2020-06-17\",\n        \"source_type\": \"developer_profile_and_repos\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"hc-conference-offbyone-poc\",\n      \"date\": \"2026\",\n      \"claim\": \"人物记录（person_json）的 selected_conference_evidence 字段标注为 'OffByOne 2026 / POC'，提示该研究者 2026 年在 OffByOne 或 POC（Power of Community）会议有演讲事实。未能抓取到任何会议 speaker 页面、议程或演讲材料以独立确认该事实。\",\n      \"status\": \"unknown\",\n      \"growth_signal\": \"本地种子提及 2026 会议演讲，若成立则代表其从 writeup 发布向公开演讲输出的转化；但在未抓取到一手/权威会议页面之前不能据以判定成长机制。\",\n      \"source\": {\n        \"title\": \"person_json.selected_conference_evidence (本地种子，未抓取验证)\",\n        \"url\": \"local-seed://person_json/selected_conference_evidence\",\n        \"published\": \"2026\",\n        \"source_type\": \"local_seed_note\",\n        \"level\": \"lead_only\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"person_json 将 primary_focus 标注为 'Windows 内核与 LPE 漏洞'，但其抓取到的公开作品集中为第三方软件安装器/驱动的 user-mode LPE 与逻辑漏洞；唯一内核态 exploit 为第三方驱动 ASUS MsIo64.sys 的栈溢出（CVE-2022-44898），未发现 Windows 内核本身（ntoskrnl/win32k 等）的 LPE writeup，GitHub 仓库亦无内核 LPE 代码。该标注与公开作品证据存在范围上的张力。\"\n  ],\n  \"gaps\": [\n    \"OffByOne 2026 / POC 会议演讲未能抓取验证：X 个人资料返回 402 不可抓取，针对 OffByOne/POC 2026 speaker 的 WebSearch 多次返回工具不可用说明而非结果，会议官方网站未抓取。该事实仅以本地种子形式存在，不能标记为 documented/reported。\",\n    \"2024-2026 年的公开作品缺失：博客 archives 止于 2023-09-24，GitHub 仓库最新更新为 2025-11（ssu_p5js_pages，非安全研究），无法判断 2023 年后其研究方向是否仍为 Windows LPE 或已转向内核/其他方向。\",\n    \"导师、团队协作与同行反馈机制未见证据：TeamH4C 仅以 affiliation 形式出现在 profile 与 writeup 署名，未见团队内部协作、code review 或 mentorship 的一手材料。\",\n    \"重复练习/训练的内部记录缺失：可见的是工具建设产物（Python 监控脚本、C++ PoC DLL 模板）与方法在多漏洞上的复用，但无学习笔记内容（study_note_heegong 仓库无描述细节未抓取）可佐证其刻意练习过程。\",\n    \"未抓取 study_note_heegong 仓库内容，无法判断其中是否含研究方法论/复盘记录。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "13b2cce83cf8e5f2b365a92b4e4ac532a81d2f78a246e42d05c81c0736a8643c",
+        "accessed_at": "2026-09-28T07:04:17.608173+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790579057608187000-heechan-kim-works.json",
+    "label": "HeeChan Kim:works",
+    "elapsed_seconds": 808.65,
+    "prompt_sha256": "00e36ff94ea74c2517186bf65f6d02d9be183b90a78c7845bf28dfd288097f4d",
+    "num_turns": 19,
+    "total_cost_usd": 2.0609619999999995,
+    "usage": {
+      "input_tokens": 29886,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 337408,
+      "output_tokens": 11895,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 82341,
+        "outputTokens": 58897,
+        "cacheReadInputTokens": 353664,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 2.0609619999999995,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": true,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

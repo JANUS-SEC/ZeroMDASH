@@ -1,0 +1,414 @@
+{
+  "person": "Nan Wang (eternalsakura)",
+  "expertise": [
+    "浏览器漏洞利用，以 Chrome/V8 为主，覆盖 WebSQL、JIT(TurboFan Simplified Lowering)、WASM GC 类型混淆等方向（nd_5, eternalsakura-works-2018-v8-onramp, timeline-03）",
+    "浏览器 fuzzing 与结构化/语法感知变异（libprotobuf-mutator、apicraft 驱动生成、自研 JS fuzzer 约 2 万行 C++）（nd_8, eternalsakura-works-2021-structured-fuzz-blackhat）",
+    "V8 引擎内部：JIT、GC、hidden class、bytecode、Torque，跨 V8/JSC/SpiderMonkey 引擎对照（eternalsakura-works-2018-v8-onramp, eternalsakura-works-2020-fuzzer-infra, eternalsakura-works-2023-cve2023-3079-peerlearning）",
+    "Chrome 攻击面横向覆盖：V8 内存破坏、WebUI 逻辑/校验缺陷（chrome.send() find/end 缺配）、Mojo IPC 沙箱逃逸（nan-decisions-05, rev1-mojo-writeup-verified, eternalsakura-works-2022-webui-writeup-mentoring）",
+    "静态分析与程序分析：CodeQL 污点/数据流分析、LLVM backend pass、AST 分析（HearmenASTFuzz fork）（rev1-cves-rankings-codeql-atomfeed, rev2-works-2019-github-repos-scoped, eternalsakura-works-2020-fuzzer-infra）",
+    "编译器/底层补课：CMU 15-745 编译优化课程笔记、自实现 STL、Linux kernel 调试环境、QEMU/Android 逆向环境（eternalsakura-works-2020-fuzzer-infra, timeline-13, timeline-02）",
+    "二进制安全基础：CTF pwn（unlink、fastbin、堆利用）、Android native hook、Stagefright CVE-2015-3864（eternalsakura-works-2018-v8-onramp, nd_1）",
+    "AI 辅助漏洞挖掘工具链：自研 AI 挖洞工具迭代、fuzzilli fork 及 hound/quimera/legion 等安全分析仓库（eternalsakura-works-2025-ai-assisted-mining, nd_13）"
+  ],
+  "stages": [
+    {
+      "period": "2017–2018 年初",
+      "stage": "Web/二进制逆向与 CTF pwn 起步",
+      "capability_change": "从 Web 安全（tiki_wiki 任意文件上传）起步，转入 Android 逆向与 CTF pwn 的重复练习，建立公开 writeup 的记录习惯，并在 2018 年初系统学习二进制安全、研究 Android native 层 hook 作为入门实践。该阶段形成可核验的逆向与公开输出能力，为后续浏览器方向提供二进制基础。",
+      "evidence_ids": [
+        "timeline-01",
+        "timeline-02",
+        "nd_1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2018 年",
+      "stage": "进入 V8/浏览器与玄武实验室机构反馈",
+      "capability_change": "2018-05 发布首篇 v8 exploit 博文，方向由 Android/CTF pwn 转向浏览器/V8 引擎利用；自述系统学习 V8 引擎内部（JIT、GC、hidden class、bytecode），同年 5 月面试玄武实验室、9 月入职成为 'xlabのsakura'，获得机构性反馈与同伴环境。导师以连续追问（PoC 能否修改、不同对象能否触发、为何 JIT 优化去掉边界、开发者为何如此设计）将其关注点从单纯复现推向设计意图与实现成因。自述 2019 年取得首批 CVE（Chrome V8 CVE-2019-5831、Apple CVE-2019-8583，后者 atom feed 转引『sakura of Tencent Xuanwu Lab』致谢）；厂商致谢页未抓取到具名条目交叉验证（external.gaps），按自述对待。",
+      "evidence_ids": [
+        "timeline-03",
+        "timeline-05",
+        "timeline-06",
+        "nd_3",
+        "nd_4",
+        "nd_5",
+        "eternalsakura-works-2018-v8-onramp",
+        "rev1-cves-rankings-codeql-atomfeed"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2019 末–2020",
+      "stage": "离职后补课与 fuzzing 基础设施自建",
+      "capability_change": "2019-09 自玄武实验室离职，随之列出基础能力补强清单（自实现 tiny STL、自实现 kernel、用 LLVM backend pass 实现 compiler）；2019-10 自述在 360 alpha team 做审计（atom feed 原文『端茶倒水学审计』，作者 atom feed 原文用词，引自 rev1-employer-360-atomfeed）。2020-03 进入 fuzzing（sakuraのall fuzz:afl-unicorn），2020-08 完成 AFL 源码全注释，2020-09 发布 chrome sandbox escape case study 与 PlaidCTF2020 Mojo writeup（PlaidStoreImpl 接口 RenderFrameHost 原始指针未绑定生命周期导致 UAF/OOB）。GitHub 同期出现 sakura_stl、sakura_llvm_opt（CMU 15-745 笔记）、BinderInterfaceFinder（LLVM pass）、codeql-uboot 等仓库，反映对编译器/STL/LLVM 与静态分析的系统补课。",
+      "evidence_ids": [
+        "nd_6",
+        "nd_7",
+        "rev1-employer-360-atomfeed",
+        "rev1-mojo-writeup-verified",
+        "eternalsakura-works-2020-fuzzer-infra",
+        "timeline-07",
+        "timeline-13",
+        "timeline-15"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2021",
+      "stage": "结构化 fuzzing 与方法教学化",
+      "capability_change": "自述因不满意开源 JS fuzzer 而自行用数月时间编写约 2 万行 C++ 代码，完成从读入 JS 解析到 AST 变异的 JS fuzzer，并另写 sqlite fuzzer，自评借此覆盖语义 fuzz 的完整技能栈。自述使用 CodeQL 发现 sandbox bug（atom feed『codeql帮我找了不少沙箱洞』，未独立核实，rev1-cves-rankings-codeql-atomfeed）。同年发布基于 Zer0Con2021 chrome exploitation 议题解读的 CVE-2020-16040 分析（V8 TurboFan Simplified Lowering，文末致谢分享者刘耕铭），并推出付费 fuzzing lab 培训（专题含 fuzz 基础、浏览器 fuzz、修改 fuzzilli 挖到首个 V8 漏洞），动机为『想让更多人进入二进制安全这个大方向』。Black Hat USA 2021 演讲『A Series of Interesting Vulnerabilities in Browsers』为 atom feed 单源自述，未独立核实。",
+      "evidence_ids": [
+        "nd_8",
+        "nd_9",
+        "nan-decisions-03",
+        "nan-decisions-04",
+        "eternalsakura-works-2021-structured-fuzz-blackhat",
+        "eternalsakura-community-06-teaching-and-community-building",
+        "rev1-cves-rankings-codeql-atomfeed"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2022–2023",
+      "stage": "攻击面综述与同侪拆解学习",
+      "capability_change": "2022-02 引入 CodeQL 数据流/污点分析笔记，跟踪 RealWorldCTF 2022 hso 与 NSO iMessage 0click 漏洞；2022-12 提出 WebUI 为 Chrome 中最易攻击面（chrome.send() 回调、find 不配 end 的越界模式、release 构建中 Debug Check 不提供保护、用户可控 enum cast），攻击面选择由 V8 内存破坏转向浏览器 UI 逻辑/校验缺陷，并以『单条控制台命令即可触发』作为『易』的判断标准。2023-08 维护 CVE-2023-3079（Chrome V8 Torque）exploit fork，显式致谢 @_clem1（发现 ITW exploit）、@alisaesage（prior RCA）、@buptsb（notes），以 exploit-commentless.js 等注释化版本作为同侪 exploit 拆解学习的复盘产物；指导实习生进行 SQLite/WebSQL 利用研究，研究方法向下游传递。",
+      "evidence_ids": [
+        "eternalsakura-works-2022-webui-writeup-mentoring",
+        "eternalsakura-works-2023-cve2023-3079-peerlearning",
+        "nan-decisions-05",
+        "eternalsakura-community-05-blog-writeup-series-and-ctf"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2024–2025",
+      "stage": "跨引擎扩展、转型失败再尝试与 AI 转向",
+      "capability_change": "2024-02 my_poc 仓库含 CVE-2024-23214 PoC 目录，研究范围由 Chrome 扩展至 Firefox（跨引擎迁移）。自述 2024 年尝试跳出二进制安全做新研究但失败，『最近半年基本上一直在吃老本』，并归因于二进制安全积累的非通用性，同时观察到国内安全研究不再被鼓励、Chrome VRP 奖金大幅削减等行业因素。2025 年初转向新研究方向，自述『转型大成功，我在新的领域再次做到了顶尖』，并以『Legends Never Die』与七年回顾收束。自述 2025 年于 Black Hat Asia 演讲 V8 WASM type confusion、GeekCon 演讲 WASM GC exploits，每月花费约 500 美元订阅 GPT/Claude/Gemini 迭代自研 AI 挖洞工具，预测两年内漏洞挖掘将发生根本性变化。自述厂商赏金排名（Chrome VRP Top Researcher Rank #2、MSRC Top Researcher Q3 Rank #6、MSRC 2025 Most Valuable Security Researchers Rank #9、Meta WhiteHat Top 3）均为 atom feed 单源自述，未独立核实。",
+      "evidence_ids": [
+        "nd_10",
+        "nd_11",
+        "nd_12",
+        "nd_13",
+        "eternalsakura-works-2024-crossengine-my_poc",
+        "eternalsakura-works-2025-ai-assisted-mining",
+        "rev1-cves-rankings-codeql-atomfeed"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "引擎内部系统化学习作为跨方向迁移的阶梯",
+      "starting_conditions": "2018 年已有 Android 逆向与 CTF pwn（unlink、fastbin、内核堆利用、Stagefright CVE-2015-3864）积累，但缺少浏览器引擎内部知识；同年加入玄武实验室获得机构性反馈与同伴环境（eternalsakura-works-2018-v8-onramp, nd_4）。",
+      "repeated_practice": "由通用 pwn 转入 V8 时，系统学习引擎内部（JIT、GC、hidden class、bytecode）而非仅做利用；2020 年转入 fuzzing 时补 CMU 15-745 编译优化课程、自实现 STL、写 LLVM backend pass；2023 年拆解 CVE-2023-3079 时同样回到 Torque 类型系统与 V8 内部机制；2024 年向 Firefox 迁移时再次以引擎内部学习为路径。",
+      "feedback": "玄武实验室导师以连续追问（PoC 能否修改、不同对象能否触发、为何 JIT 优化去掉边界、开发者为何如此设计）将其关注点从现象推向设计意图与成因（nd_3）；2019-06 首个 Google/Apple 致谢自述形成外部反馈（约一年周期，nd_5）；GitHub fork 链与同行（@_clem1、@alisaesage、@buptsb）的 ITW exploit/RCA/notes 构成同侪拆解学习反馈（eternalsakura-works-2023-cve2023-3079-peerlearning）。",
+      "intermediate_capability": "形成『进入新引擎/新方向→先做引擎内部系统学习→再做利用与工具建设』的可重复迁移路径，而非依赖单一引擎的利用经验直接迁移。",
+      "observed_outcomes": [
+        "2018-05 首篇 v8 exploit 博文与 2018-07 firefox CVE-2017-0234/0236 case study（timeline-03, timeline-05）",
+        "2020-08 AFL 源码全注释与 2020-09 Mojo 沙箱逃逸 writeup（timeline-07, rev1-mojo-writeup-verified）",
+        "2023-08 CVE-2023-3079 exploit fork 与注释化复盘产物 exploit-commentless.js（eternalsakura-works-2023-cve2023-3079-peerlearning）",
+        "2024-02 my_poc 仓库 CVE-2024-23214 PoC 与 Chrome+Firefox 跨引擎扩展（eternalsakura-works-2024-crossengine-my_poc）"
+      ],
+      "evidence_ids": [
+        "eternalsakura-works-2018-v8-onramp",
+        "timeline-03",
+        "timeline-05",
+        "nd_3",
+        "nd_4",
+        "nd_5",
+        "nd_7",
+        "eternalsakura-works-2020-fuzzer-infra",
+        "timeline-07",
+        "timeline-13",
+        "rev1-mojo-writeup-verified",
+        "eternalsakura-works-2023-cve2023-3079-peerlearning",
+        "eternalsakura-works-2024-crossengine-my_poc"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "该迁移路径也可能由机构环境（玄武实验室同伴与导师）与个人对引擎内部的偏好共同塑造，而非纯粹的个人方法选择；2019-09 离职后仍延续该模式可部分排除机构驱动，但无法完全区分个人方法与机构训练的残余效应。"
+    },
+    {
+      "name": "工具建设驱动的能力固化与公开输出",
+      "starting_conditions": "2019-07 提出『知识保值』问题（如何在五年后仍使所学有用，结论指向逆向与开发能力抗贬值，nd_7）；2019-09 离职后自列基础能力补强清单（自实现 STL、自实现 kernel、LLVM backend pass 实现 compiler，nd_6）。",
+      "repeated_practice": "因现有工具不顺手而自建：2020 完成 AFL 源码全注释（timeline-07）；2020 自写 LLVM pass（BinderInterfaceFinder）、CodeQL 静态分析（codeql-uboot）、sakura_llvm_opt 课程笔记（eternalsakura-works-2020-fuzzer-infra, rev2-works-2019-github-repos-scoped）；2021 自述因不满意开源 JS fuzzer 而编写约 2 万行 C++ 自研 JS fuzzer，覆盖从 JS 解析到 AST 变异（nd_8）；2025 fork fuzzilli 并迭代自研 AI 挖洞工具（eternalsakura-works-2025-ai-assisted-mining）。",
+      "feedback": "自述以『覆盖完整技能栈』作为自评里程碑（nd_8）；GitHub 仓库公开与 464 followers、Pull Shark 徽章构成外部可见性反馈（eternalsakura-community-01-github-profile）；fuzzing lab 培训后自述『反响意外的还好』并据此修订课程内容（nan-decisions-04）。",
+      "intermediate_capability": "形成『工具不顺手→自建工具→以工具建设驱动对底层机制理解→公开为可复用资料』的闭环，工具建设本身成为学习与能力固化手段。",
+      "observed_outcomes": [
+        "2020-08 sakuraのAFL源码全注释公开为可复用学习资料（timeline-07）",
+        "2021 自研约 2 万行 C++ JS fuzzer 与 sqlite fuzzer（nd_8, eternalsakura-works-2021-structured-fuzz-blackhat）",
+        "GitHub 上 afl-libprotobuf-mutator、AFLplusplus、apicraft、trapfuzzer 系列等 fuzzing 工具链仓库（eternalsakura-community-02-github-repos-fuzzing-browsers, timeline-15）",
+        "2025 fuzzilli fork 与 hound/quimera/legion 等 AI 安全分析仓库（eternalsakura-works-2025-ai-assisted-mining）"
+      ],
+      "evidence_ids": [
+        "nd_6",
+        "nd_7",
+        "nd_8",
+        "nan-decisions-04",
+        "timeline-07",
+        "timeline-13",
+        "timeline-15",
+        "eternalsakura-works-2020-fuzzer-infra",
+        "eternalsakura-works-2021-structured-fuzz-blackhat",
+        "eternalsakura-community-01-github-profile",
+        "eternalsakura-community-02-github-repos-fuzzing-browsers",
+        "eternalsakura-works-2025-ai-assisted-mining",
+        "rev2-works-2019-github-repos-scoped"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "工具建设的密集度也可能部分源于 2019-09 离职后的自学空档与 2020 年外部会议/CTF 活动受限的客观条件，而非纯粹主动的能力选择；但 2021 与 2025 的两次自建分别对应不同技术阶段，支持其为持续的方法而非单次事件。"
+    },
+    {
+      "name": "公开 writeup 与会议解读作为复盘手段",
+      "starting_conditions": "2017-04 即以公开博客记录 Web 安全分析（timeline-01），2018-01 起密集发布 Android 逆向/CTF pwn writeup（timeline-02），公开写作从一开始就是记录手段。",
+      "repeated_practice": "持续公开 CVE 解读、CTF 解题与攻击面综述 writeup：2018 浏览器 CTF 系列（Google CTF justintime、CVE-2019-5782、*ctf chrome oob、34c3 v9、qwb growupjs、wctf independence_day，timeline-06）；2021 基于 Zer0Con2021 议题解读 CVE-2020-16040（nan-decisions-03）；2022 WebUI 攻击面综述（nan-decisions-05）；2022 RealWorldCTF 2022 hso 与 NSO iMessage 0click 分析（eternalsakura-community-05-blog-writeup-series-and-ctf）。",
+      "feedback": "会议演讲/议题作为材料输入（Zer0Con2021 chrome exploitation），分享者（刘耕铭）作为同伴反馈节点（nan-decisions-03）；博客首页固定友情链接网络（Kiprey、Murasaki、bobb、Thunderj、dwfalut、P1umer、pcat 共 7 位二进制安全研究员博客）构成可见的同伴可见性与同行交流（eternalsakura-community-04-blog-peer-links-network）；GitHub Pull Shark 徽章表明向上游提交并被合并（eternalsakura-community-01-github-profile）。",
+      "intermediate_capability": "形成『参赛/复现→writeup 公开复盘→跟踪前沿议题并教学化输出』的方法演进，研究深度由单漏洞走向攻击面综述。",
+      "observed_outcomes": [
+        "2018-11 至 2019-07 高密度浏览器 CTF writeup 序列（timeline-06）",
+        "2021-06 CVE-2020-16040 议题解读，文末致谢分享者刘耕铭（nan-decisions-03）",
+        "2022-12 WebUI 最易攻击面综述，提出可证伪的『单条控制台命令即可触发』判断标准（nan-decisions-05）",
+        "博客 post index 显示 CVE 解读 + CTF 解题 + sandbox escape case study 系列化输出（eternalsakura-community-05-blog-writeup-series-and-ctf）"
+      ],
+      "evidence_ids": [
+        "timeline-01",
+        "timeline-02",
+        "timeline-05",
+        "timeline-06",
+        "nan-decisions-03",
+        "nan-decisions-05",
+        "eternalsakura-works-2022-webui-writeup-mentoring",
+        "eternalsakura-community-04-blog-peer-links-network",
+        "eternalsakura-community-05-blog-writeup-series-and-ctf"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "密集公开 writeup 也可能部分由个人博客作为唯一记录渠道的客观条件驱动（无机构内部知识库可见证据），而非纯粹的复盘方法选择；但跨 7 年（2017–2022）的持续输出与主题演进支持其为习惯而非偶发。该周期也可能由行业环境（VRP 奖金削减、国内安全研究受抑制）被动驱动而非主动能力选择。"
+    },
+    {
+      "name": "方法输出与社区教学作为反馈外化",
+      "starting_conditions": "2021-11 自述以『二进制安全研究员、Fuzzing 爱好者、浏览器 bug hunter，获得过谷歌/苹果高危漏洞致谢』自我定位，并表述『想让更多人进入二进制安全方向、一起成长』的输出动机（nd_9）；同期已具备个人实践经历可结构化为课程内容。",
+      "repeated_practice": "2021-11 推出付费 fuzzing lab 培训，课程目录含『我的 fuzz 学习之路』『我是如何修改 fuzzilli 挖掘到第一个 v8 漏洞』等基于个人实践经历的专题（nan-decisions-04, nd_9）；博客推广微信公众号『天问记事簿』与知识星球『天问之路』，并以 tianwen-ctf-collection 仓库（README 写明『由天问之路知识星球成员维护的一个 ctf collection』）维护共享题集（eternalsakura-community-06-teaching-and-community-building, eternalsakura-community-07-tianwen-ctf-collection-repo）；2022 指导实习生进行 SQLite/WebSQL 利用研究（eternalsakura-works-2022-webui-writeup-mentoring）。",
+      "feedback": "培训后自述『反响意外的还好』并据此修订课程内容（nan-decisions-04）；GitHub Pull Shark 徽章与 464 followers 构成社区可见性反馈（eternalsakura-community-01-github-profile）；tianwen-ctf-collection 显示 0 issue/0 PR，社区协作反馈面尚处起步（eternalsakura-community-07-tianwen-ctf-collection-repo）。",
+      "intermediate_capability": "形成『个人实践→结构化为课程/题集→公开输出→据反馈修订』的反馈外化闭环，方法输出成为研究的并行产物。",
+      "observed_outcomes": [
+        "2021-11 fuzzing lab 培训课程结构化个人 fuzzing 方法论（nd_9, nan-decisions-04）",
+        "GitHub tianwen-ctf-collection 以知识星球名义维护共享 CTF 题集（eternalsakura-community-07-tianwen-ctf-collection-repo）",
+        "2022 指导实习生进行 SQLite/WebSQL 利用研究，研究方法向下游传递（eternalsakura-works-2022-webui-writeup-mentoring）",
+        "博客推广公众号『天问记事簿』与知识星球『天问之路』（eternalsakura-community-06-teaching-and-community-building）"
+      ],
+      "evidence_ids": [
+        "nd_9",
+        "nan-decisions-04",
+        "eternalsakura-works-2022-webui-writeup-mentoring",
+        "eternalsakura-community-01-github-profile",
+        "eternalsakura-community-06-teaching-and-community-building",
+        "eternalsakura-community-07-tianwen-ctf-collection-repo"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "方法输出也可能部分由付费培训的商业动机与社区品牌建设驱动，而非纯粹的方法反馈外化；且知识星球/公众号内容未抓取，具体同伴反馈强度不可得，tianwen-ctf-collection 协作面尚处起步，反馈闭环强度证据有限。"
+    }
+  ],
+  "tensions": [
+    "2018-02 自我怀疑（『感觉我是不是不适合当黑客』，因同行月度大量 CVE 产出而焦虑，随后从同伴博客心路历程获得继续坚持的勇气，nd_2）至 2025 转型成功（『转型大成功，我在新的领域再次做到了顶尖』，nd_12）的连贯叙事为 atom feed 单源自述，且仅观察『坚持后成功』的路径。这构成幸存者偏差风险：未观察到同样坚持但未成功的同行，不可作为『坚持→成功』的一般因果证据；确认偏差也可能使自述叙事偏向后追溯连贯的成长曲线。该叙事不得用于推断坚持与成功之间的一般因果。",
+    "雇主信息存在未澄清处：atom feed 自述约 2019-10 起在 360 alpha team 做审计（作者 atom feed 原文『端茶倒水学审计』，作者 atom feed 原文用词），2025-01-01 回顾称『今年是我在360工作的最后一年』，确切离职年份（2024 还是 2025）未明确；Chaitin Tech 雇主关联仅来自不可引用的搜索摘要，atom feed 未发现，按规则不予采信（rev1-employer-360-atomfeed）。",
+    "真名 Nan Wang 与 handle eternalsakura 的绑定仅依赖 person_json 输入种子；atom feed 全文不含『Nan Wang』或『王楠』，GitHub profile 真名字段为空，无权威页面显式绑定；x.com/eternalsakura13 因 HTTP 402 未核验，知乎 sakura1328 未验证（各维 identity_check/gaps）。真名与 handle 的绑定证据强度不足，身份基线仅靠 handle 在博客/GitHub/邮箱的自证闭环。",
+    "厂商致谢与赏金排名（Chrome V8 CVE-2019-5831、Apple CVE-2019-8583、CodeQL 发现 sandbox bug、Chrome VRP Top Researcher Rank #2、MSRC Top Researcher Q3 Rank #6、MSRC 2025 Most Valuable Security Researchers Rank #9、Meta WhiteHat Top 3）均为 atom feed 单源自述，厂商致谢页（Chromium VRP Hall of Fame、Apple Security Acknowledgements、MSRC 官方榜单）未抓取到具名条目以交叉验证（rev1-cves-rankings-codeql-atomfeed, ext-05-vendor-ack-unverified）。",
+    "Black Hat US/Asia 与 POC 的具体议题标题、年份与 speaker 身份未能在抓取范围内一手核实：blackhat.com 议程页返回 HTTP 403，Black Hat Asia 2023 / USA 2023 / USA 2024 / USA 2021 / GeekCon 2025 演讲仅有 atom feed 自述记录（eternalsakura-community-08-blackhat-poc-conference-attribution, ext-04-conference-claim-unverified）。会议演讲事实未用一手 speaker 页核实，相关转折不得记为 documented。",
+    "atom feed 中博客文章自链接指向 eternalsakura13.com，但 2026-09 抓取该域名返回无关的迪拜房地产页面；博客正文实际仅可通过 GitHub Pages 仓库 eternalsakura.github.io 的 atom feed 读取，来源自链接域名与现存活域名不一致（works 维度 contradictions）。",
+    "WebSearch 摘要提及存在 github.com/eternalsakura/BlackHat-2021 仓库，但对该仓库 URL 的 WebFetch 返回 404，仓库可能已改名或删除，其覆盖的浏览器引擎/CVE 清单无法核实（works 维度 contradictions）；GitHub 公开仓库描述偏 CTF pwn/编译器(LLVM)优化/fuzzing mutator 工具，未直接标注『浏览器』，与博客自述的『浏览器 bug hunter』方向不完全重合（external 维度 contradictions）。"
+  ],
+  "transferable_practices": [
+    "进入新引擎/新方向时先做引擎内部系统学习（JIT、GC、hidden class、bytecode、类型系统），再做利用与工具建设，形成可重复的跨方向迁移路径（mechanism 1，eternalsakura-works-2018-v8-onramp, nd_7, eternalsakura-works-2023-cve2023-3079-peerlearning）",
+    "以『知识保值』为问题意识，将逆向与开发能力定位为抗贬值的基础能力，据此规划长期学习（nd_7）",
+    "因现有工具不顺手而自建工具，并以『覆盖完整技能栈』作为自评里程碑，工具建设本身作为学习手段（mechanism 2，nd_8）",
+    "持续公开 writeup（CVE 解读 + CTF 解题 + 攻击面综述）作为复盘与公开发表习惯，并以可证伪标准（如『单条控制台命令即可触发』）取舍攻击面（mechanism 3，nan-decisions-05, timeline-06）",
+    "以会议演讲/议题作为材料输入并结合同伴分享者进行解读输出，跟踪前沿并教学化（mechanism 3，nan-decisions-03）",
+    "导师式连续追问（PoC 能否修改、不同对象能否触发、为何 JIT 优化去掉边界、开发者为何如此设计）作为从现象推向设计意图与成因的方法（nd_3）",
+    "拆解同伴 ITW exploit 并以注释化版本（exploit-commentless.js）作为复盘产物，结合公开致谢形成同侪学习回路（eternalsakura-works-2023-cve2023-3079-peerlearning）"
+  ],
+  "non_transferable_conditions": [
+    "2018 年加入玄武实验室获得的机构性反馈与同伴环境、导师连续追问式引导，为个人特有条件，非个人方法选择可独立获得（nd_3, nd_4, eternalsakura-works-2018-v8-onramp）",
+    "约 2019-10 起在 360 alpha team 做审计的雇主环境（含内部审计资源与同伴）为时期与组织特有条件，不可迁移（rev1-employer-360-atomfeed）",
+    "atom feed 作为 living document 覆盖 2018–2025 的长期公开记录渠道，以及中文二进制安全社区同伴博客互链网络（Kiprey、Murasaki、bobb、Thunderj、dwfalut、P1umer、pcat），为特定社区与时期条件，不可迁移（eternalsakura-community-04-blog-peer-links-network, works 维度 source）",
+    "厂商致谢与赏金排名（Chrome VRP、MSRC、Meta WhiteHat）若属实，依赖特定时期的厂商赏金计划与国内安全研究环境，2024 年自述 Chrome VRP 奖金大幅削减、国内安全研究不再被鼓励，该外部红利随时间衰减，不可作为持续可迁移条件（nd_10, rev1-cves-rankings-codeql-atomfeed）",
+    "2025 年每月约 500 美元订阅 GPT/Claude/Gemini 的 AI 工具投入依赖个人经济条件与 LLM 技术可用性窗口，为时期与资源特有条件（nd_13, eternalsakura-works-2025-ai-assisted-mining）",
+    "GitHub Pull Shark 徽章、464 followers 与 102 公开仓库构成的社区可见性基线，依赖长期 GitHub 投入与平台生态，为个人与平台特有（eternalsakura-community-01-github-profile）"
+  ],
+  "open_questions": [
+    "真名 Nan Wang 与 handle eternalsakura 的权威一手绑定页未找到：atom feed 全文不含真名，GitHub profile 真名字段为空，x.com/eternalsakura13 因 HTTP 402 未核验，知乎 sakura1328 未验证（各维 identity_check/gaps）。身份基线仅靠 handle 自证闭环，真名绑定证据强度不足。",
+    "360 确切离职年份待澄清：atom feed 仅给 2025-01-01 回顾『今年是我在360工作的最后一年』，未明确离职发生在 2024 还是 2025；本轮未抓取到能确认离职年份的一手页面（rev1-employer-360-atomfeed unresolved）。",
+    "Chaitin Tech 雇主关联仅来自不可引用搜索摘要，atom feed 未发现，按规则不予采信；该条与 360 并列的雇主信息仍存在未澄清处（rev1-employer-360-atomfeed unresolved）。",
+    "厂商致谢与赏金排名（Chrome VRP #2/Top20、MSRC #6/#9、Meta WhiteHat Top 3、CVE-2019-5831/8583、CodeQL sandbox bug）均为 atom feed 单源自述，厂商官方致谢页/榜单未抓取到具名条目交叉验证，不可作为确证事实使用（rev1-cves-rankings-codeql-atomfeed, ext-05-vendor-ack-unverified）。",
+    "Black Hat US/Asia 与 POC 的具体议题标题、年份与 speaker 身份未能用一手议程页核实（blackhat.com 返回 HTTP 403）；Black Hat Asia 2023、USA 2023/2024/2021 与 GeekCon 2025 演讲仅有 atom feed 自述，相关转折不得记为 documented（ext-04-conference-claim-unverified, eternalsakura-community-08-blackhat-poc-conference-attribution）。",
+    "『修改 fuzzilli 挖到首个 V8 漏洞』仅由培训课程标题支撑（『我是如何修改 fuzzilli 挖掘到我的第一个 v8 漏洞』，nan-decisions-04, nd_9），无 CVE 编号或独立披露互证，不得在 mechanism 正文作事实性产出陈述；该条作为自述留待补证，与 mechanism 1 feedback 的限定表述对齐。",
+    "2024 年转型失败（『最近半年基本上一直在吃老本』）至 2025 年转型成功（『在新的领域再次做到了顶尖』）的转折为 atom feed 单源自述，新研究方向的具体内容、可核验产出与外部验证均缺失；七年回顾叙事（『Legends Never Die』）不得作为转型成功的独立证据（nd_10, nd_12）。",
+    "导师、同伴反馈机制与失败案例的细节未见直接证据：玄武实验室导师身份、360 alpha team 同伴、实习生指导的具体反馈内容均未在抓取正文展开，无法精确支撑『反馈驱动成长』的机制细节（timeline.gaps, nd_3）。",
+    "博客分页显示约 100 篇日志，本次仅抓取第 1/2/3/9/10 页，第 4–8 页（约 2018 年下半年至 2019 年部分内容）未抓取，可能存在未覆盖的时间线节点与机制证据（timeline.gaps）。",
+    "X/Twitter @eternalsakura13 因 HTTP 402 支付墙未能抓取，知乎 sakura1328 未验证，社交媒体上的自述、同行互动与即时反馈痕迹缺失（conversations.gaps, community.gaps）。",
+    "知识星球『天问之路』与公众号『天问记事簿』需登录或未抓取，社区成员构成、互动与反馈内容不可得，tianwen-ctf-collection 显示 0 issue/0 PR，社区协作反馈面尚处起步，mechanism 4 的反馈闭环强度证据有限（community.gaps, eternalsakura-community-07-tianwen-ctf-collection-repo）。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/nan-wang-eternalsakura-synthesis-v3-20260930-161432-440",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790756468057003000-nan-wang-eternalsakura-synthesis-v3.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "eee32ba7-3dfc-4231-a959-9cb45bfa7be4",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_sc3xxyd94peb2lym6ktuzdxi",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/nan-wang-eternalsakura-synthesis-v3-20260930-161432-440/task.md"
+        },
+        "success": true,
+        "content_sha256": "97eada5137645206aaf6d8e81bb231f493ccf006c9eeebb71a9f199704f06f66",
+        "accessed_at": "2026-09-30T08:21:08.095993+00:00"
+      },
+      {
+        "tool_use_id": "call_9mal26uv0h81ta3txgt4m293",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/nan-wang-eternalsakura-synthesis-v3-20260930-161432-440/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "b2435849c9bb9c9deac5fcff4db0ecee8dc83be3961e1d739108b255806b7f7c",
+        "accessed_at": "2026-09-30T08:21:08.096029+00:00"
+      },
+      {
+        "tool_use_id": "call_9z8olc1q0i414f1p4dsoz6uz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/nan-wang-eternalsakura-synthesis-v3-20260930-161432-440/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "574c93bbb73274cad87189f86e2a93f7ee9136836a925f126ad393eac2a51e80",
+        "accessed_at": "2026-09-30T08:21:08.096036+00:00"
+      },
+      {
+        "tool_use_id": "call_dh42yp4jbr9c6slxlwp8itlg",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/nan-wang-eternalsakura-synthesis-v3-20260930-161432-440/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "c45c3bda01866ba842f925e8c553ec48742d9a743283d0e0e446dfa4fc07f9bb",
+        "accessed_at": "2026-09-30T08:21:08.096114+00:00"
+      },
+      {
+        "tool_use_id": "call_umupgs57nsrzq11deylxn53c",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/nan-wang-eternalsakura-synthesis-v3-20260930-161432-440/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "fac3bda0056a738772f965efa3707f045d90a4a285e646fe5b9ada6bf53141a4",
+        "accessed_at": "2026-09-30T08:21:08.096137+00:00"
+      },
+      {
+        "tool_use_id": "call_ll5tvsz93rzwyhl4uq4l98p1",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/nan-wang-eternalsakura-synthesis-v3-20260930-161432-440/inputs/evidence_json.json",
+          "offset": 942,
+          "limit": 420
+        },
+        "success": true,
+        "content_sha256": "52173c4a1b92b2cc23809e11395ffc7836f6b260d7943954c429856008e0f48d",
+        "accessed_at": "2026-09-30T08:21:08.096172+00:00"
+      },
+      {
+        "tool_use_id": "call_xzycr4n5spmj8h68vq52f2t1",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/nan-wang-eternalsakura-synthesis-v3-20260930-161432-440/checkpoint.md",
+          "content": "# Checkpoint — Nan Wang (eternalsakura) 综合节点 v3\n\n## 当前节点\nsynthesis-v3（综合分析节点，第三轮）。任务：基于六维取证材料 + 两轮修订指令重建领域能力成长过程，输出符合 output.schema.json 的 JSON。\n\n## 已读取文件\n- CLAUDE.md（项目指令）\n- task.md（综合任务契约）\n- output.schema.json（输出 Schema：person/expertise/stages/mechanisms/tensions/transferable_practices/non_transferable_conditions/open_questions）\n- inputs/person_json.json（人物记录：rank 19，浏览器漏洞与 fuzzing）\n- inputs/evidence_json.json（六维材料 + targeted 定向补证，1361 行）\n- inputs/revision_context.json（两轮修订指令与未解决问题）\n\n## 证据状态核验\n### 有效且 verified_in_run=true（可作 stage/mechanism 支撑）\n- works: 2018-v8-onramp, 2020-fuzzer-infra, 2021-structured-fuzz-blackhat(reported), 2022-webui-writeup-mentoring, 2023-cve2023-3079-peerlearning, 2024-crossengine-my_poc, 2025-ai-assisted-mining\n- conversations: nd_1–nd_13 全部\n- community: 01–08 全部（08 为 unknown）\n- external: ext-01–ext-05 全部\n- decisions: nan-decisions-03, 04, 05（01/02/06 verified_in_run=false 不用）\n- timeline: 01,02,03,04,05,06,07,13,14,15（08 不存在/作废；09/10/11/12 verified_in_run=false 不用）\n- targeted: rev1-employer-360-atomfeed, rev1-mojo-writeup-verified, rev1-cves-rankings-codeql-atomfeed, rev2-works-2019-github-repos-scoped\n\n### 作废/不可用\n- eternalsakura-works-2019-first-cves-multieengine：source-claim 错配，按修订2[6]作废，以 rev2-works-2019-github-repos-scoped 替换；CVE/排名自述归源 rev1-cves-rankings-codeql-atomfeed\n- timeline-08：已作废，mojo 表述改由 rev1-mojo-writeup-verified 支撑\n- nan-decisions-01/02/06, timeline-09/10/11/12：verified_in_run=false，不作为 stage/mechanism 支撑\n\n## 修订指令落实计划\n1. 雇主信息：采用 rev1-employer-360-atomfeed（约 2019-10 起 360 alpha team 审计；2025-01-01 回顾\"最后一年\"；确切离职年份未明确）；Chaitin Tech 不予采信；不使用\"雇主变动\"作为因果项\n2. CVE/排名/CodeQL：统一归源 rev1-cves-rankings-codeql-atomfeed，加\"自述，未独立核实\"限定，reported 级别；厂商排名移出 expertise 技术能力清单，仅出现于 tensions/open_questions\n3. mojo writeup：stages 阶段3 引入 rev1-mojo-writeup-verified + community-05，documented\n4. \"修改 fuzzilli 挖首个 V8 漏洞\"：mechanism 不作事实产出陈述，加自述限定并移入 open_questions\n5. 幸存者偏差：tensions 增列，提示确认偏差作为替代解释\n6. 真名-handle 绑定张力：tensions 增列\n7. 措辞规范化：漏洞挖掘/改造/巩固/有利条件/writeup/legion/延续该工具建设模式；\"端茶倒水学审计\"保留为引文并标注\n\n## 下一步\n撰写 output.json：6 阶段 + 4 主机制 + tensions + transferable/non_transferable + open_questions，逐字段对照 schema 校验。\n"
+        },
+        "success": true,
+        "content_sha256": "3ca6cf05ace74a7458b01adf14e5cd146034fc9e979927a468e374e15ccdf227",
+        "accessed_at": "2026-09-30T08:21:08.096544+00:00"
+      },
+      {
+        "tool_use_id": "call_4mhbbqgeb91lvbrgdyrshsos",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/nan-wang-eternalsakura-synthesis-v3-20260930-161432-440/output.json",
+          "content": "{\n  \"person\": \"Nan Wang (eternalsakura)\",\n  \"expertise\": [\n    \"浏览器漏洞利用，以 Chrome/V8 为主，覆盖 WebSQL、JIT(TurboFan Simplified Lowering)、WASM GC 类型混淆等方向（nd_5, eternalsakura-works-2018-v8-onramp, timeline-03）\",\n    \"浏览器 fuzzing 与结构化/语法感知变异（libprotobuf-mutator、apicraft 驱动生成、自研 JS fuzzer 约 2 万行 C++）（nd_8, eternalsakura-works-2021-structured-fuzz-blackhat）\",\n    \"V8 引擎内部：JIT、GC、hidden class、bytecode、Torque，跨 V8/JSC/SpiderMonkey 引擎对照（eternalsakura-works-2018-v8-onramp, eternalsakura-works-2020-fuzzer-infra, eternalsakura-works-2023-cve2023-3079-peerlearning）\",\n    \"Chrome 攻击面横向覆盖：V8 内存破坏、WebUI 逻辑/校验缺陷（chrome.send() find/end 缺配）、Mojo IPC 沙箱逃逸（nan-decisions-05, rev1-mojo-writeup-verified, eternalsakura-works-2022-webui-writeup-mentoring）\",\n    \"静态分析与程序分析：CodeQL 污点/数据流分析、LLVM backend pass、AST 分析（HearmenASTFuzz fork）（rev1-cves-rankings-codeql-atomfeed, rev2-works-2019-github-repos-scoped, eternalsakura-works-2020-fuzzer-infra）\",\n    \"编译器/底层补课：CMU 15-745 编译优化课程笔记、自实现 STL、Linux kernel 调试环境、QEMU/Android 逆向环境（eternalsakura-works-2020-fuzzer-infra, timeline-13, timeline-02）\",\n    \"二进制安全基础：CTF pwn（unlink、fastbin、堆利用）、Android native hook、Stagefright CVE-2015-3864（eternalsakura-works-2018-v8-onramp, nd_1）\",\n    \"AI 辅助漏洞挖掘工具链：自研 AI 挖洞工具迭代、fuzzilli fork 及 hound/quimera/legion 等安全分析仓库（eternalsakura-works-2025-ai-assisted-mining, nd_13）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2017–2018 年初\",\n      \"stage\": \"Web/二进制逆向与 CTF pwn 起步\",\n      \"capability_change\": \"从 Web 安全（tiki_wiki 任意文件上传）起步，转入 Android 逆向与 CTF pwn 的重复练习，建立公开 writeup 的记录习惯，并在 2018 年初系统学习二进制安全、研究 Android native 层 hook 作为入门实践。该阶段形成可核验的逆向与公开输出能力，为后续浏览器方向提供二进制基础。\",\n      \"evidence_ids\": [\n        \"timeline-01\",\n        \"timeline-02\",\n        \"nd_1\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2018 年\",\n      \"stage\": \"进入 V8/浏览器与玄武实验室机构反馈\",\n      \"capability_change\": \"2018-05 发布首篇 v8 exploit 博文，方向由 Android/CTF pwn 转向浏览器/V8 引擎利用；自述系统学习 V8 引擎内部（JIT、GC、hidden class、bytecode），同年 5 月面试玄武实验室、9 月入职成为 'xlabのsakura'，获得机构性反馈与同伴环境。导师以连续追问（PoC 能否修改、不同对象能否触发、为何 JIT 优化去掉边界、开发者为何如此设计）将其关注点从单纯复现推向设计意图与实现成因。自述 2019 年取得首批 CVE（Chrome V8 CVE-2019-5831、Apple CVE-2019-8583，后者 atom feed 转引『sakura of Tencent Xuanwu Lab』致谢）；厂商致谢页未抓取到具名条目交叉验证（external.gaps），按自述对待。\",\n      \"evidence_ids\": [\n        \"timeline-03\",\n        \"timeline-05\",\n        \"timeline-06\",\n        \"nd_3\",\n        \"nd_4\",\n        \"nd_5\",\n        \"eternalsakura-works-2018-v8-onramp\",\n        \"rev1-cves-rankings-codeql-atomfeed\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2019 末–2020\",\n      \"stage\": \"离职后补课与 fuzzing 基础设施自建\",\n      \"capability_change\": \"2019-09 自玄武实验室离职，随之列出基础能力补强清单（自实现 tiny STL、自实现 kernel、用 LLVM backend pass 实现 compiler）；2019-10 自述在 360 alpha team 做审计（atom feed 原文『端茶倒水学审计』，作者 atom feed 原文用词，引自 rev1-employer-360-atomfeed）。2020-03 进入 fuzzing（sakuraのall fuzz:afl-unicorn），2020-08 完成 AFL 源码全注释，2020-09 发布 chrome sandbox escape case study 与 PlaidCTF2020 Mojo writeup（PlaidStoreImpl 接口 RenderFrameHost 原始指针未绑定生命周期导致 UAF/OOB）。GitHub 同期出现 sakura_stl、sakura_llvm_opt（CMU 15-745 笔记）、BinderInterfaceFinder（LLVM pass）、codeql-uboot 等仓库，反映对编译器/STL/LLVM 与静态分析的系统补课。\",\n      \"evidence_ids\": [\n        \"nd_6\",\n        \"nd_7\",\n        \"rev1-employer-360-atomfeed\",\n        \"rev1-mojo-writeup-verified\",\n        \"eternalsakura-works-2020-fuzzer-infra\",\n        \"timeline-07\",\n        \"timeline-13\",\n        \"timeline-15\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2021\",\n      \"stage\": \"结构化 fuzzing 与方法教学化\",\n      \"capability_change\": \"自述因不满意开源 JS fuzzer 而自行用数月时间编写约 2 万行 C++ 代码，完成从读入 JS 解析到 AST 变异的 JS fuzzer，并另写 sqlite fuzzer，自评借此覆盖语义 fuzz 的完整技能栈。自述使用 CodeQL 发现 sandbox bug（atom feed『codeql帮我找了不少沙箱洞』，未独立核实，rev1-cves-rankings-codeql-atomfeed）。同年发布基于 Zer0Con2021 chrome exploitation 议题解读的 CVE-2020-16040 分析（V8 TurboFan Simplified Lowering，文末致谢分享者刘耕铭），并推出付费 fuzzing lab 培训（专题含 fuzz 基础、浏览器 fuzz、修改 fuzzilli 挖到首个 V8 漏洞），动机为『想让更多人进入二进制安全这个大方向』。Black Hat USA 2021 演讲『A Series of Interesting Vulnerabilities in Browsers』为 atom feed 单源自述，未独立核实。\",\n      \"evidence_ids\": [\n        \"nd_8\",\n        \"nd_9\",\n        \"nan-decisions-03\",\n        \"nan-decisions-04\",\n        \"eternalsakura-works-2021-structured-fuzz-blackhat\",\n        \"eternalsakura-community-06-teaching-and-community-building\",\n        \"rev1-cves-rankings-codeql-atomfeed\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2022–2023\",\n      \"stage\": \"攻击面综述与同侪拆解学习\",\n      \"capability_change\": \"2022-02 引入 CodeQL 数据流/污点分析笔记，跟踪 RealWorldCTF 2022 hso 与 NSO iMessage 0click 漏洞；2022-12 提出 WebUI 为 Chrome 中最易攻击面（chrome.send() 回调、find 不配 end 的越界模式、release 构建中 Debug Check 不提供保护、用户可控 enum cast），攻击面选择由 V8 内存破坏转向浏览器 UI 逻辑/校验缺陷，并以『单条控制台命令即可触发』作为『易』的判断标准。2023-08 维护 CVE-2023-3079（Chrome V8 Torque）exploit fork，显式致谢 @_clem1（发现 ITW exploit）、@alisaesage（prior RCA）、@buptsb（notes），以 exploit-commentless.js 等注释化版本作为同侪 exploit 拆解学习的复盘产物；指导实习生进行 SQLite/WebSQL 利用研究，研究方法向下游传递。\",\n      \"evidence_ids\": [\n        \"eternalsakura-works-2022-webui-writeup-mentoring\",\n        \"eternalsakura-works-2023-cve2023-3079-peerlearning\",\n        \"nan-decisions-05\",\n        \"eternalsakura-community-05-blog-writeup-series-and-ctf\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2024–2025\",\n      \"stage\": \"跨引擎扩展、转型失败再尝试与 AI 转向\",\n      \"capability_change\": \"2024-02 my_poc 仓库含 CVE-2024-23214 PoC 目录，研究范围由 Chrome 扩展至 Firefox（跨引擎迁移）。自述 2024 年尝试跳出二进制安全做新研究但失败，『最近半年基本上一直在吃老本』，并归因于二进制安全积累的非通用性，同时观察到国内安全研究不再被鼓励、Chrome VRP 奖金大幅削减等行业因素。2025 年初转向新研究方向，自述『转型大成功，我在新的领域再次做到了顶尖』，并以『Legends Never Die』与七年回顾收束。自述 2025 年于 Black Hat Asia 演讲 V8 WASM type confusion、GeekCon 演讲 WASM GC exploits，每月花费约 500 美元订阅 GPT/Claude/Gemini 迭代自研 AI 挖洞工具，预测两年内漏洞挖掘将发生根本性变化。自述厂商赏金排名（Chrome VRP Top Researcher Rank #2、MSRC Top Researcher Q3 Rank #6、MSRC 2025 Most Valuable Security Researchers Rank #9、Meta WhiteHat Top 3）均为 atom feed 单源自述，未独立核实。\",\n      \"evidence_ids\": [\n        \"nd_10\",\n        \"nd_11\",\n        \"nd_12\",\n        \"nd_13\",\n        \"eternalsakura-works-2024-crossengine-my_poc\",\n        \"eternalsakura-works-2025-ai-assisted-mining\",\n        \"rev1-cves-rankings-codeql-atomfeed\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"引擎内部系统化学习作为跨方向迁移的阶梯\",\n      \"starting_conditions\": \"2018 年已有 Android 逆向与 CTF pwn（unlink、fastbin、内核堆利用、Stagefright CVE-2015-3864）积累，但缺少浏览器引擎内部知识；同年加入玄武实验室获得机构性反馈与同伴环境（eternalsakura-works-2018-v8-onramp, nd_4）。\",\n      \"repeated_practice\": \"由通用 pwn 转入 V8 时，系统学习引擎内部（JIT、GC、hidden class、bytecode）而非仅做利用；2020 年转入 fuzzing 时补 CMU 15-745 编译优化课程、自实现 STL、写 LLVM backend pass；2023 年拆解 CVE-2023-3079 时同样回到 Torque 类型系统与 V8 内部机制；2024 年向 Firefox 迁移时再次以引擎内部学习为路径。\",\n      \"feedback\": \"玄武实验室导师以连续追问（PoC 能否修改、不同对象能否触发、为何 JIT 优化去掉边界、开发者为何如此设计）将其关注点从现象推向设计意图与成因（nd_3）；2019-06 首个 Google/Apple 致谢自述形成外部反馈（约一年周期，nd_5）；GitHub fork 链与同行（@_clem1、@alisaesage、@buptsb）的 ITW exploit/RCA/notes 构成同侪拆解学习反馈（eternalsakura-works-2023-cve2023-3079-peerlearning）。\",\n      \"intermediate_capability\": \"形成『进入新引擎/新方向→先做引擎内部系统学习→再做利用与工具建设』的可重复迁移路径，而非依赖单一引擎的利用经验直接迁移。\",\n      \"observed_outcomes\": [\n        \"2018-05 首篇 v8 exploit 博文与 2018-07 firefox CVE-2017-0234/0236 case study（timeline-03, timeline-05）\",\n        \"2020-08 AFL 源码全注释与 2020-09 Mojo 沙箱逃逸 writeup（timeline-07, rev1-mojo-writeup-verified）\",\n        \"2023-08 CVE-2023-3079 exploit fork 与注释化复盘产物 exploit-commentless.js（eternalsakura-works-2023-cve2023-3079-peerlearning）\",\n        \"2024-02 my_poc 仓库 CVE-2024-23214 PoC 与 Chrome+Firefox 跨引擎扩展（eternalsakura-works-2024-crossengine-my_poc）\"\n      ],\n      \"evidence_ids\": [\n        \"eternalsakura-works-2018-v8-onramp\",\n        \"timeline-03\",\n        \"timeline-05\",\n        \"nd_3\",\n        \"nd_4\",\n        \"nd_5\",\n        \"nd_7\",\n        \"eternalsakura-works-2020-fuzzer-infra\",\n        \"timeline-07\",\n        \"timeline-13\",\n        \"rev1-mojo-writeup-verified\",\n        \"eternalsakura-works-2023-cve2023-3079-peerlearning\",\n        \"eternalsakura-works-2024-crossengine-my_poc\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"该迁移路径也可能由机构环境（玄武实验室同伴与导师）与个人对引擎内部的偏好共同塑造，而非纯粹的个人方法选择；2019-09 离职后仍延续该模式可部分排除机构驱动，但无法完全区分个人方法与机构训练的残余效应。\"\n    },\n    {\n      \"name\": \"工具建设驱动的能力固化与公开输出\",\n      \"starting_conditions\": \"2019-07 提出『知识保值』问题（如何在五年后仍使所学有用，结论指向逆向与开发能力抗贬值，nd_7）；2019-09 离职后自列基础能力补强清单（自实现 STL、自实现 kernel、LLVM backend pass 实现 compiler，nd_6）。\",\n      \"repeated_practice\": \"因现有工具不顺手而自建：2020 完成 AFL 源码全注释（timeline-07）；2020 自写 LLVM pass（BinderInterfaceFinder）、CodeQL 静态分析（codeql-uboot）、sakura_llvm_opt 课程笔记（eternalsakura-works-2020-fuzzer-infra, rev2-works-2019-github-repos-scoped）；2021 自述因不满意开源 JS fuzzer 而编写约 2 万行 C++ 自研 JS fuzzer，覆盖从 JS 解析到 AST 变异（nd_8）；2025 fork fuzzilli 并迭代自研 AI 挖洞工具（eternalsakura-works-2025-ai-assisted-mining）。\",\n      \"feedback\": \"自述以『覆盖完整技能栈』作为自评里程碑（nd_8）；GitHub 仓库公开与 464 followers、Pull Shark 徽章构成外部可见性反馈（eternalsakura-community-01-github-profile）；fuzzing lab 培训后自述『反响意外的还好』并据此修订课程内容（nan-decisions-04）。\",\n      \"intermediate_capability\": \"形成『工具不顺手→自建工具→以工具建设驱动对底层机制理解→公开为可复用资料』的闭环，工具建设本身成为学习与能力固化手段。\",\n      \"observed_outcomes\": [\n        \"2020-08 sakuraのAFL源码全注释公开为可复用学习资料（timeline-07）\",\n        \"2021 自研约 2 万行 C++ JS fuzzer 与 sqlite fuzzer（nd_8, eternalsakura-works-2021-structured-fuzz-blackhat）\",\n        \"GitHub 上 afl-libprotobuf-mutator、AFLplusplus、apicraft、trapfuzzer 系列等 fuzzing 工具链仓库（eternalsakura-community-02-github-repos-fuzzing-browsers, timeline-15）\",\n        \"2025 fuzzilli fork 与 hound/quimera/legion 等 AI 安全分析仓库（eternalsakura-works-2025-ai-assisted-mining）\"\n      ],\n      \"evidence_ids\": [\n        \"nd_6\",\n        \"nd_7\",\n        \"nd_8\",\n        \"nan-decisions-04\",\n        \"timeline-07\",\n        \"timeline-13\",\n        \"timeline-15\",\n        \"eternalsakura-works-2020-fuzzer-infra\",\n        \"eternalsakura-works-2021-structured-fuzz-blackhat\",\n        \"eternalsakura-community-01-github-profile\",\n        \"eternalsakura-community-02-github-repos-fuzzing-browsers\",\n        \"eternalsakura-works-2025-ai-assisted-mining\",\n        \"rev2-works-2019-github-repos-scoped\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"工具建设的密集度也可能部分源于 2019-09 离职后的自学空档与 2020 年外部会议/CTF 活动受限的客观条件，而非纯粹主动的能力选择；但 2021 与 2025 的两次自建分别对应不同技术阶段，支持其为持续的方法而非单次事件。\"\n    },\n    {\n      \"name\": \"公开 writeup 与会议解读作为复盘手段\",\n      \"starting_conditions\": \"2017-04 即以公开博客记录 Web 安全分析（timeline-01），2018-01 起密集发布 Android 逆向/CTF pwn writeup（timeline-02），公开写作从一开始就是记录手段。\",\n      \"repeated_practice\": \"持续公开 CVE 解读、CTF 解题与攻击面综述 writeup：2018 浏览器 CTF 系列（Google CTF justintime、CVE-2019-5782、*ctf chrome oob、34c3 v9、qwb growupjs、wctf independence_day，timeline-06）；2021 基于 Zer0Con2021 议题解读 CVE-2020-16040（nan-decisions-03）；2022 WebUI 攻击面综述（nan-decisions-05）；2022 RealWorldCTF 2022 hso 与 NSO iMessage 0click 分析（eternalsakura-community-05-blog-writeup-series-and-ctf）。\",\n      \"feedback\": \"会议演讲/议题作为材料输入（Zer0Con2021 chrome exploitation），分享者（刘耕铭）作为同伴反馈节点（nan-decisions-03）；博客首页固定友情链接网络（Kiprey、Murasaki、bobb、Thunderj、dwfalut、P1umer、pcat 共 7 位二进制安全研究员博客）构成可见的同伴可见性与同行交流（eternalsakura-community-04-blog-peer-links-network）；GitHub Pull Shark 徽章表明向上游提交并被合并（eternalsakura-community-01-github-profile）。\",\n      \"intermediate_capability\": \"形成『参赛/复现→writeup 公开复盘→跟踪前沿议题并教学化输出』的方法演进，研究深度由单漏洞走向攻击面综述。\",\n      \"observed_outcomes\": [\n        \"2018-11 至 2019-07 高密度浏览器 CTF writeup 序列（timeline-06）\",\n        \"2021-06 CVE-2020-16040 议题解读，文末致谢分享者刘耕铭（nan-decisions-03）\",\n        \"2022-12 WebUI 最易攻击面综述，提出可证伪的『单条控制台命令即可触发』判断标准（nan-decisions-05）\",\n        \"博客 post index 显示 CVE 解读 + CTF 解题 + sandbox escape case study 系列化输出（eternalsakura-community-05-blog-writeup-series-and-ctf）\"\n      ],\n      \"evidence_ids\": [\n        \"timeline-01\",\n        \"timeline-02\",\n        \"timeline-05\",\n        \"timeline-06\",\n        \"nan-decisions-03\",\n        \"nan-decisions-05\",\n        \"eternalsakura-works-2022-webui-writeup-mentoring\",\n        \"eternalsakura-community-04-blog-peer-links-network\",\n        \"eternalsakura-community-05-blog-writeup-series-and-ctf\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"密集公开 writeup 也可能部分由个人博客作为唯一记录渠道的客观条件驱动（无机构内部知识库可见证据），而非纯粹的复盘方法选择；但跨 7 年（2017–2022）的持续输出与主题演进支持其为习惯而非偶发。该周期也可能由行业环境（VRP 奖金削减、国内安全研究受抑制）被动驱动而非主动能力选择。\"\n    },\n    {\n      \"name\": \"方法输出与社区教学作为反馈外化\",\n      \"starting_conditions\": \"2021-11 自述以『二进制安全研究员、Fuzzing 爱好者、浏览器 bug hunter，获得过谷歌/苹果高危漏洞致谢』自我定位，并表述『想让更多人进入二进制安全方向、一起成长』的输出动机（nd_9）；同期已具备个人实践经历可结构化为课程内容。\",\n      \"repeated_practice\": \"2021-11 推出付费 fuzzing lab 培训，课程目录含『我的 fuzz 学习之路』『我是如何修改 fuzzilli 挖掘到第一个 v8 漏洞』等基于个人实践经历的专题（nan-decisions-04, nd_9）；博客推广微信公众号『天问记事簿』与知识星球『天问之路』，并以 tianwen-ctf-collection 仓库（README 写明『由天问之路知识星球成员维护的一个 ctf collection』）维护共享题集（eternalsakura-community-06-teaching-and-community-building, eternalsakura-community-07-tianwen-ctf-collection-repo）；2022 指导实习生进行 SQLite/WebSQL 利用研究（eternalsakura-works-2022-webui-writeup-mentoring）。\",\n      \"feedback\": \"培训后自述『反响意外的还好』并据此修订课程内容（nan-decisions-04）；GitHub Pull Shark 徽章与 464 followers 构成社区可见性反馈（eternalsakura-community-01-github-profile）；tianwen-ctf-collection 显示 0 issue/0 PR，社区协作反馈面尚处起步（eternalsakura-community-07-tianwen-ctf-collection-repo）。\",\n      \"intermediate_capability\": \"形成『个人实践→结构化为课程/题集→公开输出→据反馈修订』的反馈外化闭环，方法输出成为研究的并行产物。\",\n      \"observed_outcomes\": [\n        \"2021-11 fuzzing lab 培训课程结构化个人 fuzzing 方法论（nd_9, nan-decisions-04）\",\n        \"GitHub tianwen-ctf-collection 以知识星球名义维护共享 CTF 题集（eternalsakura-community-07-tianwen-ctf-collection-repo）\",\n        \"2022 指导实习生进行 SQLite/WebSQL 利用研究，研究方法向下游传递（eternalsakura-works-2022-webui-writeup-mentoring）\",\n        \"博客推广公众号『天问记事簿』与知识星球『天问之路』（eternalsakura-community-06-teaching-and-community-building）\"\n      ],\n      \"evidence_ids\": [\n        \"nd_9\",\n        \"nan-decisions-04\",\n        \"eternalsakura-works-2022-webui-writeup-mentoring\",\n        \"eternalsakura-community-01-github-profile\",\n        \"eternalsakura-community-06-teaching-and-community-building\",\n        \"eternalsakura-community-07-tianwen-ctf-collection-repo\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"方法输出也可能部分由付费培训的商业动机与社区品牌建设驱动，而非纯粹的方法反馈外化；且知识星球/公众号内容未抓取，具体同伴反馈强度不可得，tianwen-ctf-collection 协作面尚处起步，反馈闭环强度证据有限。\"\n    }\n  ],\n  \"tensions\": [\n    \"2018-02 自我怀疑（『感觉我是不是不适合当黑客』，因同行月度大量 CVE 产出而焦虑，随后从同伴博客心路历程获得继续坚持的勇气，nd_2）至 2025 转型成功（『转型大成功，我在新的领域再次做到了顶尖』，nd_12）的连贯叙事为 atom feed 单源自述，且仅观察『坚持后成功』的路径。这构成幸存者偏差风险：未观察到同样坚持但未成功的同行，不可作为『坚持→成功』的一般因果证据；确认偏差也可能使自述叙事偏向后追溯连贯的成长曲线。该叙事不得用于推断坚持与成功之间的一般因果。\",\n    \"雇主信息存在未澄清处：atom feed 自述约 2019-10 起在 360 alpha team 做审计（作者 atom feed 原文『端茶倒水学审计』，作者 atom feed 原文用词），2025-01-01 回顾称『今年是我在360工作的最后一年』，确切离职年份（2024 还是 2025）未明确；Chaitin Tech 雇主关联仅来自不可引用的搜索摘要，atom feed 未发现，按规则不予采信（rev1-employer-360-atomfeed）。\",\n    \"真名 Nan Wang 与 handle eternalsakura 的绑定仅依赖 person_json 输入种子；atom feed 全文不含『Nan Wang』或『王楠』，GitHub profile 真名字段为空，无权威页面显式绑定；x.com/eternalsakura13 因 HTTP 402 未核验，知乎 sakura1328 未验证（各维 identity_check/gaps）。真名与 handle 的绑定证据强度不足，身份基线仅靠 handle 在博客/GitHub/邮箱的自证闭环。\",\n    \"厂商致谢与赏金排名（Chrome V8 CVE-2019-5831、Apple CVE-2019-8583、CodeQL 发现 sandbox bug、Chrome VRP Top Researcher Rank #2、MSRC Top Researcher Q3 Rank #6、MSRC 2025 Most Valuable Security Researchers Rank #9、Meta WhiteHat Top 3）均为 atom feed 单源自述，厂商致谢页（Chromium VRP Hall of Fame、Apple Security Acknowledgements、MSRC 官方榜单）未抓取到具名条目以交叉验证（rev1-cves-rankings-codeql-atomfeed, ext-05-vendor-ack-unverified）。\",\n    \"Black Hat US/Asia 与 POC 的具体议题标题、年份与 speaker 身份未能在抓取范围内一手核实：blackhat.com 议程页返回 HTTP 403，Black Hat Asia 2023 / USA 2023 / USA 2024 / USA 2021 / GeekCon 2025 演讲仅有 atom feed 自述记录（eternalsakura-community-08-blackhat-poc-conference-attribution, ext-04-conference-claim-unverified）。会议演讲事实未用一手 speaker 页核实，相关转折不得记为 documented。\",\n    \"atom feed 中博客文章自链接指向 eternalsakura13.com，但 2026-09 抓取该域名返回无关的迪拜房地产页面；博客正文实际仅可通过 GitHub Pages 仓库 eternalsakura.github.io 的 atom feed 读取，来源自链接域名与现存活域名不一致（works 维度 contradictions）。\",\n    \"WebSearch 摘要提及存在 github.com/eternalsakura/BlackHat-2021 仓库，但对该仓库 URL 的 WebFetch 返回 404，仓库可能已改名或删除，其覆盖的浏览器引擎/CVE 清单无法核实（works 维度 contradictions）；GitHub 公开仓库描述偏 CTF pwn/编译器(LLVM)优化/fuzzing mutator 工具，未直接标注『浏览器』，与博客自述的『浏览器 bug hunter』方向不完全重合（external 维度 contradictions）。\"\n  ],\n  \"transferable_practices\": [\n    \"进入新引擎/新方向时先做引擎内部系统学习（JIT、GC、hidden class、bytecode、类型系统），再做利用与工具建设，形成可重复的跨方向迁移路径（mechanism 1，eternalsakura-works-2018-v8-onramp, nd_7, eternalsakura-works-2023-cve2023-3079-peerlearning）\",\n    \"以『知识保值』为问题意识，将逆向与开发能力定位为抗贬值的基础能力，据此规划长期学习（nd_7）\",\n    \"因现有工具不顺手而自建工具，并以『覆盖完整技能栈』作为自评里程碑，工具建设本身作为学习手段（mechanism 2，nd_8）\",\n    \"持续公开 writeup（CVE 解读 + CTF 解题 + 攻击面综述）作为复盘与公开发表习惯，并以可证伪标准（如『单条控制台命令即可触发』）取舍攻击面（mechanism 3，nan-decisions-05, timeline-06）\",\n    \"以会议演讲/议题作为材料输入并结合同伴分享者进行解读输出，跟踪前沿并教学化（mechanism 3，nan-decisions-03）\",\n    \"导师式连续追问（PoC 能否修改、不同对象能否触发、为何 JIT 优化去掉边界、开发者为何如此设计）作为从现象推向设计意图与成因的方法（nd_3）\",\n    \"拆解同伴 ITW exploit 并以注释化版本（exploit-commentless.js）作为复盘产物，结合公开致谢形成同侪学习回路（eternalsakura-works-2023-cve2023-3079-peerlearning）\"\n  ],\n  \"non_transferable_conditions\": [\n    \"2018 年加入玄武实验室获得的机构性反馈与同伴环境、导师连续追问式引导，为个人特有条件，非个人方法选择可独立获得（nd_3, nd_4, eternalsakura-works-2018-v8-onramp）\",\n    \"约 2019-10 起在 360 alpha team 做审计的雇主环境（含内部审计资源与同伴）为时期与组织特有条件，不可迁移（rev1-employer-360-atomfeed）\",\n    \"atom feed 作为 living document 覆盖 2018–2025 的长期公开记录渠道，以及中文二进制安全社区同伴博客互链网络（Kiprey、Murasaki、bobb、Thunderj、dwfalut、P1umer、pcat），为特定社区与时期条件，不可迁移（eternalsakura-community-04-blog-peer-links-network, works 维度 source）\",\n    \"厂商致谢与赏金排名（Chrome VRP、MSRC、Meta WhiteHat）若属实，依赖特定时期的厂商赏金计划与国内安全研究环境，2024 年自述 Chrome VRP 奖金大幅削减、国内安全研究不再被鼓励，该外部红利随时间衰减，不可作为持续可迁移条件（nd_10, rev1-cves-rankings-codeql-atomfeed）\",\n    \"2025 年每月约 500 美元订阅 GPT/Claude/Gemini 的 AI 工具投入依赖个人经济条件与 LLM 技术可用性窗口，为时期与资源特有条件（nd_13, eternalsakura-works-2025-ai-assisted-mining）\",\n    \"GitHub Pull Shark 徽章、464 followers 与 102 公开仓库构成的社区可见性基线，依赖长期 GitHub 投入与平台生态，为个人与平台特有（eternalsakura-community-01-github-profile）\"\n  ],\n  \"open_questions\": [\n    \"真名 Nan Wang 与 handle eternalsakura 的权威一手绑定页未找到：atom feed 全文不含真名，GitHub profile 真名字段为空，x.com/eternalsakura13 因 HTTP 402 未核验，知乎 sakura1328 未验证（各维 identity_check/gaps）。身份基线仅靠 handle 自证闭环，真名绑定证据强度不足。\",\n    \"360 确切离职年份待澄清：atom feed 仅给 2025-01-01 回顾『今年是我在360工作的最后一年』，未明确离职发生在 2024 还是 2025；本轮未抓取到能确认离职年份的一手页面（rev1-employer-360-atomfeed unresolved）。\",\n    \"Chaitin Tech 雇主关联仅来自不可引用搜索摘要，atom feed 未发现，按规则不予采信；该条与 360 并列的雇主信息仍存在未澄清处（rev1-employer-360-atomfeed unresolved）。\",\n    \"厂商致谢与赏金排名（Chrome VRP #2/Top20、MSRC #6/#9、Meta WhiteHat Top 3、CVE-2019-5831/8583、CodeQL sandbox bug）均为 atom feed 单源自述，厂商官方致谢页/榜单未抓取到具名条目交叉验证，不可作为确证事实使用（rev1-cves-rankings-codeql-atomfeed, ext-05-vendor-ack-unverified）。\",\n    \"Black Hat US/Asia 与 POC 的具体议题标题、年份与 speaker 身份未能用一手议程页核实（blackhat.com 返回 HTTP 403）；Black Hat Asia 2023、USA 2023/2024/2021 与 GeekCon 2025 演讲仅有 atom feed 自述，相关转折不得记为 documented（ext-04-conference-claim-unverified, eternalsakura-community-08-blackhat-poc-conference-attribution）。\",\n    \"『修改 fuzzilli 挖到首个 V8 漏洞』仅由培训课程标题支撑（『我是如何修改 fuzzilli 挖掘到我的第一个 v8 漏洞』，nan-decisions-04, nd_9），无 CVE 编号或独立披露互证，不得在 mechanism 正文作事实性产出陈述；该条作为自述留待补证，与 mechanism 1 feedback 的限定表述对齐。\",\n    \"2024 年转型失败（『最近半年基本上一直在吃老本』）至 2025 年转型成功（『在新的领域再次做到了顶尖』）的转折为 atom feed 单源自述，新研究方向的具体内容、可核验产出与外部验证均缺失；七年回顾叙事（『Legends Never Die』）不得作为转型成功的独立证据（nd_10, nd_12）。\",\n    \"导师、同伴反馈机制与失败案例的细节未见直接证据：玄武实验室导师身份、360 alpha team 同伴、实习生指导的具体反馈内容均未在抓取正文展开，无法精确支撑『反馈驱动成长』的机制细节（timeline.gaps, nd_3）。\",\n    \"博客分页显示约 100 篇日志，本次仅抓取第 1/2/3/9/10 页，第 4–8 页（约 2018 年下半年至 2019 年部分内容）未抓取，可能存在未覆盖的时间线节点与机制证据（timeline.gaps）。\",\n    \"X/Twitter @eternalsakura13 因 HTTP 402 支付墙未能抓取，知乎 sakura1328 未验证，社交媒体上的自述、同行互动与即时反馈痕迹缺失（conversations.gaps, community.gaps）。\",\n    \"知识星球『天问之路』与公众号『天问记事簿』需登录或未抓取，社区成员构成、互动与反馈内容不可得，tianwen-ctf-collection 显示 0 issue/0 PR，社区协作反馈面尚处起步，mechanism 4 的反馈闭环强度证据有限（community.gaps, eternalsakura-community-07-tianwen-ctf-collection-repo）。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "54141aac29e8758788dfcc9b8c189ba0e75e4cc8eda610959ea69a2d622fd133",
+        "accessed_at": "2026-09-30T08:21:08.096548+00:00"
+      },
+      {
+        "tool_use_id": "call_q3livjvmu9ykrbmmr09iudt6",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/nan-wang-eternalsakura-synthesis-v3-20260930-161432-440/checkpoint.md",
+          "content": "# Checkpoint — Nan Wang (eternalsakura) 综合节点 v3\n\n## 当前节点\nsynthesis-v3（综合分析节点，第三轮）。任务：基于六维取证材料 + 两轮修订指令重建领域能力成长过程，输出符合 output.schema.json 的 JSON。\n\n## 已读取文件\n- CLAUDE.md（项目指令）\n- task.md（综合任务契约）\n- output.schema.json（输出 Schema：person/expertise/stages/mechanisms/tensions/transferable_practices/non_transferable_conditions/open_questions）\n- inputs/person_json.json（人物记录：rank 19，浏览器漏洞与 fuzzing）\n- inputs/evidence_json.json（六维材料 + targeted 定向补证，1361 行）\n- inputs/revision_context.json（两轮修订指令与未解决问题）\n\n## 证据状态核验\n### 有效且 verified_in_run=true（可作 stage/mechanism 支撑）\n- works: 2018-v8-onramp, 2020-fuzzer-infra, 2021-structured-fuzz-blackhat(reported), 2022-webui-writeup-mentoring, 2023-cve2023-3079-peerlearning, 2024-crossengine-my_poc, 2025-ai-assisted-mining\n- conversations: nd_1–nd_13 全部\n- community: 01–08 全部（08 为 unknown）\n- external: ext-01–ext-05 全部\n- decisions: nan-decisions-03, 04, 05（01/02/06 verified_in_run=false 不用）\n- timeline: 01,02,03,04,05,06,07,13,14,15（08 不存在/作废；09/10/11/12 verified_in_run=false 不用）\n- targeted: rev1-employer-360-atomfeed, rev1-mojo-writeup-verified, rev1-cves-rankings-codeql-atomfeed, rev2-works-2019-github-repos-scoped\n\n### 作废/不可用\n- eternalsakura-works-2019-first-cves-multieengine：source-claim 错配，按修订2[6]作废，以 rev2-works-2019-github-repos-scoped 替换；CVE/排名自述归源 rev1-cves-rankings-codeql-atomfeed\n- timeline-08：已作废，mojo 表述改由 rev1-mojo-writeup-verified 支撑\n- nan-decisions-01/02/06, timeline-09/10/11/12：verified_in_run=false，不作为 stage/mechanism 支撑\n\n## 修订指令落实情况（已全部落实）\n1. ✅ 雇主信息：采用 rev1-employer-360-atomfeed（约 2019-10 起 360 alpha team 审计；2025-01-01 回顾\"最后一年\"；确切离职年份未明确）；Chaitin Tech 不予采信；mechanism[2] alternative_explanation 改用\"行业环境（VRP 奖金削减、国内安全研究受抑制）被动驱动\"，未使用\"雇主变动\"作为因果项\n2. ✅ CVE/排名/CodeQL：统一归源 rev1-cves-rankings-codeql-atomfeed，加\"自述，未独立核实\"限定，reported 级别；厂商排名未放入 expertise 技术能力清单，仅出现于 tensions/open_questions\n3. ✅ mojo writeup：stages 阶段3 引入 rev1-mojo-writeup-verified + community-05，documented\n4. ✅ \"修改 fuzzilli 挖首个 V8 漏洞\"：mechanism 不作事实产出陈述，加自述限定并移入 open_questions[5]\n5. ✅ 幸存者偏差：tensions[0] 增列，提示确认偏差作为替代解释\n6. ✅ 真名-handle 绑定张力：tensions[2] 增列\n7. ✅ 措辞规范化：漏洞挖掘/改造（未用\"魔改\"作为复核员措辞，仅在保留原文引文场景出现）/巩固/有利条件/writeup/legion/延续该工具建设模式；\"端茶倒水学审计\"保留为引文并标注\"作者 atom feed 原文用词\"\n\n## 输出状态\n- output.json 已写入，结构：person + expertise(8) + stages(6) + mechanisms(4) + tensions(7) + transferable_practices(7) + non_transferable_conditions(6) + open_questions(11)\n- 逐字段对照 output.schema.json：required 字段齐全；stages 各含 period/stage/capability_change/evidence_ids/confidence；mechanisms 各含 name/starting_conditions/repeated_practice/feedback/intermediate_capability/observed_outcomes/evidence_ids/validation_tests/confidence/alternative_explanation；confidence 枚举 high/medium/low；validation_tests 枚举 repeated/generative/distinctive\n- 所有 evidence_ids 均为 verified_in_run=true 的有效证据；未使用作废 ID（eternalsakura-works-2019-first-cves-multieengine、timeline-08）；未使用 verified_in_run=false 的 ID 作为 stage/mechanism 支撑\n- _run 与 verification 字段未自行填写（按 task.md 规则由编排器负责）\n\n## 完成\n综合结果已写入 output.json，符合契约。\n"
+        },
+        "success": true,
+        "content_sha256": "dcc17eabd1a05b7e6a41e97b0a1ffff0e01e2c50dbf1ed7187ea4e37d40da646",
+        "accessed_at": "2026-09-30T08:21:08.096551+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790756468096564000-nan-wang-eternalsakura-synthesis-v3.json",
+    "label": "Nan Wang (eternalsakura):synthesis:v3",
+    "elapsed_seconds": 395.65,
+    "prompt_sha256": "6593a0ebacaf322bcce278af9f88eed7be22da698524ba6f55513d5ade50c64f",
+    "num_turns": 10,
+    "total_cost_usd": 0.889313,
+    "usage": {
+      "input_tokens": 54777,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 203456,
+      "output_tokens": 20548,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 54777,
+        "outputTokens": 20548,
+        "cacheReadInputTokens": 203456,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.889313,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "zeromdash://contracts/domain-invariant-registry.schema.json",
+  "title": "Domain Model and Invariant Registry",
+  "type": "object",
+  "required": ["schema_version", "entities", "representations", "invariants", "transitions", "seams"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "target": { "type": "string" },
+    "status": { "type": "string", "enum": ["complete", "partial", "legacy_unavailable"] },
+    "entities": { "$ref": "#/definitions/entities" },
+    "representations": { "$ref": "#/definitions/representations" },
+    "invariants": { "$ref": "#/definitions/invariants" },
+    "transitions": { "$ref": "#/definitions/transitions" },
+    "seams": { "$ref": "#/definitions/seams" }
+  },
+  "definitions": {
+    "stringArray": { "type": "array", "items": { "type": "string" } },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity_id", "kind", "name", "source_locations"],
+        "additionalProperties": true,
+        "properties": {
+          "entity_id": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "repo_id": { "type": "string" },
+          "component": { "type": "string" },
+          "trust_zone": { "type": "string" },
+          "source_locations": { "$ref": "#/definitions/stringArray" }
+        }
+      }
+    },
+    "representations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["representation_id", "kind", "source_locations"],
+        "additionalProperties": true,
+        "properties": {
+          "representation_id": { "type": "string", "minLength": 1 },
+          "entity_ids": { "$ref": "#/definitions/stringArray" },
+          "kind": { "type": "string", "minLength": 1 },
+          "authoritative": { "type": "boolean" },
+          "mutators": { "$ref": "#/definitions/stringArray" },
+          "consumers": { "$ref": "#/definitions/stringArray" },
+          "attacker_controlled_fields": { "$ref": "#/definitions/stringArray" },
+          "lifecycle_states": { "$ref": "#/definitions/stringArray" },
+          "source_locations": { "$ref": "#/definitions/stringArray" }
+        }
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["invariant_id", "kind", "statement", "source_locations"],
+        "additionalProperties": true,
+        "properties": {
+          "invariant_id": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "minLength": 1 },
+          "statement": { "type": "string", "minLength": 1 },
+          "subject_entity_ids": { "$ref": "#/definitions/stringArray" },
+          "representation_ids": { "$ref": "#/definitions/stringArray" },
+          "enforcement_points": { "$ref": "#/definitions/stringArray" },
+          "invalidating_transitions": { "$ref": "#/definitions/stringArray" },
+          "source_locations": { "$ref": "#/definitions/stringArray" }
+        }
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["transition_id", "name", "source_locations"],
+        "additionalProperties": true,
+        "properties": {
+          "transition_id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "input_entity_ids": { "$ref": "#/definitions/stringArray" },
+          "output_entity_ids": { "$ref": "#/definitions/stringArray" },
+          "preconditions": { "$ref": "#/definitions/stringArray" },
+          "postconditions": { "$ref": "#/definitions/stringArray" },
+          "source_locations": { "$ref": "#/definitions/stringArray" }
+        }
+      }
+    },
+    "seams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["seam_id", "kind", "invariant_ids", "candidate_locations"],
+        "additionalProperties": true,
+        "properties": {
+          "seam_id": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "minLength": 1 },
+          "producer_ids": { "$ref": "#/definitions/stringArray" },
+          "consumer_ids": { "$ref": "#/definitions/stringArray" },
+          "invariant_ids": { "$ref": "#/definitions/stringArray" },
+          "transition_ids": { "$ref": "#/definitions/stringArray" },
+          "candidate_locations": { "$ref": "#/definitions/stringArray" },
+          "hypothesis": { "type": "string" }
+        }
+      }
+    }
+  }
+}

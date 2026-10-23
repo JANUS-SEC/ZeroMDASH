@@ -1,0 +1,416 @@
+{
+  "person": "Felix Wilhelm",
+  "dimension": "关键决策与转折",
+  "identity_check": "目标人物 Felix Wilhelm，社交账号 @_fel1x（曾用 @_felixwilhelm），主攻内核/虚拟化/云漏洞，后转 DeFi 安全。同源去歧义通过多源一手锚点交叉确认：(1) Project Zero 博文 \"An EPYC escape\" (2021-06-29) byline 为 Felix Wilhelm，Project Zero；(2) Xen XSA-155 advisory (2015-12-17) 致谢 \"Felix Wilhelm (ERNW Research, KIT / Operating Systems Group)\"；(3) Asymmetric Research blog 三篇署名博文 (2025-09-17 / 2025-09-22 / 2026-04-15) 作者为 Felix Wilhelm。三个不同时期、不同机构的署名一致指向同一人，未发现同名歧义冲突。",
+  "items": [
+    {
+      "id": "fw-dec-001",
+      "date": "2015-12-17",
+      "claim": "在 ERNW 任职期间同时与 KIT 操作系统组保持学术关联，其 KIT 硕士论文产出的内存访问追踪工具 xenpwn 直接导致 Xen XSA-155（CVE-2015-8550，paravirtualized 驱动对共享内存内容的 double-fetch）的发现。advisory 同时署名 ERNW Research 与 KIT Operating Systems Group，显示其早期决策将学术研究与工业咨询并行，让学位研究直接产出真实 CVE，而非纯学术练习。",
+      "status": "documented",
+      "growth_signal": "用学位研究承载真实漏洞发现；方法论受 j00ru/gynvael 的 Bochspwn 启发后适配到 Xen PV 设备（选择性地追踪 inter-domain 通信页以控制开销，而非全内存追踪），体现\"借鉴已有工具→选择性问题缩小\"的工程化思路；学术导师组（Bellosa/Karl）与企业研究环境（ERNW）双轨提供研究自由度。",
+      "short_quote": "discovered by Felix Wilhelm (ERNW Research, KIT / Operating Systems Group)",
+      "source": {
+        "title": "XSA-155: paravirtualized drivers incautious about shared memory contents",
+        "url": "https://xenbits.xen.org/xsa/advisory-155.html",
+        "published": "2015-12-17",
+        "source_type": "vendor security advisory",
+        "level": "first_hand_other"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_yviwnb08krgsfc1pms0k1vai",
+        "accessed_at": "2026-09-26T14:35:27.809263+00:00",
+        "content_sha256": "2f781f5ff47547fd5b71993d67b284f33e097b1fad3aa1055c2c0e56c4dc46ac"
+      }
+    },
+    {
+      "id": "fw-dec-002",
+      "date": "2021-06-29",
+      "claim": "选择 KVM AMD 嵌套虚拟化作为目标，依据是先前在 Intel 侧的成功，以及 AMD 服务器市场份额上升使 KVM 的 AMD 实现成为\"更有趣的目标\"；研究历时约两个月、以个人身份仅远程访问 AMD 系统完成。期间因利用策略停滞两周而\"沮丧\"后意识到自己对 host save area 字段的假设有误，改用\"缓慢试错\"逐字段验证，最终接受\"boring but easy-to-implement\"的利用路径。该案例集中体现其目标选择（市场 ROI + 代码未被充分审查）与方法论（挫折触发重审假设、务实优于优雅）。",
+      "status": "documented",
+      "growth_signal": "目标选择编码\"攻击面经济学\"——选审查不足的代码与市场份额上升的目标（\"a large potential for complex logic flaws, making it a perfect target for manual code review\"）；挫折作为重审底层假设的信号而非放弃（\"I made an important mistake\"）；务实接受 boring 方案优于追求优雅；独立工作能力（两月单干、仅远程访问硬件）。",
+      "short_quote": "I've spent around two months on this research, working as an individual with only remote access to an AMD system.",
+      "source": {
+        "title": "An EPYC escape: Case-study of a KVM breakout",
+        "url": "https://projectzero.google/2021/06/an-epyc-escape-case-study-of-kvm.html",
+        "published": "2021-06-29",
+        "source_type": "personal research blog post",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_g77j3dqkhjk5uti3p0n83pf6",
+        "accessed_at": "2026-09-26T14:35:27.809255+00:00",
+        "content_sha256": "f329e3d2f944d4d8ef9a10765523c19558a4e8b6ef66fa38d626b5a7a6e09748"
+      }
+    },
+    {
+      "id": "fw-dec-003",
+      "date": "2021",
+      "claim": "构建 weggli（C/C++ 语义搜索工具），显式选择四项设计取舍：一等 C++ 支持、最小设置（无需构建目标软件、可处理不完整源码）、交互式（多数查询快于 grep）、贪婪匹配（recall 优于 precision，接受假阳性以简化查询创建）。明确声明受 Semgrep/Coccinelle/joern/CodeQL 启发但做出不同设计决策；项目托管于 googleprojectzero 组织但声明\"非官方 Google 项目\"。这一工具建设决策将其\"工具辅助而非替代人类审计\"的信念编码为可复用工具。",
+      "status": "unknown",
+      "growth_signal": "把\"工具辅助人类审计\"信念编码为设计——minimal setup 降低审计门槛、greedy matching 服务人工过滤、interactive 支持快速查询迭代；将自己置于既有工具谱系中而非宣称独创（\"inspired by great tools like...but makes some different design decisions\"）；工具产出与其手动代码审计研究（见 fw-dec-002）形成方法论闭环。",
+      "short_quote": "inspired by great tools like Semgrep, Coccinelle, joern and CodeQL, but makes some different design decisions",
+      "source": {
+        "title": "weggli — a fast and robust semantic search tool for C and C++ codebases",
+        "url": "https://github.com/googleprojectzero/weggli",
+        "published": "2021",
+        "source_type": "open-source project README",
+        "level": "lead_only"
+      },
+      "verification": {
+        "verified_in_run": false,
+        "retrieval_method": "unverified",
+        "tool_use_id": "",
+        "accessed_at": "",
+        "content_sha256": ""
+      }
+    },
+    {
+      "id": "fw-dec-004",
+      "date": "2025-09-17",
+      "claim": "离开 Google Project Zero 后转向 DeFi/区块链安全，作为 Asymmetric Research 成员发布首批署名博文：2025-09-17 marginfi flash loan 漏洞、2025-09-22 Relay 签名验证绕过、2026-04-15 Solana p-token。该公司自我定位为\"专注与 L1/L2 区块链和 DeFi 协议建立长期整合合作的专项安全公司\"。转型事实（在 Asymmetric 研究 Solana/DeFi）一手可证；转型动机无本人公开声明，仅可由研究轨迹推断。",
+      "status": "documented",
+      "growth_signal": "转型动机为推断（inferred，无一手声明）：延续其\"跟踪每个时代最高价值安全边界\"的可见模式——企业网络设备(2014-2016)→云虚拟化(2017-2021)→DeFi(2025+)；将虚拟化/隔离边界研究经验迁移到智能合约边界。DeFi 期博文反复强调\"审计过的代码库仍可被小改动引入关键漏洞\"，与 EPYC 期\"逻辑漏洞优先\"方法论一致，体现跨期方法论延续而非断裂。",
+      "short_quote": "Asymmetric Research is a specialized security firm focused on long-term, integrated partnerships with L1/L2 blockchains and DeFi protocols.",
+      "source": {
+        "title": "Asymmetric Research blog (Felix Wilhelm authored posts: marginfi, Relay, Solana p-token)",
+        "url": "https://blog.asymmetric.re/",
+        "published": "2025-09-17",
+        "source_type": "company blog",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_pnz466h73hv21k2xq8jeeu3n",
+        "accessed_at": "2026-09-26T14:35:27.809246+00:00",
+        "content_sha256": "fed947d6102bbe938dd96a33097180c1ab88aae124debb8ffcfd79ecffb45f28"
+      }
+    }
+  ],
+  "contradictions": [],
+  "gaps": [
+    "P0 加入与离开的确切日期无本人一手声明，仅由\"最后 ERNW 博客约 2016-04 / EPYC 博文 2021-06 已在 P0 / Asymmetric 首篇 2025-09\"时间夹断推断，约 2017 入职、约 2022 离开。",
+    "P0→Asymmetric 之间是否经过 Jump Crypto 过渡期，仅本地二手种子转述，无一手抓取确认；本次未将该过渡作为独立决策项。",
+    "Asymmetric Research 联合创始人/CTO 头衔未能一手核验：公司 about 页 (https://www.asymmetric.re/about) 抓取返回 404，相关头衔仅来自本地种子，作 lead_only 处理未入 items。",
+    "weggli 起始发布日期与具体构建动机无一手 commit/发布时间线核验，item date 仅能标到年份 2021。",
+    "dnsmasq(2017) 团队贡献的 byline 一手核验失败：Google Security Blog \"Behind the Masq\" (https://projectzero.google/blog/behind-the-masq/) 抓取返回 404，相关团队协作证据未能升级到 reported/documentd，未入 items。",
+    "转向 DeFi 的个人动机无本人公开声明，fw-dec-004 的动机部分为基于研究轨迹的推断（inferred），非本人表述。",
+    "P0 博客按作者标签检索页 (https://googleprojectzero.blogspot.com/search/label/Felix%20Wilhelm) 返回\"No posts with label Felix Wilhelm\"，标签可能已撤，不可作为证据；本次改用已知具体博文 URL 直接抓取。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-decisions-20260926-222908-614",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790433327787658000-felix-wilhelm-decisions.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "7b06546e-045b-4d7f-a436-f653df095be6",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_6iia14gk487dg58k1i9oxwzo",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-decisions-20260926-222908-614/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "e93e1fea0cf7f75fe9b633203878edc6030edd05b6b783634604888d5af128c0",
+        "accessed_at": "2026-09-26T14:35:27.808972+00:00"
+      },
+      {
+        "tool_use_id": "call_s0hk3zxhs87lcygr8osj75ww",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-decisions-20260926-222908-614/task.md"
+        },
+        "success": true,
+        "content_sha256": "452909103f08f6a1afef54dac0b9bc2c295af33bbfdc982b9ec8a88369f92493",
+        "accessed_at": "2026-09-26T14:35:27.808999+00:00"
+      },
+      {
+        "tool_use_id": "call_iib36ust2p5njiv1gryxwfzh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-decisions-20260926-222908-614/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "ed4424dd35b245d0807cc1952fd5d65d73b2d7f9d11fa98e8f25dfc702b6daeb",
+        "accessed_at": "2026-09-26T14:35:27.809016+00:00"
+      },
+      {
+        "tool_use_id": "call_234r9x367swbcg2xr69awt5g",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-decisions-20260926-222908-614/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "a9b7e44252b6031bb7b483621e88aab3060a0d9c637cdba6a193af04a7956aad",
+        "accessed_at": "2026-09-26T14:35:27.809026+00:00"
+      },
+      {
+        "tool_use_id": "call_a9cfsex9a39va4mc2syvlgde",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-decisions-20260926-222908-614/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "e22779ebfe7d5b49ded04b7dd8eea061c886b28b0ef96ff5ac6a83dd37d9ffcb",
+        "accessed_at": "2026-09-26T14:35:27.809030+00:00"
+      },
+      {
+        "tool_use_id": "call_c49m7267laubcnewqaj27cfw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-decisions-20260926-222908-614/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "a6ede7b3f3853b6c792b73d1dfa23cf053f07280a0fc2bcf2453d7c28705a45e",
+        "accessed_at": "2026-09-26T14:35:27.809038+00:00"
+      },
+      {
+        "tool_use_id": "call_gp1hdx13cr3t8w2nispagnx4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-decisions-20260926-222908-614/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "5bcea1a194d3dd3a26a1a81e5b1ed2994dbbd93efd42759693fad6277d9aacd0",
+        "accessed_at": "2026-09-26T14:35:27.809044+00:00"
+      },
+      {
+        "tool_use_id": "call_jrnoahs38npdeo5maebi1xfe",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/felix-wilhelm-perspective/references/research/05-decisions.md"
+        },
+        "success": true,
+        "content_sha256": "c0479212e6c29704c33653966f42a2fb559121f376437a2425287a366bb1815f",
+        "accessed_at": "2026-09-26T14:35:27.809069+00:00"
+      },
+      {
+        "tool_use_id": "call_my3qbimljek4pfe8y2voj179",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/felix-wilhelm-perspective/references/research/06-timeline.md"
+        },
+        "success": true,
+        "content_sha256": "5cc816b43c30459bc527d0e5967a8e9b22712e967a970e610b9f1acf01620f05",
+        "accessed_at": "2026-09-26T14:35:27.809084+00:00"
+      },
+      {
+        "tool_use_id": "call_venm3ildya2f6vgjb066o41g",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/felix-wilhelm-perspective/references/research/01-writings.md"
+        },
+        "success": true,
+        "content_sha256": "37913ce72fcc765b0946db853f5f0d10d4199c9d65ac423c442800887f16e5c8",
+        "accessed_at": "2026-09-26T14:35:27.809104+00:00"
+      },
+      {
+        "tool_use_id": "call_6dzc0efkr1pgxpt8fthzvpue",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/felix-wilhelm-perspective/references/research/02-conversations.md"
+        },
+        "success": true,
+        "content_sha256": "91ac27624467066ca37daeceb746f3dfdfd5c51bf1f6b04f8e0f4b261fc89562",
+        "accessed_at": "2026-09-26T14:35:27.809117+00:00"
+      },
+      {
+        "tool_use_id": "call_mipiwk46p46f56u1dverc6zt",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/felix-wilhelm-perspective/references/research/03-expression-dna.md"
+        },
+        "success": true,
+        "content_sha256": "0c6f41dd5a41265e83beda896d2ac312f66e527317c8fd7a5f595334d89141c6",
+        "accessed_at": "2026-09-26T14:35:27.809133+00:00"
+      },
+      {
+        "tool_use_id": "call_qqy38g5qbauujnvzcn3oh08v",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/felix-wilhelm-perspective/references/research/04-external-views.md"
+        },
+        "success": true,
+        "content_sha256": "8b3d5b09558f0647b7d74b8052f5ace7e6cfecd4911f5b39785a19d4e0367532",
+        "accessed_at": "2026-09-26T14:35:27.809144+00:00"
+      },
+      {
+        "tool_use_id": "call_xkvb5s9r0eb9alvqzehesjq8",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://googleprojectzero.blogspot.com/search/label/Felix%20Wilhelm",
+          "prompt": "List all blog posts authored by Felix Wilhelm with their exact URLs, titles, and publication dates. I need the full URLs for each post."
+        },
+        "success": true,
+        "content_sha256": "516b759efceba7c466794c865f0f34a7f702540fc0ee3c13d49c61dcf4e39156",
+        "accessed_at": "2026-09-26T14:35:27.809203+00:00"
+      },
+      {
+        "tool_use_id": "call_rxz01tp8n4l0h8xk144drw4w",
+        "tool": "WebSearch",
+        "input": {
+          "query": "weggli github felix wilhelm semantic search C C++"
+        },
+        "success": true,
+        "content_sha256": "b68f011b26c624b13998d3501fbad9e2670255e3a5447c61cc5ce1847076cd6a",
+        "accessed_at": "2026-09-26T14:35:27.809199+00:00"
+      },
+      {
+        "tool_use_id": "call_r8xe8lx81i0chpd1xabn9zed",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Asymmetric Research Felix Wilhelm CTO blockchain DeFi security"
+        },
+        "success": true,
+        "content_sha256": "4d9628752b2fb228e0da36c9f90de0a36212e4473b8d95a5264e6867c62535d4",
+        "accessed_at": "2026-09-26T14:35:27.809207+00:00"
+      },
+      {
+        "tool_use_id": "call_kvah9g1xvwr0svd8kwr4u38i",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the exact text where the author explains: (1) why he chose KVM/AMD nested virtualization as a target, (2) his research process including frustration and changing strategy, (3) how long the research took and whether he worked alone, (4) any ROI/market reasoning. Quote short verbatim phrases. Also give the publication date.",
+          "url": "https://googleprojectzero.blogspot.com/2021/06/an-epyc-escape-case-study-of-kvm.html"
+        },
+        "success": true,
+        "content_sha256": "b9d33335e4bf15aa50d162676c4b8e06ba830cda01310ae24a316bde4cc11e28",
+        "accessed_at": "2026-09-26T14:35:27.809236+00:00"
+      },
+      {
+        "tool_use_id": "call_coyomhrzrtt9p8yc8u9pstre",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the exact project description, the stated design decisions/philosophy (e.g. minimal setup, interactive, greedy matching, recall vs precision), the author name, and how the tool compares to or is inspired by semgrep/coccinelle/joern/CodeQL. Quote short verbatim phrases. Give any dates or version info.",
+          "url": "https://github.com/weggli-rs/weggli"
+        },
+        "success": true,
+        "content_sha256": "3ea5e28565438e8e0c1503b01382db95cdf54df01d9bdc8272b906c14d54c108",
+        "accessed_at": "2026-09-26T14:35:27.809242+00:00"
+      },
+      {
+        "tool_use_id": "call_pnz466h73hv21k2xq8jeeu3n",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog posts visible on this page with their exact titles, URLs, and publication dates. Also extract any author bio or \"about us\" text mentioning the team, founders, and what the company does. Quote verbatim where possible.",
+          "url": "https://blog.asymmetric.re/"
+        },
+        "success": true,
+        "content_sha256": "fed947d6102bbe938dd96a33097180c1ab88aae124debb8ffcfd79ecffb45f28",
+        "accessed_at": "2026-09-26T14:35:27.809246+00:00"
+      },
+      {
+        "tool_use_id": "call_g77j3dqkhjk5uti3p0n83pf6",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the exact text where the author explains: (1) why he chose KVM/AMD nested virtualization as a target, (2) his research process including frustration and changing strategy, (3) how long the research took and whether he worked alone, (4) any ROI/market reasoning about AMD market share. Quote short verbatim phrases. Also give the publication date.",
+          "url": "https://projectzero.google/2021/06/an-epyc-escape-case-study-of-kvm.html"
+        },
+        "success": true,
+        "content_sha256": "f329e3d2f944d4d8ef9a10765523c19558a4e8b6ef66fa38d626b5a7a6e09748",
+        "accessed_at": "2026-09-26T14:35:27.809255+00:00"
+      },
+      {
+        "tool_use_id": "call_zlvfi2bzdce6cudpqw0odxuy",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the full author byline and any statement about who the author is or was (e.g. \"Felix Wilhelm, Project Zero\"). Also extract the closing phrase or tagline. Quote verbatim. Give the publication date.",
+          "url": "https://projectzero.google/blog/behind-the-masq/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:35:27.809251+00:00"
+      },
+      {
+        "tool_use_id": "call_yviwnb08krgsfc1pms0k1vai",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the full advisory text. I need: the advisory ID (XSA number), the CVE, the publication date, the title, and the exact \"reported by\" / \"acknowledgements\" / \"researcher\" line naming who reported it. Quote verbatim.",
+          "url": "https://xenbits.xen.org/xsa/advisory-155.html"
+        },
+        "success": true,
+        "content_sha256": "2f781f5ff47547fd5b71993d67b284f33e097b1fad3aa1055c2c0e56c4dc46ac",
+        "accessed_at": "2026-09-26T14:35:27.809263+00:00"
+      },
+      {
+        "tool_use_id": "call_z07ydux8qvd7tup41ammpos1",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the full \"About\" / company description / team / founders text. I need: who founded the company, roles (CTO etc.), what the company does, where it is headquartered, and any mention of Felix Wilhelm. Quote verbatim.",
+          "url": "https://www.asymmetric.re/about"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:35:27.809260+00:00"
+      },
+      {
+        "tool_use_id": "call_f1w10y9i5bz5yabt45ygbfhx",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-decisions-20260926-222908-614/checkpoint.md",
+          "content": "# Checkpoint — Felix Wilhelm / 关键决策与转折\n\n## 身份核验（同源去歧义）\n- 目标人物：Felix Wilhelm，handle `@_fel1x`（曾 `@_felixwilhelm`），主攻内核/虚拟化/云漏洞，后转 DeFi。\n- 多源一致锚点：\n  - P0 博文 \"An EPYC escape\" byline = Felix Wilhelm，Project Zero（一手）。\n  - XSA-155 advisory (xenbits, 2015-12-17)：\"This issue was discovered by Felix Wilhelm (ERNW Research, KIT / Operating Systems Group).\"（一手）。\n  - Asymmetric Research blog 三篇博文署名 Felix Wilhelm（一手：2025-09-17 / 2025-09-22 / 2026-04-15）。\n- 无同名歧义冲突。\n\n## 已确认一手来源（WebFetch 实读成功）\n1. XSA-155 advisory — https://xenbits.xen.org/xsa/advisory-155.html — 2015-12-17 — ERNW/KIT 身份锚点。CVE-2015-8550。\n2. \"An EPYC escape\" — https://projectzero.google/2021/06/an-epyc-escape-case-study-of-kvm.html (原 blogger URL 301 到此) — 2021-06-29 — P0 byline。关键决策文本已逐字核验：\n   - 目标选择：\"reviewing the same functionality for AMD seemed like a good starting point\"；\"a large potential for complex logic flaws, making it a perfect target for manual code review\"。\n   - 市场/ROI 推理：\"the recent increase of AMD's market share in the server segment means that KVM's AMD implementation is suddenly becoming a more interesting target\"；\"Looking at the potential ROI on an exploit like this, it seems safe to assume that more people are working on similar issues right now\"。\n   - 挫折/转向：\"After getting frustrated with the total lack of progress, watching my server reboot for the hundredth time, trying to come up with a different exploitation strategy for two weeks\"；\"I made an important mistake\"；\"Slow trial and error led to the discovery...\"。\n   - 时长/独立：\"I've spent around two months on this research, working as an individual with only remote access to an AMD system.\"\n3. weggli GitHub README — https://github.com/googleprojectzero/weggli — 设计哲学逐字核验：\"Minimal setup\"/\"Interactive\"/\"Greedy\"；\"inspired by great tools like Semgrep, Coccinelle, joern and CodeQL, but makes some different design decisions\"；非官方 Google 项目声明。2.5k stars。\n4. Asymmetric Research blog — https://blog.asymmetric.re/ — 公司定位：\"Asymmetric Research is a specialized security firm focused on long-term, integrated partnerships with L1/L2 blockchains and DeFi protocols.\"；Felix Wilhelm 为署名作者（3 篇：2025-09-17 marginfi、2025-09-22 Relay、2026-04-15 Solana p-token）。公司自我描述页无个人 bio。\n\n## 抓取失败 / 未达一手\n- P0 label 页 (https://googleprojectzero.blogspot.com/search/label/Felix%20Wilhelm) 返回 \"No posts with label Felix Wilhelm\"（标签可能已撤）→ 不可作为证据，仅 lead。\n- Google Security Blog \"Behind the Masq\" (https://projectzero.google/blog/behind-the-masq/) → 404。dnsmasq 团队贡献的 byline 未能一手核验，降级为 lead_only / reported。\n- Asymmetric about 页 (https://www.asymmetric.re/about) → 404。联合创始人/CTO 头衔未能一手核验，降级 lead_only / inferred。\n- Jump Crypto 过渡期：仅本地种子二手转述，无一手抓取 → lead_only / inferred（不放入 items 作 reported）。\n\n## 资料缺口（留待 output.gaps）\n- P0 加入确切日期（仅能由\"最后 ERNW 博客 2016-04 / 首个 P0 credit 推断 2017\"夹定），无一手离职/入职声明。\n- P0 离开确切日期（约 2022），无公开声明。\n- Asymmetric Research 联合创始人/CTO 头衔无一手核验（about 404）。\n- Jump Crypto 过渡期无一手证据。\n- weggli 起始日期与发布动机无一手 commit 时间线核验。\n\n## 维度映射（关键决策与转折）\n决策项候选（status 控制在一手能支撑范围）：\n- D1 ERNW→学术结合：xenpwn 源于 KIT 硕士论文，XSA-155 致谢同时列 ERNW + KIT（documented）。\n- D2 选择虚拟化/hypervisor 攻击面 + 逻辑漏洞优先：EPYC 文本直接陈述（documented）。\n- D3 挫折即转向 + 务实利用（\"boring but easy-to-implement\"路径）：EPYC 文本（documented）。\n- D4 weggli 工具建设哲学（辅助人类审计、recall>precision）：README（documented）。\n- D5 P0→Asymmetric/DeFi 转型：blog byline + 公司定位（转型事实 documented；动机 inferred，无一手声明）。\n- D6 目标选择的市场ROI推理（AMD 份额）：EPYC 文本（documented）。\n\n不放入：Jump Crypto（无一手）、90 天政策立场（无公开声明）、Intel CSME/TDX 评估参与度（未确认）。\n"
+        },
+        "success": true,
+        "content_sha256": "ff3a11f6c1436daead3c0f019e847a0e3625dbe98dc5453693c105008b35423a",
+        "accessed_at": "2026-09-26T14:35:27.809269+00:00"
+      },
+      {
+        "tool_use_id": "call_u8zg39ch20oefyw4kw3ziujm",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/felix-wilhelm-decisions-20260926-222908-614/output.json",
+          "content": "{\n  \"person\": \"Felix Wilhelm\",\n  \"dimension\": \"关键决策与转折\",\n  \"identity_check\": \"目标人物 Felix Wilhelm，社交账号 @_fel1x（曾用 @_felixwilhelm），主攻内核/虚拟化/云漏洞，后转 DeFi 安全。同源去歧义通过多源一手锚点交叉确认：(1) Project Zero 博文 \\\"An EPYC escape\\\" (2021-06-29) byline 为 Felix Wilhelm，Project Zero；(2) Xen XSA-155 advisory (2015-12-17) 致谢 \\\"Felix Wilhelm (ERNW Research, KIT / Operating Systems Group)\\\"；(3) Asymmetric Research blog 三篇署名博文 (2025-09-17 / 2025-09-22 / 2026-04-15) 作者为 Felix Wilhelm。三个不同时期、不同机构的署名一致指向同一人，未发现同名歧义冲突。\",\n  \"items\": [\n    {\n      \"id\": \"fw-dec-001\",\n      \"date\": \"2015-12-17\",\n      \"claim\": \"在 ERNW 任职期间同时与 KIT 操作系统组保持学术关联，其 KIT 硕士论文产出的内存访问追踪工具 xenpwn 直接导致 Xen XSA-155（CVE-2015-8550，paravirtualized 驱动对共享内存内容的 double-fetch）的发现。advisory 同时署名 ERNW Research 与 KIT Operating Systems Group，显示其早期决策将学术研究与工业咨询并行，让学位研究直接产出真实 CVE，而非纯学术练习。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"用学位研究承载真实漏洞发现；方法论受 j00ru/gynvael 的 Bochspwn 启发后适配到 Xen PV 设备（选择性地追踪 inter-domain 通信页以控制开销，而非全内存追踪），体现\\\"借鉴已有工具→选择性问题缩小\\\"的工程化思路；学术导师组（Bellosa/Karl）与企业研究环境（ERNW）双轨提供研究自由度。\",\n      \"short_quote\": \"discovered by Felix Wilhelm (ERNW Research, KIT / Operating Systems Group)\",\n      \"source\": {\n        \"title\": \"XSA-155: paravirtualized drivers incautious about shared memory contents\",\n        \"url\": \"https://xenbits.xen.org/xsa/advisory-155.html\",\n        \"published\": \"2015-12-17\",\n        \"source_type\": \"vendor security advisory\",\n        \"level\": \"first_hand_other\"\n      }\n    },\n    {\n      \"id\": \"fw-dec-002\",\n      \"date\": \"2021-06-29\",\n      \"claim\": \"选择 KVM AMD 嵌套虚拟化作为目标，依据是先前在 Intel 侧的成功，以及 AMD 服务器市场份额上升使 KVM 的 AMD 实现成为\\\"更有趣的目标\\\"；研究历时约两个月、以个人身份仅远程访问 AMD 系统完成。期间因利用策略停滞两周而\\\"沮丧\\\"后意识到自己对 host save area 字段的假设有误，改用\\\"缓慢试错\\\"逐字段验证，最终接受\\\"boring but easy-to-implement\\\"的利用路径。该案例集中体现其目标选择（市场 ROI + 代码未被充分审查）与方法论（挫折触发重审假设、务实优于优雅）。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"目标选择编码\\\"攻击面经济学\\\"——选审查不足的代码与市场份额上升的目标（\\\"a large potential for complex logic flaws, making it a perfect target for manual code review\\\"）；挫折作为重审底层假设的信号而非放弃（\\\"I made an important mistake\\\"）；务实接受 boring 方案优于追求优雅；独立工作能力（两月单干、仅远程访问硬件）。\",\n      \"short_quote\": \"I've spent around two months on this research, working as an individual with only remote access to an AMD system.\",\n      \"source\": {\n        \"title\": \"An EPYC escape: Case-study of a KVM breakout\",\n        \"url\": \"https://projectzero.google/2021/06/an-epyc-escape-case-study-of-kvm.html\",\n        \"published\": \"2021-06-29\",\n        \"source_type\": \"personal research blog post\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"fw-dec-003\",\n      \"date\": \"2021\",\n      \"claim\": \"构建 weggli（C/C++ 语义搜索工具），显式选择四项设计取舍：一等 C++ 支持、最小设置（无需构建目标软件、可处理不完整源码）、交互式（多数查询快于 grep）、贪婪匹配（recall 优于 precision，接受假阳性以简化查询创建）。明确声明受 Semgrep/Coccinelle/joern/CodeQL 启发但做出不同设计决策；项目托管于 googleprojectzero 组织但声明\\\"非官方 Google 项目\\\"。这一工具建设决策将其\\\"工具辅助而非替代人类审计\\\"的信念编码为可复用工具。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"把\\\"工具辅助人类审计\\\"信念编码为设计——minimal setup 降低审计门槛、greedy matching 服务人工过滤、interactive 支持快速查询迭代；将自己置于既有工具谱系中而非宣称独创（\\\"inspired by great tools like...but makes some different design decisions\\\"）；工具产出与其手动代码审计研究（见 fw-dec-002）形成方法论闭环。\",\n      \"short_quote\": \"inspired by great tools like Semgrep, Coccinelle, joern and CodeQL, but makes some different design decisions\",\n      \"source\": {\n        \"title\": \"weggli — a fast and robust semantic search tool for C and C++ codebases\",\n        \"url\": \"https://github.com/googleprojectzero/weggli\",\n        \"published\": \"2021\",\n        \"source_type\": \"open-source project README\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"fw-dec-004\",\n      \"date\": \"2025-09-17\",\n      \"claim\": \"离开 Google Project Zero 后转向 DeFi/区块链安全，作为 Asymmetric Research 成员发布首批署名博文：2025-09-17 marginfi flash loan 漏洞、2025-09-22 Relay 签名验证绕过、2026-04-15 Solana p-token。该公司自我定位为\\\"专注与 L1/L2 区块链和 DeFi 协议建立长期整合合作的专项安全公司\\\"。转型事实（在 Asymmetric 研究 Solana/DeFi）一手可证；转型动机无本人公开声明，仅可由研究轨迹推断。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"转型动机为推断（inferred，无一手声明）：延续其\\\"跟踪每个时代最高价值安全边界\\\"的可见模式——企业网络设备(2014-2016)→云虚拟化(2017-2021)→DeFi(2025+)；将虚拟化/隔离边界研究经验迁移到智能合约边界。DeFi 期博文反复强调\\\"审计过的代码库仍可被小改动引入关键漏洞\\\"，与 EPYC 期\\\"逻辑漏洞优先\\\"方法论一致，体现跨期方法论延续而非断裂。\",\n      \"short_quote\": \"Asymmetric Research is a specialized security firm focused on long-term, integrated partnerships with L1/L2 blockchains and DeFi protocols.\",\n      \"source\": {\n        \"title\": \"Asymmetric Research blog (Felix Wilhelm authored posts: marginfi, Relay, Solana p-token)\",\n        \"url\": \"https://blog.asymmetric.re/\",\n        \"published\": \"2025-09-17\",\n        \"source_type\": \"company blog\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [],\n  \"gaps\": [\n    \"P0 加入与离开的确切日期无本人一手声明，仅由\\\"最后 ERNW 博客约 2016-04 / EPYC 博文 2021-06 已在 P0 / Asymmetric 首篇 2025-09\\\"时间夹断推断，约 2017 入职、约 2022 离开。\",\n    \"P0→Asymmetric 之间是否经过 Jump Crypto 过渡期，仅本地二手种子转述，无一手抓取确认；本次未将该过渡作为独立决策项。\",\n    \"Asymmetric Research 联合创始人/CTO 头衔未能一手核验：公司 about 页 (https://www.asymmetric.re/about) 抓取返回 404，相关头衔仅来自本地种子，作 lead_only 处理未入 items。\",\n    \"weggli 起始发布日期与具体构建动机无一手 commit/发布时间线核验，item date 仅能标到年份 2021。\",\n    \"dnsmasq(2017) 团队贡献的 byline 一手核验失败：Google Security Blog \\\"Behind the Masq\\\" (https://projectzero.google/blog/behind-the-masq/) 抓取返回 404，相关团队协作证据未能升级到 reported/documentd，未入 items。\",\n    \"转向 DeFi 的个人动机无本人公开声明，fw-dec-004 的动机部分为基于研究轨迹的推断（inferred），非本人表述。\",\n    \"P0 博客按作者标签检索页 (https://googleprojectzero.blogspot.com/search/label/Felix%20Wilhelm) 返回\\\"No posts with label Felix Wilhelm\\\"，标签可能已撤，不可作为证据；本次改用已知具体博文 URL 直接抓取。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "bb369244fedb1ae222e1110c71a55c8047de2b06102b3a13083653a6f787130b",
+        "accessed_at": "2026-09-26T14:35:27.809449+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790433327809475000-felix-wilhelm-decisions.json",
+    "label": "Felix Wilhelm:decisions",
+    "elapsed_seconds": 379.19,
+    "prompt_sha256": "06fa67d75ff94049718eef0c5d73bc068d3ccf07d2c22f0b92c409d4c22a8726",
+    "num_turns": 26,
+    "total_cost_usd": 0.751049,
+    "usage": {
+      "input_tokens": 35572,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 262976,
+      "output_tokens": 12267,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 39161,
+        "outputTokens": 16396,
+        "cacheReadInputTokens": 290688,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.751049,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

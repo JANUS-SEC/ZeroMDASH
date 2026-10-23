@@ -1,0 +1,347 @@
+{
+  "person": "Linus Henze",
+  "expertise": [
+    "Apple 平台漏洞发现与利用",
+    "iOS 越狱工具链构建（bootrom exploit、iBoot patch、kernel bootstrap、用户态包管理）",
+    "iOS 内核利用与缓解绕过（kernel PAC bypass、PPL bypass、code-signing bypass、untether 持久化）",
+    "WebKit 浏览器引擎 JIT 侧效应类利用",
+    "macOS 本地信任边界绕过（System Integrity Protection/Rootless、Keychain/securityd、kext 加载）",
+    "公开源代码工具发布与社区披露"
+  ],
+  "stages": [
+    {
+      "period": "约 2016 年",
+      "stage": "macOS 本地保护绕过的工具化起步",
+      "capability_change": "在 macOS 上以可复用 kext/加载器形态发布对 System Integrity Protection 的绕过工具，形成可公开分发的单一目标工具，而非仅作概念验证。此阶段建立的工具化发布习惯延续至后续多个项目。",
+      "evidence_ids": [
+        "lh-conv-003",
+        "lh-dec-001",
+        "lh-tl-2016-anykextloader",
+        "lh-works-07"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "约 2018 年",
+      "stage": "CTF 团队环境与浏览器引擎 JIT 侧效应利用的并行推进",
+      "capability_change": "在 35C3 CTF 中以团队（allesctf）环境产出可公开的 writeup，同时发布 WebKit 正则表达式 JIT 侧效应类利用 PoC。利用目标由 macOS 内核绕过横向扩展至客户端 Web 攻击面，并形成对同行公开原语（Samuel Groß 的 CVE-2018-4233 利用与 Int64 库）的复用与归属习惯。",
+      "evidence_ids": [
+        "lh-works-01",
+        "lh-dec-002",
+        "lh-tl-2018-35c3ctf",
+        "lh-conv-004",
+        "lh-tl-2020-multi-tool-expansion"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "约 2019 年",
+      "stage": "受保护子系统利用与以披露条件驱动的厂商博弈",
+      "capability_change": "研究对象从系统级绕过细化为 Keychain/securityd 受保护子系统利用，并以 daemon + client 注入 + 框架 patch 的组合形式发布完整利用。决策层面因 macOS 缺少 bug bounty 程序而拒绝向 Apple 上报 KeySteal 细节，改为在 Objective by the Sea v2 公开完整 exploit；由此确立以披露条件促成厂商激励结构改变的博弈取向。",
+      "evidence_ids": [
+        "lh-works-02",
+        "lh-works-03",
+        "lh-conv-001",
+        "lh-conv-002",
+        "lh-conv-005",
+        "lh-conv-006",
+        "lh-dec-003",
+        "lh-tl-2019-keysteal"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "约 2020 年至 2021 年",
+      "stage": "由单点工具向完整越狱链升级",
+      "capability_change": "在 axi0mX 公开的 checkm8 bootrom 漏洞之上构建首个开源越狱 Fugu，形成 bootrom exploit → iBoot patch → kernel bootstrap → 用户态包管理的完整链，并发布配套 bootstrap 仓库。研究重心由 macOS 转向 iOS 引导阶段，呈现对既有公开成果的沿用与扩展而非从零复现的工作方式。",
+      "evidence_ids": [
+        "lh-works-04",
+        "lh-dec-004",
+        "lh-tl-2021-fugu"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "约 2021 年至 2023 年",
+      "stage": "缓解层级递进与项目边界的显式收尾",
+      "capability_change": "在 iOS 14 的 Fugu14 中加入 untether 持久化、kernel PAC bypass 与 PPL bypass，并以 Swift 重写工具链，明确以 exploit 不触发 kernel panic 的可靠性作为目标。随后在面向 iOS 15 的 Fugu15 中以 FAQ 形式声明项目边界（开发者向、不扩展版本/设备、不维护）并归档仓库，构成以显式终止取代模糊淡出的收尾模式。",
+      "evidence_ids": [
+        "lh-works-05",
+        "lh-works-06",
+        "lh-dec-006",
+        "lh-dec-007",
+        "lh-dec-008",
+        "lh-dec-010",
+        "lh-tl-2022-fugu14",
+        "lh-dec-009",
+        "lh-tl-2023-swiftxpc"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "在同伴公开原语之上组合为完整利用/越狱链",
+      "starting_conditions": "起步期处于德国 CTF 圈层并与 allesctf/pinauten 等组织关联；同期可获取 axi0mX 的 checkm8 与 ipwndfu、Samuel Groß 的 WebKit 利用/SLOP/Int64 库等公开原语。",
+      "repeated_practice": "在 WebKit-RegEx-Exploit 中复用 CVE-2018-4233 利用与 Int64 库；在 Fugu 中以 axi0mX 的 checkm8 与 ipwndfu fork 为基础构建越狱；在 Fugu14 中整合 SLOP 与 libkrw；在 README 中公开点名并归属原语来源。",
+      "feedback": "公开致谢与方法借鉴构成可见的方法输入痕迹；同伴原语使完整链得以在自身不重复造轮的前提下交付，README 中的归属与警告反映对来源与供应链反馈的处理。",
+      "intermediate_capability": "形成以既有公开原语为模块、按目标平台组合完整链的工程化能力，以及公开归属外部贡献的发布纪律。",
+      "observed_outcomes": [
+        "Fugu 作为基于 checkm8 的开源越狱发布",
+        "Fugu14 整合 SLOP、libkrw 并加入 untether、PAC bypass、PPL bypass",
+        "WebKit-RegEx-Exploit 以同行利用为模板复用 Int64 库"
+      ],
+      "evidence_ids": [
+        "lh-works-01",
+        "lh-works-04",
+        "lh-works-05",
+        "linus-community-02",
+        "lh-dec-004",
+        "lh-tl-2020-multi-tool-expansion"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "对公开原语的重度依赖也可能反映自研原语积累相对有限，而非主动的整合策略；公开归属亦可被解释为对许可与社区规范的被动遵循。"
+    },
+    {
+      "name": "以公开披露作为促成厂商激励结构变化的博弈手段",
+      "starting_conditions": "2019 年前后 macOS 缺少正式 bug bounty 程序，研究者以独立身份运作并具备自有发布渠道（个人网站、Twitter、GitHub、Apple 生态专题会议）。",
+      "repeated_practice": "2018 年以附带警示语公开 Safari/Webkit 0day；2019 年因 macOS 无 bug bounty 拒绝上报 KeySteal 细节并在 Objective by the Sea v2 公开完整 exploit 代码；长期以公开仓库替代私下厂商流程发布工具。",
+      "feedback": "会议议程页明确将 KeySteal 公开披露与争取 macOS bug bounty 程序的目标相关联，使披露路径的转向可核验地连接到外部激励结构。",
+      "intermediate_capability": "形成以披露条件而非单纯技术猎取驱动的决策模式，能够在厂商激励缺失时主动切换披露路径。",
+      "observed_outcomes": [
+        "KeySteal 完整 exploit 在 OBTS v2 公开并随后线上发布",
+        "WebKit 0day 以警示语形式公开",
+        "持续以公开仓库而非厂商流程为主渠道发布研究成果"
+      ],
+      "evidence_ids": [
+        "lh-conv-002",
+        "lh-conv-004",
+        "lh-conv-005",
+        "lh-conv-006",
+        "lh-works-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "公开披露亦可由个人知名度建设或对厂商流程的不信任驱动，并非必然源自对激励结构的策略性判断；目前可核验的动机证据主要是 OBTS v2 议程页的二手措辞，缺乏本人长篇自述佐证。"
+    },
+    {
+      "name": "按 Apple 缓解层级递进的重定向练习",
+      "starting_conditions": "Apple 平台存在系统性的缓解阶梯（SIP/Rootless → Keychain 信任边界 → bootrom checkm8 → kernel PAC → PPL），且研究者早期已熟悉 macOS 内核扩展与 SIP 绕过。",
+      "repeated_practice": "由 SIP 绕过（anyKextLoader、Unrootless-Kext）转向 Keychain/securityd 利用（Keysteal），再转向 checkm8 越狱链（Fugu），进而在 Fugu14/Fugu15 中绕过 kernel PAC 与 PPL；每引入一层新缓解即在下一项目中作为对抗目标。",
+      "feedback": "目标平台版本的更替与缓解的引入构成外部约束，迫使研究主题随之迁移；README 中对 PAC/PPL/untether 的逐项标注反映对缓解层级的显式跟踪。",
+      "intermediate_capability": "形成按缓解层级定向迁移研究对象、在新缓解出现时将其纳入下一对抗目标的能力。",
+      "observed_outcomes": [
+        "anyKextLoader/Unrootless-Kext 针对 SIP/Rootless",
+        "Keysteal 针对 Keychain/securityd",
+        "Fugu 针对 checkm8 bootrom",
+        "Fugu14/Fugu15 针对 kernel PAC 与 PPL"
+      ],
+      "evidence_ids": [
+        "lh-tl-2016-anykextloader",
+        "lh-works-07",
+        "lh-tl-2019-keysteal",
+        "lh-tl-2021-fugu",
+        "lh-works-05",
+        "lh-dec-006",
+        "lh-dec-007"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "研究主题的迁移也可能由设备可获得性、社区热度或 CVE 归因机会驱动，而非源自系统性的缓解阶梯映射；当前未取得本人对研究路线选择的直接自述。"
+    },
+    {
+      "name": "以可靠性目标与显式项目边界控制维护成本",
+      "starting_conditions": "越狱工具链维护成本高、设备与版本组合发散，且研究者以独立身份运作而无团队分担支持负载。",
+      "repeated_practice": "在 Fugu14 中将 kernel exploit 描述为极其可靠、不会触发 kernel panic；在 README 中要求改动前先在虚拟设备测试；在 Fugu15 中以 FAQ 形式声明项目边界（开发者向、不扩展版本/设备、不维护）并在事后归档仓库。",
+      "feedback": "社区采纳规模（Fugu14 约 1.4k stars、312 forks、140 open issues）与潜在的维护负载形成反馈，FAQ 边界与归档可视为对该负载的处置。",
+      "intermediate_capability": "形成将可靠性作为研究目标之一、并以公开承诺限定维护范围的能力。",
+      "observed_outcomes": [
+        "Fugu14 自述 kernel exploit 极其可靠",
+        "Fugu14 README 要求虚拟设备先行测试",
+        "Fugu15 FAQ 声明不扩展不维护并归档仓库"
+      ],
+      "evidence_ids": [
+        "lh-works-05",
+        "lh-works-06",
+        "lh-dec-007",
+        "lh-dec-008",
+        "lh-dec-010",
+        "linus-community-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "FAQ 边界与归档亦可由兴趣转移或外部争议（如 remount patch 版权问题）驱动，而非主动的维护成本控制；README 中的可靠性自述未经独立验证。"
+    }
+  ],
+  "tensions": [
+    "PPL bypass 的归属在不同证据间不一致：lh-works-05 将 PPL bypass 列为 Fugu14 组件，而 lh-dec-007 将其描述为相较 Fugu14 新增的对抗项；二者尚未在一手材料中调和。",
+    "Fugu14 的时间证据存在张力：lh-works-05 引用 CVE-2021-30740/30768/30769/30770/30773 指向 2021 年，而 lh-dec-006 与 lh-tl-2022-fugu14 记录的仓库最后更新时间为 2022-06-12；后者为维护时间而非首次发布时间。",
+    "Fugu15 的归属与存在性存在张力：lh-dec-007/lh-dec-008/lh-dec-010 记录 pinauten/Fugu15，而本人个人仓库列表中未见同名仓库（lh-timeline gap）；该差异可能由组织归属而非独立矛盾解释。",
+    "Fugu14 中 kernel exploit 极其可靠的自述为作者自评，未取得独立复现或第三方评价；不应作为可靠性事实陈述。",
+    "公开披露与争取 macOS bug bounty 之间的因果主要依赖 OBTS v2 议程页的二手措辞，缺乏本人长篇自述确认二者直接因果；相关性或时间先后不等于因果。",
+    "Fugu14 的 remount patch 存在未解决的版权争议（multiple parties think the code is theirs），表明其工具链并非完全自研，涉及多来源代码整合；该争议的解决结果无来源。",
+    "Objective-See 博客列表页未见对该研究者的提及（linus-henze-ext-02），构成外部可见度的一项否定性数据点，与高星标的社区采纳规模形成张力。"
+  ],
+  "transferable_practices": [
+    "在公开原语之上组合完整链，并在 README 中显式归属原语来源（如 checkm8、SLOP、Int64 库），而非隐式复用。",
+    "对高风险改动要求先在虚拟设备测试，再在真机执行，作为可观察的回归纪律。",
+    "以 README 为主发布渠道并附供应链警告（仅从本人 GitHub 下载以防被植入恶意代码），以降低公开工具的供应链风险。",
+    "以 FAQ 形式公开声明项目边界（支持范围、是否维护），并以仓库归档作为显式收尾动作，替代模糊淡出。",
+    "以 CTF 解题与 writeup 作为可重复练习与公开复盘的输入，并与同期漏洞利用开发交叉对照。"
+  ],
+  "non_transferable_conditions": [
+    "青少年阶段即完成对 SIP 的具体绕过并公开发布，起步年龄作为个人条件难以复制。",
+    "研究对象高度依赖 Apple 平台特定的缓解阶梯与 checkm8 等 bootrom 原语，且这些原语的出现具有一次性机会窗口。",
+    "对 Samuel Groß、axi0mX 等同伴公开原语的获取与整合依赖特定时期的公开研究成果，属机会性条件。",
+    "德国 CTF 圈层与 allesctf/pinauten 组织提供的同伴网络与训练环境，作为地理与社群条件不易迁移。",
+    "2019 年前后 macOS 缺少正式 bug bounty 程序这一外部激励结构，是公开披露博弈取向得以成立的时期条件；该条件随 Apple 后续激励政策变化而改变。",
+    "checkm8 属一次性 bootrom 漏洞，其可被作为开源越狱基础的窗口具有不可重复性。"
+  ],
+  "open_questions": [
+    "公开披露 KeySteal 与 Apple 后续设立/调整 macOS bug bounty 之间是否存在可核验的因果关系，目前仅有 OBTS v2 议程页的二手措辞，缺乏本人长篇自述与厂商侧材料。",
+    "person_json 标注的 Black Hat EU / POC 演讲（linus-community-06，status=unknown，verified_in_run=false）未能经抓取核验，演讲事实、题目与年份均待证。",
+    "Fugu15 的精确首次发布日期、所属 OBTS 版本（v4.0 或 v5.0）及演讲标题均未核验；objectivebythesea.org 相关页面抓取空白或 404。",
+    "SwiftXPC 仓库（lh-dec-009，status=inferred）是否代表公开输出重心由 iOS 越狱向 macOS/Swift 工具方向转移，缺乏本人陈述佐证。",
+    "PPL bypass 是否由该研究者首创尚不可判定，需进一步核验其在 Fugu14 与 Fugu15 中的具体归属与首创性。",
+    "Fugu14 kernel exploit 的可靠性自述未经独立复现或第三方评价，可靠性是否如自述所述待证。",
+    "本人一手站点 linushenze.com 与 blog.linushenze.com 抓取失败（ECONNREFUSED），其自撰 writeup、博客与成长自述为一手材料缺口。",
+    "OffensiveCon 2022 演讲（Fugu15: A (mostly) stable kernel exploit for iOS 15）未能经抓取核验，仅作为线索保留。",
+    "allesctf 与 pinauten 的性质（CTF 战队、雇主或大学团体）未核验，是否存在正式团队或雇主隶属关系无一手来源。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/linus-henze-synthesis-v1-20260927-232049-609",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790522840995338000-linus-henze-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "b0373019-40e3-49c1-8a51-e471876c0132",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_jr1mkuikrldjwarez3sqnnpo",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/linus-henze-synthesis-v1-20260927-232049-609/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T15:27:21.046894+00:00"
+      },
+      {
+        "tool_use_id": "call_a0ujmq1ofvaak9hej52d9ai7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/linus-henze-synthesis-v1-20260927-232049-609/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "06e159303de12858313fcb09c9d47c94116e24363bf0e40ea6d65f744b660edc",
+        "accessed_at": "2026-09-27T15:27:21.046928+00:00"
+      },
+      {
+        "tool_use_id": "call_owrfnsjra7b7iprix3rjy8ng",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/linus-henze-synthesis-v1-20260927-232049-609/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "d624ec4ead58c6b21a546001d4c842b7422eec16e0bbf67848cdf14493ef5385",
+        "accessed_at": "2026-09-27T15:27:21.046938+00:00"
+      },
+      {
+        "tool_use_id": "call_5d8fsoly6yyzuatd64cd5w8u",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/linus-henze-synthesis-v1-20260927-232049-609/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "4fd61b5c5a5d876fbd8dd0daebe5631fdceeeb789ce5f703613b794bf423a815",
+        "accessed_at": "2026-09-27T15:27:21.047019+00:00"
+      },
+      {
+        "tool_use_id": "call_g08ddpsf5yek5jvx5vkwkxfy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/linus-henze-synthesis-v1-20260927-232049-609/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-27T15:27:21.047022+00:00"
+      },
+      {
+        "tool_use_id": "call_2hp0gzvwcarc7jhu86xs8pna",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/linus-henze-synthesis-v1-20260927-232049-609/checkpoint.md",
+          "content": "# Checkpoint — Linus Henze 综合 (首次综合, revision_context 为空)\n\n## 任务状态\n- 节点: linus-henze-synthesis-v1\n- 模式: 首次综合 (revision_context.json = [])\n- 已读取: task.md, output.schema.json, person_json.json, evidence_json.json, revision_context.json\n- 身份锚点: GitHub github.com/LinusHenze + OBTS v2 议程页交叉确认 (德国, iOS/macOS, @LinusHenze)\n\n## 有效证据盘点 (按维度, verified_in_run=true)\n- works: lh-works-01..08 (全部 documented + verified)\n- conversations: lh-conv-001..006 (全部 documented + verified; 一手来源为 OBTS v2 议程页)\n- community: linus-community-01..05 (documented+verified); linus-community-06 (status=unknown, verified=false → 不作正向支撑)\n- external: linus-henze-ext-01..02 (documented+verified; ext-02 为 Objective-See 博客否定性观察)\n- decisions: lh-dec-001..008,010 (documented+verified); lh-dec-009 (inferred+verified, SwiftXPC 转向)\n- timeline: lh-tl-2016/2018/2019/2020/2021/2022/2023 (全部 documented+verified)\n- targeted: 空 (无定向补证)\n\n## 关键矛盾 (待保留, 不抹平)\n1. PPL bypass 归属: lh-works-05 将 PPL bypass 列入 Fugu14; lh-dec-007 称 PPL bypass 为\"相较 Fugu14 新增\"。→ 不在 Fugu15 过度宣称 PPL 首创。\n2. Fugu14 日期: works=2021 (CVE-2021-*) vs decisions/timeline=2022-06-12(last-updated)。→ 解释为 2021 发布、2022 维护。\n3. Fugu15 仓库位置: pinauten/Fugu15 (lh-dec-007) vs 个人 repo 列表未见 (timeline gap)。→ 归于 pinauten 组织, 非矛盾。\n4. OBTS 版本 v4/v5 (Fugu15)、OffensiveCon 2022 演讲: 均未核验 → open_questions。\n5. linus-community-06 (Black Hat EU/POC) unknown+unverified → 不作正向支撑, 列 open_question。\n\n## 不可使用/谨慎使用\n- linus-community-06: unknown, verified=false → 仅在 open_questions 引用为未核验记录, 不进 stages/mechanisms evidence_ids。\n- lh-dec-009 (SwiftXPC 转向): inferred → 标注为推断。\n\n## 综合 (草稿要点)\n- expertise: Apple 平台漏洞发现与利用 / iOS 越狱工具链 / iOS 内核利用与缓解绕过(PAC/PPL/code-signing) / WebKit JIT 侧效应利用 / macOS 本地信任边界绕过(SIP/Rootless, Keychain/securityd)\n- stages: 2016 SIP→2018 CTF+WebKit JIT→2019 Keychain+披露博弈→2021 完整越狱链(checkm8)→2022-2023 PAC/PPL+项目边界收尾\n- mechanisms (≥2 of 3 准则):\n  M1 在同伴公开原语之上组合完整链 (repeated+generative, high)\n  M2 公开披露作为促成厂商激励结构变化的博弈手段 (repeated+distinctive, medium)\n  M3 按 Apple 缓解层级递进的重定向练习 (repeated+generative, high)\n  M4 以可靠性目标与显式项目边界控制维护成本 (repeated+distinctive, medium)\n- tensions: PPL 归属矛盾 / 日期矛盾 / 自述可靠性未独立验证 / 披露因果未验证 / 文档化滞后 TODO / 版权争议 / 否定性外部可见度\n- transferable: 同伴原语组合+归属 / 虚拟设备先行测试 / README 优先+供应链警告 / FAQ 边界+归档收尾 / CTF writeup 练习\n- non_transferable: 青少年起步 / Apple 缓解阶梯+checkm8 原语 / 同伴原语机会窗口 / 德国 CTF 圈层 / 2019 无 macOS bug bounty / checkm8 一次性 bootrom\n- open_questions: 9 项 (披露因果 / BH EU·POC / Fugu15 日期·OBTS 版本 / SwiftXPC 转向 / PPL 首创 / 可靠性独立验证 / linushenze.com 缺口 / OffensiveCon / org 性质)\n\n## 下一步\n- 写入 output.json (符合 schema, 全字段中文书面语, 不填 _run/verification)。\n"
+        },
+        "success": true,
+        "content_sha256": "8f8c4a5f7ef2b1e07542f388ead4d61ab815bb408af8b4fec7c486c7243f31b8",
+        "accessed_at": "2026-09-27T15:27:21.047636+00:00"
+      },
+      {
+        "tool_use_id": "call_4mi4lsduzoeiei0l8pxhpub1",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/linus-henze-synthesis-v1-20260927-232049-609/output.json",
+          "content": "{\n  \"person\": \"Linus Henze\",\n  \"expertise\": [\n    \"Apple 平台漏洞发现与利用\",\n    \"iOS 越狱工具链构建（bootrom exploit、iBoot patch、kernel bootstrap、用户态包管理）\",\n    \"iOS 内核利用与缓解绕过（kernel PAC bypass、PPL bypass、code-signing bypass、untether 持久化）\",\n    \"WebKit 浏览器引擎 JIT 侧效应类利用\",\n    \"macOS 本地信任边界绕过（System Integrity Protection/Rootless、Keychain/securityd、kext 加载）\",\n    \"公开源代码工具发布与社区披露\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"约 2016 年\",\n      \"stage\": \"macOS 本地保护绕过的工具化起步\",\n      \"capability_change\": \"在 macOS 上以可复用 kext/加载器形态发布对 System Integrity Protection 的绕过工具，形成可公开分发的单一目标工具，而非仅作概念验证。此阶段建立的工具化发布习惯延续至后续多个项目。\",\n      \"evidence_ids\": [\"lh-conv-003\", \"lh-dec-001\", \"lh-tl-2016-anykextloader\", \"lh-works-07\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"约 2018 年\",\n      \"stage\": \"CTF 团队环境与浏览器引擎 JIT 侧效应利用的并行推进\",\n      \"capability_change\": \"在 35C3 CTF 中以团队（allesctf）环境产出可公开的 writeup，同时发布 WebKit 正则表达式 JIT 侧效应类利用 PoC。利用目标由 macOS 内核绕过横向扩展至客户端 Web 攻击面，并形成对同行公开原语（Samuel Groß 的 CVE-2018-4233 利用与 Int64 库）的复用与归属习惯。\",\n      \"evidence_ids\": [\"lh-works-01\", \"lh-dec-002\", \"lh-tl-2018-35c3ctf\", \"lh-conv-004\", \"lh-tl-2020-multi-tool-expansion\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"约 2019 年\",\n      \"stage\": \"受保护子系统利用与以披露条件驱动的厂商博弈\",\n      \"capability_change\": \"研究对象从系统级绕过细化为 Keychain/securityd 受保护子系统利用，并以 daemon + client 注入 + 框架 patch 的组合形式发布完整利用。决策层面因 macOS 缺少 bug bounty 程序而拒绝向 Apple 上报 KeySteal 细节，改为在 Objective by the Sea v2 公开完整 exploit；由此确立以披露条件促成厂商激励结构改变的博弈取向。\",\n      \"evidence_ids\": [\"lh-works-02\", \"lh-works-03\", \"lh-conv-001\", \"lh-conv-002\", \"lh-conv-005\", \"lh-conv-006\", \"lh-dec-003\", \"lh-tl-2019-keysteal\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"约 2020 年至 2021 年\",\n      \"stage\": \"由单点工具向完整越狱链升级\",\n      \"capability_change\": \"在 axi0mX 公开的 checkm8 bootrom 漏洞之上构建首个开源越狱 Fugu，形成 bootrom exploit → iBoot patch → kernel bootstrap → 用户态包管理的完整链，并发布配套 bootstrap 仓库。研究重心由 macOS 转向 iOS 引导阶段，呈现对既有公开成果的沿用与扩展而非从零复现的工作方式。\",\n      \"evidence_ids\": [\"lh-works-04\", \"lh-dec-004\", \"lh-tl-2021-fugu\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"约 2021 年至 2023 年\",\n      \"stage\": \"缓解层级递进与项目边界的显式收尾\",\n      \"capability_change\": \"在 iOS 14 的 Fugu14 中加入 untether 持久化、kernel PAC bypass 与 PPL bypass，并以 Swift 重写工具链，明确以 exploit 不触发 kernel panic 的可靠性作为目标。随后在面向 iOS 15 的 Fugu15 中以 FAQ 形式声明项目边界（开发者向、不扩展版本/设备、不维护）并归档仓库，构成以显式终止取代模糊淡出的收尾模式。\",\n      \"evidence_ids\": [\"lh-works-05\", \"lh-works-06\", \"lh-dec-006\", \"lh-dec-007\", \"lh-dec-008\", \"lh-dec-010\", \"lh-tl-2022-fugu14\", \"lh-dec-009\", \"lh-tl-2023-swiftxpc\"],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"在同伴公开原语之上组合为完整利用/越狱链\",\n      \"starting_conditions\": \"起步期处于德国 CTF 圈层并与 allesctf/pinauten 等组织关联；同期可获取 axi0mX 的 checkm8 与 ipwndfu、Samuel Groß 的 WebKit 利用/SLOP/Int64 库等公开原语。\",\n      \"repeated_practice\": \"在 WebKit-RegEx-Exploit 中复用 CVE-2018-4233 利用与 Int64 库；在 Fugu 中以 axi0mX 的 checkm8 与 ipwndfu fork 为基础构建越狱；在 Fugu14 中整合 SLOP 与 libkrw；在 README 中公开点名并归属原语来源。\",\n      \"feedback\": \"公开致谢与方法借鉴构成可见的方法输入痕迹；同伴原语使完整链得以在自身不重复造轮的前提下交付，README 中的归属与警告反映对来源与供应链反馈的处理。\",\n      \"intermediate_capability\": \"形成以既有公开原语为模块、按目标平台组合完整链的工程化能力，以及公开归属外部贡献的发布纪律。\",\n      \"observed_outcomes\": [\n        \"Fugu 作为基于 checkm8 的开源越狱发布\",\n        \"Fugu14 整合 SLOP、libkrw 并加入 untether、PAC bypass、PPL bypass\",\n        \"WebKit-RegEx-Exploit 以同行利用为模板复用 Int64 库\"\n      ],\n      \"evidence_ids\": [\"lh-works-01\", \"lh-works-04\", \"lh-works-05\", \"linus-community-02\", \"lh-dec-004\", \"lh-tl-2020-multi-tool-expansion\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"对公开原语的重度依赖也可能反映自研原语积累相对有限，而非主动的整合策略；公开归属亦可被解释为对许可与社区规范的被动遵循。\"\n    },\n    {\n      \"name\": \"以公开披露作为促成厂商激励结构变化的博弈手段\",\n      \"starting_conditions\": \"2019 年前后 macOS 缺少正式 bug bounty 程序，研究者以独立身份运作并具备自有发布渠道（个人网站、Twitter、GitHub、Apple 生态专题会议）。\",\n      \"repeated_practice\": \"2018 年以附带警示语公开 Safari/Webkit 0day；2019 年因 macOS 无 bug bounty 拒绝上报 KeySteal 细节并在 Objective by the Sea v2 公开完整 exploit 代码；长期以公开仓库替代私下厂商流程发布工具。\",\n      \"feedback\": \"会议议程页明确将 KeySteal 公开披露与争取 macOS bug bounty 程序的目标相关联，使披露路径的转向可核验地连接到外部激励结构。\",\n      \"intermediate_capability\": \"形成以披露条件而非单纯技术猎取驱动的决策模式，能够在厂商激励缺失时主动切换披露路径。\",\n      \"observed_outcomes\": [\n        \"KeySteal 完整 exploit 在 OBTS v2 公开并随后线上发布\",\n        \"WebKit 0day 以警示语形式公开\",\n        \"持续以公开仓库而非厂商流程为主渠道发布研究成果\"\n      ],\n      \"evidence_ids\": [\"lh-conv-002\", \"lh-conv-004\", \"lh-conv-005\", \"lh-conv-006\", \"lh-works-02\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"公开披露亦可由个人知名度建设或对厂商流程的不信任驱动，并非必然源自对激励结构的策略性判断；目前可核验的动机证据主要是 OBTS v2 议程页的二手措辞，缺乏本人长篇自述佐证。\"\n    },\n    {\n      \"name\": \"按 Apple 缓解层级递进的重定向练习\",\n      \"starting_conditions\": \"Apple 平台存在系统性的缓解阶梯（SIP/Rootless → Keychain 信任边界 → bootrom checkm8 → kernel PAC → PPL），且研究者早期已熟悉 macOS 内核扩展与 SIP 绕过。\",\n      \"repeated_practice\": \"由 SIP 绕过（anyKextLoader、Unrootless-Kext）转向 Keychain/securityd 利用（Keysteal），再转向 checkm8 越狱链（Fugu），进而在 Fugu14/Fugu15 中绕过 kernel PAC 与 PPL；每引入一层新缓解即在下一项目中作为对抗目标。\",\n      \"feedback\": \"目标平台版本的更替与缓解的引入构成外部约束，迫使研究主题随之迁移；README 中对 PAC/PPL/untether 的逐项标注反映对缓解层级的显式跟踪。\",\n      \"intermediate_capability\": \"形成按缓解层级定向迁移研究对象、在新缓解出现时将其纳入下一对抗目标的能力。\",\n      \"observed_outcomes\": [\n        \"anyKextLoader/Unrootless-Kext 针对 SIP/Rootless\",\n        \"Keysteal 针对 Keychain/securityd\",\n        \"Fugu 针对 checkm8 bootrom\",\n        \"Fugu14/Fugu15 针对 kernel PAC 与 PPL\"\n      ],\n      \"evidence_ids\": [\"lh-tl-2016-anykextloader\", \"lh-works-07\", \"lh-tl-2019-keysteal\", \"lh-tl-2021-fugu\", \"lh-works-05\", \"lh-dec-006\", \"lh-dec-007\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"研究主题的迁移也可能由设备可获得性、社区热度或 CVE 归因机会驱动，而非源自系统性的缓解阶梯映射；当前未取得本人对研究路线选择的直接自述。\"\n    },\n    {\n      \"name\": \"以可靠性目标与显式项目边界控制维护成本\",\n      \"starting_conditions\": \"越狱工具链维护成本高、设备与版本组合发散，且研究者以独立身份运作而无团队分担支持负载。\",\n      \"repeated_practice\": \"在 Fugu14 中将 kernel exploit 描述为极其可靠、不会触发 kernel panic；在 README 中要求改动前先在虚拟设备测试；在 Fugu15 中以 FAQ 形式声明项目边界（开发者向、不扩展版本/设备、不维护）并在事后归档仓库。\",\n      \"feedback\": \"社区采纳规模（Fugu14 约 1.4k stars、312 forks、140 open issues）与潜在的维护负载形成反馈，FAQ 边界与归档可视为对该负载的处置。\",\n      \"intermediate_capability\": \"形成将可靠性作为研究目标之一、并以公开承诺限定维护范围的能力。\",\n      \"observed_outcomes\": [\n        \"Fugu14 自述 kernel exploit 极其可靠\",\n        \"Fugu14 README 要求虚拟设备先行测试\",\n        \"Fugu15 FAQ 声明不扩展不维护并归档仓库\"\n      ],\n      \"evidence_ids\": [\"lh-works-05\", \"lh-works-06\", \"lh-dec-007\", \"lh-dec-008\", \"lh-dec-010\", \"linus-community-04\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"FAQ 边界与归档亦可由兴趣转移或外部争议（如 remount patch 版权问题）驱动，而非主动的维护成本控制；README 中的可靠性自述未经独立验证。\"\n    }\n  ],\n  \"tensions\": [\n    \"PPL bypass 的归属在不同证据间不一致：lh-works-05 将 PPL bypass 列为 Fugu14 组件，而 lh-dec-007 将其描述为相较 Fugu14 新增的对抗项；二者尚未在一手材料中调和。\",\n    \"Fugu14 的时间证据存在张力：lh-works-05 引用 CVE-2021-30740/30768/30769/30770/30773 指向 2021 年，而 lh-dec-006 与 lh-tl-2022-fugu14 记录的仓库最后更新时间为 2022-06-12；后者为维护时间而非首次发布时间。\",\n    \"Fugu15 的归属与存在性存在张力：lh-dec-007/lh-dec-008/lh-dec-010 记录 pinauten/Fugu15，而本人个人仓库列表中未见同名仓库（lh-timeline gap）；该差异可能由组织归属而非独立矛盾解释。\",\n    \"Fugu14 中 kernel exploit 极其可靠的自述为作者自评，未取得独立复现或第三方评价；不应作为可靠性事实陈述。\",\n    \"公开披露与争取 macOS bug bounty 之间的因果主要依赖 OBTS v2 议程页的二手措辞，缺乏本人长篇自述确认二者直接因果；相关性或时间先后不等于因果。\",\n    \"Fugu14 的 remount patch 存在未解决的版权争议（multiple parties think the code is theirs），表明其工具链并非完全自研，涉及多来源代码整合；该争议的解决结果无来源。\",\n    \"Objective-See 博客列表页未见对该研究者的提及（linus-henze-ext-02），构成外部可见度的一项否定性数据点，与高星标的社区采纳规模形成张力。\"\n  ],\n  \"transferable_practices\": [\n    \"在公开原语之上组合完整链，并在 README 中显式归属原语来源（如 checkm8、SLOP、Int64 库），而非隐式复用。\",\n    \"对高风险改动要求先在虚拟设备测试，再在真机执行，作为可观察的回归纪律。\",\n    \"以 README 为主发布渠道并附供应链警告（仅从本人 GitHub 下载以防被植入恶意代码），以降低公开工具的供应链风险。\",\n    \"以 FAQ 形式公开声明项目边界（支持范围、是否维护），并以仓库归档作为显式收尾动作，替代模糊淡出。\",\n    \"以 CTF 解题与 writeup 作为可重复练习与公开复盘的输入，并与同期漏洞利用开发交叉对照。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"青少年阶段即完成对 SIP 的具体绕过并公开发布，起步年龄作为个人条件难以复制。\",\n    \"研究对象高度依赖 Apple 平台特定的缓解阶梯与 checkm8 等 bootrom 原语，且这些原语的出现具有一次性机会窗口。\",\n    \"对 Samuel Groß、axi0mX 等同伴公开原语的获取与整合依赖特定时期的公开研究成果，属机会性条件。\",\n    \"德国 CTF 圈层与 allesctf/pinauten 组织提供的同伴网络与训练环境，作为地理与社群条件不易迁移。\",\n    \"2019 年前后 macOS 缺少正式 bug bounty 程序这一外部激励结构，是公开披露博弈取向得以成立的时期条件；该条件随 Apple 后续激励政策变化而改变。\",\n    \"checkm8 属一次性 bootrom 漏洞，其可被作为开源越狱基础的窗口具有不可重复性。\"\n  ],\n  \"open_questions\": [\n    \"公开披露 KeySteal 与 Apple 后续设立/调整 macOS bug bounty 之间是否存在可核验的因果关系，目前仅有 OBTS v2 议程页的二手措辞，缺乏本人长篇自述与厂商侧材料。\",\n    \"person_json 标注的 Black Hat EU / POC 演讲（linus-community-06，status=unknown，verified_in_run=false）未能经抓取核验，演讲事实、题目与年份均待证。\",\n    \"Fugu15 的精确首次发布日期、所属 OBTS 版本（v4.0 或 v5.0）及演讲标题均未核验；objectivebythesea.org 相关页面抓取空白或 404。\",\n    \"SwiftXPC 仓库（lh-dec-009，status=inferred）是否代表公开输出重心由 iOS 越狱向 macOS/Swift 工具方向转移，缺乏本人陈述佐证。\",\n    \"PPL bypass 是否由该研究者首创尚不可判定，需进一步核验其在 Fugu14 与 Fugu15 中的具体归属与首创性。\",\n    \"Fugu14 kernel exploit 的可靠性自述未经独立复现或第三方评价，可靠性是否如自述所述待证。\",\n    \"本人一手站点 linushenze.com 与 blog.linushenze.com 抓取失败（ECONNREFUSED），其自撰 writeup、博客与成长自述为一手材料缺口。\",\n    \"OffensiveCon 2022 演讲（Fugu15: A (mostly) stable kernel exploit for iOS 15）未能经抓取核验，仅作为线索保留。\",\n    \"allesctf 与 pinauten 的性质（CTF 战队、雇主或大学团体）未核验，是否存在正式团队或雇主隶属关系无一手来源。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "be7e594a81ff6bed88c4b8cd3b54ddb302995c9d67f4798eb7aed74f30a035dd",
+        "accessed_at": "2026-09-27T15:27:21.047640+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790522841047704000-linus-henze-synthesis-v1.json",
+    "label": "Linus Henze:synthesis:v1",
+    "elapsed_seconds": 391.44,
+    "prompt_sha256": "44419c3dc806b0f414adc88561c86466d8c5edbf37f98c9e6bc76eda8a1419a1",
+    "num_turns": 8,
+    "total_cost_usd": 0.748149,
+    "usage": {
+      "input_tokens": 37396,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 95488,
+      "output_tokens": 20537,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 37396,
+        "outputTokens": 20537,
+        "cacheReadInputTokens": 95488,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.748149,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

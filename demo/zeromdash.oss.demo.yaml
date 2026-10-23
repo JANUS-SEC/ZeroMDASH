@@ -1,0 +1,268 @@
+# Single-repository demo/template only: copy this file to a task-specific YAML and then fill in
+# target-specific focus. Do not treat the focus text below as a universal answer.
+#
+# Supported runtime values: claude_code (alias: claude), codex (alias: codex_cli),
+# traex (aliases: trae, trae_cli, traecli, trae_code, traecode),
+# kimi (alias: kimi_code), opencode, dsh (aliases: deepseek_harness,
+# deepseek_harness_cli), deepagent.
+# Optional runtime examples:
+#   runtime: claude_code
+#   runtime: codex
+#   runtime: traex
+#   runtime: kimi
+#   runtime: dsh
+#
+# Config semantics:
+#   - runtime=claude_code: short config `bedrock` expands to ~/.claude/settings.bedrock.json.
+#     A path such as $HOME/.claude/settings.bedrock.json is also accepted.
+#   - runtime=codex: config is passed as a Codex profile name, e.g. `config: ark` -> `codex --profile ark`.
+#   - runtime=traex: config is passed as a TraeX profile name, e.g.
+#     `config: work` -> `traecli exec --profile work`. The profile file is
+#     `~/.trae/work.traecli.toml`.
+#   - runtime=kimi: config/provider can be omitted; Kimi Code reads ~/.kimi-code/config.toml by default.
+#   - runtime=dsh: defaults to ZeroMDASH-safe minimal-plus-search mode
+#     (persistent bash + str_replace_editor + bounded glob/grep). config is an
+#     optional trusted extra --patch path; provider/model are written to
+#     invocation-local DSH settings.
+#   - config/provider can be omitted to use runtime defaults.
+#   - model can be omitted or empty to avoid passing --model. Non-empty model is
+#     passed to the selected runtime command as `--model <model>` (except dsh
+#     and deepagent).
+#   - fallbacks is optional. Each fallback supports runtime/config/provider/model/env
+#     like the primary config. It is used only after the current runtime has
+#     exhausted that node's retry attempts.
+#
+# Provider currently uses the labels bedrock | bailian | ark.
+# Pick provider by reading the referenced global settings/profile and identifying
+# which API/model service it uses. At the moment provider-specific env handling is
+# implemented for Claude Code + bedrock; bailian/ark are semantic labels whose
+# concrete API behavior comes from the selected settings/profile.
+
+common_focus: >
+  Global task-level focus shared by focus-aware nodes. Put the high-level threat
+  model here: attacker position, trusted/untrusted boundary, exposed interface,
+  target component family, impact class, and any project-wide constraints.
+
+# Optional subagent fan-out caps. Values must be positive YAML integers, not
+# quoted strings. Omit a bucket to leave that bucket unlimited; --disable-spec
+# still suppresses spec subtasks even when top_K.spec is set. The chain bucket
+# caps chain candidates dispatched to chain battles; --disable-chain skips
+# chain planning and battles even when top_K.chain is set.
+top_K:
+  spec: 8
+  vuln: 24
+  patch: 12
+  feature: 8
+  chain: 16
+
+# Optional cross-primitive chain aggregation controls. The chain stage consumes
+# standalone findings and confirmed primitives produced by first-level subtasks,
+# uses a deterministic bounded prefilter only as advisory input, then lets the
+# native-subagent `plan_chains` agent compose candidates for investigate/critic
+# battles. All keys are optional; defaults shown below.
+# chain:
+#   enabled: true                      # set false (or use --disable-chain) to skip
+#   max_length: 4                      # max primitives per candidate chain
+#   max_successors_per_capability: 4   # successor cap when expanding one capability
+#   beam_width: 64                     # search frontier cap
+#   max_candidates_before_top_k: 200   # candidate cap before top_K.chain truncation
+#   max_battle_rounds: 2               # max chain investigate/critic iterations
+#   attacker_entry_capabilities: []    # custom entry capabilities; empty = default
+
+node:
+  fetch_target_repo:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually point this at the exact upstream repository URL, for example:
+    # focus: git://git.kernel.org/pub/scm/virt/kvm/kvm.git
+    focus: <upstream repository URL, mirror URL, branch/tag, or fetch constraints>
+
+  search_spec:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # This stage benefits from broad exploration; usually leave focus empty unless
+    # the target domain has mandatory specs that should not be missed.
+    focus: ""
+
+  search_fuzz_driver:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # This stage also benefits from broad exploration. For kernel targets, a useful
+    # hint is to search syzkaller dashboards/programs: https://syzkaller.appspot.com/
+    focus: ""
+
+  search_similar_software:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Keep broad unless you already know a small set of comparable implementations.
+    focus: ""
+
+  search_similar_history:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Threat model is the most important user input here. Fill in attacker position,
+    # trust boundary, exposed interface, required privileges, impact class, and any
+    # bug classes to prioritize.
+    focus: >
+      Threat model to fill: attacker controls <input/interface>, crosses
+      <trust-boundary>, has <privileges>, targets <component>, and impact of
+      interest is <memory corruption / sandbox escape / privilege escalation /
+      information leak / denial of service>. Prefer historical vulnerabilities
+      whose exploit path and patch map to this threat model.
+
+  search_target_history:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Also threat-model driven. Add target-specific components, branches, historical
+    # incidents, stable/backport constraints, or security-fix patterns here.
+    focus: >
+      Threat model to fill: attacker controls <target-facing input/interface>,
+      reaches <target component/subsystem>, crosses <security boundary>, and can
+      cause <impact>. Prioritize target project security fixes, incomplete fixes,
+      regressions, and patch-miss opportunities relevant to this model.
+
+  search_new_feature:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Runs after the other search_* nodes. Use this to steer coverage-gap
+    # discovery toward recently added or weakly covered feature surfaces.
+    focus: >
+      Identify new or weakly covered feature surfaces under the threat model:
+      untrusted input objects, trust boundaries, parser/protocol/state-machine
+      families, feature flags, external backend bridges, and expected data flow
+      not already covered well by specs, history, similar software, or fuzzing.
+
+  analyze_attack_surface:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    focus: >
+      Identify externally reachable or attacker-influenced attack surfaces under
+      the chosen threat model, including entrypoints, trust boundaries, privilege
+      boundaries, parser/protocol/state-machine boundaries, shared state, lifetime
+      edges, and concurrency-sensitive paths.
+
+  plan_by_spec:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually leave empty; planner should use gathered specs and attack-surface data.
+    focus: ""
+
+  plan_by_vuln_similar:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Optional explicit fallback chain. Health-checked at startup; used only after
+    # the primary runtime's retry attempts are exhausted.
+    fallbacks:
+      - runtime: codex
+        config: ark
+        model: ""
+        provider: ark
+    # Usually leave empty; planner should use similar-history evidence and attack-surface data.
+    focus: ""
+
+  plan_by_vuln_patch:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually leave empty; planner should use target-history evidence and patch context.
+    focus: ""
+
+  plan_by_new_feature:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually leave empty; planner should use main/feature and attack-surface data.
+    focus: ""
+
+  investigate_subtask:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually leave empty; each generated subtask already carries its own objective.
+    focus: ""
+
+  critic_subtask:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually leave empty; critic should judge the concrete investigation evidence.
+    focus: ""
+
+  plan_chains:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually leave empty; it receives the primitive pool, Domain Registry and
+    # deterministic advisory, then delegates bounded composition passes.
+    focus: ""
+
+  chain_investigate_subtask:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually leave empty; each chain candidate already carries ordered
+    # primitives, bindings, and expected terminal impact.
+    focus: ""
+
+  chain_critic_subtask:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually leave empty; chain critic verifies every edge binding and the
+    # end-to-end closure evidence.
+    focus: ""
+
+  chain_finalizer_subtask:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually leave empty; this agent adjudicates confirmed chains that failed
+    # deterministic structural materialization.
+    focus: ""
+
+  report_group_adjudicator:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    # Usually leave empty; this agent merges duplicate report groups by
+    # root cause, sink, trigger equivalence, and fix boundary.
+    focus: ""
+
+  summary:
+    runtime: claude_code
+    config: bedrock
+    model: ""
+    provider: bedrock
+    focus: >
+      Emphasize the final attack-surface model: attacker-controlled entrypoints,
+      trust/privilege boundaries, reachable vulnerable components, confirmed and
+      rejected hypotheses, severity/confidence, and concrete next validation steps.

@@ -1,0 +1,341 @@
+{
+  "person": "Brandon Azad",
+  "expertise": [
+    "macOS 与 iOS 内核漏洞发现、利用与提权",
+    "XNU 内核源码审计与运行时内核内省",
+    "Mach IPC、IOKit、XPC 子系统攻击面分析",
+    "iOS kernelcache 逆向（IDA Pro 类重建、tagged pointer 分析）",
+    "ARM64 ROP/JOP 利用原语工程化",
+    "利用工具与调试基础设施开源建设"
+  ],
+  "stages": [
+    {
+      "period": "2016-05 至 2016-12",
+      "stage": "OS X 内核提权起点：信息泄露链与可靠性量化度量的建立",
+      "capability_change": "首次公开完整的 macOS 内核利用链，将 OSUnserializeBinary 释放后重用（CVE-2016-1828）与内核栈信息泄露（CVE-2016-1758）串联实现本地提权，技术栈覆盖 XNU 内核源码审计、Mach trap 触发、ROP（约 45000 gadget）改写 cr_svuid 取 root；同期建立以执行次数与崩溃次数量化可靠性的工作习惯，自述对开发路径中大量试错与随机内核崩溃的调试过程。研究产物以 writeup 形式公开，奠定后续「writeup+CVE+开源工具」的披露范式起点。",
+      "evidence_ids": [
+        "azad-works-001",
+        "ba-tl-01",
+        "azad-conv-01",
+        "BAZAD-DEC-07"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017-01 至 2017-12",
+      "stage": "物理内存访问与内核内省的工具化迁移",
+      "capability_change": "研究对象由单一提权链转向可复用工具：发表 physmem（CVE-2016-1825，IOHIDevice 属性校验缺陷获得用户态物理内存读写，覆盖 sysent 表实现内核函数调用，发布日期以 azad-works-002 所载 2017-01-16 及 URL 路径 /2017/01/ 为准），随后发表 memctl 将 macOS 物理内存访问思路迁移为 iOS 内核运行时自省与读写平台。方法学上从单点漏洞转向「系统性枚举 type-confusion 机会→选定目标→固化为可复用工具」，并主动对照他人在共享 ucred（如 tmux）下 panic 的提权方法，改用 kauth_cred_setsvuid_gid 并管理引用计数。ba-tl-02 与 ba-comm-04 将 physmem 发布日期记为 2016-01-16，与 azad-works-002 及 URL 路径 /2017/01/ 所载 2017-01-16 冲突，该日期记为证据层笔误，以 2017-01-16 为准。",
+      "evidence_ids": [
+        "azad-works-002",
+        "azad-works-003",
+        "ba-tl-02",
+        "ba-tl-03",
+        "ba-comm-01",
+        "ba-comm-04",
+        "BAZAD-DEC-01",
+        "BAZAD-DEC-02"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2018-01 至 2018-12",
+      "stage": "iOS 12 攻击面系统化枚举与逆向基础设施密集输出",
+      "capability_change": "进入方法论密集输出期：以源码审计独立发现 CVE-2017-13868（XNU ctl_ctloutput 未检查返回值的信息泄露），针对 iOS 12 kernelcache 的 split-kernel/Mach-O 与 tagged pointers 结构变化构建 ida_kernelcache（数据流分析自动重建 C++ 类布局），将 2 参数内核调用原语扩展为基于 JOP 的最多 14 参数、可取完整返回值的调用原语；研究面扩展到用户态 XPC 字符串越读、task_threads 绕过平台二进制限制、launchd 端口替换提权（CVE-2018-4280，blanket）、GSSCred 竞态（CVE-2018-4331）。每个攻击面配套独立开源工具，形成「审计方向→漏洞→公开 writeup+开源工具」的稳定产出闭环。同年 12 月独立发现并向 Apple 报告 MIG/voucher 漏洞（该漏洞在 2019-01-29 的 voucher_swap 文章中关联 CVE-2019-6225）。",
+      "evidence_ids": [
+        "azad-works-004",
+        "azad-works-005",
+        "ba-tl-04",
+        "ba-tl-05",
+        "ba-tl-06",
+        "ba-tl-07",
+        "ba-tl-08",
+        "ba-tl-09",
+        "ba-tl-10",
+        "ba-tl-11",
+        "ba-comm-02",
+        "ba-comm-03",
+        "ba-comm-05",
+        "BAZAD-DEC-03",
+        "BAZAD-DEC-04",
+        "BAZAD-DEC-06"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2019-01 至 2019-12",
+      "stage": "Project Zero 转入与披露渠道迁移",
+      "capability_change": "以 Project Zero 成员身份在团队博客发表 voucher_swap（CVE-2019-6225，MIG 引用计数漏洞，2019-01-29 署名「Posted by Brandon Azad, Project Zero」），证实其不晚于 2019 年 1 月加入 Google Project Zero，研究产出渠道由个人博客迁移至团队研究博客。此前已于 2018-12-06 独立发现并向 Apple 报告同一 MIG/voucher 漏洞（CVE-2019-6225 与 2018-12-06 报告日期同时由 voucher_swap 本人自述与 In-the-wild iOS Exploit Chain 5 印证）。同年公开发布 ktrw（A11 内核调试器，托管于 googleprojectzero 组织，README 署名 bazad@google.com，测试 iOS 12.1.2 与 iOS 13.3），研究产出由利用工具扩展到内核调试基础设施。二手检索称其 2020 年 8 月加入 Project Zero，与一手署名 2019-01-29 冲突，以一手为准。",
+      "evidence_ids": [
+        "BAZAD-DEC-05",
+        "BAZAD-DEC-06",
+        "ba-tl-13",
+        "ba-tl-14",
+        "ba-tl-15",
+        "azad-r1-ev-001",
+        "azad-r1-ev-002"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "把一次性 PoC 转化为可复用工具与基础设施",
+      "starting_conditions": "2016 年以单次 macOS 提权 writeup 起步，研究产物为一次性利用链，缺少跨漏洞复用的底层工具。",
+      "repeated_practice": "将每个漏洞的研究产物固化为独立开源工具：2017 年 physmem（物理内存读写）、memctl（内核内省）、2018 年 ida_kernelcache（逆向基础设施）、threadexec（通用调用库）、blanket（提权工具），并在加入 Project Zero 后将 ktrw 托管于 googleprojectzero 组织作为内核调试基础设施，按 iOS 版本（12.1.2、13.3）持续迭代。",
+      "feedback": "反馈来源三重：自用过程中发现工具不足以支撑新攻击面时驱动迭代（memctl 旧 8 参数策略不足催生 14 参数 JOP 调用原语）；社区 fork 与复用（ktrw 700 stars/128 forks、ida_kernelcache 305/86）提供外部采用信号；Apple 平台版本演进（iOS 12 kernelcache 结构变化）作为外部约束触发工具更新。",
+      "intermediate_capability": "形成「漏洞→工具→下一漏洞的研究支点」的循环：工具既服务当前漏洞，也降低后续同类研究的起步成本，使研究从单点突破转向平台化。",
+      "observed_outcomes": [
+        "memctl 成为后续内核调用原语的验证与迭代载体，14 参数 JOP 调用原语明确自述为对 memctl 旧 8 参数策略的 refinement。",
+        "把逆向方法论本身（kernelcache C++ 类重建、tagged pointer 分析）固化为工具 ida_kernelcache，使逆向流程可复用于后续 iOS 12 利用研究。",
+        "ktrw 将研究产出由利用工具扩展到内核调试基础设施，覆盖 iOS 12.1.2 与 iOS 13.3 两个版本。"
+      ],
+      "evidence_ids": [
+        "azad-works-002",
+        "azad-works-003",
+        "azad-works-004",
+        "azad-works-005",
+        "ba-tl-03",
+        "ba-tl-05",
+        "ba-tl-10",
+        "ba-tl-13",
+        "ba-tl-14",
+        "ba-tl-15",
+        "ba-comm-03",
+        "ba-comm-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "工具化的高频出现也可能部分源于 2016-2018 年 iOS/macOS 研究社区整体偏好开源工具建设的风气，而非个人独有能力；区分点在于 Azad 将工具按 iOS 版本持续迭代并作为后续研究的直接支点，体现跨时期的依赖关系。"
+    },
+    {
+      "name": "同伴技法借取与再实现",
+      "starting_conditions": "2017 年构建 memctl 时已有的 iOS 研究社区公共技法（Stefan Esser 的 vtable patching、Ian Beer 的 mach_portal/triple_fetch）可作为再实现起点。",
+      "repeated_practice": "在设计自研工具时直接复用同伴已验证的工程策略而非从零设计：memctl 借鉴 Stefan Esser 的 vtable-patching 技法，threadexec 复用 Ian Beer triple_fetch 中检测函数返回的轮询策略与 fileports 传递文件描述符的技法，并追踪 Ian Beer 在 Project Zero 的内核调试器工作作为自身方向可行性的参照。",
+      "feedback": "反馈来源为同伴公开 writeup 与开源工具：通过阅读与拆解他人利用，将其中可复用的工程策略移植到自身工具，并以「方向是否被同伴并行验证」作为研究可行性的间接信号。",
+      "intermediate_capability": "形成「拆解同伴公开利用→提取可复用技法→移植到自研工具」的吸收-再实现能力，降低单一研究的重复成本。",
+      "observed_outcomes": [
+        "threadexec 库基于 Ian Beer triple_fetch 的返回检测轮询与 fileports 技法再实现。",
+        "memctl 致谢 Ian Beer、Luca Todesco、Stefan Esser、Jonathan Levin 的先前工作，并将 Ian Beer 的并行工作视为对自身方向的验证。"
+      ],
+      "evidence_ids": [
+        "ba-comm-01",
+        "ba-comm-02",
+        "ba-comm-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "技法借取在公开 writeup 社区普遍存在，区分度有限；Azad 的特点在于明确标注借取来源并将借取对象限定为可验证的工程策略（轮询、fileports），而非整套利用链。XPC 字符串越读一例无同伴输入，表明并非所有产出都依赖该机制，存在独立逆向路径。"
+    },
+    {
+      "name": "边界条件审查与可靠性度量",
+      "starting_conditions": "2016-2017 年在借鉴他人提权方法时发现边界条件缺陷（共享 ucred 下 panic），由此形成对引用计数与边界条件单独审查的实践。",
+      "repeated_practice": "在采纳他人方法时独立审查其适用边界：physmem 工作中对照 tpwn「only changes the process count by one」在共享 ucred（如 tmux）下 panic 的问题，改用 kauth_cred_setsvuid_gid 并管理引用计数；以执行次数与崩溃次数量化可靠性（2016 年 CVE-2016-1828 中 3000 次执行崩溃 2 次）。该机制真正独占的边界条件审查实例仅 physmem 一处，量化度量为单点示例。",
+      "feedback": "反馈来源为他人方法在不同运行环境（共享 ucred）下崩溃的失败案例，以崩溃与引用计数问题作为边界条件审查的触发信号。",
+      "intermediate_capability": "形成对借鉴技法的适用边界与引用计数副作用进行独立判断的能力，而非无条件移植他人方法。",
+      "observed_outcomes": [
+        "physmem 以 kauth_cred_setsvuid_gid 替代直接改 svuid，规避共享 ucred 下的 panic，并管理引用计数。"
+      ],
+      "evidence_ids": [
+        "azad-works-001",
+        "azad-works-002"
+      ],
+      "validation_tests": [
+        "distinctive"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "边界条件审查实例仅 physmem 一处，2017 年后未见同类公开对照，难以排除该实践为对特定崩溃案例的局部反应而非稳定机制的可能；量化度量亦仅 2016 年单点，是否持续无一手证据。ba-comm-01/02/05 中虽含借鉴技法，但其 claim 与 growth_signal 支撑的是技法借取再实现而非独立的边界条件审查，故不计入本机制的 repeated 支撑。"
+    }
+  ],
+  "tensions": [
+    "Project Zero 从属冲突：Azad 的 GitHub 用户主页（一手自述，ext-03）将机构从属标注为 Google Project Zero，但 Project Zero 官方当前团队介绍页与主页作者名单、维基百科 Project Zero 条目现役与过往成员名单均未将其列出（ext-05，reported，基于 2026-09 抓取的官方页面与维基百科条目，名单随官方维护可能变动）；一手自述与权威二手官方名单之间存在冲突，其 Project Zero 成员身份当前无法以权威二手来源佐证为现役。",
+    "FORCEDENTRY 署名分层：维基百科 ForcedEntry 条目（ext-04，reported）将 2021 年 12 月 FORCEDENTRY 漏洞利用链的技术分析署名归于 Project Zero 的 Ian Beer 与 Samuel Groß，未提及 Azad；这并不否认其 Project Zero 从属，但表明其在重大公开事件中的外部能见度相对低于同组部分成员，属客观外部评价分层而非机构品牌的直接能力证据。",
+    "physmem 发布日期冲突：ba-tl-02 与 ba-comm-04 将 physmem 发布日期记为 2016-01-16，与 azad-works-002 所载 2017-01-16 及原文 URL 路径 /2017/01/ 冲突；以 azad-works-002（round-1 verified，URL 路径 /2017/01/、date 2017-01-16）为可信值，ba-tl-02/ba-comm-04 所载 2016-01-16 系证据层日期笔误，该日期的一手再核验因一手来源被域安全/网络策略阻断而未完成。",
+    "Project Zero 加入时间冲突：二手网络检索称 Azad 于 2020 年 8 月加入 Project Zero，且提及加入前供职于 Apple；但一手证据 voucher_swap（BAZAD-DEC-05，2019-01-29）明确署名「Posted by Brandon Azad, Project Zero」，Ian Beer 2019-08-29 文章亦称其为 Project Zero 成员，一手优先，采纳加入时间不晚于 2019 年 1 月，2020 年 8 月的二手说法判定为错误；加入前是否正式受雇于 Apple 无一手材料证实，记为资料缺口。",
+    "会议与媒体缺一手核验：人物记录将会议证据列为 Black Hat US / POC，但 Black Hat 议程页返回 403、Objective by the Sea 议程页返回 404，Ars Technica 与 Wired 等媒体报道无法抓取核验，会议演讲事实与媒体评价原句均停留于 lead_only，无法以一手来源佐证。"
+  ],
+  "transferable_practices": [
+    "将每个漏洞的研究产物固化为独立开源工具，使工具成为后续同类研究的支点而非一次性产物，形成「漏洞→工具→下一漏洞」的研究循环。",
+    "在采纳他人提权方法前独立审查其适用边界与引用计数副作用，以他人在不同运行环境下的崩溃案例作为边界条件审查的触发信号。",
+    "在构建利用原语时显式区分个人项目与通用化目标，并对 gadget 依赖的脆弱性（小改动可能迫使大幅重新设计）做自省，避免将个人项目原语过度通用化。",
+    "把逆向方法论本身（kernelcache C++ 类重建、tagged pointer 分析）固化为工具，使逆向流程跨漏洞可复用，降低新平台版本下的起步成本。",
+    "对照已知漏洞（如 Heartbleed）建立新原语的心智模型，以既有公共知识框架定位新发现的性质，便于同行理解与自我评估。"
+  ],
+  "non_transferable_conditions": [
+    "Stanford 计算机科学（系统与安全方向）的学历自述（ext-02）与其公开联系邮箱 bazad@cs.stanford.edu 所暗示的机构关联，属个人教育条件，非可迁移的方法论。",
+    "Google Project Zero 的机构从属（ext-03、ba-tl-13、ktrw README 署名 bazad@google.com）提供团队博客披露渠道、机构内协作（ktrw 托管于 googleprojectzero 组织）与内核调试硬件支持等资源，属组织条件，非个人可迁移做法。",
+    "2016-2018 年 Apple 平台外部条件：kernelcache 去符号与 tagged pointers 结构、平台二进制限制、IOKit/XPC 攻击面的存在，构成其工具建设与方法论的特定研究客体，随平台演进而变化，不可直接迁移到其他平台或时期。",
+    "FORCEDENTRY 等重大事件的署名分工（ext-04，署名归于 Ian Beer 与 Samuel Groß）属团队内部分工与外部能见度分层，反映组织与事件条件而非个人可迁移能力。"
+  ],
+  "open_questions": [
+    "Project Zero 官方当前团队名单与维基百科条目均未列出 Azad（ext-05，reported，基于 2026-09 抓取的官方页面与维基百科条目，名单随官方维护可能变动），其是否仍在 Project Zero 任职或已转入其他机构，无一手或权威二手来源确认。",
+    "2016 年 CVE-2016-1828 中以 3000 次执行崩溃 2 次量化可靠性为单点示例，2017 年后未见同类公开统计，该量化度量习惯是否持续无一手证据。",
+    "physmem 发布日期的一手再核验未完成：round-2 对 bazad.github.io、projectzero.google、github.com、web.archive.org 的 WebFetch 全部被域安全/网络策略阻断，当前以 azad-works-002（URL 路径 /2017/01/、date 2017-01-16）为准并标注 ba-tl-02/ba-comm-04 日期笔误，待后续可抓取轮次一手确认。",
+    "PAC on Apple Silicon、IOMMU（与 Ian Beer 合著）、Swift type resolver 等被多份二手摘要素引指向的题目，因 bazad.github.io 首页仅渲染至 2018-11、Project Zero 新站与旧 Blogspot 单文 URL 返回 404，未能核验正文与日期，留作 lead_only。",
+    "Black Hat US / POC 演讲题目与日期、Ars Technica/Wired 等媒体评价原句均无一手核验（议程页 403、媒体站不可抓取），会议与媒体维度无 documented 证据。",
+    "本成长分析基于公开发表的成功 writeup 与开源工具重建，失败、未完成或未发表的研究无一手材料，方法论连续性与有效性的判断受发表偏差与幸存者偏差影响。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790684574013560000-brandon-azad-synthesis-v3.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "b1419765-3603-4898-8258-3f99f9268a96",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_dugr9zfoogcwodfcst4lwfvt",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-29T12:22:54.055953+00:00"
+      },
+      {
+        "tool_use_id": "call_5j5y00y9bxz74yv4jinl9756",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-29T12:22:54.055976+00:00"
+      },
+      {
+        "tool_use_id": "call_mjo3cdxkm8mzgmtdz02ndt72",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "d13c17fc48feb8ca647aea669e7193eb73109f2a4bb5ebbc74a176b429439f98",
+        "accessed_at": "2026-09-29T12:22:54.055983+00:00"
+      },
+      {
+        "tool_use_id": "call_nzzhsj27qi0l2n7l4erqosz3",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "c6195813cd78a376c44bccda5a82629e03f295afe46778e632d91fb638dc4847",
+        "accessed_at": "2026-09-29T12:22:54.055989+00:00"
+      },
+      {
+        "tool_use_id": "call_oh2cvwdjwl42hbhx9ldh9m74",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "b0259da2b0e607d6a8ce5bad7c2cef422130f7b5722e804e4dfb20d2e6d99e08",
+        "accessed_at": "2026-09-29T12:22:54.056070+00:00"
+      },
+      {
+        "tool_use_id": "call_hliovr1hw69k7qggn40r40io",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679/inputs/evidence_json.json",
+          "offset": 917,
+          "limit": 916
+        },
+        "success": true,
+        "content_sha256": "afd2c8074c7e2212a9b041308b571e0e478b174d1684300026a87d3ecc38898f",
+        "accessed_at": "2026-09-29T12:22:54.056095+00:00"
+      },
+      {
+        "tool_use_id": "call_a4r8bgu0mts3m5l5okd80osi",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "5cad9e3623c2aa8a7b9ddc807136b82ba2088a64a3ca88ad8b907d8bcd16e462",
+        "accessed_at": "2026-09-29T12:22:54.056164+00:00"
+      },
+      {
+        "tool_use_id": "call_gcxr0shsqrsiawkmcjllvvbj",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679/inputs/revision_context.json",
+          "offset": 493,
+          "limit": 200
+        },
+        "success": true,
+        "content_sha256": "81b7d0abe9b5d4f50a15ac73acd1ad00b1e040a269027a42e448ca72a9d9f74c",
+        "accessed_at": "2026-09-29T12:22:54.056193+00:00"
+      },
+      {
+        "tool_use_id": "call_w690nk94rs5dq5qhu66rstvf",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679/checkpoint.md",
+          "content": "# Checkpoint — Brandon Azad 综合分析 v3\n\n## 输入状态\n- CLAUDE.md / task.md / output.schema.json：已读。\n- person_json.json：已读（rank 14, primary_focus iOS/macOS, social x.com/bazad, writeup_evidence bazad.github.io, conference Black Hat US / POC）。\n- evidence_json.json：已读全文（1127 行，六维 works/conversations/community/external/decisions/timeline + targeted round-1 azad-r1-ev-001/002）。\n- revision_context.json：已读全文（615 行，round-1 + round-2 修订上下文）。\n\n## 有效证据盘点（verified_in_run=true，可作支撑锚点）\n- works：azad-works-001(2016-05-17, primary), 002(2017-01-16 physmem, primary, 日期权威), 003(2017-09-15 memctl), 004(2018-04-07 JOP 14 参), 005(2018 广度)。\n- conversations：azad-conv-01/02。\n- community：ba-comm-01(memctl 致谢/ Esser vtable), 02(task_threads 借 triple_fetch), 03(writeup+CVE+tool 三联), 04(GitHub pinned/forks/ktrw 机构), 05(XPC Heartbleed 类比/独立逆向)。\n- external：ext-01/02(Stanford CS), 03(GitHub P0), 04(Wikipedia ForcedEntry 署名 Beer/Groß), 05(P0 官方名单缺 Azad, reported 2026-09), 08(inferred 方法论工具化)。\n- decisions：BAZAD-DEC-05(voucher_swap 2019-01-29 P0 署名), 06(Ian Beer 2019-08-29 记 2018-12-06 报告 + CVE-2019-6225)。\n- timeline：ba-tl-01..15（全 verified primary）；ba-tl-13(ktrw README bazad@google.com), 14(ktrw A11/iOS 12.1.2/13.3), 15(pinned 仓库集)。\n- targeted：azad-r1-ev-001(DEC-05 一手自述), 002(DEC-06 一手印证)。\n\n## 仅 lead_only/unknown（不作支撑锚点，仅用于 gap/tension）\n- ba-comm-06(Black Hat US 2019 403), ba-comm-07(P0 blog 404)。\n- ext-06(Black Hat speaker 403), ext-07(Ars/Wired unverified, verified_in_run=false)。\n- ba-tl-16(PAC 2020 lead_only/inferred)。\n- BAZAD-DEC-01/02/03/04/07（lead_only, verified_in_run=false，其事实由对应 verified 证据覆盖）。\n\n## 修订指令执行\n| 指令 | 字段 | 处置 |\n|------|------|------|\n| RR1(r2) | mechanisms[2] | validation_tests=[distinctive], confidence=low, ba-comm-01/02/05 移至 mechanisms[1]，独占边界审查实例=azad-works-002 |\n| RR2(r2) | transferable_practices | 删除量化度量条，移入 open_questions |\n| RR3(r2) | physmem 日期 | 以 azad-works-002(2017-01-16, URL /2017/01/) 为准；ba-tl-02/ba-comm-04 的 2016-01-16 系笔误，在 tension/open_questions 标注 |\n| RR4(r1/r2) | 比喻 | \"实验床\"→\"验证与迭代载体\"；\"沉淀为\"→\"转化为\"/\"固化为\"；tensions/open_questions 补 2026-09 抓取时点 |\n| RR3(r1) | stages[3] | 保留\"2018-12-06 独立发现并向 Apple 报告 CVE-2019-6225\"，补注来源链条（azad-r1-ev-001/002） |\n| RR5(r2) | open_questions | 增补发表偏差声明 |\n\n## 结构\n- stages：4（2016 OS X 提权起点 / 2017 物理内存与内核内省工具化 / 2018 iOS 12 攻击面与逆向基础设施 / 2019 P0 转入与披露渠道迁移）。\n- mechanisms：3（一次性 PoC→可复用工具与基础设施 / 同伴技法借取再实现 / 边界条件审查与可靠性度量[low]）。\n- tensions：5（P0 从属冲突 / ForcedEntry 署名分层 / physmem 日期笔误 / P0 加入时间二手 vs 一手冲突 / 会议与媒体缺一手核验）。\n- transferable_practices：5（不含量化度量）。\n- non_transferable_conditions：4（Stanford 学历 / P0 机构资源 / 2016-2018 平台外部条件 / ForcedEntry 署名分工）。\n- open_questions：6（含 RR4 时点 / RR2 量化单点 / RR5 发表偏差 / PAC 等未核验 / 会议媒体缺核验 / physmem 日期再核验未完成）。\n\n## 状态\n分析完成，写入 output.json。\n"
+        },
+        "success": true,
+        "content_sha256": "31916682c81c16e055e52e17f81fc4558d966c239f8598498eb884202269ccca",
+        "accessed_at": "2026-09-29T12:22:54.056897+00:00"
+      },
+      {
+        "tool_use_id": "call_etqhrskfiu0xe3ibj3q2gl7g",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/brandon-azad-synthesis-v3-20260929-201616-679/output.json",
+          "content": "{\n  \"person\": \"Brandon Azad\",\n  \"expertise\": [\n    \"macOS 与 iOS 内核漏洞发现、利用与提权\",\n    \"XNU 内核源码审计与运行时内核内省\",\n    \"Mach IPC、IOKit、XPC 子系统攻击面分析\",\n    \"iOS kernelcache 逆向（IDA Pro 类重建、tagged pointer 分析）\",\n    \"ARM64 ROP/JOP 利用原语工程化\",\n    \"利用工具与调试基础设施开源建设\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2016-05 至 2016-12\",\n      \"stage\": \"OS X 内核提权起点：信息泄露链与可靠性量化度量的建立\",\n      \"capability_change\": \"首次公开完整的 macOS 内核利用链，将 OSUnserializeBinary 释放后重用（CVE-2016-1828）与内核栈信息泄露（CVE-2016-1758）串联实现本地提权，技术栈覆盖 XNU 内核源码审计、Mach trap 触发、ROP（约 45000 gadget）改写 cr_svuid 取 root；同期建立以执行次数与崩溃次数量化可靠性的工作习惯，自述对开发路径中大量试错与随机内核崩溃的调试过程。研究产物以 writeup 形式公开，奠定后续「writeup+CVE+开源工具」的披露范式起点。\",\n      \"evidence_ids\": [\n        \"azad-works-001\",\n        \"ba-tl-01\",\n        \"azad-conv-01\",\n        \"BAZAD-DEC-07\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017-01 至 2017-12\",\n      \"stage\": \"物理内存访问与内核内省的工具化迁移\",\n      \"capability_change\": \"研究对象由单一提权链转向可复用工具：发表 physmem（CVE-2016-1825，IOHIDevice 属性校验缺陷获得用户态物理内存读写，覆盖 sysent 表实现内核函数调用，发布日期以 azad-works-002 所载 2017-01-16 及 URL 路径 /2017/01/ 为准），随后发表 memctl 将 macOS 物理内存访问思路迁移为 iOS 内核运行时自省与读写平台。方法学上从单点漏洞转向「系统性枚举 type-confusion 机会→选定目标→固化为可复用工具」，并主动对照他人在共享 ucred（如 tmux）下 panic 的提权方法，改用 kauth_cred_setsvuid_gid 并管理引用计数。ba-tl-02 与 ba-comm-04 将 physmem 发布日期记为 2016-01-16，与 azad-works-002 及 URL 路径 /2017/01/ 所载 2017-01-16 冲突，该日期记为证据层笔误，以 2017-01-16 为准。\",\n      \"evidence_ids\": [\n        \"azad-works-002\",\n        \"azad-works-003\",\n        \"ba-tl-02\",\n        \"ba-tl-03\",\n        \"ba-comm-01\",\n        \"ba-comm-04\",\n        \"BAZAD-DEC-01\",\n        \"BAZAD-DEC-02\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2018-01 至 2018-12\",\n      \"stage\": \"iOS 12 攻击面系统化枚举与逆向基础设施密集输出\",\n      \"capability_change\": \"进入方法论密集输出期：以源码审计独立发现 CVE-2017-13868（XNU ctl_ctloutput 未检查返回值的信息泄露），针对 iOS 12 kernelcache 的 split-kernel/Mach-O 与 tagged pointers 结构变化构建 ida_kernelcache（数据流分析自动重建 C++ 类布局），将 2 参数内核调用原语扩展为基于 JOP 的最多 14 参数、可取完整返回值的调用原语；研究面扩展到用户态 XPC 字符串越读、task_threads 绕过平台二进制限制、launchd 端口替换提权（CVE-2018-4280，blanket）、GSSCred 竞态（CVE-2018-4331）。每个攻击面配套独立开源工具，形成「审计方向→漏洞→公开 writeup+开源工具」的稳定产出闭环。同年 12 月独立发现并向 Apple 报告 MIG/voucher 漏洞（该漏洞在 2019-01-29 的 voucher_swap 文章中关联 CVE-2019-6225）。\",\n      \"evidence_ids\": [\n        \"azad-works-004\",\n        \"azad-works-005\",\n        \"ba-tl-04\",\n        \"ba-tl-05\",\n        \"ba-tl-06\",\n        \"ba-tl-07\",\n        \"ba-tl-08\",\n        \"ba-tl-09\",\n        \"ba-tl-10\",\n        \"ba-tl-11\",\n        \"ba-comm-02\",\n        \"ba-comm-03\",\n        \"ba-comm-05\",\n        \"BAZAD-DEC-03\",\n        \"BAZAD-DEC-04\",\n        \"BAZAD-DEC-06\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2019-01 至 2019-12\",\n      \"stage\": \"Project Zero 转入与披露渠道迁移\",\n      \"capability_change\": \"以 Project Zero 成员身份在团队博客发表 voucher_swap（CVE-2019-6225，MIG 引用计数漏洞，2019-01-29 署名「Posted by Brandon Azad, Project Zero」），证实其不晚于 2019 年 1 月加入 Google Project Zero，研究产出渠道由个人博客迁移至团队研究博客。此前已于 2018-12-06 独立发现并向 Apple 报告同一 MIG/voucher 漏洞（CVE-2019-6225 与 2018-12-06 报告日期同时由 voucher_swap 本人自述与 In-the-wild iOS Exploit Chain 5 印证）。同年公开发布 ktrw（A11 内核调试器，托管于 googleprojectzero 组织，README 署名 bazad@google.com，测试 iOS 12.1.2 与 iOS 13.3），研究产出由利用工具扩展到内核调试基础设施。二手检索称其 2020 年 8 月加入 Project Zero，与一手署名 2019-01-29 冲突，以一手为准。\",\n      \"evidence_ids\": [\n        \"BAZAD-DEC-05\",\n        \"BAZAD-DEC-06\",\n        \"ba-tl-13\",\n        \"ba-tl-14\",\n        \"ba-tl-15\",\n        \"azad-r1-ev-001\",\n        \"azad-r1-ev-002\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"把一次性 PoC 转化为可复用工具与基础设施\",\n      \"starting_conditions\": \"2016 年以单次 macOS 提权 writeup 起步，研究产物为一次性利用链，缺少跨漏洞复用的底层工具。\",\n      \"repeated_practice\": \"将每个漏洞的研究产物固化为独立开源工具：2017 年 physmem（物理内存读写）、memctl（内核内省）、2018 年 ida_kernelcache（逆向基础设施）、threadexec（通用调用库）、blanket（提权工具），并在加入 Project Zero 后将 ktrw 托管于 googleprojectzero 组织作为内核调试基础设施，按 iOS 版本（12.1.2、13.3）持续迭代。\",\n      \"feedback\": \"反馈来源三重：自用过程中发现工具不足以支撑新攻击面时驱动迭代（memctl 旧 8 参数策略不足催生 14 参数 JOP 调用原语）；社区 fork 与复用（ktrw 700 stars/128 forks、ida_kernelcache 305/86）提供外部采用信号；Apple 平台版本演进（iOS 12 kernelcache 结构变化）作为外部约束触发工具更新。\",\n      \"intermediate_capability\": \"形成「漏洞→工具→下一漏洞的研究支点」的循环：工具既服务当前漏洞，也降低后续同类研究的起步成本，使研究从单点突破转向平台化。\",\n      \"observed_outcomes\": [\n        \"memctl 成为后续内核调用原语的验证与迭代载体，14 参数 JOP 调用原语明确自述为对 memctl 旧 8 参数策略的 refinement。\",\n        \"把逆向方法论本身（kernelcache C++ 类重建、tagged pointer 分析）固化为工具 ida_kernelcache，使逆向流程可复用于后续 iOS 12 利用研究。\",\n        \"ktrw 将研究产出由利用工具扩展到内核调试基础设施，覆盖 iOS 12.1.2 与 iOS 13.3 两个版本。\"\n      ],\n      \"evidence_ids\": [\n        \"azad-works-002\",\n        \"azad-works-003\",\n        \"azad-works-004\",\n        \"azad-works-005\",\n        \"ba-tl-03\",\n        \"ba-tl-05\",\n        \"ba-tl-10\",\n        \"ba-tl-13\",\n        \"ba-tl-14\",\n        \"ba-tl-15\",\n        \"ba-comm-03\",\n        \"ba-comm-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"工具化的高频出现也可能部分源于 2016-2018 年 iOS/macOS 研究社区整体偏好开源工具建设的风气，而非个人独有能力；区分点在于 Azad 将工具按 iOS 版本持续迭代并作为后续研究的直接支点，体现跨时期的依赖关系。\"\n    },\n    {\n      \"name\": \"同伴技法借取与再实现\",\n      \"starting_conditions\": \"2017 年构建 memctl 时已有的 iOS 研究社区公共技法（Stefan Esser 的 vtable patching、Ian Beer 的 mach_portal/triple_fetch）可作为再实现起点。\",\n      \"repeated_practice\": \"在设计自研工具时直接复用同伴已验证的工程策略而非从零设计：memctl 借鉴 Stefan Esser 的 vtable-patching 技法，threadexec 复用 Ian Beer triple_fetch 中检测函数返回的轮询策略与 fileports 传递文件描述符的技法，并追踪 Ian Beer 在 Project Zero 的内核调试器工作作为自身方向可行性的参照。\",\n      \"feedback\": \"反馈来源为同伴公开 writeup 与开源工具：通过阅读与拆解他人利用，将其中可复用的工程策略移植到自身工具，并以「方向是否被同伴并行验证」作为研究可行性的间接信号。\",\n      \"intermediate_capability\": \"形成「拆解同伴公开利用→提取可复用技法→移植到自研工具」的吸收-再实现能力，降低单一研究的重复成本。\",\n      \"observed_outcomes\": [\n        \"threadexec 库基于 Ian Beer triple_fetch 的返回检测轮询与 fileports 技法再实现。\",\n        \"memctl 致谢 Ian Beer、Luca Todesco、Stefan Esser、Jonathan Levin 的先前工作，并将 Ian Beer 的并行工作视为对自身方向的验证。\"\n      ],\n      \"evidence_ids\": [\n        \"ba-comm-01\",\n        \"ba-comm-02\",\n        \"ba-comm-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"技法借取在公开 writeup 社区普遍存在，区分度有限；Azad 的特点在于明确标注借取来源并将借取对象限定为可验证的工程策略（轮询、fileports），而非整套利用链。XPC 字符串越读一例无同伴输入，表明并非所有产出都依赖该机制，存在独立逆向路径。\"\n    },\n    {\n      \"name\": \"边界条件审查与可靠性度量\",\n      \"starting_conditions\": \"2016-2017 年在借鉴他人提权方法时发现边界条件缺陷（共享 ucred 下 panic），由此形成对引用计数与边界条件单独审查的实践。\",\n      \"repeated_practice\": \"在采纳他人方法时独立审查其适用边界：physmem 工作中对照 tpwn「only changes the process count by one」在共享 ucred（如 tmux）下 panic 的问题，改用 kauth_cred_setsvuid_gid 并管理引用计数；以执行次数与崩溃次数量化可靠性（2016 年 CVE-2016-1828 中 3000 次执行崩溃 2 次）。该机制真正独占的边界条件审查实例仅 physmem 一处，量化度量为单点示例。\",\n      \"feedback\": \"反馈来源为他人方法在不同运行环境（共享 ucred）下崩溃的失败案例，以崩溃与引用计数问题作为边界条件审查的触发信号。\",\n      \"intermediate_capability\": \"形成对借鉴技法的适用边界与引用计数副作用进行独立判断的能力，而非无条件移植他人方法。\",\n      \"observed_outcomes\": [\n        \"physmem 以 kauth_cred_setsvuid_gid 替代直接改 svuid，规避共享 ucred 下的 panic，并管理引用计数。\"\n      ],\n      \"evidence_ids\": [\n        \"azad-works-001\",\n        \"azad-works-002\"\n      ],\n      \"validation_tests\": [\n        \"distinctive\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"边界条件审查实例仅 physmem 一处，2017 年后未见同类公开对照，难以排除该实践为对特定崩溃案例的局部反应而非稳定机制的可能；量化度量亦仅 2016 年单点，是否持续无一手证据。ba-comm-01/02/05 中虽含借鉴技法，但其 claim 与 growth_signal 支撑的是技法借取再实现而非独立的边界条件审查，故不计入本机制的 repeated 支撑。\"\n    }\n  ],\n  \"tensions\": [\n    \"Project Zero 从属冲突：Azad 的 GitHub 用户主页（一手自述，ext-03）将机构从属标注为 Google Project Zero，但 Project Zero 官方当前团队介绍页与主页作者名单、维基百科 Project Zero 条目现役与过往成员名单均未将其列出（ext-05，reported，基于 2026-09 抓取的官方页面与维基百科条目，名单随官方维护可能变动）；一手自述与权威二手官方名单之间存在冲突，其 Project Zero 成员身份当前无法以权威二手来源佐证为现役。\",\n    \"FORCEDENTRY 署名分层：维基百科 ForcedEntry 条目（ext-04，reported）将 2021 年 12 月 FORCEDENTRY 漏洞利用链的技术分析署名归于 Project Zero 的 Ian Beer 与 Samuel Groß，未提及 Azad；这并不否认其 Project Zero 从属，但表明其在重大公开事件中的外部能见度相对低于同组部分成员，属客观外部评价分层而非机构品牌的直接能力证据。\",\n    \"physmem 发布日期冲突：ba-tl-02 与 ba-comm-04 将 physmem 发布日期记为 2016-01-16，与 azad-works-002 所载 2017-01-16 及原文 URL 路径 /2017/01/ 冲突；以 azad-works-002（round-1 verified，URL 路径 /2017/01/、date 2017-01-16）为可信值，ba-tl-02/ba-comm-04 所载 2016-01-16 系证据层日期笔误，该日期的一手再核验因一手来源被域安全/网络策略阻断而未完成。\",\n    \"Project Zero 加入时间冲突：二手网络检索称 Azad 于 2020 年 8 月加入 Project Zero，且提及加入前供职于 Apple；但一手证据 voucher_swap（BAZAD-DEC-05，2019-01-29）明确署名「Posted by Brandon Azad, Project Zero」，Ian Beer 2019-08-29 文章亦称其为 Project Zero 成员，一手优先，采纳加入时间不晚于 2019 年 1 月，2020 年 8 月的二手说法判定为错误；加入前是否正式受雇于 Apple 无一手材料证实，记为资料缺口。\",\n    \"会议与媒体缺一手核验：人物记录将会议证据列为 Black Hat US / POC，但 Black Hat 议程页返回 403、Objective by the Sea 议程页返回 404，Ars Technica 与 Wired 等媒体报道无法抓取核验，会议演讲事实与媒体评价原句均停留于 lead_only，无法以一手来源佐证。\"\n  ],\n  \"transferable_practices\": [\n    \"将每个漏洞的研究产物固化为独立开源工具，使工具成为后续同类研究的支点而非一次性产物，形成「漏洞→工具→下一漏洞」的研究循环。\",\n    \"在采纳他人提权方法前独立审查其适用边界与引用计数副作用，以他人在不同运行环境下的崩溃案例作为边界条件审查的触发信号。\",\n    \"在构建利用原语时显式区分个人项目与通用化目标，并对 gadget 依赖的脆弱性（小改动可能迫使大幅重新设计）做自省，避免将个人项目原语过度通用化。\",\n    \"把逆向方法论本身（kernelcache C++ 类重建、tagged pointer 分析）固化为工具，使逆向流程跨漏洞可复用，降低新平台版本下的起步成本。\",\n    \"对照已知漏洞（如 Heartbleed）建立新原语的心智模型，以既有公共知识框架定位新发现的性质，便于同行理解与自我评估。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Stanford 计算机科学（系统与安全方向）的学历自述（ext-02）与其公开联系邮箱 bazad@cs.stanford.edu 所暗示的机构关联，属个人教育条件，非可迁移的方法论。\",\n    \"Google Project Zero 的机构从属（ext-03、ba-tl-13、ktrw README 署名 bazad@google.com）提供团队博客披露渠道、机构内协作（ktrw 托管于 googleprojectzero 组织）与内核调试硬件支持等资源，属组织条件，非个人可迁移做法。\",\n    \"2016-2018 年 Apple 平台外部条件：kernelcache 去符号与 tagged pointers 结构、平台二进制限制、IOKit/XPC 攻击面的存在，构成其工具建设与方法论的特定研究客体，随平台演进而变化，不可直接迁移到其他平台或时期。\",\n    \"FORCEDENTRY 等重大事件的署名分工（ext-04，署名归于 Ian Beer 与 Samuel Groß）属团队内部分工与外部能见度分层，反映组织与事件条件而非个人可迁移能力。\"\n  ],\n  \"open_questions\": [\n    \"Project Zero 官方当前团队名单与维基百科条目均未列出 Azad（ext-05，reported，基于 2026-09 抓取的官方页面与维基百科条目，名单随官方维护可能变动），其是否仍在 Project Zero 任职或已转入其他机构，无一手或权威二手来源确认。\",\n    \"2016 年 CVE-2016-1828 中以 3000 次执行崩溃 2 次量化可靠性为单点示例，2017 年后未见同类公开统计，该量化度量习惯是否持续无一手证据。\",\n    \"physmem 发布日期的一手再核验未完成：round-2 对 bazad.github.io、projectzero.google、github.com、web.archive.org 的 WebFetch 全部被域安全/网络策略阻断，当前以 azad-works-002（URL 路径 /2017/01/、date 2017-01-16）为准并标注 ba-tl-02/ba-comm-04 日期笔误，待后续可抓取轮次一手确认。\",\n    \"PAC on Apple Silicon、IOMMU（与 Ian Beer 合著）、Swift type resolver 等被多份二手摘要素引指向的题目，因 bazad.github.io 首页仅渲染至 2018-11、Project Zero 新站与旧 Blogspot 单文 URL 返回 404，未能核验正文与日期，留作 lead_only。\",\n    \"Black Hat US / POC 演讲题目与日期、Ars Technica/Wired 等媒体评价原句均无一手核验（议程页 403、媒体站不可抓取），会议与媒体维度无 documented 证据。\",\n    \"本成长分析基于公开发表的成功 writeup 与开源工具重建，失败、未完成或未发表的研究无一手材料，方法论连续性与有效性的判断受发表偏差与幸存者偏差影响。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "acfd65390a8df5ee0d3f791e3356d9c720874fc3adb36f9fe5dab249bbbf99e7",
+        "accessed_at": "2026-09-29T12:22:54.056907+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790684574056923000-brandon-azad-synthesis-v3.json",
+    "label": "Brandon Azad:synthesis:v3",
+    "elapsed_seconds": 397.36,
+    "prompt_sha256": "c39862296f231fe6fed043fa012a86779f7cd515f76592b1402ecc936e90f0f1",
+    "num_turns": 11,
+    "total_cost_usd": 1.262336,
+    "usage": {
+      "input_tokens": 131775,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 252672,
+      "output_tokens": 19085,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 131775,
+        "outputTokens": 19085,
+        "cacheReadInputTokens": 252672,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.262336,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

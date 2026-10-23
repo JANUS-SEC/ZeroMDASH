@@ -1,0 +1,313 @@
+{
+  "person": "Michał Bentkowski",
+  "expertise": [
+    "Web 跨站脚本（XSS）漏洞发现",
+    "HTML/JS 清洗器与解析器差异研究",
+    "mutation XSS（mXSS）绕过方法构造",
+    "同源策略与浏览器进程隔离边界分析",
+    "Chromium DevTools 与 Site Isolation 交互缺陷研究",
+    "HTTP 请求/响应语法解析差异利用",
+    "内容安全策略（CSP）规避",
+    "Web 漏洞链化（open redirect → XSS → code execution）",
+    "上游清洗器维护者协作与披露协调",
+    "研究辅助工具建设（livedom、excessy、burp-exceptions）"
+  ],
+  "stages": [
+    {
+      "period": "2014-03 至 2015",
+      "stage": "应用层输入校验型 XSS 与厂商聚焦选题的建立",
+      "capability_change": "2014 年 3 月在 bentkowski.info 开设个人博客并记录公开产出，研究对象系统性锁定 Google 多产品的 Web 入口漏洞，技术栈以路径穿越、XSS、HTTP 响应拆分、Host 头注入等入力校验类问题为主。至 2015 年，研究对象从输出转义漏点本身转向对保护/清洗层（window.stop() 保护、文件上传过滤）的规避。这一阶段建立了围绕单一厂商多产品反复选题的早期调查习惯，并构成后续进入清洗器/解析器研究的起点。mb-dec-02 关于 Google 实物奖励的描述 verified_in_run=false，未作为能力来源证据使用。",
+      "evidence_ids": [
+        "mb-works-01",
+        "mb-works-02",
+        "mb-dec-01-google-products-xss-start",
+        "mb-dec-03-shift-to-sanitizer-parser"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2016-07 至 2017-11",
+      "stage": "清洗器与浏览器安全边界两条谱系的明确",
+      "capability_change": "2016 年 7 月首次明确把研究对象从应用层 XSS 扩展到两条不同谱系：HTML/JS 清洗器（Google Caja 的 XSS）与浏览器自身安全边界（Firefox SOP bypass CVE-2015-7188）。2017 年 11 月以约一年半的间隔复访 Caja，公表与 2016 年自报 XSS『无关』的另外三件 bypass，并通过对 ECMAScript 新特性（async function、async generator、dynamic import）未被 Caja 的 FakeFunction/FakeGeneratorFunction 捕获的根因分析，把同一对象的复访与差异化绕过结构化。方法学由单点注入转向对清洗器内部不一致性的系统性研究，并以 Kangax 兼容性表作为语言演化与清洗空白之间关系的参照。",
+      "evidence_ids": [
+        "mb-works-03",
+        "mb-works-04",
+        "mb-dec-03-shift-to-sanitizer-parser"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2018-06 至 2018-09",
+      "stage": "漏洞链化与 HTTP/CSP 解释差异的并置",
+      "capability_change": "2018 年 6 至 9 月公开三件产出：Chromium CRLF 注入设定任意请求头、Google Colaboratory XSS + CSP 绕过、Hangouts Chat 从 open redirect 到代码执行的链化。研究对象扩展到浏览器对 HTTP 请求语法与 CSP 政策的解释差异，并明确把单点漏洞组合为 redirect → XSS → RCE 的链化方法。2018 年 9 月复访 Colaboratory，发现 2018-06 的 XSS 根因在 MathJax Assistive MathML 插件、Google 通过禁用插件修复后，可通过跨域 cookie（mjx.menu=assistiveMML%3Atrue）重新启用被禁插件使原 payload 再次生效；作者自述这是与 2018-06 件直接相关的另一绕过路径。该阶段确立了同一对象修复后差异化再发现的习惯。",
+      "evidence_ids": [
+        "mb-works-05",
+        "mb-works-06",
+        "mb-works-07",
+        "mb-tgt-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2020",
+      "stage": "DOMPurify mutation XSS 研究序列与上游修复致谢",
+      "capability_change": "围绕 DOMPurify 形成 2.0.0 至 2.0.17 跨版本的 mXSS 研究序列（bentkowski.info/research 列出 2.0.0、2.0.17 与标题 Helping secure DOMPurify）。DOMPurify 2.0.16 release notes（2020-09-18）记载修复了由 MathML 内嵌套 form 触发的 mXSS bypass 并致谢 Michał Bentkowski (@securityMB) of Securitum，2.0.17（2020-09-20）修复另一由 MathML 触发的 mXSS。该上游官方来源证实了报告与上游修复致谢环节，构成由绕过向与上游维护者协作修复延伸的转折；但研究正文（research.securitum.com）全部 302 重定向至泛用 chronicles 页，正文未取得，协作过程细节未证实。这一阶段同时构成 person_json 标注的解析器差异主线的代表作归属线索。",
+      "evidence_ids": [
+        "mb-works-09",
+        "mb-dec-04-dompurify-mxss-research-program",
+        "mb-tgt-01"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2020-04（报告）至 2022-11（公开）",
+      "stage": "浏览器引擎层（Chromium 进程隔离与 DevTools）研究",
+      "capability_change": "向 Chromium 报告 bug #1069486：通过 console 的 debug() 设置的持久断点在同一 Site 进程的不同 origin 之间跨域携带，结合 Site Isolation 下同 Site 不同 origin 共进程的机制构成 SOP 绕过。取得 Chromium 团队全披露许可后于 2022-11-16 在个人博客以 Google Roulette 公开。研究对象由此前应用层 XSS/清洗器扩展到浏览器引擎的进程隔离与 DevTools 行为交互。2020-04 报告月份来源为 2022-11 一手正文自述，Chromium bug tracker 需登录未取得独立时间戳。2018 年后博客公开发表频率下降，2022-11 以单件 writeup 重回公开（正文取得）。",
+      "evidence_ids": [
+        "mb-works-08",
+        "mb-dec-05-chromium-browser-layer-extension",
+        "mb-tgt-03"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "单一厂商多产品的反复选题与外部厂商反馈循环",
+      "starting_conditions": "2014 年开设个人博客时缺乏可核验的雇主/团队背景；研究对象由个人选定。早期证据显示其围绕 Google 多产品（Code Playground、Gmail、Google+、Doodle、CSE、Colaboratory、Hangouts Chat）反复选取 XSS 与入口类漏洞作为题料。",
+      "repeated_practice": "对同一厂商的多个产品持续做 XSS 与 HTTP/路径类漏洞的选取、构造与公开写作；以 2014-03 至 2015 的输入校验型 XSS 为起点，逐步把同一厂商的产品作为可复用的题料池。GitHub bio 当前为 Information Security Engineer at @google，与该厂商聚焦方向在职业上共现。",
+      "feedback": "厂商（Google）的漏洞奖励与修复响应（如 mb-works-04 中 Caja 自报 XSS 在 2017-11 的复访被明确区分为无关系谱、mb-tgt-01 中 DOMPurify 上游在 release notes 中具名致谢）构成外部可核验的正向反馈；这种厂商层面的反馈回环可解释其选题的延续性。",
+      "intermediate_capability": "形成厂商聚焦的选题习惯与跨产品的类比迁移能力，使后续进入清洗器与解析器研究时能沿用同一类比视角（不同清洗器/解析器内部的同类不一致性）。",
+      "observed_outcomes": [
+        "2014-2015 年间多件 Google 产品 XSS/HTTP 入力校验类公开产出（mb-works-01、mb-works-02）",
+        "研究主题在 2016-2017 年间由应用层 XSS 迁移到清洗器与浏览器安全边界（mb-works-03、mb-works-04）"
+      ],
+      "evidence_ids": [
+        "mb-works-01",
+        "mb-works-02",
+        "mb-works-03",
+        "mb-works-04",
+        "mb-dec-01-google-products-xss-start",
+        "mb-timeline-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "Google 产品漏洞面广、赏金计划开放且反馈稳定，任何独立 Web 研究者都可能自然形成厂商聚焦，该机制不一定为个人特有。当前雇主（Google）与早期研究方向的共现仅证明共现，不证明因果：GitHub bio 未给出入职时间、团队或与漏洞报告的关联，无证据表明持续报告 Google 漏洞导致受雇；职业转折可能由市场机会、组织资源或个人条件共同解释。该共现关系列入 open_questions 与 non_transferable_conditions。"
+    },
+    {
+      "name": "同一对象的复访与修正后再发现",
+      "starting_conditions": "2016-07 对 Google Caja 首次报告 XSS，形成可被复访的研究对象与自报记录。",
+      "repeated_practice": "对同一对象（Caja、Colaboratory、DOMPurify）以月到年级别的间隔复访，在修复后再发现并公开差异化绕过；复访时显式引用自报的前作以标记新旧件的差异关系。2017-11 对 Caja 的复访通过 ECMAScript 新特性未被清洗器捕获的根因，把 2016-07 自报件之外的三件 bypass 结构化；2018-09 对 Colaboratory 的复访以跨域 cookie 重启用被禁插件的方式形成与 2018-06 件不同的绕过路径（作者自述 directly related to the previous）；DOMPurify 序列则跨 2.0.0 至 2.0.17 多个版本。",
+      "feedback": "上游修复行为（禁用插件、发布 2.0.16/2.0.17 修复并致谢）本身成为复访时识别修复边界与新绕过路径的依据；mb-tgt-01 的上游 release notes 致谢把单次报告反馈为可核验的修复响应。",
+      "intermediate_capability": "把同一根因下不同绕过路径识别为可复用的研究结构，形成修正后再发现的稳定模式与对修复盲区的敏感度。",
+      "observed_outcomes": [
+        "2017-11 Caja 复访公开三件与 2016-07 自报件无关的 bypass（mb-works-04）",
+        "2018-09 Colaboratory 以重启用被禁插件形成与 2018-06 件不同的绕过路径（mb-works-07、mb-tgt-02）",
+        "DOMPurify mXSS 序列跨 2.0.0/2.0.17 版本并获 2.0.16/2.0.17 上游修复致谢（mb-dec-04、mb-tgt-01）"
+      ],
+      "evidence_ids": [
+        "mb-works-04",
+        "mb-works-07",
+        "mb-works-09",
+        "mb-dec-04-dompurify-mxss-research-program",
+        "mb-tgt-01",
+        "mb-tgt-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "复访行为也可能由厂商在修复后未公开通知或研究者的记忆/笔记积累等机会性因素促成，而非一套显式的方法论；2018-09 件作者自述 directly related to the previous，并非不同系谱的全新根因，差异化程度受限。DOMPurify 序列的正文 302 失效，复访的协作过程细节未证实，仅由上游 release notes 与目录标题支持。"
+    },
+    {
+      "name": "清洗器/解析器差异研究与工具化",
+      "starting_conditions": "2016-07 对 Google Caja 与 Firefox SOP 的研究首次把清洗器实现与浏览器安全边界作为两条并列谱系；2018 年 CRLF/CSP 研究把对象扩展到 HTTP 请求与政策层的解释差异。",
+      "repeated_practice": "以清洗器与解析器内部的解释/规范化不一致为题：Caja（Function/GeneratorFunction 替换未覆盖 async/import）、Chromium CRLF 注入、CSP 绕过、DOMPurify mXSS（MathML 嵌套 form）、Chromium Site Isolation + DevTools debug()。把研究方法固化为可复用工具：livedom（对应 livedom.bentkowski.info，演示 DOM 解析差异）、excessy（XSS 效果学习）、burp-exceptions（改善 Burp Suite Python 扩展异常可读性）。",
+      "feedback": "上游 release notes 致谢（mb-tgt-01）与厂商全披露许可（mb-tgt-03）构成可核验的外部反馈；livedom 仓库在 GitHub profile 可见其 Updated Dec 27, 2022，提示其研究方法被沉淀为长期维护的工具基础设施。",
+      "intermediate_capability": "形成对解析/规范化差异的通用敏感度，使方法可在不同清洗器/浏览器之间迁移；并形成把研究方法固化为公开工具的基础设施建设能力。",
+      "observed_outcomes": [
+        "DOMPurify mXSS 序列与上游修复致谢（mb-tgt-01）",
+        "Chromium Site Isolation + DevTools SOP 绕过并获全披露许可（mb-works-08、mb-tgt-03）",
+        "livedom/excessy/burp-exceptions 工具仓库在 GitHub 公开（mb-dec-07、mb-timeline-02、mb-tgt-04）"
+      ],
+      "evidence_ids": [
+        "mb-works-03",
+        "mb-works-04",
+        "mb-works-05",
+        "mb-works-08",
+        "mb-works-09",
+        "mb-dec-04-dompurify-mxss-research-program",
+        "mb-dec-07-tool-building-livedom-excessy",
+        "mb-timeline-02",
+        "mb-tgt-01",
+        "mb-tgt-03",
+        "mb-tgt-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "把 CRLF、CSP、漏洞链化、SOP、livedom 并列为统一解释层框架属于后视归纳的可能（见 alternative_explanation 与 tensions），研究当时是否以同一框架指导并未由证据证实；各项均为分别可核验的产出，但共享框架是事后归纳。livedom 仓库创建日期与 commit 时间线未取得，其与相应 writeup 的先后反馈关系未证实，工具建设闭环未闭合；工具化也可能由个人开发偏好而非方法论驱动。"
+    }
+  ],
+  "tensions": [
+    "person_json 将 https://research.securitum.com/author/michal-bentkowski/ 列为 writeup_evidence，但抓取时 302 重定向至 securitum.com/pentest-chronicles.html，后者作者名单不含 Bentkowski（出现的是 Michał Żaczek、Michał Wnękowicz 等同名他人），种子证据 URL 与其预期内容不一致；bentkowski.info/research 的研究链接仍指向 research.securitum.com，存在来源托管结构变化与同名歧义并存的张力。",
+    "外部归因互相冲突：一则搜索摘要把 Bentkowski 归入 Google Project Zero，另一则称其为 Securitum principal security engineer 且非 GPZ 成员；两项均来自搜索机器人摘要而非可抓取一手正文，互斥且均不构成 documented，本综合不采纳任一。",
+    "Black Hat EU 议题归属存在缺口：Black Hat 官方 briefings 页 403 不可达，且另有一则搜索摘要把 Black Hat EU 2019 的 mXSS 议题误归为 Mathias Karlsson (Bentkowski)，系瑞典研究员 Mathias Karlsson 与 Michał Bentkowski 的同名合并；会议事实与届次未能一手核验，仅 person_json 标注 Black Hat EU，且 bentkowski.info/research 的 Videos 仅提及 CONFidence 2018。",
+    "研究目录由 research.securitum.com 托管的事实，与当前 GitHub bio 为 Information Security Engineer at @google 并存；由 Securitum（乙方测试/研究）到 Google（甲方产品安全）的职业转折可推断，但转入时间、团队、与任职是否重叠均无一手来源，属 inferred 而非 documented。",
+    "解释层框架的后视归纳张力：CRLF、CSP、漏洞链化、SOP、livedom 的并置可能是事后归纳；其研究当时是否以同一框架指导未证实，机制项已前置该说明。"
+  ],
+  "transferable_practices": [
+    "以单一厂商多产品作为可复用题料池，对同一对象（清洗器/解析器/产品）以月到年级别复访，并在复访时显式引用前作以标记新旧件的差异关系——该方法不依赖个人特有条件，可迁移。",
+    "以修复响应（禁用插件、发布新版本、release notes 致谢）作为识别修复边界与新绕过路径的反馈源，形成修正后再发现的稳定模式。",
+    "把研究方法固化为可复用的公开工具（如 livedom 用于 DOM 解析差异演示），使方法可在不同对象间迁移并可供他人复核。",
+    "对修复后再发现的件，明确区分根因相同与绕过路径不同（如 2018-09 Colaboratory 相对 2018-06 为不同绕过路径而非不同系谱），避免把绕过路径差异表述为根因差异。",
+    "先与厂商协调、获全披露许可再公开（如 Google Roulette 相对 Chromium 团队），把披露流程规范化。"
+  ],
+  "non_transferable_conditions": [
+    "Google 产品漏洞面广、赏金计划开放且反馈稳定，任何独立 Web 研究者都可能形成厂商聚焦，该条件不构成个人特有能力。",
+    "当前雇主为 Google（GitHub bio，无入职时间、团队或与漏洞报告的关联证据）：该职业状态与早期研究方向仅共现，不构成因果，不可作为厂商聚焦机制导致受雇的证据。",
+    "bentkowski.info 博客持续存活使其成为可核验时间线的主体来源；securitymb.blogspot.com 旧博客 404、securitymb.com 301、research.securitum.com 302、x.com/SecurityMB HTTP 402、Black Hat 官方页 403，使得早期产出分布与协作细节受来源可得性限制，存活来源构成个人特有条件而非可迁移条件。",
+    "DOMPurify 上游 release notes 具名致谢由上游维护者（Cure53）出具，研究者个人不可复现该外部认可条件。"
+  ],
+  "open_questions": [
+    "research.securitum.com 下托管的研究正文（DOMPurify 2.0.0 / 2.0.17 bypass、Helping secure DOMPurify、Sanitizer API、Ruby Sanitize、Kibana CVE-2019-7609、AMP4Email DOM Clobbering、prototype pollution 等）当前对该域名抓取均 302 跳转至 securitum.com/pentest-chronicles.html，目标页未保留对应条目；这些研究的方法学细节（如何发现、使用了哪些工具、与上游协作过程）无法核对，仅由 bentkowski.info/research 目录列表证实标题存在。",
+    "DOMPurify 协作修复的过程细节未证实：DOMPurify 2.0.16/2.0.17 release notes（mb-tgt-01）证实报告与上游修复致谢，但 Helping secure DOMPurify 正文 302 失效，是否与维护者直接协作、修复过程如何均未取得；mb-works-09（DOMPurify mXSS）正文未取得，status 仍为 reported。",
+    "Chromium bug #1069486 的独立时间戳未取得：issues.chromium.org 与 bugs.chromium.org 页面需登录、正文不可见；2020-04 报告月份仅由 2022-11 一手正文自述支持（mb-tgt-03），无 bug tracker 独立佐证。",
+    "livedom 工具建设的闭环未闭合：仓库 Updated Dec 27, 2022 取得（mb-tgt-04），但创建日期与 commit 时间线未取得，与 writeup（尤其 2022-11 Google Roulette）的先后反馈关系未证实；需逐个抓取仓库 commits 或 git log 才能补全。",
+    "Black Hat EU 的具体届次、年份、演讲标题与日期未由一手会议页面核验（官方页 403）；CONFidence 2018 仅由 bentkowski.info/research Videos 部分提及，未抓取 speaker/视频页面。",
+    "职业转折的转入时间、所在团队、与 Securitum 任职是否重叠均无一手来源；当前 GitHub bio 仅给出当前岗位，无任职起始时间，受雇与报告之间的因果未证实（与 RR1 overclaim 对齐）。",
+    "GitHub 公开仓库（burp-exceptions、excessy、livedom 等）的创建/更新日期在 profile 页未完整展示，工具发布时间线与 writeup 的先后关系无法仅凭 profile 页建立。",
+    "从应用层 XSS 转向清洗器/解析器层、再转向浏览器引擎层的两段方法学转型，其触发条件（导师、团队反馈、具体项目）缺乏可核验证据，当前只能由发表主题的时间序列推断。",
+    "幸存者偏差与来源可得性偏差：早期时间线依赖已存活的 bentkowski.info，securitymb.blogspot.com 旧博客 404 不可得（mb-timeline-04），早期产出分布与时间线起点可能受存活偏差影响；核心一手来源（research.securitum.com 302、securitymb.com 301、x.com/SecurityMB HTTP 402、Black Hat 官方页 403）多失效或付费墙，综合结论高度依赖 bentkowski.info 与 GitHub profile 两类存活来源。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/micha-bentkowski-synthesis-v2-20260927-135158-721",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790488630980967000-micha-bentkowski-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "91d23c97-f67d-40e9-9bd6-fd68ec2f3039",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_6um1mjgb33f7se803k7ubztz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/micha-bentkowski-synthesis-v2-20260927-135158-721/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T05:57:11.023966+00:00"
+      },
+      {
+        "tool_use_id": "call_rtnxjrvwfiar1d6lnw26oo1m",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/micha-bentkowski-synthesis-v2-20260927-135158-721/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "a3f3d694cb46b0c90c2ea90336b727bf22d96100c0646bcb0bb7af50126cfb94",
+        "accessed_at": "2026-09-27T05:57:11.023995+00:00"
+      },
+      {
+        "tool_use_id": "call_erg1n0ob603d0rpy6yh47xhu",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/micha-bentkowski-synthesis-v2-20260927-135158-721/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "951517f98f9283a128a8a872f989fa4ea79518c8beeabe18f6d31ec54a893629",
+        "accessed_at": "2026-09-27T05:57:11.024002+00:00"
+      },
+      {
+        "tool_use_id": "call_2e4tmanzns7yo8ztb7zda3g1",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/micha-bentkowski-synthesis-v2-20260927-135158-721/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "fddc45e0855d0b4f75d0395591318344361fa961903ebce23a9b929285b1ba9f",
+        "accessed_at": "2026-09-27T05:57:11.024078+00:00"
+      },
+      {
+        "tool_use_id": "call_g3x33hfgxi8ggi3yhfceqevy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/micha-bentkowski-synthesis-v2-20260927-135158-721/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "5251c87ff7320ba802c65742750218ff8b1868a1b2975fc0178bd06ae8f19166",
+        "accessed_at": "2026-09-27T05:57:11.024150+00:00"
+      },
+      {
+        "tool_use_id": "call_fh5c0hbfql8q5820hnhirn6s",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/micha-bentkowski-synthesis-v2-20260927-135158-721/checkpoint.md",
+          "content": "# Checkpoint — Michał Bentkowski 综合 v2\n\n## 任务\n综合六维材料 + round 1 定向补证，重建领域能力成长过程（非成就罗列）。\n落实 revision_context round 1 的 RR1–RR8 synthesis_instructions。\n\n## 有效证据盘点（verified_in_run=true 为主）\n- works: mb-works-01..09（09 为 reported/lead_only）\n- conv: mb-conv-001/002/003\n- ext: mb-ext-001/002/003\n- dec: mb-dec-01..07（mb-dec-02 verified_in_run=**false**，unverified，谨慎引用）\n- timeline: mb-timeline-01..05\n- targeted: mb-tgt-01..04\n- invalid_evidence_ids: 空 → 无需作废\n\n## RR1–RR8 落实点\n- RR1（overclaim）：mechanisms[0].observed_outcomes 不含『转为 Google ISE』；移入 open_questions + non_transferable_conditions，alternative_explanation 注共现非因果\n- RR2（部分推翻/部分保留）：DOMPurify 用 mb-tgt-01 上游 release notes 致谢（documented）+ mb-dec-04/mb-works-09（reported，正文 302 失效）并存；协作过程细节列入 open_questions\n- RR3：stages[2]『不同系谱』→『不同绕过路径』（mb-tgt-02），『高频』→『6 至 9 月共三件公开产出』\n- RR4（推翻）：stages[3] 保留 2020-04，括注来源为 mb-tgt-03 一手正文自述，bug tracker 未取得\n- RR5（overclaim）：stages[3] 删除『大规模』，改为『以单件 writeup 重回公开（正文取得）』\n- RR6（overclaim）：mechanisms[2] alternative_explanation 前置『统一框架为后视归纳可能，研究时是否以同一框架指导未证实』\n- RR7（overclaim，v2 schema 无 biases 字段）：幸存者偏差 + 来源可得性偏差写入 tensions 与 open_questions\n- RR8（部分填补，unresolved）：livedom Updated Dec 27, 2022 取得（mb-tgt-04），创建日期未取得 → open_questions 保留闭环未闭合\n\n## 阶段（5）/ 机制（3）已定稿\n- stages: 2014-2015 应用层输入校验 / 2016-2017 清洗器解析器切入 / 2018 链化与解释差异 / 2020 DOMPurify mXSS 序列 / 2022 浏览器引擎层\n- mechanisms: 单一厂商多产品反复选题 / 同对象复访与修正后再发现 / 清洗器解析器差异研究与工具化\n\n## 未完成\n- output.json 待写入。\n"
+        },
+        "success": true,
+        "content_sha256": "e610f3885faa67f80a4261364f63f33f73da1789100ac7d88e311cf3fa7d873f",
+        "accessed_at": "2026-09-27T05:57:11.024690+00:00"
+      },
+      {
+        "tool_use_id": "call_0dfknsfulj5aq0yrcrs02e3u",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/micha-bentkowski-synthesis-v2-20260927-135158-721/output.json",
+          "content": "{\n  \"person\": \"Michał Bentkowski\",\n  \"expertise\": [\n    \"Web 跨站脚本（XSS）漏洞发现\",\n    \"HTML/JS 清洗器与解析器差异研究\",\n    \"mutation XSS（mXSS）绕过方法构造\",\n    \"同源策略与浏览器进程隔离边界分析\",\n    \"Chromium DevTools 与 Site Isolation 交互缺陷研究\",\n    \"HTTP 请求/响应语法解析差异利用\",\n    \"内容安全策略（CSP）规避\",\n    \"Web 漏洞链化（open redirect → XSS → code execution）\",\n    \"上游清洗器维护者协作与披露协调\",\n    \"研究辅助工具建设（livedom、excessy、burp-exceptions）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2014-03 至 2015\",\n      \"stage\": \"应用层输入校验型 XSS 与厂商聚焦选题的建立\",\n      \"capability_change\": \"2014 年 3 月在 bentkowski.info 开设个人博客并记录公开产出，研究对象系统性锁定 Google 多产品的 Web 入口漏洞，技术栈以路径穿越、XSS、HTTP 响应拆分、Host 头注入等入力校验类问题为主。至 2015 年，研究对象从输出转义漏点本身转向对保护/清洗层（window.stop() 保护、文件上传过滤）的规避。这一阶段建立了围绕单一厂商多产品反复选题的早期调查习惯，并构成后续进入清洗器/解析器研究的起点。mb-dec-02 关于 Google 实物奖励的描述 verified_in_run=false，未作为能力来源证据使用。\",\n      \"evidence_ids\": [\n        \"mb-works-01\",\n        \"mb-works-02\",\n        \"mb-dec-01-google-products-xss-start\",\n        \"mb-dec-03-shift-to-sanitizer-parser\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2016-07 至 2017-11\",\n      \"stage\": \"清洗器与浏览器安全边界两条谱系的明确\",\n      \"capability_change\": \"2016 年 7 月首次明确把研究对象从应用层 XSS 扩展到两条不同谱系：HTML/JS 清洗器（Google Caja 的 XSS）与浏览器自身安全边界（Firefox SOP bypass CVE-2015-7188）。2017 年 11 月以约一年半的间隔复访 Caja，公表与 2016 年自报 XSS『无关』的另外三件 bypass，并通过对 ECMAScript 新特性（async function、async generator、dynamic import）未被 Caja 的 FakeFunction/FakeGeneratorFunction 捕获的根因分析，把同一对象的复访与差异化绕过结构化。方法学由单点注入转向对清洗器内部不一致性的系统性研究，并以 Kangax 兼容性表作为语言演化与清洗空白之间关系的参照。\",\n      \"evidence_ids\": [\n        \"mb-works-03\",\n        \"mb-works-04\",\n        \"mb-dec-03-shift-to-sanitizer-parser\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2018-06 至 2018-09\",\n      \"stage\": \"漏洞链化与 HTTP/CSP 解释差异的并置\",\n      \"capability_change\": \"2018 年 6 至 9 月公开三件产出：Chromium CRLF 注入设定任意请求头、Google Colaboratory XSS + CSP 绕过、Hangouts Chat 从 open redirect 到代码执行的链化。研究对象扩展到浏览器对 HTTP 请求语法与 CSP 政策的解释差异，并明确把单点漏洞组合为 redirect → XSS → RCE 的链化方法。2018 年 9 月复访 Colaboratory，发现 2018-06 的 XSS 根因在 MathJax Assistive MathML 插件、Google 通过禁用插件修复后，可通过跨域 cookie（mjx.menu=assistiveMML%3Atrue）重新启用被禁插件使原 payload 再次生效；作者自述这是与 2018-06 件直接相关的另一绕过路径。该阶段确立了同一对象修复后差异化再发现的习惯。\",\n      \"evidence_ids\": [\n        \"mb-works-05\",\n        \"mb-works-06\",\n        \"mb-works-07\",\n        \"mb-tgt-02\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020\",\n      \"stage\": \"DOMPurify mutation XSS 研究序列与上游修复致谢\",\n      \"capability_change\": \"围绕 DOMPurify 形成 2.0.0 至 2.0.17 跨版本的 mXSS 研究序列（bentkowski.info/research 列出 2.0.0、2.0.17 与标题 Helping secure DOMPurify）。DOMPurify 2.0.16 release notes（2020-09-18）记载修复了由 MathML 内嵌套 form 触发的 mXSS bypass 并致谢 Michał Bentkowski (@securityMB) of Securitum，2.0.17（2020-09-20）修复另一由 MathML 触发的 mXSS。该上游官方来源证实了报告与上游修复致谢环节，构成由绕过向与上游维护者协作修复延伸的转折；但研究正文（research.securitum.com）全部 302 重定向至泛用 chronicles 页，正文未取得，协作过程细节未证实。这一阶段同时构成 person_json 标注的解析器差异主线的代表作归属线索。\",\n      \"evidence_ids\": [\n        \"mb-works-09\",\n        \"mb-dec-04-dompurify-mxss-research-program\",\n        \"mb-tgt-01\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2020-04（报告）至 2022-11（公开）\",\n      \"stage\": \"浏览器引擎层（Chromium 进程隔离与 DevTools）研究\",\n      \"capability_change\": \"向 Chromium 报告 bug #1069486：通过 console 的 debug() 设置的持久断点在同一 Site 进程的不同 origin 之间跨域携带，结合 Site Isolation 下同 Site 不同 origin 共进程的机制构成 SOP 绕过。取得 Chromium 团队全披露许可后于 2022-11-16 在个人博客以 Google Roulette 公开。研究对象由此前应用层 XSS/清洗器扩展到浏览器引擎的进程隔离与 DevTools 行为交互。2020-04 报告月份来源为 2022-11 一手正文自述，Chromium bug tracker 需登录未取得独立时间戳。2018 年后博客公开发表频率下降，2022-11 以单件 writeup 重回公开（正文取得）。\",\n      \"evidence_ids\": [\n        \"mb-works-08\",\n        \"mb-dec-05-chromium-browser-layer-extension\",\n        \"mb-tgt-03\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"单一厂商多产品的反复选题与外部厂商反馈循环\",\n      \"starting_conditions\": \"2014 年开设个人博客时缺乏可核验的雇主/团队背景；研究对象由个人选定。早期证据显示其围绕 Google 多产品（Code Playground、Gmail、Google+、Doodle、CSE、Colaboratory、Hangouts Chat）反复选取 XSS 与入口类漏洞作为题料。\",\n      \"repeated_practice\": \"对同一厂商的多个产品持续做 XSS 与 HTTP/路径类漏洞的选取、构造与公开写作；以 2014-03 至 2015 的输入校验型 XSS 为起点，逐步把同一厂商的产品作为可复用的题料池。GitHub bio 当前为 Information Security Engineer at @google，与该厂商聚焦方向在职业上共现。\",\n      \"feedback\": \"厂商（Google）的漏洞奖励与修复响应（如 mb-works-04 中 Caja 自报 XSS 在 2017-11 的复访被明确区分为无关系谱、mb-tgt-01 中 DOMPurify 上游在 release notes 中具名致谢）构成外部可核验的正向反馈；这种厂商层面的反馈回环可解释其选题的延续性。\",\n      \"intermediate_capability\": \"形成厂商聚焦的选题习惯与跨产品的类比迁移能力，使后续进入清洗器与解析器研究时能沿用同一类比视角（不同清洗器/解析器内部的同类不一致性）。\",\n      \"observed_outcomes\": [\n        \"2014-2015 年间多件 Google 产品 XSS/HTTP 入力校验类公开产出（mb-works-01、mb-works-02）\",\n        \"研究主题在 2016-2017 年间由应用层 XSS 迁移到清洗器与浏览器安全边界（mb-works-03、mb-works-04）\"\n      ],\n      \"evidence_ids\": [\n        \"mb-works-01\",\n        \"mb-works-02\",\n        \"mb-works-03\",\n        \"mb-works-04\",\n        \"mb-dec-01-google-products-xss-start\",\n        \"mb-timeline-01\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"Google 产品漏洞面广、赏金计划开放且反馈稳定，任何独立 Web 研究者都可能自然形成厂商聚焦，该机制不一定为个人特有。当前雇主（Google）与早期研究方向的共现仅证明共现，不证明因果：GitHub bio 未给出入职时间、团队或与漏洞报告的关联，无证据表明持续报告 Google 漏洞导致受雇；职业转折可能由市场机会、组织资源或个人条件共同解释。该共现关系列入 open_questions 与 non_transferable_conditions。\"\n    },\n    {\n      \"name\": \"同一对象的复访与修正后再发现\",\n      \"starting_conditions\": \"2016-07 对 Google Caja 首次报告 XSS，形成可被复访的研究对象与自报记录。\",\n      \"repeated_practice\": \"对同一对象（Caja、Colaboratory、DOMPurify）以月到年级别的间隔复访，在修复后再发现并公开差异化绕过；复访时显式引用自报的前作以标记新旧件的差异关系。2017-11 对 Caja 的复访通过 ECMAScript 新特性未被清洗器捕获的根因，把 2016-07 自报件之外的三件 bypass 结构化；2018-09 对 Colaboratory 的复访以跨域 cookie 重启用被禁插件的方式形成与 2018-06 件不同的绕过路径（作者自述 directly related to the previous）；DOMPurify 序列则跨 2.0.0 至 2.0.17 多个版本。\",\n      \"feedback\": \"上游修复行为（禁用插件、发布 2.0.16/2.0.17 修复并致谢）本身成为复访时识别修复边界与新绕过路径的依据；mb-tgt-01 的上游 release notes 致谢把单次报告反馈为可核验的修复响应。\",\n      \"intermediate_capability\": \"把同一根因下不同绕过路径识别为可复用的研究结构，形成修正后再发现的稳定模式与对修复盲区的敏感度。\",\n      \"observed_outcomes\": [\n        \"2017-11 Caja 复访公开三件与 2016-07 自报件无关的 bypass（mb-works-04）\",\n        \"2018-09 Colaboratory 以重启用被禁插件形成与 2018-06 件不同的绕过路径（mb-works-07、mb-tgt-02）\",\n        \"DOMPurify mXSS 序列跨 2.0.0/2.0.17 版本并获 2.0.16/2.0.17 上游修复致谢（mb-dec-04、mb-tgt-01）\"\n      ],\n      \"evidence_ids\": [\n        \"mb-works-04\",\n        \"mb-works-07\",\n        \"mb-works-09\",\n        \"mb-dec-04-dompurify-mxss-research-program\",\n        \"mb-tgt-01\",\n        \"mb-tgt-02\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"复访行为也可能由厂商在修复后未公开通知或研究者的记忆/笔记积累等机会性因素促成，而非一套显式的方法论；2018-09 件作者自述 directly related to the previous，并非不同系谱的全新根因，差异化程度受限。DOMPurify 序列的正文 302 失效，复访的协作过程细节未证实，仅由上游 release notes 与目录标题支持。\"\n    },\n    {\n      \"name\": \"清洗器/解析器差异研究与工具化\",\n      \"starting_conditions\": \"2016-07 对 Google Caja 与 Firefox SOP 的研究首次把清洗器实现与浏览器安全边界作为两条并列谱系；2018 年 CRLF/CSP 研究把对象扩展到 HTTP 请求与政策层的解释差异。\",\n      \"repeated_practice\": \"以清洗器与解析器内部的解释/规范化不一致为题：Caja（Function/GeneratorFunction 替换未覆盖 async/import）、Chromium CRLF 注入、CSP 绕过、DOMPurify mXSS（MathML 嵌套 form）、Chromium Site Isolation + DevTools debug()。把研究方法固化为可复用工具：livedom（对应 livedom.bentkowski.info，演示 DOM 解析差异）、excessy（XSS 效果学习）、burp-exceptions（改善 Burp Suite Python 扩展异常可读性）。\",\n      \"feedback\": \"上游 release notes 致谢（mb-tgt-01）与厂商全披露许可（mb-tgt-03）构成可核验的外部反馈；livedom 仓库在 GitHub profile 可见其 Updated Dec 27, 2022，提示其研究方法被沉淀为长期维护的工具基础设施。\",\n      \"intermediate_capability\": \"形成对解析/规范化差异的通用敏感度，使方法可在不同清洗器/浏览器之间迁移；并形成把研究方法固化为公开工具的基础设施建设能力。\",\n      \"observed_outcomes\": [\n        \"DOMPurify mXSS 序列与上游修复致谢（mb-tgt-01）\",\n        \"Chromium Site Isolation + DevTools SOP 绕过并获全披露许可（mb-works-08、mb-tgt-03）\",\n        \"livedom/excessy/burp-exceptions 工具仓库在 GitHub 公开（mb-dec-07、mb-timeline-02、mb-tgt-04）\"\n      ],\n      \"evidence_ids\": [\n        \"mb-works-03\",\n        \"mb-works-04\",\n        \"mb-works-05\",\n        \"mb-works-08\",\n        \"mb-works-09\",\n        \"mb-dec-04-dompurify-mxss-research-program\",\n        \"mb-dec-07-tool-building-livedom-excessy\",\n        \"mb-timeline-02\",\n        \"mb-tgt-01\",\n        \"mb-tgt-03\",\n        \"mb-tgt-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"把 CRLF、CSP、漏洞链化、SOP、livedom 并列为统一解释层框架属于后视归纳的可能（见 alternative_explanation 与 tensions），研究当时是否以同一框架指导并未由证据证实；各项均为分别可核验的产出，但共享框架是事后归纳。livedom 仓库创建日期与 commit 时间线未取得，其与相应 writeup 的先后反馈关系未证实，工具建设闭环未闭合；工具化也可能由个人开发偏好而非方法论驱动。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 将 https://research.securitum.com/author/michal-bentkowski/ 列为 writeup_evidence，但抓取时 302 重定向至 securitum.com/pentest-chronicles.html，后者作者名单不含 Bentkowski（出现的是 Michał Żaczek、Michał Wnękowicz 等同名他人），种子证据 URL 与其预期内容不一致；bentkowski.info/research 的研究链接仍指向 research.securitum.com，存在来源托管结构变化与同名歧义并存的张力。\",\n    \"外部归因互相冲突：一则搜索摘要把 Bentkowski 归入 Google Project Zero，另一则称其为 Securitum principal security engineer 且非 GPZ 成员；两项均来自搜索机器人摘要而非可抓取一手正文，互斥且均不构成 documented，本综合不采纳任一。\",\n    \"Black Hat EU 议题归属存在缺口：Black Hat 官方 briefings 页 403 不可达，且另有一则搜索摘要把 Black Hat EU 2019 的 mXSS 议题误归为 Mathias Karlsson (Bentkowski)，系瑞典研究员 Mathias Karlsson 与 Michał Bentkowski 的同名合并；会议事实与届次未能一手核验，仅 person_json 标注 Black Hat EU，且 bentkowski.info/research 的 Videos 仅提及 CONFidence 2018。\",\n    \"研究目录由 research.securitum.com 托管的事实，与当前 GitHub bio 为 Information Security Engineer at @google 并存；由 Securitum（乙方测试/研究）到 Google（甲方产品安全）的职业转折可推断，但转入时间、团队、与任职是否重叠均无一手来源，属 inferred 而非 documented。\",\n    \"解释层框架的后视归纳张力：CRLF、CSP、漏洞链化、SOP、livedom 的并置可能是事后归纳；其研究当时是否以同一框架指导未证实，机制项已前置该说明。\"\n  ],\n  \"transferable_practices\": [\n    \"以单一厂商多产品作为可复用题料池，对同一对象（清洗器/解析器/产品）以月到年级别复访，并在复访时显式引用前作以标记新旧件的差异关系——该方法不依赖个人特有条件，可迁移。\",\n    \"以修复响应（禁用插件、发布新版本、release notes 致谢）作为识别修复边界与新绕过路径的反馈源，形成修正后再发现的稳定模式。\",\n    \"把研究方法固化为可复用的公开工具（如 livedom 用于 DOM 解析差异演示），使方法可在不同对象间迁移并可供他人复核。\",\n    \"对修复后再发现的件，明确区分根因相同与绕过路径不同（如 2018-09 Colaboratory 相对 2018-06 为不同绕过路径而非不同系谱），避免把绕过路径差异表述为根因差异。\",\n    \"先与厂商协调、获全披露许可再公开（如 Google Roulette 相对 Chromium 团队），把披露流程规范化。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Google 产品漏洞面广、赏金计划开放且反馈稳定，任何独立 Web 研究者都可能形成厂商聚焦，该条件不构成个人特有能力。\",\n    \"当前雇主为 Google（GitHub bio，无入职时间、团队或与漏洞报告的关联证据）：该职业状态与早期研究方向仅共现，不构成因果，不可作为厂商聚焦机制导致受雇的证据。\",\n    \"bentkowski.info 博客持续存活使其成为可核验时间线的主体来源；securitymb.blogspot.com 旧博客 404、securitymb.com 301、research.securitum.com 302、x.com/SecurityMB HTTP 402、Black Hat 官方页 403，使得早期产出分布与协作细节受来源可得性限制，存活来源构成个人特有条件而非可迁移条件。\",\n    \"DOMPurify 上游 release notes 具名致谢由上游维护者（Cure53）出具，研究者个人不可复现该外部认可条件。\"\n  ],\n  \"open_questions\": [\n    \"research.securitum.com 下托管的研究正文（DOMPurify 2.0.0 / 2.0.17 bypass、Helping secure DOMPurify、Sanitizer API、Ruby Sanitize、Kibana CVE-2019-7609、AMP4Email DOM Clobbering、prototype pollution 等）当前对该域名抓取均 302 跳转至 securitum.com/pentest-chronicles.html，目标页未保留对应条目；这些研究的方法学细节（如何发现、使用了哪些工具、与上游协作过程）无法核对，仅由 bentkowski.info/research 目录列表证实标题存在。\",\n    \"DOMPurify 协作修复的过程细节未证实：DOMPurify 2.0.16/2.0.17 release notes（mb-tgt-01）证实报告与上游修复致谢，但 Helping secure DOMPurify 正文 302 失效，是否与维护者直接协作、修复过程如何均未取得；mb-works-09（DOMPurify mXSS）正文未取得，status 仍为 reported。\",\n    \"Chromium bug #1069486 的独立时间戳未取得：issues.chromium.org 与 bugs.chromium.org 页面需登录、正文不可见；2020-04 报告月份仅由 2022-11 一手正文自述支持（mb-tgt-03），无 bug tracker 独立佐证。\",\n    \"livedom 工具建设的闭环未闭合：仓库 Updated Dec 27, 2022 取得（mb-tgt-04），但创建日期与 commit 时间线未取得，与 writeup（尤其 2022-11 Google Roulette）的先后反馈关系未证实；需逐个抓取仓库 commits 或 git log 才能补全。\",\n    \"Black Hat EU 的具体届次、年份、演讲标题与日期未由一手会议页面核验（官方页 403）；CONFidence 2018 仅由 bentkowski.info/research Videos 部分提及，未抓取 speaker/视频页面。\",\n    \"职业转折的转入时间、所在团队、与 Securitum 任职是否重叠均无一手来源；当前 GitHub bio 仅给出当前岗位，无任职起始时间，受雇与报告之间的因果未证实（与 RR1 overclaim 对齐）。\",\n    \"GitHub 公开仓库（burp-exceptions、excessy、livedom 等）的创建/更新日期在 profile 页未完整展示，工具发布时间线与 writeup 的先后关系无法仅凭 profile 页建立。\",\n    \"从应用层 XSS 转向清洗器/解析器层、再转向浏览器引擎层的两段方法学转型，其触发条件（导师、团队反馈、具体项目）缺乏可核验证据，当前只能由发表主题的时间序列推断。\",\n    \"幸存者偏差与来源可得性偏差：早期时间线依赖已存活的 bentkowski.info，securitymb.blogspot.com 旧博客 404 不可得（mb-timeline-04），早期产出分布与时间线起点可能受存活偏差影响；核心一手来源（research.securitum.com 302、securitymb.com 301、x.com/SecurityMB HTTP 402、Black Hat 官方页 403）多失效或付费墙，综合结论高度依赖 bentkowski.info 与 GitHub profile 两类存活来源。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "2ef78ad2a72e1b6afa2e0aa7495116cad4d520ea804a807c9e45b303abe774e9",
+        "accessed_at": "2026-09-27T05:57:11.024695+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790488631024713000-micha-bentkowski-synthesis-v2.json",
+    "label": "Michał Bentkowski:synthesis:v2",
+    "elapsed_seconds": 312.3,
+    "prompt_sha256": "2fed97c75729b766eadd7f0b082127d523c2c975c8f36b964ecff73fd2c451ee",
+    "num_turns": 8,
+    "total_cost_usd": 0.789978,
+    "usage": {
+      "input_tokens": 52144,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 122816,
+      "output_tokens": 18714,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 52144,
+        "outputTokens": 18714,
+        "cacheReadInputTokens": 122816,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.789978,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

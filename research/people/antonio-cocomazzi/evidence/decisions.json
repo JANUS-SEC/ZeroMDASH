@@ -1,0 +1,605 @@
+{
+  "person": "Antonio Cocomazzi",
+  "dimension": "关键决策与转折",
+  "identity_check": "身份经一手来源交叉确认：GitHub 用户 antonioCoco 的个人简介为 '@splinter_code | offensive security - windows internals - reverse engineering'，所在地 Italy，并链接博客 https://splintercod3.blogspot.com/；博客署名为 'splinter_code'，与人物记录中的 handle (@splinter_code)、writeup_evidence (splintercod3.blogspot.com)、primary_focus (Windows 与 EDR 漏洞) 一致。据此判定 Antonio Cocomazzi = @splinter_code = antonioCoco 为同一人。WebSearch 返回的片段曾将该研究员误作 'Gabriel Cocomazzi'，并将某次演讲误记为 'Black Hat USA 2021' 且带有共同演讲人 'Roberto Sestino'；这些与一手来源（博客 Talks 页列出 'Black Hat Asia 2021' 且无共同演讲人；GitHub/博客一致署名 Antonio/splinter_code）冲突，属搜索工具噪声，不予采纳。",
+  "items": [
+    {
+      "id": "ac-decisions-01",
+      "date": "2019-12-06",
+      "claim": "在微软于 Windows 10 1809 / Server 2019 限制 OXID 解析器仅允许端口 135、从而封堵 JuicyPotato 之后，作者将研究方向转向寻找该限制的绕过路径，产出 RogueWinRM：利用 BITS 服务向 5985 端口的 WinRM 进行 NTLM 认证，通过自建伪 WinRM 服务器完成握手获取 SYSTEM 令牌。该帖自述为 JuicyPotato 限制绕过研究的“非预期”结果。",
+      "status": "documented",
+      "growth_signal": "面对厂商补丁封堵既有利用路径的约束，作者选择不放弃该研究方向而是寻找绕过，构成其后“Potato”研究线持续数年的起点；从被动跟进补丁转向主动逆向系统服务（BITS/WinRM）以重建利用原语。",
+      "short_quote": "This is the 'unintended' result of a research we did on Juicypotato exploit in order to find a possible bypass on restrictions MS applied in latest Windows versions.",
+      "source": {
+        "title": "We thought they were potatoes but they were beans (from Service Account to SYSTEM again)",
+        "url": "https://splintercod3.blogspot.com/p/we-thought-they-were-potatoes-but-they.html",
+        "published": "2019-12-06",
+        "source_type": "personal blog writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_wtshwtvp1l50h6h2rvt6k5by",
+        "accessed_at": "2026-09-27T10:43:01.205114+00:00",
+        "content_sha256": "a5bd3a9e2cbbb0e48cafae7951790c9384bec494f5f62968c8e66cb9bf60a28c"
+      }
+    },
+    {
+      "id": "ac-decisions-02",
+      "date": "2020-05-11",
+      "claim": "作者在 RogueWinRM 仅获得识别令牌的限制后，转而实现自建“Oxid Resolver”并以命名管道端点替代 TCP/IP 序列，结合 PrintSpoofer 的命名管道路径校验缺陷，获取 NETWORK SERVICE 令牌再经令牌劫持升至 SYSTEM，命名为 RoguePotato。微软将该问题判定为“expected behavior”而非漏洞。",
+      "status": "documented",
+      "growth_signal": "在上一条路径产出“无用”令牌后未终止，而是更换传输原语（TCP/IP→命名管道）并复用他人（itm4n/PrintSpoofer）已公开的缺陷，体现对失败结果的迭代式再利用与跨技术点拼装的方法习惯；厂商“expected behavior”判定促使其后续转向寻求正式披露路径。",
+      "short_quote": "If we resolve the fake OXID request by providing an RPC binding with our named pipe instead of the TCP/IP sequence, we should in theory be able to impersonate the NETWORK SERVICE Account and after that… SYSTEM is just a step beyond",
+      "source": {
+        "title": "No more JuicyPotato? Old story, welcome RoguePotato!",
+        "url": "https://splintercod3.blogspot.com/p/no-more-juicypotato-old-story-welcome.html",
+        "published": "2020-05-11",
+        "source_type": "personal blog writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_55ec8eg06v7p2usszfxbvh33",
+        "accessed_at": "2026-09-27T10:43:01.205109+00:00",
+        "content_sha256": "3ea5c1a2404fbf5004f9addd7267ae45950b1b256f5694639d8df6f3c34ef411"
+      }
+    },
+    {
+      "id": "ac-decisions-03",
+      "date": "2021-04-26",
+      "claim": "作者与 decoder_it 将 Potato 类技术从“本地令牌窃取/冒用”转向“跨协议远程中继”，产出 RemotePotato0：使标准用户在无受害者交互下触发特权认证并中继到远程 LDAP/SMB/HTTP。该问题于 2020-11-30 提报 MSRC（案件 62293，定为 Important/Elevation of Privilege），微软最终判定为“Won't Fix”，理由为“服务器须自行防御 NTLM 中继”。",
+      "status": "documented",
+      "growth_signal": "研究范围由本地提权扩展到跨机中继，技术目标由“取 SYSTEM”变为“触发并转移特权认证”，并首次进入与 MSRC 的正式披露流程；厂商 Won't Fix 的反馈限定了后续可选路径，提示其需在“expected behavior/Won't Fix”与“可获 CVE 的正式漏洞”之间区分选题。",
+      "short_quote": "The basic idea was that a standard user could trigger the privileged authentication without the victim's interaction and relay it to a privileged service on another machine.",
+      "source": {
+        "title": "Relaying Potatoes: Another Unexpected Privilege Escalation Vulnerability in Windows RPC Protocol",
+        "url": "https://splintercod3.blogspot.com/p/relaying-potatoes-another-unexpected.html",
+        "published": "2021-04-26",
+        "source_type": "personal blog writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_i00b09vvhz5cp0suka254a0a",
+        "accessed_at": "2026-09-27T10:43:01.205154+00:00",
+        "content_sha256": "07ec3b706940bbb6eb8234c8ea661c15ce18b788c4d2ee79f894da873b093aa3"
+      }
+    },
+    {
+      "id": "ac-decisions-04",
+      "date": "2021",
+      "claim": "作者在 2020 年以意大利语于 RomHack 讲述本地服务账户提权后，2021 年登上 Black Hat Asia 与 HITB AMS，议题均为 “The Rise of Potatoes: Privilege Escalation(s) in Windows Services”。这是其研究进入一线会议议程的最早可证记录。",
+      "status": "documented",
+      "growth_signal": "演讲场所层级在一年内由地区性会议（RomHack）升至 Black Hat Asia/HITB，反映其 Potato 研究线获得外部议程认可；会议演讲页仅能证明演讲事实，成长机制（选题成熟度、社区可见度上升）属基于时间线的推断。",
+      "source": {
+        "title": "Talks (splintercod3 blog) — RomHack 2020 / Black Hat Asia 2021 / HITB 2021 AMS",
+        "url": "https://splintercod3.blogspot.com/p/talks.html",
+        "published": "2021",
+        "source_type": "personal blog (talks list)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_5cuyjeb0x8vkajysizdtvjk7",
+        "accessed_at": "2026-09-27T10:43:01.205055+00:00",
+        "content_sha256": "17ed57dabcfe9e33a84d7b3e9a13d82dea46ca80a1af4fbd3e1f92fcef89fc8a"
+      }
+    },
+    {
+      "id": "ac-decisions-05",
+      "date": "2021-12-07",
+      "claim": "作者在逆向 Seclogon 服务时发现 SlrCreateProcessWithLogon 信任客户端传入的调用方 PID，可通过修改 TEB 中的 ClientId 伪造 PPID，从而借合法系统服务打开目标进程句柄，实现不直接调用 OpenProcess、不直接读取 LSASS 内存的隐蔽 LSASS 转储。作者明确将该披露定位为帮助 EDR/AV 厂商建立检测。",
+      "status": "documented",
+      "growth_signal": "研究方向由“提权原语”扩展到“EDR/检测规避”，并首次给出方法论动机陈述（攻击方法公开才能催生检测方法）；选题由攻击者收益转向防御可见性，标志方法取向的转型。",
+      "short_quote": "New detection methods could be created only if attacking methods are known, that's another fact.",
+      "source": {
+        "title": "The hidden side of Seclogon part 2: Abusing leaked handles to dump LSASS memory",
+        "url": "https://splintercod3.blogspot.com/p/the-hidden-side-of-seclogon-part-2.html",
+        "published": "2021-12-07",
+        "source_type": "personal blog writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_l9terkfzxhpem59m9m7vwlq5",
+        "accessed_at": "2026-09-27T10:43:01.205140+00:00",
+        "content_sha256": "5272e7ecbe02875390f68f71ec8434e99203cfc4a620a499ba8a371741ee35e0"
+      }
+    },
+    {
+      "id": "ac-decisions-06",
+      "date": "2022-09-21",
+      "claim": "作者与 decoder_it 基于 James Forshaw (@tiraniddo) 关于本地 Kerberos DCOM 认证中继的研究，将 OXID 解析改为本机 COM 服务器、以 LogonUser NewCredentials 注入 INTERACTIVE SID、并以 SSPI hook 取代 RpcImpersonateClient，产出 JuicyPotatoNG，使其在仅持有 SeAssignPrimaryTokenPrivilege 时亦可提权。作者将其表述为“永不放弃、永远把极限再推一步”。",
+      "status": "documented",
+      "growth_signal": "体现两条成长机制：其一，持续跟踪并吸收特定同行（Forshaw）的新成果以重启被补丁封闭的旧选题；其二，与固定合作者（decoder_it）的重复协作。该选题再次被微软判定为非安全边界违反，强化了“expected behavior”类选题不可获 CVE 的约束认知。",
+      "short_quote": "the demonstration that you should never give up and always push the limits one step further.",
+      "source": {
+        "title": "Giving JuicyPotato a second chance: JuicyPotatoNG",
+        "url": "https://splintercod3.blogspot.com/p/giving-juicypotato-second.html",
+        "published": "2022-09-21",
+        "source_type": "personal blog writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_trvj56dcbszstp6xc6bep72l",
+        "accessed_at": "2026-09-27T10:43:01.205132+00:00",
+        "content_sha256": "e72744d280c26201a7b7f69ba053fc6091eb3c0839ff238598f3bf046fc9db02"
+      }
+    },
+    {
+      "id": "ac-decisions-07",
+      "date": "2023-02-10",
+      "claim": "作者受 Elad Shamir 提示研究 NTLM Challenge 的 Reserved 字段，与同伴发现 LocalPotato：通过在特权与非特权客户端间交换 NTLM 安全上下文句柄实现本地认证反射与任意文件读写，并以注入任意 SPN 绕过 SMB 反射缓解（CVE-2016-3225）。该问题于 2022-09-09 报告 MSRC，获 CVE-2023-21746，并在 2023 年 1 月补丁星期二修复；0patch 为不受支持版本提供补丁。作者认为该修复可能仅为权宜之计。",
+      "status": "documented",
+      "growth_signal": "与前述 expected behavior/Won't Fix 选题不同，本次完成正式 MSRC 协同披露并取得 CVE 与补丁，标志披露策略与选题取向的转折：由“厂商不修的边界研究”转向“可获 CVE 的协议级漏洞”；同行提示（Elad Shamir）成为选题入口，延续以特定同行网络驱动的选题模式。",
+      "short_quote": "The journey to discovering the LocalPotato began with a hint from our friend Elad Shamir, who suggested examining the 'Reserved' field in NTLM Challenge messages.",
+      "source": {
+        "title": "LocalPotato - When Swapping The Context Leads You To SYSTEM",
+        "url": "https://splintercod3.blogspot.com/p/localpotato-when-swapping-context-leads.html",
+        "published": "2023-02-10",
+        "source_type": "personal blog writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_uyymj143j7hhz2tcpbl4wyik",
+        "accessed_at": "2026-09-27T10:43:01.205122+00:00",
+        "content_sha256": "c98759eb3868ffdbb99caf8fe6cc5ab12387b4f47f576c5ecd870ff1b9e119e7"
+      }
+    },
+    {
+      "id": "ac-decisions-08",
+      "date": "2023-09-14",
+      "claim": "作者在浏览旧仓库时重新发现一个两年前尝试以特定 SSPI 配置绕过 UAC 但失败的项目，改用新的利用路径（Datagram 风格 NTLM + LSASS 登录会话令牌混淆 + 经 SMB 的 SCM RPC），产出新 UAC 绕过并公开 PoC。帖中未提及向 MSRC 报告或 CVE。",
+      "status": "documented",
+      "growth_signal": "体现对失败/搁置选题的存档与日后重访习惯：旧失败项目被保留并在获得新思路时重启，构成可复用的研究资产；该次以 PoC 公开发布而非协同披露，与 LocalPotato 的披露路径形成对照。",
+      "short_quote": "i stumbled upon another UAC related project (a 2 years old project) ... but i failed miserably that time",
+      "source": {
+        "title": "Bypassing UAC with SSPI Datagram Contexts",
+        "url": "https://splintercod3.blogspot.com/p/bypassing-uac-with-sspi-datagram.html",
+        "published": "2023-09-14",
+        "source_type": "personal blog writeup",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_vpfw27w4anbsglks0rsip1yf",
+        "accessed_at": "2026-09-27T10:43:01.205159+00:00",
+        "content_sha256": "262f598342793bd6062be30aa799b0b35702d5028261d256ce3ee1d61a57dd45"
+      }
+    },
+    {
+      "id": "ac-decisions-09",
+      "date": "2023",
+      "claim": "作者于 POC2023（首尔）发表 “10 Years of Windows Privilege Escalation with Potatoes”，对其 Potato 研究线作十年回顾。这是其就该研究线进行阶段性总结的最早可证记录。",
+      "status": "documented",
+      "growth_signal": "以回顾性议题对长期研究线作收束，标志该选题由“持续产出新原语”进入“方法学总结”阶段；会议演讲页仅证明演讲事实，将其解读为研究线成熟度的标志属推断。",
+      "source": {
+        "title": "Talks (splintercod3 blog) — POC2023 Seoul: 10 Years of Windows Privilege Escalation with Potatoes",
+        "url": "https://splintercod3.blogspot.com/p/talks.html",
+        "published": "2023",
+        "source_type": "personal blog (talks list)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_5cuyjeb0x8vkajysizdtvjk7",
+        "accessed_at": "2026-09-27T10:43:01.205055+00:00",
+        "content_sha256": "17ed57dabcfe9e33a84d7b3e9a13d82dea46ca80a1af4fbd3e1f92fcef89fc8a"
+      }
+    },
+    {
+      "id": "ac-decisions-10",
+      "date": "2016",
+      "claim": "博客最早可见的帖子集中于勒索软件/恶意代码逆向（2016-06 Locky、2016-07 Zepto、2017-06 Ransomware at X-Rays），主题与 2019 年起的 Windows 本地提权研究明显不同。将其解读为“由勒索软件逆向转向 Windows 提权/规避”的领域转折，系基于帖子时间线与主题的推断。",
+      "status": "inferred",
+      "growth_signal": "若该解读成立，则作者存在一次领域转型：从恶意样本逆向转向 Windows 内核/系统机制与 EDR 规避；转型的诱因、时间点与决策依据在所读一手来源中无直接陈述，故仅作推断并标注缺口。",
+      "source": {
+        "title": "Posts archive (splintercod3 blog) — earliest entries: Locky / Zepto / Ransomware at X-Rays",
+        "url": "https://splintercod3.blogspot.com/p/blog-page_7.html",
+        "published": "2016",
+        "source_type": "personal blog (posts archive)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_e5rsagwmdna473bcoslecavs",
+        "accessed_at": "2026-09-27T10:43:01.205062+00:00",
+        "content_sha256": "f59c6051be4f74bcb962bef2b7a5b9b05c005ac1e8f351f008cd3e6b419017f7"
+      }
+    }
+  ],
+  "contradictions": [
+    "WebSearch 返回的片段将该研究员的名字误作 'Gabriel Cocomazzi'，并将其 Black Hat 演讲记为 'Black Hat USA 2021'、共同演讲人 'Roberto Sestino'。一手来源（博客 Talks 页列出 'Black Hat Asia 2021' 且各演讲均无共同演讲人；GitHub 与博客一致署名 Antonio Cocomazzi / @splinter_code）与上述片段冲突。该搜索工具在本环境输出不可靠（含自述无搜索能力、虚构 Slack 通知等内容），故相关派生信息不予采纳，仅记录为待核冲突。"
+  ],
+  "gaps": [
+    "未在所读一手来源中找到可证的雇主或团队归属：GitHub 资料未列公司，博客 whoami 页面（/p/blog-page.html）返回 404 不可读。作者是否/何时加入特定雇主或研究团队无法确认。",
+    "安全活动的确切起点早于最早博客帖子（2016）；此前的学习经历、教育背景与入行路径无证据。",
+    "2016–2017 年勒索软件帖子与 2020 年 'Welcome to my blog' 帖共存于同一博客，是否存在博客迁移/导入未明；据此推断的“领域转型”缺乏作者直接陈述。",
+    "Black Hat 议程页 (blackhat.com) 返回 HTTP 403 不可抓取；演讲摘要仅依赖作者自列 Talks 页，可证演讲事实但无法核验摘要正文、听众规模或共同演讲人。",
+    "各会议演讲的共同演讲人未获确认：博客 Talks 页均未列共同演讲人，Black Hat speaker 页未能抓取；与 decoder_it 的合作仅见于博客 writeup 署名，不见于演讲清单。",
+    "ConPtyShell、SharPyShell、RunasCs 等较早工具的发布时间与动机未在本次抓取的 writeup 中得到直接说明（仅见于 GitHub pinned 仓库列表），其作为“决策/转折”的证据不足。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790505781171960000-antonio-cocomazzi-decisions.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "e6f38f50-a1e6-4d44-8ac3-e772cba7534f",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_c7xwhkiu4jniwczxlgphq6qm",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T10:43:01.204926+00:00"
+      },
+      {
+        "tool_use_id": "call_3uok41i5l781zpmsd5kysgxh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-27T10:43:01.204955+00:00"
+      },
+      {
+        "tool_use_id": "call_763jmeoahosjjadyf4l4sap1",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "dba3c0742dad02543576a993f5532aafec1b3a90d10f3e0e5126bab65a375572",
+        "accessed_at": "2026-09-27T10:43:01.204965+00:00"
+      },
+      {
+        "tool_use_id": "call_ojgoyjscea1hwzsc01fa3fxv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "5225c228aee614a7ea03955de28d62f49ef5cf9c2f5ed5216e6e7545f4347755",
+        "accessed_at": "2026-09-27T10:43:01.204972+00:00"
+      },
+      {
+        "tool_use_id": "call_nusmbb5bsoelpioovx3pgtcj",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "e22779ebfe7d5b49ded04b7dd8eea061c886b28b0ef96ff5ac6a83dd37d9ffcb",
+        "accessed_at": "2026-09-27T10:43:01.204976+00:00"
+      },
+      {
+        "tool_use_id": "call_sef8obo6j46d4ket5hfi6rjd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "a6ede7b3f3853b6c792b73d1dfa23cf053f07280a0fc2bcf2453d7c28705a45e",
+        "accessed_at": "2026-09-27T10:43:01.204980+00:00"
+      },
+      {
+        "tool_use_id": "call_486w3v2hujmdcemt3m7ujee6",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-27T10:43:01.204984+00:00"
+      },
+      {
+        "tool_use_id": "call_i7yub34sqgyil64gqk1mbd1f",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/checkpoint.md",
+          "content": "# Checkpoint — Antonio Cocomazzi / 关键决策与转折\n\n## 进度\n- 读取契约与输入完成：person=Antonio Cocomazzi (rank 42)，dimension=关键决策与转折，primary_focus=Windows 与 EDR 漏洞。\n- 本地种子为空，需从公开来源发现。\n\n## 待确认线索（尚未抓取）\n- splintercod3.blogspot.com 的 writeup 列表（一手 blog）。\n- X/Twitter @splinter_code 简介与活动（身份确认用）。\n- Black Hat US/EU speaker 页（议题与年份）。\n- 关键议题候选：EDR bypass、PPL bypass、Credential Guard、Windows kernel LPE、BYOVD、CVE writeup。\n- 雇主/团队信息：是否与 Zeronorth / 团队相关待查。\n\n## 证据草稿（待抓取后定级）\n- 尚无抓取到的来源。\n"
+        },
+        "success": true,
+        "content_sha256": "51cfe3cd9eb07ada50fcbb5f0e6c5d95892e75ddc6b226fba037d32af70635c1",
+        "accessed_at": "2026-09-27T10:43:01.204990+00:00"
+      },
+      {
+        "tool_use_id": "call_5mzbmnp0orw31rim7j85eyjw",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Antonio Cocomazzi splinter_code security researcher Windows EDR bypass"
+        },
+        "success": true,
+        "content_sha256": "9561b825d09379c96df7f2c6c3286254096d1b4ca29023031e7e08b04fed1422",
+        "accessed_at": "2026-09-27T10:43:01.205007+00:00"
+      },
+      {
+        "tool_use_id": "call_823s7978qjiv85cd5mc3c5hj",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://splintercod3.blogspot.com/",
+          "prompt": "List all blog post titles, dates, and brief descriptions found on this page. Include any author bio, self-description, employer, and topics covered. Return verbatim titles and ISO dates if present."
+        },
+        "success": true,
+        "content_sha256": "555e14a708c728c98fe7cf855999704eed34b651f1083b63fc87e85e871120b7",
+        "accessed_at": "2026-09-27T10:43:01.205000+00:00"
+      },
+      {
+        "tool_use_id": "call_4m9854tnoe1l90d5wt6p3nbp",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List every blog post entry in this Atom feed: for each, provide the exact title, the published date (ISO), and a one-sentence summary. Also report the author name and any author URI/handle. Return a complete chronological list.",
+          "url": "https://splintercod3.blogspot.com/feeds/posts/default"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T10:43:01.205034+00:00"
+      },
+      {
+        "tool_use_id": "call_ecdpc4kbaqkzsjzhh2qe0495",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the full text of this \"whoami\" / about page. Include any biographical details: real name, employer/company, team, role, history, locations, and any stated motivations or career transitions. Quote verbatim where relevant.",
+          "url": "https://splintercod3.blogspot.com/p/whoami.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T10:43:01.205038+00:00"
+      },
+      {
+        "tool_use_id": "call_5y6gnrt4rtfuuqxcckndbvi6",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all visible links to blog posts or an archive/posts page on this blog homepage. Report the exact URLs and link text. Also report any navigation menu items (Posts, Talks, Tools, whoami) with their href values.",
+          "url": "https://splintercod3.blogspot.com/"
+        },
+        "success": true,
+        "content_sha256": "0012e6fbdbc9412164e86a5f86989bfed00b947c6bdc58c0f4aca941770c730e",
+        "accessed_at": "2026-09-27T10:43:01.205045+00:00"
+      },
+      {
+        "tool_use_id": "call_91exa5c7a9phgjvt22rbughk",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"splintercod3\" OR \"splinter_code\" Cocomazzi Black Hat presentation EDR Windows"
+        },
+        "success": true,
+        "content_sha256": "49710c5625852c25068e38a145894694754cae7280e2e8d174d67473fe738957",
+        "accessed_at": "2026-09-27T10:43:01.205049+00:00"
+      },
+      {
+        "tool_use_id": "call_e5rsagwmdna473bcoslecavs",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List every blog post listed on this archive/posts page. For each: exact title, the post URL, and the publication date. Return a complete chronological list verbatim.",
+          "url": "https://splintercod3.blogspot.com/p/blog-page_7.html"
+        },
+        "success": true,
+        "content_sha256": "f59c6051be4f74bcb962bef2b7a5b9b05c005ac1e8f351f008cd3e6b419017f7",
+        "accessed_at": "2026-09-27T10:43:01.205062+00:00"
+      },
+      {
+        "tool_use_id": "call_5cuyjeb0x8vkajysizdtvjk7",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List every conference talk listed on this Talks page. For each: the talk title, the conference name, the year, any co-speakers, and a one-sentence description or abstract summary. Return verbatim titles.",
+          "url": "https://splintercod3.blogspot.com/p/talks.html"
+        },
+        "success": true,
+        "content_sha256": "17ed57dabcfe9e33a84d7b3e9a13d82dea46ca80a1af4fbd3e1f92fcef89fc8a",
+        "accessed_at": "2026-09-27T10:43:01.205055+00:00"
+      },
+      {
+        "tool_use_id": "call_r3egxmg56gm9dvwg4wp5vll6",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the full text of this blog post. Focus on: the author's stated motivation for starting the blog, who they credit or thank, what topics they plan to cover, and any mention of their background or career. Quote key sentences verbatim.",
+          "url": "https://splintercod3.blogspot.com/2020/07/welcome-to-my-blog.html"
+        },
+        "success": true,
+        "content_sha256": "667a10e53dbb2491b556af5215900467f207fe147e3dc1d378b9b843560c6a5b",
+        "accessed_at": "2026-09-27T10:43:01.205103+00:00"
+      },
+      {
+        "tool_use_id": "call_55ec8eg06v7p2usszfxbvh33",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the key technical content of this blog post. Focus on: what problem motivated this research, what prior work (e.g. JuicyPotato) it builds on or replaces, what was patched/closed that forced a new approach, and what the new technique achieves. Quote the author's framing of the motivation verbatim where relevant.",
+          "url": "https://splintercod3.blogspot.com/p/no-more-juicypotato-old-story-welcome.html"
+        },
+        "success": true,
+        "content_sha256": "3ea5c1a2404fbf5004f9addd7267ae45950b1b256f5694639d8df6f3c34ef411",
+        "accessed_at": "2026-09-27T10:43:01.205109+00:00"
+      },
+      {
+        "tool_use_id": "call_wtshwtvp1l50h6h2rvt6k5by",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the key technical content of this blog post. Focus on: what motivated this research, what prior technique it builds on (e.g. RottenPotato/JuicyPotato), what limitation it overcomes, and the author's stated goal. Quote the author's framing of the motivation verbatim where relevant.",
+          "url": "https://splintercod3.blogspot.com/p/we-thought-they-were-potatoes-but-they.html"
+        },
+        "success": true,
+        "content_sha256": "a5bd3a9e2cbbb0e48cafae7951790c9384bec494f5f62968c8e66cb9bf60a28c",
+        "accessed_at": "2026-09-27T10:43:01.205114+00:00"
+      },
+      {
+        "tool_use_id": "call_l9terkfzxhpem59m9m7vwlq5",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the key technical content of this blog post. Focus on: what motivated the Seclogon research, what previous approach (e.g. dump tools) it improves on or evades, what EDR/AV detection it bypasses, and the author's framing of why this matters. Quote the author's motivation verbatim where relevant.",
+          "url": "https://splintercod3.blogspot.com/p/the-hidden-side-of-seclogon-part-2.html"
+        },
+        "success": true,
+        "content_sha256": "5272e7ecbe02875390f68f71ec8434e99203cfc4a620a499ba8a371741ee35e0",
+        "accessed_at": "2026-09-27T10:43:01.205140+00:00"
+      },
+      {
+        "tool_use_id": "call_uyymj143j7hhz2tcpbl4wyik",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the key technical content of this blog post \"LocalPotato\". Focus on: what motivated the research, what prior technique (e.g. RottenPotato/JuicyPotato/RoguePotato) it extends, what Microsoft considered the status (patched/expected behavior/vulnerability), whether it was coordinated disclosure, and the CVE if any. Quote the author's framing verbatim where relevant.",
+          "url": "https://splintercod3.blogspot.com/p/localpotato-when-swapping-context-leads.html"
+        },
+        "success": true,
+        "content_sha256": "c98759eb3868ffdbb99caf8fe6cc5ab12387b4f47f576c5ecd870ff1b9e119e7",
+        "accessed_at": "2026-09-27T10:43:01.205122+00:00"
+      },
+      {
+        "tool_use_id": "call_trvj56dcbszstp6xc6bep72l",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the key technical content of this blog post. Focus on: what motivated the JuicyPotatoNG research, what limitations of prior JuicyPotato it addresses (e.g. Windows Server 2019+ / OXID resolver restrictions), the author's stated goal, and any acknowledgment of collaborators or prior work. Quote the author's framing verbatim where relevant.",
+          "url": "https://splintercod3.blogspot.com/p/giving-juicypotato-second.html"
+        },
+        "success": true,
+        "content_sha256": "e72744d280c26201a7b7f69ba053fc6091eb3c0839ff238598f3bf046fc9db02",
+        "accessed_at": "2026-09-27T10:43:01.205132+00:00"
+      },
+      {
+        "tool_use_id": "call_vpfw27w4anbsglks0rsip1yf",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the key technical content of this blog post \"Bypassing UAC with SSPI Datagram Contexts\". Focus on: what motivated the research, what prior UAC bypass work it builds on, the disclosure status (was it reported to MSRC, patched or by-design), any CVE, and collaborators. Quote the author's motivation verbatim where relevant.",
+          "url": "https://splintercod3.blogspot.com/p/bypassing-uac-with-sspi-datagram.html"
+        },
+        "success": true,
+        "content_sha256": "262f598342793bd6062be30aa799b0b35702d5028261d256ce3ee1d61a57dd45",
+        "accessed_at": "2026-09-27T10:43:01.205159+00:00"
+      },
+      {
+        "tool_use_id": "call_i00b09vvhz5cp0suka254a0a",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the key technical content of this blog post about \"Relaying Potatoes: Another Unexpected Privilege Escalation Vulnerability in Windows RPC Protocol\". Focus on: what motivated the research, what prior technique it extends, whether Microsoft classified it as a vulnerability and patched it, any CVE, and collaborators. Quote the author's motivation verbatim where relevant.",
+          "url": "https://splintercod3.blogspot.com/p/relaying-potatoes-another-unexpected.html"
+        },
+        "success": true,
+        "content_sha256": "07ec3b706940bbb6eb8234c8ea661c15ce18b788c4d2ee79f894da873b093aa3",
+        "accessed_at": "2026-09-27T10:43:01.205154+00:00"
+      },
+      {
+        "tool_use_id": "call_rr4s3p64s4rpfxjaqoqauurj",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is this GitHub page about? Report the repository owner's display name, bio, location, employer/company, pinned repositories and their topics. Quote any bio text verbatim.",
+          "url": "https://github.com/antonioCoco"
+        },
+        "success": true,
+        "content_sha256": "9dbfd8e1c98f600d9e74165cc19669006cb19fa4d13191c8f3b784be0ae13bee",
+        "accessed_at": "2026-09-27T10:43:01.205149+00:00"
+      },
+      {
+        "tool_use_id": "call_qowc5cyu8cmvg2fyk5izov2y",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the full text of the speaker bio and talk abstract for the Black Hat Asia 2021 talk \"The Rise of Potatoes: Privilege Escalations in Windows Services\" by Antonio Cocomazzi. Report the conference, year, speaker name exactly as listed, and the abstract verbatim.",
+          "url": "https://www.blackhat.com/asia-21/briefings/schedule/index.html"
+        },
+        "success": true,
+        "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47",
+        "accessed_at": "2026-09-27T10:43:01.205162+00:00"
+      },
+      {
+        "tool_use_id": "call_04b7tophtiyx8en79682iwaf",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Antonio Cocomazzi\" Black Hat 2021 \"Rise of Potatoes\" abstract"
+        },
+        "success": true,
+        "content_sha256": "c6e7850346ac5d7810909c2b743a39f64e1d763eecf66860dffdf6aa1e66a7db",
+        "accessed_at": "2026-09-27T10:43:01.205167+00:00"
+      },
+      {
+        "tool_use_id": "call_oduokbu00j6ca49s515oowgz",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/output.json",
+          "content": "{\n  \"person\": \"Antonio Cocomazzi\",\n  \"dimension\": \"关键决策与转折\",\n  \"identity_check\": \"身份经一手来源交叉确认：GitHub 用户 antonioCoco 的个人简介为 '@splinter_code | offensive security - windows internals - reverse engineering'，所在地 Italy，并链接博客 https://splintercod3.blogspot.com/；博客署名为 'splinter_code'，与人物记录中的 handle (@splinter_code)、writeup_evidence (splintercod3.blogspot.com)、primary_focus (Windows 与 EDR 漏洞) 一致。据此判定 Antonio Cocomazzi = @splinter_code = antonioCoco 为同一人。WebSearch 返回的片段曾将该研究员误作 'Gabriel Cocomazzi'，并将某次演讲误记为 'Black Hat USA 2021' 且带有共同演讲人 'Roberto Sestino'；这些与一手来源（博客 Talks 页列出 'Black Hat Asia 2021' 且无共同演讲人；GitHub/博客一致署名 Antonio/splinter_code）冲突，属搜索工具噪声，不予采纳。\",\n  \"items\": [\n    {\n      \"id\": \"ac-decisions-01\",\n      \"date\": \"2019-12-06\",\n      \"claim\": \"在微软于 Windows 10 1809 / Server 2019 限制 OXID 解析器仅允许端口 135、从而封堵 JuicyPotato 之后，作者将研究方向转向寻找该限制的绕过路径，产出 RogueWinRM：利用 BITS 服务向 5985 端口的 WinRM 进行 NTLM 认证，通过自建伪 WinRM 服务器完成握手获取 SYSTEM 令牌。该帖自述为 JuicyPotato 限制绕过研究的“非预期”结果。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"面对厂商补丁封堵既有利用路径的约束，作者选择不放弃该研究方向而是寻找绕过，构成其后“Potato”研究线持续数年的起点；从被动跟进补丁转向主动逆向系统服务（BITS/WinRM）以重建利用原语。\",\n      \"short_quote\": \"This is the 'unintended' result of a research we did on Juicypotato exploit in order to find a possible bypass on restrictions MS applied in latest Windows versions.\",\n      \"source\": {\n        \"title\": \"We thought they were potatoes but they were beans (from Service Account to SYSTEM again)\",\n        \"url\": \"https://splintercod3.blogspot.com/p/we-thought-they-were-potatoes-but-they.html\",\n        \"published\": \"2019-12-06\",\n        \"source_type\": \"personal blog writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ac-decisions-02\",\n      \"date\": \"2020-05-11\",\n      \"claim\": \"作者在 RogueWinRM 仅获得识别令牌的限制后，转而实现自建“Oxid Resolver”并以命名管道端点替代 TCP/IP 序列，结合 PrintSpoofer 的命名管道路径校验缺陷，获取 NETWORK SERVICE 令牌再经令牌劫持升至 SYSTEM，命名为 RoguePotato。微软将该问题判定为“expected behavior”而非漏洞。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"在上一条路径产出“无用”令牌后未终止，而是更换传输原语（TCP/IP→命名管道）并复用他人（itm4n/PrintSpoofer）已公开的缺陷，体现对失败结果的迭代式再利用与跨技术点拼装的方法习惯；厂商“expected behavior”判定促使其后续转向寻求正式披露路径。\",\n      \"short_quote\": \"If we resolve the fake OXID request by providing an RPC binding with our named pipe instead of the TCP/IP sequence, we should in theory be able to impersonate the NETWORK SERVICE Account and after that… SYSTEM is just a step beyond\",\n      \"source\": {\n        \"title\": \"No more JuicyPotato? Old story, welcome RoguePotato!\",\n        \"url\": \"https://splintercod3.blogspot.com/p/no-more-juicypotato-old-story-welcome.html\",\n        \"published\": \"2020-05-11\",\n        \"source_type\": \"personal blog writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ac-decisions-03\",\n      \"date\": \"2021-04-26\",\n      \"claim\": \"作者与 decoder_it 将 Potato 类技术从“本地令牌窃取/冒用”转向“跨协议远程中继”，产出 RemotePotato0：使标准用户在无受害者交互下触发特权认证并中继到远程 LDAP/SMB/HTTP。该问题于 2020-11-30 提报 MSRC（案件 62293，定为 Important/Elevation of Privilege），微软最终判定为“Won't Fix”，理由为“服务器须自行防御 NTLM 中继”。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"研究范围由本地提权扩展到跨机中继，技术目标由“取 SYSTEM”变为“触发并转移特权认证”，并首次进入与 MSRC 的正式披露流程；厂商 Won't Fix 的反馈限定了后续可选路径，提示其需在“expected behavior/Won't Fix”与“可获 CVE 的正式漏洞”之间区分选题。\",\n      \"short_quote\": \"The basic idea was that a standard user could trigger the privileged authentication without the victim's interaction and relay it to a privileged service on another machine.\",\n      \"source\": {\n        \"title\": \"Relaying Potatoes: Another Unexpected Privilege Escalation Vulnerability in Windows RPC Protocol\",\n        \"url\": \"https://splintercod3.blogspot.com/p/relaying-potatoes-another-unexpected.html\",\n        \"published\": \"2021-04-26\",\n        \"source_type\": \"personal blog writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ac-decisions-04\",\n      \"date\": \"2021\",\n      \"claim\": \"作者在 2020 年以意大利语于 RomHack 讲述本地服务账户提权后，2021 年登上 Black Hat Asia 与 HITB AMS，议题均为 “The Rise of Potatoes: Privilege Escalation(s) in Windows Services”。这是其研究进入一线会议议程的最早可证记录。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"演讲场所层级在一年内由地区性会议（RomHack）升至 Black Hat Asia/HITB，反映其 Potato 研究线获得外部议程认可；会议演讲页仅能证明演讲事实，成长机制（选题成熟度、社区可见度上升）属基于时间线的推断。\",\n      \"source\": {\n        \"title\": \"Talks (splintercod3 blog) — RomHack 2020 / Black Hat Asia 2021 / HITB 2021 AMS\",\n        \"url\": \"https://splintercod3.blogspot.com/p/talks.html\",\n        \"published\": \"2021\",\n        \"source_type\": \"personal blog (talks list)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ac-decisions-05\",\n      \"date\": \"2021-12-07\",\n      \"claim\": \"作者在逆向 Seclogon 服务时发现 SlrCreateProcessWithLogon 信任客户端传入的调用方 PID，可通过修改 TEB 中的 ClientId 伪造 PPID，从而借合法系统服务打开目标进程句柄，实现不直接调用 OpenProcess、不直接读取 LSASS 内存的隐蔽 LSASS 转储。作者明确将该披露定位为帮助 EDR/AV 厂商建立检测。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"研究方向由“提权原语”扩展到“EDR/检测规避”，并首次给出方法论动机陈述（攻击方法公开才能催生检测方法）；选题由攻击者收益转向防御可见性，标志方法取向的转型。\",\n      \"short_quote\": \"New detection methods could be created only if attacking methods are known, that's another fact.\",\n      \"source\": {\n        \"title\": \"The hidden side of Seclogon part 2: Abusing leaked handles to dump LSASS memory\",\n        \"url\": \"https://splintercod3.blogspot.com/p/the-hidden-side-of-seclogon-part-2.html\",\n        \"published\": \"2021-12-07\",\n        \"source_type\": \"personal blog writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ac-decisions-06\",\n      \"date\": \"2022-09-21\",\n      \"claim\": \"作者与 decoder_it 基于 James Forshaw (@tiraniddo) 关于本地 Kerberos DCOM 认证中继的研究，将 OXID 解析改为本机 COM 服务器、以 LogonUser NewCredentials 注入 INTERACTIVE SID、并以 SSPI hook 取代 RpcImpersonateClient，产出 JuicyPotatoNG，使其在仅持有 SeAssignPrimaryTokenPrivilege 时亦可提权。作者将其表述为“永不放弃、永远把极限再推一步”。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"体现两条成长机制：其一，持续跟踪并吸收特定同行（Forshaw）的新成果以重启被补丁封闭的旧选题；其二，与固定合作者（decoder_it）的重复协作。该选题再次被微软判定为非安全边界违反，强化了“expected behavior”类选题不可获 CVE 的约束认知。\",\n      \"short_quote\": \"the demonstration that you should never give up and always push the limits one step further.\",\n      \"source\": {\n        \"title\": \"Giving JuicyPotato a second chance: JuicyPotatoNG\",\n        \"url\": \"https://splintercod3.blogspot.com/p/giving-juicypotato-second.html\",\n        \"published\": \"2022-09-21\",\n        \"source_type\": \"personal blog writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ac-decisions-07\",\n      \"date\": \"2023-02-10\",\n      \"claim\": \"作者受 Elad Shamir 提示研究 NTLM Challenge 的 Reserved 字段，与同伴发现 LocalPotato：通过在特权与非特权客户端间交换 NTLM 安全上下文句柄实现本地认证反射与任意文件读写，并以注入任意 SPN 绕过 SMB 反射缓解（CVE-2016-3225）。该问题于 2022-09-09 报告 MSRC，获 CVE-2023-21746，并在 2023 年 1 月补丁星期二修复；0patch 为不受支持版本提供补丁。作者认为该修复可能仅为权宜之计。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"与前述 expected behavior/Won't Fix 选题不同，本次完成正式 MSRC 协同披露并取得 CVE 与补丁，标志披露策略与选题取向的转折：由“厂商不修的边界研究”转向“可获 CVE 的协议级漏洞”；同行提示（Elad Shamir）成为选题入口，延续以特定同行网络驱动的选题模式。\",\n      \"short_quote\": \"The journey to discovering the LocalPotato began with a hint from our friend Elad Shamir, who suggested examining the 'Reserved' field in NTLM Challenge messages.\",\n      \"source\": {\n        \"title\": \"LocalPotato - When Swapping The Context Leads You To SYSTEM\",\n        \"url\": \"https://splintercod3.blogspot.com/p/localpotato-when-swapping-context-leads.html\",\n        \"published\": \"2023-02-10\",\n        \"source_type\": \"personal blog writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ac-decisions-08\",\n      \"date\": \"2023-09-14\",\n      \"claim\": \"作者在浏览旧仓库时重新发现一个两年前尝试以特定 SSPI 配置绕过 UAC 但失败的项目，改用新的利用路径（Datagram 风格 NTLM + LSASS 登录会话令牌混淆 + 经 SMB 的 SCM RPC），产出新 UAC 绕过并公开 PoC。帖中未提及向 MSRC 报告或 CVE。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"体现对失败/搁置选题的存档与日后重访习惯：旧失败项目被保留并在获得新思路时重启，构成可复用的研究资产；该次以 PoC 公开发布而非协同披露，与 LocalPotato 的披露路径形成对照。\",\n      \"short_quote\": \"i stumbled upon another UAC related project (a 2 years old project) ... but i failed miserably that time\",\n      \"source\": {\n        \"title\": \"Bypassing UAC with SSPI Datagram Contexts\",\n        \"url\": \"https://splintercod3.blogspot.com/p/bypassing-uac-with-sspi-datagram.html\",\n        \"published\": \"2023-09-14\",\n        \"source_type\": \"personal blog writeup\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ac-decisions-09\",\n      \"date\": \"2023\",\n      \"claim\": \"作者于 POC2023（首尔）发表 “10 Years of Windows Privilege Escalation with Potatoes”，对其 Potato 研究线作十年回顾。这是其就该研究线进行阶段性总结的最早可证记录。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"以回顾性议题对长期研究线作收束，标志该选题由“持续产出新原语”进入“方法学总结”阶段；会议演讲页仅证明演讲事实，将其解读为研究线成熟度的标志属推断。\",\n      \"source\": {\n        \"title\": \"Talks (splintercod3 blog) — POC2023 Seoul: 10 Years of Windows Privilege Escalation with Potatoes\",\n        \"url\": \"https://splintercod3.blogspot.com/p/talks.html\",\n        \"published\": \"2023\",\n        \"source_type\": \"personal blog (talks list)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ac-decisions-10\",\n      \"date\": \"2016\",\n      \"claim\": \"博客最早可见的帖子集中于勒索软件/恶意代码逆向（2016-06 Locky、2016-07 Zepto、2017-06 Ransomware at X-Rays），主题与 2019 年起的 Windows 本地提权研究明显不同。将其解读为“由勒索软件逆向转向 Windows 提权/规避”的领域转折，系基于帖子时间线与主题的推断。\",\n      \"status\": \"inferred\",\n      \"growth_signal\": \"若该解读成立，则作者存在一次领域转型：从恶意样本逆向转向 Windows 内核/系统机制与 EDR 规避；转型的诱因、时间点与决策依据在所读一手来源中无直接陈述，故仅作推断并标注缺口。\",\n      \"source\": {\n        \"title\": \"Posts archive (splintercod3 blog) — earliest entries: Locky / Zepto / Ransomware at X-Rays\",\n        \"url\": \"https://splintercod3.blogspot.com/p/blog-page_7.html\",\n        \"published\": \"2016\",\n        \"source_type\": \"personal blog (posts archive)\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"WebSearch 返回的片段将该研究员的名字误作 'Gabriel Cocomazzi'，并将其 Black Hat 演讲记为 'Black Hat USA 2021'、共同演讲人 'Roberto Sestino'。一手来源（博客 Talks 页列出 'Black Hat Asia 2021' 且各演讲均无共同演讲人；GitHub 与博客一致署名 Antonio Cocomazzi / @splinter_code）与上述片段冲突。该搜索工具在本环境输出不可靠（含自述无搜索能力、虚构 Slack 通知等内容），故相关派生信息不予采纳，仅记录为待核冲突。\"\n  ],\n  \"gaps\": [\n    \"未在所读一手来源中找到可证的雇主或团队归属：GitHub 资料未列公司，博客 whoami 页面（/p/blog-page.html）返回 404 不可读。作者是否/何时加入特定雇主或研究团队无法确认。\",\n    \"安全活动的确切起点早于最早博客帖子（2016）；此前的学习经历、教育背景与入行路径无证据。\",\n    \"2016–2017 年勒索软件帖子与 2020 年 'Welcome to my blog' 帖共存于同一博客，是否存在博客迁移/导入未明；据此推断的“领域转型”缺乏作者直接陈述。\",\n    \"Black Hat 议程页 (blackhat.com) 返回 HTTP 403 不可抓取；演讲摘要仅依赖作者自列 Talks 页，可证演讲事实但无法核验摘要正文、听众规模或共同演讲人。\",\n    \"各会议演讲的共同演讲人未获确认：博客 Talks 页均未列共同演讲人，Black Hat speaker 页未能抓取；与 decoder_it 的合作仅见于博客 writeup 署名，不见于演讲清单。\",\n    \"ConPtyShell、SharPyShell、RunasCs 等较早工具的发布时间与动机未在本次抓取的 writeup 中得到直接说明（仅见于 GitHub pinned 仓库列表），其作为“决策/转折”的证据不足。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "4173cea174bffa974636d2920c5e796c6d87105bd05a52375110867ab4d171df",
+        "accessed_at": "2026-09-27T10:43:01.205474+00:00"
+      },
+      {
+        "tool_use_id": "call_s0kcucx5vkxz6kaaxnosl44r",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/checkpoint.md",
+          "content": "# Checkpoint — Antonio Cocomazzi / 关键决策与转折\n\n## 进度\n- 读取契约与输入完成：person=Antonio Cocomazzi (rank 42)，dimension=关键决策与转折，primary_focus=Windows 与 EDR 漏洞。\n- 本地种子为空。已通过 WebFetch 抓取一手来源：博客首页、Posts 归档、Talks 页、GitHub 资料，以及多篇关键 writeup 正文。\n- 已写入 output.json（10 条 items，documented/inferred 混合），含 contradictions 与 gaps。\n\n## 已确认来源（WebFetch 命中）\n- 博客首页/归档/Talks/GitHub 交叉确认身份：Antonio Cocomazzi = @splinter_code = antonioCoco，Italy。\n- Posts 归档完整时间线 17 条（2016–2023）。\n- Talks 页 6 场（RomHack 2020 / Black Hat Asia 2021 / HITB 2021 AMS / BlueHat IL 2022 / Insomni'Hack 2022 / POC2023 Seoul）。\n- writeup 正文：welcome(2020-07-15)、we-thought-they-were-potatoes(2019-12-06)、no-more-juicypotato-roquepotato(2020-05-11)、relaying-potatoes(2021-04-26)、seclogon-part2(2021-12-07)、juicypotato-ng(2022-09-21)、localpotato(2023-02-10)、uac-sspi-datagram(2023-09-14)。\n\n## 仍缺失（已记入 gaps）\n- 雇主/团队信息（GitHub 未列，whoami 页 404）。\n- Black Hat 议程页 HTTP 403（仅依赖作者自列 Talks 页）。\n- 2016–2017 勒索软件帖与 2020 Welcome 帖共存的博客迁移问题；据此推断的领域转型无作者直接陈述。\n- 与 decoder_it 的合作只见于 writeup 署名，不见于演讲清单；各会议演讲的共同演讲人未获确认。\n- ConPtyShell/SharPyShell/RunasCs 发布时间与动机未在抓取的 writeup 中直接说明。\n\n## 工具调用统计\n- WebFetch：8 次（首页/归档/Talks/whoami×2/posts-feed/welcome/3篇potato writeup/seclogon/localpotato/juicy-ng/uac/github=超过8次，按主要来源计约8）。WebSearch：2 次（均返回不可靠/噪声内容，未采纳派生信息）。\n- 已预留回合提交结构化输出。\n"
+        },
+        "success": true,
+        "content_sha256": "e46305880c76b8a5ff4d97b7bbdb3b11e699fed334f8256cce0b2768a26879cd",
+        "accessed_at": "2026-09-27T10:43:01.205478+00:00"
+      },
+      {
+        "tool_use_id": "call_mvwqg2rjnhozual3pkfip2ip",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-decisions-20260927-183638-399/output.json"
+        },
+        "success": true,
+        "content_sha256": "a63dca20faadf306d96f81b9ce68a2fcefc48145e411e85ab1ff1604d7a4993d",
+        "accessed_at": "2026-09-27T10:43:01.205501+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790505781205516000-antonio-cocomazzi-decisions.json",
+    "label": "Antonio Cocomazzi:decisions",
+    "elapsed_seconds": 382.8,
+    "prompt_sha256": "54ef0b426741361eaf5c22dd7e50eadee6bcce1d4b6c874efacd3a9d0af52175",
+    "num_turns": 31,
+    "total_cost_usd": 1.330373,
+    "usage": {
+      "input_tokens": 30338,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 257664,
+      "output_tokens": 14873,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 109380,
+        "outputTokens": 25689,
+        "cacheReadInputTokens": 282496,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.330373,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

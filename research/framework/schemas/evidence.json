@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["person", "dimension", "identity_check", "items", "contradictions", "gaps"],
+  "properties": {
+    "_run": {"type": "object"},
+    "person": {"type": "string"},
+    "dimension": {"type": "string"},
+    "identity_check": {"type": "string"},
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "date", "claim", "status", "growth_signal", "source"],
+        "properties": {
+          "id": {"type": "string"},
+          "verification": {
+            "type": "object",
+            "description": "由编排器依据实际工具事件填写；Agent 不得自行声明已核验。",
+            "properties": {
+              "verified_in_run": {"type": "boolean"},
+              "retrieval_method": {"enum": ["web_fetch", "unverified"]},
+              "tool_use_id": {"type": "string"},
+              "accessed_at": {"type": "string"},
+              "content_sha256": {"type": "string"}
+            },
+            "additionalProperties": false
+          },
+          "date": {"type": "string"},
+          "claim": {"type": "string"},
+          "status": {"enum": ["documented", "reported", "inferred", "unknown"]},
+          "growth_signal": {"type": "string"},
+          "short_quote": {"type": "string"},
+          "source": {
+            "type": "object",
+            "required": ["title", "url", "published", "source_type", "level"],
+            "properties": {
+              "title": {"type": "string"},
+              "url": {"type": "string"},
+              "published": {"type": "string"},
+              "source_type": {"type": "string"},
+              "level": {"enum": ["primary", "first_hand_other", "authoritative_secondary", "lead_only"]}
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "contradictions": {"type": "array", "items": {"type": "string"}},
+    "gaps": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

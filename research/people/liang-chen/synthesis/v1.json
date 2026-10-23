@@ -1,0 +1,250 @@
+{
+  "person": "Liang Chen",
+  "expertise": [
+    "浏览器漏洞利用（Safari/WebKit，覆盖 macOS 与 iOS 双平台）",
+    "OS X/macOS 沙箱逃逸（WindowServer 等系统组件）",
+    "端到端利用链构建（renderer → sandbox escape → kernel privilege escalation）",
+    "公开竞赛攻防（Pwn2Own 系列赛事）"
+  ],
+  "stages": [
+    {
+      "period": "约2013–2014",
+      "stage": "攻击面选型确立与单漏洞公开竞赛取胜",
+      "capability_change": "约2013年与团队确立 OS X 沙箱逃逸的攻击面选型标准（可从浏览器沙箱触达、沙箱配置薄弱或缺失、组件早于 OS X Leopard 沙箱引入而长期存在），随后以单一 CVE（CVE-2014-1314）在 Pwn2Own 2014 攻取 OS X/Mavericks Safari，形成可核验的单点竞赛能力起点。",
+      "evidence_ids": [
+        "LC-DEC-01",
+        "LC-DEC-02"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2015–2016",
+      "stage": "长期组件深耕、跨平台迁移与端到端利用链",
+      "capability_change": "将 WindowServer 固化为长期研究对象，同年内把同一 Safari/WebKit 攻击从 macOS 桌面迁移到 iOS 移动端（iPhone 6S/iOS 10），并由单点漏洞推进到 renderer → sandbox escape → kernel privilege escalation 的完整利用链（CVE-2016-1804 经浏览器漏洞远程攻下 OS X El Capitan 并提权至 root），于 Pwn2Own 2016 桌面与移动两场均获 Master of Pwn。",
+      "evidence_ids": [
+        "LC-DEC-03",
+        "LC-DEC-04",
+        "lc_works_pwn2own_2016_desktop",
+        "lc_works_pwn2own_2016_mobile",
+        "liang-chen-deep-02",
+        "liang-chen-deep-03"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "攻击面工程化选型驱动长期组件深耕",
+      "starting_conditions": "约2013年 Keen Lab 团队决定探索 OS X 沙箱逃逸，面临选哪个组件作为研究对象的工程决策。",
+      "repeated_practice": "以可核验的工程约束（可从浏览器沙箱触达、沙箱配置薄弱或缺失、组件早于 OS X Leopard 沙箱引入而长期存在）作为攻击面选型标准，并在选定 WindowServer 后持续对同一组件深挖，而非零散追逐单个 CVE。",
+      "feedback": "公开竞赛（Pwn2Own）成绩与公开 writeup 产出构成可核验的外部反馈闭环；选型结果由作者在2016年 WindowServer writeup 中回溯陈述。",
+      "intermediate_capability": "由一次性 CVE 发现固化为对单一系统组件的长期、可复用的漏洞发现路径。",
+      "observed_outcomes": [
+        "WindowServer 成为 Keen Lab 长期焦点之一",
+        "2016年 CVE-2016-1804 经浏览器漏洞远程攻下 OS X El Capitan 并提权至 root"
+      ],
+      "evidence_ids": [
+        "LC-DEC-01",
+        "LC-DEC-03",
+        "LC-DEC-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "整条'选型—深耕'叙事来自单一2016年回溯性 writeup 对早期零散取胜的事后合理化；可能存在事前未明言的工程约束，事后才被系统化表述，故选型标准对早期行为的因果解释力受限。"
+    },
+    {
+      "name": "Safari/WebKit 攻击在 macOS 与 iOS 间的跨平台迁移",
+      "starting_conditions": "2016年初（3月 Pwn2Own 桌面）已具备 macOS Safari/WebKit 攻击能力。",
+      "repeated_practice": "同年内对同一 Safari/WebKit 栈在 macOS（桌面）与 iOS（iPhone 6S/iOS 10）两个平台上重复攻击，进行平台间迁移练习。",
+      "feedback": "两场 Pwn2Own 均获 Master of Pwn，构成公开可核验的成绩反馈。",
+      "intermediate_capability": "同一浏览器内核栈的多平台攻击能力，而非仅单一平台。",
+      "observed_outcomes": [
+        "2016-03 Pwn2Own 桌面 Safari on macOS 获 Master of Pwn",
+        "2016-10 Mobile Pwn2Own Safari on iPhone 6S/iOS 10 获 Master of Pwn"
+      ],
+      "evidence_ids": [
+        "lc_works_pwn2own_2016_desktop",
+        "lc_works_pwn2own_2016_mobile",
+        "liang-chen-deep-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "两场均为多人队伍（含 Qidan He、Marco Grassi、Yubin Fu 等），个人跨平台能力难以从队伍结果干净分离；迁移练习可能主要由团队协作完成，而非个人独立获得该能力。"
+    },
+    {
+      "name": "由单点漏洞向端到端利用链的能力跃迁",
+      "starting_conditions": "2014年以单一 CVE（CVE-2014-1314）完成公开竞赛，具备单点漏洞利用能力。",
+      "repeated_practice": "把 renderer 漏洞、沙箱逃逸与内核提权组合为完整利用链，并通过 POC 2016 公开演示由全新 bug 组成的完整利用链。",
+      "feedback": "POC 2016 公开演讲与 Pwn2Own 2016 成绩构成外部反馈。",
+      "intermediate_capability": "端到端利用链工程能力：从浏览器渲染器推进到沙箱逃逸与内核提权，并在最新移动设备上完成远程利用演示。",
+      "observed_outcomes": [
+        "POC 2016 演讲《Hacking Phones from 2013 to 2016》自述完整利用链",
+        "CVE-2016-1804 链：浏览器漏洞远程攻下 OS X El Capitan 并提权至 root"
+      ],
+      "evidence_ids": [
+        "liang-chen-deep-02",
+        "LC-DEC-04",
+        "LC-DEC-02"
+      ],
+      "validation_tests": [
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "POC 2016 摘要与 WindowServer writeup 均为2016年成果自述，其将2013–2016描述为线性递进可能掩盖同期并行的失败与转向；材料未提供对失败路径或转折的自述，故跃迁叙事的因果连续性未被独立验证。"
+    }
+  ],
+  "tensions": [
+    "person_json 将 primary_focus 标注为'Android 与浏览器漏洞'，但可核验证据指向 macOS/iOS 的 Safari/WebKit 与 OS X 沙箱逃逸；'Android'主轴对本人无直接证据，攻 Android（Nexus 6P/Chrome）的 Keen Lab 子队名单不含 Liang Chen（lc_works_android_focus_unsupported）。",
+    "Keen Lab 官方博客首页与可见文章列表均未见 Liang Chen 署名，其余条目为 Ian Fang、Qoobee、Marco Grassi、Azureyang、Jackyxty 或团队集体署名，与 person_json 将 keenlab.tencent.com 列为 writeup 证据存在张力；其唯一可核验的个人署名 writeup 为2016年 WindowServer 单篇。",
+    "Pwn2Own 成果均为多人队伍，个人能力难以从队伍结果干净分离。",
+    "竞赛锚点集中于2013–2016，2016年后个人技术演化链条在公开渠道中断，无法重建后续阶段。"
+  ],
+  "transferable_practices": [
+    "以可核验的工程约束（可达性、沙箱配置薄弱、组件历史长存）作为攻击面选型标准，而非主观偏好。",
+    "选定组件后长期深耕同一对象，形成可复用的漏洞发现路径，而非零散追逐单个 CVE。",
+    "通过公开竞赛与会议演讲作为外部反馈与能力校验的闭环。"
+  ],
+  "non_transferable_conditions": [
+    "Keen Lab 团队资源与多人协作队伍（Qidan He、Marco Grassi、Yubin Fu 等）是2016年竞赛成果的条件，个人复现需等价团队。",
+    "约2013年 OS X 沙箱逃逸选型所处的 OS X 组件生态与早期沙箱配置薄弱是时期性外部条件，不可在当前环境复制。",
+    "竞赛成绩的'Master of Pwn'依赖 Pwn2Own 赛事与当时的目标设备/系统版本，不可直接迁移。"
+  ],
+  "open_questions": [
+    "2016年以后的技术演化（目标难度、研究方法、技术栈、复盘方式随时间的变化）无法从公开渠道重建：可核验材料集中于2013–2016，缺2017年及以后的个人产出序列。",
+    "Android 方向对 Liang Chen 本人的直接证据缺失：person_json 标注的'Android'主轴在本节点检索范围内仅由人物记录转述，未由一手或权威二手来源对个人证实。",
+    "是否存在从 Apple/macOS 方向转向 Android 的转折无文档证据；作者仅自述 OS X 决策始于约2013，更早方向的时间线缺失。",
+    "x.com/chenliang0817 返回 HTTP 402 未抓取，社交 handle 与真名绑定、个人 bio、就业历史未独立核验。",
+    "Black Hat US-16 议程页返回 HTTP 403，'The Art of War: A Journey Through Android Chrome Exploitation'演讲的事实、日期与合著者未能独立核对。",
+    "未取得同事、团队负责人或权威媒体对其技术成长、失败与转向、导师与同伴关系的具体评价；成长机制叙事缺乏一手长访谈佐证。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/liang-chen-synthesis-v1-20260928-184253-485",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790592473233492000-liang-chen-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "6ff8d09e-8338-4298-adb5-63fb77dd2691",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_ljwpaguslj5uyu06tfy6v540",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/liang-chen-synthesis-v1-20260928-184253-485/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T10:47:53.275535+00:00"
+      },
+      {
+        "tool_use_id": "call_01tncgb2pef5gaheuxj4zmoq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/liang-chen-synthesis-v1-20260928-184253-485/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "0933a54b99d420aa39cf56c7bc23494e77152e07cdc3c2ad4e9c2739d29af91c",
+        "accessed_at": "2026-09-28T10:47:53.275568+00:00"
+      },
+      {
+        "tool_use_id": "call_mxvnyayfxqbf22idqon1ywja",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/liang-chen-synthesis-v1-20260928-184253-485/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "bd6f3232b8437b8cc7f410cb1f94e0c99174ad7e5941ce6fc34eecb9ba555350",
+        "accessed_at": "2026-09-28T10:47:53.275577+00:00"
+      },
+      {
+        "tool_use_id": "call_w1nple5uq2800uy1tti7guxp",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/liang-chen-synthesis-v1-20260928-184253-485/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "acd7bc9ea52db6db1fcd8b34ced0ac24e22c296787c126a415c21297c417c1e7",
+        "accessed_at": "2026-09-28T10:47:53.275627+00:00"
+      },
+      {
+        "tool_use_id": "call_iw7dl1tu8hzll3sgz7gq1k3q",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/liang-chen-synthesis-v1-20260928-184253-485/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-28T10:47:53.275635+00:00"
+      },
+      {
+        "tool_use_id": "call_euo28qhnljueml778ixi8ncn",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/liang-chen-synthesis-v1-20260928-184253-485/checkpoint.md",
+          "content": "# Checkpoint — Liang Chen 综合（首次综合，revision_context 为空）\n\n## 任务状态\n- 已读 task.md、output.schema.json、person_json.json、evidence_json.json（六维）、revision_context.json（空）。\n- 首次综合：无定向补证 item；不引入作废证据。\n\n## 有效证据（verified_in_run=true）\n- documented：lc_works_pwn2own_2016_desktop、lc_works_pwn2own_2016_mobile、lc_works_keenlab_blog_absence、liang-chen-deep-01、liang-chen-deep-02、liang-chen-deep-03、lc-ext-001、LC-DEC-01、LC-DEC-03、LC-DEC-04\n- reported：LC-DEC-02（Pwn2Own 2014 CVE-2014-1314，仅 writeup 自述，无独立公告）\n- inferred：lc_works_android_focus_unsupported（Android 子队名单不含本人，反例）\n- unknown（仅作缺口/限制）：lc-community-01、lc-community-02、lc-community-03、lc-timeline-001、lc-timeline-002、lc-timeline-003\n\n## 身份核验\n- 经 LC-DEC 系列所引 WindowServer writeup（keenlab.tencent.com, 2016-07-22）署名 \"by Liang Chen (@chenliang0817)\" 确认；POC 2016 议程页 speaker bio 一致。\n- x.com/chenliang0817 返回 HTTP 402，未独立核验。\n- Keen Lab 博客首页列表未见其署名（其余条目为 Ian Fang/Qoobee/Marco Grassi/Azureyang/Jackyxty 或团队集体署名）。\n\n## 综合判断\n- 可核验个人轨迹集中于 2013–2016；核心正向证据来自 2016 年 WindowServer 回溯性 writeup + POC 2016 议程页 + Wikipedia Pwn2Own 结果表。\n- 重建为两阶段（约2013–2014 选型与单漏洞竞赛；2015–2016 组件持续研究与端到端利用链）+ 三个主机制（选型→长期组件研究；Safari/WebKit 跨平台迁移；单漏洞→端到端利用链）。\n- 不为凑阶段编造 2017 年后内容；2016 年后缺口列入 tensions/open_questions。\n- Android 方向对本人无直接证据，作为张力与开放问题处理，不列为 expertise/机制。\n\n## 主要竞争性解释\n- 整条\"成长\"叙事可能部分来自单一 2016 年回溯性 writeup 对早期零散取胜的事后合理化。\n- Pwn2Own 成果均为多人队伍，个人能力难以从队伍结果干净分离（M2/M3 alternative 已记）。\n\n## 待办\n- 完成 output.json 并逐字段比对 schema（required、enum、additionalProperties=false、不填 _run/verification）。\n"
+        },
+        "success": true,
+        "content_sha256": "f35afb2354d0c0081a70c9d60b1e57a4a43254fa8f516750b6cb1594552646ad",
+        "accessed_at": "2026-09-28T10:47:53.276049+00:00"
+      },
+      {
+        "tool_use_id": "call_lzh4emb5i7l0r65ju3x4pmg9",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/liang-chen-synthesis-v1-20260928-184253-485/output.json",
+          "content": "{\n  \"person\": \"Liang Chen\",\n  \"expertise\": [\n    \"浏览器漏洞利用（Safari/WebKit，覆盖 macOS 与 iOS 双平台）\",\n    \"OS X/macOS 沙箱逃逸（WindowServer 等系统组件）\",\n    \"端到端利用链构建（renderer → sandbox escape → kernel privilege escalation）\",\n    \"公开竞赛攻防（Pwn2Own 系列赛事）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"约2013–2014\",\n      \"stage\": \"攻击面选型确立与单漏洞公开竞赛取胜\",\n      \"capability_change\": \"约2013年与团队确立 OS X 沙箱逃逸的攻击面选型标准（可从浏览器沙箱触达、沙箱配置薄弱或缺失、组件早于 OS X Leopard 沙箱引入而长期存在），随后以单一 CVE（CVE-2014-1314）在 Pwn2Own 2014 攻取 OS X/Mavericks Safari，形成可核验的单点竞赛能力起点。\",\n      \"evidence_ids\": [\"LC-DEC-01\", \"LC-DEC-02\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2015–2016\",\n      \"stage\": \"长期组件深耕、跨平台迁移与端到端利用链\",\n      \"capability_change\": \"将 WindowServer 固化为长期研究对象，同年内把同一 Safari/WebKit 攻击从 macOS 桌面迁移到 iOS 移动端（iPhone 6S/iOS 10），并由单点漏洞推进到 renderer → sandbox escape → kernel privilege escalation 的完整利用链（CVE-2016-1804 经浏览器漏洞远程攻下 OS X El Capitan 并提权至 root），于 Pwn2Own 2016 桌面与移动两场均获 Master of Pwn。\",\n      \"evidence_ids\": [\"LC-DEC-03\", \"LC-DEC-04\", \"lc_works_pwn2own_2016_desktop\", \"lc_works_pwn2own_2016_mobile\", \"liang-chen-deep-02\", \"liang-chen-deep-03\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"攻击面工程化选型驱动长期组件深耕\",\n      \"starting_conditions\": \"约2013年 Keen Lab 团队决定探索 OS X 沙箱逃逸，面临选哪个组件作为研究对象的工程决策。\",\n      \"repeated_practice\": \"以可核验的工程约束（可从浏览器沙箱触达、沙箱配置薄弱或缺失、组件早于 OS X Leopard 沙箱引入而长期存在）作为攻击面选型标准，并在选定 WindowServer 后持续对同一组件深挖，而非零散追逐单个 CVE。\",\n      \"feedback\": \"公开竞赛（Pwn2Own）成绩与公开 writeup 产出构成可核验的外部反馈闭环；选型结果由作者在2016年 WindowServer writeup 中回溯陈述。\",\n      \"intermediate_capability\": \"由一次性 CVE 发现固化为对单一系统组件的长期、可复用的漏洞发现路径。\",\n      \"observed_outcomes\": [\n        \"WindowServer 成为 Keen Lab 长期焦点之一\",\n        \"2016年 CVE-2016-1804 经浏览器漏洞远程攻下 OS X El Capitan 并提权至 root\"\n      ],\n      \"evidence_ids\": [\"LC-DEC-01\", \"LC-DEC-03\", \"LC-DEC-04\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"整条'选型—深耕'叙事来自单一2016年回溯性 writeup 对早期零散取胜的事后合理化；可能存在事前未明言的工程约束，事后才被系统化表述，故选型标准对早期行为的因果解释力受限。\"\n    },\n    {\n      \"name\": \"Safari/WebKit 攻击在 macOS 与 iOS 间的跨平台迁移\",\n      \"starting_conditions\": \"2016年初（3月 Pwn2Own 桌面）已具备 macOS Safari/WebKit 攻击能力。\",\n      \"repeated_practice\": \"同年内对同一 Safari/WebKit 栈在 macOS（桌面）与 iOS（iPhone 6S/iOS 10）两个平台上重复攻击，进行平台间迁移练习。\",\n      \"feedback\": \"两场 Pwn2Own 均获 Master of Pwn，构成公开可核验的成绩反馈。\",\n      \"intermediate_capability\": \"同一浏览器内核栈的多平台攻击能力，而非仅单一平台。\",\n      \"observed_outcomes\": [\n        \"2016-03 Pwn2Own 桌面 Safari on macOS 获 Master of Pwn\",\n        \"2016-10 Mobile Pwn2Own Safari on iPhone 6S/iOS 10 获 Master of Pwn\"\n      ],\n      \"evidence_ids\": [\"lc_works_pwn2own_2016_desktop\", \"lc_works_pwn2own_2016_mobile\", \"liang-chen-deep-01\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"两场均为多人队伍（含 Qidan He、Marco Grassi、Yubin Fu 等），个人跨平台能力难以从队伍结果干净分离；迁移练习可能主要由团队协作完成，而非个人独立获得该能力。\"\n    },\n    {\n      \"name\": \"由单点漏洞向端到端利用链的能力跃迁\",\n      \"starting_conditions\": \"2014年以单一 CVE（CVE-2014-1314）完成公开竞赛，具备单点漏洞利用能力。\",\n      \"repeated_practice\": \"把 renderer 漏洞、沙箱逃逸与内核提权组合为完整利用链，并通过 POC 2016 公开演示由全新 bug 组成的完整利用链。\",\n      \"feedback\": \"POC 2016 公开演讲与 Pwn2Own 2016 成绩构成外部反馈。\",\n      \"intermediate_capability\": \"端到端利用链工程能力：从浏览器渲染器推进到沙箱逃逸与内核提权，并在最新移动设备上完成远程利用演示。\",\n      \"observed_outcomes\": [\n        \"POC 2016 演讲《Hacking Phones from 2013 to 2016》自述完整利用链\",\n        \"CVE-2016-1804 链：浏览器漏洞远程攻下 OS X El Capitan 并提权至 root\"\n      ],\n      \"evidence_ids\": [\"liang-chen-deep-02\", \"LC-DEC-04\", \"LC-DEC-02\"],\n      \"validation_tests\": [\"generative\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"POC 2016 摘要与 WindowServer writeup 均为2016年成果自述，其将2013–2016描述为线性递进可能掩盖同期并行的失败与转向；材料未提供对失败路径或转折的自述，故跃迁叙事的因果连续性未被独立验证。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 将 primary_focus 标注为'Android 与浏览器漏洞'，但可核验证据指向 macOS/iOS 的 Safari/WebKit 与 OS X 沙箱逃逸；'Android'主轴对本人无直接证据，攻 Android（Nexus 6P/Chrome）的 Keen Lab 子队名单不含 Liang Chen（lc_works_android_focus_unsupported）。\",\n    \"Keen Lab 官方博客首页与可见文章列表均未见 Liang Chen 署名，其余条目为 Ian Fang、Qoobee、Marco Grassi、Azureyang、Jackyxty 或团队集体署名，与 person_json 将 keenlab.tencent.com 列为 writeup 证据存在张力；其唯一可核验的个人署名 writeup 为2016年 WindowServer 单篇。\",\n    \"Pwn2Own 成果均为多人队伍，个人能力难以从队伍结果干净分离。\",\n    \"竞赛锚点集中于2013–2016，2016年后个人技术演化链条在公开渠道中断，无法重建后续阶段。\"\n  ],\n  \"transferable_practices\": [\n    \"以可核验的工程约束（可达性、沙箱配置薄弱、组件历史长存）作为攻击面选型标准，而非主观偏好。\",\n    \"选定组件后长期深耕同一对象，形成可复用的漏洞发现路径，而非零散追逐单个 CVE。\",\n    \"通过公开竞赛与会议演讲作为外部反馈与能力校验的闭环。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Keen Lab 团队资源与多人协作队伍（Qidan He、Marco Grassi、Yubin Fu 等）是2016年竞赛成果的条件，个人复现需等价团队。\",\n    \"约2013年 OS X 沙箱逃逸选型所处的 OS X 组件生态与早期沙箱配置薄弱是时期性外部条件，不可在当前环境复制。\",\n    \"竞赛成绩的'Master of Pwn'依赖 Pwn2Own 赛事与当时的目标设备/系统版本，不可直接迁移。\"\n  ],\n  \"open_questions\": [\n    \"2016年以后的技术演化（目标难度、研究方法、技术栈、复盘方式随时间的变化）无法从公开渠道重建：可核验材料集中于2013–2016，缺2017年及以后的个人产出序列。\",\n    \"Android 方向对 Liang Chen 本人的直接证据缺失：person_json 标注的'Android'主轴在本节点检索范围内仅由人物记录转述，未由一手或权威二手来源对个人证实。\",\n    \"是否存在从 Apple/macOS 方向转向 Android 的转折无文档证据；作者仅自述 OS X 决策始于约2013，更早方向的时间线缺失。\",\n    \"x.com/chenliang0817 返回 HTTP 402 未抓取，社交 handle 与真名绑定、个人 bio、就业历史未独立核验。\",\n    \"Black Hat US-16 议程页返回 HTTP 403，'The Art of War: A Journey Through Android Chrome Exploitation'演讲的事实、日期与合著者未能独立核对。\",\n    \"未取得同事、团队负责人或权威媒体对其技术成长、失败与转向、导师与同伴关系的具体评价；成长机制叙事缺乏一手长访谈佐证。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "c9c71fd21a27a0992e555810625831218db2b0efbca25471249f3f426ff551fa",
+        "accessed_at": "2026-09-28T10:47:53.276161+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790592473276179000-liang-chen-synthesis-v1.json",
+    "label": "Liang Chen:synthesis:v1",
+    "elapsed_seconds": 299.95,
+    "prompt_sha256": "f3127e9d1a24d83ad591f14fe1175a7cbe08017d00181eaae4e4f58506d28971",
+    "num_turns": 8,
+    "total_cost_usd": 0.5797399999999999,
+    "usage": {
+      "input_tokens": 26067,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 76160,
+      "output_tokens": 16453,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 26067,
+        "outputTokens": 16453,
+        "cacheReadInputTokens": 76160,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.5797399999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

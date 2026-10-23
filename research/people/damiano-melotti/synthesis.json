@@ -1,0 +1,351 @@
+{
+  "person": "Damiano Melotti",
+  "expertise": [
+    "Android 安全芯片（Titan M）固件逆向与漏洞研究",
+    "安全芯片固件模糊测试（黑盒与 AFL++ Unicorn 仿真模式）",
+    "Android 文件级加密（FBE）与凭据加密（CE）密钥派生分析",
+    "TrustZone/Gatekeeper 与 Weaver 认证机制攻击",
+    "受限目标下的利用链构建（1 字节越界写经指针重定向、ROP、任意读到密钥外泄）",
+    "缺乏调试可见性下的迭代式利用（UART 日志监控、栈 pivot、gadget 构造）",
+    "面向目标的工具自建（nosclient）与运行时 hook（Frida）",
+    "MediaTek boot ROM 利用（经 MTKClient）"
+  ],
+  "stages": [
+    {
+      "period": "约2020–2021年",
+      "stage": "团队固件逆向与背景知识沉淀",
+      "capability_change": "以 Quarkslab 团队形式对 Titan M 安全芯片固件开展约一年半的逆向工程，并以 Black Hat EU 2021 演讲（A Titan M Odyssey）与白皮书形式公开沉淀背景知识，构成后续模糊测试与利用工作的知识基础。Damiano Melotti 作为 2022 年合著 writeup 中“we”的一员参与该阶段；其是否为 2021 年演讲与白皮书的署名作者，在抓取文本中未明确（reported）。",
+      "evidence_ids": [
+        "damiano-melotti-deep-titan-m-origin-2022",
+        "tl-06-bheu-2021-titan-m-odyssey",
+        "DM-EXT-04"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2022年初至2022年8月",
+      "stage": "黑盒到仿真模糊测试转向与自建工具",
+      "capability_change": "自建 nosclient（Android 原生客户端，经内核驱动向 Titan M 发送任意命令），先用自建黑盒模糊测试（libprotobuf-mutator、Radamsa）测试，发现黑盒仅覆盖浅层状态后转向 AFL++ 的 Unicorn 模式仿真模糊测试；经 UC_ERR_WRITE_UNMAPPED 崩溃发现 Keymaster ImportKey 的 1 字节越界写（CVE-2022-20233），2022-03-02 向 Google 报告（documented）。GitHub 按姓名搜索存在署名 Damiano Melotti 的模糊测试工具链提交（dm-community-01，documented），但账号层面未核实，归属为推断。",
+      "evidence_ids": [
+        "damiano-melotti-deep-blackbox-to-emulation-pivot-2022",
+        "damiano-melotti-deep-tool-building-nosclient-2022",
+        "DM-EXT-01",
+        "tl-01-identity-quarkslab-author-page",
+        "tl-02-cve-2022-20233-report",
+        "tl-03-nosclient-tool",
+        "dm-community-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022年3月至6月",
+      "stage": "约束下的迭代式利用构建与披露闭环",
+      "capability_change": "在缺乏调试器与栈追踪的条件下，通过逐步增大命令并监控 UART 日志（焊线至主板 UART 引脚）定位触发点，以仿真执行 Keymaster DestroyAttestationIds 定位栈中唯一未覆盖的 32-bit 槽，构造栈 pivot 与 ROP，最终外泄 StrongBox AES 密钥；2022-03-20 向 Google 演示代码执行。Google 初称未发现越界写且无法复现安全问题，团队以密钥外泄 PoC 重新提交后，奖励由 10,000 美元提升至 75,000 美元并评 Critical（documented）。",
+      "evidence_ids": [
+        "damiano-melotti-deep-iterative-exploitation-2022",
+        "damiano-melotti-deep-disclosure-reward-feedback-2022",
+        "DM-EXT-01",
+        "DM-EXT-02",
+        "tl-02-cve-2022-20233-report"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022年下半年",
+      "stage": "研究成果的会议化公开发表",
+      "capability_change": "将 Titan M 研究转化为公开技术输出，于 TROOPERS 2022（6月底，德国）与 Black Hat USA 2022（8月，拉斯维加斯，题 Attack on Titan M Reloaded）演讲，并于 2022-08-11 发布配套 writeup。会议议程页未独立抓取成功，发表事实来自 writeup 正文转述（reported）。",
+      "evidence_ids": [
+        "tl-04-troopers-bhus-2022-talks",
+        "DM-EXT-05",
+        "damiano-melotti-deep-titan-m-origin-2022"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2023年",
+      "stage": "跨题目复用与方法扩展",
+      "capability_change": "由外部求助（设备主 SoC 损坏但 Titan M 可用）触发 Android 文件级加密（FBE）研究，明确限定仅软件攻击假设；复用 CVE-2022-20233 任意读原语构建 Weaver PoC，经 MTKClient 在 MediaTek boot ROM 上构建 Gatekeeper PoC，并以 Frida 钩住 system_server 泄露 Keymaster 中间解密结果；对 Weaver 任务采用先逆向再试错提取密钥。研究于 REcon'23 演讲（writeup 为 documented，会议为 reported）。",
+      "evidence_ids": [
+        "damiano-melotti-deep-disk-encryption-motivation-2023",
+        "damiano-melotti-deep-tool-adaptation-magisk-frida-2023",
+        "damiano-melotti-deep-collaboration-proofreading-2023",
+        "DM-EXT-03",
+        "DM-EXT-04",
+        "tl-05-fbe-writeup-recon23"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "为受限目标自建专用工具并把工具局限重构为方法优势",
+      "starting_conditions": "Titan M 安全芯片无现成命令接口、无调试器访问，需焊线至主板 UART 引脚维持持久控制台；通用 fuzzer 无法直接驱动目标。",
+      "repeated_practice": "为目标自建 nosclient（经内核驱动发送任意命令，同时用于模糊测试与利用投递）；评估多种仿真方案后选用 Unicorn，将其“仅 CPU 仿真、无全系统仿真”作为速度与可控性优势而非限制，配合 AFL++ 与 libprotobuf-mutator/Radamsa；2023 年按需改造 Magisk、使用 Frida 钩 system_server、引用 MTKClient，并将 nosclient 与 CVE-2022-20233 任意读原语复用于 Weaver PoC。",
+      "feedback": "工具自身行为（UC_ERR_WRITE_UNMAPPED 崩溃定位漏洞）、仿真可确定性验证（替代调试可见性）、同事校对、厂商对可复现性的质疑迫使补强证据。",
+      "intermediate_capability": "形成可跨目标复用的工具链与原语库（nosclient、仿真 harness、任意读原语），以及对工具能力边界的工程化判断。",
+      "observed_outcomes": [
+        "经仿真模糊测试发现 CVE-2022-20233",
+        "nosclient 与任意读原语在 2023 年 Weaver PoC 中复用",
+        "MTKClient 改造用于 MediaTek boot ROM 的 Gatekeeper PoC"
+      ],
+      "evidence_ids": [
+        "damiano-melotti-deep-tool-building-nosclient-2022",
+        "damiano-melotti-deep-tool-adaptation-magisk-frida-2023",
+        "DM-EXT-01",
+        "DM-EXT-03",
+        "tl-03-nosclient-tool",
+        "tl-05-fbe-writeup-recon23",
+        "dm-community-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "工具建设可能主要由 Quarkslab 团队基础设施与机构资源支撑，writeup 全为合著“we”，个人与团队贡献不可分离；dm-community-01 的 GitHub 提交归属仅依据姓名唯一性推断，账号 /damianomelotti、/DamianoMelotti 均返回 404，未在账号层面核实。跨题目复用亦可由团队累积的资产库解释，而非个人方法论。"
+    },
+    {
+      "name": "方法无效时主动转向并以失败记录驱动下一步选择",
+      "starting_conditions": "黑盒模糊测试只能覆盖目标浅层状态；SPI rescue 模糊测试无有意义结果；某已知漏洞因仿真缺乏全系统仿真无法在模拟环境复现；厂商初称未发现越界写且无法复现安全问题。",
+      "repeated_practice": "黑盒模糊测试覆盖不足后转向仿真模糊测试；SPI rescue 无结果后转向 Keymaster/Identity/Weaver 任务；厂商否认可复现后以密钥外泄 PoC 重新提交；2023 年对 Weaver 任务先逆向再试错提取密钥。",
+      "feedback": "fuzzer 覆盖度（浅层状态可观察）、仿真可复现性（已知 bug 不可复现）、厂商对可复现性与危害等级的判定（质疑迫更强证据）。",
+      "intermediate_capability": "在方法低效时放弃并重配努力方向的判断力，以及“以可演示影响回应质疑”的反馈应对模式。",
+      "observed_outcomes": [
+        "转向 Keymaster 后发现 CVE-2022-20233",
+        "补强 PoC 后奖励由 10,000 美元升至 75,000 美元并评 Critical",
+        "2023 年 Weaver PoC 经试错提取密钥"
+      ],
+      "evidence_ids": [
+        "damiano-melotti-deep-blackbox-to-emulation-pivot-2022",
+        "damiano-melotti-deep-disclosure-reward-feedback-2022",
+        "damiano-melotti-deep-tool-adaptation-magisk-frida-2023",
+        "DM-EXT-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "转向决策可能受团队决策与外部截止线（会议、赏金）驱动，而非个人方法论判断；writeup 中记录的失败可能为事后叙事重构，而非实时决策日志。时间先后（转向后即发现漏洞）不构成因果证明。"
+    },
+    {
+      "name": "缺乏调试可见性下的迭代逼近式利用构建",
+      "starting_conditions": "Titan M 无调试器与栈追踪，仅能经焊线的 UART 引脚读取日志；栈 pivot 缺乏现成 gadget。",
+      "repeated_practice": "逐步增大命令并监控 UART 日志定位触发点；仿真执行 Keymaster DestroyAttestationIds 定位栈中唯一未覆盖的 32-bit 槽；创造性构造栈 pivot gadget；以仿真可确定性替代调试可见性反复验证。",
+      "feedback": "UART 日志的增量响应、仿真执行的确定性验证。",
+      "intermediate_capability": "在近似黑盒约束下以仿真替代调试可见性、以日志增量迭代逼近触发点与利用布局的能力。",
+      "observed_outcomes": [
+        "1 字节越界写经指针重定向、ROP、任意读链外泄 StrongBox AES 密钥",
+        "2022-03-20 向 Google 演示代码执行"
+      ],
+      "evidence_ids": [
+        "damiano-melotti-deep-iterative-exploitation-2022",
+        "DM-EXT-01",
+        "tl-02-cve-2022-20233-report"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "利用链可能依赖 Quarkslab 此前约一年半的团队 Titan M 逆向成果与 Philippe Teuwen 的协作，故“以仿真替代调试可见性”可能为团队级实践而非个人能力；“最具挑战性的一步”为作者自述。"
+    },
+    {
+      "name": "先公开沉淀背景知识再推进新成果的发表与协作节奏",
+      "starting_conditions": "Quarkslab 具备 Black Hat/REcon/TROOPERS 发表传统；与 Maxime Rossi Bellom 长期合著；同事参与校对。",
+      "repeated_practice": "2021 年以白皮书与 Black Hat EU 演讲沉淀 Titan M 背景知识；2022 年以 writeup 与 Black Hat USA 2022/TROOPERS 2022 演讲输出 CVE-2022-20233 研究；2023 年以 writeup 与 REcon'23 演讲输出 FBE 研究。每个研究周期以 writeup 加会议演讲收束。",
+      "feedback": "会议议程采纳（reported，议程页未独立抓取）、同事校对、厂商赏金与严重等级作为外部校验。",
+      "intermediate_capability": "将研究转化为可审计公开产物的发表节奏与稳定的合著协作结构。",
+      "observed_outcomes": [
+        "2022-08-11 发布 Titan M writeup",
+        "Black Hat USA 2022 与 TROOPERS 2022 演讲（reported）",
+        "2023-08-14 发布 FBE writeup 并于 REcon'23 演讲"
+      ],
+      "evidence_ids": [
+        "damiano-melotti-deep-titan-m-origin-2022",
+        "damiano-melotti-deep-collaboration-proofreading-2023",
+        "DM-EXT-04",
+        "DM-EXT-05",
+        "tl-04-troopers-bhus-2022-talks",
+        "tl-06-bheu-2021-titan-m-odyssey"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "发表节奏可能为 Quarkslab 机构规范而非个人习惯；与 Maxime Rossi Bellom 的合著意味着个人发表主动性不可分离；会议“采纳”为作者自述（reported），议程委员会评审未独立核验；2021 年 Black Hat EU 作者署名边界未明。"
+    }
+  ],
+  "tensions": [
+    "奖金标准不透明：Google 公开称 Titan M 代码执行最高奖励 1,000,000 美元，实际获 75,000 美元，且未给出分级判据（documented，见 damiano-melotti-deep-disclosure-reward-feedback-2022 与 timeline contradictions）。",
+    "机构背景指向不一致：person_json 将 writeup_evidence 指向 Quarkslab，搜索引擎摘要将其背景指向 F-Secure/WithSecure；前者经 Quarkslab 作者页确认，后者为二手搜索摘要且可能由模型生成，未取得一手来源。",
+    "会议记录覆盖不一致：person_json 列 OffByOne 2024 / Black Hat US/EU，writeup 自述为 Black Hat EU 2021、TROOPERS 2022、Black Hat USA 2022、REcon'23；OffByOne 2024 与 Black Hat EU 相关页面未抓取成功。",
+    "协作与个人贡献不可分离：writeup 全为合著“we”（Maxime Rossi Bellom；逆向阶段含 Philippe Teuwen），并经同事校对，个人能力与团队贡献无法独立区分。",
+    "偶然机会作为研究起点：2023 年 FBE 研究由外部求助（设备主 SoC 损坏但 Titan M 可用）触发，而非纯学术动机。",
+    "明确记录的失败：黑盒模糊测试仅覆盖浅层状态、SPI rescue 模糊测试无有意义结果、某已知漏洞因仿真缺乏全系统仿真无法复现、Google 初称无法复现安全问题。",
+    "GitHub 提交归属仅依据姓名唯一性推断：dm-community-01 的署名提交存在，但账号 /damianomelotti、/DamianoMelotti 均返回 404，归属关系未在账号层面核实。"
+  ],
+  "transferable_practices": [
+    "为缺乏现成接口的受限目标自建专用通信客户端，并复用于模糊测试与利用投递。",
+    "方法覆盖不足或无结果时记录失败原因并据此重选目标与方法，而非延长无效路径。",
+    "以可演示影响（PoC 加运行日志）回应厂商对可复现性或危害等级的质疑，推动重新评估。",
+    "在缺乏调试器时以仿真执行的确定性替代调试可见性，配合日志增量迭代逼近触发点。",
+    "跨题目复用既有漏洞原语与自建工具，将一次成果作为后续研究的构建块。",
+    "在每个研究周期以 writeup 与会议演讲公开沉淀背景知识与成果，形成可审计的发表节奏。"
+  ],
+  "non_transferable_conditions": [
+    "Quarkslab 团队资源与长期合著关系（Maxime Rossi Bellom、Philippe Teuwen；同事校对）。",
+    "约一年半的团队 Titan M 固件逆向积累所形成的背景知识基础。",
+    "Titan M 硬件物理访问条件与 SuzyQable、UART 焊线等硬件手段。",
+    "Google Titan M 赏金计划与厂商反馈通道（特定于 Google/Android 生态）。",
+    "Black Hat/REcon/TROOPERS 等会议发表渠道与机构发表传统。"
+  ],
+  "open_questions": [
+    "OffByOne 2024 与 Black Hat EU 2024 的参与情况未核验（offbyone.ca ECONNREFUSED、blackhat.com 返回 403）。",
+    "教育背景、入职 Quarkslab 时间、当前雇主均缺失（LinkedIn/X 未抓取成功）。",
+    "2023-08-14 之后无公开可核验活动。",
+    "Black Hat EU 2021 “A Titan M Odyssey” 的作者署名边界未明，Damiano Melotti 是否为署名作者未在抓取文本中确认。",
+    "GitHub 提交归属仅靠姓名推断（dm-community-01），账号返回 404，无法在账号层面核实。",
+    "个人与团队贡献无法分离（writeup 全为合著“we”）。",
+    "F-Secure/WithSecure 背景指向未经一手来源确认，仅见于搜索引擎摘要。",
+    "X @DamianoMelotti 返回 HTTP 402，无法获取其自述近期活动。",
+    "公开作品维度（works）与关键决策维度（decisions）无可用的 evidence item，作品序列与关键决策无法重建。",
+    "长访谈、播客、AMA 等深度对话格式未取得，所提取的自述全部来自合著 writeup，非问答式深度对话。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/damiano-melotti-synthesis-v1-20260928-084019-040",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790556336835355000-damiano-melotti-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "cce12a8c-fc37-4594-acb1-39a965d95e0c",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_6k7s8iacii4nswgjdibqor0y",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/damiano-melotti-synthesis-v1-20260928-084019-040/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-28T00:45:36.884710+00:00"
+      },
+      {
+        "tool_use_id": "call_xgkax1sl95zwln1eosvltj7h",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/damiano-melotti-synthesis-v1-20260928-084019-040/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T00:45:36.884746+00:00"
+      },
+      {
+        "tool_use_id": "call_faqa50yj91i9byl8haxhlk00",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/damiano-melotti-synthesis-v1-20260928-084019-040/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "ca41adee1ab895426335e1fdd96ba7d16eac098e60dae6a77a7edce9118bd902",
+        "accessed_at": "2026-09-28T00:45:36.884753+00:00"
+      },
+      {
+        "tool_use_id": "call_3w6bazyp7dorkuronxg22mgy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/damiano-melotti-synthesis-v1-20260928-084019-040/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "f89279ce428cb0c664a026cf6ec85f17019f28ae5627d20b534dd41dfd31a5eb",
+        "accessed_at": "2026-09-28T00:45:36.884759+00:00"
+      },
+      {
+        "tool_use_id": "call_cq77x886pqus59v647ekb580",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/damiano-melotti-synthesis-v1-20260928-084019-040/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "3bf446dc00a4548630cd912ff44db7c3f512319079b3ded8b95ac383e28f3bd3",
+        "accessed_at": "2026-09-28T00:45:36.884817+00:00"
+      },
+      {
+        "tool_use_id": "call_vephfhfgxpugxu2w3dg7dxs0",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/damiano-melotti-synthesis-v1-20260928-084019-040/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-28T00:45:36.884823+00:00"
+      },
+      {
+        "tool_use_id": "call_gphofms59jihvdpvc5b9p5z9",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/damiano-melotti-synthesis-v1-20260928-084019-040/checkpoint.md",
+          "content": "# Checkpoint — Damiano Melotti 综合节点\n\n## 身份确认\n- Quarkslab 官方博客作者页 https://blog.quarkslab.com/author/damiano-melotti.html 列 Damiano Melotti 为 Android 类目作者，挂 2 篇合著文章（最早 2022-08-11）。\n- 身份一致性经 conversations/external/timeline 三个维度交叉确认；GitHub/LinkedIn/X 抓取失败不影响身份确认。\n\n## 已使用的有效证据（verified_in_run=true）\n- conversations: damiano-melotti-deep-titan-m-origin-2022 / -blackbox-to-emulation-pivot-2022 / -tool-building-nosclient-2022 / -iterative-exploitation-2022 / -disclosure-reward-feedback-2022 / -disk-encryption-motivation-2023 / -tool-adaptation-magisk-frida-2023 / -collaboration-proofreading-2023\n- community: dm-community-01（提交存在但归属仅姓名推断，已在 alternative_explanation 与 tensions 标注；dm-community-02 为 lead_only，不采用）\n- external: DM-EXT-01 ~ DM-EXT-05\n- timeline: tl-01 ~ tl-06\n\n## 不采用\n- damiano-melotti-deep-offbyone-2024-uncaptured：verified_in_run=false、status=unknown，仅列入 open_questions/tensions，不入 evidence_ids。\n- revision_context.json 为空，无定向补证引入。\n\n## 主要张力/缺口\n- 奖金标准不透明（1,000,000 vs 75,000 美元）。\n- 机构背景指向不一致（Quarkslab 经作者页确认；F-Secure/WithSecure 仅搜索摘要）。\n- 会议记录覆盖不一致（OffByOne 2024 / Black Hat EU 页面未抓取成功）。\n- 全部 writeup 为合著“we”，个人与团队贡献不可分离。\n- 2021 Black Hat EU“A Titan M Odyssey”作者署名边界未明。\n- 教育背景、入职时间、当前雇主、2023-08-14 后活动均缺失。\n- works/decisions 维度无 item，作品序列与关键决策无法重建。\n\n## 状态\n综合完成；拟写入 output.json，5 阶段 + 4 主机制。\n"
+        },
+        "success": true,
+        "content_sha256": "3465aa2636a73e1c6bb1e177feced4b7e9ab99eac2134e05caed839445da3a84",
+        "accessed_at": "2026-09-28T00:45:36.885401+00:00"
+      },
+      {
+        "tool_use_id": "call_m17jathd2nyshcb3g9uavkxu",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/damiano-melotti-synthesis-v1-20260928-084019-040/output.json",
+          "content": "{\n  \"person\": \"Damiano Melotti\",\n  \"expertise\": [\n    \"Android 安全芯片（Titan M）固件逆向与漏洞研究\",\n    \"安全芯片固件模糊测试（黑盒与 AFL++ Unicorn 仿真模式）\",\n    \"Android 文件级加密（FBE）与凭据加密（CE）密钥派生分析\",\n    \"TrustZone/Gatekeeper 与 Weaver 认证机制攻击\",\n    \"受限目标下的利用链构建（1 字节越界写经指针重定向、ROP、任意读到密钥外泄）\",\n    \"缺乏调试可见性下的迭代式利用（UART 日志监控、栈 pivot、gadget 构造）\",\n    \"面向目标的工具自建（nosclient）与运行时 hook（Frida）\",\n    \"MediaTek boot ROM 利用（经 MTKClient）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"约2020–2021年\",\n      \"stage\": \"团队固件逆向与背景知识沉淀\",\n      \"capability_change\": \"以 Quarkslab 团队形式对 Titan M 安全芯片固件开展约一年半的逆向工程，并以 Black Hat EU 2021 演讲（A Titan M Odyssey）与白皮书形式公开沉淀背景知识，构成后续模糊测试与利用工作的知识基础。Damiano Melotti 作为 2022 年合著 writeup 中“we”的一员参与该阶段；其是否为 2021 年演讲与白皮书的署名作者，在抓取文本中未明确（reported）。\",\n      \"evidence_ids\": [\n        \"damiano-melotti-deep-titan-m-origin-2022\",\n        \"tl-06-bheu-2021-titan-m-odyssey\",\n        \"DM-EXT-04\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2022年初至2022年8月\",\n      \"stage\": \"黑盒到仿真模糊测试转向与自建工具\",\n      \"capability_change\": \"自建 nosclient（Android 原生客户端，经内核驱动向 Titan M 发送任意命令），先用自建黑盒模糊测试（libprotobuf-mutator、Radamsa）测试，发现黑盒仅覆盖浅层状态后转向 AFL++ 的 Unicorn 模式仿真模糊测试；经 UC_ERR_WRITE_UNMAPPED 崩溃发现 Keymaster ImportKey 的 1 字节越界写（CVE-2022-20233），2022-03-02 向 Google 报告（documented）。GitHub 按姓名搜索存在署名 Damiano Melotti 的模糊测试工具链提交（dm-community-01，documented），但账号层面未核实，归属为推断。\",\n      \"evidence_ids\": [\n        \"damiano-melotti-deep-blackbox-to-emulation-pivot-2022\",\n        \"damiano-melotti-deep-tool-building-nosclient-2022\",\n        \"DM-EXT-01\",\n        \"tl-01-identity-quarkslab-author-page\",\n        \"tl-02-cve-2022-20233-report\",\n        \"tl-03-nosclient-tool\",\n        \"dm-community-01\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022年3月至6月\",\n      \"stage\": \"约束下的迭代式利用构建与披露闭环\",\n      \"capability_change\": \"在缺乏调试器与栈追踪的条件下，通过逐步增大命令并监控 UART 日志（焊线至主板 UART 引脚）定位触发点，以仿真执行 Keymaster DestroyAttestationIds 定位栈中唯一未覆盖的 32-bit 槽，构造栈 pivot 与 ROP，最终外泄 StrongBox AES 密钥；2022-03-20 向 Google 演示代码执行。Google 初称未发现越界写且无法复现安全问题，团队以密钥外泄 PoC 重新提交后，奖励由 10,000 美元提升至 75,000 美元并评 Critical（documented）。\",\n      \"evidence_ids\": [\n        \"damiano-melotti-deep-iterative-exploitation-2022\",\n        \"damiano-melotti-deep-disclosure-reward-feedback-2022\",\n        \"DM-EXT-01\",\n        \"DM-EXT-02\",\n        \"tl-02-cve-2022-20233-report\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022年下半年\",\n      \"stage\": \"研究成果的会议化公开发表\",\n      \"capability_change\": \"将 Titan M 研究转化为公开技术输出，于 TROOPERS 2022（6月底，德国）与 Black Hat USA 2022（8月，拉斯维加斯，题 Attack on Titan M Reloaded）演讲，并于 2022-08-11 发布配套 writeup。会议议程页未独立抓取成功，发表事实来自 writeup 正文转述（reported）。\",\n      \"evidence_ids\": [\n        \"tl-04-troopers-bhus-2022-talks\",\n        \"DM-EXT-05\",\n        \"damiano-melotti-deep-titan-m-origin-2022\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2023年\",\n      \"stage\": \"跨题目复用与方法扩展\",\n      \"capability_change\": \"由外部求助（设备主 SoC 损坏但 Titan M 可用）触发 Android 文件级加密（FBE）研究，明确限定仅软件攻击假设；复用 CVE-2022-20233 任意读原语构建 Weaver PoC，经 MTKClient 在 MediaTek boot ROM 上构建 Gatekeeper PoC，并以 Frida 钩住 system_server 泄露 Keymaster 中间解密结果；对 Weaver 任务采用先逆向再试错提取密钥。研究于 REcon'23 演讲（writeup 为 documented，会议为 reported）。\",\n      \"evidence_ids\": [\n        \"damiano-melotti-deep-disk-encryption-motivation-2023\",\n        \"damiano-melotti-deep-tool-adaptation-magisk-frida-2023\",\n        \"damiano-melotti-deep-collaboration-proofreading-2023\",\n        \"DM-EXT-03\",\n        \"DM-EXT-04\",\n        \"tl-05-fbe-writeup-recon23\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"为受限目标自建专用工具并把工具局限重构为方法优势\",\n      \"starting_conditions\": \"Titan M 安全芯片无现成命令接口、无调试器访问，需焊线至主板 UART 引脚维持持久控制台；通用 fuzzer 无法直接驱动目标。\",\n      \"repeated_practice\": \"为目标自建 nosclient（经内核驱动发送任意命令，同时用于模糊测试与利用投递）；评估多种仿真方案后选用 Unicorn，将其“仅 CPU 仿真、无全系统仿真”作为速度与可控性优势而非限制，配合 AFL++ 与 libprotobuf-mutator/Radamsa；2023 年按需改造 Magisk、使用 Frida 钩 system_server、引用 MTKClient，并将 nosclient 与 CVE-2022-20233 任意读原语复用于 Weaver PoC。\",\n      \"feedback\": \"工具自身行为（UC_ERR_WRITE_UNMAPPED 崩溃定位漏洞）、仿真可确定性验证（替代调试可见性）、同事校对、厂商对可复现性的质疑迫使补强证据。\",\n      \"intermediate_capability\": \"形成可跨目标复用的工具链与原语库（nosclient、仿真 harness、任意读原语），以及对工具能力边界的工程化判断。\",\n      \"observed_outcomes\": [\n        \"经仿真模糊测试发现 CVE-2022-20233\",\n        \"nosclient 与任意读原语在 2023 年 Weaver PoC 中复用\",\n        \"MTKClient 改造用于 MediaTek boot ROM 的 Gatekeeper PoC\"\n      ],\n      \"evidence_ids\": [\n        \"damiano-melotti-deep-tool-building-nosclient-2022\",\n        \"damiano-melotti-deep-tool-adaptation-magisk-frida-2023\",\n        \"DM-EXT-01\",\n        \"DM-EXT-03\",\n        \"tl-03-nosclient-tool\",\n        \"tl-05-fbe-writeup-recon23\",\n        \"dm-community-01\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"工具建设可能主要由 Quarkslab 团队基础设施与机构资源支撑，writeup 全为合著“we”，个人与团队贡献不可分离；dm-community-01 的 GitHub 提交归属仅依据姓名唯一性推断，账号 /damianomelotti、/DamianoMelotti 均返回 404，未在账号层面核实。跨题目复用亦可由团队累积的资产库解释，而非个人方法论。\"\n    },\n    {\n      \"name\": \"方法无效时主动转向并以失败记录驱动下一步选择\",\n      \"starting_conditions\": \"黑盒模糊测试只能覆盖目标浅层状态；SPI rescue 模糊测试无有意义结果；某已知漏洞因仿真缺乏全系统仿真无法在模拟环境复现；厂商初称未发现越界写且无法复现安全问题。\",\n      \"repeated_practice\": \"黑盒模糊测试覆盖不足后转向仿真模糊测试；SPI rescue 无结果后转向 Keymaster/Identity/Weaver 任务；厂商否认可复现后以密钥外泄 PoC 重新提交；2023 年对 Weaver 任务先逆向再试错提取密钥。\",\n      \"feedback\": \"fuzzer 覆盖度（浅层状态可观察）、仿真可复现性（已知 bug 不可复现）、厂商对可复现性与危害等级的判定（质疑迫更强证据）。\",\n      \"intermediate_capability\": \"在方法低效时放弃并重配努力方向的判断力，以及“以可演示影响回应质疑”的反馈应对模式。\",\n      \"observed_outcomes\": [\n        \"转向 Keymaster 后发现 CVE-2022-20233\",\n        \"补强 PoC 后奖励由 10,000 美元升至 75,000 美元并评 Critical\",\n        \"2023 年 Weaver PoC 经试错提取密钥\"\n      ],\n      \"evidence_ids\": [\n        \"damiano-melotti-deep-blackbox-to-emulation-pivot-2022\",\n        \"damiano-melotti-deep-disclosure-reward-feedback-2022\",\n        \"damiano-melotti-deep-tool-adaptation-magisk-frida-2023\",\n        \"DM-EXT-02\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"转向决策可能受团队决策与外部截止线（会议、赏金）驱动，而非个人方法论判断；writeup 中记录的失败可能为事后叙事重构，而非实时决策日志。时间先后（转向后即发现漏洞）不构成因果证明。\"\n    },\n    {\n      \"name\": \"缺乏调试可见性下的迭代逼近式利用构建\",\n      \"starting_conditions\": \"Titan M 无调试器与栈追踪，仅能经焊线的 UART 引脚读取日志；栈 pivot 缺乏现成 gadget。\",\n      \"repeated_practice\": \"逐步增大命令并监控 UART 日志定位触发点；仿真执行 Keymaster DestroyAttestationIds 定位栈中唯一未覆盖的 32-bit 槽；创造性构造栈 pivot gadget；以仿真可确定性替代调试可见性反复验证。\",\n      \"feedback\": \"UART 日志的增量响应、仿真执行的确定性验证。\",\n      \"intermediate_capability\": \"在近似黑盒约束下以仿真替代调试可见性、以日志增量迭代逼近触发点与利用布局的能力。\",\n      \"observed_outcomes\": [\n        \"1 字节越界写经指针重定向、ROP、任意读链外泄 StrongBox AES 密钥\",\n        \"2022-03-20 向 Google 演示代码执行\"\n      ],\n      \"evidence_ids\": [\n        \"damiano-melotti-deep-iterative-exploitation-2022\",\n        \"DM-EXT-01\",\n        \"tl-02-cve-2022-20233-report\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"利用链可能依赖 Quarkslab 此前约一年半的团队 Titan M 逆向成果与 Philippe Teuwen 的协作，故“以仿真替代调试可见性”可能为团队级实践而非个人能力；“最具挑战性的一步”为作者自述。\"\n    },\n    {\n      \"name\": \"先公开沉淀背景知识再推进新成果的发表与协作节奏\",\n      \"starting_conditions\": \"Quarkslab 具备 Black Hat/REcon/TROOPERS 发表传统；与 Maxime Rossi Bellom 长期合著；同事参与校对。\",\n      \"repeated_practice\": \"2021 年以白皮书与 Black Hat EU 演讲沉淀 Titan M 背景知识；2022 年以 writeup 与 Black Hat USA 2022/TROOPERS 2022 演讲输出 CVE-2022-20233 研究；2023 年以 writeup 与 REcon'23 演讲输出 FBE 研究。每个研究周期以 writeup 加会议演讲收束。\",\n      \"feedback\": \"会议议程采纳（reported，议程页未独立抓取）、同事校对、厂商赏金与严重等级作为外部校验。\",\n      \"intermediate_capability\": \"将研究转化为可审计公开产物的发表节奏与稳定的合著协作结构。\",\n      \"observed_outcomes\": [\n        \"2022-08-11 发布 Titan M writeup\",\n        \"Black Hat USA 2022 与 TROOPERS 2022 演讲（reported）\",\n        \"2023-08-14 发布 FBE writeup 并于 REcon'23 演讲\"\n      ],\n      \"evidence_ids\": [\n        \"damiano-melotti-deep-titan-m-origin-2022\",\n        \"damiano-melotti-deep-collaboration-proofreading-2023\",\n        \"DM-EXT-04\",\n        \"DM-EXT-05\",\n        \"tl-04-troopers-bhus-2022-talks\",\n        \"tl-06-bheu-2021-titan-m-odyssey\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"发表节奏可能为 Quarkslab 机构规范而非个人习惯；与 Maxime Rossi Bellom 的合著意味着个人发表主动性不可分离；会议“采纳”为作者自述（reported），议程委员会评审未独立核验；2021 年 Black Hat EU 作者署名边界未明。\"\n    }\n  ],\n  \"tensions\": [\n    \"奖金标准不透明：Google 公开称 Titan M 代码执行最高奖励 1,000,000 美元，实际获 75,000 美元，且未给出分级判据（documented，见 damiano-melotti-deep-disclosure-reward-feedback-2022 与 timeline contradictions）。\",\n    \"机构背景指向不一致：person_json 将 writeup_evidence 指向 Quarkslab，搜索引擎摘要将其背景指向 F-Secure/WithSecure；前者经 Quarkslab 作者页确认，后者为二手搜索摘要且可能由模型生成，未取得一手来源。\",\n    \"会议记录覆盖不一致：person_json 列 OffByOne 2024 / Black Hat US/EU，writeup 自述为 Black Hat EU 2021、TROOPERS 2022、Black Hat USA 2022、REcon'23；OffByOne 2024 与 Black Hat EU 相关页面未抓取成功。\",\n    \"协作与个人贡献不可分离：writeup 全为合著“we”（Maxime Rossi Bellom；逆向阶段含 Philippe Teuwen），并经同事校对，个人能力与团队贡献无法独立区分。\",\n    \"偶然机会作为研究起点：2023 年 FBE 研究由外部求助（设备主 SoC 损坏但 Titan M 可用）触发，而非纯学术动机。\",\n    \"明确记录的失败：黑盒模糊测试仅覆盖浅层状态、SPI rescue 模糊测试无有意义结果、某已知漏洞因仿真缺乏全系统仿真无法复现、Google 初称无法复现安全问题。\",\n    \"GitHub 提交归属仅依据姓名唯一性推断：dm-community-01 的署名提交存在，但账号 /damianomelotti、/DamianoMelotti 均返回 404，归属关系未在账号层面核实。\"\n  ],\n  \"transferable_practices\": [\n    \"为缺乏现成接口的受限目标自建专用通信客户端，并复用于模糊测试与利用投递。\",\n    \"方法覆盖不足或无结果时记录失败原因并据此重选目标与方法，而非延长无效路径。\",\n    \"以可演示影响（PoC 加运行日志）回应厂商对可复现性或危害等级的质疑，推动重新评估。\",\n    \"在缺乏调试器时以仿真执行的确定性替代调试可见性，配合日志增量迭代逼近触发点。\",\n    \"跨题目复用既有漏洞原语与自建工具，将一次成果作为后续研究的构建块。\",\n    \"在每个研究周期以 writeup 与会议演讲公开沉淀背景知识与成果，形成可审计的发表节奏。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Quarkslab 团队资源与长期合著关系（Maxime Rossi Bellom、Philippe Teuwen；同事校对）。\",\n    \"约一年半的团队 Titan M 固件逆向积累所形成的背景知识基础。\",\n    \"Titan M 硬件物理访问条件与 SuzyQable、UART 焊线等硬件手段。\",\n    \"Google Titan M 赏金计划与厂商反馈通道（特定于 Google/Android 生态）。\",\n    \"Black Hat/REcon/TROOPERS 等会议发表渠道与机构发表传统。\"\n  ],\n  \"open_questions\": [\n    \"OffByOne 2024 与 Black Hat EU 2024 的参与情况未核验（offbyone.ca ECONNREFUSED、blackhat.com 返回 403）。\",\n    \"教育背景、入职 Quarkslab 时间、当前雇主均缺失（LinkedIn/X 未抓取成功）。\",\n    \"2023-08-14 之后无公开可核验活动。\",\n    \"Black Hat EU 2021 “A Titan M Odyssey” 的作者署名边界未明，Damiano Melotti 是否为署名作者未在抓取文本中确认。\",\n    \"GitHub 提交归属仅靠姓名推断（dm-community-01），账号返回 404，无法在账号层面核实。\",\n    \"个人与团队贡献无法分离（writeup 全为合著“we”）。\",\n    \"F-Secure/WithSecure 背景指向未经一手来源确认，仅见于搜索引擎摘要。\",\n    \"X @DamianoMelotti 返回 HTTP 402，无法获取其自述近期活动。\",\n    \"公开作品维度（works）与关键决策维度（decisions）无可用的 evidence item，作品序列与关键决策无法重建。\",\n    \"长访谈、播客、AMA 等深度对话格式未取得，所提取的自述全部来自合著 writeup，非问答式深度对话。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "0b711f41f7e64493ba21133ab8fb0031b2e93b5762382a3a480063ab55bb3738",
+        "accessed_at": "2026-09-28T00:45:36.885413+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790556336885425000-damiano-melotti-synthesis-v1.json",
+    "label": "Damiano Melotti:synthesis:v1",
+    "elapsed_seconds": 317.86,
+    "prompt_sha256": "f205672573e2b950231850240bb43ab5282f5b1eaaf856443658f2af1991f83c",
+    "num_turns": 9,
+    "total_cost_usd": 0.683158,
+    "usage": {
+      "input_tokens": 32609,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 53376,
+      "output_tokens": 19737,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 32609,
+        "outputTokens": 19737,
+        "cacheReadInputTokens": 53376,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.683158,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

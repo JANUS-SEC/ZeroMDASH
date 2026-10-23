@@ -1,0 +1,471 @@
+{
+  "person": "Zhenghang Xiao (Kiprey)",
+  "expertise": [
+    "C/C++ 二进制利用：glibc ptmalloc 堆机制（fastbin、off-by-one、house 漏洞）、SROP、Linux 内核利用（Dirty Pipe、Dirty Cred、kernel pwn）",
+    "浏览器安全：Chromium/V8 漏洞分析与复现，覆盖 IndexedDB UAF 沙箱逃逸、WebUSB UAF、V8 TurboFan JIT 优化缺陷、TypeInductionVariablePhi、DCE、TypedArray detach 等类型",
+    "内核 fuzzing：syzkaller 环境部署与源码阅读，HEALER、CollAFL、VScape、COOP、IMF 等模糊测试与防御论文笔记，并自研内核 fuzzer 产出真实 CVE 与赏金（细节未披露）",
+    "静态分析与自动化：CodeQL 入门与深入、protobuf + AFL++ CTF 自动化 fuzz harness 构建",
+    "跨领域漏洞模式迁移：整数/精度损失、reentrancy（Curve Finance、Balancer 128M）、IPC 与沙箱逃逸（Chromium mojo、macOS Mach IPC）、网络中继（Tailscale DERP、ZeroTier Moon）",
+    "CTF 与团队协作：PlaidCTF、DEFCON Quals、RealWorldCTF、idekCTF、网鼎杯、pwnable.tw 等高水平赛事复盘，r3kapig 战队成员（战队加入仅一手间接确认）"
+  ],
+  "stages": [
+    {
+      "period": "2020-03 至 2020-05（本科早期）",
+      "stage": "二进制基础建立期",
+      "capability_change": "以 glibc ptmalloc 堆机制源码逐函数拆解为入门方式，覆盖 heap-1 arena 至 heap-14 house 漏洞、fastbin attack、off-by-one、UAF 与 SROP，并辅以 HNUCTF2020、pwnable.tw、网鼎杯、BUUOJ 题解；方法上以系统化源码阅读为主而非零散练习，形成可复用的堆利用心智模型。该阶段基础建立在 verified_in_run=false 的 works-02/timeline-02 上，属来源待补强阶段。",
+      "evidence_ids": [
+        "timeline-02-pwn-heap-foundations",
+        "kiprey-works-02-early-pwn-foundations"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2020-05 至 2020-09（博客开张与方向明确）",
+      "stage": "公开写作习惯起步与方向初次明确",
+      "capability_change": "2020-05-07 发布 Welcome 开张个人博客，确立以时间序列公开记录学习过程的习惯；同期完成 uCore Lab8 等教学操作系统练习。2020-09-27 起进入浏览器/V8 方向，2020-10-03 发布 PlaidCTF 2020 mojo（Chromium 沙箱逃逸）writeup，标志从通用 pwn 向 Chromium/V8 全栈研究的方向明确化，mojo IPC 与 V8 CVE 并行处理。",
+      "evidence_ids": [
+        "timeline-01-blog-start",
+        "kiprey-works-01-blog-established",
+        "timeline-03-browser-v8-start",
+        "kiprey-community-006"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2020-10 至 2021-04（浏览器深度期）",
+      "stage": "浏览器/V8 漏洞模式的重复练习",
+      "capability_change": "密集分析 CVE-2019-5826（IndexedDB UAF 配合沙箱逃逸）、CVE-2020-6541（WebUSB UAF）、CVE-2020-6549（media UAF）、CVE-2018-16065（V8 EmitBigTypedArrayElementStore）、CVE-2019-5755、CVE-2019-13764（V8 TypeInductionVariablePhi）、CVE-2020-6468（V8 DCE），并发布 V8 TurboFan IR 简析与 chromium/v8 编译指南。方法为手动源码审查 + 阶段化 POC 复现 + patch 对照，从单点 CVE 复现上升到对 TurboFan JIT 优化管线结构性漏洞类型的归纳。CVE-2020-6541 中主动暴露对 Promise 机制理解不足并将其定位为扩展学习主题，体现以缺口驱动自我补充学习的反馈。",
+      "evidence_ids": [
+        "kiprey-works-03-chrome-v8-series",
+        "kiprey-works-04-methodology-early-ack",
+        "timeline-04-v8-turbofan-cve-cluster",
+        "kiprey-community-005"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2020-12（静态分析引入）",
+      "stage": "静态分析工具引入",
+      "capability_change": "发布 CodeQL 入门与 CodeQL by security_lab 深入学习笔记，在手动源码审查之外引入自动化程序分析工具，扩展可处理代码规模与方法多样性。该阶段建立在 verified_in_run=false 的 works-05 上，属待补强阶段。",
+      "evidence_ids": [
+        "kiprey-works-05-codeql-and-tianwen"
+      ],
+      "confidence": "low"
+    },
+    {
+      "period": "2021-11 至 2022-03（内核 fuzzing 转向与论文阅读期）",
+      "stage": "从浏览器方向转向内核 fuzzing",
+      "capability_change": "研究方向发生显式转向：搭建 syzkaller 环境、撰写源码阅读笔记，系统阅读 HEALER、IMF、CollAFL、VScape、COOP 等模糊测试与利用防御论文，并以 protobuf + AFL++ 对 TCTF2021 babyheap2021 进行 CTF 自动化 fuzz。形成“工具使用 → 工具源码 → 学术方法”的递进，为后续自研 fuzzer 建立方法论知识库。fuzzing 论文/工具笔记系列由 timeline-05（verified）支撑，works-06（unverified）作为同期转述补充。",
+      "evidence_ids": [
+        "timeline-05-fuzzing-papers-and-tools",
+        "decisions-09-fuzzing-paper-reading-2021h2",
+        "kiprey-community-003",
+        "kiprey-works-06-kernel-fuzzing-pivot"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2021-12 至 2022-08（本科高年级至保研过渡期）",
+      "stage": "跨平台扩展与高水平 CTF 复盘",
+      "capability_change": "2021-12-24 发表《MacOSX Mach IPC 入门》，正文覆盖 Mach IPC（tasks/threads/ports/messages/port rights/MIG），将沙箱逃逸与 IPC 攻击面从 Chromium mojo 迁移到 macOS Mach；页面仅链接独立的 XPC 入门文，本文未涉及 XPC 正文、沙箱逃逸或 35c3 CTF pillow。2022-08-27 发表《Defcon-30-Quals rust-pwn constricted 复盘笔记》，复盘对象涵盖 LuaJIT、Rust+boa 引擎等多样技术栈。同期约 2021 年底联系清华网研院导师开始远程实习，进入主动对接研究组阶段。两项一手来源由 targeted 补证（r1-ev-01、r1-ev-03），早于 2022-09 录取与约 2023-09 入学，不应归入研究生阶段。",
+      "evidence_ids": [
+        "r1-ev-01-macos-mach-ipc",
+        "r1-ev-03-defcon30quals-constricted",
+        "kiprey-works-07-macos-sandbox",
+        "kiprey-works-10-ctf-repeat-practice",
+        "timeline-06-nisl-internship-2021",
+        "decisions-02-nisl-internship-dec2021"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022-04 至 2022-10（内核利用系统化与保研决策期）",
+      "stage": "内核利用系统化与保研策略沉淀",
+      "capability_change": "分析 Dirty Pipe（CVE-2022-0847）、提出 Dirty Cred 利用技术分析、分析 sudo（CVE-2021-3156）与 Linux Canary 机制；Dirty Cred 一文按 OOB write / UAF / Double Free 分类、跨引用自身 Dirty Pipe 分析、评估 24 个 CVE 的成功率，并指出 vmalloc 隔离缓解的失效边界，写作从复现转向抽象与评估。同期明确以“该论文已中 CCS 2022 & Black Hat USA 2022”标注他人会议工作，区分自身分析与引用。保研流程中经历复旦、北大软微、上交 ipads、南大等多校失败与候补，最终录取清华网研院学硕；将经历抽象为可复用优先级“提前联系导师进组实习 >> 科研经历与产出 > 项目经历 >= 竞赛经历 >= 大厂实习经历 >> rank”，并强调投递 top2 院校文书需精雕细磨。",
+      "evidence_ids": [
+        "kiprey-works-08-dirty-cred-systematic",
+        "kiprey-works-09-dirty-cred-conference-attribution",
+        "decisions-10-dirty-cred-attribution-correction",
+        "timeline-07-baoyan-camp-timeline",
+        "timeline-10-tsinghua-admission",
+        "kiprey-conv-03",
+        "kiprey-conv-04",
+        "kiprey-conv-07",
+        "decisions-01-baoyan-tsinghua"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022 年下半年至 2023-01（研究认知迭代与自研工具产出期）",
+      "stage": "从漏洞挖掘到研究问题定义的认知跃迁",
+      "capability_change": "经导师反馈“挖洞不是安全研究”与研究观“研究的对象应该是一个有规律的东西”后，将研究观从单纯漏洞挖掘转向系统化改进某一领域（更好的 fuzzing 覆盖率、更好的防御机制），以 e9afl/e9patch、Healer 的“问题 → 方案 → 实现”链条为方法论范本。自研约 2 万行（自写约 1.2 万行）内核 fuzzer 在头部厂商产品中发现漏洞、获 CVE 编号与赏金，并以第三作者向 USENIX Security 2023 投稿论文，形成“读论文 → 读源码 → 开发工具 → 获得产出 → 学术投稿”的完整链路；论文题目与最终录用状态未在一手源确认。2022 年上半年在 NISL 学术沙龙做一次论文汇报（学姐鼓励参与）。同年因博客长期可见性收到华为 HR 实习邀约、清华 chyyuu 邮件、上交 GOSSIP 实习邀约与 Water Paddler 战队邀约；其中 Water Paddler 加入仅由作者自述支撑，未一手确认。",
+      "evidence_ids": [
+        "kiprey-conv-08",
+        "decisions-03-research-philosophy-shift",
+        "timeline-09-fuzzer-cve-usenix-paper",
+        "decisions-06-fuzzer-output-cve-bounty",
+        "decisions-05-blog-driven-opportunities",
+        "timeline-08-blog-driven-opportunities-2022",
+        "decisions-07-academic-salon-talk-2022h1",
+        "kiprey-conv-09",
+        "decisions-04-employment-vs-grad-school"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2023-08 起（研究生阶段：跨领域扩展）",
+      "stage": "研究生阶段方向再扩展",
+      "capability_change": "研究面从浏览器/V8 向 DeFi 与网络中继扩展：2023-08-10 复现 Curve Finance Vyper 编译器 reentrancy 漏洞；2023-05-17 发表《使用 Frpc 进行内网穿透构建 ZeroTier Moon 记录》（记录连接由 RELAY 中继转为 DIRECT 直连、延迟由约 300ms 降至约 100ms）；2023-11-14 浅探 Tailscale DERP 中转；2025-11-23 发布 Balancer 128M Exploit Analysis（算术精度损失）。持续将过往底层漏洞模式（整数/精度、reentrancy）复用到新领域，方法迁移性可见。ZeroTier Moon 由 targeted r1-ev-02 一手确认；Curve/Balancer/Tailscale 项建立在 verified_in_run=false 的 works-11 与 timeline-12 上。",
+      "evidence_ids": [
+        "r1-ev-02-zerotier-moon-frpc",
+        "timeline-12-kernel-and-defi-extension",
+        "kiprey-works-11-blockchain-pivot"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "源码级系统拆解 + CVE 复现的重复练习",
+      "starting_conditions": "2020-03 入门阶段，以 glibc ptmalloc 堆机制与 CTF pwn 题为起点，具备源码阅读与二进制基础。",
+      "repeated_practice": "跨时期、跨领域对底层机制做逐函数拆解：早期 glibc heap-1 至 heap-14 源码精读；2020-10 至 2021-04 集中复现多枚 V8/Chromium CVE 并配 TurboFan IR 图分析；2021-11 起以 syzkaller 源码 + HEALER/CollAFL 论文笔记进入内核 fuzzing；2022-04 起对 Dirty Pipe/Dirty Cred 按 OOB write/UAF/Double Free 分类评估；2023-08 起对 Curve/Balancer 做 reentrancy 与精度损失复现。",
+      "feedback": "自我暴露知识边界并转化为下一学习主题（CVE-2020-6541 中承认对 Promise 机制理解不足并定位为扩展学习）；patch 对照与阶段化 POC 复现提供技术正确性反馈；导师反馈“挖洞不是安全研究”触发从复现向问题定义的认知校正。",
+      "intermediate_capability": "形成可迁移的漏洞模式心智模型（堆利用、JIT 优化缺陷、UAF、类型混淆、reentrancy、整数精度），能在新领域快速复用既有分析方法。",
+      "observed_outcomes": [
+        "Dirty Cred 一文按缺陷类型分类、跨引用自身 Dirty Pipe 分析并评估 24 个 CVE 成功率与 vmalloc 隔离缓解边界（documented, kiprey-works-08）",
+        "TurboFan 系列与多枚 V8 CVE 复现形成浏览器漏洞模式归纳（documented, kiprey-works-03/timeline-04）",
+        "自研内核 fuzzer 发现真实厂商漏洞、获 CVE 编号与赏金（reported, timeline-09/decisions-06；细节未披露）"
+      ],
+      "evidence_ids": [
+        "kiprey-works-02-early-pwn-foundations",
+        "kiprey-works-03-chrome-v8-series",
+        "kiprey-works-04-methodology-early-ack",
+        "kiprey-works-08-dirty-cred-systematic",
+        "timeline-04-v8-turbofan-cve-cluster",
+        "timeline-05-fuzzing-papers-and-tools",
+        "r1-ev-02-zerotier-moon-frpc",
+        "timeline-12-kernel-and-defi-extension"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "公开可见的博客内容存在选择性发表偏差：复现类与分析类文章更易被记录，独立发现类（如自研 fuzzer 触发的 CVE）细节未披露，可能使“系统化拆解”机制的可观察产出被高估。早期堆机制阶段（works-02）与 CodeQL/内核 fuzzing 转向点（works-05/06）尚未一手验证，时间因果链条依赖待补强来源。"
+    },
+    {
+      "name": "公开写作作为被动反馈与机会通路",
+      "starting_conditions": "2020-05-07 开张个人博客并长期维护（版权跨越 2020-2026），习惯以时间序列公开记录学习与研究成果；handle Kiprey 与博客、社交账号可交叉确认，真名 Zhenghang Xiao 与 handle 的绑定仅依赖 person_json 输入（inferred）。",
+      "repeated_practice": "持续发布技术博客：heap 系列、V8/Chromium CVE 系列、TurboFan IR 分析、syzkaller/fuzzing 论文笔记、内核利用分析、CTF writeup、年度总结，并保留课程笔记（uCore 等）。",
+      "feedback": "博客长期可见性带来被动外部触达：2022-05 华为 HR 实习邀约与清华 chyyuu（uCore 作者）通过 SJTU ipads x 老师转发的邮件联络、2022-09 上交 GOSSIP 实习邀约、2022-10 Water Paddler 战队邀约；保研中上交 ipads x 老师翻看其博客 uCore 课程笔记后推荐给 chyyuu。上述反馈来源均为作者自述（reported），external 维度未独立佐证。",
+      "intermediate_capability": "以公开输出作为被外部识别的媒介，形成“输出 → 被识别 → 新机会 → 再投入”的正反馈循环，而非孤立提升技术。",
+      "observed_outcomes": [
+        "2022-05 起的实习/战队邀约（reported, timeline-08/decisions-05）",
+        "保研中导师通过博客课程笔记建立内推（documented, kiprey-conv-05）",
+        "持续至 2026 年的博客维护与版权署名（documented, kiprey-works-01）"
+      ],
+      "evidence_ids": [
+        "timeline-01-blog-start",
+        "kiprey-works-01-blog-established",
+        "kiprey-conv-05",
+        "timeline-08-blog-driven-opportunities-2022",
+        "decisions-05-blog-driven-opportunities",
+        "kiprey-conv-09"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "机会与博客写作的相关性由作者在 2022 年终总结中自述建立，未由华为/清华/上交/Water Paddler 等外部方独立确认；Water Paddler 加入事实仅由自述支撑，community.gaps 明确邀约后续是否加入未一手确认。竞争性解释：邀约可能同时由 NISL 实习身份、CVE 产出与博客共同触发，博客不一定是唯一通路。"
+    },
+    {
+      "name": "论文阅读 + 工具源码 + 自研工具的递进式研究链",
+      "starting_conditions": "2021-11 起对 fuzzing 主题产生兴趣，具备 syzkaller 环境部署与 AFL++ 实战基础，并已在 CVE-2020-6541 中养成以扩展阅读驱动自我补充学习的习惯。",
+      "repeated_practice": "以“读论文（HEALER/CollAFL/VScape/COOP/IMF 笔记）→ 读工具源码（syzkaller）→ 开发工具（自研内核 fuzzer 约 2 万行）→ 获得产出（CVE、赏金）→ 学术投稿（USENIX Security 2023 三作）”的递进链条投入研究主题。",
+      "feedback": "导师将“挖洞不是安全研究”的论断与“研究的对象应该是一个有规律的东西”的研究观反馈给作者；以 Healer“发现 syscall 序列覆盖率不足 → 提出 syscall 间显式与隐式关系 → 分析 syzlang 与覆盖率反馈实现”为研究链条范本，校正从战术型漏洞挖掘向研究型问题定义的视角。",
+      "intermediate_capability": "能把模糊测试方法论文落地为自研工具，并以此产出可核验的真实漏洞成果与学术投稿，形成从学习者向漏洞挖掘研究者身份转变的里程碑。",
+      "observed_outcomes": [
+        "自研 fuzzer 在头部厂商产品中发现漏洞、获 CVE 编号与赏金（reported, timeline-09/decisions-06；工具名与 CVE 编号未披露）",
+        "以第三作者向 USENIX Security 2023 投稿论文（reported, timeline-09；论文题目与最终录用状态未确认）",
+        "模糊测试论文/工具笔记系列公开输出（documented, timeline-05/decisions-09）"
+      ],
+      "evidence_ids": [
+        "timeline-05-fuzzing-papers-and-tools",
+        "decisions-09-fuzzing-paper-reading-2021h2",
+        "timeline-09-fuzzer-cve-usenix-paper",
+        "decisions-06-fuzzer-output-cve-bounty",
+        "kiprey-conv-08",
+        "decisions-03-research-philosophy-shift"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "自研 fuzzer 的具体 CVE 编号、受影响厂商、赏金数额与 USENIX Security 2023 论文题目/录用状态均未在一手源披露，无法独立核验“工具 → 产出 → 学术投稿”链路的末端；链路完整性依赖作者自述。竞争性解释：该投稿可能为团队成果而非作者工具直接驱动，作者为三作的身份亦削弱单一个体因果归因。"
+    },
+    {
+      "name": "失败结构化归因 + 策略清单化沉淀",
+      "starting_conditions": "2022 年保研流程中面临多校面试，初期以方向匹配与提前联系导师的优先级未完全清晰、对机试与开放性科研思维题准备不足为起点。",
+      "repeated_practice": "对每一次失败做结构化归因而非归结为运气：复旦机试仅做出第一题、英语面试被追问 Related Work，归因为自身模糊测试方向与该组软件代码分析主攻方向不匹配；南大千人海营要求英语描述 Kruskal 算法，归因为车祸后未做准备；上交 ipads 开放性科研思维题（单 CPU → 多 CPU 并行）答不上来，归因为研究迁移能力短板；据此调整后续投递策略，更重视方向匹配与提前联系导师，并对学硕/专硕/直博做明确约束-排除式决策。",
+      "feedback": "导师群体在面试当晚主动来电认可其模糊测试经验、中科大老师保留名额直到清北结果出炉；上交 ipads x 老师翻看博客 uCore 笔记后推荐给清华 chyyuu；清华网研院夏令营未入营后重新归因（优先直博），并在预推免保持目标院校投递，最终录取。",
+      "intermediate_capability": "将经历抽象为可传播的方法论与优先级清单“提前联系导师进组实习 >> 科研经历与产出 > 项目经历 >= 竞赛经历 >= 大厂实习经历 >> rank”，并强调投递 top2 院校文书需精雕细磨；具备对失败信息的二次核实习惯（如清华预推免“比想象的要好”）。",
+      "observed_outcomes": [
+        "保研策略优先级清单（documented, kiprey-conv-07/decisions-02）",
+        "2022-09-19 录取清华网研院学硕（documented, timeline-10）",
+        "在多 offer 间按研究方向定向取舍、放弃部分优营（documented, timeline-07/kiprey-conv-06）"
+      ],
+      "evidence_ids": [
+        "kiprey-conv-03",
+        "kiprey-conv-04",
+        "kiprey-conv-06",
+        "kiprey-conv-07",
+        "timeline-07-baoyan-camp-timeline",
+        "timeline-10-tsinghua-admission",
+        "decisions-01-baoyan-tsinghua",
+        "decisions-02-nisl-internship-dec2021"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "保研成功是多因素结果（GPA 3.79/4.00、专业排名 1/42、NISL 长期远程实习、自研 fuzzer 产出、导师内推），结构化归因机制只是其中一环，不能单独解释录取结果。竞争性解释：NISL 实习身份与导师内推可能比归因策略本身更具决定性。"
+    }
+  ],
+  "tensions": [
+    "primary_focus 标注与时间线张力：person_json 将 primary_focus 标为“浏览器安全与 fuzzing”，但一手博客中浏览器/V8 内容集中于 2020-10 至 2021-04，之后转向内核 fuzzing/macOS/CTF/区块链/网络中继，2022-2025 未见新的浏览器/V8 一手 writeup（kiprey-works-13、timeline contradictions）。两者不构成直接矛盾（研究面可扩展），但“专注浏览器安全”的标签与后期博客重心存在张力。",
+    "selected_conference_evidence 与一手来源冲突：person_json 标注“Black Hat US/Asia / POC”，但一手博客中唯一与 Black Hat 相关的记录是 2022-10-06 Dirty Cred 浅析文，且以第三人称“该论文”指代 CCS 2022 & Black Hat USA 2022 原工作（原作者 Zhenpeng Lin 等），未声明本人为论文作者或演讲者；2022 年终总结与保研历程亦未提及本人在 Black Hat/POC 演讲（kiprey-works-09/14、decisions-10、timeline-13）。需以一手来源为准并下调为“未证实本人演讲”。",
+    "qualification 字段“浏览器漏洞发现与利用”与证据强度张力：博客中浏览器相关记录以 CVE 分析/复现为主，未见由 Kiprey 首次披露并被厂商致谢的浏览器 CVE；可证实的“漏洞发现”产出集中在自研 fuzzer 领域（CVE 编号与赏金细节未披露），而非浏览器领域（decisions contradictions）。",
+    "真名-handle 绑定缺口：person_json 给出真名“Zhenghang Xiao”，但一手博客内容作者仅以 handle Kiprey 自称，未出现真名；真名与 handle 的绑定仅依赖 person_json 输入（inferred），未在已抓取页面中找到将法定名与 handle 绑定到同一主体的第三方权威档案（works/timeline/community identity_check gaps）。",
+    "研究认知转型与持续产出之间的观察缺口：作者 2022 年自述研究观从“单纯挖洞”转向“系统化改进某一领域”，但 2023-2025 博客可见产出仍以单点漏洞复现/分析（Curve、Balancer、Tailscale DERP）为主，缺少体现“系统化改进方法”的独立工具或论文一手产出（其自研 fuzzer 工具名、CVE、论文题目均未披露），认知转型与可观察产出之间存在资料缺口。"
+  ],
+  "transferable_practices": [
+    "以源码级逐函数拆解底层机制（glibc heap、V8 TurboFan、syzkaller）作为进入新领域的入门方式，而非停留在题解层面；并以阶段化 POC 复现 + patch 对照作为技术正确性反馈（源自 kiprey-works-02/03/04/08、timeline-05）。",
+    "主动暴露知识边界并将其转化为下一学习主题（如 CVE-2020-6541 中承认对 Promise 机制理解不足并定位为扩展学习），形成以缺口驱动自我补充学习的反馈机制（源自 kiprey-works-04、kiprey-conv-02）。",
+    "以“读论文 → 读工具源码 → 开发工具 → 获得产出 → 学术投稿”的递进链条投入研究主题，用论文方法指导工具实现，用工具产出验证方法（源自 timeline-05/09、decisions-09/06）。",
+    "长期维护个人技术博客并保留课程笔记，使公开输出成为被外部识别的被动通路（实习/战队/导师内推），形成“输出 → 被识别 → 新机会”的正反馈循环（源自 timeline-01/08、decisions-05、kiprey-conv-05）。",
+    "对每次失败做结构化归因（方向不匹配、未做准备、能力短板）而非归结为运气，并将经验抽象为可复用的优先级清单与策略（提前联系导师进组实习 >> 科研经历与产出 > 项目经历 >= 竞赛经历 >= 大厂实习经历 >> rank；投递 top2 院校文书需精雕细磨）（源自 kiprey-conv-03/04/07、decisions-02）。",
+    "对高曝光他人工作明确以“分析者/转述者”身份出现而非冒认作者，标注原始会议归属与原作者，体现来源意识与学术诚信边界（源自 kiprey-works-09、decisions-10）。"
+  ],
+  "non_transferable_conditions": [
+    "本科院校与 GPA/排名条件：自述末流 985 信息安全专业、GPA 3.79/4.00、专业排名 1/42，是保研多校投递与录取的基础门槛，他人不具备同口径学术背景则策略清单不可直接复制（源自 timeline-07、kiprey-conv-01）。",
+    "NISL 长期远程实习身份：约 2021 年底起在清华网研院远程实习约一年，早于正式保研申请，被视为进入顶级实验室的主要筹码；该身份与导师内推网络（清华 chyyuu、上交 ipads x 老师、NISL 学姐）是个人特有条件，非公开写作习惯单独可获（源自 decisions-02、timeline-06、kiprey-conv-05/09）。",
+    "腾讯安全玄武实验室实习与头部厂商 CVE 产出：自研 fuzzer 发现真实厂商漏洞、获 CVE 编号与赏金，以及 USENIX Security 2023 三作投稿，依赖实验室资源、厂商接触面与团队协作，细节未披露且不可独立复现（源自 timeline-09、decisions-06；细节见 gaps）。",
+    "时间窗口与保研制度环境：2022 年保研流程的多校夏令营/预推免节奏、清华网研院外校硕士 25 进 10 的录取口径、机考占比由 10% 升至 20% 等为特定年份的制度条件，他人无法复刻同一时间窗（源自 timeline-10、kiprey-conv-06）。",
+    "会议演讲资格的不可证实性：person_json 标注的 Black Hat US/Asia / POC 演讲资格未在一手源证实，不能作为可迁移的公开演讲实践基础（源自 kiprey-works-14、timeline-13、decisions contradictions）。"
+  ],
+  "open_questions": [
+    "自研 fuzzer 的工具名称、具体 CVE 编号、受影响厂商、赏金数额与时间均未在博客披露，无法独立核验“工具建设 → 真实漏洞产出”链路末端（decisions gaps、timeline gaps）。",
+    "作为第三作者投递的 USENIX Security 2023 论文题目、摘要与最终录用状态未在一手源披露，无法核验“投稿”是否最终“发表”，亦无法确认作者实际贡献（revision_context unresolved、timeline gaps）。",
+    "Water Paddler 战队加入事实仅由 2022 年终总结自述（reported）支撑，邀约后续是否加入未一手确认，external 维度无独立佐证（revision_context unresolved、community gaps）。",
+    "kiprey-community-001（idekCTF2022 Coroutine Writeup）与 kiprey-community-002（CTF Docker 小记）的 claim URL 返回 404，archives 页确认标题与日期存在，但 r3kapig 战队归属与“4 队解出”细节无法用原 URL 一手验证（revision_context unresolved）。",
+    "真名 Zhenghang Xiao 与 handle Kiprey 的独立一手绑定未获证实：博客 About 页未提供真实姓名，未找到将法定名与 handle 绑定到同一主体的第三方权威档案（works/conversations/community/timeline identity_check gaps）。",
+    "works-02（glibc heap，2020-05-04）、works-05（CodeQL，2020-12-06）、works-06（syzkaller/Healer，2021-11-20）、works-11（Curve/Balancer，2023-08）、works-12（年度总结，2023-01-05）等 verified_in_run=false 项因抓取预算约束未本次一手验证，相关阶段/机制的早期因果链条保留待补强状态（revision_context unresolved）。",
+    "Black Hat US/Asia / POC 会议演讲未一手核验：本节点未抓取任何 Black Hat 或 POC 官方议程/speaker 页面，无法确认演讲年份、议题、是否本人主讲（timeline gaps、decisions gaps）。",
+    "2023-2026 期间是否仍有年终总结或后续长自述未确认；本节点仅确认到 2022 年自述，研究生阶段的纵向反馈回路与方向扩展动机缺少叙述性博文说明（conversations gaps、decisions gaps）。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790756160915682000-zhenghang-xiao-kiprey-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "e17e34f5-288c-4bbc-b782-06ec0a8dae19",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_07praw175isary87wcur0uoy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "2e7b4a983c619035aabd676c64b00d9b1fa9c84dfe0cdede4ce3be64ccc3ac63",
+        "accessed_at": "2026-09-30T08:16:00.963445+00:00"
+      },
+      {
+        "tool_use_id": "call_mwbrihypgt4j62s993tmh9ap",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/task.md"
+        },
+        "success": true,
+        "content_sha256": "97eada5137645206aaf6d8e81bb231f493ccf006c9eeebb71a9f199704f06f66",
+        "accessed_at": "2026-09-30T08:16:00.963473+00:00"
+      },
+      {
+        "tool_use_id": "call_hmktokmg3mmnbjwkqwupto1u",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "050bd4c40f4c9d6ca187ad8aae906297458cf4bd5cddedcca009c26c73b81919",
+        "accessed_at": "2026-09-30T08:16:00.963483+00:00"
+      },
+      {
+        "tool_use_id": "call_k4djv4ntoy6t61weyg6en40l",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "215a5a9f6f4cb7772381ea157d184eb2897ed4a6abf8120e193b9f0558e3bd85",
+        "accessed_at": "2026-09-30T08:16:00.963495+00:00"
+      },
+      {
+        "tool_use_id": "call_uvkthpr6goljmpdav8kbr1jm",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "3ff7af8465696344d1b16dd26ee0883adb20f5d85b9da460c97dd95f2a672a5b",
+        "accessed_at": "2026-09-30T08:16:00.963507+00:00"
+      },
+      {
+        "tool_use_id": "call_iitehs5bim14w15jpn4g323f",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "6863bf0e3cd6e1c150a0f0ee4b0439d8f4a3202d35b3c3892f301cd95b8dbd4d",
+        "accessed_at": "2026-09-30T08:16:00.963573+00:00"
+      },
+      {
+        "tool_use_id": "call_0cqz06zp2ridmredh68geh4g",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/inputs/evidence_json.json",
+          "offset": 902,
+          "limit": 433
+        },
+        "success": true,
+        "content_sha256": "cbec6b2d909a708f4469382ed277d3d03716b8fbca6217d20557235964972953",
+        "accessed_at": "2026-09-30T08:16:00.963612+00:00"
+      },
+      {
+        "tool_use_id": "call_px2y9sz3gz335nkbyjait75s",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/checkpoint.md",
+          "content": "# 综合节点 checkpoint\n\n## 当前节点\nzhenghang-xiao-kiprey-synthesis-v2（综合分析师，第二次综合，已含复核修订指令）\n\n## 已读取文件\n- task.md（综合分析师角色，重建领域能力成长过程；6 维材料 + 定向补证 + 修订指令）\n- output.schema.json（person/expertise/stages/mechanisms/tensions/transferable_practices/non_transferable_conditions/open_questions；_run 与 verification 不得自填）\n- inputs/person_json.json（rank 20，Zhenghang Xiao (Kiprey)，浏览器安全与 fuzzing，blog kiprey.github.io，social @Kipreyyy，Black Hat US/Asia / POC）\n- inputs/evidence_json.json（works 14 项 / conversations 10 项 / community 7 项 / external 0 项 / decisions 10 项 / timeline 13 项 / targeted 3 项）\n- inputs/revision_context.json（7 条 synthesis_instructions + 7 条 unresolved）\n\n## 证据状态盘点（verified_in_run=true 为主支撑）\n- works 维度已验证：works-01, works-03, works-04, works-08, works-09, works-13, works-14；未验证：works-02, works-05, works-06, works-07, works-10, works-11, works-12（works-07/10 由 targeted r1-ev-01/03 一手补强；ZeroTier Moon 由 r1-ev-02 补强）\n- conversations 维度：conv-01 至 conv-10 全部 verified\n- community 维度已验证：community-003 至 community-007；未验证：community-001, community-002\n- decisions 维度已验证：decisions-01 至 07, 09, 10；未验证：decisions-08\n- timeline 维度已验证：timeline-01 至 10, 12, 13；未验证：timeline-11\n- targeted 维度：r1-ev-01, r1-ev-02, r1-ev-03 全部 verified\n\n## 修订指令落实计划\n1. stages 拆分：原 stage 5 拆为\"本科高年级至保研过渡期（2021-12 至 2022-08）\"（含 works-07/10）与\"研究生阶段（2023-09 起，含 ZeroTier Moon 前置）\"。\n2. macOS 子描述精确化：仅 Mach IPC（XPC/沙箱逃逸为相关主题但本文未证实）。\n3. ZeroTier Moon 日期修正为 2023-05-17，归入研究生阶段前置。\n4. \"向学术发表延伸\"改为\"向学术投稿延伸\"（USENIX Security 2023 题目/录用未确认）。\n5. mechanisms[0] confidence 下调为 medium，机会类产出标注 reported。\n6. 引用 verified_in_run=false 项时显式标注 status 并下调 confidence。\n7. 文字修订：开发工具/获得产出、练习、自我补充学习、提前联系导师、漏洞挖掘。\n\n## 下一步\n按 schema 写入 output.json（8 stages / 4 mechanisms / tensions / transferable / non_transferable / open_questions），逐字段对照枚举与必填项校验。\n"
+        },
+        "success": true,
+        "content_sha256": "9af7f2663702e45e32f7543f8672626e0ea4ad0c2314f076bf932a1c8826916c",
+        "accessed_at": "2026-09-30T08:16:00.964155+00:00"
+      },
+      {
+        "tool_use_id": "call_j1evtm1xrf7mgtv5kzggx1b8",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/output.json",
+          "content": "{\n  \"person\": \"Zhenghang Xiao (Kiprey)\",\n  \"expertise\": [\n    \"C/C++ 二进制利用：glibc ptmalloc 堆机制（fastbin、off-by-one、house 漏洞）、SROP、Linux 内核利用（Dirty Pipe、Dirty Cred、kernel pwn）\",\n    \"浏览器安全：Chromium/V8 漏洞分析与复现，覆盖 IndexedDB UAF 沙箱逃逸、WebUSB UAF、V8 TurboFan JIT 优化缺陷、TypeInductionVariablePhi、DCE、TypedArray detach 等类型\",\n    \"内核 fuzzing：syzkaller 环境部署与源码阅读，HEALER、CollAFL、VScape、COOP、IMF 等模糊测试与防御论文笔记，并自研内核 fuzzer 产出真实 CVE 与赏金（细节未披露）\",\n    \"静态分析与自动化：CodeQL 入门与深入、protobuf + AFL++ CTF 自动化 fuzz harness 构建\",\n    \"跨领域漏洞模式迁移：整数/精度损失、reentrancy（Curve Finance、Balancer 128M）、IPC 与沙箱逃逸（Chromium mojo、macOS Mach IPC）、网络中继（Tailscale DERP、ZeroTier Moon）\",\n    \"CTF 与团队协作：PlaidCTF、DEFCON Quals、RealWorldCTF、idekCTF、网鼎杯、pwnable.tw 等高水平赛事复盘，r3kapig 战队成员（战队加入仅一手间接确认）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2020-03 至 2020-05（本科早期）\",\n      \"stage\": \"二进制基础建立期\",\n      \"capability_change\": \"以 glibc ptmalloc 堆机制源码逐函数拆解为入门方式，覆盖 heap-1 arena 至 heap-14 house 漏洞、fastbin attack、off-by-one、UAF 与 SROP，并辅以 HNUCTF2020、pwnable.tw、网鼎杯、BUUOJ 题解；方法上以系统化源码阅读为主而非零散练习，形成可复用的堆利用心智模型。该阶段基础建立在 verified_in_run=false 的 works-02/timeline-02 上，属来源待补强阶段。\",\n      \"evidence_ids\": [\"timeline-02-pwn-heap-foundations\", \"kiprey-works-02-early-pwn-foundations\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2020-05 至 2020-09（博客开张与方向明确）\",\n      \"stage\": \"公开写作习惯起步与方向初次明确\",\n      \"capability_change\": \"2020-05-07 发布 Welcome 开张个人博客，确立以时间序列公开记录学习过程的习惯；同期完成 uCore Lab8 等教学操作系统练习。2020-09-27 起进入浏览器/V8 方向，2020-10-03 发布 PlaidCTF 2020 mojo（Chromium 沙箱逃逸）writeup，标志从通用 pwn 向 Chromium/V8 全栈研究的方向明确化，mojo IPC 与 V8 CVE 并行处理。\",\n      \"evidence_ids\": [\"timeline-01-blog-start\", \"kiprey-works-01-blog-established\", \"timeline-03-browser-v8-start\", \"kiprey-community-006\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020-10 至 2021-04（浏览器深度期）\",\n      \"stage\": \"浏览器/V8 漏洞模式的重复练习\",\n      \"capability_change\": \"密集分析 CVE-2019-5826（IndexedDB UAF 配合沙箱逃逸）、CVE-2020-6541（WebUSB UAF）、CVE-2020-6549（media UAF）、CVE-2018-16065（V8 EmitBigTypedArrayElementStore）、CVE-2019-5755、CVE-2019-13764（V8 TypeInductionVariablePhi）、CVE-2020-6468（V8 DCE），并发布 V8 TurboFan IR 简析与 chromium/v8 编译指南。方法为手动源码审查 + 阶段化 POC 复现 + patch 对照，从单点 CVE 复现上升到对 TurboFan JIT 优化管线结构性漏洞类型的归纳。CVE-2020-6541 中主动暴露对 Promise 机制理解不足并将其定位为扩展学习主题，体现以缺口驱动自我补充学习的反馈。\",\n      \"evidence_ids\": [\"kiprey-works-03-chrome-v8-series\", \"kiprey-works-04-methodology-early-ack\", \"timeline-04-v8-turbofan-cve-cluster\", \"kiprey-community-005\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020-12（静态分析引入）\",\n      \"stage\": \"静态分析工具引入\",\n      \"capability_change\": \"发布 CodeQL 入门与 CodeQL by security_lab 深入学习笔记，在手动源码审查之外引入自动化程序分析工具，扩展可处理代码规模与方法多样性。该阶段建立在 verified_in_run=false 的 works-05 上，属待补强阶段。\",\n      \"evidence_ids\": [\"kiprey-works-05-codeql-and-tianwen\"],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2021-11 至 2022-03（内核 fuzzing 转向与论文阅读期）\",\n      \"stage\": \"从浏览器方向转向内核 fuzzing\",\n      \"capability_change\": \"研究方向发生显式转向：搭建 syzkaller 环境、撰写源码阅读笔记，系统阅读 HEALER、IMF、CollAFL、VScape、COOP 等模糊测试与利用防御论文，并以 protobuf + AFL++ 对 TCTF2021 babyheap2021 进行 CTF 自动化 fuzz。形成\"工具使用 → 工具源码 → 学术方法\"的递进，为后续自研 fuzzer 建立方法论知识库。fuzzing 论文/工具笔记系列由 timeline-05（verified）支撑，works-06（unverified）作为同期转述补充。\",\n      \"evidence_ids\": [\"timeline-05-fuzzing-papers-and-tools\", \"decisions-09-fuzzing-paper-reading-2021h2\", \"kiprey-community-003\", \"kiprey-works-06-kernel-fuzzing-pivot\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2021-12 至 2022-08（本科高年级至保研过渡期）\",\n      \"stage\": \"跨平台扩展与高水平 CTF 复盘\",\n      \"capability_change\": \"2021-12-24 发表《MacOSX Mach IPC 入门》，正文覆盖 Mach IPC（tasks/threads/ports/messages/port rights/MIG），将沙箱逃逸与 IPC 攻击面从 Chromium mojo 迁移到 macOS Mach；页面仅链接独立的 XPC 入门文，本文未涉及 XPC 正文、沙箱逃逸或 35c3 CTF pillow。2022-08-27 发表《Defcon-30-Quals rust-pwn constricted 复盘笔记》，复盘对象涵盖 LuaJIT、Rust+boa 引擎等多样技术栈。同期约 2021 年底联系清华网研院导师开始远程实习，进入主动对接研究组阶段。两项一手来源由 targeted 补证（r1-ev-01, r1-ev-03），早于 2022-09 录取与约 2023-09 入学，不应归入研究生阶段。\",\n      \"evidence_ids\": [\"r1-ev-01-macos-mach-ipc\", \"r1-ev-03-defcon30quals-constricted\", \"kiprey-works-07-macos-sandbox\", \"kiprey-works-10-ctf-repeat-practice\", \"timeline-06-nisl-internship-2021\", \"decisions-02-nisl-internship-dec2021\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022-04 至 2022-10（内核利用系统化与保研决策期）\",\n      \"stage\": \"内核利用系统化与保研策略沉淀\",\n      \"capability_change\": \"分析 Dirty Pipe（CVE-2022-0847）、提出 Dirty Cred 利用技术分析、分析 sudo（CVE-2021-3156）与 Linux Canary 机制；Dirty Cred 一文按 OOB write / UAF / Double Free 分类、跨引用自身 Dirty Pipe 分析、评估 24 个 CVE 的成功率，并指出 vmalloc 隔离缓解的失效边界，写作从复现转向抽象与评估。同期明确以\"该论文已中 CCS 2022 & Black Hat USA 2022\"标注他人会议工作，区分自身分析与引用。保研流程中经历复旦、北大软微、上交 ipads、南大等多校失败与候补，最终录取清华网研院学硕；将经历抽象为可复用优先级\"提前联系导师进组实习 >> 科研经历与产出 > 项目经历 >= 竞赛经历 >= 大厂实习经历 >> rank\"，并强调投递 top2 院校文书需精雕细磨。\",\n      \"evidence_ids\": [\"kiprey-works-08-dirty-cred-systematic\", \"kiprey-works-09-dirty-cred-conference-attribution\", \"decisions-10-dirty-cred-attribution-correction\", \"timeline-07-baoyan-camp-timeline\", \"timeline-10-tsinghua-admission\", \"kiprey-conv-03\", \"kiprey-conv-04\", \"kiprey-conv-07\", \"decisions-01-baoyan-tsinghua\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022 年下半年至 2023-01（研究认知迭代与自研工具产出期）\",\n      \"stage\": \"从漏洞挖掘到研究问题定义的认知跃迁\",\n      \"capability_change\": \"经导师反馈\"挖洞不是安全研究\"与研究观\"研究的对象应该是一个有规律的东西\"后，将研究观从单纯漏洞挖掘转向系统化改进某一领域（更好的 fuzzing 覆盖率、更好的防御机制），以 e9afl/e9patch、Healer 的\"问题 → 方案 → 实现\"链条为方法论范本。自研约 2 万行（自写约 1.2 万行）内核 fuzzer 在头部厂商产品中发现漏洞、获 CVE 编号与赏金，并以第三作者向 USENIX Security 2023 投稿论文，形成\"读论文 → 读源码 → 开发工具 → 获得产出 → 学术投稿\"的完整链路；论文题目与最终录用状态未在一手源确认。2022 年上半年在 NISL 学术沙龙做一次论文汇报（学姐鼓励参与）。同年因博客长期可见性收到华为 HR 实习邀约、清华 chyyuu 邮件、上交 GOSSIP 实习邀约与 Water Paddler 战队邀约；其中 Water Paddler 加入仅由作者自述支撑，未一手确认。\",\n      \"evidence_ids\": [\"kiprey-conv-08\", \"decisions-03-research-philosophy-shift\", \"timeline-09-fuzzer-cve-usenix-paper\", \"decisions-06-fuzzer-output-cve-bounty\", \"decisions-05-blog-driven-opportunities\", \"timeline-08-blog-driven-opportunities-2022\", \"decisions-07-academic-salon-talk-2022h1\", \"kiprey-conv-09\", \"decisions-04-employment-vs-grad-school\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2023-08 起（研究生阶段：跨领域扩展）\",\n      \"stage\": \"研究生阶段方向再扩展\",\n      \"capability_change\": \"研究面从浏览器/V8 向 DeFi 与网络中继扩展：2023-08-10 复现 Curve Finance Vyper 编译器 reentrancy 漏洞；2023-05-17 发表《使用 Frpc 进行内网穿透构建 ZeroTier Moon 记录》（记录连接由 RELAY 中继转为 DIRECT 直连、延迟由约 300ms 降至约 100ms）；2023-11-14 浅探 Tailscale DERP 中转；2025-11-23 发布 Balancer 128M Exploit Analysis（算术精度损失）。持续将过往底层漏洞模式（整数/精度、reentrancy）复用到新领域，方法迁移性可见。ZeroTier Moon 由 targeted r1-ev-02 一手确认；Curve/Balancer/Tailscale 项建立在 verified_in_run=false 的 works-11 与 timeline-12 上。\",\n      \"evidence_ids\": [\"r1-ev-02-zerotier-moon-frpc\", \"timeline-12-kernel-and-defi-extension\", \"kiprey-works-11-blockchain-pivot\"],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"源码级系统拆解 + CVE 复现的重复练习\",\n      \"starting_conditions\": \"2020-03 入门阶段，以 glibc ptmalloc 堆机制与 CTF pwn 题为起点，具备源码阅读与二进制基础。\",\n      \"repeated_practice\": \"跨时期、跨领域对底层机制做逐函数拆解：早期 glibc heap-1 至 heap-14 源码精读；2020-10 至 2021-04 集中复现多枚 V8/Chromium CVE 并配 TurboFan IR 图分析；2021-11 起以 syzkaller 源码 + HEALER/CollAFL 论文笔记进入内核 fuzzing；2022-04 起对 Dirty Pipe/Dirty Cred 按 OOB write/UAF/Double Free 分类评估；2023-08 起对 Curve/Balancer 做 reentrancy 与精度损失复现。\",\n      \"feedback\": \"自我暴露知识边界并转化为下一学习主题（CVE-2020-6541 中承认对 Promise 机制理解不足并定位为扩展学习）；patch 对照与阶段化 POC 复现提供技术正确性反馈；导师反馈\"挖洞不是安全研究\"触发从复现向问题定义的认知校正。\",\n      \"intermediate_capability\": \"形成可迁移的漏洞模式心智模型（堆利用、JIT 优化缺陷、UAF、类型混淆、reentrancy、整数精度），能在新领域快速复用既有分析方法。\",\n      \"observed_outcomes\": [\n        \"Dirty Cred 一文按缺陷类型分类、跨引用自身 Dirty Pipe 分析并评估 24 个 CVE 成功率与 vmalloc 隔离缓解边界（documented, kiprey-works-08）\",\n        \"TurboFan 系列与多枚 V8 CVE 复现形成浏览器漏洞模式归纳（documented, kiprey-works-03/timeline-04）\",\n        \"自研内核 fuzzer 发现真实厂商漏洞、获 CVE 编号与赏金（reported, timeline-09/decisions-06；细节未披露）\"\n      ],\n      \"evidence_ids\": [\"kiprey-works-02-early-pwn-foundations\", \"kiprey-works-03-chrome-v8-series\", \"kiprey-works-04-methodology-early-ack\", \"kiprey-works-08-dirty-cred-systematic\", \"timeline-04-v8-turbofan-cve-cluster\", \"timeline-05-fuzzing-papers-and-tools\", \"r1-ev-02-zerotier-moon-frpc\", \"timeline-12-kernel-and-defi-extension\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"公开可见的博客内容存在选择性发表偏差：复现类与分析类文章更易被记录，独立发现类（如自研 fuzzer 触发的 CVE）细节未披露，可能使\"系统化拆解\"机制的可观察产出被高估。早期堆机制阶段（works-02）与 CodeQL/内核 fuzzing 转向点（works-05/06）尚未一手验证，时间因果链条依赖待补强来源。\"\n    },\n    {\n      \"name\": \"公开写作作为被动反馈与机会通路\",\n      \"starting_conditions\": \"2020-05-07 开张个人博客并长期维护（版权跨越 2020-2026），习惯以时间序列公开记录学习与研究成果；handle Kiprey 与博客、社交账号可交叉确认，真名 Zhenghang Xiao 与 handle 的绑定仅依赖 person_json 输入（inferred）。\",\n      \"repeated_practice\": \"持续发布技术博客：heap 系列、V8/Chromium CVE 系列、TurboFan IR 分析、syzkaller/fuzzing 论文笔记、内核利用分析、CTF writeup、年度总结，并保留课程笔记（uCore 等）。\",\n      \"feedback\": \"博客长期可见性带来被动外部触达：2022-05 华为 HR 实习邀约与清华 chyyuu（uCore 作者）通过 SJTU ipads x 老师转发的邮件联络、2022-09 上交 GOSSIP 实习邀约、2022-10 Water Paddler 战队邀约；保研中上交 ipads x 老师翻看其博客 uCore 课程笔记后推荐给 chyyuu。上述反馈来源均为作者自述（reported），external 维度未独立佐证。\",\n      \"intermediate_capability\": \"以公开输出作为被外部识别的媒介，形成\"输出 → 被识别 → 新机会 → 再投入\"的正反馈循环，而非孤立提升技术。\",\n      \"observed_outcomes\": [\n        \"2022-05 起的实习/战队邀约（reported, timeline-08/decisions-05）\",\n        \"保研中导师通过博客课程笔记建立内推（documented, kiprey-conv-05）\",\n        \"持续至 2026 年的博客维护与版权署名（documented, kiprey-works-01）\"\n      ],\n      \"evidence_ids\": [\"timeline-01-blog-start\", \"kiprey-works-01-blog-established\", \"kiprey-conv-05\", \"timeline-08-blog-driven-opportunities-2022\", \"decisions-05-blog-driven-opportunities\", \"kiprey-conv-09\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"机会与博客写作的相关性由作者在 2022 年终总结中自述建立，未由华为/清华/上交/Water Paddler 等外部方独立确认；Water Paddler 加入事实仅由自述支撑，community.gaps 明确邀约后续是否加入未一手确认。竞争性解释：邀约可能同时由 NISL 实习身份、CVE 产出与博客共同触发，博客不一定是唯一通路。\"\n    },\n    {\n      \"name\": \"论文阅读 + 工具源码 + 自研工具的递进式研究链\",\n      \"starting_conditions\": \"2021-11 起对 fuzzing 主题产生兴趣，具备 syzkaller 环境部署与 AFL++ 实战基础，并已在 CVE-2020-6541 中养成以扩展阅读驱动自我补充学习的习惯。\",\n      \"repeated_practice\": \"以\"读论文（HEALER/CollAFL/VScape/COOP/IMF 笔记）→ 读工具源码（syzkaller）→ 开发工具（自研内核 fuzzer 约 2 万行）→ 获得产出（CVE、赏金）→ 学术投稿（USENIX Security 2023 三作）\"的递进链条投入研究主题。\",\n      \"feedback\": \"导师将\"挖洞不是安全研究\"的论断与\"研究的对象应该是一个有规律的东西\"的研究观反馈给作者；以 Healer\"发现 syscall 序列覆盖率不足 → 提出 syscall 间显式与隐式关系 → 分析 syzlang 与覆盖率反馈实现\"为研究链条范本，校正从战术型漏洞挖掘向研究型问题定义的视角。\",\n      \"intermediate_capability\": \"能把模糊测试方法论文落地为自研工具，并以此产出可核验的真实漏洞成果与学术投稿，形成从学习者向漏洞挖掘研究者身份转变的里程碑。\",\n      \"observed_outcomes\": [\n        \"自研 fuzzer 在头部厂商产品中发现漏洞、获 CVE 编号与赏金（reported, timeline-09/decisions-06；工具名与 CVE 编号未披露）\",\n        \"以第三作者向 USENIX Security 2023 投稿论文（reported, timeline-09；论文题目与最终录用状态未确认）\",\n        \"模糊测试论文/工具笔记系列公开输出（documented, timeline-05/decisions-09）\"\n      ],\n      \"evidence_ids\": [\"timeline-05-fuzzing-papers-and-tools\", \"decisions-09-fuzzing-paper-reading-2021h2\", \"timeline-09-fuzzer-cve-usenix-paper\", \"decisions-06-fuzzer-output-cve-bounty\", \"kiprey-conv-08\", \"decisions-03-research-philosophy-shift\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"自研 fuzzer 的具体 CVE 编号、受影响厂商、赏金数额与 USENIX Security 2023 论文题目/录用状态均未在一手源披露，无法独立核验\"工具 → 产出 → 学术投稿\"链路的末端；链路完整性依赖作者自述。竞争性解释：该投稿可能为团队成果而非作者工具直接驱动，作者为三作的身份亦削弱单一个体因果归因。\"\n    },\n    {\n      \"name\": \"失败结构化归因 + 策略清单化沉淀\",\n      \"starting_conditions\": \"2022 年保研流程中面临多校面试，初期以方向匹配与提前联系导师的优先级未完全清晰、对机试与开放性科研思维题准备不足为起点。\",\n      \"repeated_practice\": \"对每一次失败做结构化归因而非归结为运气：复旦机试仅做出第一题、英语面试被追问 Related Work，归因为自身模糊测试方向与该组软件代码分析主攻方向不匹配；南大千人海营要求英语描述 Kruskal 算法，归因为车祸后未做准备；上交 ipads 开放性科研思维题（单 CPU → 多 CPU 并行）答不上来，归因为研究迁移能力短板；据此调整后续投递策略，更重视方向匹配与提前联系导师，并对学硕/专硕/直博做明确约束-排除式决策。\",\n      \"feedback\": \"导师群体在面试当晚主动来电认可其模糊测试经验、中科大老师保留名额直到清北结果出炉；上交 ipads x 老师翻看博客 uCore 笔记后推荐给清华 chyyuu；清华网研院夏令营未入营后重新归因（优先直博），并在预推免保持目标院校投递，最终录取。\",\n      \"intermediate_capability\": \"将经历抽象为可传播的方法论与优先级清单\"提前联系导师进组实习 >> 科研经历与产出 > 项目经历 >= 竞赛经历 >= 大厂实习经历 >> rank\"，并强调投递 top2 院校文书需精雕细磨；具备对失败信息的二次核实习惯（如清华预推免\"比想象的要好\"）。\",\n      \"observed_outcomes\": [\n        \"保研策略优先级清单（documented, kiprey-conv-07/decisions-02）\",\n        \"2022-09-19 录取清华网研院学硕（documented, timeline-10）\",\n        \"在多 offer 间按研究方向定向取舍、放弃部分优营（documented, timeline-07/kiprey-conv-06）\"\n      ],\n      \"evidence_ids\": [\"kiprey-conv-03\", \"kiprey-conv-04\", \"kiprey-conv-06\", \"kiprey-conv-07\", \"timeline-07-baoyan-camp-timeline\", \"timeline-10-tsinghua-admission\", \"decisions-01-baoyan-tsinghua\", \"decisions-02-nisl-internship-dec2021\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"保研成功是多因素结果（GPA 3.79/4.00、专业排名 1/42、NISL 长期远程实习、自研 fuzzer 产出、导师内推），结构化归因机制只是其中一环，不能单独解释录取结果。竞争性解释：NISL 实习身份与导师内推可能比归因策略本身更具决定性。\"\n    }\n  ],\n  \"tensions\": [\n    \"primary_focus 标注与时间线张力：person_json 将 primary_focus 标为\"浏览器安全与 fuzzing\"，但一手博客中浏览器/V8 内容集中于 2020-10 至 2021-04，之后转向内核 fuzzing/macOS/CTF/区块链/网络中继，2022-2025 未见新的浏览器/V8 一手 writeup（kiprey-works-13、timeline contradictions）。两者不构成直接矛盾（研究面可扩展），但\"专注浏览器安全\"的标签与后期博客重心存在张力。\",\n    \"selected_conference_evidence 与一手来源冲突：person_json 标注\"Black Hat US/Asia / POC\"，但一手博客中唯一与 Black Hat 相关的记录是 2022-10-06 Dirty Cred 浅析文，且以第三人称\"该论文\"指代 CCS 2022 & Black Hat USA 2022 原工作（原作者 Zhenpeng Lin 等），未声明本人为论文作者或演讲者；2022 年终总结与保研历程亦未提及本人在 Black Hat/POC 演讲（kiprey-works-09/14、decisions-10、timeline-13）。需以一手来源为准并下调为\"未证实本人演讲\"。\",\n    \"qualification 字段\"浏览器漏洞发现与利用\"与证据强度张力：博客中浏览器相关记录以 CVE 分析/复现为主，未见由 Kiprey 首次披露并被厂商致谢的浏览器 CVE；可证实的\"漏洞发现\"产出集中在自研 fuzzer 领域（CVE 编号与赏金细节未披露），而非浏览器领域（decisions contradictions）。\",\n    \"真名-handle 绑定缺口：person_json 给出真名\"Zhenghang Xiao\"，但一手博客内容作者仅以 handle Kiprey 自称，未出现真名；真名与 handle 的绑定仅依赖 person_json 输入（inferred），未在已抓取页面中找到将法定名与 handle 绑定到同一主体的第三方权威档案（works/timeline/community identity_check gaps）。\",\n    \"研究认知转型与持续产出之间的观察缺口：作者 2022 年自述研究观从\"单纯挖洞\"转向\"系统化改进某一领域\"，但 2023-2025 博客可见产出仍以单点漏洞复现/分析（Curve、Balancer、Tailscale DERP）为主，缺少体现\"系统化改进方法\"的独立工具或论文一手产出（其自研 fuzzer 工具名、CVE、论文题目均未披露），认知转型与可观察产出之间存在资料缺口。\"\n  ],\n  \"transferable_practices\": [\n    \"以源码级逐函数拆解底层机制（glibc heap、V8 TurboFan、syzkaller）作为进入新领域的入门方式，而非停留在题解层面；并以阶段化 POC 复现 + patch 对照作为技术正确性反馈（源自 kiprey-works-02/03/04/08、timeline-05）。\",\n    \"主动暴露知识边界并将其转化为下一学习主题（如 CVE-2020-6541 中承认对 Promise 机制理解不足并定位为扩展学习），形成以缺口驱动自我补充学习的反馈机制（源自 kiprey-works-04、kiprey-conv-02）。\",\n    \"以\"读论文 → 读工具源码 → 开发工具 → 获得产出 → 学术投稿\"的递进链条投入研究主题，用论文方法指导工具实现，用工具产出验证方法（源自 timeline-05/09、decisions-09/06）。\",\n    \"长期维护个人技术博客并保留课程笔记，使公开输出成为被外部识别的被动通路（实习/战队/导师内推），形成\"输出 → 被识别 → 新机会\"的正反馈循环（源自 timeline-01/08、decisions-05、kiprey-conv-05）。\",\n    \"对每次失败做结构化归因（方向不匹配、未做准备、能力短板）而非归结为运气，并将经验抽象为可复用的优先级清单与策略（提前联系导师进组实习 >> 科研经历与产出 > 项目经历 >= 竞赛经历 >= 大厂实习经历 >> rank；投递 top2 院校文书需精雕细磨）（源自 kiprey-conv-03/04/07、decisions-02）。\",\n    \"对高曝光他人工作明确以\"分析者/转述者\"身份出现而非冒认作者，标注原始会议归属与原作者，体现来源意识与学术诚信边界（源自 kiprey-works-09、decisions-10）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"本科院校与 GPA/排名条件：自述末流 985 信息安全专业、GPA 3.79/4.00、专业排名 1/42，是保研多校投递与录取的基础门槛，他人不具备同口径学术背景则策略清单不可直接复制（源自 timeline-07、kiprey-conv-01）。\",\n    \"NISL 长期远程实习身份：约 2021 年底起在清华网研院远程实习约一年，早于正式保研申请，被视为进入顶级实验室的主要筹码；该身份与导师内推网络（清华 chyyuu、上交 ipads x 老师、NISL 学姐）是个人特有条件，非公开写作习惯单独可获（源自 decisions-02、timeline-06、kiprey-conv-05/09）。\",\n    \"腾讯安全玄武实验室实习与头部厂商 CVE 产出：自研 fuzzer 发现真实厂商漏洞、获 CVE 编号与赏金，以及 USENIX Security 2023 三作投稿，依赖实验室资源、厂商接触面与团队协作，细节未披露且不可独立复现（源自 timeline-09、decisions-06；细节见 gaps）。\",\n    \"时间窗口与保研制度环境：2022 年保研流程的多校夏令营/预推免节奏、清华网研院外校硕士 25 进 10 的录取口径、机考占比由 10% 升至 20% 等为特定年份的制度条件，他人无法复刻同一时间窗（源自 timeline-10、kiprey-conv-06）。\",\n    \"会议演讲资格的不可证实性：person_json 标注的 Black Hat US/Asia / POC 演讲资格未在一手源证实，不能作为可迁移的公开演讲实践基础（源自 kiprey-works-14、timeline-13、decisions contradictions）。\"\n  ],\n  \"open_questions\": [\n    \"自研 fuzzer 的工具名称、具体 CVE 编号、受影响厂商、赏金数额与时间均未在博客披露，无法独立核验\"工具建设 → 真实漏洞产出\"链路末端（decisions gaps、timeline gaps）。\",\n    \"作为第三作者投递的 USENIX Security 2023 论文题目、摘要与最终录用状态未在一手源披露，无法核验\"投稿\"是否最终\"发表\"，亦无法确认作者实际贡献（revision_context unresolved、timeline gaps）。\",\n    \"Water Paddler 战队加入事实仅由 2022 年终总结自述（reported）支撑，邀约后续是否加入未一手确认，external 维度无独立佐证（revision_context unresolved、community gaps）。\",\n    \"kiprey-community-001（idekCTF2022 Coroutine Writeup）与 kiprey-community-002（CTF Docker 小记）的 claim URL 返回 404，archives 页确认标题与日期存在，但 r3kapig 战队归属与\"4 队解出\"细节无法用原 URL 一手验证（revision_context unresolved）。\",\n    \"真名 Zhenghang Xiao 与 handle Kiprey 的独立一手绑定未获证实：博客 About 页未提供真实姓名，未找到将法定名与 handle 绑定到同一主体的第三方权威档案（works/conversations/community/timeline identity_check gaps）。\",\n    \"works-02（glibc heap，2020-05-04）、works-05（CodeQL，2020-12-06）、works-06（syzkaller/Healer，2021-11-20）、works-11（Curve/Balancer，2023-08）、works-12（年度总结，2023-01-05）等 verified_in_run=false 项因抓取预算约束未本次一手验证，相关阶段/机制的早期因果链条保留待补强状态（revision_context unresolved）。\",\n    \"Black Hat US/Asia / POC 会议演讲未一手核验：本节点未抓取任何 Black Hat 或 POC 官方议程/speaker 页面，无法确认演讲年份、议题、是否本人主讲（timeline gaps、decisions gaps）。\",\n    \"2023-2026 期间是否仍有年终总结或后续长自述未确认；本节点仅确认到 2022 年自述，研究生阶段的纵向反馈回路与方向扩展动机缺少叙述性博文说明（conversations gaps、decisions gaps）。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "61dea3b877baced64e9ccb2efcda0e47e5a39d5239b0cbbde5288c400d5e6c13",
+        "accessed_at": "2026-09-30T08:16:00.964158+00:00"
+      },
+      {
+        "tool_use_id": "call_zdotix8dimmr6hqpeik2w50h",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/output.json",
+          "limit": 5,
+          "offset": 100
+        },
+        "success": true,
+        "content_sha256": "6db81eeae814192c4b2ad9eaf07ed535b356880b5cb5f97d53f8d859ce7af3a6",
+        "accessed_at": "2026-09-30T08:16:00.964231+00:00"
+      },
+      {
+        "tool_use_id": "call_e7atlla0iwg7btadrhz7kbmz",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/output.json",
+          "content": "{\n  \"person\": \"Zhenghang Xiao (Kiprey)\",\n  \"expertise\": [\n    \"C/C++ 二进制利用：glibc ptmalloc 堆机制（fastbin、off-by-one、house 漏洞）、SROP、Linux 内核利用（Dirty Pipe、Dirty Cred、kernel pwn）\",\n    \"浏览器安全：Chromium/V8 漏洞分析与复现，覆盖 IndexedDB UAF 沙箱逃逸、WebUSB UAF、V8 TurboFan JIT 优化缺陷、TypeInductionVariablePhi、DCE、TypedArray detach 等类型\",\n    \"内核 fuzzing：syzkaller 环境部署与源码阅读，HEALER、CollAFL、VScape、COOP、IMF 等模糊测试与防御论文笔记，并自研内核 fuzzer 产出真实 CVE 与赏金（细节未披露）\",\n    \"静态分析与自动化：CodeQL 入门与深入、protobuf + AFL++ CTF 自动化 fuzz harness 构建\",\n    \"跨领域漏洞模式迁移：整数/精度损失、reentrancy（Curve Finance、Balancer 128M）、IPC 与沙箱逃逸（Chromium mojo、macOS Mach IPC）、网络中继（Tailscale DERP、ZeroTier Moon）\",\n    \"CTF 与团队协作：PlaidCTF、DEFCON Quals、RealWorldCTF、idekCTF、网鼎杯、pwnable.tw 等高水平赛事复盘，r3kapig 战队成员（战队加入仅一手间接确认）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2020-03 至 2020-05（本科早期）\",\n      \"stage\": \"二进制基础建立期\",\n      \"capability_change\": \"以 glibc ptmalloc 堆机制源码逐函数拆解为入门方式，覆盖 heap-1 arena 至 heap-14 house 漏洞、fastbin attack、off-by-one、UAF 与 SROP，并辅以 HNUCTF2020、pwnable.tw、网鼎杯、BUUOJ 题解；方法上以系统化源码阅读为主而非零散练习，形成可复用的堆利用心智模型。该阶段基础建立在 verified_in_run=false 的 works-02/timeline-02 上，属来源待补强阶段。\",\n      \"evidence_ids\": [\"timeline-02-pwn-heap-foundations\", \"kiprey-works-02-early-pwn-foundations\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2020-05 至 2020-09（博客开张与方向明确）\",\n      \"stage\": \"公开写作习惯起步与方向初次明确\",\n      \"capability_change\": \"2020-05-07 发布 Welcome 开张个人博客，确立以时间序列公开记录学习过程的习惯；同期完成 uCore Lab8 等教学操作系统练习。2020-09-27 起进入浏览器/V8 方向，2020-10-03 发布 PlaidCTF 2020 mojo（Chromium 沙箱逃逸）writeup，标志从通用 pwn 向 Chromium/V8 全栈研究的方向明确化，mojo IPC 与 V8 CVE 并行处理。\",\n      \"evidence_ids\": [\"timeline-01-blog-start\", \"kiprey-works-01-blog-established\", \"timeline-03-browser-v8-start\", \"kiprey-community-006\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020-10 至 2021-04（浏览器深度期）\",\n      \"stage\": \"浏览器/V8 漏洞模式的重复练习\",\n      \"capability_change\": \"密集分析 CVE-2019-5826（IndexedDB UAF 配合沙箱逃逸）、CVE-2020-6541（WebUSB UAF）、CVE-2020-6549（media UAF）、CVE-2018-16065（V8 EmitBigTypedArrayElementStore）、CVE-2019-5755、CVE-2019-13764（V8 TypeInductionVariablePhi）、CVE-2020-6468（V8 DCE），并发布 V8 TurboFan IR 简析与 chromium/v8 编译指南。方法为手动源码审查 + 阶段化 POC 复现 + patch 对照，从单点 CVE 复现上升到对 TurboFan JIT 优化管线结构性漏洞类型的归纳。CVE-2020-6541 中主动暴露对 Promise 机制理解不足并将其定位为扩展学习主题，体现以缺口驱动自我补充学习的反馈。\",\n      \"evidence_ids\": [\"kiprey-works-03-chrome-v8-series\", \"kiprey-works-04-methodology-early-ack\", \"timeline-04-v8-turbofan-cve-cluster\", \"kiprey-community-005\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020-12（静态分析引入）\",\n      \"stage\": \"静态分析工具引入\",\n      \"capability_change\": \"发布 CodeQL 入门与 CodeQL by security_lab 深入学习笔记，在手动源码审查之外引入自动化程序分析工具，扩展可处理代码规模与方法多样性。该阶段建立在 verified_in_run=false 的 works-05 上，属待补强阶段。\",\n      \"evidence_ids\": [\"kiprey-works-05-codeql-and-tianwen\"],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2021-11 至 2022-03（内核 fuzzing 转向与论文阅读期）\",\n      \"stage\": \"从浏览器方向转向内核 fuzzing\",\n      \"capability_change\": \"研究方向发生显式转向：搭建 syzkaller 环境、撰写源码阅读笔记，系统阅读 HEALER、IMF、CollAFL、VScape、COOP 等模糊测试与利用防御论文，并以 protobuf + AFL++ 对 TCTF2021 babyheap2021 进行 CTF 自动化 fuzz。形成“工具使用 → 工具源码 → 学术方法”的递进，为后续自研 fuzzer 建立方法论知识库。fuzzing 论文/工具笔记系列由 timeline-05（verified）支撑，works-06（unverified）作为同期转述补充。\",\n      \"evidence_ids\": [\"timeline-05-fuzzing-papers-and-tools\", \"decisions-09-fuzzing-paper-reading-2021h2\", \"kiprey-community-003\", \"kiprey-works-06-kernel-fuzzing-pivot\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2021-12 至 2022-08（本科高年级至保研过渡期）\",\n      \"stage\": \"跨平台扩展与高水平 CTF 复盘\",\n      \"capability_change\": \"2021-12-24 发表《MacOSX Mach IPC 入门》，正文覆盖 Mach IPC（tasks/threads/ports/messages/port rights/MIG），将沙箱逃逸与 IPC 攻击面从 Chromium mojo 迁移到 macOS Mach；页面仅链接独立的 XPC 入门文，本文未涉及 XPC 正文、沙箱逃逸或 35c3 CTF pillow。2022-08-27 发表《Defcon-30-Quals rust-pwn constricted 复盘笔记》，复盘对象涵盖 LuaJIT、Rust+boa 引擎等多样技术栈。同期约 2021 年底联系清华网研院导师开始远程实习，进入主动对接研究组阶段。两项一手来源由 targeted 补证（r1-ev-01、r1-ev-03），早于 2022-09 录取与约 2023-09 入学，不应归入研究生阶段。\",\n      \"evidence_ids\": [\"r1-ev-01-macos-mach-ipc\", \"r1-ev-03-defcon30quals-constricted\", \"kiprey-works-07-macos-sandbox\", \"kiprey-works-10-ctf-repeat-practice\", \"timeline-06-nisl-internship-2021\", \"decisions-02-nisl-internship-dec2021\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022-04 至 2022-10（内核利用系统化与保研决策期）\",\n      \"stage\": \"内核利用系统化与保研策略沉淀\",\n      \"capability_change\": \"分析 Dirty Pipe（CVE-2022-0847）、提出 Dirty Cred 利用技术分析、分析 sudo（CVE-2021-3156）与 Linux Canary 机制；Dirty Cred 一文按 OOB write / UAF / Double Free 分类、跨引用自身 Dirty Pipe 分析、评估 24 个 CVE 的成功率，并指出 vmalloc 隔离缓解的失效边界，写作从复现转向抽象与评估。同期明确以“该论文已中 CCS 2022 & Black Hat USA 2022”标注他人会议工作，区分自身分析与引用。保研流程中经历复旦、北大软微、上交 ipads、南大等多校失败与候补，最终录取清华网研院学硕；将经历抽象为可复用优先级“提前联系导师进组实习 >> 科研经历与产出 > 项目经历 >= 竞赛经历 >= 大厂实习经历 >> rank”，并强调投递 top2 院校文书需精雕细磨。\",\n      \"evidence_ids\": [\"kiprey-works-08-dirty-cred-systematic\", \"kiprey-works-09-dirty-cred-conference-attribution\", \"decisions-10-dirty-cred-attribution-correction\", \"timeline-07-baoyan-camp-timeline\", \"timeline-10-tsinghua-admission\", \"kiprey-conv-03\", \"kiprey-conv-04\", \"kiprey-conv-07\", \"decisions-01-baoyan-tsinghua\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022 年下半年至 2023-01（研究认知迭代与自研工具产出期）\",\n      \"stage\": \"从漏洞挖掘到研究问题定义的认知跃迁\",\n      \"capability_change\": \"经导师反馈“挖洞不是安全研究”与研究观“研究的对象应该是一个有规律的东西”后，将研究观从单纯漏洞挖掘转向系统化改进某一领域（更好的 fuzzing 覆盖率、更好的防御机制），以 e9afl/e9patch、Healer 的“问题 → 方案 → 实现”链条为方法论范本。自研约 2 万行（自写约 1.2 万行）内核 fuzzer 在头部厂商产品中发现漏洞、获 CVE 编号与赏金，并以第三作者向 USENIX Security 2023 投稿论文，形成“读论文 → 读源码 → 开发工具 → 获得产出 → 学术投稿”的完整链路；论文题目与最终录用状态未在一手源确认。2022 年上半年在 NISL 学术沙龙做一次论文汇报（学姐鼓励参与）。同年因博客长期可见性收到华为 HR 实习邀约、清华 chyyuu 邮件、上交 GOSSIP 实习邀约与 Water Paddler 战队邀约；其中 Water Paddler 加入仅由作者自述支撑，未一手确认。\",\n      \"evidence_ids\": [\"kiprey-conv-08\", \"decisions-03-research-philosophy-shift\", \"timeline-09-fuzzer-cve-usenix-paper\", \"decisions-06-fuzzer-output-cve-bounty\", \"decisions-05-blog-driven-opportunities\", \"timeline-08-blog-driven-opportunities-2022\", \"decisions-07-academic-salon-talk-2022h1\", \"kiprey-conv-09\", \"decisions-04-employment-vs-grad-school\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2023-08 起（研究生阶段：跨领域扩展）\",\n      \"stage\": \"研究生阶段方向再扩展\",\n      \"capability_change\": \"研究面从浏览器/V8 向 DeFi 与网络中继扩展：2023-08-10 复现 Curve Finance Vyper 编译器 reentrancy 漏洞；2023-05-17 发表《使用 Frpc 进行内网穿透构建 ZeroTier Moon 记录》（记录连接由 RELAY 中继转为 DIRECT 直连、延迟由约 300ms 降至约 100ms）；2023-11-14 浅探 Tailscale DERP 中转；2025-11-23 发布 Balancer 128M Exploit Analysis（算术精度损失）。持续将过往底层漏洞模式（整数/精度、reentrancy）复用到新领域，方法迁移性可见。ZeroTier Moon 由 targeted r1-ev-02 一手确认；Curve/Balancer/Tailscale 项建立在 verified_in_run=false 的 works-11 与 timeline-12 上。\",\n      \"evidence_ids\": [\"r1-ev-02-zerotier-moon-frpc\", \"timeline-12-kernel-and-defi-extension\", \"kiprey-works-11-blockchain-pivot\"],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"源码级系统拆解 + CVE 复现的重复练习\",\n      \"starting_conditions\": \"2020-03 入门阶段，以 glibc ptmalloc 堆机制与 CTF pwn 题为起点，具备源码阅读与二进制基础。\",\n      \"repeated_practice\": \"跨时期、跨领域对底层机制做逐函数拆解：早期 glibc heap-1 至 heap-14 源码精读；2020-10 至 2021-04 集中复现多枚 V8/Chromium CVE 并配 TurboFan IR 图分析；2021-11 起以 syzkaller 源码 + HEALER/CollAFL 论文笔记进入内核 fuzzing；2022-04 起对 Dirty Pipe/Dirty Cred 按 OOB write/UAF/Double Free 分类评估；2023-08 起对 Curve/Balancer 做 reentrancy 与精度损失复现。\",\n      \"feedback\": \"自我暴露知识边界并转化为下一学习主题（CVE-2020-6541 中承认对 Promise 机制理解不足并定位为扩展学习）；patch 对照与阶段化 POC 复现提供技术正确性反馈；导师反馈“挖洞不是安全研究”触发从复现向问题定义的认知校正。\",\n      \"intermediate_capability\": \"形成可迁移的漏洞模式心智模型（堆利用、JIT 优化缺陷、UAF、类型混淆、reentrancy、整数精度），能在新领域快速复用既有分析方法。\",\n      \"observed_outcomes\": [\n        \"Dirty Cred 一文按缺陷类型分类、跨引用自身 Dirty Pipe 分析并评估 24 个 CVE 成功率与 vmalloc 隔离缓解边界（documented, kiprey-works-08）\",\n        \"TurboFan 系列与多枚 V8 CVE 复现形成浏览器漏洞模式归纳（documented, kiprey-works-03/timeline-04）\",\n        \"自研内核 fuzzer 发现真实厂商漏洞、获 CVE 编号与赏金（reported, timeline-09/decisions-06；细节未披露）\"\n      ],\n      \"evidence_ids\": [\"kiprey-works-02-early-pwn-foundations\", \"kiprey-works-03-chrome-v8-series\", \"kiprey-works-04-methodology-early-ack\", \"kiprey-works-08-dirty-cred-systematic\", \"timeline-04-v8-turbofan-cve-cluster\", \"timeline-05-fuzzing-papers-and-tools\", \"r1-ev-02-zerotier-moon-frpc\", \"timeline-12-kernel-and-defi-extension\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"公开可见的博客内容存在选择性发表偏差：复现类与分析类文章更易被记录，独立发现类（如自研 fuzzer 触发的 CVE）细节未披露，可能使“系统化拆解”机制的可观察产出被高估。早期堆机制阶段（works-02）与 CodeQL/内核 fuzzing 转向点（works-05/06）尚未一手验证，时间因果链条依赖待补强来源。\"\n    },\n    {\n      \"name\": \"公开写作作为被动反馈与机会通路\",\n      \"starting_conditions\": \"2020-05-07 开张个人博客并长期维护（版权跨越 2020-2026），习惯以时间序列公开记录学习与研究成果；handle Kiprey 与博客、社交账号可交叉确认，真名 Zhenghang Xiao 与 handle 的绑定仅依赖 person_json 输入（inferred）。\",\n      \"repeated_practice\": \"持续发布技术博客：heap 系列、V8/Chromium CVE 系列、TurboFan IR 分析、syzkaller/fuzzing 论文笔记、内核利用分析、CTF writeup、年度总结，并保留课程笔记（uCore 等）。\",\n      \"feedback\": \"博客长期可见性带来被动外部触达：2022-05 华为 HR 实习邀约与清华 chyyuu（uCore 作者）通过 SJTU ipads x 老师转发的邮件联络、2022-09 上交 GOSSIP 实习邀约、2022-10 Water Paddler 战队邀约；保研中上交 ipads x 老师翻看其博客 uCore 课程笔记后推荐给 chyyuu。上述反馈来源均为作者自述（reported），external 维度未独立佐证。\",\n      \"intermediate_capability\": \"以公开输出作为被外部识别的媒介，形成“输出 → 被识别 → 新机会 → 再投入”的正反馈循环，而非孤立提升技术。\",\n      \"observed_outcomes\": [\n        \"2022-05 起的实习/战队邀约（reported, timeline-08/decisions-05）\",\n        \"保研中导师通过博客课程笔记建立内推（documented, kiprey-conv-05）\",\n        \"持续至 2026 年的博客维护与版权署名（documented, kiprey-works-01）\"\n      ],\n      \"evidence_ids\": [\"timeline-01-blog-start\", \"kiprey-works-01-blog-established\", \"kiprey-conv-05\", \"timeline-08-blog-driven-opportunities-2022\", \"decisions-05-blog-driven-opportunities\", \"kiprey-conv-09\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"机会与博客写作的相关性由作者在 2022 年终总结中自述建立，未由华为/清华/上交/Water Paddler 等外部方独立确认；Water Paddler 加入事实仅由自述支撑，community.gaps 明确邀约后续是否加入未一手确认。竞争性解释：邀约可能同时由 NISL 实习身份、CVE 产出与博客共同触发，博客不一定是唯一通路。\"\n    },\n    {\n      \"name\": \"论文阅读 + 工具源码 + 自研工具的递进式研究链\",\n      \"starting_conditions\": \"2021-11 起对 fuzzing 主题产生兴趣，具备 syzkaller 环境部署与 AFL++ 实战基础，并已在 CVE-2020-6541 中养成以扩展阅读驱动自我补充学习的习惯。\",\n      \"repeated_practice\": \"以“读论文（HEALER/CollAFL/VScape/COOP/IMF 笔记）→ 读工具源码（syzkaller）→ 开发工具（自研内核 fuzzer 约 2 万行）→ 获得产出（CVE、赏金）→ 学术投稿（USENIX Security 2023 三作）”的递进链条投入研究主题。\",\n      \"feedback\": \"导师将“挖洞不是安全研究”的论断与“研究的对象应该是一个有规律的东西”的研究观反馈给作者；以 Healer“发现 syscall 序列覆盖率不足 → 提出 syscall 间显式与隐式关系 → 分析 syzlang 与覆盖率反馈实现”为研究链条范本，校正从战术型漏洞挖掘向研究型问题定义的视角。\",\n      \"intermediate_capability\": \"能把模糊测试方法论文落地为自研工具，并以此产出可核验的真实漏洞成果与学术投稿，形成从学习者向漏洞挖掘研究者身份转变的里程碑。\",\n      \"observed_outcomes\": [\n        \"自研 fuzzer 在头部厂商产品中发现漏洞、获 CVE 编号与赏金（reported, timeline-09/decisions-06；工具名与 CVE 编号未披露）\",\n        \"以第三作者向 USENIX Security 2023 投稿论文（reported, timeline-09；论文题目与最终录用状态未确认）\",\n        \"模糊测试论文/工具笔记系列公开输出（documented, timeline-05/decisions-09）\"\n      ],\n      \"evidence_ids\": [\"timeline-05-fuzzing-papers-and-tools\", \"decisions-09-fuzzing-paper-reading-2021h2\", \"timeline-09-fuzzer-cve-usenix-paper\", \"decisions-06-fuzzer-output-cve-bounty\", \"kiprey-conv-08\", \"decisions-03-research-philosophy-shift\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"自研 fuzzer 的具体 CVE 编号、受影响厂商、赏金数额与 USENIX Security 2023 论文题目/录用状态均未在一手源披露，无法独立核验“工具 → 产出 → 学术投稿”链路的末端；链路完整性依赖作者自述。竞争性解释：该投稿可能为团队成果而非作者工具直接驱动，作者为三作的身份亦削弱单一个体因果归因。\"\n    },\n    {\n      \"name\": \"失败结构化归因 + 策略清单化沉淀\",\n      \"starting_conditions\": \"2022 年保研流程中面临多校面试，初期以方向匹配与提前联系导师的优先级未完全清晰、对机试与开放性科研思维题准备不足为起点。\",\n      \"repeated_practice\": \"对每一次失败做结构化归因而非归结为运气：复旦机试仅做出第一题、英语面试被追问 Related Work，归因为自身模糊测试方向与该组软件代码分析主攻方向不匹配；南大千人海营要求英语描述 Kruskal 算法，归因为车祸后未做准备；上交 ipads 开放性科研思维题（单 CPU → 多 CPU 并行）答不上来，归因为研究迁移能力短板；据此调整后续投递策略，更重视方向匹配与提前联系导师，并对学硕/专硕/直博做明确约束-排除式决策。\",\n      \"feedback\": \"导师群体在面试当晚主动来电认可其模糊测试经验、中科大老师保留名额直到清北结果出炉；上交 ipads x 老师翻看博客 uCore 笔记后推荐给清华 chyyuu；清华网研院夏令营未入营后重新归因（优先直博），并在预推免保持目标院校投递，最终录取。\",\n      \"intermediate_capability\": \"将经历抽象为可传播的方法论与优先级清单“提前联系导师进组实习 >> 科研经历与产出 > 项目经历 >= 竞赛经历 >= 大厂实习经历 >> rank”，并强调投递 top2 院校文书需精雕细磨；具备对失败信息的二次核实习惯（如清华预推免“比想象的要好”）。\",\n      \"observed_outcomes\": [\n        \"保研策略优先级清单（documented, kiprey-conv-07/decisions-02）\",\n        \"2022-09-19 录取清华网研院学硕（documented, timeline-10）\",\n        \"在多 offer 间按研究方向定向取舍、放弃部分优营（documented, timeline-07/kiprey-conv-06）\"\n      ],\n      \"evidence_ids\": [\"kiprey-conv-03\", \"kiprey-conv-04\", \"kiprey-conv-06\", \"kiprey-conv-07\", \"timeline-07-baoyan-camp-timeline\", \"timeline-10-tsinghua-admission\", \"decisions-01-baoyan-tsinghua\", \"decisions-02-nisl-internship-dec2021\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"保研成功是多因素结果（GPA 3.79/4.00、专业排名 1/42、NISL 长期远程实习、自研 fuzzer 产出、导师内推），结构化归因机制只是其中一环，不能单独解释录取结果。竞争性解释：NISL 实习身份与导师内推可能比归因策略本身更具决定性。\"\n    }\n  ],\n  \"tensions\": [\n    \"primary_focus 标注与时间线张力：person_json 将 primary_focus 标为“浏览器安全与 fuzzing”，但一手博客中浏览器/V8 内容集中于 2020-10 至 2021-04，之后转向内核 fuzzing/macOS/CTF/区块链/网络中继，2022-2025 未见新的浏览器/V8 一手 writeup（kiprey-works-13、timeline contradictions）。两者不构成直接矛盾（研究面可扩展），但“专注浏览器安全”的标签与后期博客重心存在张力。\",\n    \"selected_conference_evidence 与一手来源冲突：person_json 标注“Black Hat US/Asia / POC”，但一手博客中唯一与 Black Hat 相关的记录是 2022-10-06 Dirty Cred 浅析文，且以第三人称“该论文”指代 CCS 2022 & Black Hat USA 2022 原工作（原作者 Zhenpeng Lin 等），未声明本人为论文作者或演讲者；2022 年终总结与保研历程亦未提及本人在 Black Hat/POC 演讲（kiprey-works-09/14、decisions-10、timeline-13）。需以一手来源为准并下调为“未证实本人演讲”。\",\n    \"qualification 字段“浏览器漏洞发现与利用”与证据强度张力：博客中浏览器相关记录以 CVE 分析/复现为主，未见由 Kiprey 首次披露并被厂商致谢的浏览器 CVE；可证实的“漏洞发现”产出集中在自研 fuzzer 领域（CVE 编号与赏金细节未披露），而非浏览器领域（decisions contradictions）。\",\n    \"真名-handle 绑定缺口：person_json 给出真名“Zhenghang Xiao”，但一手博客内容作者仅以 handle Kiprey 自称，未出现真名；真名与 handle 的绑定仅依赖 person_json 输入（inferred），未在已抓取页面中找到将法定名与 handle 绑定到同一主体的第三方权威档案（works/timeline/community identity_check gaps）。\",\n    \"研究认知转型与持续产出之间的观察缺口：作者 2022 年自述研究观从“单纯挖洞”转向“系统化改进某一领域”，但 2023-2025 博客可见产出仍以单点漏洞复现/分析（Curve、Balancer、Tailscale DERP）为主，缺少体现“系统化改进方法”的独立工具或论文一手产出（其自研 fuzzer 工具名、CVE、论文题目均未披露），认知转型与可观察产出之间存在资料缺口。\"\n  ],\n  \"transferable_practices\": [\n    \"以源码级逐函数拆解底层机制（glibc heap、V8 TurboFan、syzkaller）作为进入新领域的入门方式，而非停留在题解层面；并以阶段化 POC 复现 + patch 对照作为技术正确性反馈（源自 kiprey-works-02/03/04/08、timeline-05）。\",\n    \"主动暴露知识边界并将其转化为下一学习主题（如 CVE-2020-6541 中承认对 Promise 机制理解不足并定位为扩展学习），形成以缺口驱动自我补充学习的反馈机制（源自 kiprey-works-04、kiprey-conv-02）。\",\n    \"以“读论文 → 读工具源码 → 开发工具 → 获得产出 → 学术投稿”的递进链条投入研究主题，用论文方法指导工具实现，用工具产出验证方法（源自 timeline-05/09、decisions-09/06）。\",\n    \"长期维护个人技术博客并保留课程笔记，使公开输出成为被外部识别的被动通路（实习/战队/导师内推），形成“输出 → 被识别 → 新机会”的正反馈循环（源自 timeline-01/08、decisions-05、kiprey-conv-05）。\",\n    \"对每次失败做结构化归因（方向不匹配、未做准备、能力短板）而非归结为运气，并将经验抽象为可复用的优先级清单与策略（提前联系导师进组实习 >> 科研经历与产出 > 项目经历 >= 竞赛经历 >= 大厂实习经历 >> rank；投递 top2 院校文书需精雕细磨）（源自 kiprey-conv-03/04/07、decisions-02）。\",\n    \"对高曝光他人工作明确以“分析者/转述者”身份出现而非冒认作者，标注原始会议归属与原作者，体现来源意识与学术诚信边界（源自 kiprey-works-09、decisions-10）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"本科院校与 GPA/排名条件：自述末流 985 信息安全专业、GPA 3.79/4.00、专业排名 1/42，是保研多校投递与录取的基础门槛，他人不具备同口径学术背景则策略清单不可直接复制（源自 timeline-07、kiprey-conv-01）。\",\n    \"NISL 长期远程实习身份：约 2021 年底起在清华网研院远程实习约一年，早于正式保研申请，被视为进入顶级实验室的主要筹码；该身份与导师内推网络（清华 chyyuu、上交 ipads x 老师、NISL 学姐）是个人特有条件，非公开写作习惯单独可获（源自 decisions-02、timeline-06、kiprey-conv-05/09）。\",\n    \"腾讯安全玄武实验室实习与头部厂商 CVE 产出：自研 fuzzer 发现真实厂商漏洞、获 CVE 编号与赏金，以及 USENIX Security 2023 三作投稿，依赖实验室资源、厂商接触面与团队协作，细节未披露且不可独立复现（源自 timeline-09、decisions-06；细节见 gaps）。\",\n    \"时间窗口与保研制度环境：2022 年保研流程的多校夏令营/预推免节奏、清华网研院外校硕士 25 进 10 的录取口径、机考占比由 10% 升至 20% 等为特定年份的制度条件，他人无法复刻同一时间窗（源自 timeline-10、kiprey-conv-06）。\",\n    \"会议演讲资格的不可证实性：person_json 标注的 Black Hat US/Asia / POC 演讲资格未在一手源证实，不能作为可迁移的公开演讲实践基础（源自 kiprey-works-14、timeline-13、decisions contradictions）。\"\n  ],\n  \"open_questions\": [\n    \"自研 fuzzer 的工具名称、具体 CVE 编号、受影响厂商、赏金数额与时间均未在博客披露，无法独立核验“工具建设 → 真实漏洞产出”链路末端（decisions gaps、timeline gaps）。\",\n    \"作为第三作者投递的 USENIX Security 2023 论文题目、摘要与最终录用状态未在一手源披露，无法核验“投稿”是否最终“发表”，亦无法确认作者实际贡献（revision_context unresolved、timeline gaps）。\",\n    \"Water Paddler 战队加入事实仅由 2022 年终总结自述（reported）支撑，邀约后续是否加入未一手确认，external 维度无独立佐证（revision_context unresolved、community gaps）。\",\n    \"kiprey-community-001（idekCTF2022 Coroutine Writeup）与 kiprey-community-002（CTF Docker 小记）的 claim URL 返回 404，archives 页确认标题与日期存在，但 r3kapig 战队归属与“4 队解出”细节无法用原 URL 一手验证（revision_context unresolved）。\",\n    \"真名 Zhenghang Xiao 与 handle Kiprey 的独立一手绑定未获证实：博客 About 页未提供真实姓名，未找到将法定名与 handle 绑定到同一主体的第三方权威档案（works/conversations/community/timeline identity_check gaps）。\",\n    \"works-02（glibc heap，2020-05-04）、works-05（CodeQL，2020-12-06）、works-06（syzkaller/Healer，2021-11-20）、works-11（Curve/Balancer，2023-08）、works-12（年度总结，2023-01-05）等 verified_in_run=false 项因抓取预算约束未本次一手验证，相关阶段/机制的早期因果链条保留待补强状态（revision_context unresolved）。\",\n    \"Black Hat US/Asia / POC 会议演讲未一手核验：本节点未抓取任何 Black Hat 或 POC 官方议程/speaker 页面，无法确认演讲年份、议题、是否本人主讲（timeline gaps、decisions gaps）。\",\n    \"2023-2026 期间是否仍有年终总结或后续长自述未确认；本节点仅确认到 2022 年自述，研究生阶段的纵向反馈回路与方向扩展动机缺少叙述性博文说明（conversations gaps、decisions gaps）。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "c6bd53bd69812df824578d0bc5eb7b258d41c9410123d4bae4c5f08217ff2638",
+        "accessed_at": "2026-09-30T08:16:00.964234+00:00"
+      },
+      {
+        "tool_use_id": "call_cwp48h3b1dchb0e7rqqryso7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/output.json",
+          "limit": 1
+        },
+        "success": true,
+        "content_sha256": "58c8b69aa4c2169bea85f08a69fb636f2a61e2681c2550a751678cd0a81a94e0",
+        "accessed_at": "2026-09-30T08:16:00.964237+00:00"
+      },
+      {
+        "tool_use_id": "call_3jhmkpffrppbm7muoszz09gn",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/output.json",
+          "offset": 68,
+          "limit": 8
+        },
+        "success": true,
+        "content_sha256": "9580dd051ca4983f3f426539ae68f01fafc408fbabc9b1a5390053dacf7f89cd",
+        "accessed_at": "2026-09-30T08:16:00.964241+00:00"
+      },
+      {
+        "tool_use_id": "call_z3nw8hnuvvakdzgr04yo98wy",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/zhenghang-xiao-kiprey-synthesis-v2-20260930-160607-408/checkpoint.md",
+          "content": "# 综合节点 checkpoint\n\n## 当前节点\nzhenghang-xiao-kiprey-synthesis-v2（综合分析师，第二次综合，已含复核修订指令）\n\n## 状态\n已完成 output.json 写入。所有字符串内嵌引用统一使用中文引号“”与书名号《》，避免 ASCII 双引号破坏 JSON 结构。\n\n## 已读取文件\n- task.md、output.schema.json\n- inputs/person_json.json、inputs/evidence_json.json、inputs/revision_context.json\n\n## 修订指令落实（已写入 output.json）\n1. stages 拆分：将原 stage 5 拆为 stage[5]“本科高年级至保研过渡期（2021-12 至 2022-08）”（含 works-07/10，由 r1-ev-01/03 一手补证）与 stage[8]“研究生阶段（2023-08 起，含 ZeroTier Moon 由 r1-ev-02 补证）”。\n2. macOS 子描述精确化：仅 Mach IPC（tasks/threads/ports/messages/port rights/MIG），XPC/沙箱逃逸标注为相关主题但本文未证实。\n3. ZeroTier Moon 日期修正为 2023-05-17，归入研究生阶段前置。\n4. “向学术发表延伸”改为“向学术投稿延伸”（USENIX Security 2023 题目/录用未确认，见 open_questions）。\n5. mechanisms[0] confidence 下调为 medium，机会类产出（华为/清华/上交/Water Paddler 邀约）标注 reported，alternative_explanation 列出竞争性解释。\n6. 引用 verified_in_run=false 项（works-02/05/06/11/12、timeline-11、community-001/002、decisions-08）时显式标注 status 并相应下调 stage/mechanism confidence。\n7. 文字修订：开发工具/获得产出、练习、自我补充学习、提前联系导师、漏洞挖掘。\n\n## 证据使用原则\n- 仅使用 evidence_json 中的有效证据；被标记为无效的 evidence id 未引入。\n- 每个 stage 与 mechanism 均列出 evidence_ids，并至少有 verified_in_run=true 来源支撑。\n- _run 与 verification 字段未自填，交由编排器负责。\n\n## 输出校验\n- 必填字段：person、expertise、stages、mechanisms、tensions、transferable_practices、non_transferable_conditions、open_questions 全部存在。\n- stages：9 项，每项含 period/stage/capability_change/evidence_ids/confidence，confidence 枚举合法。\n- mechanisms：4 项，每项含全部必填字段，validation_tests 枚举合法（repeated/generative/distinctive），confidence 枚举合法。\n- 未引入 schema 外字段；additionalProperties=false 约束已遵守。\n"
+        },
+        "success": true,
+        "content_sha256": "0128fe1738460e68e893a0863fb77c3d92023d4662c047bcb5bc45d67854c791",
+        "accessed_at": "2026-09-30T08:16:00.964244+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790756160964257000-zhenghang-xiao-kiprey-synthesis-v2.json",
+    "label": "Zhenghang Xiao (Kiprey):synthesis:v2",
+    "elapsed_seconds": 593.53,
+    "prompt_sha256": "2ebd9827d490e6be78668c5d0c645cb9f47d6b9fc26c6d43cf027e0530406353",
+    "num_turns": 15,
+    "total_cost_usd": 1.3197979999999998,
+    "usage": {
+      "input_tokens": 59536,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 447936,
+      "output_tokens": 31926,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 59536,
+        "outputTokens": 31926,
+        "cacheReadInputTokens": 447936,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.3197979999999998,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

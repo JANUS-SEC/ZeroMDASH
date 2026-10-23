@@ -1,0 +1,289 @@
+{
+  "person": "Andrea Allievi",
+  "expertise": [
+    "Windows 内核结构与内部机理（NT 内核对象、内核态编程、Windows Internals 体系化知识）",
+    "Windows 内核漏洞发现与分析（主攻方向自述）",
+    "开源 Windows 兼容内核实现（ReactOS 内核逆向与重写，据编者简介转述，未经一手核验）",
+    "反恶意软件/勒索软件分析工具链（TeslaDecrypt fork）",
+    "硬件层与虚拟化层研究（MiniKvm、CH9329 串口转 HID 控制器）",
+    "C++ 内核与系统工具开发",
+    "C#/.NET 工具开发"
+  ],
+  "stages": [
+    {
+      "period": "约2015年及以前",
+      "stage": "反恶意软件工具分叉与（据述）开源 Windows 兼容内核实现阶段",
+      "capability_change": "可核验的最早公开痕迹为对 Cisco-Talos/TeslaDecrypt 的 fork（C++，反勒索解密工具），表明其技术起点落在反恶意软件社区工具链而非内核漏洞研究；需注意的是该仓库的 2015-05-05 为 GitHub last-updated 日期，并非创建或发布日期，不能据以确定进入内核研究的时点。同期编者简介据述其在 ReactOS 项目从事开源 Windows 兼容内核实现，进行 NT 内核结构的逆向与重写工作，但该身份仅见于二手学术索引条目，未经 ReactOS 官方 CREDITS 一手核验。",
+      "evidence_ids": [
+        "aa-works-01-tesladecrypt",
+        "aa-community-05-tesladecrypt-fork",
+        "aa-dec-001"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "约2021年",
+      "stage": "权威 Windows 内部机理著述的合著者身份确立",
+      "capability_change": "作为合著者加入《Windows Internals, Part 2》第7版（与 Alex Ionescu、Mark E. Russinovich、David A. Solomon 合著，Pearson / Microsoft Press），由据述的开源/独立研究角色转向权威技术著述；该书配套代码仓库 WindowsInternals 的存在表明其工作重心之一由利用侧向内核内部机制的工具化与文档化延伸。出版年份 2021 来自学术索引条目，具体加入合著的时点与邀约过程未见于一手来源；作者身份本身未经该书版权/作者页一手核验。",
+      "evidence_ids": [
+        "aa-dec-002",
+        "aa-works-03-windowsinternals",
+        "aa-community-02-windowsinternals-repo"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2023–2024年",
+      "stage": "公开工具建设与归档式整理阶段",
+      "capability_change": "公开 retroware（C++，自述为 'some tools that I have written in the past'）与 WindowsInternals 配套代码仓库，形成对过往自用工具的归档式整理与对权威参考书配套示例代码的持续维护能力；retroware 的 'in the past' 措辞暗示存在一个先于当前公开仓库的早期工具建设阶段，但具体年代缺失。配套代码的公开使内核内部知识固化为可被社区检视与复用的资产，但其 fork 数（13）与 star 数（30/121）仅反映社区采纳程度，不直接证明能力跃迁。",
+      "evidence_ids": [
+        "aa-works-02-retroware",
+        "aa-community-04-retroware-repo",
+        "aa-works-03-windowsinternals",
+        "aa-community-02-windowsinternals-repo"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2025年",
+      "stage": "技术栈向硬件层与虚拟化方向扩展",
+      "capability_change": "发布 MiniKvm_public（C#），包含 MiniKvm 项目与 CH9329 串口转 HID 控制器的代码与文档，技术栈由 C++ 内核方向扩展至 C#/.NET 与硬件输入/虚拟化切换方向。该仓库发布日期 2025-01-27 来自 GitHub last-updated，非创建日期。CH9329 为串口转 HID 芯片，MiniKvm 为硬件 KVM/输入切换项目，与 Windows 内核漏洞主攻方向的关系未由材料说明；可能为业余项目而非职业研究产出的延伸，故能力变化仅为可观察到的方向扩展，不构成主机制级证据。",
+      "evidence_ids": [
+        "aa-works-04-minikvm",
+        "aa-community-03-minikvm-repo"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "当前（截至2026-09）",
+      "stage": "受雇厂商内核团队，开发与研究双重角色阶段",
+      "capability_change": "GitHub profile 一手自述显示其雇主为 Microsoft Corporation（Redmond, WA），角色为 'Windows Kernel Developer, Security Research Engineer, Windows Internals enthusiast'，即由外部研究者/独立开源贡献者转入被研究对象方（Windows 内核开发团队）的厂商内部开发与安全研究双重角色。受雇厂商后，研究目标与披露约束随之改变，公开攻击性研究与内部防御工作之间的关系需重新界定；但本次未取得任何可核验的 CVE 归属、披露事件时间线或厂商雇佣前后的披露策略对比，故该阶段的能力变化仅为身份与角色定位层面，具体研究产出与披露实践的变化属资料缺口。",
+      "evidence_ids": [
+        "aa-works-05-profile-bio",
+        "andrea-allievi-conv-01",
+        "aa-community-01-github-profile",
+        "aa-dec-003",
+        "AA-TL-01"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "输出驱动的工具建设与公开归档循环",
+      "starting_conditions": "可核验起点为对既有社区反恶意软件工具（Cisco-Talos/TeslaDecrypt）的 fork，随后据述有 ReactOS 开源 Windows 兼容内核实现背景；具备 C++ 系统工具开发基础与（据述）NT 内核结构逆向能力。",
+      "repeated_practice": "将研究与学习产物固化为公开仓库并配以文档：TeslaDecrypt fork 参与既有工具链、retroware 归档过往自用工具、WindowsInternals 维护权威参考书配套示例代码、MiniKvm_public 发布带文档的硬件/虚拟化项目。每次产出均以可被社区检视与复用的仓库形式公开，而非仅一次性报告或私有脚本。",
+      "feedback": "可核验的反馈来自 GitHub 平台的社区采纳指标（WindowsInternals 121 star/10 fork、retroware 30 star/13 fork、MiniKvm_public 34 star/2 fork、TeslaDecrypt 2 star/1 fork）与 Pull Shark achievement 表明的 PR 合并/评审互动痕迹；缺乏 reviewer 评语、issue 讨论或合著者协作反馈的一手记录，反馈回路的具体形态属资料缺口。",
+      "intermediate_capability": "形成'研究/学习 → 工具化 → 公开归档 → 社区采纳反馈'的稳定产出链条，使内核内部机理知识从个人理解转化为可复用、可被他人检视的代码资产；这一中间能力同时支撑其承担权威参考书配套代码维护者角色与厂商内核开发团队的双重身份。",
+      "observed_outcomes": [
+        "WindowsInternals 仓库作为《Windows Internals, Part 2》第7版配套代码公开维护（121 star）",
+        "retroware 对早期自用工具的归档式公开（13 fork 表明社区二次开发）",
+        "MiniKvm_public 将硬件/虚拟化方向产出以带文档形式发布",
+        "GitHub profile 显示 147 follower 与 Pull Shark、Arctic Code Vault Contributor 等 achievement"
+      ],
+      "evidence_ids": [
+        "aa-works-01-tesladecrypt",
+        "aa-works-02-retroware",
+        "aa-works-03-windowsinternals",
+        "aa-works-04-minikvm",
+        "aa-community-01-github-profile",
+        "aa-community-02-windowsinternals-repo",
+        "aa-community-03-minikvm-repo",
+        "aa-community-04-retroware-repo",
+        "aa-community-05-tesladecrypt-fork",
+        "AA-TL-02",
+        "AA-TL-03",
+        "AA-TL-04",
+        "AA-TL-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "公开仓库的高 star/fork 与多语言产出可能部分源于其在 Microsoft 雇佣身份与 Windows Internals 合著者身份带来的可见度加成，而非纯粹由个人工具建设习惯驱动；社区采纳指标是结果而非练习量，且 star 计数与实际能力变化之间无直接因果。"
+    },
+    {
+      "name": "由开源内核实现到权威著述的体系化知识积累路径",
+      "starting_conditions": "据编者简介转述，其早期以开源 Windows 兼容内核实现（ReactOS）开发者的身份投入 NT 内核结构的逆向与重写，作为进入安全研究前的方法训练场；但该起点未经 ReactOS 官方 CREDITS 一手核验，仅见于二手学术索引条目。",
+      "repeated_practice": "通过对 NT 内核结构的实现级理解（据述 ReactOS 重写工作）积累体系化内核知识，并以配套代码与合著形式将其外部化：先参与开源 Windows 兼容内核实现，再成为权威 Windows Internals 著作合著者并维护配套示例代码仓库。",
+      "feedback": "可核验的反馈仅为《Windows Internals, Part 2》第7版的合著邀约本身（来自与 Alex Ionescu 等长期 Windows 内核专家的合作），可视为同行/资深研究者对其体系化内核知识的认可；但邀约过程、合著者对其具体贡献的评价未见于一手来源，反馈回路的具体内容属资料缺口。",
+      "intermediate_capability": "形成实现级、结构化的 Windows 内核内部机理知识（区别于纯漏洞利用侧的片段化知识），使其能够承担权威参考书的配套代码开发与合著工作；这一中间能力是其在漏洞研究方向之外的第二条可核验能力线索。",
+      "observed_outcomes": [
+        "《Windows Internals, Part 2》第7版合著者身份（2021，据学术索引条目）",
+        "WindowsInternals 配套代码仓库的持续公开维护",
+        "GitHub bio 自述 'Windows Internals enthusiast' 与该路径一致"
+      ],
+      "evidence_ids": [
+        "aa-dec-001",
+        "aa-dec-002",
+        "aa-works-03-windowsinternals",
+        "aa-community-02-windowsinternals-repo",
+        "aa-works-05-profile-bio"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "ReactOS 开发者身份与 Windows Internals 合著者身份之间的因果关联为推断：合著邀约可能源于其在 Microsoft 雇佣背景下的内部网络或独立漏洞研究产出，而非必然经由 ReactOS 实现训练；ReactOS 角色本身未经一手核验，存在编者简介转述失实的可能。"
+    }
+  ],
+  "tensions": [
+    "GitHub bio 自述为 'Windows Kernel Developer'（厂商开发者取向），与 person_json 将其 primary_focus 标为 'Windows 内核漏洞'（研究者取向）在侧重点上不同；二者互补而非互斥，但 '开发者' 框架会弱化其作为纯漏洞猎人的形象。",
+    "多份搜索合成叙述对其雇主历史给出相互冲突的表述（Endgame/Elastic、ZDI/0patch、SentinelOne、ESET、Trail of Bits 等），其中仅 GitHub 自填的 Microsoft Corporation 被一手抓取确认，其余雇主更替时序与对应产出均未一手核验；这些冲突来源均为搜索工具合成文本而非可抓取页面，不能作为来源采信。",
+    "搜索合成叙述称其在 OffensiveCon 2024 主讲 'Hyperspace' 议题，但对该会议一手 speaker 页的抓取结果显示页面未列出 Andrea Allievi；合成叙述与一手页面直接冲突，在取得确凿一手 speaker 页前不得采信。",
+    "person_json 将 Black Hat US/EU / BlueHat 列为 selected_conference_evidence，但 Black Hat 简报页返回 HTTP 403、个人网站因 TLS 证书校验失败未抓取，没有任何 Black Hat 或 BlueHat 演讲事实被一手或权威二手来源证实；种子声明与可核验证据之间存在缺口。",
+    "搜索合成叙述提及名为 'AMF' 的内核态反恶意软件框架，但一手抓取的 GitHub 仓库列表仅含 TeslaDecrypt、retroware、WindowsInternals、MiniKvm_public 四个仓库，未出现 AMF；AMF 是否曾存在后删除、改名或属摘要失实，未决。",
+    "TeslaDecrypt 仓库标注的 2015-05-05 实为 GitHub last-updated 日期，并非创建或首次发布日期；以该日期作为进入内核研究的时点会构成时间误读。",
+    "Check Point Research 站内存在以 Andrea Allievi 为作者的搜索结果分页，但该机构作者专属页返回 404，未能取得具体文章标题、日期或合著者；其与该机构的关系无法据证陈述。"
+  ],
+  "transferable_practices": [
+    "将研究/学习产物固化为带文档的公开仓库并持续维护，而非停留在一次性报告或私有脚本，使知识可被社区检视与复用。",
+    "对过往自用工具进行归档式整理（retroware 模式），保留早期技术轨迹的可追溯性。",
+    "以配套代码形式承接权威参考书的工具化工作，将体系化内核知识与教学输出耦合，形成研究—著述—工具三位一体的产出链条。",
+    "跨语言/抽象层扩展技术栈（C++ 内核向 C# 硬件/虚拟化），通过完整带文档项目而非片段代码推进新方向。"
+  ],
+  "non_transferable_conditions": [
+    "与 Alex Ionescu、Mark Russinovich、David A. Solomon 等长期 Windows 内核专家的合著关系属个人网络资源，非可普遍复制的条件。",
+    "受雇于 Microsoft Corporation（Redmond, WA）Windows 内核开发团队所带来的内部资料、代码访问与厂商内部研究通道，属组织资源而非个人可迁移做法。",
+    "GitHub profile 的可见度（147 follower、Arctic Code Vault Contributor、Windows Internals 合著者身份带来的关注加成）部分源于历史项目与平台早期参与时机，存在幸存者偏差。",
+    "ReactOS 开源 Windows 兼容内核实现背景（据述）作为 NT 内核结构逆向训练场的前提，依赖特定时期的项目参与机会与当时的开源生态状态。"
+  ],
+  "open_questions": [
+    "个人网站 https://www.andrea-allievi.com/ 因 TLS 证书校验失败未抓取，其中的 writeup、CVE 列表、演讲记录与履历均未核验；该站是 person_json 指定的 writeup_evidence，是本节点最大且仍可尝试的资料缺口。",
+    "Black Hat US/EU / BlueHat 演讲的具体标题、年份、合著者与摘要均未取得一手核验（简报页 HTTP 403）；person_json 的 selected_conference_evidence 仅为种子声明。",
+    "OffensiveCon 2024 'Hyperspace' 议题归属与一手 speaker 页冲突，需取得确凿一手 speaker 页方可定论。",
+    "多雇主轨迹（Endgame/Elastic/ZDI/0patch/SentinelOne/ESET/Trail of Bits 等）均为搜索合成叙述，无一被一手页面证实；完整职业时间线缺失。",
+    "ReactOS 中的具体角色、贡献时间与规模未经 ReactOS 官方 CREDITS 一手核验，'kernel developer for ReactOS' 仅见于学术索引编者简介转述。",
+    "未核验到任何具体 CVE 编号与 Andrea Allievi 的关联，无法据证评估其漏洞发现产出量级与披露策略（尤其在受雇 Microsoft 前后）。",
+    "未取得任何一手长访谈、播客或 AMA 正文，本人对入门路径、学习方式、失败经历、导师或同伴、职业转折的自述完全缺失；反馈回路的具体形态无法据证陈述。",
+    "名为 'AMF' 的内核态反恶意软件框架是否曾作为公开仓库存在、其与 retroware 的关系，因无仓库页与抓取结果，未决。",
+    "MiniKvm_public 与其 Windows 内核漏洞主攻方向的内在关联未由材料说明，无法判断其为职业研究产出的延伸抑或独立业余项目。",
+    "各 GitHub 仓库的创建时间与首次提交时间均未取得，时间线节点的精确年代缺失，stage 划分主要依赖 last-updated 日期与二手学术索引年份，存在系统性时点不确定性。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/andrea-allievi-synthesis-v1-20260927-185712-525",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790506946086966000-andrea-allievi-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "1ac0cfea-4bb1-469c-8386-0d3a07c3cf6c",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_yio58532tssjdev4f0e4481a",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/andrea-allievi-synthesis-v1-20260927-185712-525/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T11:02:26.130858+00:00"
+      },
+      {
+        "tool_use_id": "call_w8exfr4nlfklj14m6el8deeu",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/andrea-allievi-synthesis-v1-20260927-185712-525/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "388ae141d6691fb47264352f63fbf878de9a9873c37fa7e161ff0964370683c3",
+        "accessed_at": "2026-09-27T11:02:26.130897+00:00"
+      },
+      {
+        "tool_use_id": "call_xmqhpq44foub35ixdinxx5ca",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/andrea-allievi-synthesis-v1-20260927-185712-525/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "40fada19a2fe102df9ea97d0b0af3acd61c131dd7e5b4764fce73626d9695edc",
+        "accessed_at": "2026-09-27T11:02:26.130906+00:00"
+      },
+      {
+        "tool_use_id": "call_96a496s9dde5cuhzz83n8jni",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/andrea-allievi-synthesis-v1-20260927-185712-525/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-27T11:02:26.130911+00:00"
+      },
+      {
+        "tool_use_id": "call_myw50t8su01ewc5ad8xspsfp",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/andrea-allievi-synthesis-v1-20260927-185712-525/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "524890439b44d784bbfb6339e931e3a91dcdeef47672d3b470a47f7c1054d117",
+        "accessed_at": "2026-09-27T11:02:26.130972+00:00"
+      },
+      {
+        "tool_use_id": "call_1z4kmw0n1onggpaow6wtuqt7",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/andrea-allievi-synthesis-v1-20260927-185712-525/checkpoint.md",
+          "content": "# Checkpoint — Andrea Allievi 综合节点\n\n## 任务状态\n- 首次综合（revision_context 为空，targeted.items 为空）。\n- 已读取 person_json、evidence_json、output.schema.json。\n- 待写入 output.json。\n\n## 有效证据范围（仅 verified_in_run=true）\n- works: aa-works-01-tesladecrypt, aa-works-02-retroware, aa-works-03-windowsinternals, aa-works-04-minikvm, aa-works-05-profile-bio\n- conversations: andrea-allievi-conv-01\n- community: aa-community-01-github-profile, aa-community-02-windowsinternals-repo, aa-community-03-minikvm-repo, aa-community-04-retroware-repo, aa-community-05-tesladecrypt-fork\n- external: ext-001（inferred，仅搜索分页存在，无文章正文）\n- decisions: aa-dec-001（reported，ReactOS）, aa-dec-002（reported，Win Internals 合著）, aa-dec-003（documented，Microsoft）\n- timeline: AA-TL-01 ~ AA-TL-05\n\n## 作废证据（不使用）\n- andrea-allievi-conv-02（verified=false）\n- andrea-allievi-conv-03（verified=false，OffensiveCon/Hyperspace 与一手页冲突）\n- aa-community-06-writeup-site-lead（verified=false，TLS 失败）\n- aa-dec-004（verified=false）\n\n## 阶段划分（5 段）\n1. 约2015及以前：反恶意软件社区工具分叉 +（据述）ReactOS 开源 NT 内核实现背景。medium。\n2. 2021：Win Internals Part 2 第7版合著。medium（Scholar 转述）。\n3. 2024：WindowsInternals 配套代码公开维护。high。\n4. 2025：MiniKvm 向硬件/C# 扩展。medium（单点，可能业余）。\n5. 当前：受雇 Microsoft，内核开发+安全研究双重角色。high。\n\n## 主机制判定（门槛：3 项中至少 2 项）\n- M1 输出驱动的工具建设与公开归档：跨时期重复(是) + 解释多个结果(是) + 区分度(是) = 3/3，high。纳入。\n- M2 由开源内核实现到权威著述的知识积累路径：跨时期(部分，ReactOS 日期缺) + 解释多个(是) + 区分度(是) = 2.5/3，medium。纳入。\n- M3 跨技术栈/抽象层扩展（C++内核→C#硬件）：跨时期(否，单仓) + 解释多个(边际) + 区分度(是) = 1.5/3，**不达门槛**，不列为主机制；其内容并入 Stage 4 与 open_questions。\n\n## 主要张力\n- bio 'Windows Kernel Developer'（厂商开发者）vs person_json '内核漏洞'（研究者）取向互补而非互斥。\n- ReactOS 身份仅 Scholar 编者简介转述，ReactOS CREDITS 未列。\n- 雇主轨迹多份冲突二手叙述（Endgame/Elastic/SentinelOne/ESET/Trail of Bits/ZDI/0patch），仅 Microsoft 一手确认。\n- OffensiveCon 2024 'Hyperspace' 二手叙述与一手 speaker 页冲突。\n- Black Hat US/EU / BlueHat 仅为种子声明，无一手核验。\n- andrea-allievi.com（writeup_evidence）TLS 失败，未抓取。\n- 'AMF' 二手叙述与一手仓库列表（仅4仓）不符。\n- TeslaDecrypt 2015-05-05 实为 last-updated 非创建日期。\n"
+        },
+        "success": true,
+        "content_sha256": "b23af8acae5d43399ace6b7bff75b091425fb99442f1c3e49d8eaae8eb2bc482",
+        "accessed_at": "2026-09-27T11:02:26.131509+00:00"
+      },
+      {
+        "tool_use_id": "call_icaegpzpcwf3spa2sq5ldepp",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/andrea-allievi-synthesis-v1-20260927-185712-525/output.json",
+          "content": "{\n  \"person\": \"Andrea Allievi\",\n  \"expertise\": [\n    \"Windows 内核结构与内部机理（NT 内核对象、内核态编程、Windows Internals 体系化知识）\",\n    \"Windows 内核漏洞发现与分析（主攻方向自述）\",\n    \"开源 Windows 兼容内核实现（ReactOS 内核逆向与重写，据编者简介转述，未经一手核验）\",\n    \"反恶意软件/勒索软件分析工具链（TeslaDecrypt fork）\",\n    \"硬件层与虚拟化层研究（MiniKvm、CH9329 串口转 HID 控制器）\",\n    \"C++ 内核与系统工具开发\",\n    \"C#/.NET 工具开发\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"约2015年及以前\",\n      \"stage\": \"反恶意软件工具分叉与（据述）开源 Windows 兼容内核实现阶段\",\n      \"capability_change\": \"可核验的最早公开痕迹为对 Cisco-Talos/TeslaDecrypt 的 fork（C++，反勒索解密工具），表明其技术起点落在反恶意软件社区工具链而非内核漏洞研究；需注意的是该仓库的 2015-05-05 为 GitHub last-updated 日期，并非创建或发布日期，不能据以确定进入内核研究的时点。同期编者简介据述其在 ReactOS 项目从事开源 Windows 兼容内核实现，进行 NT 内核结构的逆向与重写工作，但该身份仅见于二手学术索引条目，未经 ReactOS 官方 CREDITS 一手核验。\",\n      \"evidence_ids\": [\n        \"aa-works-01-tesladecrypt\",\n        \"aa-community-05-tesladecrypt-fork\",\n        \"aa-dec-001\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"约2021年\",\n      \"stage\": \"权威 Windows 内部机理著述的合著者身份确立\",\n      \"capability_change\": \"作为合著者加入《Windows Internals, Part 2》第7版（与 Alex Ionescu、Mark E. Russinovich、David A. Solomon 合著，Pearson / Microsoft Press），由据述的开源/独立研究角色转向权威技术著述；该书配套代码仓库 WindowsInternals 的存在表明其工作重心之一由利用侧向内核内部机制的工具化与文档化延伸。出版年份 2021 来自学术索引条目，具体加入合著的时点与邀约过程未见于一手来源；作者身份本身未经该书版权/作者页一手核验。\",\n      \"evidence_ids\": [\n        \"aa-dec-002\",\n        \"aa-works-03-windowsinternals\",\n        \"aa-community-02-windowsinternals-repo\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2023–2024年\",\n      \"stage\": \"公开工具建设与归档式整理阶段\",\n      \"capability_change\": \"公开 retroware（C++，自述为 'some tools that I have written in the past'）与 WindowsInternals 配套代码仓库，形成对过往自用工具的归档式整理与对权威参考书配套示例代码的持续维护能力；retroware 的 'in the past' 措辞暗示存在一个先于当前公开仓库的早期工具建设阶段，但具体年代缺失。配套代码的公开使内核内部知识固化为可被社区检视与复用的资产，但其 fork 数（13）与 star 数（30/121）仅反映社区采纳程度，不直接证明能力跃迁。\",\n      \"evidence_ids\": [\n        \"aa-works-02-retroware\",\n        \"aa-community-04-retroware-repo\",\n        \"aa-works-03-windowsinternals\",\n        \"aa-community-02-windowsinternals-repo\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2025年\",\n      \"stage\": \"技术栈向硬件层与虚拟化方向扩展\",\n      \"capability_change\": \"发布 MiniKvm_public（C#），包含 MiniKvm 项目与 CH9329 串口转 HID 控制器的代码与文档，技术栈由 C++ 内核方向扩展至 C#/.NET 与硬件输入/虚拟化切换方向。该仓库发布日期 2025-01-27 来自 GitHub last-updated，非创建日期。CH9329 为串口转 HID 芯片，MiniKvm 为硬件 KVM/输入切换项目，与 Windows 内核漏洞主攻方向的关系未由材料说明；可能为业余项目而非职业研究产出的延伸，故能力变化仅为可观察到的方向扩展，不构成主机制级证据。\",\n      \"evidence_ids\": [\n        \"aa-works-04-minikvm\",\n        \"aa-community-03-minikvm-repo\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"当前（截至2026-09）\",\n      \"stage\": \"受雇厂商内核团队，开发与研究双重角色阶段\",\n      \"capability_change\": \"GitHub profile 一手自述显示其雇主为 Microsoft Corporation（Redmond, WA），角色为 'Windows Kernel Developer, Security Research Engineer, Windows Internals enthusiast'，即由外部研究者/独立开源贡献者转入被研究对象方（Windows 内核开发团队）的厂商内部开发与安全研究双重角色。受雇厂商后，研究目标与披露约束随之改变，公开攻击性研究与内部防御工作之间的关系需重新界定；但本次未取得任何可核验的 CVE 归属、披露事件时间线或厂商雇佣前后的披露策略对比，故该阶段的能力变化仅为身份与角色定位层面，具体研究产出与披露实践的变化属资料缺口。\",\n      \"evidence_ids\": [\n        \"aa-works-05-profile-bio\",\n        \"andrea-allievi-conv-01\",\n        \"aa-community-01-github-profile\",\n        \"aa-dec-003\",\n        \"AA-TL-01\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"输出驱动的工具建设与公开归档循环\",\n      \"starting_conditions\": \"可核验起点为对既有社区反恶意软件工具（Cisco-Talos/TeslaDecrypt）的 fork，随后据述有 ReactOS 开源 Windows 兼容内核实现背景；具备 C++ 系统工具开发基础与（据述）NT 内核结构逆向能力。\",\n      \"repeated_practice\": \"将研究与学习产物固化为公开仓库并配以文档：TeslaDecrypt fork 参与既有工具链、retroware 归档过往自用工具、WindowsInternals 维护权威参考书配套示例代码、MiniKvm_public 发布带文档的硬件/虚拟化项目。每次产出均以可被社区检视与复用的仓库形式公开，而非仅一次性报告或私有脚本。\",\n      \"feedback\": \"可核验的反馈来自 GitHub 平台的社区采纳指标（WindowsInternals 121 star/10 fork、retroware 30 star/13 fork、MiniKvm_public 34 star/2 fork、TeslaDecrypt 2 star/1 fork）与 Pull Shark achievement 表明的 PR 合并/评审互动痕迹；缺乏 reviewer 评语、issue 讨论或合著者协作反馈的一手记录，反馈回路的具体形态属资料缺口。\",\n      \"intermediate_capability\": \"形成'研究/学习 → 工具化 → 公开归档 → 社区采纳反馈'的稳定产出链条，使内核内部机理知识从个人理解转化为可复用、可被他人检视的代码资产；这一中间能力同时支撑其承担权威参考书配套代码维护者角色与厂商内核开发团队的双重身份。\",\n      \"observed_outcomes\": [\n        \"WindowsInternals 仓库作为《Windows Internals, Part 2》第7版配套代码公开维护（121 star）\",\n        \"retroware 对早期自用工具的归档式公开（13 fork 表明社区二次开发）\",\n        \"MiniKvm_public 将硬件/虚拟化方向产出以带文档形式发布\",\n        \"GitHub profile 显示 147 follower 与 Pull Shark、Arctic Code Vault Contributor 等 achievement\"\n      ],\n      \"evidence_ids\": [\n        \"aa-works-01-tesladecrypt\",\n        \"aa-works-02-retroware\",\n        \"aa-works-03-windowsinternals\",\n        \"aa-works-04-minikvm\",\n        \"aa-community-01-github-profile\",\n        \"aa-community-02-windowsinternals-repo\",\n        \"aa-community-03-minikvm-repo\",\n        \"aa-community-04-retroware-repo\",\n        \"aa-community-05-tesladecrypt-fork\",\n        \"AA-TL-02\",\n        \"AA-TL-03\",\n        \"AA-TL-04\",\n        \"AA-TL-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"公开仓库的高 star/fork 与多语言产出可能部分源于其在 Microsoft 雇佣身份与 Windows Internals 合著者身份带来的可见度加成，而非纯粹由个人工具建设习惯驱动；社区采纳指标是结果而非练习量，且 star 计数与实际能力变化之间无直接因果。\"\n    },\n    {\n      \"name\": \"由开源内核实现到权威著述的体系化知识积累路径\",\n      \"starting_conditions\": \"据编者简介转述，其早期以开源 Windows 兼容内核实现（ReactOS）开发者的身份投入 NT 内核结构的逆向与重写，作为进入安全研究前的方法训练场；但该起点未经 ReactOS 官方 CREDITS 一手核验，仅见于二手学术索引条目。\",\n      \"repeated_practice\": \"通过对 NT 内核结构的实现级理解（据述 ReactOS 重写工作）积累体系化内核知识，并以配套代码与合著形式将其外部化：先参与开源 Windows 兼容内核实现，再成为权威 Windows Internals 著作合著者并维护配套示例代码仓库。\",\n      \"feedback\": \"可核验的反馈仅为《Windows Internals, Part 2》第7版的合著邀约本身（来自与 Alex Ionescu 等长期 Windows 内核专家的合作），可视为同行/资深研究者对其体系化内核知识的认可；但邀约过程、合著者对其具体贡献的评价未见于一手来源，反馈回路的具体内容属资料缺口。\",\n      \"intermediate_capability\": \"形成实现级、结构化的 Windows 内核内部机理知识（区别于纯漏洞利用侧的片段化知识），使其能够承担权威参考书的配套代码开发与合著工作；这一中间能力是其在漏洞研究方向之外的第二条可核验能力线索。\",\n      \"observed_outcomes\": [\n        \"《Windows Internals, Part 2》第7版合著者身份（2021，据学术索引条目）\",\n        \"WindowsInternals 配套代码仓库的持续公开维护\",\n        \"GitHub bio 自述 'Windows Internals enthusiast' 与该路径一致\"\n      ],\n      \"evidence_ids\": [\n        \"aa-dec-001\",\n        \"aa-dec-002\",\n        \"aa-works-03-windowsinternals\",\n        \"aa-community-02-windowsinternals-repo\",\n        \"aa-works-05-profile-bio\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"ReactOS 开发者身份与 Windows Internals 合著者身份之间的因果关联为推断：合著邀约可能源于其在 Microsoft 雇佣背景下的内部网络或独立漏洞研究产出，而非必然经由 ReactOS 实现训练；ReactOS 角色本身未经一手核验，存在编者简介转述失实的可能。\"\n    }\n  ],\n  \"tensions\": [\n    \"GitHub bio 自述为 'Windows Kernel Developer'（厂商开发者取向），与 person_json 将其 primary_focus 标为 'Windows 内核漏洞'（研究者取向）在侧重点上不同；二者互补而非互斥，但 '开发者' 框架会弱化其作为纯漏洞猎人的形象。\",\n    \"多份搜索合成叙述对其雇主历史给出相互冲突的表述（Endgame/Elastic、ZDI/0patch、SentinelOne、ESET、Trail of Bits 等），其中仅 GitHub 自填的 Microsoft Corporation 被一手抓取确认，其余雇主更替时序与对应产出均未一手核验；这些冲突来源均为搜索工具合成文本而非可抓取页面，不能作为来源采信。\",\n    \"搜索合成叙述称其在 OffensiveCon 2024 主讲 'Hyperspace' 议题，但对该会议一手 speaker 页的抓取结果显示页面未列出 Andrea Allievi；合成叙述与一手页面直接冲突，在取得确凿一手 speaker 页前不得采信。\",\n    \"person_json 将 Black Hat US/EU / BlueHat 列为 selected_conference_evidence，但 Black Hat 简报页返回 HTTP 403、个人网站因 TLS 证书校验失败未抓取，没有任何 Black Hat 或 BlueHat 演讲事实被一手或权威二手来源证实；种子声明与可核验证据之间存在缺口。\",\n    \"搜索合成叙述提及名为 'AMF' 的内核态反恶意软件框架，但一手抓取的 GitHub 仓库列表仅含 TeslaDecrypt、retroware、WindowsInternals、MiniKvm_public 四个仓库，未出现 AMF；AMF 是否曾存在后删除、改名或属摘要失实，未决。\",\n    \"TeslaDecrypt 仓库标注的 2015-05-05 实为 GitHub last-updated 日期，并非创建或首次发布日期；以该日期作为进入内核研究的时点会构成时间误读。\",\n    \"Check Point Research 站内存在以 Andrea Allievi 为作者的搜索结果分页，但该机构作者专属页返回 404，未能取得具体文章标题、日期或合著者；其与该机构的关系无法据证陈述。\"\n  ],\n  \"transferable_practices\": [\n    \"将研究/学习产物固化为带文档的公开仓库并持续维护，而非停留在一次性报告或私有脚本，使知识可被社区检视与复用。\",\n    \"对过往自用工具进行归档式整理（retroware 模式），保留早期技术轨迹的可追溯性。\",\n    \"以配套代码形式承接权威参考书的工具化工作，将体系化内核知识与教学输出耦合，形成研究—著述—工具三位一体的产出链条。\",\n    \"跨语言/抽象层扩展技术栈（C++ 内核向 C# 硬件/虚拟化），通过完整带文档项目而非片段代码推进新方向。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"与 Alex Ionescu、Mark Russinovich、David A. Solomon 等长期 Windows 内核专家的合著关系属个人网络资源，非可普遍复制的条件。\",\n    \"受雇于 Microsoft Corporation（Redmond, WA）Windows 内核开发团队所带来的内部资料、代码访问与厂商内部研究通道，属组织资源而非个人可迁移做法。\",\n    \"GitHub profile 的可见度（147 follower、Arctic Code Vault Contributor、Windows Internals 合著者身份带来的关注加成）部分源于历史项目与平台早期参与时机，存在幸存者偏差。\",\n    \"ReactOS 开源 Windows 兼容内核实现背景（据述）作为 NT 内核结构逆向训练场的前提，依赖特定时期的项目参与机会与当时的开源生态状态。\"\n  ],\n  \"open_questions\": [\n    \"个人网站 https://www.andrea-allievi.com/ 因 TLS 证书校验失败未抓取，其中的 writeup、CVE 列表、演讲记录与履历均未核验；该站是 person_json 指定的 writeup_evidence，是本节点最大且仍可尝试的资料缺口。\",\n    \"Black Hat US/EU / BlueHat 演讲的具体标题、年份、合著者与摘要均未取得一手核验（简报页 HTTP 403）；person_json 的 selected_conference_evidence 仅为种子声明。\",\n    \"OffensiveCon 2024 'Hyperspace' 议题归属与一手 speaker 页冲突，需取得确凿一手 speaker 页方可定论。\",\n    \"多雇主轨迹（Endgame/Elastic/ZDI/0patch/SentinelOne/ESET/Trail of Bits 等）均为搜索合成叙述，无一被一手页面证实；完整职业时间线缺失。\",\n    \"ReactOS 中的具体角色、贡献时间与规模未经 ReactOS 官方 CREDITS 一手核验，'kernel developer for ReactOS' 仅见于学术索引编者简介转述。\",\n    \"未核验到任何具体 CVE 编号与 Andrea Allievi 的关联，无法据证评估其漏洞发现产出量级与披露策略（尤其在受雇 Microsoft 前后）。\",\n    \"未取得任何一手长访谈、播客或 AMA 正文，本人对入门路径、学习方式、失败经历、导师或同伴、职业转折的自述完全缺失；反馈回路的具体形态无法据证陈述。\",\n    \"名为 'AMF' 的内核态反恶意软件框架是否曾作为公开仓库存在、其与 retroware 的关系，因无仓库页与抓取结果，未决。\",\n    \"MiniKvm_public 与其 Windows 内核漏洞主攻方向的内在关联未由材料说明，无法判断其为职业研究产出的延伸抑或独立业余项目。\",\n    \"各 GitHub 仓库的创建时间与首次提交时间均未取得，时间线节点的精确年代缺失，stage 划分主要依赖 last-updated 日期与二手学术索引年份，存在系统性时点不确定性。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "cc9c4279508acb03fd70f9963e69c27c53f4f703382010428c66b6d0a38ce5c3",
+        "accessed_at": "2026-09-27T11:02:26.131512+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790506946131537000-andrea-allievi-synthesis-v1.json",
+    "label": "Andrea Allievi:synthesis:v1",
+    "elapsed_seconds": 313.6,
+    "prompt_sha256": "62ce98940041de42c00fe3c6d77b891f40191016374840d4dd398900e178ceee",
+    "num_turns": 8,
+    "total_cost_usd": 0.640277,
+    "usage": {
+      "input_tokens": 29632,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 93184,
+      "output_tokens": 17821,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 29632,
+        "outputTokens": 17821,
+        "cacheReadInputTokens": 93184,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.640277,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

@@ -1,0 +1,452 @@
+{
+  "person": "Ben Hawkes",
+  "dimension": "公开作品与技术演化",
+  "identity_check": "种子记录 rank 65、name=Ben Hawkes、primary_focus=浏览器与图片解析漏洞、social=x.com/benhawkes、writeup=blog.isosceles.com/the-webp-0day。抓取的 blog.isosceles.com 多篇文章（Exploit Equivalence Classes 2023-08-23、The WebP 0day 2023-09-21、OpenSSH Backdoors 2024-08-23）正文署名均为 Ben Hawkes；projectzero.google 的 Attacking the Qualcomm Adreno GPU（2020-09-08）署名为 Ben Hawkes, Project Zero。其中 WebP 0day（CVE-2023-4863，libwebp VP8L 解析器堆溢出）属图片解析漏洞，与种子 primary_focus 吻合，且该 URL 与种子 writeup_evidence 完全一致。未发现与其他名为 Ben Hawkes 者的混淆；x.com/benhawkes 与 blog.isosceles.com 指向同一作者（种子与抓取正文互相印证）。身份核对待编排器复核。",
+  "items": [
+    {
+      "id": "BH-WORKS-01",
+      "date": "2020-09-08",
+      "claim": "Ben Hawkes 在 Google Project Zero 期间发表 Attacking the Qualcomm Adreno GPU，分析 CVE-2020-11179：Qualcomm Adreno GPU 的 KGSL 内核驱动中 scratch buffer 为各 GPU context 共享的全局映射，可被用户提交的 GPU 命令写入；scratch buffer 存储 ringbuffer 的读指针 RPTR，攻击者通过 CP_MEM_WRITE 写入恶意 RPTR，使 CPU 与 GPU 对 ringbuffer 布局的理解失步，进而覆盖未处理的 ringbuffer 条目，竞争性地在受保护模式关闭的 context 切换窗口内插入受控间接跳转，关闭受保护模式后改写 GPU 的 TTBR0 指向伪造页表，获得物理内存任意读写并最终改写 sys_call_table 实现内核代码执行。该问题是对 CVE-2019-10567 补丁的绕过：原补丁随机化了 scratch buffer 的 GPU 地址并阻止用户性能分析命令直接出现在 ringbuffer 上，但 scratch buffer 仍可被用户命令写入。作者明确声明研究建立在 Guang Gong 报告 CVE-2019-10567 及其 Black Hat 论文之上，并发布 PoC Adrenaline（P0 Issue 2052）。",
+      "status": "documented",
+      "growth_signal": "目标难度与硬件状态机介入。研究方法为硬件/驱动逆向结合竞争窗口手工构造 PoC（buddy allocator 喷射定位已知物理地址、原始 GPU 命令序列经 IOCTL_KGSL_GPU_COMMAND 提交）。复盘方式为对前序补丁有效性的质疑：作者指出原补丁的有效性未被进一步检验，并把高质量 bug 报告视为后续挖掘的洞察来源，主张对 GPU 安全关键组件提高透明度。同伴/前置工作明确为 Guang Gong 的 Black Hat 论文。",
+      "short_quote": "This research was built upon the work by Guang Gong.",
+      "source": {
+        "title": "Attacking the Qualcomm Adreno GPU",
+        "url": "https://projectzero.google/2020/09/attacking-qualcomm-adreno-gpu.html",
+        "published": "2020-09-08",
+        "source_type": "vulnerability writeup (vendor research blog, Project Zero)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_bhwnz3l4gacjjqk5rfyme6oh",
+        "accessed_at": "2026-09-27T21:05:22.033887+00:00",
+        "content_sha256": "851846dfd72c696beae6924a9715128875156e4b16d9e75a18ef79e14639b522"
+      }
+    },
+    {
+      "id": "BH-WORKS-02",
+      "date": "2023-08-23",
+      "claim": "Ben Hawkes 在独立博客 blog.isosceles.com 发表 Exploit Equivalence Classes，提出将集合论中的等价类概念应用于漏洞可利用性评估：若新发现漏洞在与既有已利用漏洞相同的平台条件、缓解措施与环境下降级产生相同原语（如 JavaScript 引擎利用中的 addrof/fakeobj），则可归入同一 exploit 等价类，无需重新编写完整利用即可判定可利用性。作者援引 Saelo 关于 addrof/fakeobj 原语的 Phrack 文章与 v8 sandbox、Brandon Azad 的 PAC bypass、Microsoft 的 Exploitability Index 作为既有框架参照。作者自述背景为学习数学、短暂尝试密码学后转向认为更易入手的 hacking，并据此尝试将抽象数学概念映射到安全实践，同时承认该映射的不完美。",
+      "status": "documented",
+      "growth_signal": "研究方法从单一漏洞挖掘抽象为可复用的可利用性判定框架。引用同行（Saelo、Brandon Azad）的 primitive 与 bypass 工作作为方法论基础，体现对社区既有成果的吸收与再结构化。复盘方式为对现有可利用性标注体系（如 'high risk' / 'exploitation less likely'）的系统性质疑。",
+      "short_quote": "An exploit is just a collection of primitives that are cleverly stitched together to do something that we all agree is unexpected.",
+      "source": {
+        "title": "Exploit Equivalence Classes",
+        "url": "https://blog.isosceles.com/exploit-equivalence-classes/",
+        "published": "2023-08-23",
+        "source_type": "methodology essay (personal research blog)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_u5a268f8qs2cgiazlny2qhl0",
+        "accessed_at": "2026-09-27T21:05:22.033898+00:00",
+        "content_sha256": "1fda1f9ef1f2af1a7e5af3c6a43962139efb3d6a41c809c1439594a7a604af97"
+      }
+    },
+    {
+      "id": "BH-WORKS-03",
+      "date": "2023-09-21",
+      "claim": "Ben Hawkes 发表 The WebP 0day，分析 CVE-2023-4863：libwebp 的 VP8L 无损解码路径中 BuildHuffmanTable 函数存在堆缓冲区溢出。预计算缓冲区大小源自 Mark Adler 的 enough 工具（计算有效且完整 Huffman 码的最大表大小），但代码未考虑某些在一致性检查拒绝它们之前仍被部分处理的无效 Huffman 树；攻击者依次构造两个不同字母表大小（280 与 256）的最大化有效 Huffman 表，再为第三个字母表大小（40）构造一种特定的无效 Huffman 树，使 ReplicateValue 操作在最终节点数一致性检查之前越界写入。该漏洞疑与 Apple CVE-2023-41064（BLASTPASS，归因于 NSO Group Pegasus）同源。作者约用三个全天工作，与 @mistymntncop 协作（后者提供 WebP 构造 harness），使用 ASan 检测，参考 Mark Adler 的 enough 工具与 mistymntncop 构造 harness；OSS-Fuzz 虽持续模糊 libwebp 但未发现此问题。作者推断该漏洞系通过人工代码审计发现，并批评厂商扣留技术细节造成的攻防不对称、以及业界对模糊测试在复杂解析器安全保证上的过度依赖，主张加大人工源码审计与沙箱化投入。",
+      "status": "documented",
+      "growth_signal": "目标难度为前置条件极其复杂的解析器内存安全（需连续构造四张最大化有效 Huffman 表后再构造特定无效表）。研究方法为工具链辅助的人工审计：组合 enough 工具、第三方 WebP 构造 harness 与 ASan，但仍归结为对 Huffman 表分配路径的人工追踪。同伴为 @mistymntncop（协作构造与测试）。复盘方式为对模糊测试覆盖能力的系统性批评与对人工审计持久性的强调，并对厂商信息不对称提出公开批评，呈现从纯技术挖掘向流程与防御架构反思的转向。",
+      "short_quote": "this format is incredibly complex and fragile, and the preconditions to trigger this issue are immense",
+      "source": {
+        "title": "The WebP 0day",
+        "url": "https://blog.isosceles.com/the-webp-0day/",
+        "published": "2023-09-21",
+        "source_type": "vulnerability writeup (personal research blog)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_h668w2y8bvwkae94wmkm776s",
+        "accessed_at": "2026-09-27T21:05:22.033778+00:00",
+        "content_sha256": "7a7d2fe3278c67e967d722f67ad16ab6a3ba253508b35f30e226be830277a9a4"
+      }
+    },
+    {
+      "id": "BH-WORKS-04",
+      "date": "2024-08-23",
+      "claim": "Ben Hawkes 发表 OpenSSH Backdoors，对 2002 年 ftp.openbsd.org 上被植入木马的 OpenSSH 发行文件事件与 2024 年针对 systemd 系 Linux 发行版的 xz-utils/liblzma 后门进行对比分析，考察两次供应链攻击的相似性与差异及对供应链安全的启示。文章未引用具体 CVE 编号，但讨论 exim 相关漏洞（关联 Qualys 的 21Nails 研究），并指出 zlib.net 托管基础设施上 CPanel、Pure-FTPD、Apache httpd、Dovecot 等攻击面。作者描述的方法包括校验和验证（2002 攻击经 FreeBSD ports 系统的校验和差异被检测）、构建系统挂钩（两次攻击均针对构建基础设施）、仅二进制测试文件载荷暂存与社会工程获取受信维护者身份（xz-utils），以及性能回归分析（2024 后门据此被发现）。防御方面提及 Linux Landlock 沙箱（约 250 行代码即可为 make 写一个能阻止 2002 攻击的 Landlock 沙箱）、Android 的 SELinux 与 seccomp-bpf 作为隔离示例。",
+      "status": "documented",
+      "growth_signal": "目标范围扩展至供应链与构建系统，超越单一内存安全漏洞。研究方法转为历史比较分析与防御架构讨论。复盘方式为对沙箱设计理念的修正：作者自述以往认为沙箱仅适用于处理不可信数据的代码部分，现主张在代码本身即不可信的世界中，所有代码都应遵循最小权限约束。呈现从漏洞挖掘到防御架构与系统设计的明确转向。",
+      "short_quote": "In a world where it's the code rather than the data that is untrusted, the goal should be to reorient toward system designs where all code is constrained to least privilege",
+      "source": {
+        "title": "OpenSSH Backdoors",
+        "url": "https://blog.isosceles.com/openssh-backdoors/",
+        "published": "2024-08-23",
+        "source_type": "comparative analysis essay (personal research blog)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_b4qcivye81lx70ybrm1xydpj",
+        "accessed_at": "2026-09-27T21:05:22.033911+00:00",
+        "content_sha256": "b7ea38bc3f145b5fc8193cba36f9b826856e3349b27dbd2b3f2915da34ab544b"
+      }
+    }
+  ],
+  "contradictions": [
+    "本地种子将 Ben Hawkes 的 primary_focus 标注为'浏览器与图片解析漏洞'；抓取到的最早一手作品（2020 P0 的 Adreno GPU 内核驱动研究）属移动 GPU/内核攻击而非浏览器或图片解析。该标注与抓取材料在时间覆盖上不完全一致：图片解析（WebP/libwebp, 2023）确为其作品，但浏览器漏洞专门作品在本次抓取范围内未获一手来源。二者并非互斥（同一作者可跨领域），但种子描述侧重其后期作品类型。"
+  ],
+  "gaps": [
+    "Project Zero issue tracker (project-zero.issues.chromium.org) 需认证无法抓取，故 BH-WORKS-01 中提及的 Issue 2052 与 PoC Adrenaline 仅通过 P0 博客正文间接 documented，issue tracker 原始条目未直接核验。",
+    "Ben Hawkes 在 Project Zero 之前（如传说中 Matasano Security 或更早期）的职业生涯与作品缺一手来源：本地种子为空，WebSearch 在本环境返回无可用结果，无法 documented 或 inferred 其早期作品演化。",
+    "isosceles 博客中 Phineas Fisher (2023-09-14)、What is a good Linux Kernel bug? (2023-08-30)、Robots Dream of Root Shells (2024-03-11) 三篇仅有标题级别信息（lead_only），未抓取正文，故未作为 documented item 纳入；其对演化的具体贡献未知。",
+    "浏览器漏洞专门作品（primary_focus 之一）未在本次抓取中获一手来源；需后续抓取 P0 时期 Chrome/Skia 相关文章或 P0 issue tracker 记录以补全。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-works-20260928-045528-954",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790543122023875000-ben-hawkes-works.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "c252eecb-cdce-4226-9496-ad329472bcb7",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_qpnwoaox25x2yh5v8uzj4oi9",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-works-20260928-045528-954/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-27T21:05:22.033644+00:00"
+      },
+      {
+        "tool_use_id": "call_r3c411ynk1pfohrh3ov7rzuc",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-works-20260928-045528-954/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "dfabfe0919017b6ba3aacfb2d8195eb6c4a8a214c26543f76f8c159944aabb77",
+        "accessed_at": "2026-09-27T21:05:22.033696+00:00"
+      },
+      {
+        "tool_use_id": "call_l4lcy021h89prx2jvwr0661n",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-works-20260928-045528-954/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "0e8cac335c3d05c21c1758415802c5d4849ca76c8683fb84ba02e7605eeb0f65",
+        "accessed_at": "2026-09-27T21:05:22.033709+00:00"
+      },
+      {
+        "tool_use_id": "call_jtcjo4wwq1b6css0cl9ar9iv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-works-20260928-045528-954/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "98d6159955e4031db24639369d116819220986aa8ec32370f8ce25cc7e814219",
+        "accessed_at": "2026-09-27T21:05:22.033717+00:00"
+      },
+      {
+        "tool_use_id": "call_wp8buebwdhpce4y0gc51wvuo",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-works-20260928-045528-954/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6e5034a8a6d972f492d2b08811243633e8b01984efe14e10fad4de7367634388",
+        "accessed_at": "2026-09-27T21:05:22.033722+00:00"
+      },
+      {
+        "tool_use_id": "call_n948i9tj4ih52ydeekbzdfb7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-works-20260928-045528-954/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-27T21:05:22.033727+00:00"
+      },
+      {
+        "tool_use_id": "call_jhpq0cbd9t1r9ph5gle4fjjn",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-works-20260928-045528-954/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T21:05:22.033763+00:00"
+      },
+      {
+        "tool_use_id": "call_h668w2y8bvwkae94wmkm776s",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://blog.isosceles.com/the-webp-0day/",
+          "prompt": "Extract the author name, publication date, vulnerability details (CVE, affected software, bug type), the technical root cause analysis, any tools or methods described, and any reflection on the research process. Quote short passages verbatim where they describe the vulnerability mechanism or research approach."
+        },
+        "success": true,
+        "content_sha256": "7a7d2fe3278c67e967d722f67ad16ab6a3ba253508b35f30e226be830277a9a4",
+        "accessed_at": "2026-09-27T21:05:22.033778+00:00"
+      },
+      {
+        "tool_use_id": "call_42qhc1rw085iw5swotqylgui",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Ben Hawkes blog.isosceles.com writeup vulnerability archive"
+        },
+        "success": true,
+        "content_sha256": "7c0ffe9637b45523aece02475566dac9a82fffc91cc007c380ca73da299b612b",
+        "accessed_at": "2026-09-27T21:05:22.033768+00:00"
+      },
+      {
+        "tool_use_id": "call_v9krjcuvg7oxf06i0qawr8dc",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog post titles, dates, and topics. I need a chronological archive of this blog's content authored by Ben Hawkes. Note any vulnerability writeups, tool releases, or technical analyses.",
+          "url": "https://blog.isosceles.com/"
+        },
+        "success": true,
+        "content_sha256": "5aa4eaacbdfdfb5d52cc93f23a56ac68601f64f3c56fbdbe5e1e1772c98ccb7b",
+        "accessed_at": "2026-09-27T21:05:22.033794+00:00"
+      },
+      {
+        "tool_use_id": "call_1cfrzm5a5k2khivt74wwr4zb",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Ben Hawkes Project Zero bug tracker reports Chrome kernel漏洞"
+        },
+        "success": true,
+        "content_sha256": "95d2d37ad48a923346d84b5ca46fcc66eb43645fb6ca220f97279451f309ca8d",
+        "accessed_at": "2026-09-27T21:05:22.033801+00:00"
+      },
+      {
+        "tool_use_id": "call_sv50dupzxl4tf6x40q40lkcx",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all issues reported by Ben Hawkes (username \"benhawkes@...\"). For each, give the issue number, title, date opened, affected component (e.g. Chrome, Skia, Linux kernel), and status. I need a chronological list of his bug reports.",
+          "url": "https://bugs.chromium.org/p/project-zero/issues/list?q=reporter:benhawkes&can=1&sort=-opened"
+        },
+        "success": true,
+        "content_sha256": "2da28381f6c11a28b2efe1b75dc50e5a095a799cc6eecad7a9bb92278ef749e3",
+        "accessed_at": "2026-09-27T21:05:22.033809+00:00"
+      },
+      {
+        "tool_use_id": "call_dapsyxgu7qy5x2hwrpskkha2",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List blog posts authored by Ben Hawkes on Project Zero. For each post give title, publication date, and the vulnerability or technique covered. Provide a chronological list.",
+          "url": "https://googleprojectzero.blogspot.com/"
+        },
+        "success": true,
+        "content_sha256": "30f90dc021c541958959c28b054f31b545a1b83cf5b8b52c77f53d9bfafc57ff",
+        "accessed_at": "2026-09-27T21:05:22.033813+00:00"
+      },
+      {
+        "tool_use_id": "call_azy3bwlmt75592mamph4nm53",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all issues reported by Ben Hawkes. For each, give the issue number, title, date opened, affected component (e.g. Chrome, Skia, Linux kernel), and status. I need a chronological list of his bug reports.",
+          "url": "https://project-zero.issues.chromium.org/issues?q=reporter%3A%28benhawkes%29"
+        },
+        "success": true,
+        "content_sha256": "dd1224d5fe8cdadc90bdca7845028a7543376653ea1c854c36ab9e0a5a84092d",
+        "accessed_at": "2026-09-27T21:05:22.033818+00:00"
+      },
+      {
+        "tool_use_id": "call_d807iigkb1c557iqs2nxc9nu",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List blog posts authored by Ben Hawkes on Project Zero. For each post give title, publication date, and the vulnerability or technique covered. Provide a chronological list.",
+          "url": "https://projectzero.google/"
+        },
+        "success": true,
+        "content_sha256": "4b4625c6fb04de69e99ad85bd5b685bc70464a17098b03da104aaaef3952a492",
+        "accessed_at": "2026-09-27T21:05:22.033822+00:00"
+      },
+      {
+        "tool_use_id": "call_naw9op274hnqldxfj364oxad",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Ben Hawkes\" Project Zero blog post Skia or Chrome vulnerability analysis"
+        },
+        "success": true,
+        "content_sha256": "b2daf61fc385176c19a9e0dcd5c313dca42a9465ac70d123cbb2304e0ba7ec01",
+        "accessed_at": "2026-09-27T21:05:22.033832+00:00"
+      },
+      {
+        "tool_use_id": "call_hcmme2yyxjcmxdqv1d1svoci",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Ben Hawkes\" \"art of exploitation\" or \"matasano\" or \"issec\" security researcher early work"
+        },
+        "success": true,
+        "content_sha256": "09328d6c134980a73dfc7f8df67ae4e329c4a5e19fbf9adc6d38b726a609c38e",
+        "accessed_at": "2026-09-27T21:05:22.033854+00:00"
+      },
+      {
+        "tool_use_id": "call_g9khe8yw43c0thkpi5sllwj4",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog posts visible on this page. For each give the title, author name, and publication date. I am especially looking for posts authored by Ben Hawkes.",
+          "url": "https://googleprojectzero.blogspot.com/search?q=Ben+Hawkes"
+        },
+        "success": true,
+        "content_sha256": "df9368e0001a9df3d989191c7f182dbafa748115feddce3159a1e9e5faf3010b",
+        "accessed_at": "2026-09-27T21:05:22.033865+00:00"
+      },
+      {
+        "tool_use_id": "call_bxpxpei1y20ilrx1eyvopzkd",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the author bio on this page? Look for any author description, \"About\" section, list of past employers or roles, and links to other writing. Quote any biographical text verbatim.",
+          "url": "https://blog.isosceles.com/about/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T21:05:22.033859+00:00"
+      },
+      {
+        "tool_use_id": "call_qmrksnw5cm3hjnhrjx8uk9sy",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: the publication date, author, vulnerability CVE and affected component, the technical root cause, the exploitation approach, any tools or methods used, any reflection on the research process, and whether the author mentions prior work or collaboration. Quote short verbatim passages describing the bug mechanism or research approach.",
+          "url": "https://googleprojectzero.blogspot.com/2020/09/attacking-qualcomm-adreno-gpu.html"
+        },
+        "success": true,
+        "content_sha256": "f5b21afff67a1cdb6278c02e3fd020518c4c206874a01ae83626b31bc464a34a",
+        "accessed_at": "2026-09-27T21:05:22.033870+00:00"
+      },
+      {
+        "tool_use_id": "call_b5dfxy9dybgs4j07t1484ckx",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the author, publication date, main topic, any specific vulnerability or CVE discussed, tools or methods described, and any reflection on how the research approach has changed. Quote short verbatim passages describing methodology or lessons learned.",
+          "url": "https://blog.isosceles.com/the-robots-dream-of-root-shells/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T21:05:22.033873+00:00"
+      },
+      {
+        "tool_use_id": "call_bhwnz3l4gacjjqk5rfyme6oh",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: the publication date, author, vulnerability CVE and affected component, the technical root cause, the exploitation approach, any tools or methods used, any reflection on the research process, and whether the author mentions prior work or collaboration. Quote short verbatim passages describing the bug mechanism or research approach.",
+          "url": "https://projectzero.google/2020/09/attacking-qualcomm-adreno-gpu.html"
+        },
+        "success": true,
+        "content_sha256": "851846dfd72c696beae6924a9715128875156e4b16d9e75a18ef79e14639b522",
+        "accessed_at": "2026-09-27T21:05:22.033887+00:00"
+      },
+      {
+        "tool_use_id": "call_qfvjbv2klxitpgias3877vxq",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog post titles, dates, and authors visible. I need the full list to find Ben Hawkes's posts on isosceles.com.",
+          "url": "https://blog.isosceles.com/archive/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T21:05:22.033878+00:00"
+      },
+      {
+        "tool_use_id": "call_u5a268f8qs2cgiazlny2qhl0",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the author, publication date, main thesis, any specific vulnerabilities or techniques referenced, and any reflection on how the author's research approach has evolved. Quote short verbatim passages describing methodology or lessons.",
+          "url": "https://blog.isosceles.com/exploit-equivalence-classes/"
+        },
+        "success": true,
+        "content_sha256": "1fda1f9ef1f2af1a7e5af3c6a43962139efb3d6a41c809c1439594a7a604af97",
+        "accessed_at": "2026-09-27T21:05:22.033898+00:00"
+      },
+      {
+        "tool_use_id": "call_6zyd6xzy15oarc8rxeifmlal",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Find posts authored by Ben Hawkes. List each post's title, publication date, and topic. I am building a chronological bibliography of his writing.",
+          "url": "https://projectzero.google/blog/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-27T21:05:22.033892+00:00"
+      },
+      {
+        "tool_use_id": "call_b4qcivye81lx70ybrm1xydpj",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the author name, publication date, main topic, any specific CVEs or vulnerabilities analyzed, tools or methods described, and any reflection on the author's research process or how their approach has changed. Quote short verbatim passages describing methodology or lessons.",
+          "url": "https://blog.isosceles.com/openssh-backdoors/"
+        },
+        "success": true,
+        "content_sha256": "b7ea38bc3f145b5fc8193cba36f9b826856e3349b27dbd2b3f2915da34ab544b",
+        "accessed_at": "2026-09-27T21:05:22.033911+00:00"
+      },
+      {
+        "tool_use_id": "call_3yr935zhkmjscg3nxi6b3mqf",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-works-20260928-045528-954/checkpoint.md",
+          "content": "# Checkpoint — Ben Hawkes / 公开作品与技术演化\n\n## 身份核对\n- 种子: rank 65, name=Ben Hawkes, primary_focus=\"浏览器与图片解析漏洞\", social=x.com/benhawkes, writeup=blog.isosceles.com/the-webp-0day, qualification=\"漏洞发现和根因 writeup\"。\n- 抓取的 blog.isosceles.com 文章署名均为 Ben Hawkes；projectzero.google 文章署名 \"Ben Hawkes, Project Zero\"。\n- WebP 0day (CVE-2023-4863) 属图片解析漏洞，与 primary_focus 一致。\n- 未发现同名歧义冲突；x.com/benhawkes 与 blog.isosceles.com 为同一作者的公开身份（前者来自种子，后者抓取确认同一博客系列）。\n\n## 已确认一手来源（documented）\n1. projectzero.google 2020-09-08 \"Attacking the Qualcomm Adreno GPU\" — CVE-2020-11179，CVE-2019-10567 补丁绕过，P0 Issue 2052，PoC \"Adrenaline\"。技术: KGSL scratch buffer 可被用户 GPU 命令写入→RPTR 篡改→ringbuffer 竞争→TTBR0 重定向→内核任意读写。作者明确建立在 Guang Gong 工作之上。反思: 质疑原补丁有效性被忽视，主张对 GPU 安全关键组件透明化。\n2. blog.isosceles.com 2023-08-23 \"Exploit Equivalence Classes\" — 方法论文章。引 Saelo 的 addrof/fakeobj 与 v8 sandbox、Brandon Azad 的 PAC bypass、Microsoft Exploitability Index。反思: 将数学等价类映射到漏洞可利用性评估，承认映射的不完美性。\n3. blog.isosceles.com 2023-09-21 \"The WebP 0day\" — CVE-2023-4863，libwebp VP8L BuildHuffmanTable 堆溢出。与 Apple CVE-2023-41064 (BLASTPASS/NSO Pegasus) 同源疑似。技术: Mark Adler enough 工具 + mistymntncop WebP 构造 harness + ASan；OSS-Fuzz 未发现。反思: 质疑对模糊测试过度依赖，主张人工源码审计与沙箱化；批评厂商扣留技术细节造成不对称。约三整天工作，与 mistymntncop 协作。\n4. blog.isosceles.com 2024-08-23 \"OpenSSH Backdoors\" — 2002 trojaned OpenSSH vs 2024 xz-utils/liblzma 对比。工具方法: checksum 验证、build system hooking、Landlock/SELinux/seccomp-bpf。反思: 沙箱应覆盖全部代码而非仅处理不可信数据部分。\n\n## 推断/缺口\n- 早期职业生涯（P0 之前）细节未抓取到一手来源；本地种子为空。报告 P0 之前作品时标注 inferred/unknown。\n- isosceles 博客 2023-08 至 2024-08 共约 6 篇文章，其中 \"Phineas Fisher\"(2023-09-14)、\"What is a good Linux Kernel bug?\"(2023-08-30)、\"Robots Dream of Root Shells\"(2024-03-11) 仅有标题级别信息（lead_only），未抓取正文，故不作为 documented item 纳入。\n- P0 Issue tracker 需认证无法抓取；CVE-2020-11179 的 Issue 2052 与 PoC \"Adrenaline\" 通过 P0 博客正文 documented 提及（正文为 primary），但 issue tracker 本身未直接抓取。\n\n## 演化主线（documented 支撑）\n- 目标难度上升: 2020 GPU 驱动内核攻击（含竞争与硬件状态机）→ 2023 libwebp Huffman 表构造（前置条件极复杂的解析器内存安全）→ 2024 转向供应链/构建系统与防御架构。\n- 研究方法变化: 2020 依赖硬件逆向+竞争窗口手工构造 PoC；2023 结合工具链（enough/mistymntncop harness/ASan）但仍归结为人工审计，并批评纯模糊测试覆盖不足；2023 方法论抽象为\"等价类\"复用；2024 转向历史比较与防御性架构（least privilege 沙箱）。\n- 复盘方式: 多篇文章显式批评补丁有效性验证缺失(2020)、模糊测试过度依赖(2023-09)、沙箱范围过窄(2024)，呈现从\"找漏洞\"到\"反思流程与防御架构\"的转向。\n- 导师/同伴: 2020 明确致谢 Guang Gong (Black Hat 前置工作) 并与 Qualcomm 协作；2023 与 @mistymntncop 协作 WebP；引用 Saelo、Brandon Azad 等同行的 primitive 框架作为方法论基础。\n\n## 工具调用预算\n- 已用: WebFetch 8 次（含 2 次重定向重试） + WebSearch 4 次（其中 2 次无有效结果）。接近上限，不再新增抓取。\n"
+        },
+        "success": true,
+        "content_sha256": "5217f8d8ec51bda58aaa17a7e8b16f1183f5c53a3a2d80ab6e0f11fce1a705aa",
+        "accessed_at": "2026-09-27T21:05:22.033916+00:00"
+      },
+      {
+        "tool_use_id": "call_kae21hb9g7lywc8phzhvn56h",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ben-hawkes-works-20260928-045528-954/output.json",
+          "content": "{\n  \"person\": \"Ben Hawkes\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"种子记录 rank 65、name=Ben Hawkes、primary_focus=浏览器与图片解析漏洞、social=x.com/benhawkes、writeup=blog.isosceles.com/the-webp-0day。抓取的 blog.isosceles.com 多篇文章（Exploit Equivalence Classes 2023-08-23、The WebP 0day 2023-09-21、OpenSSH Backdoors 2024-08-23）正文署名均为 Ben Hawkes；projectzero.google 的 Attacking the Qualcomm Adreno GPU（2020-09-08）署名为 Ben Hawkes, Project Zero。其中 WebP 0day（CVE-2023-4863，libwebp VP8L 解析器堆溢出）属图片解析漏洞，与种子 primary_focus 吻合，且该 URL 与种子 writeup_evidence 完全一致。未发现与其他名为 Ben Hawkes 者的混淆；x.com/benhawkes 与 blog.isosceles.com 指向同一作者（种子与抓取正文互相印证）。身份核对待编排器复核。\",\n  \"items\": [\n    {\n      \"id\": \"BH-WORKS-01\",\n      \"date\": \"2020-09-08\",\n      \"claim\": \"Ben Hawkes 在 Google Project Zero 期间发表 Attacking the Qualcomm Adreno GPU，分析 CVE-2020-11179：Qualcomm Adreno GPU 的 KGSL 内核驱动中 scratch buffer 为各 GPU context 共享的全局映射，可被用户提交的 GPU 命令写入；scratch buffer 存储 ringbuffer 的读指针 RPTR，攻击者通过 CP_MEM_WRITE 写入恶意 RPTR，使 CPU 与 GPU 对 ringbuffer 布局的理解失步，进而覆盖未处理的 ringbuffer 条目，竞争性地在受保护模式关闭的 context 切换窗口内插入受控间接跳转，关闭受保护模式后改写 GPU 的 TTBR0 指向伪造页表，获得物理内存任意读写并最终改写 sys_call_table 实现内核代码执行。该问题是对 CVE-2019-10567 补丁的绕过：原补丁随机化了 scratch buffer 的 GPU 地址并阻止用户性能分析命令直接出现在 ringbuffer 上，但 scratch buffer 仍可被用户命令写入。作者明确声明研究建立在 Guang Gong 报告 CVE-2019-10567 及其 Black Hat 论文之上，并发布 PoC Adrenaline（P0 Issue 2052）。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"目标难度与硬件状态机介入。研究方法为硬件/驱动逆向结合竞争窗口手工构造 PoC（buddy allocator 喷射定位已知物理地址、原始 GPU 命令序列经 IOCTL_KGSL_GPU_COMMAND 提交）。复盘方式为对前序补丁有效性的质疑：作者指出原补丁的有效性未被进一步检验，并把高质量 bug 报告视为后续挖掘的洞察来源，主张对 GPU 安全关键组件提高透明度。同伴/前置工作明确为 Guang Gong 的 Black Hat 论文。\",\n      \"short_quote\": \"This research was built upon the work by Guang Gong.\",\n      \"source\": {\n        \"title\": \"Attacking the Qualcomm Adreno GPU\",\n        \"url\": \"https://projectzero.google/2020/09/attacking-qualcomm-adreno-gpu.html\",\n        \"published\": \"2020-09-08\",\n        \"source_type\": \"vulnerability writeup (vendor research blog, Project Zero)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"BH-WORKS-02\",\n      \"date\": \"2023-08-23\",\n      \"claim\": \"Ben Hawkes 在独立博客 blog.isosceles.com 发表 Exploit Equivalence Classes，提出将集合论中的等价类概念应用于漏洞可利用性评估：若新发现漏洞在与既有已利用漏洞相同的平台条件、缓解措施与环境下降级产生相同原语（如 JavaScript 引擎利用中的 addrof/fakeobj），则可归入同一 exploit 等价类，无需重新编写完整利用即可判定可利用性。作者援引 Saelo 关于 addrof/fakeobj 原语的 Phrack 文章与 v8 sandbox、Brandon Azad 的 PAC bypass、Microsoft 的 Exploitability Index 作为既有框架参照。作者自述背景为学习数学、短暂尝试密码学后转向认为更易入手的 hacking，并据此尝试将抽象数学概念映射到安全实践，同时承认该映射的不完美。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"研究方法从单一漏洞挖掘抽象为可复用的可利用性判定框架。引用同行（Saelo、Brandon Azad）的 primitive 与 bypass 工作作为方法论基础，体现对社区既有成果的吸收与再结构化。复盘方式为对现有可利用性标注体系（如 'high risk' / 'exploitation less likely'）的系统性质疑。\",\n      \"short_quote\": \"An exploit is just a collection of primitives that are cleverly stitched together to do something that we all agree is unexpected.\",\n      \"source\": {\n        \"title\": \"Exploit Equivalence Classes\",\n        \"url\": \"https://blog.isosceles.com/exploit-equivalence-classes/\",\n        \"published\": \"2023-08-23\",\n        \"source_type\": \"methodology essay (personal research blog)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"BH-WORKS-03\",\n      \"date\": \"2023-09-21\",\n      \"claim\": \"Ben Hawkes 发表 The WebP 0day，分析 CVE-2023-4863：libwebp 的 VP8L 无损解码路径中 BuildHuffmanTable 函数存在堆缓冲区溢出。预计算缓冲区大小源自 Mark Adler 的 enough 工具（计算有效且完整 Huffman 码的最大表大小），但代码未考虑某些在一致性检查拒绝它们之前仍被部分处理的无效 Huffman 树；攻击者依次构造两个不同字母表大小（280 与 256）的最大化有效 Huffman 表，再为第三个字母表大小（40）构造一种特定的无效 Huffman 树，使 ReplicateValue 操作在最终节点数一致性检查之前越界写入。该漏洞疑与 Apple CVE-2023-41064（BLASTPASS，归因于 NSO Group Pegasus）同源。作者约用三个全天工作，与 @mistymntncop 协作（后者提供 WebP 构造 harness），使用 ASan 检测，参考 Mark Adler 的 enough 工具与 mistymntncop 构造 harness；OSS-Fuzz 虽持续模糊 libwebp 但未发现此问题。作者推断该漏洞系通过人工代码审计发现，并批评厂商扣留技术细节造成的攻防不对称、以及业界对模糊测试在复杂解析器安全保证上的过度依赖，主张加大人工源码审计与沙箱化投入。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"目标难度为前置条件极其复杂的解析器内存安全（需连续构造四张最大化有效 Huffman 表后再构造特定无效表）。研究方法为工具链辅助的人工审计：组合 enough 工具、第三方 WebP 构造 harness 与 ASan，但仍归结为对 Huffman 表分配路径的人工追踪。同伴为 @mistymntncop（协作构造与测试）。复盘方式为对模糊测试覆盖能力的系统性批评与对人工审计持久性的强调，并对厂商信息不对称提出公开批评，呈现从纯技术挖掘向流程与防御架构反思的转向。\",\n      \"short_quote\": \"this format is incredibly complex and fragile, and the preconditions to trigger this issue are immense\",\n      \"source\": {\n        \"title\": \"The WebP 0day\",\n        \"url\": \"https://blog.isosceles.com/the-webp-0day/\",\n        \"published\": \"2023-09-21\",\n        \"source_type\": \"vulnerability writeup (personal research blog)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"BH-WORKS-04\",\n      \"date\": \"2024-08-23\",\n      \"claim\": \"Ben Hawkes 发表 OpenSSH Backdoors，对 2002 年 ftp.openbsd.org 上被植入木马的 OpenSSH 发行文件事件与 2024 年针对 systemd 系 Linux 发行版的 xz-utils/liblzma 后门进行对比分析，考察两次供应链攻击的相似性与差异及对供应链安全的启示。文章未引用具体 CVE 编号，但讨论 exim 相关漏洞（关联 Qualys 的 21Nails 研究），并指出 zlib.net 托管基础设施上 CPanel、Pure-FTPD、Apache httpd、Dovecot 等攻击面。作者描述的方法包括校验和验证（2002 攻击经 FreeBSD ports 系统的校验和差异被检测）、构建系统挂钩（两次攻击均针对构建基础设施）、仅二进制测试文件载荷暂存与社会工程获取受信维护者身份（xz-utils），以及性能回归分析（2024 后门据此被发现）。防御方面提及 Linux Landlock 沙箱（约 250 行代码即可为 make 写一个能阻止 2002 攻击的 Landlock 沙箱）、Android 的 SELinux 与 seccomp-bpf 作为隔离示例。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"目标范围扩展至供应链与构建系统，超越单一内存安全漏洞。研究方法转为历史比较分析与防御架构讨论。复盘方式为对沙箱设计理念的修正：作者自述以往认为沙箱仅适用于处理不可信数据的代码部分，现主张在代码本身即不可信的世界中，所有代码都应遵循最小权限约束。呈现从漏洞挖掘到防御架构与系统设计的明确转向。\",\n      \"short_quote\": \"In a world where it's the code rather than the data that is untrusted, the goal should be to reorient toward system designs where all code is constrained to least privilege\",\n      \"source\": {\n        \"title\": \"OpenSSH Backdoors\",\n        \"url\": \"https://blog.isosceles.com/openssh-backdoors/\",\n        \"published\": \"2024-08-23\",\n        \"source_type\": \"comparative analysis essay (personal research blog)\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"本地种子将 Ben Hawkes 的 primary_focus 标注为'浏览器与图片解析漏洞'；抓取到的最早一手作品（2020 P0 的 Adreno GPU 内核驱动研究）属移动 GPU/内核攻击而非浏览器或图片解析。该标注与抓取材料在时间覆盖上不完全一致：图片解析（WebP/libwebp, 2023）确为其作品，但浏览器漏洞专门作品在本次抓取范围内未获一手来源。二者并非互斥（同一作者可跨领域），但种子描述侧重其后期作品类型。\"\n  ],\n  \"gaps\": [\n    \"Project Zero issue tracker (project-zero.issues.chromium.org) 需认证无法抓取，故 BH-WORKS-01 中提及的 Issue 2052 与 PoC Adrenaline 仅通过 P0 博客正文间接 documented，issue tracker 原始条目未直接核验。\",\n    \"Ben Hawkes 在 Project Zero 之前（如传说中 Matasano Security 或更早期）的职业生涯与作品缺一手来源：本地种子为空，WebSearch 在本环境返回无可用结果，无法 documented 或 inferred 其早期作品演化。\",\n    \"isosceles 博客中 Phineas Fisher (2023-09-14)、What is a good Linux Kernel bug? (2023-08-30)、Robots Dream of Root Shells (2024-03-11) 三篇仅有标题级别信息（lead_only），未抓取正文，故未作为 documented item 纳入；其对演化的具体贡献未知。\",\n    \"浏览器漏洞专门作品（primary_focus 之一）未在本次抓取中获一手来源；需后续抓取 P0 时期 Chrome/Skia 相关文章或 P0 issue tracker 记录以补全。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "d9490cd8b90935a83df91b0efe581844a3382cf439f8f3595fa751390443551e",
+        "accessed_at": "2026-09-27T21:05:22.033923+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790543122033943000-ben-hawkes-works.json",
+    "label": "Ben Hawkes:works",
+    "elapsed_seconds": 593.07,
+    "prompt_sha256": "339d2bd907ed2df7263755bbdd0174a3cee0cd5c108ab6911e4c73269c2222c8",
+    "num_turns": 29,
+    "total_cost_usd": 1.5438059999999998,
+    "usage": {
+      "input_tokens": 23427,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 251648,
+      "output_tokens": 7378,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 52979,
+        "outputTokens": 45719,
+        "cacheReadInputTokens": 271872,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.5438059999999998,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

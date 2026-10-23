@@ -1,0 +1,261 @@
+{
+  "person": "Gabrielle Viala",
+  "expertise": [
+    "UEFI/SMM（ring -2）漏洞利用：在 EDK II 参考实现与 Steam Deck 商业固件上完成 SMM 代码执行链，约束写原语经边界计数器腐蚀、伪造 SMI handler 与 ROP 关闭保护递进",
+    "低层固件逆向与利用方法论：窄写原语（固定 4 字节写、单字节写、AND 掩码清位）向完整执行的升级，以及外部同行技术（Dmytro Oleksiuk SMM 后门页表重映射）的整合复用",
+    "移动平台启动链研究（团队协作语境）：以 contributor 身份参与 Samsung Galaxy A* 启动链四条 CVE 链与三项成果的团队研究",
+    "身份同一性的证据约束意识：在 handle、显示名与全名三者的一手闭合不成立时，按推断与缺口分别标注"
+  ],
+  "stages": [
+    {
+      "period": "2018-10",
+      "stage": "可一手确认的最早署名作品：Windows 通知设施（WNF）机制梳理",
+      "capability_change": "以显示名 Gwaby 在 Quarkslab 博客发表 WNF 逆向文章，记录其最早可一手确认的公开机制梳理行为；全文未涉及 Android/TrustZone/TEE。该阶段的能力变化为机制梳理与公开写作，但身份同一性（Gwaby 与全名 Gabrielle Viala）未在一手页面闭合，capability 变化归属存在推断前提。",
+      "evidence_ids": [
+        "r1-works-wnf-fetched",
+        "r1-gwaby-author-page"
+      ],
+      "confidence": "low"
+    },
+    {
+      "period": "2023-06",
+      "stage": "UEFI/SMM（ring -2）利用方法序列的首次确立",
+      "capability_change": "以显示名 Gwaby 在 Quarkslab 博客发表 EDK II Tcg2Smm 模块利用文章，针对 TPM_NVS_MM_COMM_BUFFER 的 TargetAddress 校验缺失，以固定 4 字节写原语（写 0x00000001）经腐蚀 mSmmMemLibInternalSmramCount、借 SmmLockBox 读写、向 PiSmmCore 链表注入伪造 SMI handler 并以 ROP 关闭 WP/NX，达成 SMM 代码执行。能力由 Windows 用户态/内核机制梳理转向 UEFI/SMM ring -2 利用，并确立窄写原语到完整执行的方法序列。",
+      "evidence_ids": [
+        "gv-works-02",
+        "r1-gwaby-author-page"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2024-09 至 2024-10",
+      "stage": "以全名 Gabrielle Viala 出现的团队协作研究贡献（Samsung 启动链）",
+      "capability_change": "在 Samsung Galaxy A* 启动链研究（writeup 与 PoC 仓库）中以全名 Gabrielle Viala 出现于 PoC 仓库 README credits 与 writeup 致谢段；研究作者列为 Maxime Rossi Bellom、Raphaël Neveu，Viala 为致谢 contributor，非作者列。四条 CVE（CVE-2024-20832 Little Kernel 堆溢出→代码执行与持久化；CVE-2024-20865 Odin 鉴权绕过→USB 刷写；CVE-2024-20820 Secure Monitor 读越界→内存泄露；CVE-2024-20021 任意物理内存映射→Secure World 泄露）与三项成果均归团队集体，无条目单独归 Viala。该阶段反映团队协作研究中的可观察参与，但个人具体贡献未拆分；全名 Gabrielle Viala 与显示名 Gwaby 的同一性未一手闭合，本阶段作为独立数据点存在。",
+      "evidence_ids": [
+        "r1-samsung-viala-contributor-only",
+        "r1-samsung-poc-readme-contributors",
+        "gv-community-02"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2025-02",
+      "stage": "SMM 利用方法序列的复用与窄原语升级（Steam Deck）",
+      "capability_change": "以显示名 Gwaby 在 Quarkslab 博客发表 Steam Deck（AMD Van Gogh APU）UEFI 固件中 AmdCpmDisplayFeatureSmm.efi 的 CVE-2024-0179 利用文章，原语更窄（固定单字节写 0x83 及有限 AND 掩码清位），链式：清零 mSmmIhisiSmramCount 绕过 SMRAM 边界检查获任意读、扩展共享内存缓冲区覆盖 SMRAM、注入伪造 IHISI 命令处理函数、以 ROP 关闭 NX 实现 SMM 代码执行，并整合 Dmytro Oleksiuk SMM 后门页表重映射作 post-exploitation。文章显式自参照 2023 年 EDK II 文章三处，标注原语类型不同但方法序列相同。",
+      "evidence_ids": [
+        "gv-works-03",
+        "r1-steamdeck-2023-crossref",
+        "r1-gwaby-author-page"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "窄写原语到 SMM 代码执行的方法序列复用（Gwaby 署名）",
+      "starting_conditions": "以显示名 Gwaby 在 Quarkslab 博客公开写作，目标涵盖公开参考实现（EDK II）与商业硬件固件（Steam Deck）；具备 UEFI/SMM 逆向与利用基础。",
+      "repeated_practice": "2023 年 EDK II 与 2025 年 Steam Deck 两篇署名 Gwaby 的文章均沿同一序列：以受控窄写原语（固定 4 字节写 0x00000001 / 固定单字节写 0x83 与 AND 掩码清位）为起点，腐蚀 SMRAM 边界计数器（mSmmMemLibInternalSmramCount / mSmmIhisiSmramCount）绕过边界检查，借 SmmLockBox 或扩展共享内存缓冲区读写，向 PiSmmCore 链表注入或替换为伪造 SMI/IHISI 命令处理函数，以 ROP 关闭 WP/NX，达成 SMM 代码执行。样本量为两个数据点。",
+      "feedback": "2025 年 Steam Deck 文章显式自参照 2023 年 EDK II 文章三处，标注原语更窄但序列相同，构成自我比对与标注原语差异的反馈。",
+      "intermediate_capability": "形成可跨目标复用的 SMM 利用方法序列：窄写原语 → 边界计数器清零 → 伪造命令处理函数 → ROP 关闭保护 → SMM 执行，并具备整合外部同行技术（Dmytro Oleksiuk SMM 后门页表重映射）的能力。",
+      "observed_outcomes": [
+        "2023-06 EDK II Tcg2Smm SMM 代码执行文章",
+        "2025-02 Steam Deck AmdCpmDisplayFeatureSmm（CVE-2024-0179）SMM 代码执行文章，post-exploitation 整合 SMM 后门页表重映射技术"
+      ],
+      "evidence_ids": [
+        "gv-works-02",
+        "gv-works-03",
+        "r1-steamdeck-2023-crossref"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "两篇文章署名同为 Gwaby 且显式自参照，方法序列复用可由文本直接支撑；但样本量为 2，无法据以推断该方法序列是否为该署名作者的稳定习惯而非两次独立选题的巧合。Gwaby 与全名 Gabrielle Viala 的同一性未一手闭合，跨身份外推受到限制。"
+    },
+    {
+      "name": "目标选题与 Quarkslab 平台/团队语境的关联（含身份前提）",
+      "starting_conditions": "Quarkslab 作为研究博客与 PoC 仓库的发布平台；任务输入将全名 Gabrielle Viala 关联至 Quarkslab 与 Android/Boot/TEE 方向，但该关联未在一手页面闭合。",
+      "repeated_practice": "以显示名 Gwaby 在 Quarkslab 博客发表 UEFI/SMM 主题文章；以全名 Gabrielle Viala 在 Quarkslab 组织仓库 samsung-bootchain-poc README credits 与 Samsung 启动链 writeup 致谢段中出现。目标从公开参考实现（EDK II）到商业硬件固件（Steam Deck）再到移动平台启动链（Samsung，团队协作）。",
+      "feedback": "Samsung writeup 经会议评审（README 声明关联 Black Hat US 2024 演讲与 SSTIC 2024 白皮书，二者未由本节点一手议程页证实）；博客文章经 Quarkslab 同行评审发布（致谢段提及 colleagues who reviewed this post）。",
+      "intermediate_capability": "在组织平台与团队协作语境中选题与产出，目标选择受团队资源与个人兴趣影响（2025 年文章自述研究目标来自 R&D 负责人作为圣诞礼物的 Steam Deck）。",
+      "observed_outcomes": [
+        "Quarkslab 博客三篇 Gwaby 署名文章（WNF、EDK II SMM、Steam Deck SMM）",
+        "Samsung 启动链 PoC 仓库 README 列 Gabrielle Viala 为 contributor"
+      ],
+      "evidence_ids": [
+        "r1-gwaby-author-page",
+        "r1-samsung-viala-contributor-only",
+        "r1-samsung-poc-readme-contributors",
+        "gv-works-06"
+      ],
+      "validation_tests": [
+        "repeated"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "Quarkslab 平台归属可由博客与组织仓库间接关联，但显示名 Gwaby、handle pwissenlit 与全名 Gabrielle Viala 三者的同一性未在一手页面闭合；全名仅出现在 Samsung 团队研究的 credits/致谢，与 Gwaby 署名的 SMM 文章之间缺乏同时列出三者的一手页面。因此该机制依赖身份同一性的推断前提，存在三者实为不同人或全名记录有误的竞争性解释。"
+    }
+  ],
+  "tensions": [
+    "身份同一性未一手闭合：任务输入将全名 Gabrielle Viala、handle pwissenlit、Quarkslab 归属与 Android/Boot/TEE 方向关联，但 GitHub pwissenlit 显示名为 Gwaby 且无全名与 Quarkslab 链接，Quarkslab 博客作者页与作者索引仅有 Gwaby、无 Gabrielle Viala 或 pwissenlit；全名 Gabrielle Viala 仅出现在 Samsung 团队研究的 README credits 与致谢段。Gwaby=pwissenlit 可由 GitHub 显示名一致推断，但 Gwaby/pwissenlit 与全名 Gabrielle Viala 的同一性仅靠 Quarkslab 共同归属间接关联，未在一手页面闭合。",
+    "primary_focus 定位与一手作品不符：任务输入记 primary_focus 为 Android/Boot/TEE 漏洞，但可一手确认的 Gwaby 署名三篇文章均为 Windows/UEFI/SMM 主题（WNF、EDK II SMM、Steam Deck SMM），无 Android/TrustZone/QSEE/OP-TEE/TEE；Samsung 启动链研究属移动平台/bootloader 但 Viala 为致谢 contributor，未明确指向 TrustZone/TEE 内核。",
+    "Samsung 研究中个人贡献边界未拆分：writeup 作者列为 Maxime Rossi Bellom、Raphaël Neveu，Viala 为致谢 contributor，四条 CVE 与三项成果均以集体语言（We discovered/We targeted/We implemented）归团队，无条目单独归 Viala；PoC 仓库仅 1 commit 且页面未渲染 commit 作者，提交级贡献无法拆分。",
+    "会议出场一手证据缺失：OffByOne 2024 与 Black Hat 在任务输入列为 selected_conference_evidence，但 offbyone.fr 抓取连接被拒（ECONNREFUSED），Black Hat 无一手抓取结果；Samsung PoC README 声明关联 Black Hat US 2024 演讲与 SSTIC 2024 白皮书，但 SSTIC 2024 官方 programme 中 Samsung 讲题署名为 Rossi Bellom 与 Neveu，未列 Viala，Viala 在这些会议中的具体登台角色不明。",
+    "DEF CON 26 TrustZone 证据未一手确认：DEF CON 26 'Escaping the Google TrustZone' 仅由搜索摘要支持，speaker 页抓取内容未匹配该条目，未获一手确认。",
+    "自述/访谈/反馈痕迹缺失：未抓取到本人自述（入门、学习、失败、导师、转折）的一手材料，成长机制的过程性证据（重复练习的工具自建过程、反馈如何修正研究方向）缺失。"
+  ],
+  "transferable_practices": [
+    "将窄写原语到完整执行拆解为可复用序列（边界计数器腐蚀 → 边界检查绕过 → 伪造命令处理函数 → ROP 关闭保护），并跨目标（公开参考实现与商业固件）显式比对原语差异与序列相同性。",
+    "在新目标利用中整合外部同行既有技术（如 SMM 后门页表重映射）作 post-exploitation，缩短从原语到持久访问的路径。",
+    "在团队协作研究中以 PoC 仓库 README credits 与 writeup 致谢段记录贡献边界，使协作贡献可追溯。",
+    "在身份同一性未一手闭合时，将 handle、显示名与全名分别标注为推断或缺口，不将三者合并表述为同一人的跨目标迁移主张。"
+  ],
+  "non_transferable_conditions": [
+    "Quarkslab 平台与组织资源：研究博客发布、组织 PoC 仓库（quarkslab/samsung-bootchain-poc）与团队协作（Maxime Rossi Bellom、Raphaël Neveu、Damiano Melotti 等）属于特定组织条件，非个人可迁移方法。",
+    "研究目标获取的非正式渠道：2025 年 Steam Deck 研究目标由 R&D 负责人作为圣诞礼物提供，属团队资源与个人兴趣驱动的偶然条件。",
+    "身份同一性前提：Gwaby/pwissenlit 与全名 Gabrielle Viala 的同一性未一手闭合，任何以全名为锚点的归因受此前提约束。",
+    "会议评审与发布反馈回路：Black Hat/SSTIC 评审与 Quarkslab 同行评审属于组织与会议机制，依赖外部认可而非个人练习可复现。"
+  ],
+  "open_questions": [
+    "Gwaby、handle pwissenlit 与全名 Gabrielle Viala 的同一性是否可由同时列出三者的一手页面闭合（需 web.archive.org、Google Scholar、dblp 等可抓取镜像补证）。",
+    "primary_focus='Android/Boot/TEE 漏洞' 定位的来源：是否对应未抓取的平台产出（SSTIC 其他年份、DEF CON 其他届、Black Hat 其他场次）或早期简历记录。",
+    "OffByOne 2024 与 Black Hat 的具体场次、题目、日期与登台角色，以及 Viala 是否以讲者身份参与。",
+    "Samsung 启动链研究中 Viala 的具体贡献边界（四条 CVE 链与三项成果中的个人分工）。",
+    "2018 年 WNF 文章是否作为成长阶段的合理起点：在身份同一性未闭合前提下，是否保留为署名 Gwaby 的非全名起点，或删除该阶段。",
+    "是否存在本人自述材料（writeup 内自述、访谈、AMA、演讲问答）以重建入门、学习、失败、导师与转折的具体叙述。",
+    "Gwaby 署名三篇文章之外是否存在未抓取的 Android/TrustZone/TEE 主题一手作品。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-synthesis-v2-20260928-091812-298",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790558711770568000-gabrielle-viala-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "0778e4a2-6fbe-4714-bc2d-ce38a768834a",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_132g7a7qodf29c3bx32th635",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-synthesis-v2-20260928-091812-298/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-28T01:25:11.830718+00:00"
+      },
+      {
+        "tool_use_id": "call_912g6n6ueyi7s34lf9j4xbol",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-synthesis-v2-20260928-091812-298/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T01:25:11.830746+00:00"
+      },
+      {
+        "tool_use_id": "call_zf4wgsvre5kht6lzi31dz1c7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-synthesis-v2-20260928-091812-298/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "e081bd97e25b93a29828beea29d4fcd64c5c800c489ec692d271921ef4b5b329",
+        "accessed_at": "2026-09-28T01:25:11.830753+00:00"
+      },
+      {
+        "tool_use_id": "call_zploglsmu401efq63qeyy7tc",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-synthesis-v2-20260928-091812-298/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "e2cac51510b7241c8538a97d94a3bd2956fbd7d6379718a627fabce696db769c",
+        "accessed_at": "2026-09-28T01:25:11.830761+00:00"
+      },
+      {
+        "tool_use_id": "call_qllx9p5ikdcaupulgsrtqnxn",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-synthesis-v2-20260928-091812-298/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "29f4ca85b1fff7f9be725f381482c2b863c1cd84f00893cf853920afeb1d0054",
+        "accessed_at": "2026-09-28T01:25:11.830823+00:00"
+      },
+      {
+        "tool_use_id": "call_uykhovk3uv3h5y0ddv58wo1q",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-synthesis-v2-20260928-091812-298/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "59391060e98a6e280f2814a887043404de9a2b91efaa684e2b51a99831863b0f",
+        "accessed_at": "2026-09-28T01:25:11.830899+00:00"
+      },
+      {
+        "tool_use_id": "call_cp4kgrrf1vav3dfpktftswr0",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-synthesis-v2-20260928-091812-298/checkpoint.md",
+          "content": "# Checkpoint — Gabrielle Viala synthesis v2\n\n## 任务契约\n- 综合分析节点。输出 schema required: person(const \"Gabrielle Viala\")/expertise/stages/mechanisms/tensions/transferable_practices/non_transferable_conditions/open_questions。\n- 不得自填 _run/verification；additionalProperties:false（顶层不附 _run）。\n- 每个阶段/机制须列有效 evidence_ids，且至少 verified_in_run=true 来源支撑。\n\n## 有效证据清点（verified_in_run=true）\n- r1-works-wnf-fetched: 2018-10-25 WNF 文章，署名 Gwaby（非全名），主题 Windows WNF\n- gv-works-02: 2023-06-23 EDK II Tcg2Smm SMM，署名 Gwaby\n- gv-works-03: 2025-02-11 Steam Deck SMM（CVE-2024-0179），署名 Gwaby\n- gv-works-05: pwissenlit=Gwaby 推断（GitHub 显示名一致）\n- gv-works-06: Quarkslab 作者索引无 Viala/pwissenlit，仅 Gwaby 3 篇（Windows/UEFI/SMM）\n- gv-community-02: samsung-bootchain-poc README contributors 含 Gabrielle Viala\n- gv-community-03: GitHub pwissenlit forks（edk2-libc/avatar-qemu/blackhoodiere.github.io）\n- gv-community-04: BlackHoodie（inferred）\n- GV-EXT-001/GV-EXT-002: 身份核验约束（作者索引/GitHub 均未列全名）\n- gv-decisions-01: DEF CON 26 TrustZone（inferred，speaker 页内容未匹配条目）\n- gv-decisions-02 / gv-timeline-quarkslab-affiliation: Quarkslab 归属（inferred，作者页 404）\n- gv-timeline-identity-github / gv-timeline-quarkslab-blog-absence: 身份/博客未见署名\n- r1-steamdeck-2023-crossref: 2025 文章显式自参照 2023 EDK II 文章 3 处\n- r1-samsung-viala-contributor-only: Samsung writeup Viala 仅致谢 contributor，4 CVE/3 成果归团队\n- r1-samsung-poc-readme-contributors: PoC README 4 contributors\n- r1-gwaby-author-page: Gwaby 作者页 3 篇，无全名无 bio\n- r1-identity-still-unresolved: GitHub pwissenlit 无全名无 Quarkslab 关联\n\n## 作废证据（不得使用）\n- gv-works-01（由 r1-works-wnf-fetched 替代）\n- gv-community-01（由 r1-samsung-viala-contributor-only 替代）\n\n## 未证实（仅作缺口/张力，不作支撑）\n- gv-works-04 / gv-timeline-offbyone-2024 / gv-timeline-blackhat / gv-decisions-03（OffByOne 2024/Black Hat，verified=false）\n- gv-timeline-android-boot-tee-focus（Android/TEE 定位，verified=false）\n\n## 结构决策\n- 阶段 4 个：A(2018 WNF,Gwaby,low) / B(2023 EDK II SMM,Gwaby,medium) / C(2024 Samsung 全名 contributor,medium) / D(2025 Steam Deck,Gwaby,medium)\n- 机制 2 个：M1 窄原语→SMM 可复用方法序列(repeated+distinctive,medium) / M2 目标选题与 Quarkslab 平台/团队语境关联(repeated,low)\n- 按 revision 指令拆分：Gwaby SMM 迁移归 M1；Samsung 全名 contributor 作独立阶段 C，不并入跨身份迁移机制\n- Samsung 贡献边界按 revision 降为\"致谢 contributor\"，4 CVE/3 成果归团队\n- 身份同一性作核心 tension/open_question\n- 2018 WNF 阶段以 confidence=low 保留并标注身份限制（不删除已验证证据）\n"
+        },
+        "success": true,
+        "content_sha256": "27726ec1899958ac5e71dfdeec0294c2a2986c714712131bdb0012a80ef6a7c6",
+        "accessed_at": "2026-09-28T01:25:11.831606+00:00"
+      },
+      {
+        "tool_use_id": "call_xk1awfxcht0ngs0bpcrtc2v7",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-synthesis-v2-20260928-091812-298/output.json",
+          "content": "{\n  \"person\": \"Gabrielle Viala\",\n  \"expertise\": [\n    \"UEFI/SMM（ring -2）漏洞利用：在 EDK II 参考实现与 Steam Deck 商业固件上完成 SMM 代码执行链，约束写原语经边界计数器腐蚀、伪造 SMI handler 与 ROP 关闭保护递进\",\n    \"低层固件逆向与利用方法论：窄写原语（固定 4 字节写、单字节写、AND 掩码清位）向完整执行的升级，以及外部同行技术（Dmytro Oleksiuk SMM 后门页表重映射）的整合复用\",\n    \"移动平台启动链研究（团队协作语境）：以 contributor 身份参与 Samsung Galaxy A* 启动链四条 CVE 链与三项成果的团队研究\",\n    \"身份同一性的证据约束意识：在 handle、显示名与全名三者的一手闭合不成立时，按推断与缺口分别标注\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2018-10\",\n      \"stage\": \"可一手确认的最早署名作品：Windows 通知设施（WNF）机制梳理\",\n      \"capability_change\": \"以显示名 Gwaby 在 Quarkslab 博客发表 WNF 逆向文章，记录其最早可一手确认的公开机制梳理行为；全文未涉及 Android/TrustZone/TEE。该阶段的能力变化为机制梳理与公开写作，但身份同一性（Gwaby 与全名 Gabrielle Viala）未在一手页面闭合，capability 变化归属存在推断前提。\",\n      \"evidence_ids\": [\n        \"r1-works-wnf-fetched\",\n        \"r1-gwaby-author-page\"\n      ],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2023-06\",\n      \"stage\": \"UEFI/SMM（ring -2）利用方法序列的首次确立\",\n      \"capability_change\": \"以显示名 Gwaby 在 Quarkslab 博客发表 EDK II Tcg2Smm 模块利用文章，针对 TPM_NVS_MM_COMM_BUFFER 的 TargetAddress 校验缺失，以固定 4 字节写原语（写 0x00000001）经腐蚀 mSmmMemLibInternalSmramCount、借 SmmLockBox 读写、向 PiSmmCore 链表注入伪造 SMI handler 并以 ROP 关闭 WP/NX，达成 SMM 代码执行。能力由 Windows 用户态/内核机制梳理转向 UEFI/SMM ring -2 利用，并确立窄写原语到完整执行的方法序列。\",\n      \"evidence_ids\": [\n        \"gv-works-02\",\n        \"r1-gwaby-author-page\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2024-09 至 2024-10\",\n      \"stage\": \"以全名 Gabrielle Viala 出现的团队协作研究贡献（Samsung 启动链）\",\n      \"capability_change\": \"在 Samsung Galaxy A* 启动链研究（writeup 与 PoC 仓库）中以全名 Gabrielle Viala 出现于 PoC 仓库 README credits 与 writeup 致谢段；研究作者列为 Maxime Rossi Bellom、Raphaël Neveu，Viala 为致谢 contributor，非作者列。四条 CVE（CVE-2024-20832 Little Kernel 堆溢出→代码执行与持久化；CVE-2024-20865 Odin 鉴权绕过→USB 刷写；CVE-2024-20820 Secure Monitor 读越界→内存泄露；CVE-2024-20021 任意物理内存映射→Secure World 泄露）与三项成果均归团队集体，无条目单独归 Viala。该阶段反映团队协作研究中的可观察参与，但个人具体贡献未拆分；全名 Gabrielle Viala 与显示名 Gwaby 的同一性未一手闭合，本阶段作为独立数据点存在。\",\n      \"evidence_ids\": [\n        \"r1-samsung-viala-contributor-only\",\n        \"r1-samsung-poc-readme-contributors\",\n        \"gv-community-02\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2025-02\",\n      \"stage\": \"SMM 利用方法序列的复用与窄原语升级（Steam Deck）\",\n      \"capability_change\": \"以显示名 Gwaby 在 Quarkslab 博客发表 Steam Deck（AMD Van Gogh APU）UEFI 固件中 AmdCpmDisplayFeatureSmm.efi 的 CVE-2024-0179 利用文章，原语更窄（固定单字节写 0x83 及有限 AND 掩码清位），链式：清零 mSmmIhisiSmramCount 绕过 SMRAM 边界检查获任意读、扩展共享内存缓冲区覆盖 SMRAM、注入伪造 IHISI 命令处理函数、以 ROP 关闭 NX 实现 SMM 代码执行，并整合 Dmytro Oleksiuk SMM 后门页表重映射作 post-exploitation。文章显式自参照 2023 年 EDK II 文章三处，标注原语类型不同但方法序列相同。\",\n      \"evidence_ids\": [\n        \"gv-works-03\",\n        \"r1-steamdeck-2023-crossref\",\n        \"r1-gwaby-author-page\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"窄写原语到 SMM 代码执行的方法序列复用（Gwaby 署名）\",\n      \"starting_conditions\": \"以显示名 Gwaby 在 Quarkslab 博客公开写作，目标涵盖公开参考实现（EDK II）与商业硬件固件（Steam Deck）；具备 UEFI/SMM 逆向与利用基础。\",\n      \"repeated_practice\": \"2023 年 EDK II 与 2025 年 Steam Deck 两篇署名 Gwaby 的文章均沿同一序列：以受控窄写原语（固定 4 字节写 0x00000001 / 固定单字节写 0x83 与 AND 掩码清位）为起点，腐蚀 SMRAM 边界计数器（mSmmMemLibInternalSmramCount / mSmmIhisiSmramCount）绕过边界检查，借 SmmLockBox 或扩展共享内存缓冲区读写，向 PiSmmCore 链表注入或替换为伪造 SMI/IHISI 命令处理函数，以 ROP 关闭 WP/NX，达成 SMM 代码执行。样本量为两个数据点。\",\n      \"feedback\": \"2025 年 Steam Deck 文章显式自参照 2023 年 EDK II 文章三处，标注原语更窄但序列相同，构成自我比对与标注原语差异的反馈。\",\n      \"intermediate_capability\": \"形成可跨目标复用的 SMM 利用方法序列：窄写原语 → 边界计数器清零 → 伪造命令处理函数 → ROP 关闭保护 → SMM 执行，并具备整合外部同行技术（Dmytro Oleksiuk SMM 后门页表重映射）的能力。\",\n      \"observed_outcomes\": [\n        \"2023-06 EDK II Tcg2Smm SMM 代码执行文章\",\n        \"2025-02 Steam Deck AmdCpmDisplayFeatureSmm（CVE-2024-0179）SMM 代码执行文章，post-exploitation 整合 SMM 后门页表重映射技术\"\n      ],\n      \"evidence_ids\": [\n        \"gv-works-02\",\n        \"gv-works-03\",\n        \"r1-steamdeck-2023-crossref\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"两篇文章署名同为 Gwaby 且显式自参照，方法序列复用可由文本直接支撑；但样本量为 2，无法据以推断该方法序列是否为该署名作者的稳定习惯而非两次独立选题的巧合。Gwaby 与全名 Gabrielle Viala 的同一性未一手闭合，跨身份外推受到限制。\"\n    },\n    {\n      \"name\": \"目标选题与 Quarkslab 平台/团队语境的关联（含身份前提）\",\n      \"starting_conditions\": \"Quarkslab 作为研究博客与 PoC 仓库的发布平台；任务输入将全名 Gabrielle Viala 关联至 Quarkslab 与 Android/Boot/TEE 方向，但该关联未在一手页面闭合。\",\n      \"repeated_practice\": \"以显示名 Gwaby 在 Quarkslab 博客发表 UEFI/SMM 主题文章；以全名 Gabrielle Viala 在 Quarkslab 组织仓库 samsung-bootchain-poc README credits 与 Samsung 启动链 writeup 致谢段中出现。目标从公开参考实现（EDK II）到商业硬件固件（Steam Deck）再到移动平台启动链（Samsung，团队协作）。\",\n      \"feedback\": \"Samsung writeup 经会议评审（README 声明关联 Black Hat US 2024 演讲与 SSTIC 2024 白皮书，二者未由本节点一手议程页证实）；博客文章经 Quarkslab 同行评审发布（致谢段提及 colleagues who reviewed this post）。\",\n      \"intermediate_capability\": \"在组织平台与团队协作语境中选题与产出，目标选择受团队资源与个人兴趣影响（2025 年文章自述研究目标来自 R&D 负责人作为圣诞礼物的 Steam Deck）。\",\n      \"observed_outcomes\": [\n        \"Quarkslab 博客三篇 Gwaby 署名文章（WNF、EDK II SMM、Steam Deck SMM）\",\n        \"Samsung 启动链 PoC 仓库 README 列 Gabrielle Viala 为 contributor\"\n      ],\n      \"evidence_ids\": [\n        \"r1-gwaby-author-page\",\n        \"r1-samsung-viala-contributor-only\",\n        \"r1-samsung-poc-readme-contributors\",\n        \"gv-works-06\"\n      ],\n      \"validation_tests\": [\n        \"repeated\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"Quarkslab 平台归属可由博客与组织仓库间接关联，但显示名 Gwaby、handle pwissenlit 与全名 Gabrielle Viala 三者的同一性未在一手页面闭合；全名仅出现在 Samsung 团队研究的 credits/致谢，与 Gwaby 署名的 SMM 文章之间缺乏同时列出三者的一手页面。因此该机制依赖身份同一性的推断前提，存在三者实为不同人或全名记录有误的竞争性解释。\"\n    }\n  ],\n  \"tensions\": [\n    \"身份同一性未一手闭合：任务输入将全名 Gabrielle Viala、handle pwissenlit、Quarkslab 归属与 Android/Boot/TEE 方向关联，但 GitHub pwissenlit 显示名为 Gwaby 且无全名与 Quarkslab 链接，Quarkslab 博客作者页与作者索引仅有 Gwaby、无 Gabrielle Viala 或 pwissenlit；全名 Gabrielle Viala 仅出现在 Samsung 团队研究的 README credits 与致谢段。Gwaby=pwissenlit 可由 GitHub 显示名一致推断，但 Gwaby/pwissenlit 与全名 Gabrielle Viala 的同一性仅靠 Quarkslab 共同归属间接关联，未在一手页面闭合。\",\n    \"primary_focus 定位与一手作品不符：任务输入记 primary_focus 为 Android/Boot/TEE 漏洞，但可一手确认的 Gwaby 署名三篇文章均为 Windows/UEFI/SMM 主题（WNF、EDK II SMM、Steam Deck SMM），无 Android/TrustZone/QSEE/OP-TEE/TEE；Samsung 启动链研究属移动平台/bootloader 但 Viala 为致谢 contributor，未明确指向 TrustZone/TEE 内核。\",\n    \"Samsung 研究中个人贡献边界未拆分：writeup 作者列为 Maxime Rossi Bellom、Raphaël Neveu，Viala 为致谢 contributor，四条 CVE 与三项成果均以集体语言（We discovered/We targeted/We implemented）归团队，无条目单独归 Viala；PoC 仓库仅 1 commit 且页面未渲染 commit 作者，提交级贡献无法拆分。\",\n    \"会议出场一手证据缺失：OffByOne 2024 与 Black Hat 在任务输入列为 selected_conference_evidence，但 offbyone.fr 抓取连接被拒（ECONNREFUSED），Black Hat 无一手抓取结果；Samsung PoC README 声明关联 Black Hat US 2024 演讲与 SSTIC 2024 白皮书，但 SSTIC 2024 官方 programme 中 Samsung 讲题署名为 Rossi Bellom 与 Neveu，未列 Viala，Viala 在这些会议中的具体登台角色不明。\",\n    \"DEF CON 26 TrustZone 证据未一手确认：DEF CON 26 'Escaping the Google TrustZone' 仅由搜索摘要支持，speaker 页抓取内容未匹配该条目，未获一手确认。\",\n    \"自述/访谈/反馈痕迹缺失：未抓取到本人自述（入门、学习、失败、导师、转折）的一手材料，成长机制的过程性证据（重复练习的工具自建过程、反馈如何修正研究方向）缺失。\"\n  ],\n  \"transferable_practices\": [\n    \"将窄写原语到完整执行拆解为可复用序列（边界计数器腐蚀 → 边界检查绕过 → 伪造命令处理函数 → ROP 关闭保护），并跨目标（公开参考实现与商业固件）显式比对原语差异与序列相同性。\",\n    \"在新目标利用中整合外部同行既有技术（如 SMM 后门页表重映射）作 post-exploitation，缩短从原语到持久访问的路径。\",\n    \"在团队协作研究中以 PoC 仓库 README credits 与 writeup 致谢段记录贡献边界，使协作贡献可追溯。\",\n    \"在身份同一性未一手闭合时，将 handle、显示名与全名分别标注为推断或缺口，不将三者合并表述为同一人的跨目标迁移主张。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Quarkslab 平台与组织资源：研究博客发布、组织 PoC 仓库（quarkslab/samsung-bootchain-poc）与团队协作（Maxime Rossi Bellom、Raphaël Neveu、Damiano Melotti 等）属于特定组织条件，非个人可迁移方法。\",\n    \"研究目标获取的非正式渠道：2025 年 Steam Deck 研究目标由 R&D 负责人作为圣诞礼物提供，属团队资源与个人兴趣驱动的偶然条件。\",\n    \"身份同一性前提：Gwaby/pwissenlit 与全名 Gabrielle Viala 的同一性未一手闭合，任何以全名为锚点的归因受此前提约束。\",\n    \"会议评审与发布反馈回路：Black Hat/SSTIC 评审与 Quarkslab 同行评审属于组织与会议机制，依赖外部认可而非个人练习可复现。\"\n  ],\n  \"open_questions\": [\n    \"Gwaby、handle pwissenlit 与全名 Gabrielle Viala 的同一性是否可由同时列出三者的一手页面闭合（需 web.archive.org、Google Scholar、dblp 等可抓取镜像补证）。\",\n    \"primary_focus='Android/Boot/TEE 漏洞' 定位的来源：是否对应未抓取的平台产出（SSTIC 其他年份、DEF CON 其他届、Black Hat 其他场次）或早期简历记录。\",\n    \"OffByOne 2024 与 Black Hat 的具体场次、题目、日期与登台角色，以及 Viala 是否以讲者身份参与。\",\n    \"Samsung 启动链研究中 Viala 的具体贡献边界（四条 CVE 链与三项成果中的个人分工）。\",\n    \"2018 年 WNF 文章是否作为成长阶段的合理起点：在身份同一性未闭合前提下，是否保留为署名 Gwaby 的非全名起点，或删除该阶段。\",\n    \"是否存在本人自述材料（writeup 内自述、访谈、AMA、演讲问答）以重建入门、学习、失败、导师与转折的具体叙述。\",\n    \"Gwaby 署名三篇文章之外是否存在未抓取的 Android/TrustZone/TEE 主题一手作品。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "0ab8b4b1854fe69129eb58a2d1080a31aea3fc874057b993a76652305a9d34f7",
+        "accessed_at": "2026-09-28T01:25:11.831611+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790558711831695000-gabrielle-viala-synthesis-v2.json",
+    "label": "Gabrielle Viala:synthesis:v2",
+    "elapsed_seconds": 419.53,
+    "prompt_sha256": "77551d6d0eca0fc5632a6c24715a66c3a535c552f44415d6026cab72f8eb6949",
+    "num_turns": 9,
+    "total_cost_usd": 0.9430020000000001,
+    "usage": {
+      "input_tokens": 53457,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 125184,
+      "output_tokens": 24525,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 53457,
+        "outputTokens": 24525,
+        "cacheReadInputTokens": 125184,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.9430020000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

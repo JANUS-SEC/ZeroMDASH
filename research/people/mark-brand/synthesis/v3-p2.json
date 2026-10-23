@@ -1,0 +1,420 @@
+{
+  "person": "Mark Brand",
+  "expertise": [
+    "浏览器与沙箱逃逸",
+    "Android 移动远程攻击面利用",
+    "ARM Memory Tagging Extension 等硬件缓解的攻防评估",
+    "漏洞利用可靠性与缓解有效性的量化度量",
+    "LLM 辅助漏洞研究与变体分析"
+  ],
+  "stages": [
+    {
+      "period": "2015",
+      "stage": "Flash 与 Android 远程攻击面的手工利用起点",
+      "capability_change": "在 Flash PCRE（CVE-2015-0318）与 Android Stagefright（CVE-2015-3864）研究中确立逆向理解引擎实现、定位语义假设缺陷、堆整理、越界写、任意读写原语到完整利用链的固定范式；以完整利用链而非仅崩溃证明严重性作为输出标准；确立把可靠性视为概率而非二值的研究取向，在 32 位 8 位 ASLR 下接受 1/256 暴力枚举并量化为约每分钟 4% 成功概率、4096 次尝试 15 次成功回调；以 Make zeroday hard. 作为收尾宣言，命名式 byline（Irregular Expressionist、Bypasser of Mitigations）形成身份标识习惯。",
+      "evidence_ids": [
+        "mb-works-001",
+        "mb-works-002",
+        "mb-r2-005",
+        "mb-dec-001-flash-pcre-start",
+        "mb-dec-002-stagefright-android-pivot",
+        "mb_timeline_2015_07_iobuffer",
+        "mb_timeline_2015_09_stagefrightened",
+        "mb-community-2015-samsung-bugbash",
+        "mb-ext-silvanovich-cve7888-2015",
+        "mb-r1-001"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2018",
+      "stage": "图形与 GPU 侧向攻击面及软件渲染回退路径",
+      "capability_change": "目标选择从正面强攻主 JavaScript JIT 引擎转向侧向寻找非显见子系统；识别 GPU 进程因特权高于渲染进程且在加速失败回退 SwiftShader 后始终可达，把可主动触发的环境降级（使 GPU 崩溃四次以强制回退）转化为对非默认路径的可强制可达性；与 Ivan Fratric 跨专长合著（SwiftShader 与 Skia 分工），把合著作为常规输出方式，并主动在文末征集读者补充同类案例以形成外部反馈回路。",
+      "evidence_ids": [
+        "mb-r1-002",
+        "mb-dec-003-swiftshader-sideways",
+        "mb-ext-fratric-coauthor-2018",
+        "mb-community-2018-drawing-reader-feedback"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2019",
+      "stage": "Chrome 全链沙箱逃逸与利用技术考古自我定位",
+      "capability_change": "确立完整链作为研究输出标准形态，明确选择沙箱逃逸这一全链关键环而非渲染端单点，理由为沙箱逃逸是关键提权步骤；选 bug 时以攻击者对已释放对象生命周期与重用时机的控制度为评估准则而非表象；ASLR 绕过放弃信息泄露原语，改用约 3.5–4TB 共享内存映射喷洒填满浏览器进程虚拟地址空间，利用无跨进程 ASLR 与浏览器进程无地址空间上限两项设计缺口；为未审计的 MojoJS 接口自建专用 fuzzer；自称 Exploit Technique Archaeologist，把挖掘并复活旧利用技术作为方法自我定位；据 mb-r1-004 一手核验，V8 团队移除 BCE 优化以提升 typer 类利用难度，构成对该研究的架构级响应。",
+      "evidence_ids": [
+        "mb-works-005",
+        "mb-dec-004-chrome-mojo-sandbox-escape",
+        "mb-conv-001",
+        "mb-conv-002",
+        "mb-conv-003",
+        "mb-ext-self-archaeologist-2019",
+        "mb-community-2019-mojojs-bugtracker-output",
+        "mb-r1-004",
+        "mb-r2-004",
+        "mb_timeline_2019_04_virtually_unlimited"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2020",
+      "stage": "网络栈架构转型窗口与失败叙事",
+      "capability_change": "目标选择捕捉架构转型窗口：servicification 已将网络栈拆为独立服务进程但严格沙箱化尚未完成，使该进程同时具备远程可达与高特权；把研究过程的失败、惰性与死胡同作为一等内容公开，将系列定位为展示即使是资深研究员也常常失败多于成功；外部团队反馈回路直接驱动研究方向，Chrome 团队的复现结果推翻 P0 自身已被修复的假设迫使其重新校准；与 Sergei Glazunov 的稳定双人协作成为攻关单元；对 exploit 可靠性从约 0.375 提升至 0.75 进行定量分析与基于 cookie 的堆整理。",
+      "evidence_ids": [
+        "mb-works-006",
+        "mb-dec-005-network-stack-transition-window",
+        "mb-r2-003",
+        "mb_timeline_2020_02_several_months_p2",
+        "mb-community-2020-several-months-external-feedback-loop",
+        "mb-community-2020-silvanovich-cites-suggestion",
+        "mb-ext-silvanovich-suggestion-2020"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2023",
+      "stage": "从纯进攻转向防御评估的方法论化",
+      "capability_change": "方法转型为以攻击者视角评估防御措施是否成立；建立可复用的缓解分级分类法：Mitigation、Soft Mitigation（攻击者付一次性代价绕过）、Hard Mitigation（绕过不可跨漏洞复用）、Solution（消除整类漏洞），并配以 known-tag 与 unknown-tag bypass 攻击模型；设定 95% 可靠性为攻击者目标参照点，并量化需在约 0.2ms 内完成利用，使缓解有效性从主观判断转为可复现度量；把评估结论转为可操作交付物，以 ADB setprop 三步将 Pixel 8 的 MTE 默认从 opt-in 改为 opt-out，并以个人设备自发售日起长期启用作为评估结论的可信度背书。",
+      "evidence_ids": [
+        "mb-works-007",
+        "mb-dec-006-mte-method-pivot",
+        "mb-dec-007-mte-pixel8-delivery",
+        "mb-r2-001",
+        "mb-ext-mte-personal-device-2023",
+        "mb-community-2023-mte-summary-signoff",
+        "mb_timeline_2023_08_mte_part1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2024",
+      "stage": "方法论工具化与 AI 辅助研究",
+      "capability_change": "把人类研究员方法论显式编码为 LLM 五原则：Space for Reasoning、Interactive Environment、Specialised Tools、Perfect Verification、Sampling Strategy，主张模型应复现人类研究员的系统性方法而非单次提示；选择 unfuzzable 漏洞的变体分析为 LLM 入口，理由为 fuzzing 在变体发现上存在局限且变体分析为模型提供具体起点以降低歧义；研究产出转为团队署名（Project Zero 与 DeepMind 协作）；诚实标注 target-specific fuzzer 至少同样有效且项目仍处于研究阶段，避免夸大工具能力，把研究价值锚定在发布前发现以消除攻击者竞争窗口。本阶段为最后已核验节点（2024-11-01）；种子笔记称 2025-2026 年无 Mark Brand 个人署名 P0 博客，本轮未独立核验，其时间与团队署名化相邻但因果未证实，按缺口口径保留。",
+      "evidence_ids": [
+        "mb-works-009",
+        "mb-dec-008-naptime-method-pivot",
+        "mb-dec-009-bigsleep-variant-analysis",
+        "mb-r1-003",
+        "mb_timeline_2024_11_big_sleep"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "约束下的创造性消除优于正面突破",
+      "starting_conditions": "面对强缓解或信息泄露路径受阻的攻击约束，包括 Android mediaserver 难以构造信息泄露、32 位仅 8 位随机 ASLR、Windows 无跨进程 ASLR 以及浏览器进程无地址空间上限。",
+      "repeated_practice": "在 Stagefright 中放弃昂贵的信息泄露，接受 1/256 的暴力枚举与约每分钟 4% 成功概率，因为 watering-hole 场景允许多次重试；在 Chrome 沙箱逃逸中放弃信息泄露原语，改用约 3.5–4TB 共享内存映射喷洒填满浏览器进程虚拟地址空间，把环境结构弱点作为稀缺原语的替代。",
+      "feedback": "Stagefright 以 4096 次尝试 15 次成功回调把暴力枚举的可靠性量化为可论证指标；据 mb-r1-004 一手核验，Brand 2019 原文明文记载 the v8 team have removed the BCE optimisation to make it harder to exploit such issues in the typer，即 V8 团队以移除 BCE 优化作为对该 typer 类利用的架构级而非点状响应。",
+      "intermediate_capability": "把环境结构弱点（无限地址空间、低熵 ASLR、可重试攻击模型）识别为可替代稀缺原语（信息泄露）的资源，形成约束下优先创造性消除约束而非正面突破的决策模式。",
+      "observed_outcomes": [
+        "Stagefright 完整利用链",
+        "Chrome 完整沙箱逃逸链（V8 typer 漏洞经 Mojo IPC FileWriterImpl UAF 至浏览器进程 ROP）"
+      ],
+      "evidence_ids": [
+        "mb-works-002",
+        "mb-r2-005",
+        "mb-dec-002-stagefright-android-pivot",
+        "mb-works-005",
+        "mb-dec-004-chrome-mojo-sandbox-escape",
+        "mb-r2-004",
+        "mb-r1-004"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "V8 团队移除 BCE 优化也可能是对整类 typer 漏洞的工程决策，未必专门回应 Brand 单篇；暴力枚举与大内存喷洒在 2015 年前后属社区常规做法，未必为个人方法论独创。"
+    },
+    {
+      "name": "侧向寻找非显见攻击面与架构转型窗口",
+      "starting_conditions": "主流攻击面（主 JavaScript JIT 引擎、渲染进程）竞争激烈且缓解完善；架构转型期产生沙箱化尚未完成的半成品特权服务。",
+      "repeated_practice": "2018 年提出 look at things sideways，避开更显见且高度竞争的主 JIT 引擎，选择 GPU 进程与 SwiftShader 软件渲染回退路径；2019 年选择沙箱逃逸而非渲染端单点；2020 年选择 servicification 已分进程但沙箱化未完成的网络栈；通过可主动触发的环境降级（使 GPU 加速失败四次以回退 SwiftShader）把非默认路径转化为可强制可达路径。",
+      "feedback": "网络栈研究由 Chrome 团队邮件触发，Chrome 开发者的复现结果推翻 P0 团队已被服务端修复的假设，迫使重新校准研究方向；GPU 进程特权高于高度沙箱化的渲染进程这一判断被其特权层级证实。",
+      "intermediate_capability": "把攻击者可控的环境降级与架构过渡期窗口作为目标选择启发式，形成对始终可达但低关注度子系统的识别能力。",
+      "observed_outcomes": [
+        "SwiftShader 利用",
+        "Chrome 沙箱逃逸链",
+        "Chrome 网络栈 base::Unretained UAF 利用"
+      ],
+      "evidence_ids": [
+        "mb-dec-003-swiftshader-sideways",
+        "mb-dec-004-chrome-mojo-sandbox-escape",
+        "mb-dec-005-network-stack-transition-window",
+        "mb-r1-002",
+        "mb-community-2020-several-months-external-feedback-loop"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "侧向选点可能部分源自 Project Zero 团队内部任务分配而非纯个人偏好；架构窗口判断依赖 Chrome 团队公开的 servicification 进程信息。"
+    },
+    {
+      "name": "把研究过程的失败与迭代作为一等内容公开",
+      "starting_conditions": "资深研究员身份，社区默认只展示成功路径与干净的成功叙事。",
+      "repeated_practice": "2015 年 Flash PCRE 研究中自述 took quite a while before I found a useful primitive for corrupting memory；2019 年自述 Having almost completely given up, we remembered one of the quirks，记录在结构体布局调试耗尽耐心后主动切换思路的放弃—重启循环；2020 年系列中自述懒得搭构建环境、face-palm 时刻，并把系列定位为展示即使是资深研究员也常常失败多于成功，称 persistence perhaps played more of a part here than wizardry。",
+      "feedback": "2020 年网络栈系列由 Chrome 团队邮件触发，Chrome 开发者推翻 P0 自身假设迫使重新校准；据 mb-r2-003 一手核验，正文含 too lazy to set up a build environment 与 illustrate the difficulties that even experienced researchers sometimes face，直接支撑该机制。",
+      "intermediate_capability": "把失败、放弃与重启的迭代循环作为可被同伴复盘的方法论产物，而非天赋叙事；形成对自身研究流程的诚实复盘与对社区的示范性输出习惯。",
+      "observed_outcomes": [
+        "Several months in the life of Project Zero 系列及其失败与死胡同记录",
+        "2019 年 full-chain 中几乎放弃后转向 Mojo DataPipe 共享内存机制的 pivot 记录"
+      ],
+      "evidence_ids": [
+        "mb-works-006",
+        "mb-r2-003",
+        "mb-dec-005-network-stack-transition-window",
+        "mb-conv-002",
+        "mb-dec-001-flash-pcre-start"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "失败叙事可能部分是 Project Zero 团队文体风格（系列与 Glazunov 合著）而非纯个人特征；公开的失败可能经过筛选，属表演性坦诚而非完整现场。"
+    },
+    {
+      "name": "从经验可靠性估算走向可量化评估框架",
+      "starting_conditions": "早期可靠性判断依赖直觉估算（约每分钟 4% 成功概率、1/256 ASLR）。",
+      "repeated_practice": "2015 年 Stagefright 以 4096 次尝试 15 次成功回调量化暴力枚举可靠性；2020 年网络栈把 exploit 可靠性从约 0.375 提升至 0.75 进行定量分析并接受进程重启下的概率性 exploit；2021 年 In-the-Wild Android 以 copy/paste 百分比对各变体量化归因攻击者成熟度差异；2023 年 MTE 设定 95% 可靠性阈值与约 0.2ms 时间预算，建立 Soft/Hard Mitigation 与 Solution 三级分类法及 known-tag 与 unknown-tag bypass 攻击模型分类。",
+      "feedback": "MTE 评估需 ARM 预生产硬件访问与长期测量支撑，构成与硬件与平台团队的反馈回路；Stagefright 与网络栈的可靠性量化使其可在攻击模型允许重试的场景下作为可论证工程指标被同伴复用。",
+      "intermediate_capability": "把可靠性与缓解有效性从主观判断转为可复现度量，形成跨主题的方法论沉淀。",
+      "observed_outcomes": [
+        "MTE As Implemented 四部曲评估框架",
+        "In-the-Wild Android 的 copy/paste 量化归因",
+        "Stagefright 与网络栈的可靠性定量分析"
+      ],
+      "evidence_ids": [
+        "mb-works-002",
+        "mb-r2-005",
+        "mb-dec-002-stagefright-android-pivot",
+        "mb_timeline_2020_02_several_months_p2",
+        "mb-works-007",
+        "mb-dec-006-mte-method-pivot",
+        "mb-r2-002"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "量化转向可能受 Project Zero 团队整体方法论演进（如可复现 PoC 文化、90 天披露）影响，而非纯个人路径；MTE 分类法可能部分借鉴既有缓解评估文献。"
+    },
+    {
+      "name": "把人类研究方法论显式编码为可移交框架与工具",
+      "starting_conditions": "长期沉淀的隐性实践：迭代假设—验证、调试器与脚本交互环境、确定性验证、多假设独立采样。",
+      "repeated_practice": "2019 年为未审计的 MojoJS 接口自建专用 fuzzer 以发现该批沙箱逃逸 bug；2023 年把 MTE 评估方法论形式化为 Soft/Hard/Solution 与 known/unknown-tag bypass 分类法；2024 年 Project Naptime 把人类研究员方法论编码为 LLM 五原则并选择 unfuzzable 变体分析作为入口，主张模型应复现人类系统性方法而非单次提示。",
+      "feedback": "Naptime 五原则直接来自其过往研究习惯（verbose 推理、交互式纠错、专用工具、可确定性验证、多假设独立采样）；Big Sleep 团队坦承 target-specific fuzzer 至少同样有效且项目仍处于研究阶段，形成对工具能力边界的现实评估与不夸大输出习惯。",
+      "intermediate_capability": "把隐性实践显式化为可复制、可移交、可机器化的框架，使研究方法不只是个人习惯而是可结构化产物。",
+      "observed_outcomes": [
+        "MojoJS bespoke fuzzer",
+        "MTE 缓解分级分类法",
+        "Project Naptime 五原则与 Big Sleep 变体分析框架"
+      ],
+      "evidence_ids": [
+        "mb-works-005",
+        "mb-works-007",
+        "mb-works-009",
+        "mb-dec-006-mte-method-pivot",
+        "mb-dec-008-naptime-method-pivot",
+        "mb-dec-009-bigsleep-variant-analysis",
+        "mb-r1-003",
+        "mb_timeline_2024_11_big_sleep"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "方法论工具化与 Sergei Glazunov 及 DeepMind 协作强相关，个人贡献度难以从团队署名中分离；可观测样本全部来自 Project Zero 官方博客（含合著与同事点名），受发表偏倚限制，与 non_transferable_conditions 中对组织资源与同侪关系的限制一致。"
+    }
+  ],
+  "tensions": [
+    "Flash PCRE 文章 URL 的跨维度核验状态矛盾：works 维度 mb-works-001 与 decisions 维度 mb-dec-001 标 documented 并附非空 sha256，而 timeline 维度对应条目标 404 不可达、unknown；本轮定向补证 mb-r1-001 实际加载成功，署名 Posted by Mark Brand, Irregular Expressionist、日期 2015-02-12，证明 timeline 标记错误，已由 mb-r1-001 取代。",
+    "Drawing Outside the Box 文章 URL 的跨维度核验状态矛盾：community 与 external 维度标 documented 并附非空 sha256，而 works 维度 mb-works-004 标 unknown；本轮 mb-r1-002 实际加载成功，byline 为 By Mark Brand and Ivan Fratric, Google Project Zero，证明 works 标记错误，已由 mb-r1-002 取代。",
+    "Big Sleep 文章 URL 矛盾：mb-works-010 称 /2024/11/from-naptime-to-big-sleep.html 两次 WebFetch 返回 404，但同时 verified_in_run=true 并附非空 sha256，内部矛盾；本轮确认 /2024/11/ slug 确实 404、/2024/10/ slug 加载成功且团队名单含 Mark Brand，矛盾根源是 mb-works-010 用错 slug 且核验标记自相矛盾，非抓取路径差异，已由 mb-r1-003 取代。",
+    "First handset with MTE 与 In-the-Wild Android 的跨维度矛盾：works 维度对两者标 unknown，而 decisions、external 与 timeline 维度 verified_in_run=true；已由 mb-r2-001 与 mb-r2-002 收口，其中 In-the-Wild Android 日期修正为 2021-01-12。",
+    "社交 handle 冲突：person_json.social 为 https://x.com/markbrand0，本地种子另记 @sidrfrk；WebFetch x.com/markbrand0 返回 HTTP 402 反爬，两者是否同一账号或其一已弃用未核实，留为矛盾。",
+    "会议证据冲突：person_json 将 Black Hat US/EU 与 POC 列为所选会议证据，但本地种子与本轮抓取均未找到任何一手议程页或录像；该冲突未决，会议演讲事实未能落地为 documented。"
+  ],
+  "transferable_practices": [
+    "侧向寻找非显见攻击面：避开竞争激烈的主流子系统，寻找特权层级高但关注度低的回退路径或架构转型期的半成品特权服务。",
+    "用环境结构弱点替代稀缺原语：在缓解消除信息泄露时，以可重试攻击模型下的暴力枚举或无限地址空间喷洒作为替代，并量化其可靠性。",
+    "把研究过程的失败与迭代作为一等输出内容：公开死胡同与 pivot，使方法可被同伴复盘，替代干净的成功叙事。",
+    "建立可量化的可靠性与缓解评估框架：用明确阈值（如 95% 可靠性、约 0.2ms 时间预算）与分类法（Soft/Hard/Solution、known/unknown-tag bypass）取代直觉估算。",
+    "为未审计接口自建专用工具，把隐性实践显式化为可移交、可机器化的框架。",
+    "以个人设备长期自用所评估的缓解措施，为评估结论提供一手使用证据。"
+  ],
+  "non_transferable_conditions": [
+    "Project Zero 平台资源：ARM 预生产硬件访问、与 DeepMind 跨团队协作、Project Zero 官方博客作为发表渠道，这些组织资源不可由个人复制。",
+    "与 Sergei Glazunov、Ivan Fratric、Natalie Silvanovich 等资深同侪的稳定协作与点名咨询关系，是其 Project Zero 团队内位置的产物，非个人可迁移条件。",
+    "Chrome、Android、ARM 等目标团队愿意以架构级修复（如 V8 移除 BCE 优化）回应其报告，依赖 Project Zero 的机构影响力而非纯个人说服力。",
+    "可观测样本全部来自 Project Zero 官方博客及同事在已发表研究中的点名，受发表偏倚限制；利用思路顾问角色仅见于同侪点名，不可外推为普遍角色。",
+    "早期 Flash 与 Stagefright 仍是浏览器主战场的时代窗口，使完整利用链作为输出标准得以低成本确立，当前攻击面格局已变，该窗口不可复制。",
+    "MTE advocacy 对硬件与平台团队部署决策的实际影响为基于时间相邻的推断，非一手证实，相关影响力不可直接迁移。"
+  ],
+  "open_questions": [
+    "2025-2026 年 Mark Brand 个人署名产出是否锐减或断档无法用一手来源证实或证伪：本环境 WebSearch 未返回可用 URL，既不能证实产出缺失，也不能证实仍在产出；该产出现状留为缺口，不可合理化补全为任一方向。",
+    "社交 handle @markbrand0 与 @sidrfrk 的归属关系（同一人不同 handle、或种子陈旧）未核实，限制了对社交媒体社区参与子维度的判断。",
+    "会议演讲（Black Hat US/EU、POC、OffensiveCon、35C3、HITB、Hexacon）无任何一手议程页或录像可抓取，person_json 所列会议证据未能落地为 documented 事实。",
+    "加入 Project Zero 的确切时间、pre-P0 职业与教育背景无公开一手来源，仅能由 2015-02-12 最早可核验发文推断加入不晚于 2015 年初。",
+    "Jann Horn 2018 致谢 Mark Brand 的一手 URL 返回 404，同事 Horn 致谢 Brand 利用思路这一外部评价无法核实。",
+    "Brand 与 Glazunov 2020 合著 Several months in the life of Project Zero 系列的分工细节本轮未单独抓取核验。",
+    "MTE advocacy 对 ARM 与 Google 硬件团队部署决策的实际影响为基于时间相邻的推断，非一手证实。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-synthesis-v3-20260930-132425-653",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790746941045390000-mark-brand-synthesis-v3.json",
+    "resume_response_paths": [
+      "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790748682906406000-mark-brand-synthesis-v3-resume-1.json"
+    ],
+    "recovery_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790749026700131000-mark-brand-synthesis-v3-recovery.json",
+    "output_source": "recovery",
+    "session_id": "a0f92e04-995d-48e2-bc30-a860ce767867",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_albji4vji1kgugahm72eycwk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-synthesis-v3-20260930-132425-653/task.md"
+        },
+        "success": true,
+        "content_sha256": "97eada5137645206aaf6d8e81bb231f493ccf006c9eeebb71a9f199704f06f66",
+        "accessed_at": "2026-09-30T06:11:22.915399+00:00"
+      },
+      {
+        "tool_use_id": "call_72qlc2vchykbz5bu7bbnilxx",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-synthesis-v3-20260930-132425-653/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "3fea0a45df9bac2cab335b11339735d16fc13414af9d86286d65e48e3d8e3d13",
+        "accessed_at": "2026-09-30T06:11:22.915429+00:00"
+      },
+      {
+        "tool_use_id": "call_c7f3rqocksp2oj8212guy4z6",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-synthesis-v3-20260930-132425-653/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "99155d4ccd297164f5ced8866c603c235b6938513fae52aa898748d875e37f67",
+        "accessed_at": "2026-09-30T06:11:22.915441+00:00"
+      },
+      {
+        "tool_use_id": "call_wjw3v0dnjw18chuan3o3dews",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-synthesis-v3-20260930-132425-653/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "44f8d8efa64d62026fd84d999a4712ad195fdbc6feb4cce3b0da48096e846630",
+        "accessed_at": "2026-09-30T06:11:22.915466+00:00"
+      },
+      {
+        "tool_use_id": "call_vwa9fa0y5i7wp5qnxm6s9fwy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-synthesis-v3-20260930-132425-653/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "a9d88e9424680eaad5b347d303c318dcbd7c2022aafda1c2225f062373f7bc7d",
+        "accessed_at": "2026-09-30T06:11:22.919967+00:00"
+      },
+      {
+        "tool_use_id": "call_50zjhtzbpy32kzaetuhgx9o6",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-synthesis-v3-20260930-132425-653/inputs/evidence_json.json",
+          "offset": 876,
+          "limit": 875
+        },
+        "success": true,
+        "content_sha256": "d313b9a23accaf104e430f271a1552c4cd927d011a5eed327640d04d7fd0d45b",
+        "accessed_at": "2026-09-30T06:11:22.920463+00:00"
+      },
+      {
+        "tool_use_id": "call_5rslz7k8ese9ypsdrcr5q1pf",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-synthesis-v3-20260930-132425-653/checkpoint.md"
+        },
+        "success": false,
+        "content_sha256": "a5e7ca965efea9e049068589f177b36723ae2b927c99311a6a86ea50f0445586",
+        "accessed_at": "2026-09-30T06:11:22.921179+00:00"
+      },
+      {
+        "tool_use_id": "call_ydxxtvch9xj6giq50gqsp7ce",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-synthesis-v3-20260930-132425-653/recovery-errors.json"
+        },
+        "success": true,
+        "content_sha256": "017af6b72194e979fbfd49ac381a31d241e738497e964f5597d1845599b72982",
+        "accessed_at": "2026-09-30T06:11:22.921187+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790748682921215000-mark-brand-synthesis-v3.json",
+    "label": "Mark Brand:synthesis:v3",
+    "elapsed_seconds": 486.33,
+    "prompt_sha256": "0dbafce5c22ee3defcf0c795055b3d15d977f54c781b044dc6159796fb8d6c46",
+    "num_turns": 10,
+    "total_cost_usd": 0.96166,
+    "usage": {
+      "input_tokens": 970,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 45056,
+      "output_tokens": 119,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 970,
+        "outputTokens": 119,
+        "cacheReadInputTokens": 45056,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.030352999999999998,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": true,
+    "recovery_usage": {
+      "input_tokens": 46496,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 110208,
+      "output_tokens": 17943,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    }
+  }
+}

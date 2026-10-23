@@ -1,0 +1,532 @@
+{
+  "person": "Ivan Fratric",
+  "dimension": "外部视角",
+  "identity_check": "身份确认：Project Zero 官方博客多篇由全名 'Ivan Fratric' 署名的一手 writeup（2017、2018、2021、2026）交叉确认其为 P0 的浏览器/WebKit 与模糊测试方向研究员，并自建 Domato 与 Jackalope 两套公开 fuzzer。同名歧义低。需注意 person_json 提供的 handle 'ifsecure' 及其社交/会议证据（X、Black Hat US/EU、POC）本次未通过直接抓取独立验证（GitHub github.com/ifsecure 与 Black Hat speaker 页返回 404/403），故 handle 层级暂记 lead_only，身份由 P0 官方一手署名充分确立。二手搜索摘要（非来源）曾误将 Samuel Groß 的 'JITSploitation' 系列归到 Fratric 名下；直接抓取对应文章确认作者为 Groß，已在 contradictions 中记录以防误归因。",
+  "items": [
+    {
+      "id": "ext-01",
+      "date": "2017-09-21",
+      "claim": "Fratric 发布并开源 Domato——一款基于语法的生成式 DOM fuzzer（含 HTML/CSS/JS 语法），以可控成本在五大浏览器上各跑约 1 亿次迭代做横向评测；结果显示 Safari 以 17 个 bug 显著高于 Chrome(2)/Firefox(4)/IE(4)/Edge(6)，成为明显离群值。这是其‘用公开工具做横向可重复测量’研究风格的确立。",
+      "status": "documented",
+      "growth_signal": "研究方法的外部可验证化：他不只找单个 bug，而是把‘同样的方法、同样的迭代量、同样的公开工具’作为可比基线，在不同引擎间做受控对比——把单点发现转化为可被同行复现的测量实验。同时他主动尝试额外的覆盖引导 DOM fuzzer 并如实记录其在 IE 上‘未产生新 crash’，展示对工具边界的诚实评估而非只报喜。",
+      "short_quote": "Apple Safari is a clear outlier in the experiment with significantly higher number of bugs.",
+      "source": {
+        "title": "The Great DOM Fuzz-off of 2017",
+        "url": "https://projectzero.google/2017/09/the-great-dom-fuzz-off-of-2017.html",
+        "published": "2017-09-21",
+        "source_type": "本人一手 writeup（P0 官方博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_1dmt8em9watfbkosy5pzsoqa",
+        "accessed_at": "2026-09-26T14:24:32.945137+00:00",
+        "content_sha256": "7f73ed8b883df279425a70844314f4c04143cb63712a24a475a12c3ace5c1504"
+      }
+    },
+    {
+      "id": "ext-02",
+      "date": "2018-10-04",
+      "claim": "Fratric 在一年后用同一 Domato、同一方法学（1 亿次迭代）复测 WebKit/Safari，bug 数从 17 降至 9（全部在 Safari 12 修复），并亲自为 CVE-2018-4314（SVG UAF）编写 PoC，记录‘把 UAF 转成 infoleak 是耗时最多的部分’这一可复现的工程难点；同时公开批评 Apple advisory 在修复后未及时列出对应 bug、形成误导。",
+      "status": "documented",
+      "growth_signal": "反馈回路的显式化：他建立‘同一工具/同方法学逐年复测’的纵向比较来检验供应商安全改进是否真实，并以 PoC 写作把‘找到 bug’推进到‘可验证利用’，暴露其研究由‘发现问题’向‘验证可利用+推动透明披露’演进。对供应商披露流程的公开批评显示其不把品牌（Apple）当作能力背书，而以可复现证据评价。",
+      "short_quote": "the majority of time spent working on this exploit was to turn the bug into an infoleak",
+      "source": {
+        "title": "365 Days Later: Finding and Exploiting Safari Bugs using Publicly Available Tools",
+        "url": "https://projectzero.google/2018/10/365-days-later-finding-and-exploiting.html",
+        "published": "2018-10-04",
+        "source_type": "本人一手 writeup（P0 官方博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_mso846ei6pxyz3jok27uptj3",
+        "accessed_at": "2026-09-26T14:24:32.945161+00:00",
+        "content_sha256": "4216545dce1ab882011d6dcb4b51eb697c135c61c518dd0ee5a6b30ecf83b404"
+      }
+    },
+    {
+      "id": "ext-03",
+      "date": "2021-09-14",
+      "claim": "Fratric 发布 Jackalope——覆盖引导的 black-box binary fuzzer（Windows/macOS），语法‘与 Domato 类似但有所简化’，并新增 <repeat_*> 节点以支持在保持语法有效性的前提下做插入/删除；与 Fuzzilli+TinyInst 一同在 IE 的 jscript/jscript9 上跑数周/100 核，发现 CVE-2021-26419、-31959（bytecode generator）与 -34480（JIT 编译器）。",
+      "status": "documented",
+      "growth_signal": "工具建设的迭代式累积：Domato（生成式）→ Jackalope（覆盖引导变异式），他把前一套工具的语法经验迁移、简化并扩展为后一套，体现‘把一次性发现沉淀为可复用基础设施’的输出习惯。他对 Jackalope 与 Fuzzilli 覆盖率/bug 命中度相近的如实对照，以及‘两者都在 fuzz 早期就命中、单机即可发现’的观察，显示其以工具对照而非自我宣传的方式评估方法学。",
+      "short_quote": "Jackalope with grammar-based mutations behaved quite similarly to Fuzzilli: it was hitting a similar level of coverage and finding similar bugs.",
+      "source": {
+        "title": "Fuzzing Closed-Source JavaScript Engines with Coverage Feedback",
+        "url": "https://projectzero.google/2021/09/fuzzing-closed-source-javascript.html",
+        "published": "2021-09-14",
+        "source_type": "本人一手 writeup（P0 官方博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_enis1n4pahwtl6rsqdqk814f",
+        "accessed_at": "2026-09-26T14:24:32.945145+00:00",
+        "content_sha256": "04e6ad0af9de83b7784d6aea27ed99159fd3aa6bfb48e3d1026024d180974d23"
+      }
+    },
+    {
+      "id": "ext-04",
+      "date": "2026-03-05",
+      "claim": "Fratric 在最新博文中自述变异式语法 fuzzing 过去成功用于‘在 web 浏览器的 XSLT 实现中发现问题，乃至 JIT 引擎 bug’，并系统反思覆盖引导变异式语法 fuzzing 的‘perceived flaws’及一种应对技术。",
+      "status": "documented",
+      "growth_signal": "元层面的自我审视：他从‘发布工具/报告 bug’转向‘反思方法学本身的弱点并提出改进’，显示研究从执行层进入方法论批判层。自述把同一技术跨域迁移到 XSLT 与 JIT 引擎，是‘可迁移方法学’而非单点技巧的累积标志。",
+      "short_quote": "I used it successfully in the past, including to find issues in XSLT implementations in web browsers and even JIT engine bugs.",
+      "source": {
+        "title": "On the Effectiveness of Mutational Grammar Fuzzing",
+        "url": "https://projectzero.google/",
+        "published": "2026-03-05",
+        "source_type": "本人一手 writeup（P0 官方博客主页条目）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_dg5cap6gdfkbbdouhnzv138z",
+        "accessed_at": "2026-09-26T14:24:32.945075+00:00",
+        "content_sha256": "e6e3fc04b2d6b2989f4e8e015c46db2940ade2f7fb59b6299b7253e8998d6bd9"
+      }
+    },
+    {
+      "id": "ext-05",
+      "date": "2026-01-14",
+      "claim": "同事 Natalie Silvanovich 在其 Pixel 9 0-click 利用链博文中以合作者身份点名：‘Ivan Fratric and I reported CVE-2025-54957’（Dolby Unified Decoder 漏洞）。这是 P0 同队研究员对其持续贡献的外部佐证。",
+      "status": "documented",
+      "growth_signal": "同伴认可机制：被同队高产出研究员（Silvanovich）以‘共同报告者’身份在公开 writeup 中点名，而非仅靠组织品牌背书——这符合维度要求‘与作品交叉验证的同伴评价’，且评价锚定在具体 CVE 而非泛泛赞美。跨域（Dolby 解码器，非其浏览器主场）的合作也显示其研究范围在 P0 内被同伴信任地扩展。",
+      "short_quote": "Ivan Fratric and I reported CVE-2025-54957",
+      "source": {
+        "title": "A 0-click exploit chain for the Pixel 9 Part 1: Decoding Dolby",
+        "url": "https://projectzero.google/",
+        "published": "2026-01-14",
+        "source_type": "P0 同事一手 writeup（点名 Fratric 为合作者）",
+        "level": "first_hand_other"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_dg5cap6gdfkbbdouhnzv138z",
+        "accessed_at": "2026-09-26T14:24:32.945075+00:00",
+        "content_sha256": "e6e3fc04b2d6b2989f4e8e015c46db2940ade2f7fb59b6299b7253e8998d6bd9"
+      }
+    }
+  ],
+  "contradictions": [
+    "误归因风险：WebSearch 的二手 LLM 摘要（非来源，仅作线索）曾暗示 Fratric 是 'JITSploitation I/II/III'(2020-09-01) 及 'JSC Exploits'(2019-08-29) 的作者。直接抓取 https://projectzero.google/2020/09/jitsploitation-one.html 确认 'JITSploitation I' 作者为 Samuel Groß。因此这些作品未计入 Fratric 的成长证据，避免把同事作品错置为他本人能力来源——这与维度要求‘不要把组织品牌直接解释为能力来源’一致。",
+    "handle 一致性缺口：person_json 声称 handle 为 'ifsecure'（X/Twitter https://x.com/ifsecure，并以此推断 GitHub 仓库）。本次直接抓取 https://github.com/ifsecure 返回 404，无法通过一手来源确认该 handle 与 Domato/Jackalope 仓库归属。Domato/Jackalope 仓库的 GitHub URL 以其在 P0 博客中的自述为间接依据（inferred），未做 handle 级独立验证。"
+  ],
+  "gaps": [
+    "会议演讲事实未独立验证：person_json 列出的 'Black Hat US/EU / POC' 作为 selected_conference_evidence，本次 Black Hat speaker 页面直接抓取返回 404/403，POC 会议页面未抓取；这些演讲记录未能从一手 speaker 页面确认，故未作为 documented 条目计入。",
+    "GitHub/X handle 与社交档案未通过直接抓取验证（github.com/ifsecure → 404）；Domato、Jackalope 的具体仓库 URL 仅以 P0 博客内自述为间接依据。",
+    "权威媒体外部评价缺失：未能抓取到记者专访、Black Hat/POC 主持人评语等‘权威媒体具体评价’。当前外部视角仅由 P0 同事（Silvanovich）以合作者身份点名构成，独立媒体评价侧薄弱。",
+    "教育/地理背景未一手确认：二手摘要提及 University of Zagreb / Croatia 归属，无一手来源佐证，未计入。",
+    "工具预算超出：task.md 建议 8 次搜索/抓取上限，实际因多次 404/301/403 消耗预算（projectzero.google 重定向、github 与 blackhat speaker 页 404/403），未能完成对 Black Hat/POC/GitHub/X 的逐一验证即进入输出。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-external-20260926-221640-478",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790432672918941000-ivan-fratric-external.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "896e4385-82aa-49ed-b144-7c691aa02045",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_xxlinasqk90cutqkwn8gil62",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-external-20260926-221640-478/task.md"
+        },
+        "success": true,
+        "content_sha256": "452909103f08f6a1afef54dac0b9bc2c295af33bbfdc982b9ec8a88369f92493",
+        "accessed_at": "2026-09-26T14:24:32.944925+00:00"
+      },
+      {
+        "tool_use_id": "call_9zwsnyu12tzc1gek8ruo0uo8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-external-20260926-221640-478/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "9bcea927f49592a0dd8bc1844d793ef7a52ef59e8b1b4fd31bd6c2f31ae2012b",
+        "accessed_at": "2026-09-26T14:24:32.945011+00:00"
+      },
+      {
+        "tool_use_id": "call_75kj3tm0lu5ac87h45deoi7w",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-external-20260926-221640-478/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "e93e1fea0cf7f75fe9b633203878edc6030edd05b6b783634604888d5af128c0",
+        "accessed_at": "2026-09-26T14:24:32.945016+00:00"
+      },
+      {
+        "tool_use_id": "call_usb0ho2bfnyvy98ta2gpccg7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-external-20260926-221640-478/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "08215a70a4246fcad7580d8805a3ff290203f1337fe7c51a79ed76fa4a47b93a",
+        "accessed_at": "2026-09-26T14:24:32.945021+00:00"
+      },
+      {
+        "tool_use_id": "call_yogpf0bi3m4peqsz227wihjo",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-external-20260926-221640-478/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "733e5f7b10634ce38e23c6bc14a8b90a452780002ae8e23bbef0c02a15cf8380",
+        "accessed_at": "2026-09-26T14:24:32.945024+00:00"
+      },
+      {
+        "tool_use_id": "call_1h3a4hg9263vmhthroj6fzzn",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-external-20260926-221640-478/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "85adba41aebb5c5363b18a93eef5606d9c0884a9cd11692cb04f63014ecf1b10",
+        "accessed_at": "2026-09-26T14:24:32.945027+00:00"
+      },
+      {
+        "tool_use_id": "call_lrif20r8a9lje66qxgmj1f1k",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-external-20260926-221640-478/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-26T14:24:32.945030+00:00"
+      },
+      {
+        "tool_use_id": "call_at8t4iqjet62374w40o90voe",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Ivan Fratric\" Project Zero browser security researcher profile interview"
+        },
+        "success": true,
+        "content_sha256": "35ef7ef775d713c661ca382f213c45d802e233b5328e0481e1d0c12043c168af",
+        "accessed_at": "2026-09-26T14:24:32.945060+00:00"
+      },
+      {
+        "tool_use_id": "call_bcqftu1hxi6s3zn6tznngkms",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Ivan Fratric\" Black Hat presentation review fuzzing Domato Jackalope"
+        },
+        "success": true,
+        "content_sha256": "a2553d6ff9984d852fb9ce9405aaab32068dcd4c8c461739261fdfe5ca42f3cd",
+        "accessed_at": "2026-09-26T14:24:32.945056+00:00"
+      },
+      {
+        "tool_use_id": "call_2osd6geacrkajxf96gn5mu0a",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://googleprojectzero.blogspot.com/",
+          "prompt": "Find any posts or information about Ivan Fratric (ifsecure), his role, browser/WebKit research, tools (Domato, Jackalope), and any author bio details with dates."
+        },
+        "success": true,
+        "content_sha256": "3d92e9a9f153fb3bd8f0c90425980a6999f33b6c609f4700977b88cdf9fcc387",
+        "accessed_at": "2026-09-26T14:24:32.945069+00:00"
+      },
+      {
+        "tool_use_id": "call_79ye9te6c9ugafgxfd16kmmt",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://ifsecu.re/",
+          "prompt": "Identify the site owner, their role, bio, blog posts list with dates and topics, and any tools or research described."
+        },
+        "success": false,
+        "content_sha256": "415e894063094cf47adb4abf7c6d433a373fccbea3415ec86d5cf3fc73acee80",
+        "accessed_at": "2026-09-26T14:24:32.945066+00:00"
+      },
+      {
+        "tool_use_id": "call_dg5cap6gdfkbbdouhnzv138z",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Find any posts or information about Ivan Fratric (ifsecure), his role, browser/WebKit research, tools (Domato, Jackalope), and any author bio details with dates.",
+          "url": "https://projectzero.google/"
+        },
+        "success": true,
+        "content_sha256": "e6e3fc04b2d6b2989f4e8e015c46db2940ade2f7fb59b6299b7253e8998d6bd9",
+        "accessed_at": "2026-09-26T14:24:32.945075+00:00"
+      },
+      {
+        "tool_use_id": "call_nf2osihr2ebobinsu35zmgb0",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Identify the site owner, their role, bio, blog posts list with dates and topics, and any tools or research described.",
+          "url": "https://ifsecure.blogspot.com/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:24:32.945072+00:00"
+      },
+      {
+        "tool_use_id": "call_idm3x3v8jxyap519n2lhhsy0",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Find Ivan Fratric's author profile, list of his posts with dates, and any bio details. What browsers/engines did he research and what tools did he build?",
+          "url": "https://projectzero.google/blog/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:24:32.945077+00:00"
+      },
+      {
+        "tool_use_id": "call_u1h3fehc4kj7cnsm1t90f49m",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What does this GitHub user profile say about Ivan Fratric / ifsecure - bio, location, employer, repositories like domato, jackalope, browsers?",
+          "url": "https://github.com/ifsecure"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:24:32.945080+00:00"
+      },
+      {
+        "tool_use_id": "call_shv7s610bs517llmen3f78ev",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Find Ivan Fratric's author profile, list of his posts with dates, and any bio details. What browsers/engines did he research and what tools did he build?",
+          "url": "https://projectzero.google/blog/authors/ivan-fratric/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:24:32.945083+00:00"
+      },
+      {
+        "tool_use_id": "call_ielwmiws2y92aa2aawylj7nj",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What does this GitHub profile page say about the user - bio, location, employer, repositories? Look for domato, jackalope, grammar-based fuzzing repos.",
+          "url": "https://github.com/ifsecure-"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:24:32.945085+00:00"
+      },
+      {
+        "tool_use_id": "call_0f6swik6hzb65nx2puhaq0pn",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog posts shown, with author, title and date. Especially any by Ivan Fratric and any about WebKit, Safari, Domato, Jackalope, or grammar fuzzing.",
+          "url": "https://projectzero.google/posts/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:24:32.945088+00:00"
+      },
+      {
+        "tool_use_id": "call_osw8xuaqw5pp1tadmyq6kbml",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What does this page say about Ivan Fratric, his role at AXOOM/Google Project Zero, and his research topics like WebKit, browser exploitation, fuzzing tools?",
+          "url": "https://www.blackhat.com/html/briefings/usa-2017/speakers/Ivan-Fratric.html"
+        },
+        "success": true,
+        "content_sha256": "141ba98ee9752dbbc785a7474a7c5b02bd2b643dc4a46dc2a8a53ebafbe7ee47",
+        "accessed_at": "2026-09-26T14:24:32.945090+00:00"
+      },
+      {
+        "tool_use_id": "call_ivxkqyq4jve9nih8yqa0bpt5",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog posts with author, title and date, especially any by Ivan Fratric and about WebKit, Safari, Domato, Jackalope, grammar fuzzing.",
+          "url": "https://projectzero.google/"
+        },
+        "success": true,
+        "content_sha256": "c019cbc794ea56e64f2ec01e9290bd7d570ef9c6473a838c038af7fe8328f3e4",
+        "accessed_at": "2026-09-26T14:24:32.945106+00:00"
+      },
+      {
+        "tool_use_id": "call_s98pbj9rdoyauw1mst2nloc5",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Ivan Fratric Project Zero biography WebKit researcher Domato fuzzing tool release"
+        },
+        "success": true,
+        "content_sha256": "45550696fd16f607dc1896b28b456a615ee0099c5821a62767f28d7920ffb9bb",
+        "accessed_at": "2026-09-26T14:24:32.945098+00:00"
+      },
+      {
+        "tool_use_id": "call_ah1jav6i2n3cw77v6v53i82y",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract the full text of the blog post. Focus on what Ivan Fratric says about his fuzzing approach, his past successes finding issues in XSLT and JIT engines, Jackalope/domato, and any self-described methodology. Quote short passages verbatim where useful.",
+          "url": "https://projectzero.google/blog/2600305-on-the-effectiveness-of-mutational-grammar-fuzzing/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:24:32.945108+00:00"
+      },
+      {
+        "tool_use_id": "call_lgtdqde3hxxfyjbtscegvifc",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List Project Zero blog posts by Ivan Fratric with titles and dates. Especially anything about WebKit, Safari, Domato, Jackalope, JIT.",
+          "url": "https://projectzero.google/archive.html"
+        },
+        "success": true,
+        "content_sha256": "d61da00483896f2078398e3af48f829d78bab2527ea904c724ccd99bda5b07cc",
+        "accessed_at": "2026-09-26T14:24:32.945113+00:00"
+      },
+      {
+        "tool_use_id": "call_oz24x97sed6c4o8tjrrblbkf",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract author and key points. Who wrote this post? What does it say about DOMato, grammar-based DOM fuzzing, the Great DOM Fuzz-off competition, results and lessons learned? Quote short verbatim passages.",
+          "url": "https://projectzero.google/blog/170921-the-great-dom-fuzz-off-of-2017/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:24:32.945116+00:00"
+      },
+      {
+        "tool_use_id": "call_dtsgnunmvg7d6y87urln6s9l",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract author and key points. Who wrote this post? What does it say about Jackalope, coverage feedback, closed-source JS engine fuzzing, methodology and results? Quote short verbatim passages.",
+          "url": "https://projectzero.google/blog/210914-fuzzing-closed-source-javascript-engines-with-coverage-feedback/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:24:32.945118+00:00"
+      },
+      {
+        "tool_use_id": "call_pwnybdpbc8yxbblcyj37mwd8",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract author and key points. Who wrote this post? What does it say about DOMato, grammar-based DOM fuzzing, the Great DOM Fuzz-off competition, results and lessons learned? Quote short verbatim passages.",
+          "url": "https://projectzero.google/blog/the-great-dom-fuzz-off-of-2017/"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:24:32.945129+00:00"
+      },
+      {
+        "tool_use_id": "call_8o0qx6x9ep0gh4q25tvr2bn4",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List links to blog posts on this page with their URLs and titles, especially any about DOM fuzzing, Jackalope, JIT, Safari, or by Ivan Fratric.",
+          "url": "https://projectzero.google/archive.html"
+        },
+        "success": true,
+        "content_sha256": "f13e7948c09b3431cbc675821e290391ed0aa1ca682bc2d1e5ed4cbd4c33ef9a",
+        "accessed_at": "2026-09-26T14:24:32.945133+00:00"
+      },
+      {
+        "tool_use_id": "call_1dmt8em9watfbkosy5pzsoqa",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract author and key points. Who wrote this post? What does it say about DOMato, grammar-based DOM fuzzing, the Great DOM Fuzz-off competition, results and lessons learned? Quote short verbatim passages.",
+          "url": "https://projectzero.google/2017/09/the-great-dom-fuzz-off-of-2017.html"
+        },
+        "success": true,
+        "content_sha256": "7f73ed8b883df279425a70844314f4c04143cb63712a24a475a12c3ace5c1504",
+        "accessed_at": "2026-09-26T14:24:32.945137+00:00"
+      },
+      {
+        "tool_use_id": "call_enis1n4pahwtl6rsqdqk814f",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract author and key points. Who wrote this post? What does it say about Jackalope, coverage feedback, closed-source JS engine fuzzing, methodology and results? Quote short verbatim passages.",
+          "url": "https://projectzero.google/2021/09/fuzzing-closed-source-javascript.html"
+        },
+        "success": true,
+        "content_sha256": "04e6ad0af9de83b7784d6aea27ed99159fd3aa6bfb48e3d1026024d180974d23",
+        "accessed_at": "2026-09-26T14:24:32.945145+00:00"
+      },
+      {
+        "tool_use_id": "call_mso846ei6pxyz3jok27uptj3",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract author and key points. Who wrote this post? What does it say about the Safari bugs found, the Domato fuzzer, methodology over the year, and lessons learned? Quote short verbatim passages and provide dates.",
+          "url": "https://projectzero.google/2018/10/365-days-later-finding-and-exploiting.html"
+        },
+        "success": true,
+        "content_sha256": "4216545dce1ab882011d6dcb4b51eb697c135c61c518dd0ee5a6b30ecf83b404",
+        "accessed_at": "2026-09-26T14:24:32.945161+00:00"
+      },
+      {
+        "tool_use_id": "call_6vmmxbb5mzxvl3zli9w783io",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract author and key points. Who wrote this post? What does it say about JIT bug exploitation, methodology, and the research arc? Quote short verbatim passages and dates.",
+          "url": "https://projectzero.google/2020/09/jitsploitation-one.html"
+        },
+        "success": true,
+        "content_sha256": "f03919941af31a67922529a7e24cdc9745ffeea28ad21cf6d5661d69e5993f50",
+        "accessed_at": "2026-09-26T14:24:32.945156+00:00"
+      },
+      {
+        "tool_use_id": "call_apqsrdo43wacxpn131sbd634",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-external-20260926-221640-478/checkpoint.md",
+          "content": "# Checkpoint — Ivan Fratric / 外部视角\n\n## 身份确认 (identity_check)\n- Project Zero 官方博客多篇由 \"Ivan Fratric\" 署名的一手 writeup 交叉确认：他是 P0 的浏览器/WebKit 安全研究员，自建 Domato（生成式 DOM fuzzer）与 Jackalope（覆盖引导语法 fuzzer）。\n- person_json 给出的 handle \"ifsecure\" 与 GitHub 仓库（Domato/Jackalope）本次**未通过直接抓取独立验证**（github.com/ifsecure → 404；可能 handle 不同）。\n- 同名歧义低：所有 fetched 一手来源均以全名 \"Ivan Fratric\" 署名。\n\n## 已确认来源（fetched，primary/first_hand_other）\n1. **\"The Great DOM Fuzz-off of 2017\"** — Ivan Fratric — 2017-09-21 — https://projectzero.google/2017/09/the-great-dom-fuzz-off-of-2017.html\n   - 自建 Domato（生成式 grammar fuzzer，HTML/CSS/JS 语法）；5 个浏览器各 1 亿次迭代；Safari 17 bug（Chrome 2 / Firefox 4 / IE 4 / Edge 6）；开源到 GitHub；MemGC mitigation 受其好评；额外做的覆盖引导 DOM fuzzer 在 IE 上\"未产生新 crash\"。\n2. **\"365 Days Later: Finding and Exploiting Safari Bugs using Publicly Available Tools\"** — Ivan Fratric — 2018-10-04 — https://projectzero.google/2018/10/365-days-later-finding-and-exploiting.html\n   - 同方法同工具复测 WebKit/Safari（1 年后）；bug 17→9；全部在 Safari 12 修复；为 CVE-2018-4314（SVG UAF）写 PoC（UAF→infoleak→ROP）；批评 Apple advisory 不透明。\n3. **\"Fuzzing Closed-Source JavaScript Engines with Coverage Feedback\"** — Ivan Fratric — 2021-09-14 — https://projectzero.google/2021/09/fuzzing-closed-source-javascript.html\n   - 自建 Jackalope（覆盖引导 black-box binary fuzzer，Windows/macOS），语法\"somewhat similar to Domato, but somewhat simplified\"，新增 `<repeat_*>` 节点；配合 Fuzzilli+TinyInst fuzz IE jscript/jscript9；3 个 CVE（CVE-2021-26419 / -31959 / -34480，后者在 JIT）。\n4. **\"On the Effectiveness of Mutational Grammar Fuzzing\"** — Ivan Fratric — 2026-03-05 — read via https://projectzero.google/ 主页描述\n   - 自述 \"used it successfully in the past, including to find issues in XSLT implementations in web browsers and even JIT engine bugs\"；反思覆盖引导变异式语法 fuzzing 的\"perceived flaws\"。\n5. **同事联合署名** — Natalie Silvanovich — \"A 0-click exploit chain for the Pixel 9 Part 1: Decoding Dolby\" — 2026-01-14 — first_hand_other\n   - \"Ivan Fratric and I reported CVE-2025-54957\"（Dolby Unified Decoder）→ P0 同事以合作者身份点名。\n\n## 关键更正（避免误归因）\n- 二手搜索摘要（未抓取的 LLM 摘要，不作为来源）曾暗示 Fratric 是 \"JITSploitation I/II/III\" 系列作者；直接抓取 https://projectzero.google/2020/09/jitsploitation-one.html 显示作者为 **Samuel Groß**，不应归名于 Fratric。\"JSC Exploits\"(2019-08-29) 同样不在已确认的 Fratric 作品集内。\n\n## 资料缺口 (gaps)\n- person_json 的 \"selected_conference_evidence\": \"Black Hat US/EU / POC\" — Black Hat speaker 页面直接抓取 404，POC 页面未抓取；会议演讲事实本次未独立验证（lead_only）。\n- GitHub 仓库（Domato/Jackalope）URL 与 handle 未直接抓取确认（github.com/ifsecure → 404）。\n- X/Twitter \"ifsecure\" 未直接验证。\n- 权威媒体外部评价（记者专访、Black Hat 主持人评语等）本次未成功抓取；外部评价维度除 P0 同事联合署名外较薄弱。\n- \"University of Zagreb / Croatia\" 归属只见于二手摘要，未由一手来源确认。\n\n## 预算\n搜索/抓取调用已超过 task.md 建议的 8 次上限（多次 404/redirect 消耗预算）。停止搜索，进入输出。\n"
+        },
+        "success": true,
+        "content_sha256": "55e00d08baa1476ac1c9e9c2b4520389b6c0ebf1e93965cb3b1247535c43b2ff",
+        "accessed_at": "2026-09-26T14:24:32.945381+00:00"
+      },
+      {
+        "tool_use_id": "call_60f7fjzydbhdthrkecpf0wrz",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-external-20260926-221640-478/output.json",
+          "content": "{\n  \"person\": \"Ivan Fratric\",\n  \"dimension\": \"外部视角\",\n  \"identity_check\": \"身份确认：Project Zero 官方博客多篇由全名 'Ivan Fratric' 署名的一手 writeup（2017、2018、2021、2026）交叉确认其为 P0 的浏览器/WebKit 与模糊测试方向研究员，并自建 Domato 与 Jackalope 两套公开 fuzzer。同名歧义低。需注意 person_json 提供的 handle 'ifsecure' 及其社交/会议证据（X、Black Hat US/EU、POC）本次未通过直接抓取独立验证（GitHub github.com/ifsecure 与 Black Hat speaker 页返回 404/403），故 handle 层级暂记 lead_only，身份由 P0 官方一手署名充分确立。二手搜索摘要（非来源）曾误将 Samuel Groß 的 'JITSploitation' 系列归到 Fratric 名下；直接抓取对应文章确认作者为 Groß，已在 contradictions 中记录以防误归因。\",\n  \"items\": [\n    {\n      \"id\": \"ext-01\",\n      \"date\": \"2017-09-21\",\n      \"claim\": \"Fratric 发布并开源 Domato——一款基于语法的生成式 DOM fuzzer（含 HTML/CSS/JS 语法），以可控成本在五大浏览器上各跑约 1 亿次迭代做横向评测；结果显示 Safari 以 17 个 bug 显著高于 Chrome(2)/Firefox(4)/IE(4)/Edge(6)，成为明显离群值。这是其‘用公开工具做横向可重复测量’研究风格的确立。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"研究方法的外部可验证化：他不只找单个 bug，而是把‘同样的方法、同样的迭代量、同样的公开工具’作为可比基线，在不同引擎间做受控对比——把单点发现转化为可被同行复现的测量实验。同时他主动尝试额外的覆盖引导 DOM fuzzer 并如实记录其在 IE 上‘未产生新 crash’，展示对工具边界的诚实评估而非只报喜。\",\n      \"short_quote\": \"Apple Safari is a clear outlier in the experiment with significantly higher number of bugs.\",\n      \"source\": {\n        \"title\": \"The Great DOM Fuzz-off of 2017\",\n        \"url\": \"https://projectzero.google/2017/09/the-great-dom-fuzz-off-of-2017.html\",\n        \"published\": \"2017-09-21\",\n        \"source_type\": \"本人一手 writeup（P0 官方博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ext-02\",\n      \"date\": \"2018-10-04\",\n      \"claim\": \"Fratric 在一年后用同一 Domato、同一方法学（1 亿次迭代）复测 WebKit/Safari，bug 数从 17 降至 9（全部在 Safari 12 修复），并亲自为 CVE-2018-4314（SVG UAF）编写 PoC，记录‘把 UAF 转成 infoleak 是耗时最多的部分’这一可复现的工程难点；同时公开批评 Apple advisory 在修复后未及时列出对应 bug、形成误导。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"反馈回路的显式化：他建立‘同一工具/同方法学逐年复测’的纵向比较来检验供应商安全改进是否真实，并以 PoC 写作把‘找到 bug’推进到‘可验证利用’，暴露其研究由‘发现问题’向‘验证可利用+推动透明披露’演进。对供应商披露流程的公开批评显示其不把品牌（Apple）当作能力背书，而以可复现证据评价。\",\n      \"short_quote\": \"the majority of time spent working on this exploit was to turn the bug into an infoleak\",\n      \"source\": {\n        \"title\": \"365 Days Later: Finding and Exploiting Safari Bugs using Publicly Available Tools\",\n        \"url\": \"https://projectzero.google/2018/10/365-days-later-finding-and-exploiting.html\",\n        \"published\": \"2018-10-04\",\n        \"source_type\": \"本人一手 writeup（P0 官方博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ext-03\",\n      \"date\": \"2021-09-14\",\n      \"claim\": \"Fratric 发布 Jackalope——覆盖引导的 black-box binary fuzzer（Windows/macOS），语法‘与 Domato 类似但有所简化’，并新增 <repeat_*> 节点以支持在保持语法有效性的前提下做插入/删除；与 Fuzzilli+TinyInst 一同在 IE 的 jscript/jscript9 上跑数周/100 核，发现 CVE-2021-26419、-31959（bytecode generator）与 -34480（JIT 编译器）。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"工具建设的迭代式累积：Domato（生成式）→ Jackalope（覆盖引导变异式），他把前一套工具的语法经验迁移、简化并扩展为后一套，体现‘把一次性发现沉淀为可复用基础设施’的输出习惯。他对 Jackalope 与 Fuzzilli 覆盖率/bug 命中度相近的如实对照，以及‘两者都在 fuzz 早期就命中、单机即可发现’的观察，显示其以工具对照而非自我宣传的方式评估方法学。\",\n      \"short_quote\": \"Jackalope with grammar-based mutations behaved quite similarly to Fuzzilli: it was hitting a similar level of coverage and finding similar bugs.\",\n      \"source\": {\n        \"title\": \"Fuzzing Closed-Source JavaScript Engines with Coverage Feedback\",\n        \"url\": \"https://projectzero.google/2021/09/fuzzing-closed-source-javascript.html\",\n        \"published\": \"2021-09-14\",\n        \"source_type\": \"本人一手 writeup（P0 官方博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ext-04\",\n      \"date\": \"2026-03-05\",\n      \"claim\": \"Fratric 在最新博文中自述变异式语法 fuzzing 过去成功用于‘在 web 浏览器的 XSLT 实现中发现问题，乃至 JIT 引擎 bug’，并系统反思覆盖引导变异式语法 fuzzing 的‘perceived flaws’及一种应对技术。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"元层面的自我审视：他从‘发布工具/报告 bug’转向‘反思方法学本身的弱点并提出改进’，显示研究从执行层进入方法论批判层。自述把同一技术跨域迁移到 XSLT 与 JIT 引擎，是‘可迁移方法学’而非单点技巧的累积标志。\",\n      \"short_quote\": \"I used it successfully in the past, including to find issues in XSLT implementations in web browsers and even JIT engine bugs.\",\n      \"source\": {\n        \"title\": \"On the Effectiveness of Mutational Grammar Fuzzing\",\n        \"url\": \"https://projectzero.google/\",\n        \"published\": \"2026-03-05\",\n        \"source_type\": \"本人一手 writeup（P0 官方博客主页条目）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ext-05\",\n      \"date\": \"2026-01-14\",\n      \"claim\": \"同事 Natalie Silvanovich 在其 Pixel 9 0-click 利用链博文中以合作者身份点名：‘Ivan Fratric and I reported CVE-2025-54957’（Dolby Unified Decoder 漏洞）。这是 P0 同队研究员对其持续贡献的外部佐证。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"同伴认可机制：被同队高产出研究员（Silvanovich）以‘共同报告者’身份在公开 writeup 中点名，而非仅靠组织品牌背书——这符合维度要求‘与作品交叉验证的同伴评价’，且评价锚定在具体 CVE 而非泛泛赞美。跨域（Dolby 解码器，非其浏览器主场）的合作也显示其研究范围在 P0 内被同伴信任地扩展。\",\n      \"short_quote\": \"Ivan Fratric and I reported CVE-2025-54957\",\n      \"source\": {\n        \"title\": \"A 0-click exploit chain for the Pixel 9 Part 1: Decoding Dolby\",\n        \"url\": \"https://projectzero.google/\",\n        \"published\": \"2026-01-14\",\n        \"source_type\": \"P0 同事一手 writeup（点名 Fratric 为合作者）\",\n        \"level\": \"first_hand_other\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"误归因风险：WebSearch 的二手 LLM 摘要（非来源，仅作线索）曾暗示 Fratric 是 'JITSploitation I/II/III'(2020-09-01) 及 'JSC Exploits'(2019-08-29) 的作者。直接抓取 https://projectzero.google/2020/09/jitsploitation-one.html 确认 'JITSploitation I' 作者为 Samuel Groß。因此这些作品未计入 Fratric 的成长证据，避免把同事作品错置为他本人能力来源——这与维度要求‘不要把组织品牌直接解释为能力来源’一致。\",\n    \"handle 一致性缺口：person_json 声称 handle 为 'ifsecure'（X/Twitter https://x.com/ifsecure，并以此推断 GitHub 仓库）。本次直接抓取 https://github.com/ifsecure 返回 404，无法通过一手来源确认该 handle 与 Domato/Jackalope 仓库归属。Domato/Jackalope 仓库的 GitHub URL 以其在 P0 博客中的自述为间接依据（inferred），未做 handle 级独立验证。\"\n  ],\n  \"gaps\": [\n    \"会议演讲事实未独立验证：person_json 列出的 'Black Hat US/EU / POC' 作为 selected_conference_evidence，本次 Black Hat speaker 页面直接抓取返回 404/403，POC 会议页面未抓取；这些演讲记录未能从一手 speaker 页面确认，故未作为 documented 条目计入。\",\n    \"GitHub/X handle 与社交档案未通过直接抓取验证（github.com/ifsecure → 404）；Domato、Jackalope 的具体仓库 URL 仅以 P0 博客内自述为间接依据。\",\n    \"权威媒体外部评价缺失：未能抓取到记者专访、Black Hat/POC 主持人评语等‘权威媒体具体评价’。当前外部视角仅由 P0 同事（Silvanovich）以合作者身份点名构成，独立媒体评价侧薄弱。\",\n    \"教育/地理背景未一手确认：二手摘要提及 University of Zagreb / Croatia 归属，无一手来源佐证，未计入。\",\n    \"工具预算超出：task.md 建议 8 次搜索/抓取上限，实际因多次 404/301/403 消耗预算（projectzero.google 重定向、github 与 blackhat speaker 页 404/403），未能完成对 Black Hat/POC/GitHub/X 的逐一验证即进入输出。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "7dcd94b7559f08015c98db5205c276600aad29de27a7dd640822c9b7d63c35a9",
+        "accessed_at": "2026-09-26T14:24:32.945385+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790432672945395000-ivan-fratric-external.json",
+    "label": "Ivan Fratric:external",
+    "elapsed_seconds": 472.53,
+    "prompt_sha256": "356558eacbe8844935e3319b3f9725f3f287463dec2b7ed67936a0b297798d0a",
+    "num_turns": 34,
+    "total_cost_usd": 0.8912699999999999,
+    "usage": {
+      "input_tokens": 24792,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 258688,
+      "output_tokens": 12027,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 32856,
+        "outputTokens": 22878,
+        "cacheReadInputTokens": 310080,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.8912699999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

@@ -1,0 +1,449 @@
+{
+  "person": "Man Yue Mo",
+  "expertise": [
+    "浏览器引擎（Chrome/V8）内存模型与利用：包括 use-after-free 触发、SuperIC 类型混淆、JIT 侧效应建模、对象 transition/属性层破坏，及渲染器沙箱内 RCE 与沙箱逃逸",
+    "Android/Linux 内核利用：Qualcomm GPU/NPU 驱动、Arm Mali GPU 驱动、Adreno/KGSL，以多漏洞组合达成内核任意代码执行、root 与关闭 SELinux",
+    "内核缓解机制对抗：系统梳理 Samsung KNOX RKP/JOPP/KDP、KASLR、CONFIG_INIT_STACK_ALL、CFI、MTE 等 Android 内核缓解的覆盖差异，并以逻辑缺陷绕过 MTE",
+    "以根因分析驱动变体发现，以及补丁差异（patch-diff）分析发现遗漏补丁",
+    "把已得手利用技术沉淀为可复用原语（释放页重用作 GPU 页表全局目录、AIO 与 SLUB 分配器操控、JIT spraying）并跨年自引",
+    "追踪上游新组件/新特性（concurrent compilation、Maglev、MTE、Mali CSF）对既有安全假设的打破，作为新攻击面切入",
+    "将手工 triage 经验编码为可复用 AI 工具（Taskflow Agent）并开源",
+    "需注意：本归纳基于 github.blog/author/mymo/ 作者页及已抓取正文级 writeup；X 账号（@mmxsrup，HTTP 402）、会议 speaker 页面（Black Hat 403、POC 未连通）、邮件列表与代码仓库均未取得一手抓取，能力归纳受单一公开平台可见性限制。GitHub Security Lab 机构品牌可能放大个人能力归因的偏差，下述机制均以作者正文可核验行为为据，而非组织声誉推断。"
+  ],
+  "stages": [
+    {
+      "period": "2020-04 至 2021-03",
+      "stage": "Chrome 渲染器 GC/UAF 起点与利用链组装",
+      "capability_change": "首篇可索引 writeup（mym-tl-01）即把自身工作置于 Project Zero 变体分析谱系内，引用 Sergei Glazunov 以 CodeQL 进行的变体分析与 Maddie Stone 的变体分析演讲作为分析框架；技术积累以浏览器引擎内存模型（以小内存分配在意外位置触发 Chrome 垃圾回收以制造 use-after-free）为起点。2021-03 将 2020 年分散报告的多个 Android/Chrome 漏洞逆向组合为一条完整利用链（mym-decisions-02、mym-tl-06），采用从最终目标倒推到各组件的方法，原文表述为 \"worked our way back\"（引文），把研究定位为对攻击归因叙事的校正而非单纯利用。",
+      "evidence_ids": [
+        "mym-tl-01",
+        "mym-decisions-01",
+        "mym-decisions-02",
+        "mym-tl-06",
+        "mym-tl-02",
+        "mym-tl-03",
+        "mym-tl-04",
+        "mym-tl-05"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2021-03 至 2021-11",
+      "stage": "攻击面横向迁移至移动内核协处理器驱动，并以在野 0-day 复盘作为练习",
+      "capability_change": "研究面从 Chrome 渲染器扩展到 Android 内核协处理器驱动（Qualcomm KGSL、NPU），开始组建跨组件 exploit chain（mym-tl-03/04/05、mym-pubtech-01）。同期连续两篇对据信在野利用的 Chrome 漏洞（CVE-2021-30632、CVE-2021-37975）做根因与利用复盘（R1-itw-cve2021-30632、R1-itw-cve2021-37975），形成以他人 exploit 为材料的反馈与练习行为。作者在 NPU 工作中以第一人称承认审计时漏看了 bug，并以 educated guesses 加 trial and error 描述对未知子系统的方法论探索（mymo-conv-01、mym-pubtech-01）。",
+      "evidence_ids": [
+        "mym-tl-03",
+        "mym-tl-04",
+        "mym-tl-05",
+        "mym-decisions-03",
+        "mym-pubtech-01",
+        "mymo-conv-01",
+        "mym-tl-07",
+        "mym-tl-09",
+        "mym-tl-10",
+        "R1-itw-cve2021-30632",
+        "R1-itw-cve2021-37975"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2022-06 至 2023-04",
+      "stage": "可复用利用原语的产出与内核缓解对抗的并置",
+      "capability_change": "首次发表把释放页重用作 GPU 页表全局目录（PGD）以实现任意物理内存访问的技术（mym-pubtech-03、mym-tl-13），原文称其 \"does not involve the usual type of memory corruption\"（引文），把研究视角从指针级内存破坏转到物理映射层，成为后续多年 Mali 工作的可复用原语。同期把利用与内核缓解机制对抗明确并列：既给出利用（CVE-2022-22057 在 Samsung Z Flip 3 上 root 与关闭 SELinux），也系统梳理缓解机制作为《The Android kernel mitigations obstacle race》（mym-tl-11）的标题指代——\"障碍赛\"为该来源 writeup 标题的标题指代，非本报告自撰的比喻性归纳。2023-04 以补丁差异发现 Mali 驱动 r40p0 遗漏安全补丁，在 Pixel 6 上实现内核 root（R1-tl-16-pwning-pixel6）。",
+      "evidence_ids": [
+        "mym-pubtech-03",
+        "mym-tl-13",
+        "mym-pubtech-04",
+        "mym-tl-15",
+        "mym-tl-11",
+        "mymo-conv-02",
+        "mym-tl-14",
+        "R1-tl-16-pwning-pixel6",
+        "mym-tl-16"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2023-05 至 2024-03",
+      "stage": "root cause → 变体方法论的显式化与首次 MTE bypass",
+      "capability_change": "以 Jann Horn 披露的 Arm Mali 漏洞 CVE-2022-36449（Project Zero issue 2327）为起点，通过审查代码对 backing store 生命周期的隐含假设发现 CVE-2022-46395（mym-pubtech-05、mym-tl-17、mym-decisions-04），并把\"对既有漏洞做根因分析并据此识别新变体\"显式上升为可推广方法论。同期回到 V8 JIT 跨子系统边界（mym-pubtech-02 指出该类缺陷 \"could not be found by fuzzing V8 alone\"，引文），并跟踪 concurrent compilation 与 Maglev 等新层对安全假设的打破（mym-pubtech-06/07、mym-tl-18/19）。2024-03 在 MTE 启用的 Pixel 8 上以 Arm Mali 逻辑缺陷（CVE-2023-6241）获得内核代码执行并绕过 MTE（mym-pubtech-08、mym-decisions-05、mym-tl-20），把既有 Pixel 6 技术沉淀复用于 Pixel 8。",
+      "evidence_ids": [
+        "mym-pubtech-05",
+        "mym-tl-17",
+        "mym-decisions-04",
+        "mym-pubtech-02",
+        "mym-pubtech-06",
+        "mym-pubtech-07",
+        "mym-tl-18",
+        "mym-tl-19",
+        "mym-pubtech-08",
+        "mym-decisions-05",
+        "mym-tl-20"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2024-06 至 2025-05",
+      "stage": "V8 对象模型持续产出与第二次 MTE bypass 迭代",
+      "capability_change": "围绕 V8 对象属性重复与对象 transition 机制继续类型混淆利用，在 Chrome renderer 沙箱内实现 RCE（mym-tl-21/22）。2025-05 发表第二次 MTE bypass（CVE-2025-0072，mym-pubtech-11、mym-tl-23），复用 CVE-2023-6241 与 2022 年《Corrupting memory without memory corruption》的 PGD 重用思路，并显式对比前一次 MTE bypass 的差异（GPU 侧直接访物理内存 vs 用户态页表直接插入页帧）。能力变化为跨三年自我技术沉淀的系统化复用，而非孤立成果。需注意：六维证据 mym-tl-23 的 claim 字段含\"Android 2023-05\"年份笔误，定向补证 R1-tl-23-verify 正文原文为 \"included in Android's May 2025 security update\"（引文），实际为 Android 2025-05 安全更新；本报告一律以 2025-05 为准。",
+      "evidence_ids": [
+        "mym-tl-21",
+        "mym-tl-22",
+        "mym-pubtech-11",
+        "mym-tl-23",
+        "R1-tl-23-verify",
+        "mymo-conv-03",
+        "mymo-conv-04"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2026-01 至 2026-03",
+      "stage": "向 AI 辅助研究工具建设转向",
+      "capability_change": "与 Peter Stöckli 合著《AI-supported vulnerability triage with the GitHub Security Lab Taskflow Agent》（mym-pubtech-12、mym-tl-24、mym-decisions-06）与《How to scan for vulnerabilities with GitHub Security Lab's open source AI-powered framework》（mymo-conv-05、mym-tl-25），把手工 triage 经验编码为可复用 AI 工具并开源。据作者自述（mym-pubtech-12 正文，未经独立核验），Taskflow Agent 自 2025-08 起处理大量告警并发现约 30 个真实漏洞，研究者仍逐一复核输出后再报告；该转向为渐进式而非一次性切换——2025-05 仍发布传统 MTE 绕过研究。能力变化为将重复性初筛交由工具、把人力集中于人工核验，研究范围从特定漏洞类型扩展到更通用的扫描框架。",
+      "evidence_ids": [
+        "mym-pubtech-12",
+        "mym-tl-24",
+        "mym-decisions-06",
+        "mym-decisions-07",
+        "mymo-conv-05",
+        "mym-tl-25",
+        "mym-ext-02"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "以既有公开漏洞根因为起点、搜索同假设变体（root cause → variant）",
+      "starting_conditions": "2020-04 首篇 writeup 即把自身工作置于 Project Zero 变体分析谱系内（mym-tl-01 引用 Sergei Glazunov 的 CodeQL 变体分析、Maddie Stone 的变体分析演讲）；具备可读到的 Project Zero 公开漏洞报告与 patch-diff 输入。",
+      "repeated_practice": "以既有公开漏洞（CVE-2022-36449 等）为起点，审查访问内存区 backing store 生命周期的隐含假设，再搜索隐式假设该语义的其它代码路径以发现变体（mym-pubtech-05、mym-tl-17）；以补丁差异比对 Mali r40p0 发布与既有补丁发现遗漏修复（R1-tl-16-pwning-pixel6、mym-tl-16）；对在野 0-day 做根因与利用复盘作为同源练习（R1-itw-cve2021-30632、R1-itw-cve2021-37975）。",
+      "feedback": "新发现以 writeup 形式公开反馈给社区（mymo-community-p0-variant-feedback-2023 描述的\"阅读公开研究—提取方法—发现 variant—回馈社区\"闭环）；作者自述偏好可靠、确定性触发（mymo-conv-04 原文 \"I'd like to be able to replace the backing page reliably\"，引文），以工程可靠性作为对变体有效性的内部反馈。",
+      "intermediate_capability": "把单个漏洞抽象为可被搜索的变体模式，形成从个案到方法的能力；能够区分\"真正的新根因\"与\"同假设的变体\"。",
+      "observed_outcomes": [
+        "CVE-2022-46395 作为 Project Zero issue 2327 的变体被定位，2022-11-17 报告 Arm（mym-pubtech-05、mym-tl-17）",
+        "以补丁差异发现 Mali 驱动 r40p0 遗漏安全补丁，在 Pixel 6 上实现内核 root（R1-tl-16-pwning-pixel6，primary 级正文支撑）",
+        "CVE-2025-0072 作为既有 GHSL-2023-005 类思路的变体（把 IOCTL_MEM_COMMIT 收缩改为 GPU page fault 扩展）（mym-pubtech-08、mym-pubtech-11）"
+      ],
+      "evidence_ids": [
+        "mym-tl-01",
+        "mym-pubtech-05",
+        "mym-tl-17",
+        "R1-tl-16-pwning-pixel6",
+        "mym-tl-16",
+        "R1-itw-cve2021-30632",
+        "R1-itw-cve2021-37975",
+        "mymo-community-p0-variant-feedback-2023",
+        "mymo-conv-04",
+        "mym-pubtech-08",
+        "mym-pubtech-11"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "变体分析与自引前作在本报告中被归因为研究方法，但同一作者在系列 writeup 中保持叙事连贯也可能是一种写作策略；自引行为不必然等于能力沉淀。本报告以作者跨三年对同一原语（PGD 重用、AIO/SLUB）在不同漏洞中的可核验复用作为区分依据，而非单凭自引文本。"
+    },
+    {
+      "name": "把已得手利用技术沉淀为可复用原语并跨年自引",
+      "starting_conditions": "2022-07 首次发表把释放页重用作 GPU 页表全局目录以实现任意物理内存访问的技术（mym-pubtech-03、mym-tl-13）；具备 Arm Mali ioctl 与 kbase_mem_pool 分层池机制的内核代码理解基础。",
+      "repeated_practice": "把 PGD-reuse、AIO 与 SLUB 分配器操控、JIT spraying 等技术明确作为后续研究的可复用构件：2022《Corrupting memory without memory corruption》产出 PGD-reuse，2023《The code that wasn't there》产出 AIO GFP_HIGHUSER 页重用，2023-05《Rooting with root cause》自引这两项作为可复用原语（mym-pubtech-04、mym-pubtech-05），2024 与 2025 两次 MTE bypass 均复用 PGD 重用思路（mym-pubtech-08、mym-pubtech-11）。",
+      "feedback": "后续 writeup 显式自引前作并对比技术差异（如 2025-05 对比 GPU 侧直接访物理内存与用户态页表插入页帧两种 MTE bypass 路径），以\"前作能否在新缓解下复用\"作为对该原语稳健性的反馈。",
+      "intermediate_capability": "形成可复用知识体系：把单次利用经验抽象为可在新设备、新缓解下重新组装的底层原语，而非每次从基础重新构建利用链。",
+      "observed_outcomes": [
+        "PGD-reuse 原语跨 2022、2024、2025 三年被自引复用于 Mali 利用（mym-pubtech-03、mym-pubtech-08、mym-pubtech-11）",
+        "2024-03 复用 Pixel 6 技术沉淀于 Pixel 8 实现 MTE bypass（mym-decisions-05、mym-pubtech-08）",
+        "JIT spraying 被用于绕过 V8 heap sandbox（mym-pubtech-06、mym-pubtech-07）"
+      ],
+      "evidence_ids": [
+        "mym-pubtech-03",
+        "mym-tl-13",
+        "mym-pubtech-04",
+        "mym-pubtech-05",
+        "mym-pubtech-08",
+        "mym-pubtech-11",
+        "mym-pubtech-06",
+        "mym-pubtech-07",
+        "mym-decisions-05",
+        "mymo-conv-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "自引前作可能部分源于同一作者在系列 writeup 中保持叙事连贯的写作策略，而非能力沉淀；但跨设备（Pixel 6 → Pixel 8）、跨缓解（无 MTE → MTE）的实际复用结果提供了写作策略之外的独立支撑。"
+    },
+    {
+      "name": "追踪上游新组件/新特性如何打破既有安全假设并作为新攻击面",
+      "starting_conditions": "2022-06 V8 SuperIC 工作指出该类缺陷 \"could not be found by fuzzing V8 alone\"（mym-pubtech-02，引文），确立跨子系统边界审计取向；具备 V8↔Blink 跨子系统代码阅读基础。",
+      "repeated_practice": "及时跟进上游新引入组件并对\"新特性是否破坏先前安全假设\"做跟踪复盘：concurrent compilation 使 StackCheck 节点的 side effect 属性失效（mym-pubtech-06 原文 \"the side effect property of the StackCheck node has become incorrect due to the introduction of concurrent compilation\"，引文）；Maglev（Chrome 114 默认启用）作为新 JIT 层引入未初始化对象问题（mym-pubtech-07 原文 \"with different tiers of optimizations in Chrome, the same functionality often needs to be implemented multiple times\"，引文）；Mali CSF queue 重绑定打破 queue->phys 不可变假设（mym-pubtech-11）；MTE 作为新缓解被作为正面挑战目标（mym-pubtech-08、mym-decisions-05）。",
+      "feedback": "上游 patch-diff 与 changelog 作为\"何处假设被改写\"的输入；新组件的引入时点（如 Maglev 默认启用）作为切入时机的反馈。",
+      "intermediate_capability": "形成对新组件/新特性打破既有安全假设的预判能力，把\"新层重复实现易丢失安全检查\"归纳为可复用 bug 模式。",
+      "observed_outcomes": [
+        "CVE-2023-3420 TurboFan StackCheck 侧效应建模错误（mym-pubtech-06）",
+        "CVE-2023-4069 Maglev 未初始化对象（mym-pubtech-07，该篇另自引 POC2022 关于预测 V8 对象地址的工作，属自引前作而非原语生产）",
+        "MTE 作为新缓解被两次正面绕过（mym-pubtech-08、mym-pubtech-11）",
+        "作者对攻击面趋势的公开预判：原文 \"I expect coprocessors and their kernel drivers to continue to be a powerful attack surface\"（mym-decisions-05，引文）"
+      ],
+      "evidence_ids": [
+        "mym-pubtech-02",
+        "mym-pubtech-06",
+        "mym-pubtech-07",
+        "mym-tl-18",
+        "mym-tl-19",
+        "mym-pubtech-08",
+        "mym-pubtech-11",
+        "mym-decisions-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "新组件跟踪可能与上游发布节奏的可见性强相关（Maglev 默认启用、Pixel 8 支持 MTE 均为公开事件），机会窗口的把握部分依赖平台可用性与发布时机，而非纯个人能力。"
+    },
+    {
+      "name": "把运行时异常与意外数据作为审计的补充输入",
+      "starting_conditions": "2021-11 NPU 工作中作者以第一人称承认审计时漏看了 bug，并以 educated guesses 加 trial and error 描述对未知子系统的方法论探索（mymo-conv-01、mym-pubtech-01 原文 \"I missed the bug completely when I audited the code\"，引文）；运行时数据异常先于静态审计触发发现。",
+      "repeated_practice": "把运行时反常作为追查入口：NPU 工作中 info leak 在审计时被漏掉，由运行时数据异常触发（mym-pubtech-01）；2023-02 Adreno/KGSL 工作发现路径为调试异常——GPU 命令日志出现未发送的 opcode，经 usleep 延迟线索进入追查（mym-pubtech-04 原文 \"The fact that an opcode that is not in the command buffer appears in the kernel log seems to indicate that the GPU is seeing something that I don't see\"，引文）。",
+      "feedback": "运行时数据与静态审计之间的差异本身作为反馈：审计盲点由运行时异常暴露后，作者以复盘形式公开记录盲点（\"missed the bug completely\"）。",
+      "intermediate_capability": "形成\"静态审计 + 运行时异常\"双输入的审计习惯，降低单一通道盲区。",
+      "observed_outcomes": [
+        "CVE-2021-1940/1968/1969 NPU 三缺陷经运行时异常补漏发现（mym-pubtech-01）",
+        "CVE-2022-25664 Adreno/KGSL 经调试异常发现 GPU 读取陈旧物理内存（mym-pubtech-04）"
+      ],
+      "evidence_ids": [
+        "mym-pubtech-01",
+        "mym-pubtech-04",
+        "mymo-conv-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "运行时异常的捕获依赖具体设备的调试可访问性与偶然性（Adreno 工作自称进入\"rabbit hole\"），不完全是可稳定复现的方法；样本量集中于两篇 writeup，重复性证据偏弱。"
+    },
+    {
+      "name": "将手工 triage 经验编码为可复用 AI 工具并开源",
+      "starting_conditions": "多年 writeup 中积累的伪阳性判别模式（特权上下文检查、不可达 source、自定义 sanitize 等）此前仅以人工经验形式存在；2026 年起与同事 Peter Stöckli（GitHub Security Lab 成员，mym-ext-02 团队页可证）进入协作模式。",
+      "repeated_practice": "把手工 triage 经验编码为 YAML 定义的 taskflow 规则交由 LLM 执行，对 CodeQL 告警进行分流、去伪与生成 GitHub Issue；据作者自述（mym-pubtech-12 正文，未经独立核验），taskflow 规则原文 \"chosen based on our own experience of triaging these types of alerts\"（引文），研究者仍逐一复核输出后再报告；随后把框架从分诊推进到扫描发现阶段并开源（mymo-conv-05、mym-tl-25）。",
+      "feedback": "以 writeup 形式公开反馈工具效果与局限：据作者自述（mym-pubtech-12 正文，未经独立核验），自 2025-08 起处理大量告警并发现约 30 个真实漏洞；作者完整记录误报需人工筛选的局限（mymo-conv-05 原文 \"Would it become too conservative\"，引文）。",
+      "intermediate_capability": "把个人 triage 经验转化为可复用知识体系与可协作的工具产物，研究范围从特定漏洞类型扩展到更通用的扫描框架。",
+      "observed_outcomes": [
+        "2026-01《AI-supported vulnerability triage with the GitHub Security Lab Taskflow Agent》发表（mym-pubtech-12、mym-tl-24）",
+        "2026-03《How to scan for vulnerabilities with GitHub Security Lab's open source AI-powered framework》开源框架发表（mym-tl-25、mymo-conv-05）",
+        "据作者自述（未经独立核验），在电商 cart 逻辑与 Rocket.Chat 中发现系统性问题并报告 80+ 漏洞（mymo-conv-05）"
+      ],
+      "evidence_ids": [
+        "mym-pubtech-12",
+        "mym-tl-24",
+        "mym-tl-25",
+        "mym-decisions-06",
+        "mym-decisions-07",
+        "mymo-conv-05",
+        "mym-ext-02"
+      ],
+      "validation_tests": [
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "AI 工具转向的时间点（2026-01 起）与 LLM 工具化行业趋势高度重合，可能部分受平台/机构资源与同行协作（Stöckli 合著）驱动，而非纯个人能力延伸；\"约 30 个真实漏洞\"与\"80+ 漏洞\"均为作者自述，未经独立核验。"
+    }
+  ],
+  "tensions": [
+    "六维证据 mym-tl-23 的 claim 字段含\"Android 2023-05\"年份笔误，定向补证 R1-tl-23-verify 正文原文为 \"included in Android's May 2025 security update\"（引文），实际为 Android 2025-05 安全更新；本报告一律以 2025-05 为准，不沿用该笔误。",
+    "AI 方向转型存在叙述张力：2026-03 的 AI 扫描框架文章呈现为方法转型的标志性节点，但作者存档页显示 2026-01 已有 AI triage 文章，而 2025-05 仍发布传统 MTE 绕过研究；因此\"转型\"更准确为 2025 全年以传统 VR 为主、2026 年初切入 AI 方向的渐进过程，而非一次性切换（mym-decisions-07、mymo-conv-05）。",
+    "作者自述的产出数字（Taskflow Agent 发现约 30 个真实漏洞、扫描框架报告 80+ 漏洞、研究者仍逐一复核）均来自作者正文（mym-pubtech-12、mymo-conv-05），未经独立核验；作为能力证据时需保留这一不确定度。",
+    "会议演讲事实（Black Hat US、POC）由 person_json 标注，但本轮未取得可抓取的 speaker 页面正文（Black Hat 返回 403、POC 未连通），无法核证为 documented；该缺口使\"公开输出—同行反馈\"环节在社区维度上缺少一手支撑。",
+    "二手搜索摘要称 Man Yue Mo 有 Tencent Xuanwu Lab / Keen Lab 背景及 Pwn2Own 经历，但所有抓取到的 github.blog 正文署名一致为 GitHub Security Lab，二者无法在缺乏一手来源的情况下调和，按未核验处理，不采信为事实。",
+    "安全lab.github.com/team/ 成员名单未收录 Man Yue Mo，而 github.blog/author/mymo/ 仍以 @m-y-mo 持续发布其文章；其与 GitHub Security Lab 的正式关系（在职/前成员/外部合作者）未确认，机构归属存在材料缺口（mym-ext-03）。"
+  ],
+  "transferable_practices": [
+    "以既有公开漏洞的根因分析为起点，审查代码中对同一资源生命周期的隐含假设，再搜索隐式承继该假设的其它路径，作为发现变体的可推广方法（mym-pubtech-05、mym-tl-17）。",
+    "以补丁差异比对厂商发布与既有补丁，发现遗漏或不完整修复（R1-tl-16-pwning-pixel6）。",
+    "把单次利用中得手的技术抽象为可在新设备、新缓解下重新组装的底层原语，并显式自引以维持技术线连续性（PGD-reuse 跨 2022/2024/2025 复用，mym-pubtech-03/08/11）。",
+    "把运行时异常与静态审计作为双输入，降低单一通道盲区（mym-pubtech-01、mym-pubtech-04）。",
+    "把手工 triage 经验编码为可复用工具并开源，将重复性初筛交由工具、人力集中于人工核验（mym-pubtech-12、mymo-conv-05）。",
+    "在 writeup 中完整记录工具与方法的局限（如误报需人工筛选），而非仅展示成果（mymo-conv-05）。"
+  ],
+  "non_transferable_conditions": [
+    "Pixel 6、Pixel 8 等特定设备及其 Mali 驱动版本（r40p0、r42p0、r54p0）的可获得性，是相关 Mali 利用与 patch-diff 分析的物质前提，非研究方法本身可替代（R1-tl-16-pwning-pixel6、mym-pubtech-08、mym-pubtech-11）。",
+    "MTE bypass 依赖 Pixel 8 为当时少数支持 MTE 的设备这一市场条件（mym-decisions-05），设备与缓解的可用性属外部条件而非个人能力。",
+    "AI 工具转向与同事 Peter Stöckli 的合著协作及 GitHub Security Lab 的机构资源相关（mym-ext-02、mym-pubtech-12），团队协作与机构资源为个人难以复制的条件。",
+    "上游新组件（Maglev 默认启用、Mali CSF）的引入时机由厂商发布决定，研究者对切入时机的把握部分依赖发布可见性而非纯个人能力（mym-pubtech-07、mym-pubtech-11）。",
+    "本归纳受单一公开平台（github.blog/author/mymo/）可见性限制：X 账号、会议 speaker 页面、邮件列表与代码仓库均未取得一手抓取，能力归纳存在幸存者偏差。"
+  ],
+  "open_questions": [
+    "六维证据 mym-tl-23 的 claim 字段\"Android 2023-05\"年份笔误已在定向补证 R1-tl-23-verify 中校正为 2025-05，但该笔误是否在六维其它引用处扩散需后续复核。",
+    "作者 POC2022 关于预测 V8 对象地址的工作被 mym-pubtech-07 自引，但本轮未抓取 POC2022 演讲材料，该演讲内容、日期与具体方法缺证。",
+    "CVE-2024-3833（mym-pubtech-09）与 CVE-2024-5830（mym-pubtech-10）两篇 V8 writeup 正文本轮未抓取，其技术细节与发现方法学缺证，仅作者页 lead_only 线索。",
+    "Taskflow Agent \"自 2025-08 起处理大量告警并发现约 30 个真实漏洞\"与扫描框架\"报告 80+ 漏洞\"均为作者自述（mym-pubtech-12、mymo-conv-05），未经独立核验，实际成效存疑。",
+    "Black Hat US 2019《The Dragonfly Attack》与 POC 演讲事实未由可抓取 speaker 页面核证（mym-ext-04 为 lead_only），会议展示环节缺一手支撑。",
+    "Man Yue Mo 与 GitHub Security Lab 的正式关系（在职/前成员/外部合作者）未确认（mym-ext-03），机构归属存在材料缺口。",
+    "作者 2020-04 之前的背景（教育、早期工作、加入 GitHub Security Lab 时间）无公开一手来源覆盖，早期成长轨迹缺证。",
+    "导师/同伴关系网未核实：Jann Horn、Brandon Azad、Samuel Groß 等在 writeup 中作为技术参考被引用，但无直接合作或指导证据；Peter Stöckli 为 2026 年两篇合著者，是本轮唯一可证的直接合作者。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790447329085376000-man-yue-mo-synthesis-v2.json",
+    "resume_response_paths": [
+      "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790447536155746000-man-yue-mo-synthesis-v2-resume-1.json"
+    ],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "5b02fa71-7004-49fc-96b0-88cd4bce539e",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_udk4lnicpp35nzcani8ph4ka",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-26T18:32:16.165406+00:00"
+      },
+      {
+        "tool_use_id": "call_hspuzkobvhvt7d4yiujazn44",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-26T18:32:16.165454+00:00"
+      },
+      {
+        "tool_use_id": "call_6ud23pcdbql7ns67vmlm9ob0",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "73e97913e9f27874812a0ec7d0b71fb9eb2aebdf7fdc115c37c53e6028d30bcb",
+        "accessed_at": "2026-09-26T18:32:16.165469+00:00"
+      },
+      {
+        "tool_use_id": "call_20djvgsunqlidsagsfyudr91",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "b0f6108c039eb8c7d05eb660d9e5fddd704d765aa827ad77f35d908bcf61ab96",
+        "accessed_at": "2026-09-26T18:32:16.165491+00:00"
+      },
+      {
+        "tool_use_id": "call_we8wpdckpg84zq05g25kwlq0",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "dc2e5f20c487d24fed76f396beaba461969088576280279d98ed3a80c4e607e1",
+        "accessed_at": "2026-09-26T18:32:16.165615+00:00"
+      },
+      {
+        "tool_use_id": "call_l4h2vmi2sixm5d4ca8qfgsjc",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "a99844dd740df473edb6ce555701e599a2b01f4c628b05a4a04ba7ba3a979ef0",
+        "accessed_at": "2026-09-26T18:32:16.165730+00:00"
+      },
+      {
+        "tool_use_id": "call_hj0hsjnhemnblvtz7gn16pkl",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411/inputs/evidence_json.json",
+          "offset": 965,
+          "limit": 600
+        },
+        "success": true,
+        "content_sha256": "b9fffbd6d2e51a2ceeb6d7353c91d092401be3deef0e0e4731ff08083915386d",
+        "accessed_at": "2026-09-26T18:32:16.165796+00:00"
+      },
+      {
+        "tool_use_id": "call_88mzb7vmepmblelgzlblhwjc",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411/checkpoint.md",
+          "content": "# Checkpoint — Man Yue Mo 综合分析（synthesis v2）\n\n## 任务状态\n- 已读 CLAUDE.md、task.md、output.schema.json、person_json.json、evidence_json.json（六维全量 1485 行）。\n- 已读 revision_context.json（round 1，11 条 actions + 4 条 new_evidence + synthesis_instructions）。\n- 角色为综合分析师，重建领域能力成长过程，输出 stages/mechanisms/tensions/transferable/non-transferable/open_questions。\n\n## 有效证据基线（verified_in_run=true 且 level≠lead_only）\n- timeline primary/documented：mym-tl-01（2020-04-28 Chrome GC/UAF）、mym-tl-06（2021-03-24 利用链总览）、mym-tl-17（2023-05-25 root cause 变体）、mym-tl-23（2025-05-23 MTE bypass，claim 含 2023-05 笔误，实际 2025-05）。\n- timeline authoritative_secondary/reported：mym-tl-02/03/04/05/07/08/09/10/11/12/13/14/15/16/18/19/20/21/22/24/25。\n- pubtech primary/documented：mym-pubtech-01/02/03/04/05/06/07/08/11/12（01 NPU、02 SuperIC、03 PGD-reuse、04 Adreno、05 root-cause 变体、06 TurboFan StackCheck、07 Maglev、08 MTE-Pixel8、11 MTE-CVE-2025-0072、12 Taskflow Agent）。\n- pubtech unknown（不可用）：mym-pubtech-09/10/13（正文本轮未抓取）。\n- conversations primary/documented：mymo-conv-01..05（01 trial-and-error、02 复用前作、03 Won't fix 转上游、04 可靠性偏好、05 AI 转向）。\n- decisions primary/documented：mym-decisions-01/02/04/05/06；reported：mym-decisions-03/07。\n- community documented：mymo-community-writeup-output-2020-2026、mymo-community-p0-variant-feedback-2023。\n- external documented/inferred：mym-ext-01/02/03；lead_only：mym-ext-04（Black Hat 2019 未核证）。\n- targeted（R1-）全 primary/documented：R1-tl-23-verify、R1-tl-16-pwning-pixel6、R1-itw-cve2021-30632、R1-itw-cve2021-37975。\n\n## 不可用证据（禁用）\n- mym-pubtech-09/10/13（unknown，正文未抓取）。\n- mymo-conv-06/07（unknown，长访谈/二手摘要缺证）。\n- mymo-community-intwilde-analysis-2021（lead_only/unverified）—— 由 R1-itw-cve2021-30632/37975 替代。\n- mymo-community-conference-presence（lead_only，日期 YYYY）。\n\n## 成长阶段划分（6 个 stage）\n- stage 0：2020-04 ~ 2021-03，Chrome GC/UAF 起点与利用链组装。\n- stage 1：2021-03 ~ 2021-11，移动内核协处理器驱动扩展 + 在野 0-day 复盘。\n- stage 2：2022-06 ~ 2023-04，可复用原语（PGD-reuse、AIO/SLUB）与内核缓解对抗。\n- stage 3：2023-05 ~ 2024-03，root cause → 变体方法论 + V8 JIT 新层跟踪 + 首次 MTE bypass。\n- stage 4：2024-06 ~ 2025-05，V8 对象模型持续产出 + 第二次 MTE bypass 迭代。\n- stage 5：2026-01 ~ 2026-03，向 AI 辅助研究工具建设转向。\n\n## 主机制划分（5 个 mechanism）\n- m0：以既有公开漏洞根因为起点、搜索同假设变体（root cause → variant）。\n- m1：把已得手的利用技术沉淀为可复用原语并跨年自引（PGD-reuse、AIO/SLUB、JIT spraying、对象地址预测）。\n- m2：追踪上游新组件/新特性如何打破既有安全假设并作为新攻击面（concurrent compilation、Maglev、MTE、CSF queue）。\n- m3：把运行时异常与\"意外数据\"作为审计补充输入（NPU info leak、Adreno 陈旧内存）。\n- m4：将手工 triage 经验编码为可复用 AI 工具并开源（Taskflow Agent）。\n\n## 待办\n- 写 output.json：严格按 schema 字段；执行 RV1-10 全部改写指令；标注 mym-tl-23 年份笔误与 R1 替代；标注作者自述（约 30 个、逐一复核）；补幸存者偏差与组织声誉/自引替代解释。\n- 语言规范逐字段检查：无\"回吐\"\"工具化\"\"外化\"\"从零构造\"\"快速跟进\"\"诚实/坦率记录\"；\"障碍赛\"标注为标题指代；引文标注为引文。\n"
+        },
+        "success": true,
+        "content_sha256": "d8365ff5ba195cb233da4186f23d1d48b92f10191aa2dc6492716b12bd3a21a5",
+        "accessed_at": "2026-09-26T18:32:16.165807+00:00"
+      },
+      {
+        "tool_use_id": "call_h9bsngdjgrgarkzl5kcc2jem",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411/checkpoint.md"
+        },
+        "success": true,
+        "content_sha256": "cb1dae238e82633223ba7bc53d5318b47c582b9cfdd553579130cafa2a577274",
+        "accessed_at": "2026-09-26T18:32:16.165822+00:00"
+      },
+      {
+        "tool_use_id": "call_tswqz4t2z9u97v17cgfvt21l",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/man-yue-mo-synthesis-v2-20260927-021732-411/output.json",
+          "content": "{\n  \"person\": \"Man Yue Mo\",\n  \"expertise\": [\n    \"浏览器引擎（Chrome/V8）内存模型与利用：包括 use-after-free 触发、SuperIC 类型混淆、JIT 侧效应建模、对象 transition/属性层破坏，及渲染器沙箱内 RCE 与沙箱逃逸\",\n    \"Android/Linux 内核利用：Qualcomm GPU/NPU 驱动、Arm Mali GPU 驱动、Adreno/KGSL，以多漏洞组合达成内核任意代码执行、root 与关闭 SELinux\",\n    \"内核缓解机制对抗：系统梳理 Samsung KNOX RKP/JOPP/KDP、KASLR、CONFIG_INIT_STACK_ALL、CFI、MTE 等 Android 内核缓解的覆盖差异，并以逻辑缺陷绕过 MTE\",\n    \"以根因分析驱动变体发现，以及补丁差异（patch-diff）分析发现遗漏补丁\",\n    \"把已得手利用技术沉淀为可复用原语（释放页重用作 GPU 页表全局目录、AIO 与 SLUB 分配器操控、JIT spraying）并跨年自引\",\n    \"追踪上游新组件/新特性（concurrent compilation、Maglev、MTE、Mali CSF）对既有安全假设的打破，作为新攻击面切入\",\n    \"将手工 triage 经验编码为可复用 AI 工具（Taskflow Agent）并开源\",\n    \"需注意：本归纳基于 github.blog/author/mymo/ 作者页及已抓取正文级 writeup；X 账号（@mmxsrup，HTTP 402）、会议 speaker 页面（Black Hat 403、POC 未连通）、邮件列表与代码仓库均未取得一手抓取，能力归纳受单一公开平台可见性限制。GitHub Security Lab 机构品牌可能放大个人能力归因的偏差，下述机制均以作者正文可核验行为为据，而非组织声誉推断。\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2020-04 至 2021-03\",\n      \"stage\": \"Chrome 渲染器 GC/UAF 起点与利用链组装\",\n      \"capability_change\": \"首篇可索引 writeup（mym-tl-01）即把自身工作置于 Project Zero 变体分析谱系内，引用 Sergei Glazunov 以 CodeQL 进行的变体分析与 Maddie Stone 的变体分析演讲作为分析框架；技术积累以浏览器引擎内存模型（以小内存分配在意外位置触发 Chrome 垃圾回收以制造 use-after-free）为起点。2021-03 将 2020 年分散报告的多个 Android/Chrome 漏洞逆向组合为一条完整利用链（mym-decisions-02、mym-tl-06），采用从最终目标倒推到各组件的方法，原文表述为 \\\"worked our way back\\\"（引文），把研究定位为对攻击归因叙事的校正而非单纯利用。\",\n      \"evidence_ids\": [\n        \"mym-tl-01\",\n        \"mym-decisions-01\",\n        \"mym-decisions-02\",\n        \"mym-tl-06\",\n        \"mym-tl-02\",\n        \"mym-tl-03\",\n        \"mym-tl-04\",\n        \"mym-tl-05\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2021-03 至 2021-11\",\n      \"stage\": \"攻击面横向迁移至移动内核协处理器驱动，并以在野 0-day 复盘作为练习\",\n      \"capability_change\": \"研究面从 Chrome 渲染器扩展到 Android 内核协处理器驱动（Qualcomm KGSL、NPU），开始组建跨组件 exploit chain（mym-tl-03/04/05、mym-pubtech-01）。同期连续两篇对据信在野利用的 Chrome 漏洞（CVE-2021-30632、CVE-2021-37975）做根因与利用复盘（R1-itw-cve2021-30632、R1-itw-cve2021-37975），形成以他人 exploit 为材料的反馈与练习行为。作者在 NPU 工作中以第一人称承认审计时漏看了 bug，并以 educated guesses 加 trial and error 描述对未知子系统的方法论探索（mymo-conv-01、mym-pubtech-01）。\",\n      \"evidence_ids\": [\n        \"mym-tl-03\",\n        \"mym-tl-04\",\n        \"mym-tl-05\",\n        \"mym-decisions-03\",\n        \"mym-pubtech-01\",\n        \"mymo-conv-01\",\n        \"mym-tl-07\",\n        \"mym-tl-09\",\n        \"mym-tl-10\",\n        \"R1-itw-cve2021-30632\",\n        \"R1-itw-cve2021-37975\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2022-06 至 2023-04\",\n      \"stage\": \"可复用利用原语的产出与内核缓解对抗的并置\",\n      \"capability_change\": \"首次发表把释放页重用作 GPU 页表全局目录（PGD）以实现任意物理内存访问的技术（mym-pubtech-03、mym-tl-13），原文称其 \\\"does not involve the usual type of memory corruption\\\"（引文），把研究视角从指针级内存破坏转到物理映射层，成为后续多年 Mali 工作的可复用原语。同期把利用与内核缓解机制对抗明确并列：既给出利用（CVE-2022-22057 在 Samsung Z Flip 3 上 root 与关闭 SELinux），也系统梳理缓解机制作为《The Android kernel mitigations obstacle race》（mym-tl-11）的标题指代——\\\"障碍赛\\\"为该来源 writeup 标题的标题指代，非本报告自撰的比喻性归纳。2023-04 以补丁差异发现 Mali 驱动 r40p0 遗漏安全补丁，在 Pixel 6 上实现内核 root（R1-tl-16-pwning-pixel6）。\",\n      \"evidence_ids\": [\n        \"mym-pubtech-03\",\n        \"mym-tl-13\",\n        \"mym-pubtech-04\",\n        \"mym-tl-15\",\n        \"mym-tl-11\",\n        \"mymo-conv-02\",\n        \"mym-tl-14\",\n        \"R1-tl-16-pwning-pixel6\",\n        \"mym-tl-16\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2023-05 至 2024-03\",\n      \"stage\": \"root cause → 变体方法论的显式化与首次 MTE bypass\",\n      \"capability_change\": \"以 Jann Horn 披露的 Arm Mali 漏洞 CVE-2022-36449（Project Zero issue 2327）为起点，通过审查代码对 backing store 生命周期的隐含假设发现 CVE-2022-46395（mym-pubtech-05、mym-tl-17、mym-decisions-04），并把\\\"对既有漏洞做根因分析并据此识别新变体\\\"显式上升为可推广方法论。同期回到 V8 JIT 跨子系统边界（mym-pubtech-02 指出该类缺陷 \\\"could not be found by fuzzing V8 alone\\\"，引文），并跟踪 concurrent compilation 与 Maglev 等新层对安全假设的打破（mym-pubtech-06/07、mym-tl-18/19）。2024-03 在 MTE 启用的 Pixel 8 上以 Arm Mali 逻辑缺陷（CVE-2023-6241）获得内核代码执行并绕过 MTE（mym-pubtech-08、mym-decisions-05、mym-tl-20），把既有 Pixel 6 技术沉淀复用于 Pixel 8。\",\n      \"evidence_ids\": [\n        \"mym-pubtech-05\",\n        \"mym-tl-17\",\n        \"mym-decisions-04\",\n        \"mym-pubtech-02\",\n        \"mym-pubtech-06\",\n        \"mym-pubtech-07\",\n        \"mym-tl-18\",\n        \"mym-tl-19\",\n        \"mym-pubtech-08\",\n        \"mym-decisions-05\",\n        \"mym-tl-20\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2024-06 至 2025-05\",\n      \"stage\": \"V8 对象模型持续产出与第二次 MTE bypass 迭代\",\n      \"capability_change\": \"围绕 V8 对象属性重复与对象 transition 机制继续类型混淆利用，在 Chrome renderer 沙箱内实现 RCE（mym-tl-21/22）。2025-05 发表第二次 MTE bypass（CVE-2025-0072，mym-pubtech-11、mym-tl-23），复用 CVE-2023-6241 与 2022 年《Corrupting memory without memory corruption》的 PGD 重用思路，并显式对比前一次 MTE bypass 的差异（GPU 侧直接访物理内存 vs 用户态页表直接插入页帧）。能力变化为跨三年自我技术沉淀的系统化复用，而非孤立成果。需注意：六维证据 mym-tl-23 的 claim 字段含\\\"Android 2023-05\\\"年份笔误，定向补证 R1-tl-23-verify 正文原文为 \\\"included in Android's May 2025 security update\\\"（引文），实际为 Android 2025-05 安全更新；本报告一律以 2025-05 为准。\",\n      \"evidence_ids\": [\n        \"mym-tl-21\",\n        \"mym-tl-22\",\n        \"mym-pubtech-11\",\n        \"mym-tl-23\",\n        \"R1-tl-23-verify\",\n        \"mymo-conv-03\",\n        \"mymo-conv-04\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2026-01 至 2026-03\",\n      \"stage\": \"向 AI 辅助研究工具建设转向\",\n      \"capability_change\": \"与 Peter Stöckli 合著《AI-supported vulnerability triage with the GitHub Security Lab Taskflow Agent》（mym-pubtech-12、mym-tl-24、mym-decisions-06）与《How to scan for vulnerabilities with GitHub Security Lab's open source AI-powered framework》（mymo-conv-05、mym-tl-25），把手工 triage 经验编码为可复用 AI 工具并开源。据作者自述（mym-pubtech-12 正文，未经独立核验），Taskflow Agent 自 2025-08 起处理大量告警并发现约 30 个真实漏洞，研究者仍逐一复核输出后再报告；该转向为渐进式而非一次性切换——2025-05 仍发布传统 MTE 绕过研究。能力变化为将重复性初筛交由工具、把人力集中于人工核验，研究范围从特定漏洞类型扩展到更通用的扫描框架。\",\n      \"evidence_ids\": [\n        \"mym-pubtech-12\",\n        \"mym-tl-24\",\n        \"mym-decisions-06\",\n        \"mym-decisions-07\",\n        \"mymo-conv-05\",\n        \"mym-tl-25\",\n        \"mym-ext-02\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"以既有公开漏洞根因为起点、搜索同假设变体（root cause → variant）\",\n      \"starting_conditions\": \"2020-04 首篇 writeup 即把自身工作置于 Project Zero 变体分析谱系内（mym-tl-01 引用 Sergei Glazunov 的 CodeQL 变体分析、Maddie Stone 的变体分析演讲）；具备可读到的 Project Zero 公开漏洞报告与 patch-diff 输入。\",\n      \"repeated_practice\": \"以既有公开漏洞（CVE-2022-36449 等）为起点，审查访问内存区 backing store 生命周期的隐含假设，再搜索隐式假设该语义的其它代码路径以发现变体（mym-pubtech-05、mym-tl-17）；以补丁差异比对 Mali r40p0 发布与既有补丁发现遗漏修复（R1-tl-16-pwning-pixel6、mym-tl-16）；对在野 0-day 做根因与利用复盘作为同源练习（R1-itw-cve2021-30632、R1-itw-cve2021-37975）。\",\n      \"feedback\": \"新发现以 writeup 形式公开反馈给社区（mymo-community-p0-variant-feedback-2023 描述的\\\"阅读公开研究—提取方法—发现 variant—回馈社区\\\"闭环）；作者自述偏好可靠、确定性触发（mymo-conv-04 原文 \\\"I'd like to be able to replace the backing page reliably\\\"，引文），以工程可靠性作为对变体有效性的内部反馈。\",\n      \"intermediate_capability\": \"把单个漏洞抽象为可被搜索的变体模式，形成从个案到方法的能力；能够区分\\\"真正的新根因\\\"与\\\"同假设的变体\\\"。\",\n      \"observed_outcomes\": [\n        \"CVE-2022-46395 作为 Project Zero issue 2327 的变体被定位，2022-11-17 报告 Arm（mym-pubtech-05、mym-tl-17）\",\n        \"以补丁差异发现 Mali 驱动 r40p0 遗漏安全补丁，在 Pixel 6 上实现内核 root（R1-tl-16-pwning-pixel6，primary 级正文支撑）\",\n        \"CVE-2025-0072 作为既有 GHSL-2023-005 类思路的变体（把 IOCTL_MEM_COMMIT 收缩改为 GPU page fault 扩展）（mym-pubtech-08、mym-pubtech-11）\"\n      ],\n      \"evidence_ids\": [\n        \"mym-tl-01\",\n        \"mym-pubtech-05\",\n        \"mym-tl-17\",\n        \"R1-tl-16-pwning-pixel6\",\n        \"mym-tl-16\",\n        \"R1-itw-cve2021-30632\",\n        \"R1-itw-cve2021-37975\",\n        \"mymo-community-p0-variant-feedback-2023\",\n        \"mymo-conv-04\",\n        \"mym-pubtech-08\",\n        \"mym-pubtech-11\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"变体分析与自引前作在本报告中被归因为研究方法，但同一作者在系列 writeup 中保持叙事连贯也可能是一种写作策略；自引行为不必然等于能力沉淀。本报告以作者跨三年对同一原语（PGD 重用、AIO/SLUB）在不同漏洞中的可核验复用作为区分依据，而非单凭自引文本。\"\n    },\n    {\n      \"name\": \"把已得手利用技术沉淀为可复用原语并跨年自引\",\n      \"starting_conditions\": \"2022-07 首次发表把释放页重用作 GPU 页表全局目录以实现任意物理内存访问的技术（mym-pubtech-03、mym-tl-13）；具备 Arm Mali ioctl 与 kbase_mem_pool 分层池机制的内核代码理解基础。\",\n      \"repeated_practice\": \"把 PGD-reuse、AIO 与 SLUB 分配器操控、JIT spraying 等技术明确作为后续研究的可复用构件：2022《Corrupting memory without memory corruption》产出 PGD-reuse，2023《The code that wasn't there》产出 AIO GFP_HIGHUSER 页重用，2023-05《Rooting with root cause》自引这两项作为可复用原语（mym-pubtech-04、mym-pubtech-05），2024 与 2025 两次 MTE bypass 均复用 PGD 重用思路（mym-pubtech-08、mym-pubtech-11）。\",\n      \"feedback\": \"后续 writeup 显式自引前作并对比技术差异（如 2025-05 对比 GPU 侧直接访物理内存与用户态页表插入页帧两种 MTE bypass 路径），以\\\"前作能否在新缓解下复用\\\"作为对该原语稳健性的反馈。\",\n      \"intermediate_capability\": \"形成可复用知识体系：把单次利用经验抽象为可在新设备、新缓解下重新组装的底层原语，而非每次从基础重新构建利用链。\",\n      \"observed_outcomes\": [\n        \"PGD-reuse 原语跨 2022、2024、2025 三年被自引复用于 Mali 利用（mym-pubtech-03、mym-pubtech-08、mym-pubtech-11）\",\n        \"2024-03 复用 Pixel 6 技术沉淀于 Pixel 8 实现 MTE bypass（mym-decisions-05、mym-pubtech-08）\",\n        \"JIT spraying 被用于绕过 V8 heap sandbox（mym-pubtech-06、mym-pubtech-07）\"\n      ],\n      \"evidence_ids\": [\n        \"mym-pubtech-03\",\n        \"mym-tl-13\",\n        \"mym-pubtech-04\",\n        \"mym-pubtech-05\",\n        \"mym-pubtech-08\",\n        \"mym-pubtech-11\",\n        \"mym-pubtech-06\",\n        \"mym-pubtech-07\",\n        \"mym-decisions-05\",\n        \"mymo-conv-02\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"自引前作可能部分源于同一作者在系列 writeup 中保持叙事连贯的写作策略，而非能力沉淀；但跨设备（Pixel 6 → Pixel 8）、跨缓解（无 MTE → MTE）的实际复用结果提供了写作策略之外的独立支撑。\"\n    },\n    {\n      \"name\": \"追踪上游新组件/新特性如何打破既有安全假设并作为新攻击面\",\n      \"starting_conditions\": \"2022-06 V8 SuperIC 工作指出该类缺陷 \\\"could not be found by fuzzing V8 alone\\\"（mym-pubtech-02，引文），确立跨子系统边界审计取向；具备 V8↔Blink 跨子系统代码阅读基础。\",\n      \"repeated_practice\": \"及时跟进上游新引入组件并对\\\"新特性是否破坏先前安全假设\\\"做跟踪复盘：concurrent compilation 使 StackCheck 节点的 side effect 属性失效（mym-pubtech-06 原文 \\\"the side effect property of the StackCheck node has become incorrect due to the introduction of concurrent compilation\\\"，引文）；Maglev（Chrome 114 默认启用）作为新 JIT 层引入未初始化对象问题（mym-pubtech-07 原文 \\\"with different tiers of optimizations in Chrome, the same functionality often needs to be implemented multiple times\\\"，引文）；Mali CSF queue 重绑定打破 queue->phys 不可变假设（mym-pubtech-11）；MTE 作为新缓解被作为正面挑战目标（mym-pubtech-08、mym-decisions-05）。\",\n      \"feedback\": \"上游 patch-diff 与 changelog 作为\\\"何处假设被改写\\\"的输入；新组件的引入时点（如 Maglev 默认启用）作为切入时机的反馈。\",\n      \"intermediate_capability\": \"形成对新组件/新特性打破既有安全假设的预判能力，把\\\"新层重复实现易丢失安全检查\\\"归纳为可复用 bug 模式。\",\n      \"observed_outcomes\": [\n        \"CVE-2023-3420 TurboFan StackCheck 侧效应建模错误（mym-pubtech-06）\",\n        \"CVE-2023-4069 Maglev 未初始化对象（mym-pubtech-07，该篇另自引 POC2022 关于预测 V8 对象地址的工作，属自引前作而非原语生产）\",\n        \"MTE 作为新缓解被两次正面绕过（mym-pubtech-08、mym-pubtech-11）\",\n        \"作者对攻击面趋势的公开预判：原文 \\\"I expect coprocessors and their kernel drivers to continue to be a powerful attack surface\\\"（mym-decisions-05，引文）\"\n      ],\n      \"evidence_ids\": [\n        \"mym-pubtech-02\",\n        \"mym-pubtech-06\",\n        \"mym-pubtech-07\",\n        \"mym-tl-18\",\n        \"mym-tl-19\",\n        \"mym-pubtech-08\",\n        \"mym-pubtech-11\",\n        \"mym-decisions-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"新组件跟踪可能与上游发布节奏的可见性强相关（Maglev 默认启用、Pixel 8 支持 MTE 均为公开事件），机会窗口的把握部分依赖平台可用性与发布时机，而非纯个人能力。\"\n    },\n    {\n      \"name\": \"把运行时异常与意外数据作为审计的补充输入\",\n      \"starting_conditions\": \"2021-11 NPU 工作中作者以第一人称承认审计时漏看了 bug，并以 educated guesses 加 trial and error 描述对未知子系统的方法论探索（mymo-conv-01、mym-pubtech-01 原文 \\\"I missed the bug completely when I audited the code\\\"，引文）；运行时数据异常先于静态审计触发发现。\",\n      \"repeated_practice\": \"把运行时反常作为追查入口：NPU 工作中 info leak 在审计时被漏掉，由运行时数据异常触发（mym-pubtech-01）；2023-02 Adreno/KGSL 工作发现路径为调试异常——GPU 命令日志出现未发送的 opcode，经 usleep 延迟线索进入追查（mym-pubtech-04 原文 \\\"The fact that an opcode that is not in the command buffer appears in the kernel log seems to indicate that the GPU is seeing something that I don't see\\\"，引文）。\",\n      \"feedback\": \"运行时数据与静态审计之间的差异本身作为反馈：审计盲点由运行时异常暴露后，作者以复盘形式公开记录盲点（\\\"missed the bug completely\\\"）。\",\n      \"intermediate_capability\": \"形成\\\"静态审计 + 运行时异常\\\"双输入的审计习惯，降低单一通道盲区。\",\n      \"observed_outcomes\": [\n        \"CVE-2021-1940/1968/1969 NPU 三缺陷经运行时异常补漏发现（mym-pubtech-01）\",\n        \"CVE-2022-25664 Adreno/KGSL 经调试异常发现 GPU 读取陈旧物理内存（mym-pubtech-04）\"\n      ],\n      \"evidence_ids\": [\n        \"mym-pubtech-01\",\n        \"mym-pubtech-04\",\n        \"mymo-conv-01\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"运行时异常的捕获依赖具体设备的调试可访问性与偶然性（Adreno 工作自称进入\\\"rabbit hole\\\"），不完全是可稳定复现的方法；样本量集中于两篇 writeup，重复性证据偏弱。\"\n    },\n    {\n      \"name\": \"将手工 triage 经验编码为可复用 AI 工具并开源\",\n      \"starting_conditions\": \"多年 writeup 中积累的伪阳性判别模式（特权上下文检查、不可达 source、自定义 sanitize 等）此前仅以人工经验形式存在；2026 年起与同事 Peter Stöckli（GitHub Security Lab 成员，mym-ext-02 团队页可证）进入协作模式。\",\n      \"repeated_practice\": \"把手工 triage 经验编码为 YAML 定义的 taskflow 规则交由 LLM 执行，对 CodeQL 告警进行分流、去伪与生成 GitHub Issue；据作者自述（mym-pubtech-12 正文，未经独立核验），taskflow 规则原文 \\\"chosen based on our own experience of triaging these types of alerts\\\"（引文），研究者仍逐一复核输出后再报告；随后把框架从分诊推进到扫描发现阶段并开源（mymo-conv-05、mym-tl-25）。\",\n      \"feedback\": \"以 writeup 形式公开反馈工具效果与局限：据作者自述（mym-pubtech-12 正文，未经独立核验），自 2025-08 起处理大量告警并发现约 30 个真实漏洞；作者完整记录误报需人工筛选的局限（mymo-conv-05 原文 \\\"Would it become too conservative\\\"，引文）。\",\n      \"intermediate_capability\": \"把个人 triage 经验转化为可复用知识体系与可协作的工具产物，研究范围从特定漏洞类型扩展到更通用的扫描框架。\",\n      \"observed_outcomes\": [\n        \"2026-01《AI-supported vulnerability triage with the GitHub Security Lab Taskflow Agent》发表（mym-pubtech-12、mym-tl-24）\",\n        \"2026-03《How to scan for vulnerabilities with GitHub Security Lab's open source AI-powered framework》开源框架发表（mym-tl-25、mymo-conv-05）\",\n        \"据作者自述（未经独立核验），在电商 cart 逻辑与 Rocket.Chat 中发现系统性问题并报告 80+ 漏洞（mymo-conv-05）\"\n      ],\n      \"evidence_ids\": [\n        \"mym-pubtech-12\",\n        \"mym-tl-24\",\n        \"mym-tl-25\",\n        \"mym-decisions-06\",\n        \"mym-decisions-07\",\n        \"mymo-conv-05\",\n        \"mym-ext-02\"\n      ],\n      \"validation_tests\": [\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"AI 工具转向的时间点（2026-01 起）与 LLM 工具化行业趋势高度重合，可能部分受平台/机构资源与同行协作（Stöckli 合著）驱动，而非纯个人能力延伸；\\\"约 30 个真实漏洞\\\"与\\\"80+ 漏洞\\\"均为作者自述，未经独立核验。\"\n    }\n  ],\n  \"tensions\": [\n    \"六维证据 mym-tl-23 的 claim 字段含\\\"Android 2023-05\\\"年份笔误，定向补证 R1-tl-23-verify 正文原文为 \\\"included in Android's May 2025 security update\\\"（引文），实际为 Android 2025-05 安全更新；本报告一律以 2025-05 为准，不沿用该笔误。\",\n    \"AI 方向转型存在叙述张力：2026-03 的 AI 扫描框架文章呈现为方法转型的标志性节点，但作者存档页显示 2026-01 已有 AI triage 文章，而 2025-05 仍发布传统 MTE 绕过研究；因此\\\"转型\\\"更准确为 2025 全年以传统 VR 为主、2026 年初切入 AI 方向的渐进过程，而非一次性切换（mym-decisions-07、mymo-conv-05）。\",\n    \"作者自述的产出数字（Taskflow Agent 发现约 30 个真实漏洞、扫描框架报告 80+ 漏洞、研究者仍逐一复核）均来自作者正文（mym-pubtech-12、mymo-conv-05），未经独立核验；作为能力证据时需保留这一不确定度。\",\n    \"会议演讲事实（Black Hat US、POC）由 person_json 标注，但本轮未取得可抓取的 speaker 页面正文（Black Hat 返回 403、POC 未连通），无法核证为 documented；该缺口使\\\"公开输出—同行反馈\\\"环节在社区维度上缺少一手支撑。\",\n    \"二手搜索摘要称 Man Yue Mo 有 Tencent Xuanwu Lab / Keen Lab 背景及 Pwn2Own 经历，但所有抓取到的 github.blog 正文署名一致为 GitHub Security Lab，二者无法在缺乏一手来源的情况下调和，按未核验处理，不采信为事实。\",\n    \"安全lab.github.com/team/ 成员名单未收录 Man Yue Mo，而 github.blog/author/mymo/ 仍以 @m-y-mo 持续发布其文章；其与 GitHub Security Lab 的正式关系（在职/前成员/外部合作者）未确认，机构归属存在材料缺口（mym-ext-03）。\"\n  ],\n  \"transferable_practices\": [\n    \"以既有公开漏洞的根因分析为起点，审查代码中对同一资源生命周期的隐含假设，再搜索隐式承继该假设的其它路径，作为发现变体的可推广方法（mym-pubtech-05、mym-tl-17）。\",\n    \"以补丁差异比对厂商发布与既有补丁，发现遗漏或不完整修复（R1-tl-16-pwning-pixel6）。\",\n    \"把单次利用中得手的技术抽象为可在新设备、新缓解下重新组装的底层原语，并显式自引以维持技术线连续性（PGD-reuse 跨 2022/2024/2025 复用，mym-pubtech-03/08/11）。\",\n    \"把运行时异常与静态审计作为双输入，降低单一通道盲区（mym-pubtech-01、mym-pubtech-04）。\",\n    \"把手工 triage 经验编码为可复用工具并开源，将重复性初筛交由工具、人力集中于人工核验（mym-pubtech-12、mymo-conv-05）。\",\n    \"在 writeup 中完整记录工具与方法的局限（如误报需人工筛选），而非仅展示成果（mymo-conv-05）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Pixel 6、Pixel 8 等特定设备及其 Mali 驱动版本（r40p0、r42p0、r54p0）的可获得性，是相关 Mali 利用与 patch-diff 分析的物质前提，非研究方法本身可替代（R1-tl-16-pwning-pixel6、mym-pubtech-08、mym-pubtech-11）。\",\n    \"MTE bypass 依赖 Pixel 8 为当时少数支持 MTE 的设备这一市场条件（mym-decisions-05），设备与缓解的可用性属外部条件而非个人能力。\",\n    \"AI 工具转向与同事 Peter Stöckli 的合著协作及 GitHub Security Lab 的机构资源相关（mym-ext-02、mym-pubtech-12），团队协作与机构资源为个人难以复制的条件。\",\n    \"上游新组件（Maglev 默认启用、Mali CSF）的引入时机由厂商发布决定，研究者对切入时机的把握部分依赖发布可见性而非纯个人能力（mym-pubtech-07、mym-pubtech-11）。\",\n    \"本归纳受单一公开平台（github.blog/author/mymo/）可见性限制：X 账号、会议 speaker 页面、邮件列表与代码仓库均未取得一手抓取，能力归纳存在幸存者偏差。\"\n  ],\n  \"open_questions\": [\n    \"六维证据 mym-tl-23 的 claim 字段\\\"Android 2023-05\\\"年份笔误已在定向补证 R1-tl-23-verify 中校正为 2025-05，但该笔误是否在六维其它引用处扩散需后续复核。\",\n    \"作者 POC2022 关于预测 V8 对象地址的工作被 mym-pubtech-07 自引，但本轮未抓取 POC2022 演讲材料，该演讲内容、日期与具体方法缺证。\",\n    \"CVE-2024-3833（mym-pubtech-09）与 CVE-2024-5830（mym-pubtech-10）两篇 V8 writeup 正文本轮未抓取，其技术细节与发现方法学缺证，仅作者页 lead_only 线索。\",\n    \"Taskflow Agent \\\"自 2025-08 起处理大量告警并发现约 30 个真实漏洞\\\"与扫描框架\\\"报告 80+ 漏洞\\\"均为作者自述（mym-pubtech-12、mymo-conv-05），未经独立核验，实际成效存疑。\",\n    \"Black Hat US 2019《The Dragonfly Attack》与 POC 演讲事实未由可抓取 speaker 页面核证（mym-ext-04 为 lead_only），会议展示环节缺一手支撑。\",\n    \"Man Yue Mo 与 GitHub Security Lab 的正式关系（在职/前成员/外部合作者）未确认（mym-ext-03），机构归属存在材料缺口。\",\n    \"作者 2020-04 之前的背景（教育、早期工作、加入 GitHub Security Lab 时间）无公开一手来源覆盖，早期成长轨迹缺证。\",\n    \"导师/同伴关系网未核实：Jann Horn、Brandon Azad、Samuel Groß 等在 writeup 中作为技术参考被引用，但无直接合作或指导证据；Peter Stöckli 为 2026 年两篇合著者，是本轮唯一可证的直接合作者。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "a42ff665aa9a186934bbd19dfb078720fe5c63f3e69a8036db72e09b1e0d7c4c",
+        "accessed_at": "2026-09-26T18:32:16.165832+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790447536166003000-man-yue-mo-synthesis-v2.json",
+    "label": "Man Yue Mo:synthesis:v2",
+    "elapsed_seconds": 382.44,
+    "prompt_sha256": "d6893cf664aee9b7c4dc567472661f5b9e8ba4cc2ca2faa569fa2e0abc5f1416",
+    "num_turns": 12,
+    "total_cost_usd": 0.839026,
+    "usage": {
+      "input_tokens": 9450,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 200896,
+      "output_tokens": 10982,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 9450,
+        "outputTokens": 10982,
+        "cacheReadInputTokens": 200896,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.42224800000000007,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

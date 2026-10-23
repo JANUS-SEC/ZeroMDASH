@@ -1,0 +1,366 @@
+{
+  "person": "Pan Zhenpeng",
+  "expertise": [
+    "Apple 内核与移动端漏洞研究（macOS/iOS 内核、IOKit 驱动、XNU）",
+    "Apple 驱动/内核 fuzzing 与利用（hybrid fuzzing、自研 fuzzer KidFuzzer/KidFuzzerV2.0、Backward Fuzzing）",
+    "Apple 平台漏洞根因分析与公开 writeup（类型大小不匹配、未初始化内存、空指针解引用）",
+    "Android/Qualcomm 移动端利用（GPUAF 通用 GPU 利用技术、Pixel 8）",
+    "移动 DSP 协处理器利用与 MTE 等防御机制绕过（Pixel 8 DSP、Samsung Exynos Coprocessor）",
+    "AI 辅助 exploit 开发（CODE BLUE 2025 'AI Accelerated Exploiting'）",
+    "内核扩展代码审计（macOS EndpointSecurity.kext）",
+    "CTF 二进制利用训练（Pwnable.tm）",
+    "漏洞披露流程与厂商交互（Apple 产品安全团队报告与被拒后公开披露）"
+  ],
+  "stages": [
+    {
+      "period": "2016–2018",
+      "stage": "高校社团与 CTF 起步期：pwn 基础训练",
+      "capability_change": "据本人 GitHub README 与 decisions 维度，2017-04 起在中南民族大学（SCUEC）Newthread Geek Group 参与 iOS/Python/Linux/CTF/ACM 活动，研究起点为 CTF 与 pwn 而非直接进入 Apple 内核研究；2016 年起在 SCUEC 攻读计算机科学学士学位（至 2020 年）。同期博客 2019-06 Pwnable.tm 题解 writeup（该 writeup 本身 verified_in_run=false，作为 lead_only 不单独采信，但与 GitHub README 的社团 CTF 活动自述一致）印证此阶段处于 CTF/pwn 重复练习阶段。该阶段可核验的产出为 pwn 基础与方法训练，为后续转向系统级漏洞研究提供前提，而非 Apple 内核方向本身。",
+      "evidence_ids": [
+        "pz-tl-01-education",
+        "pz-tl-02-internship",
+        "pz-community-008",
+        "pan-dec-01"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2018-07–2020-06",
+      "stage": "Qihoo 360 Nirvan Team 实习：macOS/XNU 方向起点与单点 PoC 阶段",
+      "capability_change": "2018-07 至 2019-10 在奇虎 360 Nirvan Team（北京）任 macOS Security Researcher 实习，首次将研究目标固定在 macOS/XNU 方向。可核验产出包括维护 macOS 旧版本 exploit 仓库（PegasusZero：exploit on macOS 10.11.x；L1br4：exp on 10.13；均为 C 语言、标签 poc/vulnerabilities/cve）、darwin-xnu 源码仓库与 MOXil_learning 内核学习仓库；以及 CVE-2019-8540 writeup（分析 Apple IOKit exportObjectToClient 因 io_object_t 8 字节强转为 mach_port_name_t 4 字节导致高 4 字节未初始化、泄露内核栈内存，影响 macOS ≤10.14.3 与 iOS <12.2，附 poc.c，仓库自 maldiohead/CVE-2019-8540 fork 且在其上有 12 个 commit）。同期博客并行维护 iOS12.2 越狱分析、Chrome/V8 引擎分析等 writeup。此阶段以单点、已分配 CVE 的 PoC 与 writeup 为主，方法上以手工审计与复现为主，尚未进入自建 fuzzer 的工具化阶段。（注：PegasusZero/L1br4/darwin-xnu 等仓库的创建与首次提交日期未能抓取，时间无法精确定位，仅作为方向与方法的物质留存。）",
+      "evidence_ids": [
+        "pan-dec-02",
+        "pz-tl-02-internship",
+        "pz-community-009",
+        "PZ-WORK-02",
+        "PZ-WORK-07",
+        "pz-tl-09-repos-macos-exploit",
+        "PZ-WORK-04",
+        "PZ-WORK-05"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2020-07–2022-06",
+      "stage": "Alibaba Pandora Lab 全职期：从内核扩展审计到 Apple 驱动方法论提炼与首次会议演讲",
+      "capability_change": "2020-07 至 2022-06 在阿里巴巴安全 Pandora Lab（杭州）任 Senior Security Engineer。此阶段方法从内核扩展代码审计起步：2020-02-20 通过审计 macOS 10.15.x EndpointSecurity.kext 的 newUserClient 逻辑缺陷（type 非 0/1 时返回 KERN_SUCCESS 但不创建 client，致空指针解引用 panic）发现 local DOS 并向 Apple 报告，被 Apple 产品安全团队判定非安全问题后选择公开披露。其后在 Zer0Con 发表演讲 'Three Layers in Apple Driver Bug Hunting: Pwn macOS Big Sur in One Shot'，首次将 Apple 驱动漏洞挖掘抽象为三层方法论并对外输出。此阶段可核验产出为内核扩展审计 PoC + 被拒后公开披露事件 + 首场国际会议演讲，标志方法从单点 PoC 转向可命名的挖掘方法论。（补注：Zer0Con 演讲年份存在冲突——zer0con.org/archive/2021.html 页面品牌标记为 Zer0Con2021，但 schedule 段标 'Schedule of Zer0Con2022' 并列 April 8–9 2022，Pan 被排定于 2022-04-08 11:20–12:30；OffensiveCon 2023 bio 亦以 'Zer0Con2021' 品牌名指代；确切年份未完全确定，但落在阿里期内 2020-07–2022-06。另注：README 自述 2021 年晋升 P6，据本人 README 自述，无阿里官方或第三方来源佐证，不得读为外部组织定级。）",
+      "evidence_ids": [
+        "pan-dec-03",
+        "pan-dec-04",
+        "pan-dec-05",
+        "pz-tl-04-alibaba-pandora",
+        "pz-tl-05-zer0con-talk",
+        "pz-community-002",
+        "PZ-WORK-06",
+        "PZ-R1-003",
+        "pan-ext-006",
+        "pan-conv-06"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2022-07–2023",
+      "stage": "STAR Labs SG 起步与 KidFuzzerV2.0 工具化输出期",
+      "capability_change": "2022-07 起加入新加坡 STAR Labs SG 任 Mobile Security Researcher（现为 Principal Vulnerability Researcher，据团队页；头衔升迁时间未标注，列为张力）。此阶段研究方法从手工审计/hybrid fuzzing 转向自研 fuzzer 的版本化迭代：POC 2022 发表 'The Journey To Hybrid Apple Driver Fuzzing'（coverage-guided 与 generational 结合的混合 fuzzing），OffensiveCon 2023 发表 'Unearthing Vulnerabilities in the Apple Ecosystem: The Art of KidFuzzerV2.0'，将 KidFuzzer 迭代到 V2.0 并引入 Backward Fuzzing，目标覆盖 XNU kernel / Apple Drivers / 协处理器固件（DCP/SEP/AOP）。据 OffensiveCon 2023 演讲摘要自述，发现 50 余个 XNU 内核/Apple 驱动/协处理器固件漏洞并将驱动攻击面扩展约 95%；其中 CVE-2023-28187 与 CVE-2023-28185 报告人由 Apple HT213676 一手公告独立证实为 Pan ZhenPeng (@Peterpan0927) of STAR Labs SG Pte. Ltd.，但 50 余总量与 95% 扩展为讲者自述，未由独立 CVE 清单逐条核验。此阶段可核验能力变化为：研究范式从手工审计转向自建 fuzzing 工具的版本化迭代与会议公开输出。（7 场演讲含 STAR Labs 雇主平台与演讲文化提供的输出渠道，演讲数受组织平台放大，不能直接等价于个人能力提升。）",
+      "evidence_ids": [
+        "pan-dec-06",
+        "pan-dec-07",
+        "pz-tl-07-star-labs-sg",
+        "pz-tl-08-offensivecon-2023-talk",
+        "pz-community-003",
+        "pz-community-004",
+        "pan-conv-01",
+        "pan-ext-002",
+        "pan-ext-004",
+        "PZ-R1-001",
+        "PZ-R1-002"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2024",
+      "stage": "目标平台迁移：从 Apple 内核转向 Android/Qualcomm GPU 利用",
+      "capability_change": "2024 年研究焦点首次由 Apple 内核/驱动 fuzzing 转向 Android/Pixel GPU 攻击面。OB1（Off-By-One）2024 发表 'GPUAF: Using a General GPU Exploit Technique to Attack Pixel 8'，POC 2024 进一步将 GPUAF 扩展到 'Two Ways of Rooting All Qualcomm-based Android Phones'，显示为一次方向迁移而非单次尝试，并通过同一技术主题跨两个会议重复输出以收集不同社区反馈。此阶段能力变化为攻击面从 Apple 平台向移动端 GPU/Qualcomm 扩展，方法从 fuzzing 转向通用利用技术（GPUAF）。（方向迁移的具体决策动因无作者公开陈述，仅能由演讲题目序列推断。）",
+      "evidence_ids": [
+        "pan-dec-08",
+        "pz-community-005"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2025",
+      "stage": "转向 DSP 协处理器利用与 MTE 等防御机制绕过",
+      "capability_change": "2025 年研究目标进一步扩展至移动 DSP 协处理器与 Samsung Exynos，并引入 AI 辅助 exploit 开发。HITCON 2025 发表 'Cracking the Pixel 8: Exploiting the Undocumented DSP to Bypass MTE'，CODE BLUE 2025 发表 'AI Accelerated Exploiting'（用 AI 加速针对 MTE 加固 Pixel 的 exploit 开发，经 DSP 协处理器）与 'Dancing with Exynos Coprocessor'（Samsung）。此阶段能力变化为：研究目标扩展至移动 DSP 协处理器与 Samsung Exynos，方法上引入对 MTE 等内存防护的绕过与 AI 辅助 exploit 开发。约束可重建为 MTE 等内存防护使传统利用成本上升，推动寻找新攻击面与辅助手段（该约束为推断，非作者公开陈述）。2025 年单年 3 场、累计 7 场演讲形成稳定的公开反馈回路；其中 7 场演讲含 STAR Labs 雇主平台与演讲文化提供的输出渠道，演讲数受组织平台放大，不能直接等价于个人能力提升。",
+      "evidence_ids": [
+        "pan-dec-09",
+        "pz-community-006"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "自研 fuzzing 工具的版本化迭代与会议公开闭环",
+      "starting_conditions": "2020 年前后方法为内核扩展手工审计与单点 PoC（EndpointSecurity.kext local DOS、CVE-2019-8540 writeup），Apple 驱动攻击面大、手工审计效率受限。2020-07 进入阿里 Pandora Lab，2022-07 进入 STAR Labs SG，获得以会议演讲为公开输出渠道的组织环境。",
+      "repeated_practice": "跨年度对同一自研 fuzzing 工具进行版本化迭代并在不同会议公开：Zer0Con（约 2022-04）发表三层 Apple 驱动挖掘方法；POC 2022 发表 hybrid Apple driver fuzzing；OffensiveCon 2023 发表 KidFuzzerV2.0 并引入 Backward Fuzzing，目标覆盖 XNU kernel / Apple Drivers / 协处理器固件。同一主题（Apple 驱动/内核 fuzzing）随工具版本（hybrid → KidFuzzer → KidFuzzerV2.0）连续多年演进与公开。",
+      "feedback": "会议公开作为同行审视与声誉积累节点；STAR Labs 雇主平台提供演讲文化与输出渠道（累计 7 场演讲受组织平台放大）。讲者通过摘要自述收集方法成效反馈（OffensiveCon 2023 摘要自述 expand driver attack surfaces by 95% 与 discovery of over 50 bugs），并据演讲迭代下一版本工具。",
+      "intermediate_capability": "形成把内部 fuzzing 方法论抽象为可命名、可对外交付的技术叙事的能力，并以工具版本号（V2.0）与方法命名（Backward Fuzzing）作为可复用资产对外沉淀。具体 CVE 报告人身份由 Apple HT213676 一手公告独立证实（CVE-2023-28187、CVE-2023-28185 报告人为 Pan ZhenPeng (@Peterpan0927) of STAR Labs SG Pte. Ltd.）。",
+      "observed_outcomes": [
+        "POC 2022 'The Journey To Hybrid Apple Driver Fuzzing'",
+        "OffensiveCon 2023 'Unearthing Vulnerabilities in the Apple Ecosystem: The Art of KidFuzzerV2.0'",
+        "据 OffensiveCon 2023 摘要自述：发现 50 余个 XNU 内核/Apple 驱动/协处理器固件漏洞，more than ten assigned CVEs，expand driver attack surfaces by 95%（50+ 总量与 95% 为讲者自述未逐条核验）",
+        "CVE-2023-28187 与 CVE-2023-28185 报告人由 Apple HT213676 一手公告独立证实为 Pan ZhenPeng of STAR Labs SG Pte. Ltd."
+      ],
+      "evidence_ids": [
+        "pan-dec-05",
+        "pan-dec-06",
+        "pan-conv-01",
+        "pan-conv-02",
+        "pz-community-003",
+        "pz-community-004",
+        "pz-tl-08-offensivecon-2023-talk",
+        "PZ-R1-001",
+        "PZ-R1-002"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "工具迭代与会议公开的连续性受 STAR Labs 雇主平台与会议文化放大；同一主题多年演进也可能部分源于雇主对 Apple 方向的持续投入与会议投稿惯性，而非纯个人方法论驱动。KidFuzzer/KidFuzzerV2.0 工具源码未公开（GitHub 仓库 404），框架实现与技术细节无法独立核对，方法转型的技术证据主要依赖演讲摘要而非可复现代码。"
+    },
+    {
+      "name": "厂商反馈回路下的披露决策与公开输出",
+      "starting_conditions": "2020-02 完成 macOS 10.15.x EndpointSecurity.kext 的 newUserClient 逻辑缺陷审计（type 非 0/1 时返回 KERN_SUCCESS 但不创建 client，致空指针解引用 panic），并按厂商流程向 Apple 产品安全团队报告。",
+      "repeated_practice": "2020-02 出现一次先按厂商流程报告、被 Apple 否定后转为公开披露的事件：Apple 产品安全团队评估后不认定其为安全问题，作者据此选择直接公开披露 PoC 与分析（short_quote: 'the Apple product security team does not regard it as a security problem, so i just release it'）。该事件使披露决策从依赖厂商背书转向独立论证问题价值并公开。",
+      "feedback": "厂商否定安全定性 → 作者转向公开披露；公开 writeup 与 PoC 作为向社区输出与同行审视的替代反馈渠道。同期博客维持 iOS12.2 越狱分析、Chrome/V8 等多方向 writeup 的持续公开输出。",
+      "intermediate_capability": "2020-02 出现一次先按厂商流程报告、被 Apple 否定后转为公开披露的事件；是否构成稳定工作模式因样本单一未能在本综合中确立。可计数成果（据本人 About 页自述：30 余个 Apple CVE、参与 Pwn2Own Web 类并达成目标、持有 OSCP 证书；其中 CVE-2023-28187 与 CVE-2023-28185 报告人由 Apple HT213676 一手公告独立证实为 Pan ZhenPeng (@Peterpan0927) of STAR Labs SG Pte. Ltd.，30+ 总量为自述未逐条核验；Pwn2Own 个人参与为自述无年份/队友/结果，STAR Labs 组织级 Pwn2Own Master of Pwn（含 2025 Berlin）由具名团队成员取得，不归因 Pan 个人）。",
+      "observed_outcomes": [
+        "2020-02-20 博客公开 local DOS on latest macOS（EndpointSecurity.kext 空指针解引用）",
+        "2020-02 Apple 否定安全定性后转为公开披露的单次事件",
+        "据本人 About 页自述 30 余个 Apple CVE（其中 CVE-2023-28187/28185 由 Apple 一手公告证实报告人，其余未逐条核验）"
+      ],
+      "evidence_ids": [
+        "pan-dec-03",
+        "pz-community-002",
+        "pz-community-001",
+        "PZ-WORK-06",
+        "pan-conv-04",
+        "PZ-R1-002",
+        "PZ-R1-004",
+        "PZ-R1-005"
+      ],
+      "validation_tests": [
+        "repeated"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "单次厂商否定→公开披露的交互不足以证明稳定反馈机制；'被拒后公开'可能只是该个案的处置而非可重复的工作模式。30+ Apple CVE、Pwn2Own、OSCP 均为本人自述计数，除 CVE-2023-28187/28185 外未逐条独立核验；STAR Labs 组织级 Pwn2Own Master of Pwn 由其他具名团队成员取得，不归因 Pan 个人。pz-community-001（Pwnable.tm writeup）verified_in_run=false，不作为本机制的独立来源支撑。"
+    },
+    {
+      "name": "跨攻击面迁移与会议反馈驱动的方向扩展",
+      "starting_conditions": "2022-07 进入 STAR Labs SG，所在团队为国际化移动安全研究团队（含 Billy Jheng Bing-Jhong、Bruce Chen Yu-Jen、Meysam Firouzi、Shreyas Penkar、Zafir Rasyidi Taufik、Ng Zhi Yang 等），职位从 Researcher 晋升 Principal（时间未标注）。Apple 生态 fuzzing 方向已建立工具基础（KidFuzzerV2.0），但平台覆盖单一。",
+      "repeated_practice": "2024-2025 连续两年进行攻击面迁移：2024 由 Apple 内核转 Android/Qualcomm GPU（OB1 2024 GPUAF Pixel 8 → POC 2024 GPUAF 两路 Rooting All Qualcomm-based Android Phones）；2025 转 DSP 协处理器与 MTE 绕过（HITCON 2025 Cracking Pixel 8 DSP Bypass MTE → CODE BLUE 2025 AI Accelerated Exploiting + Dancing with Exynos Coprocessor）。每次迁移均以同一技术主题跨多会议重复输出（GPUAF 跨 OB1/POC；DSP/MTE 跨 HITCON/CODE BLUE 两场）。",
+      "feedback": "同一成果跨多个会议披露以收集不同社区反馈；STAR Labs 雇主平台提供会议输出渠道与同伴网络（CODE BLUE 2025 与 HITCON 2025 多篇与 Billy Jheng Bing-Jhong 合著）。2025 单年 3 场、累计 7 场演讲形成稳定的公开反馈与同行审视回路。",
+      "intermediate_capability": "形成把单一平台的方法与利用技术迁移到新攻击面并快速产出会议议题的能力：GPUAF 作为通用 GPU 利用技术跨 Pixel 8 与所有 Qualcomm-based Android 设备；DSP 协处理器利用作为绕过 MTE 的路径。会议输出节奏（单年 3 场）显示以会议反馈驱动方向深化的工作方式，而非凭单点发现。",
+      "observed_outcomes": [
+        "OB1 2024 'GPUAF: Using a General GPU Exploit Technique to Attack Pixel 8'",
+        "POC 2024 'GPUAF: Two Ways of Rooting All Qualcomm-based Android Phones'",
+        "HITCON 2025 'Cracking the Pixel 8: Exploiting the Undocumented DSP to Bypass MTE'",
+        "CODE BLUE 2025 'AI Accelerated Exploiting' 与 'Dancing with Exynos Coprocessor'",
+        "累计 7 场公开演讲（含 STAR Labs 雇主平台放大，不能直接等价于个人能力提升）"
+      ],
+      "evidence_ids": [
+        "pan-dec-08",
+        "pan-dec-09",
+        "pz-community-005",
+        "pz-community-006",
+        "pz-community-007",
+        "pan-ext-002"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "方向迁移可能受 STAR Labs 移动安全团队方向与同伴网络牵引（组织资源），而非纯个人能力迁移；会议高频输出受雇主演讲文化与平台渠道放大。Apple→Android GPU→DSP 的迁移决策动因无作者公开陈述，仅能由演讲题目序列推断方向转移，缺乏作者本人关于为何选择 Android GPU/DSP 的说明。团队内部具体协作机制（code review、内部技术分享、联合研究）未公开，同伴网络对其能力影响的机制层面只能 inferred 而非 documented。"
+    }
+  ],
+  "tensions": [
+    "会议演讲数（累计 7 场）与职位晋升（Principal Vulnerability Researcher）受 STAR Labs 雇主平台与演讲文化放大，不能直接等价于纯个人能力提升；头衔升迁时间未标注，定级升迁链无法闭合。",
+    "阿里 Pandora Lab Senior Security Engineer 在职与 2021 年晋升 P6 仅为本人 GitHub README 自述，WebSearch 返回模型 fallback 幻觉回复，无阿里官方或第三方来源佐证，不得读为外部组织定级。",
+    "Pwn2Own 个人参与（About 页自述 'web category' 'achieved targets'，无年份/队友/结果）与 STAR Labs 组织级 Pwn2Own Master of Pwn（含 2025 Berlin，由其他具名团队成员取得）层级未区分；STAR Labs blog 全部 Pwn2Own 成绩（2019/2020/2022/2023/2025）具名团队成员均非 Pan Zhenpeng，个人自述未独立证实。",
+    "30+ Apple CVE 为本人自述计数，仅 CVE-2023-28187 与 CVE-2023-28185 由 Apple HT213676 一手公告独立证实报告人，其余未逐条核验；CVE-2023-28186 在 OffensiveCon 摘要列出但 Apple HT213676 未列，是否归 Pan 未确认。",
+    "Zer0Con 演讲年份存在冲突：zer0con.org/archive/2021.html 页面品牌标记为 Zer0Con2021，但 schedule 段标 'Zer0Con2022' 并列 April 8–9 2022，Pan 被排定于 2022-04-08；OffensiveCon 2023 bio 亦以 'Zer0Con2021' 品牌名指代；确切年份未完全确定，但落在阿里期内 2020-07–2022-06。",
+    "person_json 标注 selected_conference_evidence 'OffByOne 2024 / Black Hat / POC'，其中 OffByOne 2024 与 POC 经 STAR Labs publications 页证实（对应 OB1 2024 与 POC 2022/2024），但 Black Hat 一项未在任何一手来源中出现，疑为输入信息漂移；X handle 拼写（person_json 的 @Peterpan0927 vs GitHub bio 的 @peterpan980927）亦不一致，X 主页抓取返回 HTTP 402 无法独立核实。",
+    "OffensiveCon 2023 摘要自述的 50+ 漏洞、95% 攻击面扩展、more than ten assigned CVEs 为讲者自述，未由独立 CVE 清单逐条核验；KidFuzzer/KidFuzzerV2.0 工具源码未公开（GitHub 仓库 404），框架实现无法独立核对。",
+    "agx-exploit（CVE-2022-32947）在 Pan 的仓库列表中出现但实为 fork 自 hoshinolina/agx-exploit，原作者为 Lina/Cyan，不应计为 Pan 的作品（works 维度已排除并记录判断依据）。"
+  ],
+  "transferable_practices": [
+    "把单点漏洞挖掘抽象为可命名的方法论并对外输出（如 Apple 驱动漏洞挖掘的三层方法、hybrid fuzzing、Backward Fuzzing），以方法命名与工具版本号作为可复用资产沉淀。",
+    "同一技术主题跨多个会议重复输出以收集不同社区反馈（GPUAF 跨 OB1/POC；DSP/MTE 跨 HITCON/CODE BLUE），以会议反馈驱动方法与方向迭代。",
+    "维护公开 writeup 与 GitHub 仓库（CVE writeup、macOS exploit 仓库、XNU 源码仓库、博客多方向技术文章），把学习材料工具化、公开化，便于同行检视与后续自取。",
+    "通过 CTF 平台（Pwnable.tm）进行可被同行核验的重复练习，作为系统级漏洞研究的方法前提。",
+    "先按厂商流程报告、再据厂商反馈决定披露路径的披露决策流程（2020-02 单次事件可观察）。"
+  ],
+  "non_transferable_conditions": [
+    "STAR Labs SG 雇主平台与演讲文化提供的会议输出渠道：累计 7 场演讲受组织平台放大，独立研究者无法直接复制该输出节奏。",
+    "国际化移动安全研究团队的同伴网络（含跨越越南/新加坡/印尼/澳洲背景的研究员，CODE BLUE 2025/HITCON 2025 多篇与 Billy Jheng Bing-Jhong 合著），团队内部协作机制未公开，同伴反馈的机制层面不可复制。",
+    "阿里 Pandora Lab 与奇虎 360 Nirvan Team 的国内大厂安全实验室经历：为特定时间窗口内的组织资源，后续研究者难以复现相同雇主序列。",
+    " OffensiveCon 2023 摘要自述的 95% 攻击面扩展与 50+ 漏洞为讲者特定工具（KidFuzzerV2.0）在特定设备清单（iPhone/SRD/M1/Intel）上的产出，受 Apple 生态特定时期攻击面状态与工具私有实现约束，工具源码未公开无法独立复现。",
+    "Pwn2Own 个人参与自述与 STAR Labs 组织级 Pwn2Own Master of Pwn 为组织级成绩，不归因个人且不可复制为个人能力证据。"
+  ],
+  "open_questions": [
+    "入门经历、导师或同伴的具体作用、失败与转折动机缺乏一手叙述性文本（pan-conv-07 unknown）：个人博客仅有技术 writeup，About 页为简历式时间线，无反思性自述；该缺口应如实记录而非以天赋/努力合理化补全。",
+    "每次雇主更换（离开奇虎 360 / 阿里巴巴 / 加入 STAR Labs）的具体触发原因（反馈、项目结束、机会判断）无公开一手材料，仅有时间线与单位名，无法重建离开决策的具体动因。",
+    "从 Apple 内核 fuzzing（KidFuzzerV2.0, 2023）转向 Android GPU（GPUAF, 2024）再转 DSP 协处理器（2025）的决策动因无作者公开陈述，只能由演讲题目序列推断方向转移。",
+    "KidFuzzer/KidFuzzerV2.0 框架的源码与技术细节未公开（GitHub 仓库 404），方法转型的技术细节仅能依赖演讲标题与摘要，无法核对 fuzzing 策略的具体实现。",
+    "阿里 Pandora Lab Senior Security Engineer 在职与 2021 年晋升 P6 仅为本人自述，无阿里官方或第三方来源佐证；CVE-2023-28186 是否归 Pan 报告、所属 Apple 公告页未能确认；30+ Apple CVE 自述总量未逐条核验。",
+    "Pan 个人 '参与 Pwn2Own Web 类并达成目标' 仅 About 页自述一处，STAR Labs blog 全部 Pwn2Own 成绩具名团队成员均非 Pan，该自述未能独立证实。",
+    "X/Twitter 与微博账号内容未取得（X 抓取返回 HTTP 402），无法用作研究动态或即时决策的佐证；GitHub issue/PR、邮件列表等社区协作的直接痕迹未找到。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/pan-zhenpeng-synthesis-v2-20260928-105937-657",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790564775886728000-pan-zhenpeng-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "a9f0f5e6-a1ad-466e-af05-0496aeacb78b",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_8ewmhb8qsn17t2nv1art55nm",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/pan-zhenpeng-synthesis-v2-20260928-105937-657/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-28T03:06:15.929299+00:00"
+      },
+      {
+        "tool_use_id": "call_h87zzjtumq259jmc7gz7pmn8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/pan-zhenpeng-synthesis-v2-20260928-105937-657/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T03:06:15.929337+00:00"
+      },
+      {
+        "tool_use_id": "call_z1k5c4rn4efsouu5zwte45aa",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/pan-zhenpeng-synthesis-v2-20260928-105937-657/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "6f5b85303588f644e0660ace6e0e868f488b6440f456b593a6e3dd97acb29372",
+        "accessed_at": "2026-09-28T03:06:15.929344+00:00"
+      },
+      {
+        "tool_use_id": "call_2lg6hosof37f0bcf23mryjzi",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/pan-zhenpeng-synthesis-v2-20260928-105937-657/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "71eb3cd3a0a72ee0ccb985f8e97d4a9de96caabff0a4b839991133cd76b7894c",
+        "accessed_at": "2026-09-28T03:06:15.929350+00:00"
+      },
+      {
+        "tool_use_id": "call_ba3q1eorqmlhyv3nrlbf0mxj",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/pan-zhenpeng-synthesis-v2-20260928-105937-657/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "db2c119a8d67e9b6d6e347ea579be04ed0d98320906700c04fa2f6f4fd12e496",
+        "accessed_at": "2026-09-28T03:06:15.929429+00:00"
+      },
+      {
+        "tool_use_id": "call_m1ncp690ryo9lyo64t4j73mw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/pan-zhenpeng-synthesis-v2-20260928-105937-657/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "674716682ce3e6ef4af8e89dd6b0d485dbd9f603d0f40643c11c10b622f6a479",
+        "accessed_at": "2026-09-28T03:06:15.929516+00:00"
+      },
+      {
+        "tool_use_id": "call_7kfe5tcf9spp7bopauz931gd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/pan-zhenpeng-synthesis-v2-20260928-105937-657/inputs/evidence_json.json",
+          "offset": 971,
+          "limit": 400
+        },
+        "success": true,
+        "content_sha256": "765505508e182f74c8ee0ef0fbd196f0b1cd68b85d022e522616a93ee5b56a25",
+        "accessed_at": "2026-09-28T03:06:15.929555+00:00"
+      },
+      {
+        "tool_use_id": "call_v52u7r7ryiel44h7xnxpzspt",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/pan-zhenpeng-synthesis-v2-20260928-105937-657/checkpoint.md",
+          "content": "# Pan Zhenpeng 综合分析 v2 — Checkpoint\n\n## 任务\n综合分析节点 v2：基于 person_json、evidence_json（六维 + targeted 补证）与 revision_context（round-1 定向补证与纠错记录），重建 Pan Zhenpeng 领域能力成长过程，输出符合 output.schema.json 的完整 JSON。\n\n## 已确认来源（verified_in_run=true，作为主支撑）\n- person_json：身份锚（handle Peterpan0927、Pan Zhenpeng、Apple 内核与移动端漏洞）。\n- works：PZ-WORK-02~07（CVE-2019-8540 writeup、Pwnable.tm、iOS12.2、Chrome/V8、local DOS、PegasusZero/L1br4）；PZ-WORK-08~10 会议自述（reported）。\n- conversations：pan-conv-01~06（documented）；pan-conv-07（unknown 资料缺口）。\n- community：pz-community-002~009（documented）；pz-community-001（verified=false，不采为单源）。\n- external：pan-ext-001~005、008（documented）；pan-ext-006（reported，P6 自述）；pan-ext-007（inferred，组织级）。\n- decisions：pan-dec-01~09（documented）。\n- timeline：pz-tl-01~09（documented/reported）。\n- targeted 补证（round-1）：PZ-R1-001（OffensiveCon 2023 摘要+bio）、PZ-R1-002（Apple HT213676 CVE-2023-28187/28185 credits）、PZ-R1-003（Zer0Con 年份冲突）、PZ-R1-004（About 页 Pwn2Own/30+CVE/OSCP 自述）、PZ-R1-005（STAR Labs blog Pwn2Own 具名团队成员）。\n\n## 已应用的 revision_context 指令\n1. 机制2 intermediate_capability 改为单次事件描述（2020-02 Apple 否定→公开披露），与 alternative_explanation 一致，不称\"形成工作模式\"。\n2. stages 第5段（2025）\"下探\"→\"转向/扩展至\"。\n3. 机制1 feedback \"打磨\"→\"改进/迭代\"。\n4. stages 第4段（2022-07–2023）capability_change 显式标注 50+/95% 证据等级：讲者摘要自述；CVE-2023-28187/28185 由 Apple HT213676 一手公告独立证实报告人。\n5. stages 第3段（阿里期）就地补注 Zer0Con 年份冲突（品牌 2021 / schedule 2022-04-08）。\n6. stages 第3段 \"2021 晋升 P6\" 标注为本人自述未独立证实。\n7. stages 第4、6段与机制1、3 以\"7 场演讲\"为能力证据处就近补注组织平台放大限定。\n8. pan-conv-01 short_quote \"expand driver attack surfaces by 95%\" 保留并补注为讲者自述 + CVE-2023-28187/28185 已由 Apple 一手公告证实报告人身份。\n9. evidence_ids 经核验均存在且 verified_in_run=true，无作废；invalid_evidence_ids=[]。\n\n## 未作废 / 资料缺口\n- 阿里 P6 晋升：仅 GitHub README 自述，WebSearch 返回模型 fallback 幻觉，无独立来源 → 标注为自述未独立证实。\n- Pwn2Own 个人参与：仅 About 页自述（web category，无年份/队友/结果）；STAR Labs blog 全部 Pwn2Own 成绩具名团队成员均非 Pan → 自述未核验。\n- 30+ Apple CVE 总量：仅 CVE-2023-28187/28185 由 Apple 一手公告证实报告人，其余未逐条核验。\n- CVE-2023-28186：OffensiveCon 摘要列出，Apple HT213676 未列，是否归 Pan 未确认。\n- KidFuzzer/KidFuzzerV2.0 工具源码未公开（GitHub 仓库 404），框架实现无法核对。\n- 入门经历/导师/失败/转折动机缺乏一手叙述性文本（pan-conv-07 unknown）。\n- Apple→Android GPU→DSP 方向迁移决策动因无作者公开陈述。\n\n## 结构\n- stages：6 段（2016–2018 / 2018-07–2020-06 / 2020-07–2022-06 / 2022-07–2023 / 2024 / 2025）。\n- mechanisms：3 个主机制（自研 fuzzing 工具版本化迭代与会议公开 / 厂商反馈回路下的披露决策与公开输出 / 跨攻击面迁移与会议反馈驱动的方向扩展）。\n- tensions / transferable_practices / non_transferable_conditions / open_questions 按 schema 填写。\n- 不填写 _run 与 verification（由编排器负责）。\n\n## 状态\n完成 output.json 撰写，逐字段对照 schema 校验字段名、必填、类型、枚举、additionalProperties。\n"
+        },
+        "success": true,
+        "content_sha256": "e78eb5704d1e8a4c52aedff7d8585ddd63701b139ddd3b675bd60bf257c67cfc",
+        "accessed_at": "2026-09-28T03:06:15.930105+00:00"
+      },
+      {
+        "tool_use_id": "call_6geqfsbsxxl4v62n8eksp7y4",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/pan-zhenpeng-synthesis-v2-20260928-105937-657/output.json",
+          "content": "{\n  \"person\": \"Pan Zhenpeng\",\n  \"expertise\": [\n    \"Apple 内核与移动端漏洞研究（macOS/iOS 内核、IOKit 驱动、XNU）\",\n    \"Apple 驱动/内核 fuzzing 与利用（hybrid fuzzing、自研 fuzzer KidFuzzer/KidFuzzerV2.0、Backward Fuzzing）\",\n    \"Apple 平台漏洞根因分析与公开 writeup（类型大小不匹配、未初始化内存、空指针解引用）\",\n    \"Android/Qualcomm 移动端利用（GPUAF 通用 GPU 利用技术、Pixel 8）\",\n    \"移动 DSP 协处理器利用与 MTE 等防御机制绕过（Pixel 8 DSP、Samsung Exynos Coprocessor）\",\n    \"AI 辅助 exploit 开发（CODE BLUE 2025 'AI Accelerated Exploiting'）\",\n    \"内核扩展代码审计（macOS EndpointSecurity.kext）\",\n    \"CTF 二进制利用训练（Pwnable.tm）\",\n    \"漏洞披露流程与厂商交互（Apple 产品安全团队报告与被拒后公开披露）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2016–2018\",\n      \"stage\": \"高校社团与 CTF 起步期：pwn 基础训练\",\n      \"capability_change\": \"据本人 GitHub README 与 decisions 维度，2017-04 起在中南民族大学（SCUEC）Newthread Geek Group 参与 iOS/Python/Linux/CTF/ACM 活动，研究起点为 CTF 与 pwn 而非直接进入 Apple 内核研究；2016 年起在 SCUEC 攻读计算机科学学士学位（至 2020 年）。同期博客 2019-06 Pwnable.tm 题解 writeup（该 writeup 本身 verified_in_run=false，作为 lead_only 不单独采信，但与 GitHub README 的社团 CTF 活动自述一致）印证此阶段处于 CTF/pwn 重复练习阶段。该阶段可核验的产出为 pwn 基础与方法训练，为后续转向系统级漏洞研究提供前提，而非 Apple 内核方向本身。\",\n      \"evidence_ids\": [\"pz-tl-01-education\", \"pz-tl-02-internship\", \"pz-community-008\", \"pan-dec-01\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2018-07–2020-06\",\n      \"stage\": \"Qihoo 360 Nirvan Team 实习：macOS/XNU 方向起点与单点 PoC 阶段\",\n      \"capability_change\": \"2018-07 至 2019-10 在奇虎 360 Nirvan Team（北京）任 macOS Security Researcher 实习，首次将研究目标固定在 macOS/XNU 方向。可核验产出包括维护 macOS 旧版本 exploit 仓库（PegasusZero：exploit on macOS 10.11.x；L1br4：exp on 10.13；均为 C 语言、标签 poc/vulnerabilities/cve）、darwin-xnu 源码仓库与 MOXil_learning 内核学习仓库；以及 CVE-2019-8540 writeup（分析 Apple IOKit exportObjectToClient 因 io_object_t 8 字节强转为 mach_port_name_t 4 字节导致高 4 字节未初始化、泄露内核栈内存，影响 macOS ≤10.14.3 与 iOS <12.2，附 poc.c，仓库自 maldiohead/CVE-2019-8540 fork 且在其上有 12 个 commit）。同期博客并行维护 iOS12.2 越狱分析、Chrome/V8 引擎分析等 writeup。此阶段以单点、已分配 CVE 的 PoC 与 writeup 为主，方法上以手工审计与复现为主，尚未进入自建 fuzzer 的工具化阶段。（注：PegasusZero/L1br4/darwin-xnu 等仓库的创建与首次提交日期未能抓取，时间无法精确定位，仅作为方向与方法的物质留存。）\",\n      \"evidence_ids\": [\"pan-dec-02\", \"pz-tl-02-internship\", \"pz-community-009\", \"PZ-WORK-02\", \"PZ-WORK-07\", \"pz-tl-09-repos-macos-exploit\", \"PZ-WORK-04\", \"PZ-WORK-05\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2020-07–2022-06\",\n      \"stage\": \"Alibaba Pandora Lab 全职期：从内核扩展审计到 Apple 驱动方法论提炼与首次会议演讲\",\n      \"capability_change\": \"2020-07 至 2022-06 在阿里巴巴安全 Pandora Lab（杭州）任 Senior Security Engineer。此阶段方法从内核扩展代码审计起步：2020-02-20 通过审计 macOS 10.15.x EndpointSecurity.kext 的 newUserClient 逻辑缺陷（type 非 0/1 时返回 KERN_SUCCESS 但不创建 client，致空指针解引用 panic）发现 local DOS 并向 Apple 报告，被 Apple 产品安全团队判定非安全问题后选择公开披露。其后在 Zer0Con 发表演讲 'Three Layers in Apple Driver Bug Hunting: Pwn macOS Big Sur in One Shot'，首次将 Apple 驱动漏洞挖掘抽象为三层方法论并对外输出。此阶段可核验产出为内核扩展审计 PoC + 被拒后公开披露事件 + 首场国际会议演讲，标志方法从单点 PoC 转向可命名的挖掘方法论。（补注：Zer0Con 演讲年份存在冲突——zer0con.org/archive/2021.html 页面品牌标记为 Zer0Con2021，但 schedule 段标 'Schedule of Zer0Con2022' 并列 April 8–9 2022，Pan 被排定于 2022-04-08 11:20–12:30；OffensiveCon 2023 bio 亦以 'Zer0Con2021' 品牌名指代；确切年份未完全确定，但落在阿里期内 2020-07–2022-06。另注：README 自述 2021 年晋升 P6，据本人 README 自述，无阿里官方或第三方来源佐证，不得读为外部组织定级。）\",\n      \"evidence_ids\": [\"pan-dec-03\", \"pan-dec-04\", \"pan-dec-05\", \"pz-tl-04-alibaba-pandora\", \"pz-tl-05-zer0con-talk\", \"pz-community-002\", \"PZ-WORK-06\", \"PZ-R1-003\", \"pan-ext-006\", \"pan-conv-06\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2022-07–2023\",\n      \"stage\": \"STAR Labs SG 起步与 KidFuzzerV2.0 工具化输出期\",\n      \"capability_change\": \"2022-07 起加入新加坡 STAR Labs SG 任 Mobile Security Researcher（现为 Principal Vulnerability Researcher，据团队页；头衔升迁时间未标注，列为张力）。此阶段研究方法从手工审计/hybrid fuzzing 转向自研 fuzzer 的版本化迭代：POC 2022 发表 'The Journey To Hybrid Apple Driver Fuzzing'（coverage-guided 与 generational 结合的混合 fuzzing），OffensiveCon 2023 发表 'Unearthing Vulnerabilities in the Apple Ecosystem: The Art of KidFuzzerV2.0'，将 KidFuzzer 迭代到 V2.0 并引入 Backward Fuzzing，目标覆盖 XNU kernel / Apple Drivers / 协处理器固件（DCP/SEP/AOP）。据 OffensiveCon 2023 演讲摘要自述，发现 50 余个 XNU 内核/Apple 驱动/协处理器固件漏洞并将驱动攻击面扩展约 95%；其中 CVE-2023-28187 与 CVE-2023-28185 报告人由 Apple HT213676 一手公告独立证实为 Pan ZhenPeng (@Peterpan0927) of STAR Labs SG Pte. Ltd.，但 50 余总量与 95% 扩展为讲者自述，未由独立 CVE 清单逐条核验。此阶段可核验能力变化为：研究范式从手工审计转向自建 fuzzing 工具的版本化迭代与会议公开输出。（7 场演讲含 STAR Labs 雇主平台与演讲文化提供的输出渠道，演讲数受组织平台放大，不能直接等价于个人能力提升。）\",\n      \"evidence_ids\": [\"pan-dec-06\", \"pan-dec-07\", \"pz-tl-07-star-labs-sg\", \"pz-tl-08-offensivecon-2023-talk\", \"pz-community-003\", \"pz-community-004\", \"pan-conv-01\", \"pan-ext-002\", \"pan-ext-004\", \"PZ-R1-001\", \"PZ-R1-002\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2024\",\n      \"stage\": \"目标平台迁移：从 Apple 内核转向 Android/Qualcomm GPU 利用\",\n      \"capability_change\": \"2024 年研究焦点首次由 Apple 内核/驱动 fuzzing 转向 Android/Pixel GPU 攻击面。OB1（Off-By-One）2024 发表 'GPUAF: Using a General GPU Exploit Technique to Attack Pixel 8'，POC 2024 进一步将 GPUAF 扩展到 'Two Ways of Rooting All Qualcomm-based Android Phones'，显示为一次方向迁移而非单次尝试，并通过同一技术主题跨两个会议重复输出以收集不同社区反馈。此阶段能力变化为攻击面从 Apple 平台向移动端 GPU/Qualcomm 扩展，方法从 fuzzing 转向通用利用技术（GPUAF）。（方向迁移的具体决策动因无作者公开陈述，仅能由演讲题目序列推断。）\",\n      \"evidence_ids\": [\"pan-dec-08\", \"pz-community-005\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2025\",\n      \"stage\": \"转向 DSP 协处理器利用与 MTE 等防御机制绕过\",\n      \"capability_change\": \"2025 年研究目标进一步扩展至移动 DSP 协处理器与 Samsung Exynos，并引入 AI 辅助 exploit 开发。HITCON 2025 发表 'Cracking the Pixel 8: Exploiting the Undocumented DSP to Bypass MTE'，CODE BLUE 2025 发表 'AI Accelerated Exploiting'（用 AI 加速针对 MTE 加固 Pixel 的 exploit 开发，经 DSP 协处理器）与 'Dancing with Exynos Coprocessor'（Samsung）。此阶段能力变化为：研究目标扩展至移动 DSP 协处理器与 Samsung Exynos，方法上引入对 MTE 等内存防护的绕过与 AI 辅助 exploit 开发。约束可重建为 MTE 等内存防护使传统利用成本上升，推动寻找新攻击面与辅助手段（该约束为推断，非作者公开陈述）。2025 年单年 3 场、累计 7 场演讲形成稳定的公开反馈回路；其中 7 场演讲含 STAR Labs 雇主平台与演讲文化提供的输出渠道，演讲数受组织平台放大，不能直接等价于个人能力提升。\",\n      \"evidence_ids\": [\"pan-dec-09\", \"pz-community-006\"],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"自研 fuzzing 工具的版本化迭代与会议公开闭环\",\n      \"starting_conditions\": \"2020 年前后方法为内核扩展手工审计与单点 PoC（EndpointSecurity.kext local DOS、CVE-2019-8540 writeup），Apple 驱动攻击面大、手工审计效率受限。2020-07 进入阿里 Pandora Lab，2022-07 进入 STAR Labs SG，获得以会议演讲为公开输出渠道的组织环境。\",\n      \"repeated_practice\": \"跨年度对同一自研 fuzzing 工具进行版本化迭代并在不同会议公开：Zer0Con（约 2022-04）发表三层 Apple 驱动挖掘方法；POC 2022 发表 hybrid Apple driver fuzzing；OffensiveCon 2023 发表 KidFuzzerV2.0 并引入 Backward Fuzzing，目标覆盖 XNU kernel / Apple Drivers / 协处理器固件。同一主题（Apple 驱动/内核 fuzzing）随工具版本（hybrid → KidFuzzer → KidFuzzerV2.0）连续多年演进与公开。\",\n      \"feedback\": \"会议公开作为同行审视与声誉积累节点；STAR Labs 雇主平台提供演讲文化与输出渠道（累计 7 场演讲受组织平台放大）。讲者通过摘要自述收集方法成效反馈（OffensiveCon 2023 摘要自述 expand driver attack surfaces by 95% 与 discovery of over 50 bugs），并据演讲迭代下一版本工具。\",\n      \"intermediate_capability\": \"形成把内部 fuzzing 方法论抽象为可命名、可对外交付的技术叙事的能力，并以工具版本号（V2.0）与方法命名（Backward Fuzzing）作为可复用资产对外沉淀。具体 CVE 报告人身份由 Apple HT213676 一手公告独立证实（CVE-2023-28187、CVE-2023-28185 报告人为 Pan ZhenPeng (@Peterpan0927) of STAR Labs SG Pte. Ltd.）。\",\n      \"observed_outcomes\": [\n        \"POC 2022 'The Journey To Hybrid Apple Driver Fuzzing'\",\n        \"OffensiveCon 2023 'Unearthing Vulnerabilities in the Apple Ecosystem: The Art of KidFuzzerV2.0'\",\n        \"据 OffensiveCon 2023 摘要自述：发现 50 余个 XNU 内核/Apple 驱动/协处理器固件漏洞，more than ten assigned CVEs，expand driver attack surfaces by 95%（50+ 总量与 95% 为讲者自述未逐条核验）\",\n        \"CVE-2023-28187 与 CVE-2023-28185 报告人由 Apple HT213676 一手公告独立证实为 Pan ZhenPeng of STAR Labs SG Pte. Ltd.\"\n      ],\n      \"evidence_ids\": [\"pan-dec-05\", \"pan-dec-06\", \"pan-conv-01\", \"pan-conv-02\", \"pz-community-003\", \"pz-community-004\", \"pz-tl-08-offensivecon-2023-talk\", \"PZ-R1-001\", \"PZ-R1-002\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"工具迭代与会议公开的连续性受 STAR Labs 雇主平台与会议文化放大；同一主题多年演进也可能部分源于雇主对 Apple 方向的持续投入与会议投稿惯性，而非纯个人方法论驱动。KidFuzzer/KidFuzzerV2.0 工具源码未公开（GitHub 仓库 404），框架实现与技术细节无法独立核对，方法转型的技术证据主要依赖演讲摘要而非可复现代码。\"\n    },\n    {\n      \"name\": \"厂商反馈回路下的披露决策与公开输出\",\n      \"starting_conditions\": \"2020-02 完成 macOS 10.15.x EndpointSecurity.kext 的 newUserClient 逻辑缺陷审计（type 非 0/1 时返回 KERN_SUCCESS 但不创建 client，致空指针解引用 panic），并按厂商流程向 Apple 产品安全团队报告。\",\n      \"repeated_practice\": \"2020-02 出现一次先按厂商流程报告、被 Apple 否定后转为公开披露的事件：Apple 产品安全团队评估后不认定其为安全问题，作者据此选择直接公开披露 PoC 与分析（short_quote: 'the Apple product security team does not regard it as a security problem, so i just release it'）。该事件使披露决策从依赖厂商背书转向独立论证问题价值并公开。\",\n      \"feedback\": \"厂商否定安全定性 → 作者转向公开披露；公开 writeup 与 PoC 作为向社区输出与同行审视的替代反馈渠道。同期博客维持 iOS12.2 越狱分析、Chrome/V8 等多方向 writeup 的持续公开输出。\",\n      \"intermediate_capability\": \"2020-02 出现一次先按厂商流程报告、被 Apple 否定后转为公开披露的事件；是否构成稳定工作模式因样本单一未能在本综合中确立。可计数成果（据本人 About 页自述：30 余个 Apple CVE、参与 Pwn2Own Web 类并达成目标、持有 OSCP 证书；其中 CVE-2023-28187 与 CVE-2023-28185 报告人由 Apple HT213676 一手公告独立证实为 Pan ZhenPeng (@Peterpan0927) of STAR Labs SG Pte. Ltd.，30+ 总量为自述未逐条核验；Pwn2Own 个人参与为自述无年份/队友/结果，STAR Labs 组织级 Pwn2Own Master of Pwn（含 2025 Berlin）由具名团队成员取得，不归因 Pan 个人）。\",\n      \"observed_outcomes\": [\n        \"2020-02-20 博客公开 local DOS on latest macOS（EndpointSecurity.kext 空指针解引用）\",\n        \"2020-02 Apple 否定安全定性后转为公开披露的单次事件\",\n        \"据本人 About 页自述 30 余个 Apple CVE（其中 CVE-2023-28187/28185 由 Apple 一手公告证实报告人，其余未逐条核验）\"\n      ],\n      \"evidence_ids\": [\"pan-dec-03\", \"pz-community-002\", \"pz-community-001\", \"PZ-WORK-06\", \"pan-conv-04\", \"PZ-R1-002\", \"PZ-R1-004\", \"PZ-R1-005\"],\n      \"validation_tests\": [\"repeated\"],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"单次厂商否定→公开披露的交互不足以证明稳定反馈机制；'被拒后公开'可能只是该个案的处置而非可重复的工作模式。30+ Apple CVE、Pwn2Own、OSCP 均为本人自述计数，除 CVE-2023-28187/28185 外未逐条独立核验；STAR Labs 组织级 Pwn2Own Master of Pwn 由其他具名团队成员取得，不归因 Pan 个人。pz-community-001（Pwnable.tm writeup）verified_in_run=false，不作为本机制的独立来源支撑。\"\n    },\n    {\n      \"name\": \"跨攻击面迁移与会议反馈驱动的方向扩展\",\n      \"starting_conditions\": \"2022-07 进入 STAR Labs SG，所在团队为国际化移动安全研究团队（含 Billy Jheng Bing-Jhong、Bruce Chen Yu-Jen、Meysam Firouzi、Shreyas Penkar、Zafir Rasyidi Taufik、Ng Zhi Yang 等），职位从 Researcher 晋升 Principal（时间未标注）。Apple 生态 fuzzing 方向已建立工具基础（KidFuzzerV2.0），但平台覆盖单一。\",\n      \"repeated_practice\": \"2024-2025 连续两年进行攻击面迁移：2024 由 Apple 内核转 Android/Qualcomm GPU（OB1 2024 GPUAF Pixel 8 → POC 2024 GPUAF 两路 Rooting All Qualcomm-based Android Phones）；2025 转 DSP 协处理器与 MTE 绕过（HITCON 2025 Cracking Pixel 8 DSP Bypass MTE → CODE BLUE 2025 AI Accelerated Exploiting + Dancing with Exynos Coprocessor）。每次迁移均以同一技术主题跨多会议重复输出（GPUAF 跨 OB1/POC；DSP/MTE 跨 HITCON/CODE BLUE 两场）。\",\n      \"feedback\": \"同一成果跨多个会议披露以收集不同社区反馈；STAR Labs 雇主平台提供会议输出渠道与同伴网络（CODE BLUE 2025 与 HITCON 2025 多篇与 Billy Jheng Bing-Jhong 合著）。2025 单年 3 场、累计 7 场演讲形成稳定的公开反馈与同行审视回路。\",\n      \"intermediate_capability\": \"形成把单一平台的方法与利用技术迁移到新攻击面并快速产出会议议题的能力：GPUAF 作为通用 GPU 利用技术跨 Pixel 8 与所有 Qualcomm-based Android 设备；DSP 协处理器利用作为绕过 MTE 的路径。会议输出节奏（单年 3 场）显示以会议反馈驱动方向深化的工作方式，而非凭单点发现。\",\n      \"observed_outcomes\": [\n        \"OB1 2024 'GPUAF: Using a General GPU Exploit Technique to Attack Pixel 8'\",\n        \"POC 2024 'GPUAF: Two Ways of Rooting All Qualcomm-based Android Phones'\",\n        \"HITCON 2025 'Cracking the Pixel 8: Exploiting the Undocumented DSP to Bypass MTE'\",\n        \"CODE BLUE 2025 'AI Accelerated Exploiting' 与 'Dancing with Exynos Coprocessor'\",\n        \"累计 7 场公开演讲（含 STAR Labs 雇主平台放大，不能直接等价于个人能力提升）\"\n      ],\n      \"evidence_ids\": [\"pan-dec-08\", \"pan-dec-09\", \"pz-community-005\", \"pz-community-006\", \"pz-community-007\", \"pan-ext-002\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"方向迁移可能受 STAR Labs 移动安全团队方向与同伴网络牵引（组织资源），而非纯个人能力迁移；会议高频输出受雇主演讲文化与平台渠道放大。Apple→Android GPU→DSP 的迁移决策动因无作者公开陈述，仅能由演讲题目序列推断方向转移，缺乏作者本人关于为何选择 Android GPU/DSP 的说明。团队内部具体协作机制（code review、内部技术分享、联合研究）未公开，同伴网络对其能力影响的机制层面只能 inferred 而非 documented。\"\n    }\n  ],\n  \"tensions\": [\n    \"会议演讲数（累计 7 场）与职位晋升（Principal Vulnerability Researcher）受 STAR Labs 雇主平台与演讲文化放大，不能直接等价于纯个人能力提升；头衔升迁时间未标注，定级升迁链无法闭合。\",\n    \"阿里 Pandora Lab Senior Security Engineer 在职与 2021 年晋升 P6 仅为本人 GitHub README 自述，WebSearch 返回模型 fallback 幻觉回复，无阿里官方或第三方来源佐证，不得读为外部组织定级。\",\n    \"Pwn2Own 个人参与（About 页自述 'web category' 'achieved targets'，无年份/队友/结果）与 STAR Labs 组织级 Pwn2Own Master of Pwn（含 2025 Berlin，由其他具名团队成员取得）层级未区分；STAR Labs blog 全部 Pwn2Own 成绩（2019/2020/2022/2023/2025）具名团队成员均非 Pan Zhenpeng，个人自述未独立证实。\",\n    \"30+ Apple CVE 为本人自述计数，仅 CVE-2023-28187 与 CVE-2023-28185 由 Apple HT213676 一手公告独立证实报告人，其余未逐条核验；CVE-2023-28186 在 OffensiveCon 摘要列出但 Apple HT213676 未列，是否归 Pan 未确认。\",\n    \"Zer0Con 演讲年份存在冲突：zer0con.org/archive/2021.html 页面品牌标记为 Zer0Con2021，但 schedule 段标 'Zer0Con2022' 并列 April 8–9 2022，Pan 被排定于 2022-04-08；OffensiveCon 2023 bio 亦以 'Zer0Con2021' 品牌名指代；确切年份未完全确定，但落在阿里期内 2020-07–2022-06。\",\n    \"person_json 标注 selected_conference_evidence 'OffByOne 2024 / Black Hat / POC'，其中 OffByOne 2024 与 POC 经 STAR Labs publications 页证实（对应 OB1 2024 与 POC 2022/2024），但 Black Hat 一项未在任何一手来源中出现，疑为输入信息漂移；X handle 拼写（person_json 的 @Peterpan0927 vs GitHub bio 的 @peterpan980927）亦不一致，X 主页抓取返回 HTTP 402 无法独立核实。\",\n    \"OffensiveCon 2023 摘要自述的 50+ 漏洞、95% 攻击面扩展、more than ten assigned CVEs 为讲者自述，未由独立 CVE 清单逐条核验；KidFuzzer/KidFuzzerV2.0 工具源码未公开（GitHub 仓库 404），框架实现无法独立核对。\",\n    \"agx-exploit（CVE-2022-32947）在 Pan 的仓库列表中出现但实为 fork 自 hoshinolina/agx-exploit，原作者为 Lina/Cyan，不应计为 Pan 的作品（works 维度已排除并记录判断依据）。\"\n  ],\n  \"transferable_practices\": [\n    \"把单点漏洞挖掘抽象为可命名的方法论并对外输出（如 Apple 驱动漏洞挖掘的三层方法、hybrid fuzzing、Backward Fuzzing），以方法命名与工具版本号作为可复用资产沉淀。\",\n    \"同一技术主题跨多个会议重复输出以收集不同社区反馈（GPUAF 跨 OB1/POC；DSP/MTE 跨 HITCON/CODE BLUE），以会议反馈驱动方法与方向迭代。\",\n    \"维护公开 writeup 与 GitHub 仓库（CVE writeup、macOS exploit 仓库、XNU 源码仓库、博客多方向技术文章），把学习材料工具化、公开化，便于同行检视与后续自取。\",\n    \"通过 CTF 平台（Pwnable.tm）进行可被同行核验的重复练习，作为系统级漏洞研究的方法前提。\",\n    \"先按厂商流程报告、再据厂商反馈决定披露路径的披露决策流程（2020-02 单次事件可观察）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"STAR Labs SG 雇主平台与演讲文化提供的会议输出渠道：累计 7 场演讲受组织平台放大，独立研究者无法直接复制该输出节奏。\",\n    \"国际化移动安全研究团队的同伴网络（含跨越越南/新加坡/印尼/澳洲背景的研究员，CODE BLUE 2025/HITCON 2025 多篇与 Billy Jheng Bing-Jhong 合著），团队内部协作机制未公开，同伴反馈的机制层面不可复制。\",\n    \"阿里 Pandora Lab 与奇虎 360 Nirvan Team 的国内大厂安全实验室经历：为特定时间窗口内的组织资源，后续研究者难以复现相同雇主序列。\",\n    \" OffensiveCon 2023 摘要自述的 95% 攻击面扩展与 50+ 漏洞为讲者特定工具（KidFuzzerV2.0）在特定设备清单（iPhone/SRD/M1/Intel）上的产出，受 Apple 生态特定时期攻击面状态与工具私有实现约束，工具源码未公开无法独立复现。\",\n    \"Pwn2Own 个人参与自述与 STAR Labs 组织级 Pwn2Own Master of Pwn 为组织级成绩，不归因个人且不可复制为个人能力证据。\"\n  ],\n  \"open_questions\": [\n    \"入门经历、导师或同伴的具体作用、失败与转折动机缺乏一手叙述性文本（pan-conv-07 unknown）：个人博客仅有技术 writeup，About 页为简历式时间线，无反思性自述；该缺口应如实记录而非以天赋/努力合理化补全。\",\n    \"每次雇主更换（离开奇虎 360 / 阿里巴巴 / 加入 STAR Labs）的具体触发原因（反馈、项目结束、机会判断）无公开一手材料，仅有时间线与单位名，无法重建离开决策的具体动因。\",\n    \"从 Apple 内核 fuzzing（KidFuzzerV2.0, 2023）转向 Android GPU（GPUAF, 2024）再转 DSP 协处理器（2025）的决策动因无作者公开陈述，只能由演讲题目序列推断方向转移。\",\n    \"KidFuzzer/KidFuzzerV2.0 框架的源码与技术细节未公开（GitHub 仓库 404），方法转型的技术细节仅能依赖演讲标题与摘要，无法核对 fuzzing 策略的具体实现。\",\n    \"阿里 Pandora Lab Senior Security Engineer 在职与 2021 年晋升 P6 仅为本人自述，无阿里官方或第三方来源佐证；CVE-2023-28186 是否归 Pan 报告、所属 Apple 公告页未能确认；30+ Apple CVE 自述总量未逐条核验。\",\n    \"Pan 个人 '参与 Pwn2Own Web 类并达成目标' 仅 About 页自述一处，STAR Labs blog 全部 Pwn2Own 成绩具名团队成员均非 Pan，该自述未能独立证实。\",\n    \"X/Twitter 与微博账号内容未取得（X 抓取返回 HTTP 402），无法用作研究动态或即时决策的佐证；GitHub issue/PR、邮件列表等社区协作的直接痕迹未找到。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "5e4177534a68dd1118b477dcb849aff525de57a95fcae6ddd3cac9864adce557",
+        "accessed_at": "2026-09-28T03:06:15.930111+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790564775930168000-pan-zhenpeng-synthesis-v2.json",
+    "label": "Pan Zhenpeng:synthesis:v2",
+    "elapsed_seconds": 398.3,
+    "prompt_sha256": "daf029314532a832184367c12bf87f86d0991a4a758e3851996923ce61db8a4f",
+    "num_turns": 10,
+    "total_cost_usd": 0.962329,
+    "usage": {
+      "input_tokens": 70166,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 211648,
+      "output_tokens": 20227,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 70166,
+        "outputTokens": 20227,
+        "cacheReadInputTokens": 211648,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.962329,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

@@ -1,0 +1,346 @@
+{
+  "person": "Seth Jenkins",
+  "dimension": "公开作品与技术演化",
+  "identity_check": "身份确认：公开作品署名 Seth Jenkins，发表于 Google Project Zero 官方博客 https://projectzero.google/，主题集中于 Android 内核与在野漏洞利用链，与输入档案中的 primary_focus「Android 内核与在野漏洞」、social handle (x.com/__seth_jenkins) 及 selected_conference_evidence (Black Hat US) 一致。博客首页同时列出多篇其署名文章，未见同名歧义人物。会议演讲与早期作品尚有缺口（见 gaps）。",
+  "items": [
+    {
+      "id": "sj_pz_2025_11_kaslr",
+      "date": "2025-11-03",
+      "claim": "Seth Jenkins 在 Project Zero 博客发表《Defeating KASLR by Doing Nothing at All》，论证 arm64 Linux 线性映射不再随机化且 Pixel 固定物理地址加载 (0x80010000) 使得 KASLR 可被静态绕过，无需主动信息泄漏。",
+      "status": "documented",
+      "growth_signal": "研究方法由单点漏洞转向系统性缓解评估：自建约 5GB mmap 程序在 Samsung S23 跨 100 次重启测量物理页分配可预测性，并与 Jann Horn 协作构建基于 BPF probe_read_kernel 的内核读取工具。对前作 x86 KASLR 工作进行复盘，公开批评对 KASLR 的宿命论态度，两个 issue 被内核团队与 Pixel 判为 intended behavior，作者据此调整对缓解有效性的判断。",
+      "short_quote": "I found myself with an excellent arbitrary write primitive…but without a KASLR leak.",
+      "source": {
+        "title": "Defeating KASLR by Doing Nothing at All",
+        "url": "https://projectzero.google/2025/11/defeating-kaslr-by-doing-nothing-at-all.html",
+        "published": "2025-11-03",
+        "source_type": "本人技术 writeup（Project Zero 官方博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_yi3h12hr99jra6n8yrhms652",
+        "accessed_at": "2026-09-26T14:44:17.600771+00:00",
+        "content_sha256": "ed5412c2252ba016f541117f22f5eb7d27ca8773a780a34f7e1efdf02a3b5659"
+      }
+    },
+    {
+      "id": "sj_pz_2026_01_pixel9_bigwave",
+      "date": "2026-01-14",
+      "claim": "Seth Jenkins 在 Project Zero 博客发表《A 0-click exploit chain for the Pixel 9 Part 2: Cracking the Sandbox with a Big Wave》，利用 BigWave 驱动 (/dev/bigwave, AV1 加速) 的 UAF 逃逸 mediacodec SELinux 沙箱至内核任意读写；修复于 2026-01-05 发布。",
+      "status": "documented",
+      "growth_signal": "工具建设与攻击面枚举成为固定流程：自建 DriverCartographer 在 mediacodec 上下文中枚举可达驱动，再以数小时人工审计发现 3 个独立 bug；以 Unix Domain Socket 消息喷洒 kmalloc 控制 freed job->regs 实现任意写。将新 bug 类抽象为「类比 double-free kmalloc 原语但基于不同链表」，显示从单点利用向 bug 类抽象迁移。文中记录重复发现 2024-02 已报告但逾年未修的浅漏洞，构成对厂商修复时效的反馈观察。",
+      "short_quote": "across a couple hours of auditing the code, I discovered three separate bugs",
+      "source": {
+        "title": "A 0-click exploit chain for the Pixel 9 Part 2: Cracking the Sandbox with a Big Wave",
+        "url": "https://projectzero.google/2026/01/pixel-0-click-part-2.html",
+        "published": "2026-01-14",
+        "source_type": "本人技术 writeup（Project Zero 官方博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_h2y3ndtvsnw9kt0wr195m4t7",
+        "accessed_at": "2026-09-26T14:44:17.600758+00:00",
+        "content_sha256": "c1bc863b2834d13cc0f23adba8cd73e8964e8aaad94f495dca045f930729f714"
+      }
+    },
+    {
+      "id": "sj_pz_2026_05_pixel10_vpu",
+      "date": "2026-05-13",
+      "claim": "Seth Jenkins 在 Project Zero 博客发表《A 0-click exploit chain for the Pixel 10: When a Door Closes, a Window Opens》，将 Pixel 9 利用链移植至 Pixel 10，以 Dolby CVE-2025-54957 取得初始执行并以新 VPU 驱动 (/dev/vpu, Chips&Media Wave677DV) mmap 未限界 remap_pfn_range 实现任意物理内存映射；issue 编号 463438263。",
+      "status": "documented",
+      "growth_signal": "技术演化体现为利用链跨设备复用与对新缓解的快速适配：Dolby 利用经 offset 调整移植；针对 Pixel 10 以 RET PAC 取代 -fstack-protector，改用 dap_cpdp_init 作为覆盖目标；VPU 漏洞 2 小时审计、5 行代码取得任意内核读写。公开复盘厂商修复时效——首次在 90 天内修复其报告，并据此提出对厂商 triage/patch 流程的正向与负向反馈，显示从单纯漏洞研究向厂商流程评估扩展。",
+      "short_quote": "we spent 2 hours auditing this VPU driver and discovered an exceptional vulnerability",
+      "source": {
+        "title": "A 0-click exploit chain for the Pixel 10: When a Door Closes, a Window Opens",
+        "url": "https://projectzero.google/2026/05/pixel-10-exploit.html",
+        "published": "2026-05-13",
+        "source_type": "本人技术 writeup（Project Zero 官方博客）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_ahnlavrqssyf4zuiobpxtblg",
+        "accessed_at": "2026-09-26T14:44:17.600765+00:00",
+        "content_sha256": "99b6e0cc7fce42bd31ce3b051f95f3b7e6db98e21085d4681a0226c891d48942"
+      }
+    }
+  ],
+  "contradictions": [
+    "未发现互相冲突的材料。需注意：KASLR 一文中作者称相关 issue 被内核团队与 Pixel 判为 intended behavior（即非漏洞），而 BigWave 与 VPU 两篇则为已确认并修复的漏洞；二者属不同结论而非对同一事实的冲突。"
+  ],
+  "gaps": [
+    "早期 (2025-11 之前) 公开作品未抓取：KASLR 文中提及「my prior x86 KASLR work」，但该前作的标题、URL、日期未确认，无法定位。",
+    "Black Hat US 演讲：输入档案 selected_conference_evidence 标注 Black Hat US，但本次未抓取到具体届次、年份与议题标题，仅作 lead_only 处理，不构成 documented 证据。",
+    "工具 DriverCartographer 是否开源或公开发布未确认。",
+    "同伴与导师关系仅确认与 Jann Horn 的协作（KASLR 文共建 BPF 读取工具）；其余协作结构（如 Pixel 9 利用链与 Natalie Silvanovich 的分工）未深挖。",
+    "X (Twitter @__seth_jenkins) 历史发布未抓取，作为成长过程材料仅 lead_only。",
+    "CVE-2025-54957 (Dolby) 的原始公告与署名归属未单独抓取，本文仅依据 Pixel 10 文转述。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-works-20260926-224052-110",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790433857595150000-seth-jenkins-works.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "39df0394-0563-46ea-bb6e-81a2e25d9c72",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_4rq82tolmq7okgnuwn7iinz1",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-works-20260926-224052-110/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-26T14:44:17.600676+00:00"
+      },
+      {
+        "tool_use_id": "call_zgly9mybgdj1c6ec4w23p9er",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-works-20260926-224052-110/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-26T14:44:17.600695+00:00"
+      },
+      {
+        "tool_use_id": "call_pqmooqykauj2yn0ws55vgwou",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-works-20260926-224052-110/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "af69a54cdd3b387ab50ec41b238f275c17d306e32766098444a0e6bdba86c657",
+        "accessed_at": "2026-09-26T14:44:17.600704+00:00"
+      },
+      {
+        "tool_use_id": "call_vw855a2slr7fmb1s64a7pooe",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-works-20260926-224052-110/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "d0b8cdf3b40a9559378808dc1c7a6b485e6ec5ba9e3c6f8c9a4a9017a32b1faf",
+        "accessed_at": "2026-09-26T14:44:17.600709+00:00"
+      },
+      {
+        "tool_use_id": "call_19j8qdhs741p422n7jbavomq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-works-20260926-224052-110/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "98d6159955e4031db24639369d116819220986aa8ec32370f8ce25cc7e814219",
+        "accessed_at": "2026-09-26T14:44:17.600713+00:00"
+      },
+      {
+        "tool_use_id": "call_duoo8xe3nzcnzhgsc7vvjx9u",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-works-20260926-224052-110/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6e5034a8a6d972f492d2b08811243633e8b01984efe14e10fad4de7367634388",
+        "accessed_at": "2026-09-26T14:44:17.600716+00:00"
+      },
+      {
+        "tool_use_id": "call_rhgrv5lj2g4q0o6sdmspnj5a",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-works-20260926-224052-110/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-26T14:44:17.600719+00:00"
+      },
+      {
+        "tool_use_id": "call_1whflz70aqulzodcs6rory41",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Seth Jenkins Google Project Zero Android kernel writeup"
+        },
+        "success": true,
+        "content_sha256": "9570517cd47aa89338e719fae91d57bd76780616544cf6c27a6255162de1afe4",
+        "accessed_at": "2026-09-26T14:44:17.600724+00:00"
+      },
+      {
+        "tool_use_id": "call_bu5wn7o3esiosy09omb9y1x9",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Seth Jenkins\" Project Zero blog CVE Android"
+        },
+        "success": true,
+        "content_sha256": "73f5c428ae941446436bfaf99288cf6a7c2ed8469cb2f69b7e8d2ab561864891",
+        "accessed_at": "2026-09-26T14:44:17.600728+00:00"
+      },
+      {
+        "tool_use_id": "call_lgev7k6bsu7xo5ny7nav3okl",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/",
+          "prompt": "List all blog post titles, authors, and publication dates visible on this page. Specifically find any posts authored by Seth Jenkins. Return the exact author name as shown, post title, and ISO date if visible."
+        },
+        "success": true,
+        "content_sha256": "e63e7d17f26b0210532f2dd62b37e7e93e4cc1f5b34a1f9066139629e9a9db17",
+        "accessed_at": "2026-09-26T14:44:17.600739+00:00"
+      },
+      {
+        "tool_use_id": "call_ybjger4ndjjqypnxmvjn8k55",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://googleprojectzero.blogspot.com/",
+          "prompt": "List all blog post titles, authors, and publication dates visible on this page. Specifically find any posts authored by Seth Jenkins. Return exact author names and dates."
+        },
+        "success": true,
+        "content_sha256": "31488dbd0f0151ad65ff33d5c76332ebc4e67d266b7c35717e6b568ea9d19f9c",
+        "accessed_at": "2026-09-26T14:44:17.600734+00:00"
+      },
+      {
+        "tool_use_id": "call_sgvs8i1xkz17o7rthzpfsr3l",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize the technical content: what vulnerability/CVE is exploited, what research method was used, what the target difficulty was, what tools or techniques were built, and any retrospective or reflective language about the research process. Quote short relevant sentences (under 30 words each) verbatim where they explain method, difficulty, tooling, or lessons learned. Note the author name and publication date as shown.",
+          "url": "https://projectzero.google/blog/a-0-click-exploit-chain-for-the-pixel-10-when-a-door-closes-a-window-opens"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:44:17.600743+00:00"
+      },
+      {
+        "tool_use_id": "call_2t2udjl4il4a4m7unvd0wuo6",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize the technical content: what vulnerability/CVE is exploited, what research method was used, what the target difficulty was, what tools or techniques were built, and any reflective language about the research process. Quote short relevant sentences (under 30 words each) verbatim where they explain method, difficulty, tooling, or lessons learned. Note the author name and publication date.",
+          "url": "https://projectzero.google/blog/a-0-click-exploit-chain-for-the-pixel-9-part-2-cracking-the-sandbox-with-a-big-wave"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:44:17.600746+00:00"
+      },
+      {
+        "tool_use_id": "call_s5q1ate94yx7v8uaaxvt8czl",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize the technical content: what vulnerability or technique is described, what research method was used, what the target difficulty was, what tools or techniques were built, and any reflective language about the research process. Quote short relevant sentences (under 30 words each) verbatim where they explain method, difficulty, tooling, or lessons learned. Note the author name and publication date.",
+          "url": "https://projectzero.google/blog/defeating-kaslr-by-doing-nothing-at-all"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:44:17.600749+00:00"
+      },
+      {
+        "tool_use_id": "call_c625mio1wac7wy2pz12la5b3",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Return the full exact URLs (href values) for these three blog posts by Seth Jenkins: \"A 0-click exploit chain for the Pixel 10\", \"A 0-click exploit chain for the Pixel 9 Part 2\", and \"Defeating KASLR by Doing Nothing at All\". Output only the complete https URLs.",
+          "url": "https://projectzero.google/"
+        },
+        "success": true,
+        "content_sha256": "0ac4cd7c34efc08910e95e69cc00cbf1e02dd094247f3cdb36711284c6aa0390",
+        "accessed_at": "2026-09-26T14:44:17.600753+00:00"
+      },
+      {
+        "tool_use_id": "call_ahnlavrqssyf4zuiobpxtblg",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize the technical content: what vulnerability/CVE is exploited, what research method was used, what the target difficulty was, what tools or techniques were built, and any reflective language about the research process. Quote short relevant sentences (under 30 words each) verbatim where they explain method, difficulty, tooling, or lessons learned. Note the author name and publication date as shown.",
+          "url": "https://projectzero.google/2026/05/pixel-10-exploit.html"
+        },
+        "success": true,
+        "content_sha256": "99b6e0cc7fce42bd31ce3b051f95f3b7e6db98e21085d4681a0226c891d48942",
+        "accessed_at": "2026-09-26T14:44:17.600765+00:00"
+      },
+      {
+        "tool_use_id": "call_h2y3ndtvsnw9kt0wr195m4t7",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize the technical content: what vulnerability/CVE is exploited, what research method was used, what the target difficulty was, what tools or techniques were built, and any reflective language about the research process. Quote short relevant sentences (under 30 words each) verbatim where they explain method, difficulty, tooling, or lessons learned. Note the author name and publication date as shown.",
+          "url": "https://projectzero.google/2026/01/pixel-0-click-part-2.html"
+        },
+        "success": true,
+        "content_sha256": "c1bc863b2834d13cc0f23adba8cd73e8964e8aaad94f495dca045f930729f714",
+        "accessed_at": "2026-09-26T14:44:17.600758+00:00"
+      },
+      {
+        "tool_use_id": "call_yi3h12hr99jra6n8yrhms652",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize the technical content: what vulnerability or technique is described, what research method was used, what the target difficulty was, what tools or techniques were built, and any reflective language about the research process. Quote short relevant sentences (under 30 words each) verbatim where they explain method, difficulty, tooling, or lessons learned. Note the author name and publication date as shown.",
+          "url": "https://projectzero.google/2025/11/defeating-kaslr-by-doing-nothing-at-all.html"
+        },
+        "success": true,
+        "content_sha256": "ed5412c2252ba016f541117f22f5eb7d27ca8773a780a34f7e1efdf02a3b5659",
+        "accessed_at": "2026-09-26T14:44:17.600771+00:00"
+      },
+      {
+        "tool_use_id": "call_7cfaulli7m3bfanl4ua14mkw",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-works-20260926-224052-110/checkpoint.md",
+          "content": "# Checkpoint — Seth Jenkins / 公开作品与技术演化\n\n## 身份确认 (identity_check)\n- Seth Jenkins = Google Project Zero 研究员；公开作品署名 \"Seth Jenkins\"，发布于 https://projectzero.google/（Project Zero 官方博客）。\n- 与资料中 social handle `x.com/__seth_jenkins`、primary_focus \"Android 内核与在野漏洞\" 一致。\n- 无明显同名歧义人物：同一作者在 PZ 博客持续发表 Android 内核/利用链主题作品。\n\n## 已确认的一手来源 (documented，已 WebFetch 正文)\n1. **Defeating KASLR by Doing Nothing at All** — Seth Jenkins, 2025-11-03, Project Zero Blog。\n   - URL: https://projectzero.google/2025/11/defeating-kaslr-by-doing-nothing-at-all.html\n   - 内容：arm64 线性映射不再随机化 + Pixel 固定物理地址加载 (0x80010000) → KASLR 可被静态绕过，无需主动 leak。\n   - 方法：自建程序 (~5GB mmap/页错误) 在 Samsung S23 跨 100 次重启测试物理页分配可预测性；与 Jann Horn 协作——Jann 写了基于 BPF probe_read_kernel 的内核读取工具。\n   - 反思/反馈：两个 issue 被内核团队与 Pixel 判为 intended behavior；作者评论 \"KASLR is no longer an effective mitigation against local attackers\"；批评对 KASLR 的态度过于宿命论。\n   - 成长信号：与同伴 Jann Horn 协作、工具共建 (BPF 读取工具)、定量测试 (100 次重启)、对前作 (x86 KASLR) 的复盘。\n\n2. **A 0-click exploit chain for the Pixel 9 Part 2: Cracking the Sandbox with a Big Wave** — Seth Jenkins, 2026-01-14, Project Zero Blog。\n   - URL: https://projectzero.google/2026/01/pixel-0-click-part-2.html\n   - 内容：UAF 于 BigWave 驱动 (/dev/bigwave, AV1 加速)，逃逸 mediacodec SELinux 沙箱至内核任意读写；修复 2026-01-05。\n   - 方法：自建工具 DriverCartographer 在 mediacodec 上下文中枚举可达驱动；数小时人工审计发现 3 个 bug；UDS 消息喷洒 kmalloc 控制 freed job->regs。\n   - 难度/反馈：首 bug 为 2024-02 已报告但至 2025-06 仍未修的重复 (trivial 两行修复) — 揭示厂商修复滞后。\n   - 成长信号：工具建设 (DriverCartographer)、人工审计效率 (\"couple hours\")、把 bug 类比于 double-free kmalloc 原语但属不同链表 (概念抽象)。\n\n3. **A 0-click exploit chain for the Pixel 10: When a Door Closes, a Window Opens** — Seth Jenkins, 2026-05-13, Project Zero Blog。\n   - URL: https://projectzero.google/2026/05/pixel-10-exploit.html\n   - 内容：将 Pixel 9 利用链移植至 Pixel 10；Dolby CVE-2025-54957 (初始执行) + 新 VPU 驱动 (/dev/vpu, Chips&Media Wave677DV) mmap 未限界 remap_pfn_range → 任意物理内存映射；issue 463438263。\n   - 方法：2 小时审计 VPU 驱动；5 行代码获得任意内核读写；处理 Pixel 10 的 RET PAC (替代 -fstack-protector) 改用 dap_cpdp_init 覆盖目标。\n   - 反思/反馈：表扬厂商首次 90 天内修复其报告；批评仍存在极浅漏洞；强调驱动安全工程化。\n   - 成长信号：跨设备移植复用 (Pixel 9→10)、对新缓解 (RET PAC) 的快速适配、与前期作品的技术延续。\n\n## 已知技术演化主线 (跨 3 篇)\n- 2025-11: 静态/系统性 KASLR 评估 (理论 + 测量)，与 Jann Horn 协作共建 BPF 工具。\n- 2026-01: 沙箱逃逸利用链，工具化 (DriverCartographer) 枚举驱动攻击面，人工审计 + 堆喷。\n- 2026-05: 利用链跨设备复用与移植，应对新缓解 (RET PAC)，关注厂商修复时效。\n\n## 资料缺口 (gaps)\n- 早期 (2025-11 之前) 作品/公开记录未抓取：是否存在更早的 writeup、CVE 公告署名、Black Hat 演讲材料 (资料提及 \"Black Hat US\") 未核实。\n- x86 KASLR 前作：KASLR 文中提及 \"my prior x86 KASLR work\"，但未抓到该前作的链接/标题/日期。\n- Black Hat US 演讲：资料字段 selected_conference_evidence 标 \"Black Hat US\"，但未抓取到具体届次/年份/议题标题；仅 lead_only。\n- 同伴/导师关系除 Jann Horn 外未确认；Pixel 9 part 1/3 为 Natalie Silvanovich 作者，跨人协作链结构未深挖。\n- 工具 DriverCartographer 是否开源/发布未确认。\n- 未抓取其 X (Twitter) 历史发布作为成长材料 (social 字段，lead_only 性质)。\n\n## 调用计数\nWebSearch ×2、WebFetch ×7 (含 1 次重定向 + 3 次 404 slug 试探 + 3 次成功正文)。剩余预算充足，已具备 3 条 documented 一手证据，可提交。\n\n## 下一步\n对照 output.schema.json 写 output.json；items 以时间排序，status=documented，source.level=primary，含 short_quote (≤30 词)。不填 _run / verification。\n"
+        },
+        "success": true,
+        "content_sha256": "2bbe1aa7387f117f8e4a8792d38b189ff2b1d03fc7ffa0b3e63da611e8c8d7f2",
+        "accessed_at": "2026-09-26T14:44:17.600783+00:00"
+      },
+      {
+        "tool_use_id": "call_jatf1y0w9ybq9xzux95os1tz",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-works-20260926-224052-110/output.json",
+          "content": "{\n  \"person\": \"Seth Jenkins\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"身份确认：公开作品署名 Seth Jenkins，发表于 Google Project Zero 官方博客 https://projectzero.google/，主题集中于 Android 内核与在野漏洞利用链，与输入档案中的 primary_focus「Android 内核与在野漏洞」、social handle (x.com/__seth_jenkins) 及 selected_conference_evidence (Black Hat US) 一致。博客首页同时列出多篇其署名文章，未见同名歧义人物。会议演讲与早期作品尚有缺口（见 gaps）。\",\n  \"items\": [\n    {\n      \"id\": \"sj_pz_2025_11_kaslr\",\n      \"date\": \"2025-11-03\",\n      \"claim\": \"Seth Jenkins 在 Project Zero 博客发表《Defeating KASLR by Doing Nothing at All》，论证 arm64 Linux 线性映射不再随机化且 Pixel 固定物理地址加载 (0x80010000) 使得 KASLR 可被静态绕过，无需主动信息泄漏。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"研究方法由单点漏洞转向系统性缓解评估：自建约 5GB mmap 程序在 Samsung S23 跨 100 次重启测量物理页分配可预测性，并与 Jann Horn 协作构建基于 BPF probe_read_kernel 的内核读取工具。对前作 x86 KASLR 工作进行复盘，公开批评对 KASLR 的宿命论态度，两个 issue 被内核团队与 Pixel 判为 intended behavior，作者据此调整对缓解有效性的判断。\",\n      \"short_quote\": \"I found myself with an excellent arbitrary write primitive…but without a KASLR leak.\",\n      \"source\": {\n        \"title\": \"Defeating KASLR by Doing Nothing at All\",\n        \"url\": \"https://projectzero.google/2025/11/defeating-kaslr-by-doing-nothing-at-all.html\",\n        \"published\": \"2025-11-03\",\n        \"source_type\": \"本人技术 writeup（Project Zero 官方博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"sj_pz_2026_01_pixel9_bigwave\",\n      \"date\": \"2026-01-14\",\n      \"claim\": \"Seth Jenkins 在 Project Zero 博客发表《A 0-click exploit chain for the Pixel 9 Part 2: Cracking the Sandbox with a Big Wave》，利用 BigWave 驱动 (/dev/bigwave, AV1 加速) 的 UAF 逃逸 mediacodec SELinux 沙箱至内核任意读写；修复于 2026-01-05 发布。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"工具建设与攻击面枚举成为固定流程：自建 DriverCartographer 在 mediacodec 上下文中枚举可达驱动，再以数小时人工审计发现 3 个独立 bug；以 Unix Domain Socket 消息喷洒 kmalloc 控制 freed job->regs 实现任意写。将新 bug 类抽象为「类比 double-free kmalloc 原语但基于不同链表」，显示从单点利用向 bug 类抽象迁移。文中记录重复发现 2024-02 已报告但逾年未修的浅漏洞，构成对厂商修复时效的反馈观察。\",\n      \"short_quote\": \"across a couple hours of auditing the code, I discovered three separate bugs\",\n      \"source\": {\n        \"title\": \"A 0-click exploit chain for the Pixel 9 Part 2: Cracking the Sandbox with a Big Wave\",\n        \"url\": \"https://projectzero.google/2026/01/pixel-0-click-part-2.html\",\n        \"published\": \"2026-01-14\",\n        \"source_type\": \"本人技术 writeup（Project Zero 官方博客）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"sj_pz_2026_05_pixel10_vpu\",\n      \"date\": \"2026-05-13\",\n      \"claim\": \"Seth Jenkins 在 Project Zero 博客发表《A 0-click exploit chain for the Pixel 10: When a Door Closes, a Window Opens》，将 Pixel 9 利用链移植至 Pixel 10，以 Dolby CVE-2025-54957 取得初始执行并以新 VPU 驱动 (/dev/vpu, Chips&Media Wave677DV) mmap 未限界 remap_pfn_range 实现任意物理内存映射；issue 编号 463438263。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"技术演化体现为利用链跨设备复用与对新缓解的快速适配：Dolby 利用经 offset 调整移植；针对 Pixel 10 以 RET PAC 取代 -fstack-protector，改用 dap_cpdp_init 作为覆盖目标；VPU 漏洞 2 小时审计、5 行代码取得任意内核读写。公开复盘厂商修复时效——首次在 90 天内修复其报告，并据此提出对厂商 triage/patch 流程的正向与负向反馈，显示从单纯漏洞研究向厂商流程评估扩展。\",\n      \"short_quote\": \"we spent 2 hours auditing this VPU driver and discovered an exceptional vulnerability\",\n      \"source\": {\n        \"title\": \"A 0-click exploit chain for the Pixel 10: When a Door Closes, a Window Opens\",\n        \"url\": \"https://projectzero.google/2026/05/pixel-10-exploit.html\",\n        \"published\": \"2026-05-13\",\n        \"source_type\": \"本人技术 writeup（Project Zero 官方博客）\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"未发现互相冲突的材料。需注意：KASLR 一文中作者称相关 issue 被内核团队与 Pixel 判为 intended behavior（即非漏洞），而 BigWave 与 VPU 两篇则为已确认并修复的漏洞；二者属不同结论而非对同一事实的冲突。\"\n  ],\n  \"gaps\": [\n    \"早期 (2025-11 之前) 公开作品未抓取：KASLR 文中提及「my prior x86 KASLR work」，但该前作的标题、URL、日期未确认，无法定位。\",\n    \"Black Hat US 演讲：输入档案 selected_conference_evidence 标注 Black Hat US，但本次未抓取到具体届次、年份与议题标题，仅作 lead_only 处理，不构成 documented 证据。\",\n    \"工具 DriverCartographer 是否开源或公开发布未确认。\",\n    \"同伴与导师关系仅确认与 Jann Horn 的协作（KASLR 文共建 BPF 读取工具）；其余协作结构（如 Pixel 9 利用链与 Natalie Silvanovich 的分工）未深挖。\",\n    \"X (Twitter @__seth_jenkins) 历史发布未抓取，作为成长过程材料仅 lead_only。\",\n    \"CVE-2025-54957 (Dolby) 的原始公告与署名归属未单独抓取，本文仅依据 Pixel 10 文转述。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "60abd22001b8b87195c8f92d0f87ed568b0d947cbf307b6502e63370301d70ce",
+        "accessed_at": "2026-09-26T14:44:17.600787+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790433857600799000-seth-jenkins-works.json",
+    "label": "Seth Jenkins:works",
+    "elapsed_seconds": 205.47,
+    "prompt_sha256": "73d0fb7c4d41625c6ea73fa633d118b89340a718bf824ea68c25378d82742ddc",
+    "num_turns": 21,
+    "total_cost_usd": 0.5541869999999999,
+    "usage": {
+      "input_tokens": 22398,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 147648,
+      "output_tokens": 5080,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 28148,
+        "outputTokens": 11455,
+        "cacheReadInputTokens": 254144,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.5541869999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

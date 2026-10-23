@@ -1,0 +1,521 @@
+{
+  "person": "Mark Brand",
+  "dimension": "关键决策与转折",
+  "identity_check": "人物身份确认：核验的 9 篇 Project Zero 博客均署名 Mark Brand（部分与 Sergei Glazunov、Ivan Fratric 合著），其自署头衔随时间演变（Irregular Expressionist → Bypasser of Mitigations → Exploit Technique Archaeologist），与 person_json 的 '浏览器与沙箱逃逸' 方向一致。两处 handle 信息存疑：person_json.social 为 https://x.com/markbrand0，而本地种子 timeline/expression-dna 记 Twitter 为 @sidrfrk，二者不一致；本次未抓取 Twitter，无法判定哪个有效，留作缺口。本地种子 06-timeline 称其首篇 P0 文章在 2018-07，但已核验的 2015-02 Flash PCRE 文章早于此，种子内部存在事实错误，以核验事实为准。",
+  "items": [
+    {
+      "id": "mb-dec-001-flash-pcre-start",
+      "date": "2015-02-12",
+      "claim": "Mark Brand 在 Project Zero 的最早可核验公开研究为 2015-02 的 Flash PCRE（CVE-2015-0318）漏洞利用，自署 'Irregular Expressionist'。选择 Flash/PCRE 作为起点对应当时 Flash 仍是浏览器主导攻击面、且 PCRE 正则引擎可达的约束；利用路径为无效字节码→指针操控→OOB 写→Vector.<uint> 长度损坏→任意读写→ROP。",
+      "status": "documented",
+      "growth_signal": "机制：目标选择受当时最高暴露攻击面（Flash）驱动；面对 'surprisingly robust' 的 PCRE 字节码校验，他没有放弃而是承认 'took quite a while before I found a useful primitive'，体现重复试错而非天赋叙事；收尾 'Make zeroday hard.' 已在首篇确立为贯穿后续十年的输出习惯。",
+      "short_quote": "it took quite a while before I found a useful primitive for corrupting memory",
+      "source": {
+        "title": "Exploiting CVE-2015-0318 in Flash",
+        "url": "https://projectzero.google/2015/02/exploitingscve-2015-0318sinsflash.html",
+        "published": "2015-02-12",
+        "source_type": "Project Zero 博客（独立署名）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_24qe62shdzwq44q5y88i3s37",
+        "accessed_at": "2026-09-26T14:22:48.201307+00:00",
+        "content_sha256": "419b5cec364840969dad67b53941d228b4dd2319e3a2a3185f4556b6a9ea5464"
+      }
+    },
+    {
+      "id": "mb-dec-002-stagefright-android-pivot",
+      "date": "2015-09-16",
+      "claim": "Brand 自署 'Bypasser of Mitigations'，转向 Android Stagefright（CVE-2015-3864）。选择该 bug 的理由是它赋予攻击者对 'the size of the allocation; the amount of overflow, and the contents' 的三重控制；在 mediaserver 难以构造信息泄露的约束下，选择对 8-bit ASLR 直接暴力枚举（1/256）而非追求信息泄露，实测约 ~4%/分钟 成功率。",
+      "status": "documented",
+      "growth_signal": "机制：领域转换（Flash→Android media）跟随远程预认证高暴露面迁移；关键决策是约束下的可选项取舍——放弃昂贵的信息泄露、接受暴力枚举的较低可靠性，因为 watering-hole 场景允许多次重试。这是其后反复出现的 'pragmatism over elegance' 决策模式的首个明确实例。",
+      "short_quote": "a linear heap-overflow giving the attacker control over the size of the allocation; the amount of overflow, and the contents",
+      "source": {
+        "title": "Stagefrightened?",
+        "url": "https://projectzero.google/2015/09/stagefrightened.html",
+        "published": "2015-09-16",
+        "source_type": "Project Zero 博客（独立署名）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_mkfirq9x7obs0qxafckf4rms",
+        "accessed_at": "2026-09-26T14:22:48.201320+00:00",
+        "content_sha256": "39999623641964b5457c6fd6be884e396207b73e82dd92c928f8f08a8749294f"
+      }
+    },
+    {
+      "id": "mb-dec-003-swiftshader-sideways",
+      "date": "2018-10-24",
+      "claim": "Brand 选择 SwiftShader 作为攻击面，因 GPU 进程 'needs to have more privileges than the highly-sandboxed renderer processes'，且 Chrome 在 GPU 加速失败 4 次后会回退到 SwiftShader，故该面始终可达；方法论上他明确提出 'look at things sideways — avoiding the perhaps more obvious and highly contested areas such as the main javascript JIT engine'。",
+      "status": "documented",
+      "growth_signal": "机制：目标选择从 '正面强攻 JIT' 转向 '横向寻找非显见子系统'，这是其工具建设与选点习惯的核心启发式——攻击 GPU 回退路径而非主 JS 引擎。通过可主动触发的环境降级（crash GPU 4 次）把 '非默认路径' 转化为 '可强制可达路径'。",
+      "short_quote": "look at things sideways — avoiding the perhaps more obvious and highly contested areas such as the main javascript JIT engine",
+      "source": {
+        "title": "Heap Feng Shader: Exploiting SwiftShader in Chrome",
+        "url": "https://projectzero.google/2018/10/heap-feng-shader-exploiting-swiftshader.html",
+        "published": "2018-10-24",
+        "source_type": "Project Zero 博客（独立署名）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_pjvcdw3yer9opy7iczgeqqwv",
+        "accessed_at": "2026-09-26T14:22:48.201316+00:00",
+        "content_sha256": "c8d12031aa180ab5b8d075daaf077c9892f88cb0bf2786ea94e73b59d25bc547"
+      }
+    },
+    {
+      "id": "mb-dec-004-chrome-mojo-sandbox-escape",
+      "date": "2019-04-11",
+      "claim": "Brand 自署 'Exploit Technique Archaeologist'，选择 Chrome Mojo IPC 作为全链沙箱逃逸目标。明确决策链：(a) MojoJS binding 使 IPC 可从 JS 直接调用，故可借渲染端漏洞启用 binding 后从 JS 做提权；(b) 先发现 'a collection of possible sandbox escape vulnerabilities'，再选 issue 1755，理由为 'the high level of control the attacker has both over the lifetime of the free'd object, and over the timing of the later use'；(c) ASLR 绕过放弃信息泄露，改用 ~3.5TB 虚拟地址喷射，利用 Windows 无跨进程 ASLR 与浏览器进程无地址空间上限两项设计缺口。",
+      "status": "documented",
+      "growth_signal": "机制：选择沙箱逃逸而非渲染端 bug，因 'sandbox escape is the critical escalation step'——把研究投入放在全链中稀缺环节；选 bug 时以 '攻击者对对象生命周期与重用时机的控制度' 为评估准则，而非 bug 表象。ASLR 决策体现 '创造性消除约束优于正面突破'：用环境结构弱点（无限地址空间）替代信息泄露原语。",
+      "short_quote": "the cleanest way to implement a full Chrome chain would be to use a renderer exploit to enable these bindings in the running renderer",
+      "source": {
+        "title": "Virtually Unlimited Memory: Escaping the Chrome Sandbox",
+        "url": "https://projectzero.google/2019/04/virtually-unlimited-memory-escaping.html",
+        "published": "2019-04-11",
+        "source_type": "Project Zero 博客（独立署名）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_y9uo3opbrwv27c4pbz0f0drs",
+        "accessed_at": "2026-09-26T14:22:48.201294+00:00",
+        "content_sha256": "8cad1188c3168684ffefea60c17bed74aa1a3c27034e5584c505a6ca2dc6c324"
+      }
+    },
+    {
+      "id": "mb-dec-005-network-stack-transition-window",
+      "date": "2020-02-11",
+      "claim": "Brand 与 Glazunov 选择 Chrome 网络栈，因其 'has been split out into a new service process, the implementation of strict sandboxing for that process isn't completed yet, so it's still a highly privileged attack surface'，并称 'this bug alone would be enough to both get initial code execution, and to break out of the Chrome sandbox'。写作目的明确为 'to illustrate the difficulties that even experienced researchers sometimes face'，并坦承 'we'd just been too lazy to set up a build environment' 与 'This was a major face-palm moment'。",
+      "status": "documented",
+      "growth_signal": "机制：目标选择捕捉架构转型窗口——servicification 已分进程但沙箱未完成，使网络进程同时具备远程可达与高特权。输出习惯上选择公开失败与惰性（'too lazy'、'face-palm'）作为一等内容，把研究叙事转化为可复用的失败教训而非成功传记，构成其 'honest research journey' 文体。",
+      "short_quote": "the implementation of strict sandboxing for that process isn't completed yet, so it's still a highly privileged attack surface",
+      "source": {
+        "title": "A day^W^W Several months in the life of Project Zero - Part 1",
+        "url": "https://projectzero.google/2020/02/several-months-in-life-of-part1.html",
+        "published": "2020-02-11",
+        "source_type": "Project Zero 博客（与 Sergei Glazunov 合著）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_eg74n8uf5d57s5wel36o7ubc",
+        "accessed_at": "2026-09-26T14:22:48.201280+00:00",
+        "content_sha256": "030c80b2bada9eae8de0fe8b47e7053b627f10b8ccc0606ebb71606c04541185"
+      }
+    },
+    {
+      "id": "mb-dec-006-mte-method-pivot",
+      "date": "2023-08-02",
+      "claim": "Brand 从进攻演示转向防御评估，发布 MTE Part 1，核心研究问题为 'whether it's possible to use this instruction set extension to implement effective security mitigations, or whether its use is limited to debugging/fault detection purposes'。建立分类法：Soft mitigation='attacker pays a one-time cost'；Hard mitigation='cannot develop a bypass technique which is reusable between different vulnerabilities'；Solution='eliminates exploitability of a vulnerability or class'。设定 95% 可靠性阈值（CONFIG_HZ_250 下需 ~0.2ms 完成）。",
+      "status": "documented",
+      "growth_signal": "机制：方法转型——从 '找 bug/写 exploit' 转向 '以攻击者视角评估防御是否成立'。建立可量化的评估框架（soft/hard/solution + 明确可靠性阈值），使 '缓解措施是否有效' 从主观判断转为可复现度量。这是其智识谱系从纯进攻到攻防一体的关键转折。",
+      "short_quote": "whether it's possible to use this instruction set extension to implement effective security mitigations, or whether its use is limited to debugging/fault detection purposes",
+      "source": {
+        "title": "MTE As Implemented, Part 1: Implementation Testing",
+        "url": "https://projectzero.google/2023/08/mte-as-implemented-part-1.html",
+        "published": "2023-08-02",
+        "source_type": "Project Zero 博客（独立署名）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_pf1t7sir8bdwj8ndlh2vy2y0",
+        "accessed_at": "2026-09-26T14:22:48.201300+00:00",
+        "content_sha256": "76370e99ad308e7465df8df902482cbda588902af4fca275dad2cd2f0ac85572"
+      }
+    },
+    {
+      "id": "mb-dec-007-mte-pixel8-delivery",
+      "date": "2023-11-03",
+      "claim": "Brand 发布 Pixel 8 MTE 落地指南，称 'It's finally time for me to fulfill a long-standing promise'，并追溯其自 late 2017 起关注 MTE。自述 'I've been running my Pixel 8 with MTE enabled since release day, and so far I haven't found any issues'，在 stock image 上用 ADB setprop 三步将 MTE 默认从 opt-in 改为 opt-out。定位为 'MTE is not a silver bullet for memory safety' 但 'huge step forward'。",
+      "status": "documented",
+      "growth_signal": "机制：把评估结论转为可操作交付物（ADB 步骤+opt-out 配置），并以自用真机作为可信度背书。'兑现承诺' 的叙事显示其研究以长期承诺为驱动，而非短期产出；对 'silver bullet' 的拒绝与对 'huge step forward' 的肯定并存，体现渐进式防御投资观。",
+      "short_quote": "I've been running my Pixel 8 with MTE enabled since release day, and so far I haven't found any issues",
+      "source": {
+        "title": "First handset with MTE on the market",
+        "url": "https://projectzero.google/2023/11/first-handset-with-mte-on-market.html",
+        "published": "2023-11-03",
+        "source_type": "Project Zero 博客（独立署名）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_gazp7skwp78c8d51c5u27qtl",
+        "accessed_at": "2026-09-26T14:22:48.201312+00:00",
+        "content_sha256": "2d55a3689bee20613ebf3776666e50984e3daf8e708e2f78b61fa4bdc95e8f22"
+      }
+    },
+    {
+      "id": "mb-dec-008-naptime-method-pivot",
+      "date": "2024-06-20",
+      "claim": "Brand 与 Glazunov 发布 Project Naptime，明确方法转型：'we're always looking for new approaches'，目标为 'automated detection of unfuzzable vulnerabilities'，自 mid 2023 起与 DeepMind 合作出 LLM 辅助研究框架。提出五原则：Space for Reasoning、Interactive Environment、Specialised Tools、Perfect Verification、Sampling Strategy，主张 LLM 应复现人类研究员的系统性方法而非单次提示。",
+      "status": "documented",
+      "growth_signal": "机制：方法转型的第二条线——把人类研究员方法论编码给 LLM。五原则直接来自其过往研究习惯（verbose 推理、交互式纠错、专用工具、可确定性验证、多假设独立采样），是把 tacit practice 显式化为可复制框架的产物；选 'unfuzzable' 为切入点，是把 LLM 用在传统工具盲区而非与 fuzzer 竞争。",
+      "short_quote": "we're always looking for new approaches",
+      "source": {
+        "title": "Project Naptime: Evaluating Offensive Security Capabilities of Large Language Models",
+        "url": "https://projectzero.google/2024/06/project-naptime.html",
+        "published": "2024-06-20",
+        "source_type": "Project Zero 博客（与 Sergei Glazunov 合著）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_85i8tcskgu0sydlli9dwsp8w",
+        "accessed_at": "2026-09-26T14:22:48.201286+00:00",
+        "content_sha256": "fabcc3de2220c84023e9cd4376994ad75c44aae32c1cf2af921fd964a186bdf5"
+      }
+    },
+    {
+      "id": "mb-dec-009-bigsleep-variant-analysis",
+      "date": "2024-11-01",
+      "claim": "Brand 列名 Big Sleep 团队成员。团队选变体分析为 LLM 入口，理由为 'fuzzing is not succeeding at catching such variants, and that for attackers, manual variant analysis is a cost-effective approach'，且提供起点 'remove[s] a lot of ambiguity from vulnerability research'。该 AI 发现 SQLite seriesBestIndex 栈缓冲下溢，'remained undiscovered after 150 CPU-hours of fuzzing'。团队坦承 'still in the research stage' 且 'a target-specific fuzzer would be at least as effective'；防御框架为发布前发现使 'no scope for attackers to compete'。",
+      "status": "documented",
+      "growth_signal": "机制：选择变体分析而非全自主研究作为 LLM 落地形态，因它为模型提供 'concrete, well-founded theory' 起点从而降低模糊性——这是对 LLM 能力边界的现实评估。诚实标注 'target-specific fuzzer 至少同样有效' 体现不夸大、明确工具适用域的输出习惯；防御框架（pre-release 发现）把研究价值锚定在 '消除攻击者竞争窗口' 而非 CVE 计数。",
+      "short_quote": "fuzzing is not succeeding at catching such variants, and that for attackers, manual variant analysis is a cost-effective approach",
+      "source": {
+        "title": "From Naptime to Big Sleep: Using Large Language Models To Catch Vulnerabilities In Real-World Code",
+        "url": "https://projectzero.google/2024/10/from-naptime-to-big-sleep.html",
+        "published": "2024-11-01",
+        "source_type": "Project Zero 博客（Big Sleep 团队署名，Brand 列名）",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_ylxuyj0eu5gtbjmkgqq1sk30",
+        "accessed_at": "2026-09-26T14:22:48.201290+00:00",
+        "content_sha256": "748f15894b76ffcdb96e49bd161cec09a29fc719b6c9b969d0c0c0fe58b25398"
+      }
+    }
+  ],
+  "contradictions": [
+    "Twitter/social handle 不一致：person_json.social 记为 https://x.com/markbrand0，本地种子 06-timeline 与 03-expression-dna 记为 @sidrfrk。两处均未通过抓取核验，无法判定哪个为当前有效 handle。",
+    "首篇 P0 发文时间：本地种子 06-timeline 称 'first confirmed P0 blog post is from July 2018'，但已核验的 Flash PCRE 文章发表于 2015-02-12，种子内部存在事实错误；以核验的 2015-02 为准。",
+    "person_json 的 selected_conference_evidence 标 'Black Hat US/EU / POC'，但本地种子 04-external-views 称未找到任何确认的公开会议演讲（HITB/Hexacon 等档案不可达）。二者尚未调和，且本次未抓取任何会议演讲页面。"
+  ],
+  "gaps": [
+    "加入 Project Zero 的确切时间未公开；最早可核验发文为 2015-02-12，表明加入不晚于 2015 年初，但入职日期本身无公开来源。",
+    "2025-2026 年无 Mark Brand 独立署名的 P0 博客；当前是否仍在 P0、是否转入纯团队/DeepMind 协作项目，无公开确认，也未发现离职公告。",
+    "早期职业与教育背景无公开信息；pre-P0 雇主、学位均未见于可核验来源。",
+    "公开会议演讲未核验：未抓取任何 Black Hat / POC / OffensiveCon 演讲页面，无法确认 person_json 所列会议证据是否对应实际演讲事实。",
+    "披露争议：未发现 Brand 个人涉及 90 天期限公开争议的记录，但私下与厂商的交互不可见，'无争议' 为证据缺失而非证据。",
+    "peer 引用（Silvanovich 2020 Android Messenger、Glazunov 2021 Chrome Infinity Bug 中对 Brand 的归属）为二手，本次未抓取核验，故未作为 item 纳入。",
+    "Brand 主动放弃/中止的研究方向无公开记录；种子 05-decisions 亦承认 'No explicit discussion found of research directions Brand started and deliberately abandoned'。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-decisions-20260926-221744-742",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790432568180641000-mark-brand-decisions.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "6c3bde91-551e-44da-a543-4ba51385b146",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_89n61wzefzuu3o8nrd4fpe5p",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-decisions-20260926-221744-742/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "e93e1fea0cf7f75fe9b633203878edc6030edd05b6b783634604888d5af128c0",
+        "accessed_at": "2026-09-26T14:22:48.201050+00:00"
+      },
+      {
+        "tool_use_id": "call_7x6pag1bw9m1wvkorcyjsswh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-decisions-20260926-221744-742/task.md"
+        },
+        "success": true,
+        "content_sha256": "452909103f08f6a1afef54dac0b9bc2c295af33bbfdc982b9ec8a88369f92493",
+        "accessed_at": "2026-09-26T14:22:48.201081+00:00"
+      },
+      {
+        "tool_use_id": "call_e9imfm7k6tytysoct9lszv9u",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-decisions-20260926-221744-742/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "12dddb50880f3184b0ac7f388dccb7d02c28002cfbdfe0de4dacf98bc175af6c",
+        "accessed_at": "2026-09-26T14:22:48.201094+00:00"
+      },
+      {
+        "tool_use_id": "call_4586t7bdkzfr307v4rkp0uvh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-decisions-20260926-221744-742/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "99155d4ccd297164f5ced8866c603c235b6938513fae52aa898748d875e37f67",
+        "accessed_at": "2026-09-26T14:22:48.201105+00:00"
+      },
+      {
+        "tool_use_id": "call_izr6i7ssgf4hmp2tvck1zbih",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-decisions-20260926-221744-742/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "e22779ebfe7d5b49ded04b7dd8eea061c886b28b0ef96ff5ac6a83dd37d9ffcb",
+        "accessed_at": "2026-09-26T14:22:48.201109+00:00"
+      },
+      {
+        "tool_use_id": "call_fpqjdiufgjzeuavn1lbf36ri",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-decisions-20260926-221744-742/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "a6ede7b3f3853b6c792b73d1dfa23cf053f07280a0fc2bcf2453d7c28705a45e",
+        "accessed_at": "2026-09-26T14:22:48.201113+00:00"
+      },
+      {
+        "tool_use_id": "call_f9ro2je66qrq33u75p7w4d5o",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-decisions-20260926-221744-742/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "f1b03275d25ae05b079d5976fe70cf6764dcf499d021ee7add670a9c8692f823",
+        "accessed_at": "2026-09-26T14:22:48.201119+00:00"
+      },
+      {
+        "tool_use_id": "call_qt2jyn7jeuz8agyyc07l8i9h",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/mark-brand-perspective/references/research/05-decisions.md"
+        },
+        "success": true,
+        "content_sha256": "19fd3e8d4c4565e699c81c4cfea83e30d245db89deddb61392a1cf716abe88e8",
+        "accessed_at": "2026-09-26T14:22:48.201142+00:00"
+      },
+      {
+        "tool_use_id": "call_yaxkqo2hsqysbxzfd2cz6e87",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/mark-brand-perspective/references/research/06-timeline.md"
+        },
+        "success": true,
+        "content_sha256": "e47eda4d5148f436e45e67d98ea7aa23ea7191e6ccddc57f92185ba2d142ae6d",
+        "accessed_at": "2026-09-26T14:22:48.201159+00:00"
+      },
+      {
+        "tool_use_id": "call_ywewhvlfr3wmpcvegw177rxe",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/mark-brand-perspective/references/research/01-writings.md"
+        },
+        "success": true,
+        "content_sha256": "069263313b3047687cb80e4e4f4edd0123bfaaaa5ac929c8e6675cf286df658e",
+        "accessed_at": "2026-09-26T14:22:48.201182+00:00"
+      },
+      {
+        "tool_use_id": "call_6xcz8vpns489al44stucg55l",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/mark-brand-perspective/references/research/02-conversations.md"
+        },
+        "success": true,
+        "content_sha256": "fed4858d30032396dfb13f2196bcabc4c0c1e97c030e81c00e76fbfed1e61381",
+        "accessed_at": "2026-09-26T14:22:48.201202+00:00"
+      },
+      {
+        "tool_use_id": "call_2p8oh0dzokedxlsby8kdnho3",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/mark-brand-perspective/references/research/03-expression-dna.md"
+        },
+        "success": true,
+        "content_sha256": "0c976eab778539aed4d1f2ee571f3da1cc758417eb99aea334ad8a71f4ea4646",
+        "accessed_at": "2026-09-26T14:22:48.201219+00:00"
+      },
+      {
+        "tool_use_id": "call_jrqyo4l9egdsxp57gez1b2n4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/mark-brand-perspective/references/research/04-external-views.md"
+        },
+        "success": true,
+        "content_sha256": "04b77111fa335d41bf8b01a36a81f6eeea23d26ae61e46f7e4e459c1117e9aeb",
+        "accessed_at": "2026-09-26T14:22:48.201234+00:00"
+      },
+      {
+        "tool_use_id": "call_y9uo3opbrwv27c4pbz0f0drs",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/2019/04/virtually-unlimited-memory-escaping.html",
+          "prompt": "Extract: (1) the author byline/self-title and publication date; (2) the explicit stated reasons for choosing Chrome Mojo IPC as the research target, including any quotes about MojoJS bindings, sandbox escape being the critical step, and enabling bindings from a compromised renderer; (3) the explicit reasoning for the ASLR bypass approach (virtual memory spraying instead of info leak); (4) the closing phrase/sign-off; (5) any statement about whether this was a collection of bugs and why one was chosen. Quote verbatim short phrases."
+        },
+        "success": true,
+        "content_sha256": "8cad1188c3168684ffefea60c17bed74aa1a3c27034e5584c505a6ca2dc6c324",
+        "accessed_at": "2026-09-26T14:22:48.201294+00:00"
+      },
+      {
+        "tool_use_id": "call_85i8tcskgu0sydlli9dwsp8w",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/2024/06/project-naptime.html",
+          "prompt": "Extract: (1) authors and publication date; (2) the explicit motivation for using LLMs for vulnerability research — why this direction, what gap it fills; (3) the five guiding principles for LLM-assisted security research (list them); (4) any statement about \"unfuzzable\" vulnerabilities or variant analysis; (5) any explicit framing of this as a pivot/new approach for the team. Quote verbatim short phrases where possible."
+        },
+        "success": true,
+        "content_sha256": "fabcc3de2220c84023e9cd4376994ad75c44aae32c1cf2af921fd964a186bdf5",
+        "accessed_at": "2026-09-26T14:22:48.201286+00:00"
+      },
+      {
+        "tool_use_id": "call_pf1t7sir8bdwj8ndlh2vy2y0",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/2023/08/mte-as-implemented-part-1.html",
+          "prompt": "Extract: (1) author byline and publication date; (2) the explicit core research question about MTE (whether it can implement security mitigations vs remain debugging-only); (3) the soft/hard mitigation vs solution taxonomy definitions; (4) any statement about why the author is evaluating MTE from an attacker's perspective; (5) the 95% reliability threshold assumption and rationale. Quote verbatim short phrases."
+        },
+        "success": true,
+        "content_sha256": "76370e99ad308e7465df8df902482cbda588902af4fca275dad2cd2f0ac85572",
+        "accessed_at": "2026-09-26T14:22:48.201300+00:00"
+      },
+      {
+        "tool_use_id": "call_eg74n8uf5d57s5wel36o7ubc",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/2020/02/several-months-in-life-of-part1.html",
+          "prompt": "Extract: (1) authors and publication date; (2) the explicit reasoning for choosing the Chrome network stack as the target — quotes about servicification, the network process being split out but not yet sandboxed, and it being a highly privileged attack surface; (3) any statement that this bug alone could both get initial code execution and break out of the Chrome sandbox; (4) any self-deprecating quotes about laziness, mistakes, or \"face-palm\"; (5) the stated purpose of writing the mini-series (illustrating difficulties). Quote verbatim short phrases."
+        },
+        "success": true,
+        "content_sha256": "030c80b2bada9eae8de0fe8b47e7053b627f10b8ccc0606ebb71606c04541185",
+        "accessed_at": "2026-09-26T14:22:48.201280+00:00"
+      },
+      {
+        "tool_use_id": "call_ylxuyj0eu5gtbjmkgqq1sk30",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/2024/10/from-naptime-to-big-sleep.html",
+          "prompt": "Extract: (1) publication date and whether Mark Brand is listed as a team member; (2) the explicit rationale for choosing variant analysis as the LLM use case — quotes about providing a starting point removing ambiguity, and fuzzing not succeeding at catching variants; (3) any statement about the SQLite vulnerability found and that it evaded fuzzing; (4) any honest statement about current limitations of the AI approach; (5) the defensive framing (pre-release discovery prevents exploitation). Quote verbatim short phrases."
+        },
+        "success": true,
+        "content_sha256": "748f15894b76ffcdb96e49bd161cec09a29fc719b6c9b969d0c0c0fe58b25398",
+        "accessed_at": "2026-09-26T14:22:48.201290+00:00"
+      },
+      {
+        "tool_use_id": "call_24qe62shdzwq44q5y88i3s37",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: (1) author byline/self-title and publication date; (2) any explicit statement of why the author targeted Flash PCRE / what the exploitation path was; (3) the closing sign-off phrase; (4) any self-deprecating or persistence quote about how long it took to find a useful primitive. Quote verbatim short phrases.",
+          "url": "https://projectzero.google/2015/02/exploitingscve-2015-0318sinsflash.html"
+        },
+        "success": true,
+        "content_sha256": "419b5cec364840969dad67b53941d228b4dd2319e3a2a3185f4556b6a9ea5464",
+        "accessed_at": "2026-09-26T14:22:48.201307+00:00"
+      },
+      {
+        "tool_use_id": "call_pjvcdw3yer9opy7iczgeqqwv",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: (1) author byline/self-title and publication date; (2) the explicit reasoning for choosing SwiftShader as the target — why it is always reachable (fallback rendering on all platforms) and the precision-issue hypothesis; (3) the phrase \"look at things sideways\" and its context about finding javascript-accessible attack surface in unlikely places; (4) any mention of forcing Chrome to fall back to SwiftShader by crashing the GPU process. Quote verbatim short phrases.",
+          "url": "https://projectzero.google/2018/10/heap-feng-shader-exploiting-swiftshader.html"
+        },
+        "success": true,
+        "content_sha256": "c8d12031aa180ab5b8d075daaf077c9892f88cb0bf2786ea94e73b59d25bc547",
+        "accessed_at": "2026-09-26T14:22:48.201316+00:00"
+      },
+      {
+        "tool_use_id": "call_mkfirq9x7obs0qxafckf4rms",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: (1) author byline/self-title and publication date; (2) the \"Bypasser of Mitigations\" or other self-title; (3) any statement about why the author moved to Android Stagefright / the exploitability of CVE-2015-3864 (linear heap overflow giving attacker control over size, amount, contents); (4) any statement about using brute force against 8-bit ASLR rather than seeking an info leak, and the ~4% per-minute success rate; (5) the closing sign-off. Quote verbatim short phrases.",
+          "url": "https://projectzero.google/2015/09/stagefrightened.html"
+        },
+        "success": true,
+        "content_sha256": "39999623641964b5457c6fd6be884e396207b73e82dd92c928f8f08a8749294f",
+        "accessed_at": "2026-09-26T14:22:48.201320+00:00"
+      },
+      {
+        "tool_use_id": "call_gazp7skwp78c8d51c5u27qtl",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Extract: (1) author byline and publication date; (2) the explicit statement that this fulfills a long-standing promise; (3) any statement about running MTE on personal Pixel 8 since release with no app compatibility issues; (4) the advocacy framing — \"MTE is not a silver bullet\" but a \"huge step forward\"; (5) step-by-step ADB instructions context. Quote verbatim short phrases.",
+          "url": "https://projectzero.google/2023/11/first-handset-with-mte-on-market.html"
+        },
+        "success": true,
+        "content_sha256": "2d55a3689bee20613ebf3776666e50984e3daf8e708e2f78b61fa4bdc95e8f22",
+        "accessed_at": "2026-09-26T14:22:48.201312+00:00"
+      },
+      {
+        "tool_use_id": "call_4vus0pyt4kwu0o5iqdbxz81t",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-decisions-20260926-221744-742/checkpoint.md",
+          "content": "# Checkpoint — Mark Brand / 关键决策与转折\n\n## 任务状态\n- 维度：关键决策与转折（研究换领域、换团队、重要项目、披露事件和方法转型；重建约束、可选项、选择、后果）\n- 已读：task.md、output.schema.json、person_json.json、dimension_name.md、dimension_questions.md、local_seed_note.md、6 份本地种子\n- 抓取：9 次 WebFetch（超过 8 次上限，停止抓取，进入输出阶段）\n\n## 已确认来源（WebFetch 实读，URL 与 source.url 一致）\n1. 2015-02-12 Exploiting CVE-2015-0318 in Flash — byline \"Mark Brand, Irregular Expressionist\"；PCRE=Flash RegExp 引擎；\"surprisingly robust... took quite a while before I found a useful primitive\"；\"Make zeroday hard.\"\n2. 2015-09-16 Stagefrightened? — byline \"Mark Brand, Bypasser of Mitigations\"；CVE-2015-3864=\"linear heap-overflow giving the attacker control over the size of the allocation; the amount of overflow, and the contents\"；8-bit ASLR brute force；~4%/min；\"Make zeroday hard.\"\n3. 2018-10-24 Heap Feng Shader — \"look at things sideways — avoiding the perhaps more obvious and highly contested areas such as the main javascript JIT engine\"；GPU 进程权限高于渲染进程；4 次 GPU crash 强制 SwiftShader fallback。\n4. 2019-04-11 Virtually Unlimited Memory — byline \"Mark Brand, Exploit Technique Archaeologist\"；\"a collection of possible sandbox escape vulnerabilities\"；MojoJS binding 使 IPC 可从 JS 直接调用；issue 1755 选取理由=\"high level of control the attacker has both over the lifetime of the free'd object, and over the timing of the later use\"；3.5TB spray 绕 ASLR（\"No inter-process randomisation on Windows\"+\"No limitations on address-space usage in the Chrome Browser Process\"）；\"Make zeroday hard.\"\n5. 2020-02-11 Several Months Part 1 — Glazunov+Brand；网络栈选择理由=\"the networking code in Chrome has been split out into a new service process, the implementation of strict sandboxing for that process isn't completed yet, so it's still a highly privileged attack surface\"；\"this bug alone would be enough to both get initial code execution, and to break out of the Chrome sandbox\"；\"we'd just been too lazy to set up a build environment\"；\"This was a major face-palm moment\"；写作目的=\"to illustrate the difficulties that even experienced researchers sometimes face\"。\n6. 2023-08-02 MTE Part 1 — byline \"By Mark Brand, Project Zero\"；核心问题=\"whether it's possible to use this instruction set extension to implement effective security mitigations, or whether its use is limited to debugging/fault detection purposes\"；Soft=\"attacker pays a one-time cost\"；Hard=\"cannot develop a bypass technique which is reusable between different vulnerabilities\"；Solution=\"eliminates exploitability\"；95% 阈值+0.2ms（CONFIG_HZ_250, 4ms timer）。\n7. 2023-11-03 First handset with MTE — \"It's finally time for me to fulfill a long-standing promise\"（since late 2017 听说 MTE）；\"I've been running my Pixel 8 with MTE enabled since release day, and so far I haven't found any issues\"；\"MTE is not a silver bullet for memory safety\" 但 \"huge step forward\"；ADB setprop 三步，opt-out。\n8. 2024-06-20 Project Naptime — Glazunov+Brand；\"we're always looking for new approaches\"；\"automated detection of 'unfuzzable' vulnerabilities\"；五原则（Space for Reasoning / Interactive Environment / Specialised Tools / Perfect Verification / Sampling Strategy）；mid 2023 开始；与 DeepMind 合作。\n9. 2024-11-01 From Naptime to Big Sleep — Brand 列名团队成员；变体分析=\"fuzzing is not succeeding at catching such variants, and that for attackers, manual variant analysis is a cost-effective approach\"；起点=\"remove a lot of ambiguity\"；SQLite seriesBestIndex stack buffer underflow；\"remained undiscovered after 150 CPU-hours of fuzzing\"；\"still in the research stage\"；pre-release defensive framing=\"no scope for attackers to compete\"。\n\n## 矛盾点（待 output 记录）\n- person_json.social = https://x.com/markbrand0，但种子 timeline/expression-dna 标 Twitter 为 @sidrfrk —— handle 不一致，未核验（未抓取 Twitter）。\n- person_json.selected_conference_evidence = \"Black Hat US/EU / POC\"，但种子 04-external-views 说无确认的公开会议演讲 —— 缺口。\n- 种子 06-timeline 称\"first confirmed P0 blog post is from July 2018\"，与已核验的 2015-02 Flash PCRE 文章矛盾 —— 种子内部错误，以核验事实为准。\n\n## 缺口\n- 加入 P0 确切时间：2015-02 已发文，说明加入不晚于 2015 年初；种子估计 2016-2017 错误。\n- 2025-2026 无 solo 发文，当前状态/是否转换团队不明。\n- 无确认公开会议演讲。\n- 早期职业/教育背景无公开信息。\n- 披露争议：无公开记录（与 Tavis Ormandy 等不同），无法判断私下争议。\n- 未核验：peer 引用（Silvanovich 2020、Glazunov 2021）的二手归属——未抓取，不入 items。\n\n## 下一步\n写 output.json，9 个 items（全部 documented，一手 P0 博客核验），记录矛盾与缺口，不填 verification。\n"
+        },
+        "success": true,
+        "content_sha256": "8c5ff8bddadd5367755760e5eda0d083de7740abbbe81f30a6f12314e788a177",
+        "accessed_at": "2026-09-26T14:22:48.201415+00:00"
+      },
+      {
+        "tool_use_id": "call_i7u729h05wqo9gggnu6irdjw",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/mark-brand-decisions-20260926-221744-742/output.json",
+          "content": "{\n  \"person\": \"Mark Brand\",\n  \"dimension\": \"关键决策与转折\",\n  \"identity_check\": \"人物身份确认：核验的 9 篇 Project Zero 博客均署名 Mark Brand（部分与 Sergei Glazunov、Ivan Fratric 合著），其自署头衔随时间演变（Irregular Expressionist → Bypasser of Mitigations → Exploit Technique Archaeologist），与 person_json 的 '浏览器与沙箱逃逸' 方向一致。两处 handle 信息存疑：person_json.social 为 https://x.com/markbrand0，而本地种子 timeline/expression-dna 记 Twitter 为 @sidrfrk，二者不一致；本次未抓取 Twitter，无法判定哪个有效，留作缺口。本地种子 06-timeline 称其首篇 P0 文章在 2018-07，但已核验的 2015-02 Flash PCRE 文章早于此，种子内部存在事实错误，以核验事实为准。\",\n  \"items\": [\n    {\n      \"id\": \"mb-dec-001-flash-pcre-start\",\n      \"date\": \"2015-02-12\",\n      \"claim\": \"Mark Brand 在 Project Zero 的最早可核验公开研究为 2015-02 的 Flash PCRE（CVE-2015-0318）漏洞利用，自署 'Irregular Expressionist'。选择 Flash/PCRE 作为起点对应当时 Flash 仍是浏览器主导攻击面、且 PCRE 正则引擎可达的约束；利用路径为无效字节码→指针操控→OOB 写→Vector.<uint> 长度损坏→任意读写→ROP。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"机制：目标选择受当时最高暴露攻击面（Flash）驱动；面对 'surprisingly robust' 的 PCRE 字节码校验，他没有放弃而是承认 'took quite a while before I found a useful primitive'，体现重复试错而非天赋叙事；收尾 'Make zeroday hard.' 已在首篇确立为贯穿后续十年的输出习惯。\",\n      \"short_quote\": \"it took quite a while before I found a useful primitive for corrupting memory\",\n      \"source\": {\n        \"title\": \"Exploiting CVE-2015-0318 in Flash\",\n        \"url\": \"https://projectzero.google/2015/02/exploitingscve-2015-0318sinsflash.html\",\n        \"published\": \"2015-02-12\",\n        \"source_type\": \"Project Zero 博客（独立署名）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mb-dec-002-stagefright-android-pivot\",\n      \"date\": \"2015-09-16\",\n      \"claim\": \"Brand 自署 'Bypasser of Mitigations'，转向 Android Stagefright（CVE-2015-3864）。选择该 bug 的理由是它赋予攻击者对 'the size of the allocation; the amount of overflow, and the contents' 的三重控制；在 mediaserver 难以构造信息泄露的约束下，选择对 8-bit ASLR 直接暴力枚举（1/256）而非追求信息泄露，实测约 ~4%/分钟 成功率。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"机制：领域转换（Flash→Android media）跟随远程预认证高暴露面迁移；关键决策是约束下的可选项取舍——放弃昂贵的信息泄露、接受暴力枚举的较低可靠性，因为 watering-hole 场景允许多次重试。这是其后反复出现的 'pragmatism over elegance' 决策模式的首个明确实例。\",\n      \"short_quote\": \"a linear heap-overflow giving the attacker control over the size of the allocation; the amount of overflow, and the contents\",\n      \"source\": {\n        \"title\": \"Stagefrightened?\",\n        \"url\": \"https://projectzero.google/2015/09/stagefrightened.html\",\n        \"published\": \"2015-09-16\",\n        \"source_type\": \"Project Zero 博客（独立署名）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mb-dec-003-swiftshader-sideways\",\n      \"date\": \"2018-10-24\",\n      \"claim\": \"Brand 选择 SwiftShader 作为攻击面，因 GPU 进程 'needs to have more privileges than the highly-sandboxed renderer processes'，且 Chrome 在 GPU 加速失败 4 次后会回退到 SwiftShader，故该面始终可达；方法论上他明确提出 'look at things sideways — avoiding the perhaps more obvious and highly contested areas such as the main javascript JIT engine'。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"机制：目标选择从 '正面强攻 JIT' 转向 '横向寻找非显见子系统'，这是其工具建设与选点习惯的核心启发式——攻击 GPU 回退路径而非主 JS 引擎。通过可主动触发的环境降级（crash GPU 4 次）把 '非默认路径' 转化为 '可强制可达路径'。\",\n      \"short_quote\": \"look at things sideways — avoiding the perhaps more obvious and highly contested areas such as the main javascript JIT engine\",\n      \"source\": {\n        \"title\": \"Heap Feng Shader: Exploiting SwiftShader in Chrome\",\n        \"url\": \"https://projectzero.google/2018/10/heap-feng-shader-exploiting-swiftshader.html\",\n        \"published\": \"2018-10-24\",\n        \"source_type\": \"Project Zero 博客（独立署名）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mb-dec-004-chrome-mojo-sandbox-escape\",\n      \"date\": \"2019-04-11\",\n      \"claim\": \"Brand 自署 'Exploit Technique Archaeologist'，选择 Chrome Mojo IPC 作为全链沙箱逃逸目标。明确决策链：(a) MojoJS binding 使 IPC 可从 JS 直接调用，故可借渲染端漏洞启用 binding 后从 JS 做提权；(b) 先发现 'a collection of possible sandbox escape vulnerabilities'，再选 issue 1755，理由为 'the high level of control the attacker has both over the lifetime of the free'd object, and over the timing of the later use'；(c) ASLR 绕过放弃信息泄露，改用 ~3.5TB 虚拟地址喷射，利用 Windows 无跨进程 ASLR 与浏览器进程无地址空间上限两项设计缺口。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"机制：选择沙箱逃逸而非渲染端 bug，因 'sandbox escape is the critical escalation step'——把研究投入放在全链中稀缺环节；选 bug 时以 '攻击者对对象生命周期与重用时机的控制度' 为评估准则，而非 bug 表象。ASLR 决策体现 '创造性消除约束优于正面突破'：用环境结构弱点（无限地址空间）替代信息泄露原语。\",\n      \"short_quote\": \"the cleanest way to implement a full Chrome chain would be to use a renderer exploit to enable these bindings in the running renderer\",\n      \"source\": {\n        \"title\": \"Virtually Unlimited Memory: Escaping the Chrome Sandbox\",\n        \"url\": \"https://projectzero.google/2019/04/virtually-unlimited-memory-escaping.html\",\n        \"published\": \"2019-04-11\",\n        \"source_type\": \"Project Zero 博客（独立署名）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mb-dec-005-network-stack-transition-window\",\n      \"date\": \"2020-02-11\",\n      \"claim\": \"Brand 与 Glazunov 选择 Chrome 网络栈，因其 'has been split out into a new service process, the implementation of strict sandboxing for that process isn't completed yet, so it's still a highly privileged attack surface'，并称 'this bug alone would be enough to both get initial code execution, and to break out of the Chrome sandbox'。写作目的明确为 'to illustrate the difficulties that even experienced researchers sometimes face'，并坦承 'we'd just been too lazy to set up a build environment' 与 'This was a major face-palm moment'。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"机制：目标选择捕捉架构转型窗口——servicification 已分进程但沙箱未完成，使网络进程同时具备远程可达与高特权。输出习惯上选择公开失败与惰性（'too lazy'、'face-palm'）作为一等内容，把研究叙事转化为可复用的失败教训而非成功传记，构成其 'honest research journey' 文体。\",\n      \"short_quote\": \"the implementation of strict sandboxing for that process isn't completed yet, so it's still a highly privileged attack surface\",\n      \"source\": {\n        \"title\": \"A day^W^W Several months in the life of Project Zero - Part 1\",\n        \"url\": \"https://projectzero.google/2020/02/several-months-in-life-of-part1.html\",\n        \"published\": \"2020-02-11\",\n        \"source_type\": \"Project Zero 博客（与 Sergei Glazunov 合著）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mb-dec-006-mte-method-pivot\",\n      \"date\": \"2023-08-02\",\n      \"claim\": \"Brand 从进攻演示转向防御评估，发布 MTE Part 1，核心研究问题为 'whether it's possible to use this instruction set extension to implement effective security mitigations, or whether its use is limited to debugging/fault detection purposes'。建立分类法：Soft mitigation='attacker pays a one-time cost'；Hard mitigation='cannot develop a bypass technique which is reusable between different vulnerabilities'；Solution='eliminates exploitability of a vulnerability or class'。设定 95% 可靠性阈值（CONFIG_HZ_250 下需 ~0.2ms 完成）。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"机制：方法转型——从 '找 bug/写 exploit' 转向 '以攻击者视角评估防御是否成立'。建立可量化的评估框架（soft/hard/solution + 明确可靠性阈值），使 '缓解措施是否有效' 从主观判断转为可复现度量。这是其智识谱系从纯进攻到攻防一体的关键转折。\",\n      \"short_quote\": \"whether it's possible to use this instruction set extension to implement effective security mitigations, or whether its use is limited to debugging/fault detection purposes\",\n      \"source\": {\n        \"title\": \"MTE As Implemented, Part 1: Implementation Testing\",\n        \"url\": \"https://projectzero.google/2023/08/mte-as-implemented-part-1.html\",\n        \"published\": \"2023-08-02\",\n        \"source_type\": \"Project Zero 博客（独立署名）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mb-dec-007-mte-pixel8-delivery\",\n      \"date\": \"2023-11-03\",\n      \"claim\": \"Brand 发布 Pixel 8 MTE 落地指南，称 'It's finally time for me to fulfill a long-standing promise'，并追溯其自 late 2017 起关注 MTE。自述 'I've been running my Pixel 8 with MTE enabled since release day, and so far I haven't found any issues'，在 stock image 上用 ADB setprop 三步将 MTE 默认从 opt-in 改为 opt-out。定位为 'MTE is not a silver bullet for memory safety' 但 'huge step forward'。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"机制：把评估结论转为可操作交付物（ADB 步骤+opt-out 配置），并以自用真机作为可信度背书。'兑现承诺' 的叙事显示其研究以长期承诺为驱动，而非短期产出；对 'silver bullet' 的拒绝与对 'huge step forward' 的肯定并存，体现渐进式防御投资观。\",\n      \"short_quote\": \"I've been running my Pixel 8 with MTE enabled since release day, and so far I haven't found any issues\",\n      \"source\": {\n        \"title\": \"First handset with MTE on the market\",\n        \"url\": \"https://projectzero.google/2023/11/first-handset-with-mte-on-market.html\",\n        \"published\": \"2023-11-03\",\n        \"source_type\": \"Project Zero 博客（独立署名）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mb-dec-008-naptime-method-pivot\",\n      \"date\": \"2024-06-20\",\n      \"claim\": \"Brand 与 Glazunov 发布 Project Naptime，明确方法转型：'we're always looking for new approaches'，目标为 'automated detection of unfuzzable vulnerabilities'，自 mid 2023 起与 DeepMind 合作出 LLM 辅助研究框架。提出五原则：Space for Reasoning、Interactive Environment、Specialised Tools、Perfect Verification、Sampling Strategy，主张 LLM 应复现人类研究员的系统性方法而非单次提示。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"机制：方法转型的第二条线——把人类研究员方法论编码给 LLM。五原则直接来自其过往研究习惯（verbose 推理、交互式纠错、专用工具、可确定性验证、多假设独立采样），是把 tacit practice 显式化为可复制框架的产物；选 'unfuzzable' 为切入点，是把 LLM 用在传统工具盲区而非与 fuzzer 竞争。\",\n      \"short_quote\": \"we're always looking for new approaches\",\n      \"source\": {\n        \"title\": \"Project Naptime: Evaluating Offensive Security Capabilities of Large Language Models\",\n        \"url\": \"https://projectzero.google/2024/06/project-naptime.html\",\n        \"published\": \"2024-06-20\",\n        \"source_type\": \"Project Zero 博客（与 Sergei Glazunov 合著）\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"mb-dec-009-bigsleep-variant-analysis\",\n      \"date\": \"2024-11-01\",\n      \"claim\": \"Brand 列名 Big Sleep 团队成员。团队选变体分析为 LLM 入口，理由为 'fuzzing is not succeeding at catching such variants, and that for attackers, manual variant analysis is a cost-effective approach'，且提供起点 'remove[s] a lot of ambiguity from vulnerability research'。该 AI 发现 SQLite seriesBestIndex 栈缓冲下溢，'remained undiscovered after 150 CPU-hours of fuzzing'。团队坦承 'still in the research stage' 且 'a target-specific fuzzer would be at least as effective'；防御框架为发布前发现使 'no scope for attackers to compete'。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"机制：选择变体分析而非全自主研究作为 LLM 落地形态，因它为模型提供 'concrete, well-founded theory' 起点从而降低模糊性——这是对 LLM 能力边界的现实评估。诚实标注 'target-specific fuzzer 至少同样有效' 体现不夸大、明确工具适用域的输出习惯；防御框架（pre-release 发现）把研究价值锚定在 '消除攻击者竞争窗口' 而非 CVE 计数。\",\n      \"short_quote\": \"fuzzing is not succeeding at catching such variants, and that for attackers, manual variant analysis is a cost-effective approach\",\n      \"source\": {\n        \"title\": \"From Naptime to Big Sleep: Using Large Language Models To Catch Vulnerabilities In Real-World Code\",\n        \"url\": \"https://projectzero.google/2024/10/from-naptime-to-big-sleep.html\",\n        \"published\": \"2024-11-01\",\n        \"source_type\": \"Project Zero 博客（Big Sleep 团队署名，Brand 列名）\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"Twitter/social handle 不一致：person_json.social 记为 https://x.com/markbrand0，本地种子 06-timeline 与 03-expression-dna 记为 @sidrfrk。两处均未通过抓取核验，无法判定哪个为当前有效 handle。\",\n    \"首篇 P0 发文时间：本地种子 06-timeline 称 'first confirmed P0 blog post is from July 2018'，但已核验的 Flash PCRE 文章发表于 2015-02-12，种子内部存在事实错误；以核验的 2015-02 为准。\",\n    \"person_json 的 selected_conference_evidence 标 'Black Hat US/EU / POC'，但本地种子 04-external-views 称未找到任何确认的公开会议演讲（HITB/Hexacon 等档案不可达）。二者尚未调和，且本次未抓取任何会议演讲页面。\"\n  ],\n  \"gaps\": [\n    \"加入 Project Zero 的确切时间未公开；最早可核验发文为 2015-02-12，表明加入不晚于 2015 年初，但入职日期本身无公开来源。\",\n    \"2025-2026 年无 Mark Brand 独立署名的 P0 博客；当前是否仍在 P0、是否转入纯团队/DeepMind 协作项目，无公开确认，也未发现离职公告。\",\n    \"早期职业与教育背景无公开信息；pre-P0 雇主、学位均未见于可核验来源。\",\n    \"公开会议演讲未核验：未抓取任何 Black Hat / POC / OffensiveCon 演讲页面，无法确认 person_json 所列会议证据是否对应实际演讲事实。\",\n    \"披露争议：未发现 Brand 个人涉及 90 天期限公开争议的记录，但私下与厂商的交互不可见，'无争议' 为证据缺失而非证据。\",\n    \"peer 引用（Silvanovich 2020 Android Messenger、Glazunov 2021 Chrome Infinity Bug 中对 Brand 的归属）为二手，本次未抓取核验，故未作为 item 纳入。\",\n    \"Brand 主动放弃/中止的研究方向无公开记录；种子 05-decisions 亦承认 'No explicit discussion found of research directions Brand started and deliberately abandoned'。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "1837a1991ddd72a6570618b17fe44b9c46015d0a933f1b414249eba89e63db46",
+        "accessed_at": "2026-09-26T14:22:48.201450+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790432568201493000-mark-brand-decisions.json",
+    "label": "Mark Brand:decisions",
+    "elapsed_seconds": 303.45,
+    "prompt_sha256": "20986d236f9c849b6800583bd7d014f25f74fec697428bc3d191984e0c3117aa",
+    "num_turns": 25,
+    "total_cost_usd": 0.9615169999999997,
+    "usage": {
+      "input_tokens": 56391,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 275008,
+      "output_tokens": 12392,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 66993,
+        "outputTokens": 18456,
+        "cacheReadInputTokens": 330304,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.9615169999999997,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

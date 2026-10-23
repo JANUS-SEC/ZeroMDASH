@@ -1,0 +1,308 @@
+{
+  "person": "Natalie Silvanovich",
+  "expertise": [
+    "移动端零点击（0-click）利用链研究",
+    "媒体编解码器（音频/视频）攻击面挖掘与变异",
+    "Android 内核驱动攻击面与缓解机制（seccomp/kASLR/MTE）评估",
+    "二进制逆向工程与嵌入式/固件工具化",
+    "覆盖率引导、可定制黑盒二进制 fuzzing",
+    "面向攻击面预建可审计协议栈/格式解析器的本地副本"
+  ],
+  "stages": [
+    {
+      "period": "2014-2017",
+      "stage": "公开输出的起点：从非安全工具到逆向工具化",
+      "capability_change": "其最早可见的公开输出（2014 excusegen）是与安全无关的小工具；到 2017 年首批逆向/嵌入式向作品（Egg-Shell、Tamagotchi-Hack）已把对单一目标的逆向操作沉淀为他人可复用的开发工具，而非一次性 PoC。此阶段可观察的能力变化是从‘发布脚本’转向‘把逆向经验工具化’，但尚无攻击面研究产出（documented 起点对照，非成长机制本身）。",
+      "evidence_ids": [
+        "natalie-works-01",
+        "natalie-works-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "≤2019-2020",
+      "stage": "进入职业漏洞研究并聚焦 iMessage 攻击面",
+      "capability_change": "同事 Samuel Groß（2020-01-09）的 iMessage 远程利用研究中明确将 NSKeyedUnarchiver 组件的某 bug 归于她已‘discussed in depth’，表明此阶段她已在 iMessage/NSKeyedUnarchiver 这一移动端可达攻击面上有可被同伴引用的深耕产出。2019-02-20 的 Project Zero 招聘/团队说明页中她本人系统阐述‘进入漏洞研究最关键的是扎实的编码能力 + 公开漏洞报告 + 多样背景’，与其后续‘重复练习 + 工具建设’的实际作品自洽，标志职业方法论的显式化。",
+      "evidence_ids": [
+        "natasha-ext-04",
+        "natasha-ext-05"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2020-2025",
+      "stage": "攻击面迁移与自建工具副本的耦合建设",
+      "capability_change": "公开仓库时间线显示一条与攻击面迁移耦合的工具建设序列：2020-04 fork usrsctp（为 WebRTC data channel 使用的 SCTP 协议获取可审计本地副本）→ 2024-10 fork h26forge（把工具建设扩展到视频媒体的语法分析/变异，技术栈由 C 扩展到 Rust）→ 2025-02 fork Jackalope（把 Project Zero 内部覆盖率引导黑盒二进制 fuzzer 纳入个人可维护副本，README 自述‘easy to customize for targets where generic fuzzers might not work well’）。技术栈随目标难度上升而升级，体现‘先为攻击面预建可读副本、再造专用分析/变异工具’的工作模式。",
+      "evidence_ids": [
+        "natalie-works-03",
+        "natalie-works-04",
+        "natalie-works-05"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2026",
+      "stage": "端到端 0-click 利用链整合与复盘输出",
+      "capability_change": "2026-01-14 发布 Pixel 9 零点击利用链 Part 1（CVE-2025-54957，Dolby Unified Decoder EMDF payload 整数溢出，攻击面为 Google Messages 自动语音转写触发的 0-click 音频解码）与 Part 3 复盘文。能力变化为：把单漏洞研究整合为端到端 0-click 链，并把‘靶向复审数日内连中两洞’转化为对厂商流程的方法论建议（攻击面绘制、缓解强制校验、责任归属）。2025-12-16 她作为新博客首帖署名作者，与其随后立即跟进研究成果发布的输出节奏一致。",
+      "evidence_ids": [
+        "natalie-works-06",
+        "natalie-works-07",
+        "ns-dec-01",
+        "ns-dec-02",
+        "natalie-community-04",
+        "natalie-community-07",
+        "nsl-tl-05",
+        "nsl-tl-06",
+        "nsl-tl-07",
+        "nsl-tl-08"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "工具化沉淀：把逆向经验与攻击面研究固化为可复用工具",
+      "starting_conditions": "2014 年的公开输出仍为非安全小工具，且 2017 年首批逆向作品（Egg-Shell、Tamagotchi-Hack）已呈现‘把对单一目标的逆向操作转为他人可继续使用的开发工具’的倾向，而非只发布 PoC。",
+      "repeated_practice": "在多个目标上反复把逆向/分析经验沉淀为可维护工具或本地副本：2017 Egg-Shell/Tamagotchi-Hack（嵌入式逆向工具）→ 2020-04 fork usrsctp（为攻击 WebRTC/消息类攻击面预建协议栈本地副本）→ 2024-10 fork h26forge（视频媒体语法分析/变异工具，技术栈扩至 Rust）→ 2025-02 fork Jackalope（覆盖率引导、可分布式、可定制黑盒二进制 fuzzer，README 自述为‘generic fuzzers might not work well’的目标而设计）。",
+      "feedback": "工具被反复用于媒体/基带/消息类目标，并成为连接后续各 writeup 的工具支撑；Jackalope README 明确把‘攻击面研究 → 不适合通用 fuzzer 的目标 → 造专用 fuzzer’这一回路表述为设计目标。",
+      "intermediate_capability": "形成‘先为攻击面预建可读、可审计的本地副本，再据此造专用分析/变异工具’的工作模式，降低对厂商黑盒的依赖。",
+      "observed_outcomes": [
+        "usrsctp fork：为 WebRTC data channel 使用的 SCTP 协议获取可审计副本（2020-04）",
+        "h26forge fork：把工具建设扩展到视频媒体解析与变异，技术栈从 C 扩展到 Rust（2024-10）",
+        "Jackalope fork：把覆盖率引导黑盒二进制 fuzzer 纳入个人可维护副本，提供自定义 mutator、样本投递与插桩接口（2025-02）"
+      ],
+      "evidence_ids": [
+        "natalie-works-02",
+        "natalie-works-03",
+        "natalie-works-04",
+        "natalie-works-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "该序列亦可部分解释为 Project Zero 团队内部工程资源与协作氛围的产物：fork-维护专用工具需要持续的维护成本，个人未必能独立承担，组织资源可能放大了这一模式。此外‘工具化’与‘攻击面深耕’互为因果，单凭仓库时间线难以区分二者谁为主因。"
+    },
+    {
+      "name": "攻击面深耕与顺序推进：在同一类攻击面上逐层推进",
+      "starting_conditions": "已在 iMessage/NSKeyedUnarchiver 攻击面上有被同伴引用的深耕产出。",
+      "repeated_practice": "在同一攻击面上长期投入并按顺序逐层推进：本人自述对移动音频解码器‘I've spent a fair bit of time investigating these decoders’，先报告 Samsung 设备 Monkey's Audio codec 的 CVE-2025-49415，再与 Ivan Fratric 共同报告 Dolby Unified Decoder 的 CVE-2025-54957；在 Pixel 9 Part 3 中亦披露‘we also reviewed other audio codecs with mixed results before reviewing the Dolby UDC’——即对同一类目标先做多轮复审再锁定单点。",
+      "feedback": "外部（厂商与安全社区）对‘此类漏洞是否实际可利用’的质疑成为推动其构建完整 0-click 链的显性输入，而非自闭环。",
+      "intermediate_capability": "形成‘在同一类攻击面上做长期、顺序性的复审与单点锁定’的判断力，能从一批混合结果中收敛到可利用的单点。",
+      "observed_outcomes": [
+        "先报告 Samsung Monkey's Audio CVE-2025-49415，再推进至 Dolby UDC CVE-2025-54957（本人自述顺序）",
+        "Pixel 9 Part 1 把音频解码器判定为多数 Android 手机 0-click 攻击面（‘the size of the overflow is controllable, as are the values of the bytes written out of bounds’）",
+        "Pixel 9 Part 3：靶向复审数日内连中两洞（Dolby UDC + BigWave 内核驱动，均‘within days of targeted review’）"
+      ],
+      "evidence_ids": [
+        "natasha-ext-01",
+        "natalie-works-06",
+        "natalie-works-07",
+        "natalie-community-02",
+        "nsl-tl-03",
+        "nsl-tl-05",
+        "nsl-tl-06"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "Monkey's Audio 的原始 writeup 本会话未独立抓取，仅依据 Pixel 9 文章中作者自述回溯（inferred），其作为‘前置阶段’的因果权重可能被高估；‘靶向复审数日连中两洞’的效率在材料中被明确归因于约 3 周 hackathon 预备与约 4 周自研驱动分析工具，而非即兴能力，故效率本身也可能是工具与组织资源的结果。"
+    },
+    {
+      "name": "复盘驱动的反馈回路：把单次研究升级为对生态的公开反馈",
+      "starting_conditions": "已具备把单点漏洞研究推进到完整利用链的能力，并有 Project Zero 官方博客这一公开输出渠道。",
+      "repeated_practice": "在每个研究周期结束时例行复盘并把单次发现转化为系统性建议：Pixel 9 Part 3 显式以‘Where do we go from here?’收尾，将缓解措施的‘预期—现实’偏差（Pixel UDC 缺失 seccomp、kASLR 在 Pixel 上因 2016 遗留问题失效、MTE 默认关闭，并量化为‘likely would have added at least one person-month to exploit development’）作为发现而非回避；同时把研究嵌入长期趋势叙述（援引 2023-2024 三篇 Project Zero Android 驱动旧文与 GTIG 自 2023 起检测到的 16 个在野驱动漏洞）。",
+      "feedback": "外部反馈是显性输入：厂商/社区对 0-click 是否仍可行的质疑推动其构建完整链；团队对‘两项未提供文档所述保护的缓解措施’感到意外，并将其回写为对厂商的公开建议。",
+      "intermediate_capability": "形成‘研究完成 → 复盘 → 系统性建议（攻击面绘制 + 每版本验证缓解 + 责任归属）’的输出闭环，并能引用外部数据（GTIG）建立趋势而非孤立披露。",
+      "observed_outcomes": [
+        "对补丁延迟的公开问责：‘it took 139 days for a vulnerability exploitable in a 0-click context to get patched on any Android device’",
+        "对缓解的量化评估：把缓解失效转化为可量化的 exploit 开发人月成本",
+        "对厂商流程的方法论建议：系统绘制并 fuzz 0-click 攻击面、每版本验证 seccomp/kASLR/MTE 实际生效、避免编解码器厂商与平台方责任分散"
+      ],
+      "evidence_ids": [
+        "natalie-works-07",
+        "natalie-community-04",
+        "natalie-community-05",
+        "natalie-community-07",
+        "natasha-ext-06",
+        "nsl-tl-06",
+        "nsl-tl-07",
+        "nsl-tl-08"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "该复盘机制高度依赖 Project Zero 的公开博客渠道与团队鼓励复盘的文化，部分是组织资源而非个人特有；且本轮能用于支撑‘每个周期例行复盘’的 writeup 主要集中在 2026-01 的 Pixel 9 系列，缺乏 2018-2023 逐年 writeup 的一手逐篇验证，‘周期性’本身可能被单一突出样本放大。"
+    }
+  ],
+  "tensions": [
+    "person_json 的 primary_focus 标注为‘移动端零点击与基带漏洞’，而本会话一手抓取到的最新作品（Pixel 9 Part 1/Part 3）聚焦媒体编解码器与内核驱动的 0-click 链，并未直接出现‘基带’字样；二者不矛盾，但表明‘基带’标签无法覆盖其 2026 年的实际攻击面焦点，该标签更适用于 2019-2022 年阶段，而本会话未抓取到该阶段正文。",
+    "‘靶向复审数日内连中两洞’的效率叙事，与材料中披露的约 3 周 hackathon 预备 + 约 4 周自研驱动分析工具投入，构成一种张力：效率的表象背后是前置准备与工具成本，把‘快’单独归因于个人能力会构成幸存者偏差。",
+    "工具建设序列（usrsctp→h26forge→Jackalope）与‘攻击面深耕’机制互为因果，单凭仓库时间线难以区分哪一个是主因；且维护专用 fork 的持续成本暗示组织资源在放大该模式。",
+    "本人把‘进入漏洞研究’归因于可练习的编码能力与公开漏洞报告（2019 working-at），但这一机制化叙事与其所在团队‘背景多样、无预设路径’的声明并存，意味着团队筛选机制本身可能是部分能力的来源，难以与个人特有条件完全分离。"
+  ],
+  "transferable_practices": [
+    "把对单一目标的逆向/分析经验沉淀为可复用工具或本地副本，而非止于一次性 PoC。",
+    "在攻研一类攻击面前，先获取并维护相关协议栈/格式解析器的可读本地副本，降低对厂商黑盒的依赖。",
+    "为‘通用 fuzzer 难以覆盖’的目标自建可定制的 fuzzer（自定义 mutator、样本投递与插桩接口）。",
+    "在同一类攻击面上做长期、顺序性的多轮复审，从混合结果中收敛到可利用单点。",
+    "把缓解措施的‘预期—现实’偏差作为显性发现并量化（如折算为 exploit 开发人月成本），而非回避。",
+    "研究周期结束时例行复盘，把单次发现转化为对厂商流程的系统性建议（攻击面绘制、每版本验证缓解、责任归属）。",
+    "把单次研究嵌入长期趋势叙述（引用如 GTIG 等外部在野利用数据）以建立结构性反馈，而非孤立披露。"
+  ],
+  "non_transferable_conditions": [
+    "Project Zero 的团队协同资源：Pixel 9 链以一周团队 hackathon 形式评审 Dolby UDC，Ivan Fratric 共同报告 CVE-2025-54957（不到两天定位根因）、Seth Jenkins 报告 CVE-2025-36934 并撰写 Part 2 沙箱突破篇、Jenkins 在 Pixel 10 后续研究中直接复用其 Dolby UDC exploit（称迁移‘fairly straightforward’）；这种分工式三人协作与同伴接力是组织特有条件，不可简单移植。",
+    "约 3 周 hackathon 预备与约 4 周自研驱动分析工具的隐藏成本——‘快’依赖前置准备与工具投入，而非即兴能力。",
+    "Project Zero 官方博客作为公开复盘与问责渠道的存在（如把 139 天补丁延迟转化为对厂商的公开问责），这种发声平台与团队鼓励复盘的文化并非个人条件。",
+    "本会话抓取到的一手 writeup 高度集中于 2026-01 的 Pixel 9 系列与 2020-01 的 iMessage 研究，2018-2023 逐年 writeup 的一手逐篇验证缺失；因此‘周期性/长期性’的强度部分受证据覆盖面限制，迁移其‘长期连贯性’时需谨慎。"
+  ],
+  "open_questions": [
+    "约 2015-2016 年从 BlackBerry/QNX 加入 Google Project Zero 的换团队转折缺乏可抓取的一手来源（Wikipedia 条目与旧 Project Zero 作者/团队页均返回 404），仅作 lead_only，未核实。",
+    "FORCEDENTRY（2021）等标志性历史 writeup 的正文未被本会话抓取，其确切作者、发布日期与正文技术方法未被一手验证，无法对‘基带/iMessage 期’做 documented 级确认。",
+    "基带（baseband）方向的具体 Project Zero writeup 的一手 URL 本次未定位到，person_json 标注的基带方向尚缺可直接引用的一手证据。",
+    "Black Hat US / POC 会议演讲未被本会话以可抓取的一手议程页/speaker 页核实（POC 页面返回 404），会议演讲事实仅作 lead_only。",
+    "X/@natashenka 的实时社交内容（同伴互动、公开反馈、研究披露习惯）在本环境无法抓取，社区互动的具体形态及其对能力的影响留 unknown/lead_only。",
+    "Project Zero Monorail / bughunters.google.com 上对其漏洞的报告条目与厂商/同伴往复评论未抓取，issue 层面的反馈回路未建立；同伴对其工作的对等公开评价仅有 Groß（2020）与 Jenkins（2026）单侧可抓取样本，双向反馈回路尚不完整。",
+    "Monkey's Audio CVE-2025-49415 的原始 writeup（Samsung 设备）未独立抓取，仅依据 Pixel 9 Part 1 中作者自述转引，其作为‘攻击面深耕机制’前置阶段的独立证据缺失。",
+    "早期（约 2015-2018）Firefox/HackThePlanet 等社区协作的一手材料未抓取，无法支撑‘早期同伴网络’的成长机制叙述。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/natalie-silvanovich-synthesis-v1-20260926-215838-823",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790431519831042000-natalie-silvanovich-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "d505d279-fa02-46b5-87d1-bfef7c46345a",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_u3vsn2jy3p4ws3h8kdmmnu5x",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/natalie-silvanovich-synthesis-v1-20260926-215838-823/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "e93e1fea0cf7f75fe9b633203878edc6030edd05b6b783634604888d5af128c0",
+        "accessed_at": "2026-09-26T14:05:19.872432+00:00"
+      },
+      {
+        "tool_use_id": "call_qftwhgzzaurwmelxng34azcg",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/natalie-silvanovich-synthesis-v1-20260926-215838-823/task.md"
+        },
+        "success": true,
+        "content_sha256": "c70f31018b384849e4705a0d12fc2dfc66727bd160fb95c42c82cb7b4cd87019",
+        "accessed_at": "2026-09-26T14:05:19.872457+00:00"
+      },
+      {
+        "tool_use_id": "call_9wuld1b225hlog3byhz6lwu2",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/natalie-silvanovich-synthesis-v1-20260926-215838-823/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "60d77fd6e1ca2a68d31ceeb46b10ef6bf1bcf716f5517ea7797edafef2b31d67",
+        "accessed_at": "2026-09-26T14:05:19.872465+00:00"
+      },
+      {
+        "tool_use_id": "call_3xqbl7byk8xh798fcuwmbz9n",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/natalie-silvanovich-synthesis-v1-20260926-215838-823/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "509d6182589de462e09992b0cf1edf5c504467d6f7e4f61aa3474547b58c063b",
+        "accessed_at": "2026-09-26T14:05:19.872477+00:00"
+      },
+      {
+        "tool_use_id": "call_v4fsx1hiflwu6hmb9d3vkyvr",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/natalie-silvanovich-synthesis-v1-20260926-215838-823/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "d975eac5579a86bdb64292b8ca2c54aecf62ae7d7c2dc1d7ab9b705843f99afd",
+        "accessed_at": "2026-09-26T14:05:19.872555+00:00"
+      },
+      {
+        "tool_use_id": "call_7ejfkes5nbd9sclvwxz8ymhe",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/natalie-silvanovich-synthesis-v1-20260926-215838-823/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-26T14:05:19.872560+00:00"
+      },
+      {
+        "tool_use_id": "call_o6pazul9cc03atkufwuvwclu",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/natalie-silvanovich-synthesis-v1-20260926-215838-823/checkpoint.md",
+          "content": "# Checkpoint — Natalie Silvanovich 综合 v1\n\n## 任务\n综合六维取证材料，重建领域能力成长过程（阶段 + 机制），输出符合 output.schema.json 的 JSON。\n\n## 已确认来源（documented/inferred/reported + verified_in_run=true）\n- works: natalie-works-01(2014 excusegen) / -02(2017 Egg-Shell/Tamagotchi-Hack) / -03(2020-04 usrsctp) / -04(2024-10 h26forge) / -05(2025-02 Jackalope) / -06(2026-01-14 Pixel9 P1) / -07(2026-01-14 Pixel9 P3)\n- conversations: nats-conv-001\n- community: natalie-community-01(同伴分工) / -02(外部可利用性质疑) / -03(hackathon~3w预备+~4w工具) / -04(GTIG趋势+生态建议) / -05(缓解预期偏差) / -07(139天补丁问责)\n- external: natasha-ext-01(Monkey's Audio→Dolby顺序) / -02(团队分工) / -03(Pixel10 Jenkins复用) / -04(2020 Groß iMessage引用) / -05(2019 working-at 编码能力方法论) / -06(失败/意外)\n- decisions: ns-dec-01(新博客) / -02(Pixel9多部曲)\n- timeline: nsl-tl-01(2014 P0成立,reported) / -03(Monkey's Audio,inferred) / -04/-05/-06/-07/-08(Pixel9系列)\n\n## 不可用于确认事实（unknown / verified_in_run=false，仅作缺口记录）\n- natalie-works-08 / natalie-community-06 / -08 / ns-dec-03 / nsl-tl-02 / nsl-tl-09\n\n## 综合框架\n- 4 阶段：2014-2017 起点工具化 → ≤2019-2020 进入职业VR+iMessage → 2020-2025 攻击面↔自建工具副本耦合 → 2026 0-click链整合+复盘输出\n- 3 主机制：A 工具化沉淀(repeated+generative+distinctive) / B 攻击面深耕+顺序推进(repeated+generative) / C 复盘驱动反馈回路(repeated+generative)\n- 团队协同归入 non_transferable_conditions（组织资源，非个人机制）\n\n## 未完成事项\n- 无待补证（revision_context 为空，本轮为首次综合）\n- open_questions 已覆盖：BlackBerry/QNX→P0转折、FORCEDENTRY、基带期、会议演讲、社交侧、2018-2023中段断档、Monkey's Audio原始writeup\n\n## 状态\noutput.json 待写入。\n"
+        },
+        "success": true,
+        "content_sha256": "8e1053c120460fe6948a7a480995c753a48163306a47cd13f9b2b114a4843e4b",
+        "accessed_at": "2026-09-26T14:05:19.873095+00:00"
+      },
+      {
+        "tool_use_id": "call_988v0ys838uwrdqmp9tn72wn",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/natalie-silvanovich-synthesis-v1-20260926-215838-823/output.json",
+          "content": "{\n  \"person\": \"Natalie Silvanovich\",\n  \"expertise\": [\n    \"移动端零点击（0-click）利用链研究\",\n    \"媒体编解码器（音频/视频）攻击面挖掘与变异\",\n    \"Android 内核驱动攻击面与缓解机制（seccomp/kASLR/MTE）评估\",\n    \"二进制逆向工程与嵌入式/固件工具化\",\n    \"覆盖率引导、可定制黑盒二进制 fuzzing\",\n    \"面向攻击面预建可审计协议栈/格式解析器的本地副本\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2014-2017\",\n      \"stage\": \"公开输出的起点：从非安全工具到逆向工具化\",\n      \"capability_change\": \"其最早可见的公开输出（2014 excusegen）是与安全无关的小工具；到 2017 年首批逆向/嵌入式向作品（Egg-Shell、Tamagotchi-Hack）已把对单一目标的逆向操作沉淀为他人可复用的开发工具，而非一次性 PoC。此阶段可观察的能力变化是从‘发布脚本’转向‘把逆向经验工具化’，但尚无攻击面研究产出（documented 起点对照，非成长机制本身）。\",\n      \"evidence_ids\": [\"natalie-works-01\", \"natalie-works-02\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"≤2019-2020\",\n      \"stage\": \"进入职业漏洞研究并聚焦 iMessage 攻击面\",\n      \"capability_change\": \"同事 Samuel Groß（2020-01-09）的 iMessage 远程利用研究中明确将 NSKeyedUnarchiver 组件的某 bug 归于她已‘discussed in depth’，表明此阶段她已在 iMessage/NSKeyedUnarchiver 这一移动端可达攻击面上有可被同伴引用的深耕产出。2019-02-20 的 Project Zero 招聘/团队说明页中她本人系统阐述‘进入漏洞研究最关键的是扎实的编码能力 + 公开漏洞报告 + 多样背景’，与其后续‘重复练习 + 工具建设’的实际作品自洽，标志职业方法论的显式化。\",\n      \"evidence_ids\": [\"natasha-ext-04\", \"natasha-ext-05\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2020-2025\",\n      \"stage\": \"攻击面迁移与自建工具副本的耦合建设\",\n      \"capability_change\": \"公开仓库时间线显示一条与攻击面迁移耦合的工具建设序列：2020-04 fork usrsctp（为 WebRTC data channel 使用的 SCTP 协议获取可审计本地副本）→ 2024-10 fork h26forge（把工具建设扩展到视频媒体的语法分析/变异，技术栈由 C 扩展到 Rust）→ 2025-02 fork Jackalope（把 Project Zero 内部覆盖率引导黑盒二进制 fuzzer 纳入个人可维护副本，README 自述‘easy to customize for targets where generic fuzzers might not work well’）。技术栈随目标难度上升而升级，体现‘先为攻击面预建可读副本、再造专用分析/变异工具’的工作模式。\",\n      \"evidence_ids\": [\"natalie-works-03\", \"natalie-works-04\", \"natalie-works-05\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2026\",\n      \"stage\": \"端到端 0-click 利用链整合与复盘输出\",\n      \"capability_change\": \"2026-01-14 发布 Pixel 9 零点击利用链 Part 1（CVE-2025-54957，Dolby Unified Decoder EMDF payload 整数溢出，攻击面为 Google Messages 自动语音转写触发的 0-click 音频解码）与 Part 3 复盘文。能力变化为：把单漏洞研究整合为端到端 0-click 链，并把‘靶向复审数日内连中两洞’转化为对厂商流程的方法论建议（攻击面绘制、缓解强制校验、责任归属）。2025-12-16 她作为新博客首帖署名作者，与其随后立即跟进研究成果发布的输出节奏一致。\",\n      \"evidence_ids\": [\"natalie-works-06\", \"natalie-works-07\", \"ns-dec-01\", \"ns-dec-02\", \"natalie-community-04\", \"natalie-community-07\", \"nsl-tl-05\", \"nsl-tl-06\", \"nsl-tl-07\", \"nsl-tl-08\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"工具化沉淀：把逆向经验与攻击面研究固化为可复用工具\",\n      \"starting_conditions\": \"2014 年的公开输出仍为非安全小工具，且 2017 年首批逆向作品（Egg-Shell、Tamagotchi-Hack）已呈现‘把对单一目标的逆向操作转为他人可继续使用的开发工具’的倾向，而非只发布 PoC。\",\n      \"repeated_practice\": \"在多个目标上反复把逆向/分析经验沉淀为可维护工具或本地副本：2017 Egg-Shell/Tamagotchi-Hack（嵌入式逆向工具）→ 2020-04 fork usrsctp（为攻击 WebRTC/消息类攻击面预建协议栈本地副本）→ 2024-10 fork h26forge（视频媒体语法分析/变异工具，技术栈扩至 Rust）→ 2025-02 fork Jackalope（覆盖率引导、可分布式、可定制黑盒二进制 fuzzer，README 自述为‘generic fuzzers might not work well’的目标而设计）。\",\n      \"feedback\": \"工具被反复用于媒体/基带/消息类目标，并成为连接后续各 writeup 的工具支撑；Jackalope README 明确把‘攻击面研究 → 不适合通用 fuzzer 的目标 → 造专用 fuzzer’这一回路表述为设计目标。\",\n      \"intermediate_capability\": \"形成‘先为攻击面预建可读、可审计的本地副本，再据此造专用分析/变异工具’的工作模式，降低对厂商黑盒的依赖。\",\n      \"observed_outcomes\": [\n        \"usrsctp fork：为 WebRTC data channel 使用的 SCTP 协议获取可审计副本（2020-04）\",\n        \"h26forge fork：把工具建设扩展到视频媒体解析与变异，技术栈从 C 扩展到 Rust（2024-10）\",\n        \"Jackalope fork：把覆盖率引导黑盒二进制 fuzzer 纳入个人可维护副本，提供自定义 mutator、样本投递与插桩接口（2025-02）\"\n      ],\n      \"evidence_ids\": [\"natalie-works-02\", \"natalie-works-03\", \"natalie-works-04\", \"natalie-works-05\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"该序列亦可部分解释为 Project Zero 团队内部工程资源与协作氛围的产物：fork-维护专用工具需要持续的维护成本，个人未必能独立承担，组织资源可能放大了这一模式。此外‘工具化’与‘攻击面深耕’互为因果，单凭仓库时间线难以区分二者谁为主因。\"\n    },\n    {\n      \"name\": \"攻击面深耕与顺序推进：在同一类攻击面上逐层推进\",\n      \"starting_conditions\": \"已在 iMessage/NSKeyedUnarchiver 攻击面上有被同伴引用的深耕产出。\",\n      \"repeated_practice\": \"在同一攻击面上长期投入并按顺序逐层推进：本人自述对移动音频解码器‘I've spent a fair bit of time investigating these decoders’，先报告 Samsung 设备 Monkey's Audio codec 的 CVE-2025-49415，再与 Ivan Fratric 共同报告 Dolby Unified Decoder 的 CVE-2025-54957；在 Pixel 9 Part 3 中亦披露‘we also reviewed other audio codecs with mixed results before reviewing the Dolby UDC’——即对同一类目标先做多轮复审再锁定单点。\",\n      \"feedback\": \"外部（厂商与安全社区）对‘此类漏洞是否实际可利用’的质疑成为推动其构建完整 0-click 链的显性输入，而非自闭环。\",\n      \"intermediate_capability\": \"形成‘在同一类攻击面上做长期、顺序性的复审与单点锁定’的判断力，能从一批混合结果中收敛到可利用的单点。\",\n      \"observed_outcomes\": [\n        \"先报告 Samsung Monkey's Audio CVE-2025-49415，再推进至 Dolby UDC CVE-2025-54957（本人自述顺序）\",\n        \"Pixel 9 Part 1 把音频解码器判定为多数 Android 手机 0-click 攻击面（‘the size of the overflow is controllable, as are the values of the bytes written out of bounds’）\",\n        \"Pixel 9 Part 3：靶向复审数日内连中两洞（Dolby UDC + BigWave 内核驱动，均‘within days of targeted review’）\"\n      ],\n      \"evidence_ids\": [\"natasha-ext-01\", \"natalie-works-06\", \"natalie-works-07\", \"natalie-community-02\", \"nsl-tl-03\", \"nsl-tl-05\", \"nsl-tl-06\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"Monkey's Audio 的原始 writeup 本会话未独立抓取，仅依据 Pixel 9 文章中作者自述回溯（inferred），其作为‘前置阶段’的因果权重可能被高估；‘靶向复审数日连中两洞’的效率在材料中被明确归因于约 3 周 hackathon 预备与约 4 周自研驱动分析工具，而非即兴能力，故效率本身也可能是工具与组织资源的结果。\"\n    },\n    {\n      \"name\": \"复盘驱动的反馈回路：把单次研究升级为对生态的公开反馈\",\n      \"starting_conditions\": \"已具备把单点漏洞研究推进到完整利用链的能力，并有 Project Zero 官方博客这一公开输出渠道。\",\n      \"repeated_practice\": \"在每个研究周期结束时例行复盘并把单次发现转化为系统性建议：Pixel 9 Part 3 显式以‘Where do we go from here?’收尾，将缓解措施的‘预期—现实’偏差（Pixel UDC 缺失 seccomp、kASLR 在 Pixel 上因 2016 遗留问题失效、MTE 默认关闭，并量化为‘likely would have added at least one person-month to exploit development’）作为发现而非回避；同时把研究嵌入长期趋势叙述（援引 2023-2024 三篇 Project Zero Android 驱动旧文与 GTIG 自 2023 起检测到的 16 个在野驱动漏洞）。\",\n      \"feedback\": \"外部反馈是显性输入：厂商/社区对 0-click 是否仍可行的质疑推动其构建完整链；团队对‘两项未提供文档所述保护的缓解措施’感到意外，并将其回写为对厂商的公开建议。\",\n      \"intermediate_capability\": \"形成‘研究完成 → 复盘 → 系统性建议（攻击面绘制 + 每版本验证缓解 + 责任归属）’的输出闭环，并能引用外部数据（GTIG）建立趋势而非孤立披露。\",\n      \"observed_outcomes\": [\n        \"对补丁延迟的公开问责：‘it took 139 days for a vulnerability exploitable in a 0-click context to get patched on any Android device’\",\n        \"对缓解的量化评估：把缓解失效转化为可量化的 exploit 开发人月成本\",\n        \"对厂商流程的方法论建议：系统绘制并 fuzz 0-click 攻击面、每版本验证 seccomp/kASLR/MTE 实际生效、避免编解码器厂商与平台方责任分散\"\n      ],\n      \"evidence_ids\": [\"natalie-works-07\", \"natalie-community-04\", \"natalie-community-05\", \"natalie-community-07\", \"natasha-ext-06\", \"nsl-tl-06\", \"nsl-tl-07\", \"nsl-tl-08\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"该复盘机制高度依赖 Project Zero 的公开博客渠道与团队鼓励复盘的文化，部分是组织资源而非个人特有；且本轮能用于支撑‘每个周期例行复盘’的 writeup 主要集中在 2026-01 的 Pixel 9 系列，缺乏 2018-2023 逐年 writeup 的一手逐篇验证，‘周期性’本身可能被单一突出样本放大。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 的 primary_focus 标注为‘移动端零点击与基带漏洞’，而本会话一手抓取到的最新作品（Pixel 9 Part 1/Part 3）聚焦媒体编解码器与内核驱动的 0-click 链，并未直接出现‘基带’字样；二者不矛盾，但表明‘基带’标签无法覆盖其 2026 年的实际攻击面焦点，该标签更适用于 2019-2022 年阶段，而本会话未抓取到该阶段正文。\",\n    \"‘靶向复审数日内连中两洞’的效率叙事，与材料中披露的约 3 周 hackathon 预备 + 约 4 周自研驱动分析工具投入，构成一种张力：效率的表象背后是前置准备与工具成本，把‘快’单独归因于个人能力会构成幸存者偏差。\",\n    \"工具建设序列（usrsctp→h26forge→Jackalope）与‘攻击面深耕’机制互为因果，单凭仓库时间线难以区分哪一个是主因；且维护专用 fork 的持续成本暗示组织资源在放大该模式。\",\n    \"本人把‘进入漏洞研究’归因于可练习的编码能力与公开漏洞报告（2019 working-at），但这一机制化叙事与其所在团队‘背景多样、无预设路径’的声明并存，意味着团队筛选机制本身可能是部分能力的来源，难以与个人特有条件完全分离。\"\n  ],\n  \"transferable_practices\": [\n    \"把对单一目标的逆向/分析经验沉淀为可复用工具或本地副本，而非止于一次性 PoC。\",\n    \"在攻研一类攻击面前，先获取并维护相关协议栈/格式解析器的可读本地副本，降低对厂商黑盒的依赖。\",\n    \"为‘通用 fuzzer 难以覆盖’的目标自建可定制的 fuzzer（自定义 mutator、样本投递与插桩接口）。\",\n    \"在同一类攻击面上做长期、顺序性的多轮复审，从混合结果中收敛到可利用单点。\",\n    \"把缓解措施的‘预期—现实’偏差作为显性发现并量化（如折算为 exploit 开发人月成本），而非回避。\",\n    \"研究周期结束时例行复盘，把单次发现转化为对厂商流程的系统性建议（攻击面绘制、每版本验证缓解、责任归属）。\",\n    \"把单次研究嵌入长期趋势叙述（引用如 GTIG 等外部在野利用数据）以建立结构性反馈，而非孤立披露。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Project Zero 的团队协同资源：Pixel 9 链以一周团队 hackathon 形式评审 Dolby UDC，Ivan Fratric 共同报告 CVE-2025-54957（不到两天定位根因）、Seth Jenkins 报告 CVE-2025-36934 并撰写 Part 2 沙箱突破篇、Jenkins 在 Pixel 10 后续研究中直接复用其 Dolby UDC exploit（称迁移‘fairly straightforward’）；这种分工式三人协作与同伴接力是组织特有条件，不可简单移植。\",\n    \"约 3 周 hackathon 预备与约 4 周自研驱动分析工具的隐藏成本——‘快’依赖前置准备与工具投入，而非即兴能力。\",\n    \"Project Zero 官方博客作为公开复盘与问责渠道的存在（如把 139 天补丁延迟转化为对厂商的公开问责），这种发声平台与团队鼓励复盘的文化并非个人条件。\",\n    \"本会话抓取到的一手 writeup 高度集中于 2026-01 的 Pixel 9 系列与 2020-01 的 iMessage 研究，2018-2023 逐年 writeup 的一手逐篇验证缺失；因此‘周期性/长期性’的强度部分受证据覆盖面限制，迁移其‘长期连贯性’时需谨慎。\"\n  ],\n  \"open_questions\": [\n    \"约 2015-2016 年从 BlackBerry/QNX 加入 Google Project Zero 的换团队转折缺乏可抓取的一手来源（Wikipedia 条目与旧 Project Zero 作者/团队页均返回 404），仅作 lead_only，未核实。\",\n    \"FORCEDENTRY（2021）等标志性历史 writeup 的正文未被本会话抓取，其确切作者、发布日期与正文技术方法未被一手验证，无法对‘基带/iMessage 期’做 documented 级确认。\",\n    \"基带（baseband）方向的具体 Project Zero writeup 的一手 URL 本次未定位到，person_json 标注的基带方向尚缺可直接引用的一手证据。\",\n    \"Black Hat US / POC 会议演讲未被本会话以可抓取的一手议程页/speaker 页核实（POC 页面返回 404），会议演讲事实仅作 lead_only。\",\n    \"X/@natashenka 的实时社交内容（同伴互动、公开反馈、研究披露习惯）在本环境无法抓取，社区互动的具体形态及其对能力的影响留 unknown/lead_only。\",\n    \"Project Zero Monorail / bughunters.google.com 上对其漏洞的报告条目与厂商/同伴往复评论未抓取，issue 层面的反馈回路未建立；同伴对其工作的对等公开评价仅有 Groß（2020）与 Jenkins（2026）单侧可抓取样本，双向反馈回路尚不完整。\",\n    \"Monkey's Audio CVE-2025-49415 的原始 writeup（Samsung 设备）未独立抓取，仅依据 Pixel 9 Part 1 中作者自述转引，其作为‘攻击面深耕机制’前置阶段的独立证据缺失。\",\n    \"早期（约 2015-2018）Firefox/HackThePlanet 等社区协作的一手材料未抓取，无法支撑‘早期同伴网络’的成长机制叙述。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "2a4519d81223206e903d19b44e915e40f2be4511bf8d189e5c8088f8974048bc",
+        "accessed_at": "2026-09-26T14:05:19.873099+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790431519873187000-natalie-silvanovich-synthesis-v1.json",
+    "label": "Natalie Silvanovich:synthesis:v1",
+    "elapsed_seconds": 401.04,
+    "prompt_sha256": "28e578b499644bd5ec1d0687e2baa2beb4e32477ffc569d8f5092d28b93fb5a5",
+    "num_turns": 9,
+    "total_cost_usd": 0.7063010000000001,
+    "usage": {
+      "input_tokens": 35760,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 92352,
+      "output_tokens": 19253,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 35760,
+        "outputTokens": 19253,
+        "cacheReadInputTokens": 92352,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.7063010000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

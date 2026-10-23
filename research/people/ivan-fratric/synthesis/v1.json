@@ -1,0 +1,324 @@
+{
+  "person": "Ivan Fratric",
+  "expertise": [
+    "浏览器漏洞发现与模糊测试",
+    "基于文法的生成式模糊测试（generation-based grammar fuzzing）",
+    "覆盖引导变异式模糊测试（coverage-guided mutational fuzzing）",
+    "二进制目标覆盖引导模糊测试（Jackalope，含 Intel PT / TinyInst 插桩）",
+    "图形库精度漏洞研究（Skia 越界绘制）",
+    "JavaScript 引擎 fuzzing（jscript / jscript9，含 JIT 引擎与字节码生成器）",
+    "XSLT 实现漏洞研究（libxslt）",
+    "多媒体解码器漏洞研究（Dolby Unified Decoder，合作报告）",
+    "模糊测试方法学评估与自我修正"
+  ],
+  "stages": [
+    {
+      "period": "2017",
+      "stage": "生成式文法模糊测试与跨引擎受控对比测量基线的建立",
+      "capability_change": "在 Project Zero 阶段，将浏览器漏洞研究方法固化为可复用的 generation-based grammar fuzzer domato（基于上下文无关文法生成 HTML/CSS/JS 样本），并以同一工具、同一迭代量（约一亿次）在 Safari、Chrome、Firefox、IE、Edge 五个引擎间建立可被同行复现的对比基线，发现 Safari 以 17 个 bug 显著高于其余引擎（Chrome 2 / Firefox 4 / IE 4 / Edge 6），同时如实记录额外尝试的覆盖引导 DOM fuzzer 在 IE 上未产生新 crash。能力从单点漏洞发现扩展为'工具化产出+受控测量实验'。",
+      "evidence_ids": [
+        "if-c-001",
+        "ext-01",
+        "ivf-tl-002"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2018",
+      "stage": "高阶工具失效下的方法组合回退与机会式追因",
+      "capability_change": "在 Skia 图形库精度漏洞研究中，先用符号执行（KLEE 配 STP/Z3 后端）寻找导致越界绘制的输入，因工具不支持浮点符号变量且无法在合理时间内跑完而失败；随后显式退回并组合人工源码审查、边界值附近的 fuzzing 与对可疑代码段穷举取值等更基础的手段作为补偿，并在 Firefox DOM fuzzing 中捕捉到偶然的越界写后顺藤进入底层库做根因分析。同年以同一 domato、同一方法学复测 WebKit/Safari，bug 数由 17 降至 9，并为 CVE-2018-4314 编写 PoC，记录'把 UAF 转成 infoleak 是耗时最多的部分'，并公开批评 Apple advisory 修复后未及时列出对应 bug。能力表现为工具失效时不依赖单一方法、以证据评价供应商披露流程的工程化习惯。",
+      "evidence_ids": [
+        "if-dc-01",
+        "if-dc-02",
+        "if-c-002",
+        "ext-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2021",
+      "stage": "从生成式向覆盖引导变异式的工具迁移与跨工具诚实对照",
+      "capability_change": "将 domato 的文法经验迁移、简化并扩展为覆盖引导的二进制模糊测试器 Jackalope（Windows/macOS），新增 <repeat_*> 节点以在保持文法有效性的前提下做插入/删除；与团队同伴 Samuel Groß 的 Fuzzilli 加 TinyInst 在 IE 的 jscript/jscript9 上以约 100 核跑数周，发现 CVE-2021-26419、-31959（字节码生成器）与 -34480（JIT 编译器）。文中如实对照 Jackalope 与 Fuzzilli 在覆盖率与 bug 命中度上相近、且两者均在 fuzz 早期命中、单机即可发现，而非以自我宣传方式评估方法学。能力从前一套工具的单向发布演进为'工具间经验迁移+同类工具实证对照'。",
+      "evidence_ids": [
+        "ext-03",
+        "if-c-006"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2025-2026",
+      "stage": "方法学层面的自我审视与跨域协作扩展",
+      "capability_change": "在《On the Effectiveness of Mutational Grammar Fuzzing》中自述变异式文法 fuzzing 过去成功用于 XSLT 实现与 JIT 引擎 bug，并以 libxslt issue 409761909 为具体反馈落点；进一步系统反思该方法的 perceived flaws，提出并自测一种改进技术（周期性重启 worker、半时间独立生成半时间纳入先验覆盖），自述'worked surprisingly well and helped discover issues in libxslt quicker'。2026-01 与 Natalie Silvanovich 合作报告 CVE-2025-54957（Dolby Unified Decoder），研究范围从浏览器/JS 引擎主场向移动平台多媒体解码器延伸。能力由执行层进入方法学批判层，并在 P0 团队内被同伴以合作报告者身份信任地扩展到非主场目标。",
+      "evidence_ids": [
+        "if-c-004",
+        "ext-04",
+        "if-dec-001",
+        "ivf-tl-003",
+        "if-c-003",
+        "ext-05"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "单次漏洞发现固化为可复用模糊测试基础设施",
+      "starting_conditions": "Project Zero 阶段可投入专职资源，浏览器目标具有跨厂商共性（Safari/Chrome/IE/Edge/Firefox/JScript/VBScript 共享或相近的 DOM/JS 攻击面）。",
+      "repeated_practice": "2017 年将 DOM 漏洞研究方法固化为 domato（基于上下文无关文法的生成式 fuzzer）；2021 年把 domato 的文法经验迁移、简化并扩展为覆盖引导二进制 fuzzer Jackalope，新增 <repeat_*> 节点；2026 年继续在 Jackalope 的文法 fuzzing 实现上做变异式改进并自测。表现为多次把一次性发现沉淀为公开、可复用的工具。",
+      "feedback": "domato 的 bug showcase 横跨多浏览器 CVE（if-c-001）；Jackalope 的产出为 CVE-2021-26419/-31959/-34480（ext-03）；2026 年改进方案以 libxslt issue 409761909 为 bug tracker 反馈落点，并以自测结果确认提速（if-c-004）。",
+      "intermediate_capability": "把单点漏洞发现能力扩展为可跨目标、跨时间复用的研究基础设施，并能在工具间迁移经验而非每次从零开始。",
+      "observed_outcomes": [
+        "domato 成为 2017 与 2018 两年跨引擎/纵向复测的公共工具基线（ext-01、ext-02）",
+        "Jackalope 在 IE jscript/jscript9 上以约 100 核跑数周产出三个 CVE（ext-03）",
+        "2026 年在公开 writeup 中参照团队同伴工具 Fuzzilli 的文献描述同类问题，构成工具间反馈（if-c-004）"
+      ],
+      "evidence_ids": [
+        "if-c-001",
+        "ext-01",
+        "ext-02",
+        "ext-03",
+        "if-c-004",
+        "ivf-tl-002"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "工具建设也可能由 P0 团队'每人维护一个专门 fuzzer'的分工要求驱动，而非纯个人偏好；if-c-006 的组织仓库矩阵（domato/fuzzilli/Jackalope/TinyInst 并列）支持分工解释，但若纯为分工则无需在工具间迁移文法经验并互引文献，故个人偏好与组织分工共同作用的解释更稳。"
+    },
+    {
+      "name": "受控对比测量与对工具边界的诚实评估",
+      "starting_conditions": "浏览器多引擎并存且 bug tracker 公开，使同方法学跨引擎结果可被同行核验；目标侧存在 Safari 这类可能显著弱于同侪的引擎。",
+      "repeated_practice": "2017 年以同一 domato、同一约一亿次迭代量在五个引擎间做横向对比（ext-01）；2018 年以同一 domato、同一方法学对 WebKit/Safari 做一年后纵向复测，bug 数 17→9（ext-02）；2021 年将 Jackalope 与 Fuzzilli 在覆盖率与 bug 命中度上做同类工具对照（ext-03）；2017 年还如实记录额外尝试的覆盖引导 DOM fuzzer 在 IE 上未产生新 crash（ext-01）。",
+      "feedback": "横向对比暴露 Safari 为离群值；纵向复测验证供应商修复是否真实，并以 PoC 把发现推进到可验证利用（CVE-2018-4314，UAF→infoleak）；跨工具对照印证方法学结论而非品牌背书。",
+      "intermediate_capability": "把单点发现转化为可被同行复现的测量实验，并对工具的有效边界做不回避的记录。",
+      "observed_outcomes": [
+        "2017 年 Safari 17 bug 显著高于 Chrome 2 / Firefox 4 / IE 4 / Edge 6 的测量结论（ext-01）",
+        "2018 年复测确认 Safari 12 修复 9 bug 并公开批评 Apple advisory 未及时列出对应 bug（ext-02）",
+        "2021 年 Jackalope 与 Fuzzilli 在覆盖率/bug 命中度上相近、均早期命中、单机可发现（ext-03）"
+      ],
+      "evidence_ids": [
+        "ext-01",
+        "ext-02",
+        "ext-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "受控对比也可能是 P0 公开披露规范要求的结果，而非个人方法学自觉；但 ext-01 中主动记录'覆盖引导 DOM fuzzer 在 IE 无新 crash'与 ext-02 公开批评 Apple advisory 的行为超出了规范披露的最小要求，更符合个人对工具边界与披露透明度的评价习惯。"
+    },
+    {
+      "name": "高阶工具失效时显式退回并组合基础手段",
+      "starting_conditions": "Skia 精度漏洞涉及浮点几何，超出符号执行工具当时的能力边界；目标 bug 难以被单一方法直接命中。",
+      "repeated_practice": "2018 年在 Skia 研究中先尝试符号执行（KLEE 配 STP/Z3 后端），因不支持浮点符号变量且无法在合理时间内跑完而失败，随后显式退回并组合人工源码审查、图像边界值附近的 fuzzing 与对可疑代码段的穷举取值（if-dc-01）；同年还在 Firefox DOM fuzzing 中捕捉到偶然越界写后顺藤进入底层库做根因分析（if-dc-02）。",
+      "feedback": "符号执行失败的负反馈直接触发方法组合的回退决策；边界值 fuzzing 与穷举在定位代码段后产出 Skia 精度 bug。",
+      "intermediate_capability": "在工具失效时不依赖单一银弹，能把抽象方法论主张落到可执行的多手段组合，并在宽域 fuzzing 噪声中提炼可深挖线索。",
+      "observed_outcomes": [
+        "Skia 精度漏洞研究产出 2018-07-26 的 Project Zero 公开 writeup（if-dc-01、if-c-002）",
+        "与 Mark Brand 分工（Brand=SwiftShader，Fratric=Skia）联合发表 'Drawing Outside the Box'（if-c-002）"
+      ],
+      "evidence_ids": [
+        "if-dc-01",
+        "if-dc-02",
+        "if-c-002"
+      ],
+      "validation_tests": [
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "方法组合回退也可能只是当时符号执行工具普遍不可用所致的被动结果，而非主动的方法论选择；但 if-dc-01 中以第一人称复数自述'what we ended up doing was a combination of the more old-school methods'显示其对工具选型有独立判断，主动组合解释更贴合原文。"
+    },
+    {
+      "name": "同伴分工协作与工具间互引校验",
+      "starting_conditions": "Project Zero 团队内存在多个自建 fuzzer（domato、Fuzzilli、Jackalope、TinyInst）与同主题分工（如图形库研究）。",
+      "repeated_practice": "2018 年与 Mark Brand 在图形库主题上分工（Brand=SwiftShader，Fratric=Skia）并联合发表（if-c-002）；2021 年将 Jackalope 与同伴 Groß 的 Fuzzilli+TinyInst 联合在 jscript/jscript9 上跑数周对照（ext-03）；2026 年在 writeup 中参照 Fuzzilli 文献描述同类问题（if-c-004）；2026-01 与 Natalie Silvanovich 合作报告 CVE-2025-54957（if-c-003、ext-05）。",
+      "feedback": "联合署名与同伴点名构成校验机制；外部社区与厂商追问驱动后续 writeup 解释可利用性（if-c-003 引述 'vendors as well as members of the security community have questioned whether such vulnerabilities are exploitable'）。",
+      "intermediate_capability": "在团队内以分工并行探索再合并发表，并以工具互引而非孤立维护的方式校验方法学结论，把个人产出嵌入团队-厂商-社区三方反馈回路。",
+      "observed_outcomes": [
+        "'Drawing Outside the Box' 联合署名 writeup（if-c-002）",
+        "CVE-2025-54957 由 Silvanovich 在 Pixel 9 0-click Part 1 中点名 'Ivan Fratric and I reported'（if-c-003、ext-05）",
+        "2026 年 writeup 参照 Fuzzilli 文档描述同类问题（if-c-004）"
+      ],
+      "evidence_ids": [
+        "if-c-002",
+        "ext-03",
+        "if-c-003",
+        "if-c-004",
+        "ext-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "同伴协作也可能仅是 P0 组织流程的自然产物，而非个人能力特征；但跨域（Dolby 解码器非其浏览器主场）的合作报告与 writeup 中工具互引，超出组织流程的最小要求，更贴合同伴对其研究范围的可信扩展。"
+    }
+  ],
+  "tensions": [
+    "同一篇 2026-03-05 博文《On the Effectiveness of Mutational Grammar Fuzzing》在六维取证中存在可抓取性矛盾：深度对话维度 if-dc-03 报告其直接 URL 抓取返回 404 并标记为 reported；而社区 if-c-004、外部 ext-04、决策 if-dec-001、时间线 ivf-tl-003 四个维度均标记 verified_in_run=true 并附逐句引文（'my Jackalope fuzzer' / XSLT/JIT / libxslt issue 409761909 / 'worked surprisingly well'）。本报告以四份 verified 逐句引文为 documented，将该博文列为已核验来源；抓取性矛盾本身记入此处，不据此否定内容真实性。",
+    "handle 二元性未闭环：person_json 给出 social 为 https://x.com/ifsecure，但 https://github.com/ifsecure 返回 404，代码仓库署名为 github.com/ifratric；X @ifsecure 抓取返回 HTTP 402 无法核验正文。身份由 domato 版权头 ifratric@google.com 与 GitHub ifratric bio 'Google Project Zero member' 互证锚定，但 X handle 与 GitHub handle 之间的显式跨平台绑定未取得一手证据。",
+    "误归因风险：二手 LLM 摘要曾把同事 Samuel Groß 的 'JITSploitation' 系列（2020-09）与 'JSC Exploits'（2019-08）误归到 Fratric 名下；直接抓取确认作者为 Groß，相关作品未计入 Fratric 的成长证据。这提示在 P0 团队语境下，组织品牌与个人能力来源需严格区分。",
+    "深度对话与自述维度要求的访谈/播客/AMA/演讲问答正文本轮未取得一手抓取（x.com/ifsecure 402、linkedin 999、Black Hat 议程 403、OffensiveCon 404）；已得一手材料仅含方法论层面的自述（2018-07-26），成长背景细节缺失。"
+  ],
+  "transferable_practices": [
+    "将一次性漏洞发现固化为可跨目标、跨时间复用的公开 fuzzer，并在后续工具间迁移经验（domato→Jackalope→变异式文法改进），而非每次从零开始。",
+    "以同一工具、同一迭代量在不同引擎间建立可被同行复现的对比基线，并对纵向复测结果做逐年比较，以证据而非品牌评价供应商修复与披露。",
+    "在高阶方法（如符号执行）失效时，显式退回并组合多种基础手段（人工源码审查、边界值附近 fuzzing、可疑代码段穷举），不依赖单一方法。",
+    "对自建工具与同伴同类工具做覆盖率/bug 命中度的实证对照，并如实记录工具的负结果（如某覆盖引导 fuzzer 在 IE 上未产生新 crash）。",
+    "在 writeup 中参照同伴工具的文献描述同类问题，把个人方法学嵌入团队工具间互引的反馈回路。"
+  ],
+  "non_transferable_conditions": [
+    "Project Zero 专职漏洞研究岗位提供的资源与披露规范，是其受控对比测量、跨引擎复测与公开批评供应商披露流程得以持续的组织前提，非个人可复制的内在能力。",
+    "P0 团队内多个自建 fuzzer 并存（domato/Fuzzilli/Jackalope/TinyInst）的分工结构，是同伴分工协作与工具互引机制的组织土壤；脱离该组织生态难以复现同等的工具间校验回路。",
+    "2017-2018 年 Safari 显著弱于同侪的引擎分布，是'横向对比发现离群值'这一结果的时期性外部条件；当前引擎分布已变，相同方法学未必复现同等离群结果。",
+    "GitHub ifratric 账号下的 winafl/winipt/LibAFL/qemu-libafl-bridge 等 fork 与 Pull Shark 成就所反映的'反向回馈上游'痕迹，依赖其 P0 研究员身份带来的上游关注度，非纯个人贡献可达成。",
+    "domato/Jackalope 仓库 README 与版权头若ratric@google.com 的署名依赖其 Google/P0 阶段的雇主归属，早期（pre-Google）作品与工具归属本轮无一手证据，不可据以推断个人能力起点。"
+  ],
+  "open_questions": [
+    "加入 Google Project Zero 的确切年份（二手线索指向约 2016-2017）与触发因素：团队页 googleprojectzero.blogspot.com/p/team.html 返回 404，无一手官方个人简介，本轮未能升级为 documented。",
+    "pre-Google 阶段能力起点：萨格勒布大学（University of Zagreb）的 PhD/安全研究背景、Black Hat Europe 2012 'Browsed Off' 演讲、以及 BFF / axlib / cross_fuzz / Granota 等社区常提及的早期工具，均无一手 URL 证实，是否真实存在、是否为其原创、发布时间均未知。",
+    "2026-03-05 博文直接 URL 在深度对话维度抓取返回 404 而在其余四维度 verified 的原因：是站点 URL 结构变化、抓取时点差异，还是首页索引与正文页不一致，需补抓可抓取正文 URL 逐句核对。",
+    "x.com/ifsecure 与 github.com/ifratric 之间的显式跨平台绑定证据：X 账号正文因 HTTP 402 不可抓取，handle 一致性仅由间接互证锚定，未闭环。",
+    "Black Hat US/EU、POC、Infiltrate 等会议的具体 speaker 页与议题随时间演变所反映的方法转型轨迹：person_json 仅给出会议名作线索，本轮未抓取一手 speaker 页。",
+    "oss-fuzz、Chromium issue tracker、WebKit bugs 上 Fratric 具名提交的 issue/patch 痕迹：mutational grammar fuzzing 文仅给出 libxslt issue 409761909 一个具体 tracker 锚点，其余未逐一核验。",
+    "Fratric 与 P0 同伴（Brand、Silvanovich、Jenkins、Groß）之间的内部协作机制（code review、共享 corpus 等）：无一手资料，仅能由公开 co-byline 与工具互引推断。",
+    "domato / Jackalope 的 commit 时序、issue 讨论区与外部贡献者 PR 对工具演进的反馈：本轮仓库 Issues/PR 仅记数量未逐一读取正文，工具版本演化的反馈回路细节缺失。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-synthesis-v1-20260926-223923-012",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790433943599470000-ivan-fratric-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "1dc68fa1-9b50-4fc9-bb14-557847ba78b9",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_sq8l3859g5udyqfw9nv7vfsh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-synthesis-v1-20260926-223923-012/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-26T14:45:43.638307+00:00"
+      },
+      {
+        "tool_use_id": "call_hux4ku3a2kok065jaa9rgcyt",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-synthesis-v1-20260926-223923-012/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "2877aa2745e8750d3042d46f4713b907af38ce057bf6d3aa0760c92b051c68ee",
+        "accessed_at": "2026-09-26T14:45:43.638331+00:00"
+      },
+      {
+        "tool_use_id": "call_aqooi4g7lgmrnyoplmrpugza",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-synthesis-v1-20260926-223923-012/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-26T14:45:43.638339+00:00"
+      },
+      {
+        "tool_use_id": "call_pesp5i7eb94iinxqe1asuocu",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-synthesis-v1-20260926-223923-012/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "08215a70a4246fcad7580d8805a3ff290203f1337fe7c51a79ed76fa4a47b93a",
+        "accessed_at": "2026-09-26T14:45:43.638347+00:00"
+      },
+      {
+        "tool_use_id": "call_gykgunsmpxllu5a9nqwkxbph",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-synthesis-v1-20260926-223923-012/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-26T14:45:43.638351+00:00"
+      },
+      {
+        "tool_use_id": "call_75cjuvfjyfvktfqiuwmwa6cv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-synthesis-v1-20260926-223923-012/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "d07625c1608251b7dacea3104e7d259b26ff816d40a4eabfdf2f4e3ebdbaf033",
+        "accessed_at": "2026-09-26T14:45:43.638436+00:00"
+      },
+      {
+        "tool_use_id": "call_hzabthtsk7u6xsygaprbo3t0",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-synthesis-v1-20260926-223923-012/checkpoint.md",
+          "content": "# 节点进度 checkpoint — Ivan Fratric 综合 (synthesis v1)\n\n## 任务\n重建 Ivan Fratric 领域能力成长过程（非罗列成就）。六维取证材料综合。revision_context 为空（首次综合）。\n\n## 证据有效性盘点\n\n### verified_in_run=false — 不得使用\n- if-dc-04 (JScript GC variant, 2020-07-29, unknown)\n- if-dec-003 (Jackalope/domato/cross_fuzz 聚合线索, unknown)\n- ivf-tl-001 (~2017 加入 PZ, inferred)\n- ivf-tl-005 (Black Hat Europe 2012 \"Browsed Off\", inferred)\n\n### verified_in_run=true — 可用（按时间排序）\n- if-c-001 (2017, documented): domato 发布，跨浏览器 CVE showcase\n- ext-01 (2017-09-21, documented): \"The Great DOM Fuzz-off of 2017\" — 1 亿次迭代×5 引擎，Safari 17 离群值；诚实记录覆盖引导 DOM fuzzer 在 IE 无新 crash\n- ivf-tl-002 (YYYY, documented): domato README，作者署名 ifratric@google.com\n- if-dc-01 (2018-07-26, documented): Skia 精度 bug；KLEE+STP/Z3 符号执行因浮点失败 → 退回人工审查+边界值 fuzzing+穷举\n- if-dc-02 (2018-07-26, documented): Firefox DOM fuzzing 偶然 OOB 写 → 追因到 Skia\n- if-c-002 (2018-07-26, documented): \"Drawing Outside the Box\" 与 Mark Brand 联合署名（Brand=SwiftShader, Fratric=Skia）\n- ext-02 (2018-10-04, documented): \"365 Days Later\" — 同 Domato/同方法学复测，Safari 17→9；CVE-2018-4314 PoC；UAF→infoleak；公开批评 Apple advisory\n- ext-03 (2021-09-14, documented): Jackalope — 覆盖引导 binary fuzzer；文法\"与 Domato 类似但简化\"+<repeat_*>；Fuzzilli+TinyInst 在 jscript/jscript9 跑数周/100 核；CVE-2021-26419/-31959/-34480；如实对照 Fuzzilli\n- if-c-003 (2026-01-14, documented): Pixel 9 0-click Part 1 — \"Ivan Fratric and I reported CVE-2025-54957\"\n- ext-05 (2026-01-14, documented): 同上，Silvanovich co-report\n- if_works_01 (2026-03-05, documented): Mutational Grammar Fuzzing 博文（首页索引条目）\n- if-c-004 (2026-03-05, documented): 同文，**直接 URL 抓取成功**，逐句引文 \"my Jackalope fuzzer\" / XSLT/JIT / libxslt issue 409761909 / Fuzzilli 参照 / 自测 \"worked surprisingly well\"\n- ext-04 (2026-03-05, documented): 同文，外部视角\n- if-dec-001 (2026-03-05, documented): 同文，关键决策维度\n- ivf-tl-003 (2026-03-05, documented): 同文，时间线维度\n- if_works_03 (2026, documented): GitHub ifratric 4 个 fuzzing fork（winafl/winipt/LibAFL/qemu-libafl-bridge）\n- if-c-005 (2026, documented): GitHub ifratric bio \"Google Project Zero member\"，Pull Shark 成就\n- if-c-006 (2026, inferred): googleprojectzero 组织仓库矩阵（domato/fuzzilli/winafl/Jackalope/TinyInst）\n- ivf-tl-004 (YYYY, documented): GitHub ifratric forks\n\n### reported（verified=true，但未抓正文，需标注）\n- if_works_02 (2025, reported): CVE-2025-54957 合作报告 — **改用 documented 的 if-c-003/ext-05 覆盖同一事实，不单独依赖此项**\n- if-dc-03 (2026-03-05, reported): 博文直接 URL 在该维度 404 — **与 if-c-004/ext-04 矛盾，以 verified 逐句引文为准**\n\n### unknown — 不作证据使用\n- if-c-007 (X @ifsecure 402, Black Hat/POC 未抓)\n\n## 关键矛盾处理\n1. **2026-03-05 博文可抓取性矛盾**：深度对话维度 if-dc-03 报 direct URL 404（reported）；社区 if-c-004/外部 ext-04/决策 if-dec-001/时间线 ivf-tl-003 均 verified_in_run=true 并附逐句引文。处理：以 verified 逐句引文为 documented，矛盾本身列入 tensions。\n2. **handle 二元性**：github.com/ifsecure 404；github.com/ifratric verified；X @ifsecure 402。身份由 domato 版权头 ifratric@google.com + GitHub bio \"Google Project Zero member\" 锚定。列入 tensions。\n3. **误归因**：二手摘要曾把 Samuel Groß 的 JITSploitation 系列误归 Fratric；已排除（external contradictions）。\n\n## 综合方案\n- **stages（4）**：2017 生成式文法 fuzzing 测量基线 / 2018 工具失效下方法组合+追因 / 2021 覆盖引导变异迁移 / 2025-2026 方法论自我审视+跨域协作\n- **mechanisms（4）**：①单次发现固化为可复用 fuzzing 基础设施 ②受控对比测量 ③工具失效时显式方法组合回退 ④同伴分工协作与工具互引校验\n- pre-2017（加入 PZ、Zagreb PhD、Black Hat 2012、BFF/axlib/cross_fuzz/Granota）全部 reported/inferred/unverified → 不立 stage，列入 open_questions\n- 不自填 _run / verification\n\n## 状态\n综合完成，待写 output.json。\n"
+        },
+        "success": true,
+        "content_sha256": "c5d1cb5c21d1df2eb543365ff7541d8b09c42909cecd2108223715144b11c4be",
+        "accessed_at": "2026-09-26T14:45:43.638927+00:00"
+      },
+      {
+        "tool_use_id": "call_xnxutu29k5ii9sl13tmz72tc",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ivan-fratric-synthesis-v1-20260926-223923-012/output.json",
+          "content": "{\n  \"person\": \"Ivan Fratric\",\n  \"expertise\": [\n    \"浏览器漏洞发现与模糊测试\",\n    \"基于文法的生成式模糊测试（generation-based grammar fuzzing）\",\n    \"覆盖引导变异式模糊测试（coverage-guided mutational fuzzing）\",\n    \"二进制目标覆盖引导模糊测试（Jackalope，含 Intel PT / TinyInst 插桩）\",\n    \"图形库精度漏洞研究（Skia 越界绘制）\",\n    \"JavaScript 引擎 fuzzing（jscript / jscript9，含 JIT 引擎与字节码生成器）\",\n    \"XSLT 实现漏洞研究（libxslt）\",\n    \"多媒体解码器漏洞研究（Dolby Unified Decoder，合作报告）\",\n    \"模糊测试方法学评估与自我修正\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2017\",\n      \"stage\": \"生成式文法模糊测试与跨引擎受控对比测量基线的建立\",\n      \"capability_change\": \"在 Project Zero 阶段，将浏览器漏洞研究方法固化为可复用的 generation-based grammar fuzzer domato（基于上下文无关文法生成 HTML/CSS/JS 样本），并以同一工具、同一迭代量（约一亿次）在 Safari、Chrome、Firefox、IE、Edge 五个引擎间建立可被同行复现的对比基线，发现 Safari 以 17 个 bug 显著高于其余引擎（Chrome 2 / Firefox 4 / IE 4 / Edge 6），同时如实记录额外尝试的覆盖引导 DOM fuzzer 在 IE 上未产生新 crash。能力从单点漏洞发现扩展为'工具化产出+受控测量实验'。\",\n      \"evidence_ids\": [\"if-c-001\", \"ext-01\", \"ivf-tl-002\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2018\",\n      \"stage\": \"高阶工具失效下的方法组合回退与机会式追因\",\n      \"capability_change\": \"在 Skia 图形库精度漏洞研究中，先用符号执行（KLEE 配 STP/Z3 后端）寻找导致越界绘制的输入，因工具不支持浮点符号变量且无法在合理时间内跑完而失败；随后显式退回并组合人工源码审查、边界值附近的 fuzzing 与对可疑代码段穷举取值等更基础的手段作为补偿，并在 Firefox DOM fuzzing 中捕捉到偶然的越界写后顺藤进入底层库做根因分析。同年以同一 domato、同一方法学复测 WebKit/Safari，bug 数由 17 降至 9，并为 CVE-2018-4314 编写 PoC，记录'把 UAF 转成 infoleak 是耗时最多的部分'，并公开批评 Apple advisory 修复后未及时列出对应 bug。能力表现为工具失效时不依赖单一方法、以证据评价供应商披露流程的工程化习惯。\",\n      \"evidence_ids\": [\"if-dc-01\", \"if-dc-02\", \"if-c-002\", \"ext-02\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2021\",\n      \"stage\": \"从生成式向覆盖引导变异式的工具迁移与跨工具诚实对照\",\n      \"capability_change\": \"将 domato 的文法经验迁移、简化并扩展为覆盖引导的二进制模糊测试器 Jackalope（Windows/macOS），新增 <repeat_*> 节点以在保持文法有效性的前提下做插入/删除；与团队同伴 Samuel Groß 的 Fuzzilli 加 TinyInst 在 IE 的 jscript/jscript9 上以约 100 核跑数周，发现 CVE-2021-26419、-31959（字节码生成器）与 -34480（JIT 编译器）。文中如实对照 Jackalope 与 Fuzzilli 在覆盖率与 bug 命中度上相近、且两者均在 fuzz 早期命中、单机即可发现，而非以自我宣传方式评估方法学。能力从前一套工具的单向发布演进为'工具间经验迁移+同类工具实证对照'。\",\n      \"evidence_ids\": [\"ext-03\", \"if-c-006\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2025-2026\",\n      \"stage\": \"方法学层面的自我审视与跨域协作扩展\",\n      \"capability_change\": \"在《On the Effectiveness of Mutational Grammar Fuzzing》中自述变异式文法 fuzzing 过去成功用于 XSLT 实现与 JIT 引擎 bug，并以 libxslt issue 409761909 为具体反馈落点；进一步系统反思该方法的 perceived flaws，提出并自测一种改进技术（周期性重启 worker、半时间独立生成半时间纳入先验覆盖），自述'worked surprisingly well and helped discover issues in libxslt quicker'。2026-01 与 Natalie Silvanovich 合作报告 CVE-2025-54957（Dolby Unified Decoder），研究范围从浏览器/JS 引擎主场向移动平台多媒体解码器延伸。能力由执行层进入方法学批判层，并在 P0 团队内被同伴以合作报告者身份信任地扩展到非主场目标。\",\n      \"evidence_ids\": [\"if-c-004\", \"ext-04\", \"if-dec-001\", \"ivf-tl-003\", \"if-c-003\", \"ext-05\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"单次漏洞发现固化为可复用模糊测试基础设施\",\n      \"starting_conditions\": \"Project Zero 阶段可投入专职资源，浏览器目标具有跨厂商共性（Safari/Chrome/IE/Edge/Firefox/JScript/VBScript 共享或相近的 DOM/JS 攻击面）。\",\n      \"repeated_practice\": \"2017 年将 DOM 漏洞研究方法固化为 domato（基于上下文无关文法的生成式 fuzzer）；2021 年把 domato 的文法经验迁移、简化并扩展为覆盖引导二进制 fuzzer Jackalope，新增 <repeat_*> 节点；2026 年继续在 Jackalope 的文法 fuzzing 实现上做变异式改进并自测。表现为多次把一次性发现沉淀为公开、可复用的工具。\",\n      \"feedback\": \"domato 的 bug showcase 横跨多浏览器 CVE（if-c-001）；Jackalope 的产出为 CVE-2021-26419/-31959/-34480（ext-03）；2026 年改进方案以 libxslt issue 409761909 为 bug tracker 反馈落点，并以自测结果确认提速（if-c-004）。\",\n      \"intermediate_capability\": \"把单点漏洞发现能力扩展为可跨目标、跨时间复用的研究基础设施，并能在工具间迁移经验而非每次从零开始。\",\n      \"observed_outcomes\": [\n        \"domato 成为 2017 与 2018 两年跨引擎/纵向复测的公共工具基线（ext-01、ext-02）\",\n        \"Jackalope 在 IE jscript/jscript9 上以约 100 核跑数周产出三个 CVE（ext-03）\",\n        \"2026 年在公开 writeup 中参照团队同伴工具 Fuzzilli 的文献描述同类问题，构成工具间反馈（if-c-004）\"\n      ],\n      \"evidence_ids\": [\"if-c-001\", \"ext-01\", \"ext-02\", \"ext-03\", \"if-c-004\", \"ivf-tl-002\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"工具建设也可能由 P0 团队'每人维护一个专门 fuzzer'的分工要求驱动，而非纯个人偏好；if-c-006 的组织仓库矩阵（domato/fuzzilli/Jackalope/TinyInst 并列）支持分工解释，但若纯为分工则无需在工具间迁移文法经验并互引文献，故个人偏好与组织分工共同作用的解释更稳。\"\n    },\n    {\n      \"name\": \"受控对比测量与对工具边界的诚实评估\",\n      \"starting_conditions\": \"浏览器多引擎并存且 bug tracker 公开，使同方法学跨引擎结果可被同行核验；目标侧存在 Safari 这类可能显著弱于同侪的引擎。\",\n      \"repeated_practice\": \"2017 年以同一 domato、同一约一亿次迭代量在五个引擎间做横向对比（ext-01）；2018 年以同一 domato、同一方法学对 WebKit/Safari 做一年后纵向复测，bug 数 17→9（ext-02）；2021 年将 Jackalope 与 Fuzzilli 在覆盖率与 bug 命中度上做同类工具对照（ext-03）；2017 年还如实记录额外尝试的覆盖引导 DOM fuzzer 在 IE 上未产生新 crash（ext-01）。\",\n      \"feedback\": \"横向对比暴露 Safari 为离群值；纵向复测验证供应商修复是否真实，并以 PoC 把发现推进到可验证利用（CVE-2018-4314，UAF→infoleak）；跨工具对照印证方法学结论而非品牌背书。\",\n      \"intermediate_capability\": \"把单点发现转化为可被同行复现的测量实验，并对工具的有效边界做不回避的记录。\",\n      \"observed_outcomes\": [\n        \"2017 年 Safari 17 bug 显著高于 Chrome 2 / Firefox 4 / IE 4 / Edge 6 的测量结论（ext-01）\",\n        \"2018 年复测确认 Safari 12 修复 9 bug 并公开批评 Apple advisory 未及时列出对应 bug（ext-02）\",\n        \"2021 年 Jackalope 与 Fuzzilli 在覆盖率/bug 命中度上相近、均早期命中、单机可发现（ext-03）\"\n      ],\n      \"evidence_ids\": [\"ext-01\", \"ext-02\", \"ext-03\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"受控对比也可能是 P0 公开披露规范要求的结果，而非个人方法学自觉；但 ext-01 中主动记录'覆盖引导 DOM fuzzer 在 IE 无新 crash'与 ext-02 公开批评 Apple advisory 的行为超出了规范披露的最小要求，更符合个人对工具边界与披露透明度的评价习惯。\"\n    },\n    {\n      \"name\": \"高阶工具失效时显式退回并组合基础手段\",\n      \"starting_conditions\": \"Skia 精度漏洞涉及浮点几何，超出符号执行工具当时的能力边界；目标 bug 难以被单一方法直接命中。\",\n      \"repeated_practice\": \"2018 年在 Skia 研究中先尝试符号执行（KLEE 配 STP/Z3 后端），因不支持浮点符号变量且无法在合理时间内跑完而失败，随后显式退回并组合人工源码审查、图像边界值附近的 fuzzing 与对可疑代码段的穷举取值（if-dc-01）；同年还在 Firefox DOM fuzzing 中捕捉到偶然越界写后顺藤进入底层库做根因分析（if-dc-02）。\",\n      \"feedback\": \"符号执行失败的负反馈直接触发方法组合的回退决策；边界值 fuzzing 与穷举在定位代码段后产出 Skia 精度 bug。\",\n      \"intermediate_capability\": \"在工具失效时不依赖单一银弹，能把抽象方法论主张落到可执行的多手段组合，并在宽域 fuzzing 噪声中提炼可深挖线索。\",\n      \"observed_outcomes\": [\n        \"Skia 精度漏洞研究产出 2018-07-26 的 Project Zero 公开 writeup（if-dc-01、if-c-002）\",\n        \"与 Mark Brand 分工（Brand=SwiftShader，Fratric=Skia）联合发表 'Drawing Outside the Box'（if-c-002）\"\n      ],\n      \"evidence_ids\": [\"if-dc-01\", \"if-dc-02\", \"if-c-002\"],\n      \"validation_tests\": [\"generative\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"方法组合回退也可能只是当时符号执行工具普遍不可用所致的被动结果，而非主动的方法论选择；但 if-dc-01 中以第一人称复数自述'what we ended up doing was a combination of the more old-school methods'显示其对工具选型有独立判断，主动组合解释更贴合原文。\"\n    },\n    {\n      \"name\": \"同伴分工协作与工具间互引校验\",\n      \"starting_conditions\": \"Project Zero 团队内存在多个自建 fuzzer（domato、Fuzzilli、Jackalope、TinyInst）与同主题分工（如图形库研究）。\",\n      \"repeated_practice\": \"2018 年与 Mark Brand 在图形库主题上分工（Brand=SwiftShader，Fratric=Skia）并联合发表（if-c-002）；2021 年将 Jackalope 与同伴 Groß 的 Fuzzilli+TinyInst 联合在 jscript/jscript9 上跑数周对照（ext-03）；2026 年在 writeup 中参照 Fuzzilli 文献描述同类问题（if-c-004）；2026-01 与 Natalie Silvanovich 合作报告 CVE-2025-54957（if-c-003、ext-05）。\",\n      \"feedback\": \"联合署名与同伴点名构成校验机制；外部社区与厂商追问驱动后续 writeup 解释可利用性（if-c-003 引述 'vendors as well as members of the security community have questioned whether such vulnerabilities are exploitable'）。\",\n      \"intermediate_capability\": \"在团队内以分工并行探索再合并发表，并以工具互引而非孤立维护的方式校验方法学结论，把个人产出嵌入团队-厂商-社区三方反馈回路。\",\n      \"observed_outcomes\": [\n        \"'Drawing Outside the Box' 联合署名 writeup（if-c-002）\",\n        \"CVE-2025-54957 由 Silvanovich 在 Pixel 9 0-click Part 1 中点名 'Ivan Fratric and I reported'（if-c-003、ext-05）\",\n        \"2026 年 writeup 参照 Fuzzilli 文档描述同类问题（if-c-004）\"\n      ],\n      \"evidence_ids\": [\"if-c-002\", \"ext-03\", \"if-c-003\", \"if-c-004\", \"ext-05\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"同伴协作也可能仅是 P0 组织流程的自然产物，而非个人能力特征；但跨域（Dolby 解码器非其浏览器主场）的合作报告与 writeup 中工具互引，超出组织流程的最小要求，更贴合同伴对其研究范围的可信扩展。\"\n    }\n  ],\n  \"tensions\": [\n    \"同一篇 2026-03-05 博文《On the Effectiveness of Mutational Grammar Fuzzing》在六维取证中存在可抓取性矛盾：深度对话维度 if-dc-03 报告其直接 URL 抓取返回 404 并标记为 reported；而社区 if-c-004、外部 ext-04、决策 if-dec-001、时间线 ivf-tl-003 四个维度均标记 verified_in_run=true 并附逐句引文（'my Jackalope fuzzer' / XSLT/JIT / libxslt issue 409761909 / 'worked surprisingly well'）。本报告以四份 verified 逐句引文为 documented，将该博文列为已核验来源；抓取性矛盾本身记入此处，不据此否定内容真实性。\",\n    \"handle 二元性未闭环：person_json 给出 social 为 https://x.com/ifsecure，但 https://github.com/ifsecure 返回 404，代码仓库署名为 github.com/ifratric；X @ifsecure 抓取返回 HTTP 402 无法核验正文。身份由 domato 版权头 ifratric@google.com 与 GitHub ifratric bio 'Google Project Zero member' 互证锚定，但 X handle 与 GitHub handle 之间的显式跨平台绑定未取得一手证据。\",\n    \"误归因风险：二手 LLM 摘要曾把同事 Samuel Groß 的 'JITSploitation' 系列（2020-09）与 'JSC Exploits'（2019-08）误归到 Fratric 名下；直接抓取确认作者为 Groß，相关作品未计入 Fratric 的成长证据。这提示在 P0 团队语境下，组织品牌与个人能力来源需严格区分。\",\n    \"深度对话与自述维度要求的访谈/播客/AMA/演讲问答正文本轮未取得一手抓取（x.com/ifsecure 402、linkedin 999、Black Hat 议程 403、OffensiveCon 404）；已得一手材料仅含方法论层面的自述（2018-07-26），成长背景细节缺失。\"\n  ],\n  \"transferable_practices\": [\n    \"将一次性漏洞发现固化为可跨目标、跨时间复用的公开 fuzzer，并在后续工具间迁移经验（domato→Jackalope→变异式文法改进），而非每次从零开始。\",\n    \"以同一工具、同一迭代量在不同引擎间建立可被同行复现的对比基线，并对纵向复测结果做逐年比较，以证据而非品牌评价供应商修复与披露。\",\n    \"在高阶方法（如符号执行）失效时，显式退回并组合多种基础手段（人工源码审查、边界值附近 fuzzing、可疑代码段穷举），不依赖单一方法。\",\n    \"对自建工具与同伴同类工具做覆盖率/bug 命中度的实证对照，并如实记录工具的负结果（如某覆盖引导 fuzzer 在 IE 上未产生新 crash）。\",\n    \"在 writeup 中参照同伴工具的文献描述同类问题，把个人方法学嵌入团队工具间互引的反馈回路。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Project Zero 专职漏洞研究岗位提供的资源与披露规范，是其受控对比测量、跨引擎复测与公开批评供应商披露流程得以持续的组织前提，非个人可复制的内在能力。\",\n    \"P0 团队内多个自建 fuzzer 并存（domato/Fuzzilli/Jackalope/TinyInst）的分工结构，是同伴分工协作与工具互引机制的组织土壤；脱离该组织生态难以复现同等的工具间校验回路。\",\n    \"2017-2018 年 Safari 显著弱于同侪的引擎分布，是'横向对比发现离群值'这一结果的时期性外部条件；当前引擎分布已变，相同方法学未必复现同等离群结果。\",\n    \"GitHub ifratric 账号下的 winafl/winipt/LibAFL/qemu-libafl-bridge 等 fork 与 Pull Shark 成就所反映的'反向回馈上游'痕迹，依赖其 P0 研究员身份带来的上游关注度，非纯个人贡献可达成。\",\n    \"domato/Jackalope 仓库 README 与版权头若ratric@google.com 的署名依赖其 Google/P0 阶段的雇主归属，早期（pre-Google）作品与工具归属本轮无一手证据，不可据以推断个人能力起点。\"\n  ],\n  \"open_questions\": [\n    \"加入 Google Project Zero 的确切年份（二手线索指向约 2016-2017）与触发因素：团队页 googleprojectzero.blogspot.com/p/team.html 返回 404，无一手官方个人简介，本轮未能升级为 documented。\",\n    \"pre-Google 阶段能力起点：萨格勒布大学（University of Zagreb）的 PhD/安全研究背景、Black Hat Europe 2012 'Browsed Off' 演讲、以及 BFF / axlib / cross_fuzz / Granota 等社区常提及的早期工具，均无一手 URL 证实，是否真实存在、是否为其原创、发布时间均未知。\",\n    \"2026-03-05 博文直接 URL 在深度对话维度抓取返回 404 而在其余四维度 verified 的原因：是站点 URL 结构变化、抓取时点差异，还是首页索引与正文页不一致，需补抓可抓取正文 URL 逐句核对。\",\n    \"x.com/ifsecure 与 github.com/ifratric 之间的显式跨平台绑定证据：X 账号正文因 HTTP 402 不可抓取，handle 一致性仅由间接互证锚定，未闭环。\",\n    \"Black Hat US/EU、POC、Infiltrate 等会议的具体 speaker 页与议题随时间演变所反映的方法转型轨迹：person_json 仅给出会议名作线索，本轮未抓取一手 speaker 页。\",\n    \"oss-fuzz、Chromium issue tracker、WebKit bugs 上 Fratric 具名提交的 issue/patch 痕迹：mutational grammar fuzzing 文仅给出 libxslt issue 409761909 一个具体 tracker 锚点，其余未逐一核验。\",\n    \"Fratric 与 P0 同伴（Brand、Silvanovich、Jenkins、Groß）之间的内部协作机制（code review、共享 corpus 等）：无一手资料，仅能由公开 co-byline 与工具互引推断。\",\n    \"domato / Jackalope 的 commit 时序、issue 讨论区与外部贡献者 PR 对工具演进的反馈：本轮仓库 Issues/PR 仅记数量未逐一读取正文，工具版本演化的反馈回路细节缺失。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "9a6ed6f8386004431aa52b21f5e5c004ba5ac9a397c1420e8e7f217fd1386949",
+        "accessed_at": "2026-09-26T14:45:43.638933+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790433943638949000-ivan-fratric-synthesis-v1.json",
+    "label": "Ivan Fratric:synthesis:v1",
+    "elapsed_seconds": 380.61,
+    "prompt_sha256": "708fd6b2c566c1f2a9fc921f12184bfcee012057abf79a33d93d1cdce43f8a8a",
+    "num_turns": 9,
+    "total_cost_usd": 0.689734,
+    "usage": {
+      "input_tokens": 36459,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 100928,
+      "output_tokens": 18279,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 36459,
+        "outputTokens": 18279,
+        "cacheReadInputTokens": 100928,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.689734,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

@@ -1,0 +1,400 @@
+{
+  "person": "Antonio Cocomazzi",
+  "expertise": [
+    "Windows 本地权限提升（Potato 谱系：RoguePotato/RemotePotato0/JuicyPotatoNG/LocalPotato）",
+    "Windows 认证子系统滥用（NTLM 反射、SSPI/UAC、DCOM/RPC 中继、OXID 解析）",
+    "LSASS 内存转储与 EDR/检测规避（Seclogon 句柄泄露、Instrumentation Callback、竞态转储）",
+    "勒索软件与威胁团伙行为画像（Locky/Zepto 样本逆向、Black Basta/FIN7、Vice Society）",
+    "漏洞披露流程（MSRC 报告、Patch Tuesday、CVE 协同披露、0patch 微补丁）",
+    "Windows 内部机制逆向与公开 writeup/POC 工程"
+  ],
+  "stages": [
+    {
+      "period": "2016-06 — 2017-07",
+      "stage": "勒索样本逆向与威胁情报短文输出",
+      "capability_change": "早期公开作品以 Locky/Zepto 勒索软件样本分析与 JavaScript 投放器逆向为主，方法停留在静态/动态样本分析层面，建立以样本/家族为单位公开记录的输出习惯；此阶段未涉及权限提升或 EDR 规避，为后续难度跃迁提供可对照的基线。",
+      "evidence_ids": [
+        "ac-timeline-01",
+        "ac-timeline-02",
+        "ac-timeline-03",
+        "ac-timeline-04",
+        "ac-works-02",
+        "ac-works-03"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2019-12 — 2020-07",
+      "stage": "向 Windows 本地权限提升与进程注入/规避迁移",
+      "capability_change": "研究重心由恶意样本分析迁移到 Windows 信任边界，以 SeImpersonate 与服务账户到 SYSTEM 的 Potato 路径为入口，并在同期将技术栈横向扩展到进程注入与 Instrumentation Callback 检测规避原语；建立独立博客作为体系化公开输出渠道；这是其研究重心第一次可核验的迁移。",
+      "evidence_ids": [
+        "ac-timeline-05",
+        "ac-decisions-01",
+        "ac-timeline-06",
+        "ac-works-05",
+        "ac-community-02",
+        "ac-decisions-02",
+        "ac-timeline-08",
+        "ac-targeted-r1-01",
+        "ac-timeline-07",
+        "ac-works-01",
+        "ac-conversations-002"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2021-04 — 2022-12",
+      "stage": "进入 MSRC 披露闭环、威胁团伙行为画像与单组件序列化研究",
+      "capability_change": "研究深度向 Windows RPC 协议内部推进，首次进入与 MSRC 的正式披露流程并经历 Won't Fix 反馈；研究方法从单点漏洞扩展到威胁团伙行为画像（Black Basta/FIN7、Vice Society 等）；对 Seclogon 单一组件做跨多篇 writeup 的序列化纵深分析（part 2 → part 3）。",
+      "evidence_ids": [
+        "ac-timeline-09",
+        "ac-community-03",
+        "ac-decisions-03",
+        "ac-timeline-10",
+        "ac-timeline-11",
+        "ac-timeline-13",
+        "ac-community-07",
+        "ac-timeline-14",
+        "ac-community-04",
+        "ac-decisions-06",
+        "ac-timeline-15",
+        "ac-timeline-16",
+        "ac-timeline-12",
+        "ac-decisions-05"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2023-01 — 2023-09",
+      "stage": "协议级正式 CVE 披露与 Potato 研究线十年回顾",
+      "capability_change": "披露策略由厂商不修的边界研究转向可获 CVE 的协议级漏洞：完成 LocalPotato（CVE-2023-21746）的 MSRC 报告 → Patch Tuesday 修复 → 公开披露闭环，并主动评估补丁为 workaround 与残留攻击面；同期将 SSPI/NTLM 原语延伸到 UAC 边界绕过，并在 POC2023 对 Potato 研究线作十年阶段性总结。",
+      "evidence_ids": [
+        "ac-timeline-17",
+        "ac-works-10",
+        "ac-community-05",
+        "ac-decisions-07",
+        "ac-timeline-18",
+        "ac-community-06",
+        "ac-conversations-003",
+        "ac-decisions-08",
+        "ac-decisions-09"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "厂商封堵后更换传输原语并复用前序公开缺陷重建利用路径",
+      "starting_conditions": "2019 起进入 Windows 本地权限提升研究，JuicyPotato 在 Windows 10 1809/Server 2019 因 OXID 解析器被限制到端口 135 而被封堵；具备跟踪厂商补丁变化与同伴近期公开成果的基础。",
+      "repeated_practice": "面对厂商补丁封堵既有利用路径，不放弃研究方向，而是更换传输原语（TCP/IP → 命名管道；OXID 解析 → 本机 COM 服务器）或复用他人已公开的路径校验缺陷（itm4n PrintSpoofer 的分隔技巧），把被封堵的原语重组为新绕过。",
+      "feedback": "厂商边界判定（Service→SYSTEM 被判 expected behavior）反馈，据此调整是否进入正式披露，并提示其需在 expected behavior/Won't Fix 类选题与可获 CVE 的协议级漏洞之间区分选题。",
+      "intermediate_capability": "形成对失败或被封堵结果的迭代式再利用与跨技术点拼装能力，能把分散的前序原语组合为可复现利用链。",
+      "observed_outcomes": [
+        "RogueWinRM（BITS 向 5985 端口 WinRM 的 NTLM 认证 + 伪 WinRM 服务器获取 SYSTEM 令牌）",
+        "RoguePotato（自建 Oxid Resolver + 命名管道端点 + PrintSpoofer 路径校验绕过 + RPCSS token kidnapping）",
+        "JuicyPotatoNG（本机 COM 服务器 + LogonUser NewCredentials 注入 INTERACTIVE SID + SSPI hook 取代 RpcImpersonateClient）"
+      ],
+      "evidence_ids": [
+        "ac-decisions-01",
+        "ac-decisions-02",
+        "ac-works-05",
+        "ac-community-02",
+        "ac-timeline-06",
+        "ac-decisions-06",
+        "ac-community-04",
+        "ac-timeline-14"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "Potato 谱系的连续产出可能部分源于同期 Windows 认证子系统可挖掘原语较多与社区热度较高，存在幸存者偏差：同期其他研究者可能亦在尝试但未公开产出，个人方法习惯与外部可挖掘窗口的相对贡献难以分离。此外成长叙事主体依据研究对象自撰来源重建，external 维度未取得一手第三方评价，能力归因应限定为基于自述与可核验产出的推断。"
+    },
+    {
+      "name": "对单一 Windows 组件做跨多篇 writeup 的序列化纵深分析",
+      "starting_conditions": "2021 进入 Windows 组件级研究，逆向 Seclogon 服务时发现 SlrCreateProcessWithLogon 信任客户端传入的调用方 PID，可通过修改 TEB 中的 ClientId 伪造 PPID 借合法系统服务打开目标进程句柄。",
+      "repeated_practice": "对 Seclogon 单一组件跨多篇 writeup 纵深分析，从句柄滥用（part 2，借合法系统服务打开 LSASS 句柄实现不直接调用 OpenProcess 的隐蔽转储）推进到竞态时序（part 3，在句柄关闭前复制 LSASS 句柄）。",
+      "feedback": "自我接续的序列化推进（part 3 正文回溯 part 2 末尾曾提及该竞态方法可作为后续主题，且 part 3 在约两年后完成该主题；该依据为 part 3 的回溯引用而非 part 2 原文直接核验，来源层级见 ac-targeted-r2-01）。",
+      "intermediate_capability": "形成对单一攻击面反复复盘、逐层加深的练习模式，以自我接续方式推进而非依赖外部选题。",
+      "observed_outcomes": [
+        "Seclogon part 2：滥用泄露句柄转储 LSASS 内存",
+        "Seclogon part 3：竞态窃取 LSASS 句柄的可靠转储方法"
+      ],
+      "evidence_ids": [
+        "ac-timeline-11",
+        "ac-timeline-13",
+        "ac-community-07",
+        "ac-decisions-05",
+        "ac-targeted-r2-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "part 3 正文回溯 part 2 末尾曾提及该竞态方法可作为后续主题，且 part 3 在约两年后完成该主题；该依据为 part 3 的回溯引用而非 part 2 原文直接核验，据此推断存在主动规划的证据强度较若视为 part 2 原文直接预告为弱，需标注来源层级局限。"
+    },
+    {
+      "name": "失败或搁置选题的存档与条件变化后重访",
+      "starting_conditions": "早期以特定 SSPI 配置绕过 UAC 的尝试失败（自述 failed miserably that time）后被搁置；研究过程中积累失败或废弃项目。",
+      "repeated_practice": "保留旧失败项目，在获得新思路（如他人一手 writeup）时重新审视并改用新利用路径完成。",
+      "feedback": "他人一手 writeup 多次作为重入研究的技术起点被引用（Forshaw 的登录会话研究被引用为 SSPI、DCOM、Kerberos 多个选题的起点）；同伴校对（decoder_it 对 SSPI UAC writeup 的 proofreading）。",
+      "intermediate_capability": "形成对失败结果不作终结而是存档待条件变化时重启的能力，把旧失败作为后续可重用的研究材料。",
+      "observed_outcomes": [
+        "SSPI UAC 绕过：两年前失败项目重访，改用 Datagram 风格 NTLM + LSASS 登录会话令牌混淆 + 经 SMB 的 SCM RPC 完成"
+      ],
+      "evidence_ids": [
+        "ac-conversations-003",
+        "ac-decisions-08",
+        "ac-community-06",
+        "ac-timeline-18"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "重访习惯可能部分受研究周期与外部新思路发布节奏驱动，而非仅个人存档纪律；目前可核验的重访样本以 SSPI UAC 一例为主，该机制的跨时期重复性证据较其他机制弱，单一样本不足以排除偶然因素。"
+    },
+    {
+      "name": "以特定同行一手 writeup 为选题入口并据起点归属区分研究来源",
+      "starting_conditions": "具备阅读并跟踪特定同行（James Forshaw、Elad Shamir、itm4n、x86matthew 等）一手 writeup 的习惯与基础。",
+      "repeated_practice": "持续跟踪并吸收特定同行近期公开 writeup 并以其为多个选题的技术起点；Forshaw 的登录会话研究被引用为 RoguePotato、RemotePotato0、JuicyPotatoNG、SSPI UAC 多个选题的起点；LocalPotato 的起点则为 Elad Shamir 关于 NTLM Challenge Reserved 字段的提示，Forshaw 在瓶颈处提供后续提示而非起点。",
+      "feedback": "同行讨论（Elad Shamir 与作者持续辩论 NTLM 上下文交换思路）与瓶颈处同行提示（Forshaw 在 LocalPotato 卡壳时提供关键提示）共同推进选题。",
+      "intermediate_capability": "形成以特定同行 writeup 为选题入口、并结合自身 Potato 谱系重组原语的能力，能区分不同选题的实际起点来源。",
+      "observed_outcomes": [
+        "RoguePotato、RemotePotato0、JuicyPotatoNG、SSPI UAC（以 Forshaw 登录会话研究为起点）",
+        "LocalPotato（以 Elad Shamir 关于 NTLM Challenge Reserved 字段的提示为起点，Forshaw 提供瓶颈提示）"
+      ],
+      "evidence_ids": [
+        "ac-community-02",
+        "ac-community-03",
+        "ac-community-04",
+        "ac-community-05",
+        "ac-community-06",
+        "ac-decisions-02",
+        "ac-decisions-03",
+        "ac-decisions-06",
+        "ac-decisions-07",
+        "ac-decisions-08"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "Forshaw、Elad Shamir 的 writeup 作为起点的高频出现，可能部分反映该研究者阅读范围集中于少数高产同行，而非独特的选题能力；同期其他研究者亦可获取相同公开 writeup，个人重组能力与公共 writeup 可及性的贡献难以分离，存在幸存者偏差。"
+    },
+    {
+      "name": "跨主题迁移持续公开输出并据厂商反馈区分披露策略",
+      "starting_conditions": "2020-07 建立独立博客并以知识共享为动机；RSS 显示自 2016-06 起已有持续公开输出习惯。",
+      "repeated_practice": "跨主题迁移（勒索样本 → Windows 提权 → EDR 规避 → 协议级漏洞）持续公开 writeup 与 POC，并就部分选题进入 MSRC 报告 → Patch Tuesday 修复 → 公开披露闭环。",
+      "feedback": "可核验反馈来源为 MSRC 披露闭环（RemotePotato0 经 MSRC 案件 62293 判定 Won't Fix、LocalPotato 获 CVE-2023-21746 并于 2023-01 Patch Tuesday 修复）；会议认可部分以本人 Talks 页为来源，Black Hat 议程页返回 HTTP 403 未能一手核验，不可与 MSRC 披露闭环并列陈述为同等强度的可核验反馈。GitHub 置顶仓库的公开 star/fork 计数可作为工具被社区复用的采纳指标，但属平台聚合数据，不等同于对其研究方法的可核验反馈。",
+      "intermediate_capability": "形成稳定的公开输出节奏与据厂商反馈区分披露策略的能力：expected behavior/Won't Fix 类选题不报告或公开 POC 与缓解，可获 CVE 的协议级漏洞进入正式 MSRC 协同披露。",
+      "observed_outcomes": [
+        "RemotePotato0：MSRC 案件 62293 判 Important/Elevation of Privilege，微软 Won't Fix 后公开 POC 与 YARA 检测",
+        "LocalPotato：CVE-2023-21746，2022-09-09 报告 MSRC，2023-01 Patch Tuesday 修复，0patch 为不支持版本提供微补丁",
+        "会议序列：RomHack 2020 → Black Hat Asia 2021/HITB 2021 AMS → BlueHat IL 2022 → Insomni'Hack 2022 → POC2023（10 Years of Windows Privilege Escalation with Potatoes）"
+      ],
+      "evidence_ids": [
+        "ac-works-01",
+        "ac-community-01",
+        "ac-conversations-001",
+        "ac-conversations-004",
+        "ac-community-03",
+        "ac-community-05",
+        "ac-works-10",
+        "ac-timeline-09",
+        "ac-timeline-17",
+        "ac-decisions-03",
+        "ac-decisions-07",
+        "ac-decisions-09",
+        "ac-community-09"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "持续公开输出与会议发表可能部分受会议渠道可及性与同期社区热度影响，而非仅个人习惯；博客自 2023-09-14（ac-timeline-18）后无新条目，该机制覆盖时段止于 2023-09，2024-2026 活动未核验。"
+    }
+  ],
+  "tensions": [
+    "person_json 标注的 selected_conference_evidence（Black Hat US/EU）与本人一手 Talks 页列出的 Black Hat Asia 2021 在区域上不一致；Black Hat 议程页（blackhat.com）抓取返回 HTTP 403，未能由官方议程页一手核验其具体演讲年份与区域，本输出以一手 Talks 页为准，person_json 的 US/EU 标注存疑待核。",
+    "博客文章索引页最早条目为 2016-06-26，但博客开篇《Welcome to my blog》发布于 2020-07-15；二者关系（2016-2017 条目为后期回填/导入，或开篇日期为后期调整）未能核验，据此推断的领域转型缺乏作者直接陈述。",
+    "《Ransomware at X-Rays》（2017）索引描述称曾在 IEEE 发表，但未给出刊物名、卷期或 DOI，是否为同行评审论文未核验，其学术产出深度不能判定。",
+    "二手搜索线索提及 Black Hat Europe 2022《EDR & Blinding》合讲人 Luca Nagy，但官方议程页 HTTP 403 未一手核验，该次会议事实仅作 lead_only 线索，未进入机制支撑。",
+    "RoguePotato 研究者明确未向 MSRC 报告（理由是微软判定 Service→SYSTEM 为 expected behavior），而 LocalPotato 完成完整 MSRC 披露闭环；同期研究者在 expected behavior/Won't Fix 类选题与可获 CVE 的协议级漏洞之间的披露策略选择存在张力，且该选择部分受厂商反馈塑造而非纯技术判断。",
+    "WebSearch 摘要曾将该研究员误作 Gabriel Cocomazzi、演讲误记为 Black Hat USA 2021、合讲人误记为 Roberto Sestino，与一手来源（博客 Talks 页列出 Black Hat Asia 2021 且各演讲无共同演讲人）冲突，属搜索工具噪声，不予采纳。"
+  ],
+  "transferable_practices": [
+    "显式列明所依赖的前序公开研究并说明各自贡献（RoguePotato 致谢 JuicyPotato、RogueWinRM、Tiraniddo 共享登录会话研究、itm4n PrintSpoofer），把重组路径可复现地记录下来，便于他人验证与迭代。",
+    "面对厂商补丁封堵既有利用路径时，不放弃研究方向而是更换传输原语（TCP/IP → 命名管道；OXID 解析 → 本机 COM 服务器）或复用他人已公开缺陷重建利用原语。",
+    "对单一组件做跨多篇 writeup 的序列化纵深分析（Seclogon part 2 → part 3），从句柄滥用推进到竞态时序，逐层加深而非一次成篇。",
+    "保留失败或搁置选题，并在获得新思路（如他人一手 writeup）时重新审视改用新利用路径完成（SSPI UAC 两年前失败项目重访）。",
+    "据厂商边界判定区分披露策略：expected behavior/Won't Fix 类选题不报告或公开 POC 与缓解，可获 CVE 的协议级漏洞进入 MSRC 报告 → Patch Tuesday → 公开披露闭环，并对修复是否为 workaround 作主动复盘。"
+  ],
+  "non_transferable_conditions": [
+    "成长叙事主体依据研究对象自撰来源（博客正文、GitHub bio、Talks 页、RSS）重建，external 维度仅得搜索引擎摘要、无一手第三方 URL，能力归因应限定为基于自述与可核验产出（CVE-2023-21746、Patch Tuesday、MSRC 案件 62293、GitHub 仓库）的推断，而非独立第三方能力评价。",
+    "与 decoder_it 的固定合著关系及与 Forshaw、Elad Shamir、itm4n、x86matthew 的同伴网络为该研究者特有条件，他人难以复制；前序 writeup 作为起点的高频出现部分取决于能否进入该同伴网络的讨论圈。",
+    "Potato 谱系在 2019-2023 的连续产出部分依赖同期 Windows 认证子系统可挖掘原语较多与社区热度较高这一外部窗口（幸存者偏差），并非仅个人方法习惯；同期其他研究者可能亦在尝试但未公开产出。",
+    "2023-09-14 后博客无新条目，本输出所重建的成长过程覆盖时段止于 2023-09，2024-2026 活动未核验；据既有材料外推其后续能力变化属资料缺口。"
+  ],
+  "open_questions": [
+    "早期（2016 前）的学习路径、教育背景与入行机制无公开证据；Welcome to my blog 仅泛指免费网络教程，未点名具体导师或社区成员。",
+    "雇主或任职机构未在 GitHub 主页或博客公开披露，团队归属与同行协作网络的制度性支撑无法判定。",
+    "Black Hat 具体演讲年份、区域与合讲人未能由官方议程页一手核验（blackhat.com 返回 HTTP 403）；person_json 的 Black Hat US/EU 标注与一手 Talks 页的 Black Hat Asia 2021 区域不一致存疑待核。",
+    "2023-09 之后（2024-2026）的公开作品、会议演讲与技术演化未在抓取预算内核实，是否存在研究方向转向或停更属 unknown。",
+    "《Ransomware at X-Rays》（2017）的 IEEE 发表场所、评审状态与具体方法未抓取正文，其学术产出深度不能判定。",
+    "厂商（CrowdStrike、SentinelOne、Microsoft Defender）对其 EDR 规避研究的致谢或 advisory 页面未一手抓取，EDR 方向的外部评价与厂商确认缺失。",
+    "ConPtyShell、SharPyShell、RunasCs 等较早工具的发布时间与动机未在 writeup 中直接说明（仅见于 GitHub pinned 仓库），其作为成长节点的能力变化证据不足。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v4-20260927-194437-363",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790509897072498000-antonio-cocomazzi-synthesis-v4.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "84b7d168-f97f-419e-bbc4-bd2d523af649",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_2s3900lg7u8wdu1glsnzl79m",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v4-20260927-194437-363/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T11:51:37.129590+00:00"
+      },
+      {
+        "tool_use_id": "call_zsoywcq6ze2hzoiojof83zn1",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v4-20260927-194437-363/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "f84d0add0b59ce038493dccd20207d20ab059b61916a5c908245d3064c0b0c60",
+        "accessed_at": "2026-09-27T11:51:37.129623+00:00"
+      },
+      {
+        "tool_use_id": "call_56tv2vpfb0fgyx112r9a2ixr",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v4-20260927-194437-363/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "5225c228aee614a7ea03955de28d62f49ef5cf9c2f5ed5216e6e7545f4347755",
+        "accessed_at": "2026-09-27T11:51:37.129636+00:00"
+      },
+      {
+        "tool_use_id": "call_76hzhlde5et96wk9cjxfov9u",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v4-20260927-194437-363/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "608c22c0f793576e1c652721c615395f5d241f363347561477423b0b00c30abc",
+        "accessed_at": "2026-09-27T11:51:37.129713+00:00"
+      },
+      {
+        "tool_use_id": "call_akqcdtl8zcbkvxagikn134ow",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v4-20260927-194437-363/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "126e34ff68a2e31d84e40f0579577e38e218f1fbc9cf96d8d2b25f70166d2d5b",
+        "accessed_at": "2026-09-27T11:51:37.129779+00:00"
+      },
+      {
+        "tool_use_id": "call_7oe8phgcypp817xepjcnal9o",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v4-20260927-194437-363/inputs/evidence_json.json",
+          "offset": 961,
+          "limit": 444
+        },
+        "success": true,
+        "content_sha256": "f4c4675bfd55994ebdea54564eabb15582d0bc84d60439db993868a3b9cb7aec",
+        "accessed_at": "2026-09-27T11:51:37.129823+00:00"
+      },
+      {
+        "tool_use_id": "call_fvb9d8yfwf2xituho2onj01t",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v4-20260927-194437-363/inputs/revision_context.json",
+          "offset": 502,
+          "limit": 300
+        },
+        "success": true,
+        "content_sha256": "73d6eb088f2a0f975736fee30b4a951b2e4f8acdd52df1d587c63dbea6734831",
+        "accessed_at": "2026-09-27T11:51:37.129876+00:00"
+      },
+      {
+        "tool_use_id": "call_0dmbf4nqiigec6iqryxy3ki0",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v4-20260927-194437-363/checkpoint.md",
+          "content": "# Antonio Cocomazzi — synthesis v4 checkpoint\n\n## 任务\n综合六维取证 + 3 轮定向补证，重建领域能力成长过程，产出符合 output.schema.json 的 JSON。\n\n## 证据可用性裁定\n- 可用（verified_in_run=true）：ac-timeline-01~18、ac-works-01/02/03/05/10、ac-conversations-001~005、ac-community-01~09、ac-decisions-01~10、ext-01/02/03、ac-targeted-r1-01、ac-targeted-r2-01。\n- 排除（lead_only/unverified，不进 stages/mechanisms evidence_ids）：ac-works-04（beans，用 ac-timeline-05+ac-decisions-01 替代）、ac-works-06（Instrumentation Callback，用 ac-timeline-08+ac-targeted-r1-01 替代）、ac-works-07/08/09/11、ac-timeline-19（Black Hat EU 2022 lead_only）、ext-04（搜索摘要 lead_only）。\n- invalid_evidence_ids：3 轮均为空，无证据被作废；上述仅来源层级不足，非事实错误。\n\n## 3 轮纠错指令落地映射\n- R1-1 stages Instrumentation Callback：用 ac-timeline-08 + ac-targeted-r1-01（已入 stage 2）。\n- R1-2 mechanisms feedback stars：stars 仅作采纳指标，不入 feedback 因果；可核验反馈 = MSRC 披露闭环 + 会议议程认可（后者来源 Talks 页，Black Hat 议程页 403 未一手核验）。→ M5 feedback。\n- R1-3 tensions Black Hat 区域：US/EU（person_json）vs Asia 2021（Talks 页）不一致，议程页 403，以 Talks 页为准，US/EU 存疑待核。→ tensions。\n- R1-4 \"深挖\"→\"纵深分析\"。→ 全局。\n- R2-1 mechanisms feedback \"支点\"：改\"他人一手 writeup 多次作为重入研究的技术起点被引用\"。→ M4 feedback。\n- R2-2 mechanisms intermediate_capability \"沉没产出\"：改\"把旧失败作为后续可重用的研究材料\"。→ M4 intermediate_capability。\n- R2-3 mechanisms part2 预告 part3：改 part3 回溯引用，引 ac-targeted-r2-01。→ M3 feedback + alternative_explanation + evidence_ids。\n- R2-4 mechanisms[4] feedback 会议认可来源标注：Talks 页（ac-conversations-004）为来源，Black Hat 议程页 403，不可与 MSRC 闭环并列同等强度。→ M5 feedback。\n- R2-5 幸存者偏差限定入 alternative_explanation/non_transferable_conditions。→ M1/M5 alternative + non_transferable。\n- R3-1 stages[2] capability_change 删\"配套白皮书\"：改\"威胁团伙行为画像（Black Basta/FIN7、Vice Society 等）\"。→ stage 3。\n- R3-2 mechanisms repeated_practice LocalPotato 起点归属：Forshaw=RoguePotato/RemotePotato0/JuicyPotatoNG/SSPI UAC 起点；LocalPotato 起点=Elad Shamir NTLM Challenge Reserved 字段提示（ac-community-05、ac-decisions-07），Forshaw 瓶颈提示而非起点。→ M1 repeated_practice。\n- R3-3 单一来源依赖限定入 biases/non_transferable：成长叙事主体依自撰来源重建，external 未取得一手第三方评价，能力归因限于自述+可核验产出推断。→ non_transferable。\n- R3-4 mechanisms[4] alternative_explanation：会议渠道可及性+社区热度限定；博客自 2023-09-14（ac-timeline-18）后无新条目，覆盖止于 2023-09，2024-2026 未核验。→ M5 alternative。\n\n## 结构\n- 4 stages：2016-2017 样本逆向基线 / 2019-2020 Windows 提权+注入规避入口 / 2021-2022 披露闭环+威胁画像+单组件序列化 / 2023 协议级 CVE 披露+UAC+十年回顾。\n- 5 mechanisms：M1 前序原语重组 / M2 路径封堵后换传输迭代 / M3 单组件序列化（Seclogon）/ M4 失败存档重访 / M5 持续公开输出+披露闭环反馈。\n- tensions 6 条；transferable 5 条；non_transferable 4 条；open_questions 7 条。\n\n## 下一步\n对照 output.schema.json（additionalProperties=false；不填 _run/verification）写 output.json。\n"
+        },
+        "success": true,
+        "content_sha256": "1148b4f3f52f0212022da7132b83e92c56d66feface4fbcd31d5e81043d61d25",
+        "accessed_at": "2026-09-27T11:51:37.130393+00:00"
+      },
+      {
+        "tool_use_id": "call_084t93av5iohhkbtickv0jxj",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v4-20260927-194437-363/output.json",
+          "content": "{\n  \"person\": \"Antonio Cocomazzi\",\n  \"expertise\": [\n    \"Windows 本地权限提升（Potato 谱系：RoguePotato/RemotePotato0/JuicyPotatoNG/LocalPotato）\",\n    \"Windows 认证子系统滥用（NTLM 反射、SSPI/UAC、DCOM/RPC 中继、OXID 解析）\",\n    \"LSASS 内存转储与 EDR/检测规避（Seclogon 句柄泄露、Instrumentation Callback、竞态转储）\",\n    \"勒索软件与威胁团伙行为画像（Locky/Zepto 样本逆向、Black Basta/FIN7、Vice Society）\",\n    \"漏洞披露流程（MSRC 报告、Patch Tuesday、CVE 协同披露、0patch 微补丁）\",\n    \"Windows 内部机制逆向与公开 writeup/POC 工程\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2016-06 — 2017-07\",\n      \"stage\": \"勒索样本逆向与威胁情报短文输出\",\n      \"capability_change\": \"早期公开作品以 Locky/Zepto 勒索软件样本分析与 JavaScript 投放器逆向为主，方法停留在静态/动态样本分析层面，建立以样本/家族为单位公开记录的输出习惯；此阶段未涉及权限提升或 EDR 规避，为后续难度跃迁提供可对照的基线。\",\n      \"evidence_ids\": [\n        \"ac-timeline-01\",\n        \"ac-timeline-02\",\n        \"ac-timeline-03\",\n        \"ac-timeline-04\",\n        \"ac-works-02\",\n        \"ac-works-03\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2019-12 — 2020-07\",\n      \"stage\": \"向 Windows 本地权限提升与进程注入/规避迁移\",\n      \"capability_change\": \"研究重心由恶意样本分析迁移到 Windows 信任边界，以 SeImpersonate 与服务账户到 SYSTEM 的 Potato 路径为入口，并在同期将技术栈横向扩展到进程注入与 Instrumentation Callback 检测规避原语；建立独立博客作为体系化公开输出渠道；这是其研究重心第一次可核验的迁移。\",\n      \"evidence_ids\": [\n        \"ac-timeline-05\",\n        \"ac-decisions-01\",\n        \"ac-timeline-06\",\n        \"ac-works-05\",\n        \"ac-community-02\",\n        \"ac-decisions-02\",\n        \"ac-timeline-08\",\n        \"ac-targeted-r1-01\",\n        \"ac-timeline-07\",\n        \"ac-works-01\",\n        \"ac-conversations-002\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2021-04 — 2022-12\",\n      \"stage\": \"进入 MSRC 披露闭环、威胁团伙行为画像与单组件序列化研究\",\n      \"capability_change\": \"研究深度向 Windows RPC 协议内部推进，首次进入与 MSRC 的正式披露流程并经历 Won't Fix 反馈；研究方法从单点漏洞扩展到威胁团伙行为画像（Black Basta/FIN7、Vice Society 等）；对 Seclogon 单一组件做跨多篇 writeup 的序列化纵深分析（part 2 → part 3）。\",\n      \"evidence_ids\": [\n        \"ac-timeline-09\",\n        \"ac-community-03\",\n        \"ac-decisions-03\",\n        \"ac-timeline-10\",\n        \"ac-timeline-11\",\n        \"ac-timeline-13\",\n        \"ac-community-07\",\n        \"ac-timeline-14\",\n        \"ac-community-04\",\n        \"ac-decisions-06\",\n        \"ac-timeline-15\",\n        \"ac-timeline-16\",\n        \"ac-timeline-12\",\n        \"ac-decisions-05\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023-01 — 2023-09\",\n      \"stage\": \"协议级正式 CVE 披露与 Potato 研究线十年回顾\",\n      \"capability_change\": \"披露策略由厂商不修的边界研究转向可获 CVE 的协议级漏洞：完成 LocalPotato（CVE-2023-21746）的 MSRC 报告 → Patch Tuesday 修复 → 公开披露闭环，并主动评估补丁为 workaround 与残留攻击面；同期将 SSPI/NTLM 原语延伸到 UAC 边界绕过，并在 POC2023 对 Potato 研究线作十年阶段性总结。\",\n      \"evidence_ids\": [\n        \"ac-timeline-17\",\n        \"ac-works-10\",\n        \"ac-community-05\",\n        \"ac-decisions-07\",\n        \"ac-timeline-18\",\n        \"ac-community-06\",\n        \"ac-conversations-003\",\n        \"ac-decisions-08\",\n        \"ac-decisions-09\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"厂商封堵后更换传输原语并复用前序公开缺陷重建利用路径\",\n      \"starting_conditions\": \"2019 起进入 Windows 本地权限提升研究，JuicyPotato 在 Windows 10 1809/Server 2019 因 OXID 解析器被限制到端口 135 而被封堵；具备跟踪厂商补丁变化与同伴近期公开成果的基础。\",\n      \"repeated_practice\": \"面对厂商补丁封堵既有利用路径，不放弃研究方向，而是更换传输原语（TCP/IP → 命名管道；OXID 解析 → 本机 COM 服务器）或复用他人已公开的路径校验缺陷（itm4n PrintSpoofer 的分隔技巧），把被封堵的原语重组为新绕过。\",\n      \"feedback\": \"厂商边界判定（Service→SYSTEM 被判 expected behavior）反馈，据此调整是否进入正式披露，并提示其需在 expected behavior/Won't Fix 类选题与可获 CVE 的协议级漏洞之间区分选题。\",\n      \"intermediate_capability\": \"形成对失败或被封堵结果的迭代式再利用与跨技术点拼装能力，能把分散的前序原语组合为可复现利用链。\",\n      \"observed_outcomes\": [\n        \"RogueWinRM（BITS 向 5985 端口 WinRM 的 NTLM 认证 + 伪 WinRM 服务器获取 SYSTEM 令牌）\",\n        \"RoguePotato（自建 Oxid Resolver + 命名管道端点 + PrintSpoofer 路径校验绕过 + RPCSS token kidnapping）\",\n        \"JuicyPotatoNG（本机 COM 服务器 + LogonUser NewCredentials 注入 INTERACTIVE SID + SSPI hook 取代 RpcImpersonateClient）\"\n      ],\n      \"evidence_ids\": [\n        \"ac-decisions-01\",\n        \"ac-decisions-02\",\n        \"ac-works-05\",\n        \"ac-community-02\",\n        \"ac-timeline-06\",\n        \"ac-decisions-06\",\n        \"ac-community-04\",\n        \"ac-timeline-14\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"Potato 谱系的连续产出可能部分源于同期 Windows 认证子系统可挖掘原语较多与社区热度较高，存在幸存者偏差：同期其他研究者可能亦在尝试但未公开产出，个人方法习惯与外部可挖掘窗口的相对贡献难以分离。此外成长叙事主体依据研究对象自撰来源重建，external 维度未取得一手第三方评价，能力归因应限定为基于自述与可核验产出的推断。\"\n    },\n    {\n      \"name\": \"对单一 Windows 组件做跨多篇 writeup 的序列化纵深分析\",\n      \"starting_conditions\": \"2021 进入 Windows 组件级研究，逆向 Seclogon 服务时发现 SlrCreateProcessWithLogon 信任客户端传入的调用方 PID，可通过修改 TEB 中的 ClientId 伪造 PPID 借合法系统服务打开目标进程句柄。\",\n      \"repeated_practice\": \"对 Seclogon 单一组件跨多篇 writeup 纵深分析，从句柄滥用（part 2，借合法系统服务打开 LSASS 句柄实现不直接调用 OpenProcess 的隐蔽转储）推进到竞态时序（part 3，在句柄关闭前复制 LSASS 句柄）。\",\n      \"feedback\": \"自我接续的序列化推进（part 3 正文回溯 part 2 末尾曾提及该竞态方法可作为后续主题，且 part 3 在约两年后完成该主题；该依据为 part 3 的回溯引用而非 part 2 原文直接核验，来源层级见 ac-targeted-r2-01）。\",\n      \"intermediate_capability\": \"形成对单一攻击面反复复盘、逐层加深的练习模式，以自我接续方式推进而非依赖外部选题。\",\n      \"observed_outcomes\": [\n        \"Seclogon part 2：滥用泄露句柄转储 LSASS 内存\",\n        \"Seclogon part 3：竞态窃取 LSASS 句柄的可靠转储方法\"\n      ],\n      \"evidence_ids\": [\n        \"ac-timeline-11\",\n        \"ac-timeline-13\",\n        \"ac-community-07\",\n        \"ac-decisions-05\",\n        \"ac-targeted-r2-01\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"part 3 正文回溯 part 2 末尾曾提及该竞态方法可作为后续主题，且 part 3 在约两年后完成该主题；该依据为 part 3 的回溯引用而非 part 2 原文直接核验，据此推断存在主动规划的证据强度较若视为 part 2 原文直接预告为弱，需标注来源层级局限。\"\n    },\n    {\n      \"name\": \"失败或搁置选题的存档与条件变化后重访\",\n      \"starting_conditions\": \"早期以特定 SSPI 配置绕过 UAC 的尝试失败（自述 failed miserably that time）后被搁置；研究过程中积累失败或废弃项目。\",\n      \"repeated_practice\": \"保留旧失败项目，在获得新思路（如他人一手 writeup）时重新审视并改用新利用路径完成。\",\n      \"feedback\": \"他人一手 writeup 多次作为重入研究的技术起点被引用（Forshaw 的登录会话研究被引用为 SSPI、DCOM、Kerberos 多个选题的起点）；同伴校对（decoder_it 对 SSPI UAC writeup 的 proofreading）。\",\n      \"intermediate_capability\": \"形成对失败结果不作终结而是存档待条件变化时重启的能力，把旧失败作为后续可重用的研究材料。\",\n      \"observed_outcomes\": [\n        \"SSPI UAC 绕过：两年前失败项目重访，改用 Datagram 风格 NTLM + LSASS 登录会话令牌混淆 + 经 SMB 的 SCM RPC 完成\"\n      ],\n      \"evidence_ids\": [\n        \"ac-conversations-003\",\n        \"ac-decisions-08\",\n        \"ac-community-06\",\n        \"ac-timeline-18\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"重访习惯可能部分受研究周期与外部新思路发布节奏驱动，而非仅个人存档纪律；目前可核验的重访样本以 SSPI UAC 一例为主，该机制的跨时期重复性证据较其他机制弱，单一样本不足以排除偶然因素。\"\n    },\n    {\n      \"name\": \"以特定同行一手 writeup 为选题入口并据起点归属区分研究来源\",\n      \"starting_conditions\": \"具备阅读并跟踪特定同行（James Forshaw、Elad Shamir、itm4n、x86matthew 等）一手 writeup 的习惯与基础。\",\n      \"repeated_practice\": \"持续跟踪并吸收特定同行近期公开 writeup 并以其为多个选题的技术起点；Forshaw 的登录会话研究被引用为 RoguePotato、RemotePotato0、JuicyPotatoNG、SSPI UAC 多个选题的起点；LocalPotato 的起点则为 Elad Shamir 关于 NTLM Challenge Reserved 字段的提示，Forshaw 在瓶颈处提供后续提示而非起点。\",\n      \"feedback\": \"同行讨论（Elad Shamir 与作者持续辩论 NTLM 上下文交换思路）与瓶颈处同行提示（Forshaw 在 LocalPotato 卡壳时提供关键提示）共同推进选题。\",\n      \"intermediate_capability\": \"形成以特定同行 writeup 为选题入口、并结合自身 Potato 谱系重组原语的能力，能区分不同选题的实际起点来源。\",\n      \"observed_outcomes\": [\n        \"RoguePotato、RemotePotato0、JuicyPotatoNG、SSPI UAC（以 Forshaw 登录会话研究为起点）\",\n        \"LocalPotato（以 Elad Shamir 关于 NTLM Challenge Reserved 字段的提示为起点，Forshaw 提供瓶颈提示）\"\n      ],\n      \"evidence_ids\": [\n        \"ac-community-02\",\n        \"ac-community-03\",\n        \"ac-community-04\",\n        \"ac-community-05\",\n        \"ac-community-06\",\n        \"ac-decisions-02\",\n        \"ac-decisions-03\",\n        \"ac-decisions-06\",\n        \"ac-decisions-07\",\n        \"ac-decisions-08\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"Forshaw、Elad Shamir 的 writeup 作为起点的高频出现，可能部分反映该研究者阅读范围集中于少数高产同行，而非独特的选题能力；同期其他研究者亦可获取相同公开 writeup，个人重组能力与公共 writeup 可及性的贡献难以分离，存在幸存者偏差。\"\n    },\n    {\n      \"name\": \"跨主题迁移持续公开输出并据厂商反馈区分披露策略\",\n      \"starting_conditions\": \"2020-07 建立独立博客并以知识共享为动机；RSS 显示自 2016-06 起已有持续公开输出习惯。\",\n      \"repeated_practice\": \"跨主题迁移（勒索样本 → Windows 提权 → EDR 规避 → 协议级漏洞）持续公开 writeup 与 POC，并就部分选题进入 MSRC 报告 → Patch Tuesday 修复 → 公开披露闭环。\",\n      \"feedback\": \"可核验反馈来源为 MSRC 披露闭环（RemotePotato0 经 MSRC 案件 62293 判定 Won't Fix、LocalPotato 获 CVE-2023-21746 并于 2023-01 Patch Tuesday 修复）；会议认可部分以本人 Talks 页为来源，Black Hat 议程页返回 HTTP 403 未能一手核验，不可与 MSRC 披露闭环并列陈述为同等强度的可核验反馈。GitHub 置顶仓库的公开 star/fork 计数可作为工具被社区复用的采纳指标，但属平台聚合数据，不等同于对其研究方法的可核验反馈。\",\n      \"intermediate_capability\": \"形成稳定的公开输出节奏与据厂商反馈区分披露策略的能力：expected behavior/Won't Fix 类选题不报告或公开 POC 与缓解，可获 CVE 的协议级漏洞进入正式 MSRC 协同披露。\",\n      \"observed_outcomes\": [\n        \"RemotePotato0：MSRC 案件 62293 判 Important/Elevation of Privilege，微软 Won't Fix 后公开 POC 与 YARA 检测\",\n        \"LocalPotato：CVE-2023-21746，2022-09-09 报告 MSRC，2023-01 Patch Tuesday 修复，0patch 为不支持版本提供微补丁\",\n        \"会议序列：RomHack 2020 → Black Hat Asia 2021/HITB 2021 AMS → BlueHat IL 2022 → Insomni'Hack 2022 → POC2023（10 Years of Windows Privilege Escalation with Potatoes）\"\n      ],\n      \"evidence_ids\": [\n        \"ac-works-01\",\n        \"ac-community-01\",\n        \"ac-conversations-001\",\n        \"ac-conversations-004\",\n        \"ac-community-03\",\n        \"ac-community-05\",\n        \"ac-works-10\",\n        \"ac-timeline-09\",\n        \"ac-timeline-17\",\n        \"ac-decisions-03\",\n        \"ac-decisions-07\",\n        \"ac-decisions-09\",\n        \"ac-community-09\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"持续公开输出与会议发表可能部分受会议渠道可及性与同期社区热度影响，而非仅个人习惯；博客自 2023-09-14（ac-timeline-18）后无新条目，该机制覆盖时段止于 2023-09，2024-2026 活动未核验。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 标注的 selected_conference_evidence（Black Hat US/EU）与本人一手 Talks 页列出的 Black Hat Asia 2021 在区域上不一致；Black Hat 议程页（blackhat.com）抓取返回 HTTP 403，未能由官方议程页一手核验其具体演讲年份与区域，本输出以一手 Talks 页为准，person_json 的 US/EU 标注存疑待核。\",\n    \"博客文章索引页最早条目为 2016-06-26，但博客开篇《Welcome to my blog》发布于 2020-07-15；二者关系（2016-2017 条目为后期回填/导入，或开篇日期为后期调整）未能核验，据此推断的领域转型缺乏作者直接陈述。\",\n    \"《Ransomware at X-Rays》（2017）索引描述称曾在 IEEE 发表，但未给出刊物名、卷期或 DOI，是否为同行评审论文未核验，其学术产出深度不能判定。\",\n    \"二手搜索线索提及 Black Hat Europe 2022《EDR & Blinding》合讲人 Luca Nagy，但官方议程页 HTTP 403 未一手核验，该次会议事实仅作 lead_only 线索，未进入机制支撑。\",\n    \"RoguePotato 研究者明确未向 MSRC 报告（理由是微软判定 Service→SYSTEM 为 expected behavior），而 LocalPotato 完成完整 MSRC 披露闭环；同期研究者在 expected behavior/Won't Fix 类选题与可获 CVE 的协议级漏洞之间的披露策略选择存在张力，且该选择部分受厂商反馈塑造而非纯技术判断。\",\n    \"WebSearch 摘要曾将该研究员误作 Gabriel Cocomazzi、演讲误记为 Black Hat USA 2021、合讲人误记为 Roberto Sestino，与一手来源（博客 Talks 页列出 Black Hat Asia 2021 且各演讲无共同演讲人）冲突，属搜索工具噪声，不予采纳。\"\n  ],\n  \"transferable_practices\": [\n    \"显式列明所依赖的前序公开研究并说明各自贡献（RoguePotato 致谢 JuicyPotato、RogueWinRM、Tiraniddo 共享登录会话研究、itm4n PrintSpoofer），把重组路径可复现地记录下来，便于他人验证与迭代。\",\n    \"面对厂商补丁封堵既有利用路径时，不放弃研究方向而是更换传输原语（TCP/IP → 命名管道；OXID 解析 → 本机 COM 服务器）或复用他人已公开缺陷重建利用原语。\",\n    \"对单一组件做跨多篇 writeup 的序列化纵深分析（Seclogon part 2 → part 3），从句柄滥用推进到竞态时序，逐层加深而非一次成篇。\",\n    \"保留失败或搁置选题，并在获得新思路（如他人一手 writeup）时重新审视改用新利用路径完成（SSPI UAC 两年前失败项目重访）。\",\n    \"据厂商边界判定区分披露策略：expected behavior/Won't Fix 类选题不报告或公开 POC 与缓解，可获 CVE 的协议级漏洞进入 MSRC 报告 → Patch Tuesday → 公开披露闭环，并对修复是否为 workaround 作主动复盘。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"成长叙事主体依据研究对象自撰来源（博客正文、GitHub bio、Talks 页、RSS）重建，external 维度仅得搜索引擎摘要、无一手第三方 URL，能力归因应限定为基于自述与可核验产出（CVE-2023-21746、Patch Tuesday、MSRC 案件 62293、GitHub 仓库）的推断，而非独立第三方能力评价。\",\n    \"与 decoder_it 的固定合著关系及与 Forshaw、Elad Shamir、itm4n、x86matthew 的同伴网络为该研究者特有条件，他人难以复制；前序 writeup 作为起点的高频出现部分取决于能否进入该同伴网络的讨论圈。\",\n    \"Potato 谱系在 2019-2023 的连续产出部分依赖同期 Windows 认证子系统可挖掘原语较多与社区热度较高这一外部窗口（幸存者偏差），并非仅个人方法习惯；同期其他研究者可能亦在尝试但未公开产出。\",\n    \"2023-09-14 后博客无新条目，本输出所重建的成长过程覆盖时段止于 2023-09，2024-2026 活动未核验；据既有材料外推其后续能力变化属资料缺口。\"\n  ],\n  \"open_questions\": [\n    \"早期（2016 前）的学习路径、教育背景与入行机制无公开证据；Welcome to my blog 仅泛指免费网络教程，未点名具体导师或社区成员。\",\n    \"雇主或任职机构未在 GitHub 主页或博客公开披露，团队归属与同行协作网络的制度性支撑无法判定。\",\n    \"Black Hat 具体演讲年份、区域与合讲人未能由官方议程页一手核验（blackhat.com 返回 HTTP 403）；person_json 的 Black Hat US/EU 标注与一手 Talks 页的 Black Hat Asia 2021 区域不一致存疑待核。\",\n    \"2023-09 之后（2024-2026）的公开作品、会议演讲与技术演化未在抓取预算内核实，是否存在研究方向转向或停更属 unknown。\",\n    \"《Ransomware at X-Rays》（2017）的 IEEE 发表场所、评审状态与具体方法未抓取正文，其学术产出深度不能判定。\",\n    \"厂商（CrowdStrike、SentinelOne、Microsoft Defender）对其 EDR 规避研究的致谢或 advisory 页面未一手抓取，EDR 方向的外部评价与厂商确认缺失。\",\n    \"ConPtyShell、SharPyShell、RunasCs 等较早工具的发布时间与动机未在 writeup 中直接说明（仅见于 GitHub pinned 仓库），其作为成长节点的能力变化证据不足。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "dbdb6a59cef3bcb843ed9b35aff416bcd7f99fa5173166eef2cd311602bc99fa",
+        "accessed_at": "2026-09-27T11:51:37.130805+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790509897130829000-antonio-cocomazzi-synthesis-v4.json",
+    "label": "Antonio Cocomazzi:synthesis:v4",
+    "elapsed_seconds": 419.77,
+    "prompt_sha256": "cec47bb4a391340da15eee42a97cfc8e6e36465695be4f71d347c803a8052475",
+    "num_turns": 10,
+    "total_cost_usd": 1.1672570000000002,
+    "usage": {
+      "input_tokens": 77854,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 225024,
+      "output_tokens": 26619,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 77854,
+        "outputTokens": 26619,
+        "cacheReadInputTokens": 225024,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.1672570000000002,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

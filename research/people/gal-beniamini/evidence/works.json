@@ -1,0 +1,344 @@
+{
+  "person": "Gal Beniamini",
+  "dimension": "公开作品与技术演化",
+  "identity_check": "身份经一手抓取确认：Project Zero 博客文章页 byline 为 'Posted by Gal Beniamini, Project Zero'，发布于 2017-04；社交账号 @laginimaineb 与输入 person_json 一致。研究域经一手抓取核验为 Broadcom Wi-Fi SoC 漏洞与利用。同名歧义处理：在第一手抓取前，WebSearch 对其研究领域给出相互不一致的二手描述（一次称 Qualcomm TrustZone/QSEE KeyMaster，另一次称 iOS/Broadcom Wi-Fi/Bluetooth），均未单独采信；第一手抓取 Project Zero 博客后确认 2017-04 Broadcom Wi-Fi SoC 系列为已发表作品。Qualcomm KeyMaster/TrustZone、Qualcomm baseband 与 iOS Bluetooth 等方向未在本轮一手抓取预算内核验，记入 gaps。",
+  "items": [
+    {
+      "id": "galbeniamini-works-001",
+      "date": "2017-04-04",
+      "claim": "Gal Beniamini 在 Project Zero 博客发表 'Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)'，针对 Broadcom FullMAC Wi-Fi SoC（BCM4358）实现远程代码执行，目标设备为运行 Android 7.1.1 的 Nexus 6P。漏洞位于 TDLS（802.11z）实现中 MIC 校验函数的堆溢出：teardown 路径未校验 FT-IE 长度字段与 256 字节缓冲区关系，setup 路径 RSN IE 之后 Timeout Interval 与 Fast Transition IE 未校验长度。利用仅需 Wi-Fi 邻近且无需用户交互。",
+      "status": "documented",
+      "growth_signal": "方法学信号：固件层深度逆向并自建分析工具。具体表现为通过 dhdutil 提取 ROM、以 IDA 分析 Thumb-2 二进制、借用 NexMon 符号与开源 brcmsmac 驱动对照定位 bcm_parse_tlvs 及其 110+ 交叉引用、hook malloc/free 追踪堆操作并自建堆可视化器、将堆溢出链式转化为重叠空闲块并重定向 freelist 覆盖 timer 结构函数指针。MPU 配置为全 RWX 降低利用门槛亦被如实记录。这些构成可复用的固件逆向与堆利用工具链，符合'工具建设与重复练习'的成长证据。",
+      "short_quote": "Posted by Gal Beniamini, Project Zero",
+      "source": {
+        "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)",
+        "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html",
+        "published": "2017-04-04",
+        "source_type": "Project Zero technical blog post",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_6ud4idqggx0le3kmupb33x9p",
+        "accessed_at": "2026-09-26T17:42:31.251524+00:00",
+        "content_sha256": "032f3aebd9c51663c46414b9fe33cd6469bf42326d9fe90e2c351d505fb2dddb"
+      }
+    },
+    {
+      "id": "galbeniamini-works-002",
+      "date": "2017-04-11",
+      "claim": "Gal Beniamini 在 Project Zero 博客发表 'Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 2)'，从 Wi-Fi SoC 固件控制提权至主机内核代码执行，提出两条路径。软件路径利用 bcmdhd 驱动与固件间 EtherType 0x886C 事件通道，在 WLC_E_PFN_SWC 事件处理（dhd_handle_swc_evt，Issue #1061）中因 total_count 与 pkt_count 关系未校验导致内核堆溢出，经 SLUB slab 整形后释放含 evt_handler 函数指针表的 wl_priv 结构并回收覆写，借 stack pivot（无 KASLR）执行 ROP 链。硬件路径利用 PCIe DMA：修改固件 RAM 中 DMA 环缓冲地址指向内核代码段，确认 Snapdragon 810（Nexus 6P）与 Exynos 8890（Galaxy S7 Edge）平台 Wi-Fi PCIe 接口 SMMU 缺失或未配置，Wi-Fi SoC 可任意 DMA 主机物理内存；经逆向 dma_info 结构、hook ROM 中 dma64_txfast 实现任意物理地址写。",
+      "status": "documented",
+      "growth_signal": "技术演化信号：研究目标从'单固件 RCE'扩展至'固件→主机内核提权'，方法栈从纯软件漏洞链扩展至硬件 DMA 攻击面。具体表现为两点扩展——其一，将固件层堆利用能力迁移到主机内核 SLUB 整形与函数指针表覆写 + ROP 的内核利用范式；其二，跨平台（Qualcomm 与 Samsung 两类移动 SoC）验证 Wi-Fi PCIe 接口 SMMU 缺失这一系统性架构缺陷，并逆向 DMA 引擎实现不依赖主机内核漏洞的任意物理写。这种从'单一漏洞'到'架构性攻击面'、从'单平台'到'跨平台验证'的推进，体现研究目标难度与方法栈的系统性抬升，符合'目标难度、研究方法与技术栈演化'的维度要求。",
+      "short_quote": "PCIe allows for DMA by design",
+      "source": {
+        "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 2)",
+        "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_11.html",
+        "published": "2017-04-11",
+        "source_type": "Project Zero technical blog post",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_r39kt4uq0m2171epa21ezv0j",
+        "accessed_at": "2026-09-26T17:42:31.251547+00:00",
+        "content_sha256": "113ebf02afebaf0cd243126ccc38dbefe352569f55a9f3bab20796a9282319b4"
+      }
+    },
+    {
+      "id": "galbeniamini-works-003",
+      "date": "2017-04",
+      "claim": "基于 Part 1 与 Part 2 的一手文本可推断 Gal Beniamini 在 2017-04 期间的公开作品呈现明确的纵向技术演化：第一阶段为无线 SoC 固件内部漏洞发现与利用（堆溢出 + freelist 劫持），第二阶段为固件到主机内核的横向提权（驱动事件处理内核堆溢出 + ROP）与对硬件 DMA 攻击面的系统性考察。两篇作品均以 Project Zero 博客形式公开发表，并包含漏洞编号（如 Issue #1061）与披露流程痕迹，显示'研究—披露—公开发表'的稳定习惯。",
+      "status": "inferred",
+      "growth_signal": "复盘与公开发表习惯信号：作品成系列发表、引用内部 Issue 编号、显式记录厂商补丁时间线（如 2016 年中 Broadcom 引入事件校验）与补丁绕过方法（固件 RAM 为 RWX 可 patch 掉校验），体现对漏洞生命周期与防御-绕过循环的复盘意识。跨平台对照验证则体现方法论的迁移与复用。",
+      "source": {
+        "title": "Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1 and Part 2)",
+        "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_11.html",
+        "published": "2017-04-11",
+        "source_type": "Project Zero technical blog post series",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_r39kt4uq0m2171epa21ezv0j",
+        "accessed_at": "2026-09-26T17:42:31.251547+00:00",
+        "content_sha256": "113ebf02afebaf0cd243126ccc38dbefe352569f55a9f3bab20796a9282319b4"
+      }
+    }
+  ],
+  "contradictions": [
+    "WebSearch 在一手抓取前对 Gal Beniamini 的研究领域给出相互不一致的二手描述：一次称其研究 Qualcomm TrustZone/QSEE 与 KeyMaster 提取，另一次称其研究 iOS 与 Broadcom Wi-Fi/Bluetooth LE。两者均为搜索摘要，不可单独采信。经一手抓取 Project Zero 博客确认 2017-04 Broadcom Wi-Fi SoC 系列为已发表作品；KeyMaster/TrustZone、iOS Bluetooth 方向未在一手抓取预算内核验。"
+  ],
+  "gaps": [
+    "Project Zero 博客旧标签页 https://googleprojectzero.blogspot.com/search/label/Gal%20Beniamini 返回 'No posts with label Gal Beniamini'，无法作为其作品索引使用；Project Zero 博客已迁移至 projectzero.google，但其首页仅列近期 18 篇文章，无 Gal Beniamini 条目，未找到其完整作品归档索引页。",
+    "'Extracting Qualcomm's KeyMaster Keys'（推断 2017 年，TrustZone/QSEE）的 Project Zero 博客 URL（尝试 /2017/06/extracting-qualcomms-keymaster-keys.html）返回 404，未能在工具调用预算内找到正确 URL 并完成一手抓取；该作品仅以 WebSearch 二手摘要形式出现，不计入 documented/reported。",
+    "Qualcomm baseband（Hexagon DSP/RTOS）相关研究及 REcon/Black Hat/POC 会议演讲未一手核验；task.md 列出的会议证据仅证明演讲事实，不能单独证明成长机制，且本轮未抓取任何会议 speaker 页面或演讲材料。",
+    "iOS Bluetooth LE 研究方向（WebSearch 声称）未一手核验，可能为同名歧义或与其他研究员混淆，记为待查。",
+    "成长机制层面的一手证据缺口：未找到关于导师关系、同伴反馈、失败与转向、重复练习节奏的具体一手材料；本轮已确认的工具建设（自建堆可视化、hook malloc/free）与公开发表习惯（Project Zero 博客系列）为间接成长信号，非直接的成长机制证据。",
+    "复盘方式的一手证据有限：作品中可见对厂商补丁时间线与补丁绕过的记录，但未见独立的'复盘笔记/事后分析'类一手材料。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-works-20260927-013822-605",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790444551237394000-gal-beniamini-works.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "dd08a617-9da4-46a1-9f59-673abd79e415",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_clns6co9pnzy67j66uuxhksn",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-works-20260927-013822-605/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-26T17:42:31.251430+00:00"
+      },
+      {
+        "tool_use_id": "call_stjuacooad9q7eqsg9icenbc",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-works-20260927-013822-605/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "0f4b9e184e7f1483102ae920dd1a0b127d30187c17f381780dcb7fd45cb0d02a",
+        "accessed_at": "2026-09-26T17:42:31.251450+00:00"
+      },
+      {
+        "tool_use_id": "call_lihouyxc6hhsncuz42dqdi8t",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-works-20260927-013822-605/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "14beb476b80e6039b3508b7cd68ed19fbd066960aac6b3afc4280c8c2948401b",
+        "accessed_at": "2026-09-26T17:42:31.251458+00:00"
+      },
+      {
+        "tool_use_id": "call_jpilmyw8nsqaspyhrobhqkp7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-works-20260927-013822-605/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "98d6159955e4031db24639369d116819220986aa8ec32370f8ce25cc7e814219",
+        "accessed_at": "2026-09-26T17:42:31.251462+00:00"
+      },
+      {
+        "tool_use_id": "call_bxzqn08375at1ztt042j20k4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-works-20260927-013822-605/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6e5034a8a6d972f492d2b08811243633e8b01984efe14e10fad4de7367634388",
+        "accessed_at": "2026-09-26T17:42:31.251466+00:00"
+      },
+      {
+        "tool_use_id": "call_d9cvq5xjvma52w6uwcjvay5w",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-works-20260927-013822-605/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-26T17:42:31.251470+00:00"
+      },
+      {
+        "tool_use_id": "call_jdwfl0h2lujg82opp96xyx7e",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://googleprojectzero.blogspot.com/search/label/Gal%20Beniamini",
+          "prompt": "List all blog posts written by Gal Beniamini. For each post, provide the exact title, the publication date, and any URL or link. Also note the topics covered (e.g., Android, baseband, TrustZone, kernel, Wi-Fi, Bluetooth). Return all posts in chronological order if possible."
+        },
+        "success": true,
+        "content_sha256": "8a1bd7b080ef37627b8866f3bcbd897c87180528982a4225d7f4e0245d532027",
+        "accessed_at": "2026-09-26T17:42:31.251486+00:00"
+      },
+      {
+        "tool_use_id": "call_uemvi0hi3e4ajvb5gvfplj9z",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Gal Beniamini Project Zero Android baseband TrustZone vulnerability writeup"
+        },
+        "success": true,
+        "content_sha256": "30e11d76c5b66e864813b8671c33499347db8d7610f2039c4d003f916f1354f0",
+        "accessed_at": "2026-09-26T17:42:31.251492+00:00"
+      },
+      {
+        "tool_use_id": "call_m1xneaxfhdjc72ybrej9uace",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Gal Beniamini\" Project Zero blog \"Extracting Qualcomm's KeyMaster Keys\""
+        },
+        "success": true,
+        "content_sha256": "991284d681fe8b951996e37b3e5fb555946f695c4f95a2a58219f9e02d5a2d51",
+        "accessed_at": "2026-09-26T17:42:31.251503+00:00"
+      },
+      {
+        "tool_use_id": "call_9ks2s0vz27cg1fi9i60t7ihn",
+        "tool": "WebSearch",
+        "input": {
+          "query": "site:googleprojectzero.blogspot.com Gal Beniamini"
+        },
+        "success": true,
+        "content_sha256": "19d4237c7960c177da5d7302b9b1815f6c7eb6fb279188ba9a929d94bbf4c559",
+        "accessed_at": "2026-09-26T17:42:31.251509+00:00"
+      },
+      {
+        "tool_use_id": "call_sablyvt19b3ef3d34yl04qc8",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the exact title, author name, and publication date of this blog post? Summarize the technical content: what vulnerability, what target (e.g., Broadcom Wi-Fi, Qualcomm baseband, TrustZone, iOS, Android), and the research method described. Provide the byline/author as shown on the page.",
+          "url": "https://googleprojectzero.blogspot.com/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html"
+        },
+        "success": true,
+        "content_sha256": "1094152c9ad7cd02b2ec4ffe5d7e0bb4deeb25ff5d67a836c78547078f517310",
+        "accessed_at": "2026-09-26T17:42:31.251514+00:00"
+      },
+      {
+        "tool_use_id": "call_dlw0cfqrnbqx0rtjnbjcjcqp",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the exact title, author name, and publication date of this blog post? Summarize the technical content: what vulnerability, what target (e.g., Broadcom Wi-Fi, Qualcomm baseband, TrustZone, iOS, Android), and the research method described. Provide the byline/author as shown on the page.",
+          "url": "https://googleprojectzero.blogspot.com/2017/06/over-air-exploiting-broadcoms-wi-fi_20.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:31.251518+00:00"
+      },
+      {
+        "tool_use_id": "call_6ud4idqggx0le3kmupb33x9p",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the exact title, author name, and publication date of this blog post? Summarize the technical content: what vulnerability, what target (e.g., Broadcom Wi-Fi, Qualcomm baseband, TrustZone, iOS, Android), and the research method described. Provide the byline/author as shown on the page.",
+          "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html"
+        },
+        "success": true,
+        "content_sha256": "032f3aebd9c51663c46414b9fe33cd6469bf42326d9fe90e2c351d505fb2dddb",
+        "accessed_at": "2026-09-26T17:42:31.251524+00:00"
+      },
+      {
+        "tool_use_id": "call_dja0ogbnhiwwgfuk7co9gmsh",
+        "tool": "WebSearch",
+        "input": {
+          "query": "projectzero.google blog Gal Beniamini over the air Broadcom Wi-Fi"
+        },
+        "success": true,
+        "content_sha256": "2b64feac06268a746bf820e7c2dfdfdd153aee8b01f1e8ae6ae4bd24f317ce47",
+        "accessed_at": "2026-09-26T17:42:31.251530+00:00"
+      },
+      {
+        "tool_use_id": "call_j9v1z39jxm6d4a5aj3mt10bv",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-works-20260927-013822-605/checkpoint.md",
+          "content": "# Checkpoint — Gal Beniamini / 公开作品与技术演化\n\n## 身份确认\n- Gal Beniamini，Google Project Zero 研究员（2017 年 byline \"Posted by Gal Beniamini, Project Zero\"）。\n- 社交账号 @laginimaineb（与 task.md person_json 一致）。\n- 关注领域：Broadcom Wi-Fi SoC、Qualcomm baseband、TrustZone/QSEE。\n- Project Zero 博客已迁移至 projectzero.google（旧 googleprojectzero.blogspot.com 301 重定向）。\n\n## 已确认一手来源（WebFetch 成功）\n1. 2017-04-04, \"Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)\", projectzero.google\n   - 目标：Broadcom FullMAC Wi-Fi SoC（BCM4358），Nexus 6P / Android 7.1.1。\n   - 漏洞：TDLS 堆溢出，MIC 校验函数长度未校验。\n   - 方法：dhdutil 提取 ROM、IDA Thumb-2 分析、NexMon 符号、brcmsmac 开源代码、hook malloc/free、自建堆可视化、堆 freelist 重定向覆盖 timer 函数指针。MPU RWX。\n\n## 待抓取 / 线索\n- Part 2（Wi-Fi，2017 年中）。\n- \"Extracting Qualcomm's KeyMaster Keys\"（2017，TrustZone/QSEE）。\n- Qualcomm baseband (Hexagon) 研究，REcon/Black Hat。\n- iOS Bluetooth LE 研究（WebSearch 声称，需一手验证）。\n- 注意：WebSearch 在本环境多次声明无实时搜索能力且结果矛盾，仅作 lead_only；以 WebFetch 实抓为准。\n\n## 预算\n- 已用 ~5 次工具调用。剩余预算用于 Part2 + KeyMaster + baseband 抓取，预留提交回合。\n"
+        },
+        "success": true,
+        "content_sha256": "cbafc46021bcfad5b691c5d6a138d9c8c3b918c55320cba408909f4db6558c46",
+        "accessed_at": "2026-09-26T17:42:31.251535+00:00"
+      },
+      {
+        "tool_use_id": "call_r39kt4uq0m2171epa21ezv0j",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the exact title, author name, and publication date of this blog post? Summarize the technical content: what vulnerability, what target (e.g., Broadcom Wi-Fi, Qualcomm baseband, TrustZone, iOS, Android), and the research method described. Provide the byline/author as shown on the page.",
+          "url": "https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_11.html"
+        },
+        "success": true,
+        "content_sha256": "113ebf02afebaf0cd243126ccc38dbefe352569f55a9f3bab20796a9282319b4",
+        "accessed_at": "2026-09-26T17:42:31.251547+00:00"
+      },
+      {
+        "tool_use_id": "call_o4tpe85ixm5hf25ny9ycn5ue",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the exact title, author name, and publication date of this blog post? Summarize the technical content: what vulnerability, what target (e.g., Broadcom Wi-Fi, Qualcomm baseband, TrustZone, iOS, Android), and the research method described. Provide the byline/author as shown on the page.",
+          "url": "https://projectzero.google/2017/06/over-air-exploiting-broadcoms-wi-fi.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:31.251540+00:00"
+      },
+      {
+        "tool_use_id": "call_r1zgt3v9f8pdxl3zws1mclk8",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the exact title, author name, and publication date of this blog post? Summarize the technical content: what vulnerability, what target (e.g., Broadcom Wi-Fi, Qualcomm baseband, TrustZone, iOS, Android), and the research method described. Provide the byline/author as shown on the page.",
+          "url": "https://projectzero.google/2017/06/extracting-qualcomms-keymaster-keys.html"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T17:42:31.251552+00:00"
+      },
+      {
+        "tool_use_id": "call_orofvp4vunmcewypudt5cu6s",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog post titles, authors, and dates visible on this page. I am looking specifically for posts by Gal Beniamini and the overall list of post links/URLs shown.",
+          "url": "https://projectzero.google/"
+        },
+        "success": true,
+        "content_sha256": "fbcf22cf60356612f9ebdfbd2078b57fa4a8b7a110afa85396007f11e043d0cb",
+        "accessed_at": "2026-09-26T17:42:31.251559+00:00"
+      },
+      {
+        "tool_use_id": "call_bhkd22yyirxs4htw2lb3hcqi",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-works-20260927-013822-605/output.json",
+          "content": "{\n  \"person\": \"Gal Beniamini\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"身份经一手抓取确认：Project Zero 博客文章页 byline 为 'Posted by Gal Beniamini, Project Zero'，发布于 2017-04；社交账号 @laginimaineb 与输入 person_json 一致。研究域经一手抓取核验为 Broadcom Wi-Fi SoC 漏洞与利用。同名歧义处理：在第一手抓取前，WebSearch 对其研究领域给出相互不一致的二手描述（一次称 Qualcomm TrustZone/QSEE KeyMaster，另一次称 iOS/Broadcom Wi-Fi/Bluetooth），均未单独采信；第一手抓取 Project Zero 博客后确认 2017-04 Broadcom Wi-Fi SoC 系列为已发表作品。Qualcomm KeyMaster/TrustZone、Qualcomm baseband 与 iOS Bluetooth 等方向未在本轮一手抓取预算内核验，记入 gaps。\",\n  \"items\": [\n    {\n      \"id\": \"galbeniamini-works-001\",\n      \"date\": \"2017-04-04\",\n      \"claim\": \"Gal Beniamini 在 Project Zero 博客发表 'Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)'，针对 Broadcom FullMAC Wi-Fi SoC（BCM4358）实现远程代码执行，目标设备为运行 Android 7.1.1 的 Nexus 6P。漏洞位于 TDLS（802.11z）实现中 MIC 校验函数的堆溢出：teardown 路径未校验 FT-IE 长度字段与 256 字节缓冲区关系，setup 路径 RSN IE 之后 Timeout Interval 与 Fast Transition IE 未校验长度。利用仅需 Wi-Fi 邻近且无需用户交互。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"方法学信号：固件层深度逆向并自建分析工具。具体表现为通过 dhdutil 提取 ROM、以 IDA 分析 Thumb-2 二进制、借用 NexMon 符号与开源 brcmsmac 驱动对照定位 bcm_parse_tlvs 及其 110+ 交叉引用、hook malloc/free 追踪堆操作并自建堆可视化器、将堆溢出链式转化为重叠空闲块并重定向 freelist 覆盖 timer 结构函数指针。MPU 配置为全 RWX 降低利用门槛亦被如实记录。这些构成可复用的固件逆向与堆利用工具链，符合'工具建设与重复练习'的成长证据。\",\n      \"short_quote\": \"Posted by Gal Beniamini, Project Zero\",\n      \"source\": {\n        \"title\": \"Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1)\",\n        \"url\": \"https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_4.html\",\n        \"published\": \"2017-04-04\",\n        \"source_type\": \"Project Zero technical blog post\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"galbeniamini-works-002\",\n      \"date\": \"2017-04-11\",\n      \"claim\": \"Gal Beniamini 在 Project Zero 博客发表 'Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 2)'，从 Wi-Fi SoC 固件控制提权至主机内核代码执行，提出两条路径。软件路径利用 bcmdhd 驱动与固件间 EtherType 0x886C 事件通道，在 WLC_E_PFN_SWC 事件处理（dhd_handle_swc_evt，Issue #1061）中因 total_count 与 pkt_count 关系未校验导致内核堆溢出，经 SLUB slab 整形后释放含 evt_handler 函数指针表的 wl_priv 结构并回收覆写，借 stack pivot（无 KASLR）执行 ROP 链。硬件路径利用 PCIe DMA：修改固件 RAM 中 DMA 环缓冲地址指向内核代码段，确认 Snapdragon 810（Nexus 6P）与 Exynos 8890（Galaxy S7 Edge）平台 Wi-Fi PCIe 接口 SMMU 缺失或未配置，Wi-Fi SoC 可任意 DMA 主机物理内存；经逆向 dma_info 结构、hook ROM 中 dma64_txfast 实现任意物理地址写。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"技术演化信号：研究目标从'单固件 RCE'扩展至'固件→主机内核提权'，方法栈从纯软件漏洞链扩展至硬件 DMA 攻击面。具体表现为两点扩展——其一，将固件层堆利用能力迁移到主机内核 SLUB 整形与函数指针表覆写 + ROP 的内核利用范式；其二，跨平台（Qualcomm 与 Samsung 两类移动 SoC）验证 Wi-Fi PCIe 接口 SMMU 缺失这一系统性架构缺陷，并逆向 DMA 引擎实现不依赖主机内核漏洞的任意物理写。这种从'单一漏洞'到'架构性攻击面'、从'单平台'到'跨平台验证'的推进，体现研究目标难度与方法栈的系统性抬升，符合'目标难度、研究方法与技术栈演化'的维度要求。\",\n      \"short_quote\": \"PCIe allows for DMA by design\",\n      \"source\": {\n        \"title\": \"Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 2)\",\n        \"url\": \"https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_11.html\",\n        \"published\": \"2017-04-11\",\n        \"source_type\": \"Project Zero technical blog post\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"galbeniamini-works-003\",\n      \"date\": \"2017-04\",\n      \"claim\": \"基于 Part 1 与 Part 2 的一手文本可推断 Gal Beniamini 在 2017-04 期间的公开作品呈现明确的纵向技术演化：第一阶段为无线 SoC 固件内部漏洞发现与利用（堆溢出 + freelist 劫持），第二阶段为固件到主机内核的横向提权（驱动事件处理内核堆溢出 + ROP）与对硬件 DMA 攻击面的系统性考察。两篇作品均以 Project Zero 博客形式公开发表，并包含漏洞编号（如 Issue #1061）与披露流程痕迹，显示'研究—披露—公开发表'的稳定习惯。\",\n      \"status\": \"inferred\",\n      \"growth_signal\": \"复盘与公开发表习惯信号：作品成系列发表、引用内部 Issue 编号、显式记录厂商补丁时间线（如 2016 年中 Broadcom 引入事件校验）与补丁绕过方法（固件 RAM 为 RWX 可 patch 掉校验），体现对漏洞生命周期与防御-绕过循环的复盘意识。跨平台对照验证则体现方法论的迁移与复用。\",\n      \"source\": {\n        \"title\": \"Over The Air: Exploiting Broadcom's Wi-Fi Stack (Part 1 and Part 2)\",\n        \"url\": \"https://projectzero.google/2017/04/over-air-exploiting-broadcoms-wi-fi_11.html\",\n        \"published\": \"2017-04-11\",\n        \"source_type\": \"Project Zero technical blog post series\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"WebSearch 在一手抓取前对 Gal Beniamini 的研究领域给出相互不一致的二手描述：一次称其研究 Qualcomm TrustZone/QSEE 与 KeyMaster 提取，另一次称其研究 iOS 与 Broadcom Wi-Fi/Bluetooth LE。两者均为搜索摘要，不可单独采信。经一手抓取 Project Zero 博客确认 2017-04 Broadcom Wi-Fi SoC 系列为已发表作品；KeyMaster/TrustZone、iOS Bluetooth 方向未在一手抓取预算内核验。\"\n  ],\n  \"gaps\": [\n    \"Project Zero 博客旧标签页 https://googleprojectzero.blogspot.com/search/label/Gal%20Beniamini 返回 'No posts with label Gal Beniamini'，无法作为其作品索引使用；Project Zero 博客已迁移至 projectzero.google，但其首页仅列近期 18 篇文章，无 Gal Beniamini 条目，未找到其完整作品归档索引页。\",\n    \"'Extracting Qualcomm's KeyMaster Keys'（推断 2017 年，TrustZone/QSEE）的 Project Zero 博客 URL（尝试 /2017/06/extracting-qualcomms-keymaster-keys.html）返回 404，未能在工具调用预算内找到正确 URL 并完成一手抓取；该作品仅以 WebSearch 二手摘要形式出现，不计入 documented/reported。\",\n    \"Qualcomm baseband（Hexagon DSP/RTOS）相关研究及 REcon/Black Hat/POC 会议演讲未一手核验；task.md 列出的会议证据仅证明演讲事实，不能单独证明成长机制，且本轮未抓取任何会议 speaker 页面或演讲材料。\",\n    \"iOS Bluetooth LE 研究方向（WebSearch 声称）未一手核验，可能为同名歧义或与其他研究员混淆，记为待查。\",\n    \"成长机制层面的一手证据缺口：未找到关于导师关系、同伴反馈、失败与转向、重复练习节奏的具体一手材料；本轮已确认的工具建设（自建堆可视化、hook malloc/free）与公开发表习惯（Project Zero 博客系列）为间接成长信号，非直接的成长机制证据。\",\n    \"复盘方式的一手证据有限：作品中可见对厂商补丁时间线与补丁绕过的记录，但未见独立的'复盘笔记/事后分析'类一手材料。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "1a8a2a93e381f08decbb61cc789e4e5d9c0ccaa9917e558bddc6dbd474a80586",
+        "accessed_at": "2026-09-26T17:42:31.251714+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790444551251730000-gal-beniamini-works.json",
+    "label": "Gal Beniamini:works",
+    "elapsed_seconds": 248.65,
+    "prompt_sha256": "435fe49987d210d7541174c9cc286567a332e0317b69355a4e29ef0c7359c6fc",
+    "num_turns": 21,
+    "total_cost_usd": 0.6438780000000001,
+    "usage": {
+      "input_tokens": 20969,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 153472,
+      "output_tokens": 7509,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 43003,
+        "outputTokens": 13431,
+        "cacheReadInputTokens": 186176,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.6438780000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

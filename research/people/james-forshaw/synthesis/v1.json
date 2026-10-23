@@ -1,0 +1,309 @@
+{
+  "person": "James Forshaw",
+  "expertise": [
+    "Windows NT Object Manager 命名空间与路径查找竞态分析",
+    "COM/DCOM 运行时安全与 custom marshaling、CLSID 注册滥用",
+    "Windows 沙箱与权限边界绕过（UAC、管理员保护、UIAccess）",
+    "NT API 枚举、token 模拟与访问控制（ACL/Kerberos 中继/Active Directory 访问检查）分析",
+    "Windows 提权与特权服务/计划任务编排链构造",
+    "自建 .NET/PowerShell 安全工具链（NtObjectManager/OleViewDotNet 生态）开发与长期维护"
+  ],
+  "stages": [
+    {
+      "period": "约2015年",
+      "stage": "工具链奠基：把研究方法固化为可复用执行介质",
+      "capability_change": "将 NT API/对象管理器枚举、token 模拟、沙箱可达性测试等研究方法沉淀为可被他人加载的 PowerShell/.NET 模块（NtObjectManager/NtCoreLib 等，归入 sandbox-attacksurface-analysis-tools 套件），形成贯穿后续研究的执行与验证基础设施，而非一次性 PoC。",
+      "evidence_ids": [
+        "jf-works-003",
+        "jf-comm-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022-2024年",
+      "stage": "跨子系统应用与独立个人研究渠道维持",
+      "capability_change": "把同一套自建工具反复用于不同 Windows 子系统（ACL、Kerberos 中继、DCOM OXID、RPC 服务器枚举、Active Directory 访问检查），每次产出独立 writeup；在加入 Google 后仍以 Tyranid's Lair 个人博客作为独立研究输出渠道，未因团队归属停止个人写作。需注意 2018-2022 中间节点缺失，此阶段为可用证据下的近似锚定。",
+      "evidence_ids": [
+        "jf-decisions-01"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2025年末至2026年初",
+      "stage": "回访式复盘与短周期迭代",
+      "capability_change": "将 2016 年原作的路径查找竞态技术在 Windows 11 24H2 上重新测量复测（单次查找从约2μs放大至约4.5ms，约2250倍），并引用自身 2021 年先期工作对比；针对同一防御机制（Windows 管理员保护）约两周内换用 UIAccess 路径继续突破，体现短周期迭代；把他人已公开的 UAC bypass 作为新一轮系统化 API（GetProcessHandleFromHwnd）安全属性分析的种子。",
+      "evidence_ids": [
+        "jf-works-002",
+        "jf-timeline-01",
+        "jf-conv-01",
+        "jf-timeline-02",
+        "jf-timeline-03",
+        "jf-timeline-04",
+        "jf-comm-03",
+        "jf-comm-05"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2026年",
+      "stage": "不完整修复追踪与 bug 类枚举",
+      "capability_change": "从寻找单点漏洞转向把单点 bug 通用化为可批量枚举的 bug 类：对 CVE-2026-50343（Dark Elevator）的不完整修复进行二次利用得到 CVE-2026-66804，并随文发布 Get-ComDatabase/Import-Win32Module 扫描脚本枚举 machine hive 中 DLL 路径无法 LoadLibrary 解析的 in-process COM 类；目标难度上移到 COM runtime/特权服务/计划任务编排链。",
+      "evidence_ids": [
+        "jf-works-001",
+        "jf-timeline-05",
+        "jf-comm-04"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "工具即研究介质：把研究方法固化为可复用工具链并以工具驱动 writeup",
+      "starting_conditions": "约2015年，Windows 沙箱攻击面分析需反复枚举 NT 对象管理器、模拟 token、判定跨进程可达资源；缺乏公开可复用工具时每次研究需重复造轮子。",
+      "repeated_practice": "把研究过程产出的 NT API/对象管理器封装（NtCoreLib/NtApiDotNet、NtObjectManager、OleViewDotNet）沉淀为长期维护的公开模块，并在后续 writeup 中直接以这些模块作为执行与验证介质（如枚举 COM 接口、检查进程能力、传入伪造 marshaled 对象）。",
+      "feedback": "GitHub issue 区外部使用者提交 bug 与功能请求（如 #86、#83、#55，涉及新 Windows 版本兼容性）形成使用者→作者反馈；writeup 扩充工具用例，工具反哺 writeup 验证，形成双向闭环。",
+      "intermediate_capability": "形成'工具-研究-输出'闭环：研究不再依赖一次性 PoC，而是调用已封装能力快速验证假设；工具成为跨子系统研究的通用入口。",
+      "observed_outcomes": [
+        "2015 年起 sandbox-attacksurface-analysis-tools 套件长期维护，经历 v2.0.0 major refactor，累计 3572+ commits",
+        "2022-2024 年 Tyranid's Lair 博客多篇 writeup 直接引用 NtObjectManager 发现 RPC 服务器信息",
+        "2026-09 Dangling COM writeup 全程使用 OleViewDotNet/NtObjectManager 作为执行介质并传入伪造 marshaled 对象"
+      ],
+      "evidence_ids": [
+        "jf-works-003",
+        "jf-comm-01",
+        "jf-comm-02",
+        "jf-decisions-01",
+        "jf-works-001"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": ".NET/PowerShell 自动化生态在 2010 年代后成熟，显著降低建设此类工具链的门槛；高产出可能部分源于生态红利而非纯个人能力差异；且工具仓库归属 googleprojectzero 组织，Google 平台背书可能放大了社区采用度（2.3k stars/451 forks），个人独立发布难以等同。"
+    },
+    {
+      "name": "单点 bug 通用化为可枚举 bug 类",
+      "starting_conditions": "单一漏洞披露只能覆盖一个实例，同类问题散布在系统各处难以穷尽；vendor 修复常针对报告点而非整类。",
+      "repeated_practice": "在 writeup 中不仅给出单点利用，还把触发条件抽象为可批量扫描的判据，并随文发布扫描脚本（如 Get-ComDatabase 扫描 machine hive 中 DLL 路径无法解析的 in-process COM 类）；对同一防御机制换多条路径逐项追踪（UIAccess 系列 9 个 bypass）。",
+      "feedback": "vendor 对报告点的修复反向暴露整类未覆盖面（不完整修复成为二次利用入口，如 CVE-2026-50343→CVE-2026-66804）；社区已公开的零散 bypass 成为系统化 API 分析的种子。",
+      "intermediate_capability": "从'找单点漏洞'转向'建枚举框架'，输出习惯演化为每次披露附带可复用的类扫描能力。",
+      "observed_outcomes": [
+        "2026-09 Dangling COM writeup 附 Get-ComDatabase/Import-Win32Module 扫描脚本枚举 in-process COM 类",
+        "2026-01/02 管理员保护与 UIAccess 绕过共 9 个 bypass 逐项追踪修复",
+        "2026-02 把已公开 UAC bypass 转化为 GetProcessHandleFromHwnd API 的系统化安全属性分析"
+      ],
+      "evidence_ids": [
+        "jf-works-001",
+        "jf-comm-03",
+        "jf-comm-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "批量枚举与追踪可能是 Project Zero 晚期团队研究策略的整体趋势，而非个人能力演化的必然；2026 年集中出现也可能受博客迁移后集中归档再发布的节奏效应影响。"
+    },
+    {
+      "name": "disclose→fix→writeup 闭环与不完整修复追踪",
+      "starting_conditions": "漏洞研究需协调 vendor 修复后再公开，单次披露后修复是否覆盖整类未知；研究价值依赖修复闭环的可观察性。",
+      "repeated_practice": "对每个发现执行'报告给 Microsoft→等待修复→公开技术分析'的工作流，writeup 同时反向校验修复是否覆盖；对不完整修复进行二次利用研究。",
+      "feedback": "vendor 修复结果（是否修复、是否完整）直接构成下一轮研究的反馈与种子；writeup 中'All the issues ... have been fixed'式逐项确认提供闭合信号。",
+      "intermediate_capability": "把 vendor 反馈回路内化为固定工作流，研究-披露-校验形成可重复的产出节律，不完整修复成为新研究入口。",
+      "observed_outcomes": [
+        "2026-01/02 管理员保护与 UIAccess 绕过均明示已报告、已修复后再披露",
+        "2026-09 对 CVE-2026-50343 不完整修复二次利用得到 CVE-2026-66804",
+        "同一 CrossDevice bug 与另外 14 名研究者共同上报，体现协同披露"
+      ],
+      "evidence_ids": [
+        "jf-comm-03",
+        "jf-comm-04",
+        "jf-comm-05",
+        "jf-works-001"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "该闭环可能是 Project Zero 团队披露规范的要求而非个人选择；协同披露的'14 others'也可能由 vendor 协调机制促成，个人特有性有待自述材料证实。"
+    },
+    {
+      "name": "跨版本回访式复盘：旧技术在新系统上复测",
+      "starting_conditions": "Windows 技巧随版本演进而失效或变化，旧 writeup 的时效性需在新系统上重新验证；研究记忆依赖可复现的量化基准。",
+      "repeated_practice": "把多年前的技术（如 2016 路径查找竞态）在最新 Windows（Win11 24H2 / Snapdragon X Elite）上重新测量复测，引用自身先期工作（2021 OpLock/虚拟内存访问）对比，更新工具与写作。",
+      "feedback": "复测得到的量化变化（如单次查找从约2μs到约4.5ms）成为对旧结论的修正反馈；新版本兼容性问题经 GitHub issue 早期暴露。",
+      "intermediate_capability": "形成'同一技术跨版本复测验证时效'的复盘倾向，研究结论附带可复现基准而非凭手感。",
+      "observed_outcomes": [
+        "2016 原作路径查找竞态于 2025-12 在 Win11 24H2 上重新测量发布，量化放大倍数",
+        "writeup 显式引用自身 2021 先期工作作为对比"
+      ],
+      "evidence_ids": [
+        "jf-works-002",
+        "jf-timeline-01",
+        "jf-conv-01"
+      ],
+      "validation_tests": [
+        "distinctive"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "该复盘可能由 Project Zero 博客迁移后的归档再发布需求驱动，而非主动的复盘习惯；目前可观察的跨版本复测仅此一例，'重复'特征不充分，难以排除一次性契机；jf-conv-01 为 inferred，仅证明输出习惯而非自述复盘动机。"
+    }
+  ],
+  "tensions": [
+    "入口迁移导致一手证据断裂：人物记录给出的 writeup_evidence 旧域（googleprojectzero.blogspot.com/search/label/James%20Forshaw）抓取返回 'No posts with label James Forshaw'，与现行 projectzero.google 抓取成功并存，早期作品的一手入口失效。",
+    "2015 年前关键转折（2013 Pwn2Own、约2015 加入 Project Zero、2017 出版《Attacking Network Protocols》）均无 verified_in_run=true 的一手来源（jf-decisions-02/03/04 为 inferred、未抓取、URL 为空），决策当时的约束、备选项与后果无法重建。",
+    "组织与时代红利需与个人能力剥离：Project Zero（2014 成立）全职零日研究职位与披露渠道、Google 平台对工具仓库的背书、高密度同伴网络（同一 bug 14 人共同上报）均可能放大产出；Windows 攻击面持续暴露与 .NET/PowerShell 生态成熟亦降低研究门槛。",
+    "竞争性解释：Forshaw 的高产出与系统化输出可能部分源于 Project Zero 团队规范（批量追踪修复、迁移后集中归档再发布）而非纯个人能力演化；'回访式复盘'亦可能由迁移契机而非主动习惯驱动。",
+    "工具维护含外部驱动成分：GitHub issue 区使用者反馈显示工具演化并非纯个人练习，社区对新 Windows 版本兼容性的报告构成维护的外部触发。"
+  ],
+  "transferable_practices": [
+    "把研究方法固化为可复用工具链，使工具成为后续研究的执行与验证介质，而非一次性 PoC。",
+    "执行 disclose→fix→writeup 闭环，以 writeup 反向校验 vendor 修复是否覆盖整类，把不完整修复作为下一轮研究入口。",
+    "把他人已公开的零散发现作为系统化 API/子系统安全属性分析的种子。",
+    "对同一技术跨版本复测，以可复现的量化基准验证旧结论时效。",
+    "把单点 bug 上升为可批量枚举的 bug 类，并随披露发布扫描脚本。"
+  ],
+  "non_transferable_conditions": [
+    "Project Zero 全职零日研究职位提供的披露渠道与研究时间（属组织红利，非个人能力）。",
+    "Google 平台背书使工具仓库（googleprojectzero 组织）获得社区关注度与采用度（2.3k stars/451 forks），个人独立发布难以等同。",
+    "长期 Windows 内核/NT API/COM 运行时逆向积累，需多年沉淀，非短期可复制。",
+    "高密度 Windows 安全研究同伴网络（同一 bug 14 人共同上报）是外部协作条件，非个人能力。",
+    "2014-2026 Windows 沙箱/权限边界攻击面持续暴露的时代窗口。"
+  ],
+  "open_questions": [
+    "2015 年前（Context Information Security 时期、Pwn2Own 2013、入门与学习路径）无 verified_in_run=true 一手来源，早期能力形成机制无法重建；jf-decisions-02/03/04 仅 inferred 且未抓取。",
+    "2018-2022 中期技术演化缺中间节点，工具链从 2015 版到 v2.0.0 refactor 的演进过程无证据，只能用 2016（2025 复测）与 2022-2024 两个端点近似锚定。",
+    "conversations 维度核心缺失：本人对入门、失败、导师、关键选择与转折的自述（长访谈/播客/AMA/演讲问答）均未抓取到，jf-conv-01 仅证明输出习惯，无法支撑成长机制的自述级证据。",
+    "NtObjectManager、OleViewDotNet 独立仓库的版本与提交史未抓取（github.com/tiraniddo 返回 404），工具演化只能从主仓库 sandbox-attacksurface-analysis-tools 推断，仓库间关系为推断而非文档级证据。",
+    "协同披露的'14 others'具体身份未识别，协作披露的互动细节与同伴网络结构无材料。",
+    "Black Hat/BlueHat 演讲的具体年份与议题无一手来源（仅 WebSearch 摘要，未抓取演讲页正文），作为社区参与渠道的时间线待补。",
+    "Pwn2Own 2013 与加入 Project Zero 之间的因果（竞赛是否促成招募）无一手材料，不宜推断。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-forshaw-synthesis-v1-20260926-215811-958",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790431424932719000-james-forshaw-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "fe982eb7-9083-4b9d-b311-8ab8dcad93ac",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_koef3ngtz6b3slgimzaqj8as",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-forshaw-synthesis-v1-20260926-215811-958/task.md"
+        },
+        "success": true,
+        "content_sha256": "c70f31018b384849e4705a0d12fc2dfc66727bd160fb95c42c82cb7b4cd87019",
+        "accessed_at": "2026-09-26T14:03:44.967768+00:00"
+      },
+      {
+        "tool_use_id": "call_j61ifc9brcvwcb607wxex0nv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-forshaw-synthesis-v1-20260926-215811-958/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "d320b96997a347e0ab297d74cef9c32db19e417fc954eadddb1c7fc9fa3c7657",
+        "accessed_at": "2026-09-26T14:03:44.967795+00:00"
+      },
+      {
+        "tool_use_id": "call_ryquyil9o6tv0euqqrvzyh22",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-forshaw-synthesis-v1-20260926-215811-958/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "9f2bc822b76cb91e5942de81f5ffadda9f1da25bd96c2895a1b482707fcfb3d0",
+        "accessed_at": "2026-09-26T14:03:44.967801+00:00"
+      },
+      {
+        "tool_use_id": "call_ofk020c62mp4c8t91swjt0so",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-forshaw-synthesis-v1-20260926-215811-958/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "70b040f4e043552483665e8bc2192f8ba05f9138187c61dae6ba627ed19da552",
+        "accessed_at": "2026-09-26T14:03:44.967860+00:00"
+      },
+      {
+        "tool_use_id": "call_cv9plm6a9ibbb7h6wcrknae1",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-forshaw-synthesis-v1-20260926-215811-958/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-26T14:03:44.967864+00:00"
+      },
+      {
+        "tool_use_id": "call_mowwo2hceiok4ooa3rcj3kne",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-forshaw-synthesis-v1-20260926-215811-958/checkpoint.md",
+          "content": "# Checkpoint — James Forshaw 综合节点\n\n## 任务状态\n首轮综合（revision_context 为空 []）。已完成证据有效性盘点与机制筛选，产出 output.json。\n\n## 已确认的有效来源（verified_in_run=true）\n- jf-works-001 (2026-09-21) Dangling COM / CVE-2026-66804（对 CVE-2026-50343 不完整修复二次利用），OleViewDotNet/NtObjectManager 为执行介质，附 Get-ComDatabase 扫描脚本\n- jf-works-002 (2016→2025-12-16 复测) 路径查找竞态，Win11 24H2 量化（约2μs→4.5ms，~2250x），引用自身 2021 先期工作\n- jf-works-003 (2015) sandbox-attacksurface-analysis-tools 仓库（v2.0.0 refactor，3572+ commits，2.3k stars）\n- jf-comm-01 (2015) 工具套件作为社区基础设施\n- jf-comm-02 (2021-10) GitHub issues 外部反馈回路\n- jf-comm-03 (2026-01/02) disclose→fix→writeup 闭环，UIAccess 9 bypass\n- jf-comm-04 (2026-09-21) \"I and 14 others reported\" 协作披露\n- jf-comm-05 (2026-02-26) 已公开 UAC bypass 作为 GetProcessHandleFromHwnd 系统化分析种子\n- jf-conv-01 (2025-12-16, status=inferred) 仅证明输出/复盘习惯，非自述\n- jf-decisions-01 (2022-2024) Tyranid's Lair 个人博客持续输出，NtObjectManager 跨 ACL/Kerberos/RPC/AD 子系统\n- jf-timeline-01~05 (2025-12 至 2026-09) 五篇 PZ 博客时间线\n- ext-001/002/003 用于排除组织品牌归因与记录入口失效缺口\n\n## 已排除/降级的来源\n- jf-decisions-02 (2015 加入 P0)、jf-decisions-03 (2013 Pwn2Own)、jf-decisions-04 (2017 出书)：均 inferred、verified_in_run=false、URL 空，不作阶段/机制 evidence_ids，仅在 tensions/open_questions 作缺口记录\n- jf-decisions-05 (status=unknown)：claim\"工具仓库无法确认\"被同批 jf-works-003/jf-comm-01 证伪（该节点用了错误拼写 attackscape），不引用\n- targeted 维度 items 为空；revision_context 为空\n\n## 主机制（均满足\"重复/解释多个结果/区分度\"至少两项）\n1. 工具即研究介质（confidence=high，三验证项全中）\n2. 单点 bug 通用化为可枚举 bug 类（confidence=medium）\n3. disclose→fix→writeup 闭环 + 不完整修复追踪（confidence=high）\n4. 跨版本回访式复盘（confidence=low，仅一例跨时期复盘，\"重复\"不充分，诚实降级）\n\n## 阶段（每阶段至少一个 verified 证据）\n1. 约2015 — 工具链奠基（jf-works-003, jf-comm-01）\n2. 2022-2024 — 跨子系统应用 + 独立个人渠道（jf-decisions-01）；2018-2022 缺口\n3. 2025末-2026初 — 回访复盘 + 短周期迭代（jf-works-002, jf-timeline-01~04, jf-comm-03/05, jf-conv-01）\n4. 2026 — 不完整修复追踪 + bug 类枚举（jf-works-001, jf-timeline-05, jf-comm-04）\n\n## 未完成事项 / 资料缺口\n- 2015 年前无 verified 一手来源，早期能力形成机制不可重建\n- 2018-2022 中间节点缺失\n- conversations 维度核心（入门/失败/导师/转折自述）未抓取到\n- NtObjectManager/OleViewDotNet 独立仓库提交史未抓取（github.com/tiraniddo 404）\n- \"14 others\" 身份未识别；Black Hat/BlueHat 议题无一手来源\n"
+        },
+        "success": true,
+        "content_sha256": "7823837815054f0a8524076a0739de8cb0f0a22fc5c6e74eb646b5287f2f7adb",
+        "accessed_at": "2026-09-26T14:03:44.968317+00:00"
+      },
+      {
+        "tool_use_id": "call_yo6o2k4xsfgb44h05360y6i8",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-forshaw-synthesis-v1-20260926-215811-958/output.json",
+          "content": "{\n  \"person\": \"James Forshaw\",\n  \"expertise\": [\n    \"Windows NT Object Manager 命名空间与路径查找竞态分析\",\n    \"COM/DCOM 运行时安全与 custom marshaling、CLSID 注册滥用\",\n    \"Windows 沙箱与权限边界绕过（UAC、管理员保护、UIAccess）\",\n    \"NT API 枚举、token 模拟与访问控制（ACL/Kerberos 中继/Active Directory 访问检查）分析\",\n    \"Windows 提权与特权服务/计划任务编排链构造\",\n    \"自建 .NET/PowerShell 安全工具链（NtObjectManager/OleViewDotNet 生态）开发与长期维护\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"约2015年\",\n      \"stage\": \"工具链奠基：把研究方法固化为可复用执行介质\",\n      \"capability_change\": \"将 NT API/对象管理器枚举、token 模拟、沙箱可达性测试等研究方法沉淀为可被他人加载的 PowerShell/.NET 模块（NtObjectManager/NtCoreLib 等，归入 sandbox-attacksurface-analysis-tools 套件），形成贯穿后续研究的执行与验证基础设施，而非一次性 PoC。\",\n      \"evidence_ids\": [\"jf-works-003\", \"jf-comm-01\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022-2024年\",\n      \"stage\": \"跨子系统应用与独立个人研究渠道维持\",\n      \"capability_change\": \"把同一套自建工具反复用于不同 Windows 子系统（ACL、Kerberos 中继、DCOM OXID、RPC 服务器枚举、Active Directory 访问检查），每次产出独立 writeup；在加入 Google 后仍以 Tyranid's Lair 个人博客作为独立研究输出渠道，未因团队归属停止个人写作。需注意 2018-2022 中间节点缺失，此阶段为可用证据下的近似锚定。\",\n      \"evidence_ids\": [\"jf-decisions-01\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2025年末至2026年初\",\n      \"stage\": \"回访式复盘与短周期迭代\",\n      \"capability_change\": \"将 2016 年原作的路径查找竞态技术在 Windows 11 24H2 上重新测量复测（单次查找从约2μs放大至约4.5ms，约2250倍），并引用自身 2021 年先期工作对比；针对同一防御机制（Windows 管理员保护）约两周内换用 UIAccess 路径继续突破，体现短周期迭代；把他人已公开的 UAC bypass 作为新一轮系统化 API（GetProcessHandleFromHwnd）安全属性分析的种子。\",\n      \"evidence_ids\": [\"jf-works-002\", \"jf-timeline-01\", \"jf-conv-01\", \"jf-timeline-02\", \"jf-timeline-03\", \"jf-timeline-04\", \"jf-comm-03\", \"jf-comm-05\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2026年\",\n      \"stage\": \"不完整修复追踪与 bug 类枚举\",\n      \"capability_change\": \"从寻找单点漏洞转向把单点 bug 通用化为可批量枚举的 bug 类：对 CVE-2026-50343（Dark Elevator）的不完整修复进行二次利用得到 CVE-2026-66804，并随文发布 Get-ComDatabase/Import-Win32Module 扫描脚本枚举 machine hive 中 DLL 路径无法 LoadLibrary 解析的 in-process COM 类；目标难度上移到 COM runtime/特权服务/计划任务编排链。\",\n      \"evidence_ids\": [\"jf-works-001\", \"jf-timeline-05\", \"jf-comm-04\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"工具即研究介质：把研究方法固化为可复用工具链并以工具驱动 writeup\",\n      \"starting_conditions\": \"约2015年，Windows 沙箱攻击面分析需反复枚举 NT 对象管理器、模拟 token、判定跨进程可达资源；缺乏公开可复用工具时每次研究需重复造轮子。\",\n      \"repeated_practice\": \"把研究过程产出的 NT API/对象管理器封装（NtCoreLib/NtApiDotNet、NtObjectManager、OleViewDotNet）沉淀为长期维护的公开模块，并在后续 writeup 中直接以这些模块作为执行与验证介质（如枚举 COM 接口、检查进程能力、传入伪造 marshaled 对象）。\",\n      \"feedback\": \"GitHub issue 区外部使用者提交 bug 与功能请求（如 #86、#83、#55，涉及新 Windows 版本兼容性）形成使用者→作者反馈；writeup 扩充工具用例，工具反哺 writeup 验证，形成双向闭环。\",\n      \"intermediate_capability\": \"形成'工具-研究-输出'闭环：研究不再依赖一次性 PoC，而是调用已封装能力快速验证假设；工具成为跨子系统研究的通用入口。\",\n      \"observed_outcomes\": [\n        \"2015 年起 sandbox-attacksurface-analysis-tools 套件长期维护，经历 v2.0.0 major refactor，累计 3572+ commits\",\n        \"2022-2024 年 Tyranid's Lair 博客多篇 writeup 直接引用 NtObjectManager 发现 RPC 服务器信息\",\n        \"2026-09 Dangling COM writeup 全程使用 OleViewDotNet/NtObjectManager 作为执行介质并传入伪造 marshaled 对象\"\n      ],\n      \"evidence_ids\": [\"jf-works-003\", \"jf-comm-01\", \"jf-comm-02\", \"jf-decisions-01\", \"jf-works-001\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \".NET/PowerShell 自动化生态在 2010 年代后成熟，显著降低建设此类工具链的门槛；高产出可能部分源于生态红利而非纯个人能力差异；且工具仓库归属 googleprojectzero 组织，Google 平台背书可能放大了社区采用度（2.3k stars/451 forks），个人独立发布难以等同。\"\n    },\n    {\n      \"name\": \"单点 bug 通用化为可枚举 bug 类\",\n      \"starting_conditions\": \"单一漏洞披露只能覆盖一个实例，同类问题散布在系统各处难以穷尽；vendor 修复常针对报告点而非整类。\",\n      \"repeated_practice\": \"在 writeup 中不仅给出单点利用，还把触发条件抽象为可批量扫描的判据，并随文发布扫描脚本（如 Get-ComDatabase 扫描 machine hive 中 DLL 路径无法解析的 in-process COM 类）；对同一防御机制换多条路径逐项追踪（UIAccess 系列 9 个 bypass）。\",\n      \"feedback\": \"vendor 对报告点的修复反向暴露整类未覆盖面（不完整修复成为二次利用入口，如 CVE-2026-50343→CVE-2026-66804）；社区已公开的零散 bypass 成为系统化 API 分析的种子。\",\n      \"intermediate_capability\": \"从'找单点漏洞'转向'建枚举框架'，输出习惯演化为每次披露附带可复用的类扫描能力。\",\n      \"observed_outcomes\": [\n        \"2026-09 Dangling COM writeup 附 Get-ComDatabase/Import-Win32Module 扫描脚本枚举 in-process COM 类\",\n        \"2026-01/02 管理员保护与 UIAccess 绕过共 9 个 bypass 逐项追踪修复\",\n        \"2026-02 把已公开 UAC bypass 转化为 GetProcessHandleFromHwnd API 的系统化安全属性分析\"\n      ],\n      \"evidence_ids\": [\"jf-works-001\", \"jf-comm-03\", \"jf-comm-05\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"批量枚举与追踪可能是 Project Zero 晚期团队研究策略的整体趋势，而非个人能力演化的必然；2026 年集中出现也可能受博客迁移后集中归档再发布的节奏效应影响。\"\n    },\n    {\n      \"name\": \"disclose→fix→writeup 闭环与不完整修复追踪\",\n      \"starting_conditions\": \"漏洞研究需协调 vendor 修复后再公开，单次披露后修复是否覆盖整类未知；研究价值依赖修复闭环的可观察性。\",\n      \"repeated_practice\": \"对每个发现执行'报告给 Microsoft→等待修复→公开技术分析'的工作流，writeup 同时反向校验修复是否覆盖；对不完整修复进行二次利用研究。\",\n      \"feedback\": \"vendor 修复结果（是否修复、是否完整）直接构成下一轮研究的反馈与种子；writeup 中'All the issues ... have been fixed'式逐项确认提供闭合信号。\",\n      \"intermediate_capability\": \"把 vendor 反馈回路内化为固定工作流，研究-披露-校验形成可重复的产出节律，不完整修复成为新研究入口。\",\n      \"observed_outcomes\": [\n        \"2026-01/02 管理员保护与 UIAccess 绕过均明示已报告、已修复后再披露\",\n        \"2026-09 对 CVE-2026-50343 不完整修复二次利用得到 CVE-2026-66804\",\n        \"同一 CrossDevice bug 与另外 14 名研究者共同上报，体现协同披露\"\n      ],\n      \"evidence_ids\": [\"jf-comm-03\", \"jf-comm-04\", \"jf-comm-05\", \"jf-works-001\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"该闭环可能是 Project Zero 团队披露规范的要求而非个人选择；协同披露的'14 others'也可能由 vendor 协调机制促成，个人特有性有待自述材料证实。\"\n    },\n    {\n      \"name\": \"跨版本回访式复盘：旧技术在新系统上复测\",\n      \"starting_conditions\": \"Windows 技巧随版本演进而失效或变化，旧 writeup 的时效性需在新系统上重新验证；研究记忆依赖可复现的量化基准。\",\n      \"repeated_practice\": \"把多年前的技术（如 2016 路径查找竞态）在最新 Windows（Win11 24H2 / Snapdragon X Elite）上重新测量复测，引用自身先期工作（2021 OpLock/虚拟内存访问）对比，更新工具与写作。\",\n      \"feedback\": \"复测得到的量化变化（如单次查找从约2μs到约4.5ms）成为对旧结论的修正反馈；新版本兼容性问题经 GitHub issue 早期暴露。\",\n      \"intermediate_capability\": \"形成'同一技术跨版本复测验证时效'的复盘倾向，研究结论附带可复现基准而非凭手感。\",\n      \"observed_outcomes\": [\n        \"2016 原作路径查找竞态于 2025-12 在 Win11 24H2 上重新测量发布，量化放大倍数\",\n        \"writeup 显式引用自身 2021 先期工作作为对比\"\n      ],\n      \"evidence_ids\": [\"jf-works-002\", \"jf-timeline-01\", \"jf-conv-01\"],\n      \"validation_tests\": [\"distinctive\"],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"该复盘可能由 Project Zero 博客迁移后的归档再发布需求驱动，而非主动的复盘习惯；目前可观察的跨版本复测仅此一例，'重复'特征不充分，难以排除一次性契机；jf-conv-01 为 inferred，仅证明输出习惯而非自述复盘动机。\"\n    }\n  ],\n  \"tensions\": [\n    \"入口迁移导致一手证据断裂：人物记录给出的 writeup_evidence 旧域（googleprojectzero.blogspot.com/search/label/James%20Forshaw）抓取返回 'No posts with label James Forshaw'，与现行 projectzero.google 抓取成功并存，早期作品的一手入口失效。\",\n    \"2015 年前关键转折（2013 Pwn2Own、约2015 加入 Project Zero、2017 出版《Attacking Network Protocols》）均无 verified_in_run=true 的一手来源（jf-decisions-02/03/04 为 inferred、未抓取、URL 为空），决策当时的约束、备选项与后果无法重建。\",\n    \"组织与时代红利需与个人能力剥离：Project Zero（2014 成立）全职零日研究职位与披露渠道、Google 平台对工具仓库的背书、高密度同伴网络（同一 bug 14 人共同上报）均可能放大产出；Windows 攻击面持续暴露与 .NET/PowerShell 生态成熟亦降低研究门槛。\",\n    \"竞争性解释：Forshaw 的高产出与系统化输出可能部分源于 Project Zero 团队规范（批量追踪修复、迁移后集中归档再发布）而非纯个人能力演化；'回访式复盘'亦可能由迁移契机而非主动习惯驱动。\",\n    \"工具维护含外部驱动成分：GitHub issue 区使用者反馈显示工具演化并非纯个人练习，社区对新 Windows 版本兼容性的报告构成维护的外部触发。\"\n  ],\n  \"transferable_practices\": [\n    \"把研究方法固化为可复用工具链，使工具成为后续研究的执行与验证介质，而非一次性 PoC。\",\n    \"执行 disclose→fix→writeup 闭环，以 writeup 反向校验 vendor 修复是否覆盖整类，把不完整修复作为下一轮研究入口。\",\n    \"把他人已公开的零散发现作为系统化 API/子系统安全属性分析的种子。\",\n    \"对同一技术跨版本复测，以可复现的量化基准验证旧结论时效。\",\n    \"把单点 bug 上升为可批量枚举的 bug 类，并随披露发布扫描脚本。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Project Zero 全职零日研究职位提供的披露渠道与研究时间（属组织红利，非个人能力）。\",\n    \"Google 平台背书使工具仓库（googleprojectzero 组织）获得社区关注度与采用度（2.3k stars/451 forks），个人独立发布难以等同。\",\n    \"长期 Windows 内核/NT API/COM 运行时逆向积累，需多年沉淀，非短期可复制。\",\n    \"高密度 Windows 安全研究同伴网络（同一 bug 14 人共同上报）是外部协作条件，非个人能力。\",\n    \"2014-2026 Windows 沙箱/权限边界攻击面持续暴露的时代窗口。\"\n  ],\n  \"open_questions\": [\n    \"2015 年前（Context Information Security 时期、Pwn2Own 2013、入门与学习路径）无 verified_in_run=true 一手来源，早期能力形成机制无法重建；jf-decisions-02/03/04 仅 inferred 且未抓取。\",\n    \"2018-2022 中期技术演化缺中间节点，工具链从 2015 版到 v2.0.0 refactor 的演进过程无证据，只能用 2016（2025 复测）与 2022-2024 两个端点近似锚定。\",\n    \"conversations 维度核心缺失：本人对入门、失败、导师、关键选择与转折的自述（长访谈/播客/AMA/演讲问答）均未抓取到，jf-conv-01 仅证明输出习惯，无法支撑成长机制的自述级证据。\",\n    \"NtObjectManager、OleViewDotNet 独立仓库的版本与提交史未抓取（github.com/tiraniddo 返回 404），工具演化只能从主仓库 sandbox-attacksurface-analysis-tools 推断，仓库间关系为推断而非文档级证据。\",\n    \"协同披露的'14 others'具体身份未识别，协作披露的互动细节与同伴网络结构无材料。\",\n    \"Black Hat/BlueHat 演讲的具体年份与议题无一手来源（仅 WebSearch 摘要，未抓取演讲页正文），作为社区参与渠道的时间线待补。\",\n    \"Pwn2Own 2013 与加入 Project Zero 之间的因果（竞赛是否促成招募）无一手材料，不宜推断。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "fd501689bba5110ee1741a27ef5dde9500503e134b14c3f3c93d8558c3d0058d",
+        "accessed_at": "2026-09-26T14:03:44.968320+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790431424968333000-james-forshaw-synthesis-v1.json",
+    "label": "James Forshaw:synthesis:v1",
+    "elapsed_seconds": 333.0,
+    "prompt_sha256": "5edc1d011bb396e974dce9058258530aabc37d342a6ba9c01a20437e589b1e50",
+    "num_turns": 8,
+    "total_cost_usd": 0.5963189999999999,
+    "usage": {
+      "input_tokens": 29838,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 52608,
+      "output_tokens": 16833,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 29838,
+        "outputTokens": 16833,
+        "cacheReadInputTokens": 52608,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.5963189999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

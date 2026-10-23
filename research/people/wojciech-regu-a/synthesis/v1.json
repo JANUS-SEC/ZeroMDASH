@@ -1,0 +1,356 @@
+{
+  "person": "Wojciech Reguła",
+  "expertise": [
+    "macOS TCC 隐私保护机制绕过",
+    "macOS 沙箱逃逸",
+    "macOS/iOS XPC 进程间通信攻击面",
+    "macOS 红队方法（初始访问、凭据提取、环境变量注入）",
+    "iOS 应用安全与反篡改检测（IOSSecuritySuite）",
+    "Apple 平台漏洞负责任披露流程",
+    "Apple Silicon 迁移期新攻击面跟进（M1 GateKeeper）"
+  ],
+  "stages": [
+    {
+      "period": "2017–2018",
+      "stage": "通用应用层漏洞与负责任披露流程起点",
+      "capability_change": "以个人博客 wojciechregula.blog 作为公开输出渠道，题材覆盖 FreePlane XXE、DASAN 路由器命令注入、Cordova iOS keychain 泄漏等通用应用层漏洞，尚未聚焦 Apple 平台；初步实践先报告、等待、厂商失联后再公开披露的负责任披露流程，并记录时间线。Cordova keychain leak 一文首次把日常工作场景（移动应用审计）与公开研究关联，显示以工作场景作为研究选题来源的早期模式。",
+      "evidence_ids": [
+        "wrd-001",
+        "wrd-002",
+        "wrd-003",
+        "wr-tl-01",
+        "wr-tl-02",
+        "wr-pubworks-01"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2018–2019",
+      "stage": "向 macOS 隐私机制迁移与会议参与起步",
+      "capability_change": "题材由通用应用漏洞转向 macOS 系统级隐私泄漏（Quick Look 缓存暴露加密容器路径）；首次以参会兼演讲身份出席 OWASP AppSec EU 并与同事 Damian Rusinek 同台；权威媒体 9to5Mac 以 \"security researcher\" 与发现者署名引用其发现，并复述其 PoC 方法论，构成外部对研究者身份与工作可信度的反馈。",
+      "evidence_ids": [
+        "wr-tl-03",
+        "wr-ext-01",
+        "wr-pubworks-07",
+        "wrd-004",
+        "wrd-005"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2019–2021",
+      "stage": "XPC/TCC 主轴确立与体系化教学沉淀",
+      "capability_change": "以 Learn XPC exploitation 三部曲把单点漏洞沉淀为系统化教学，建立 class-dump-swift/Hopper 稳定逆向工具链；确立 TCC 绕过为可长期深耕的主轴，连续产出 CVE-2020-29621（coreaudiod 经 HAL 音频插件实现 TCC 全盘访问）、CVE-2021-3162（Docker for macOS 本地提权）等多个 CVE；引入以历史纸质书（Professional Cocoa Application Security）缺陷模式作为攻击面模板的方法，形成 阅读→类比→验证 的发现路径。",
+      "evidence_ids": [
+        "wrd-005",
+        "wrd-006",
+        "wrd-007",
+        "wrd-008",
+        "wr-pubworks-02",
+        "wr-tl-04",
+        "wr-tl-05"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022–2024",
+      "stage": "红队全链路与会议级议题整合",
+      "capability_change": "研究范围由单点绕过扩展到 macOS 红队全链路（AppleScript URL 初始访问、NoMAD AD 凭据提取、沙箱逃逸、环境变量注入）；把多个 TCC 绕过整合为 Black Hat 级别系统性议题（20+ ways to bypass）；建立被厂商驳回行为→同行 CVE/演讲反向验证→复盘并重新定位为可武器化变体的闭环（macOS Sandbox Escape via Terminal，Word 宏 + Mythic JXA 武器化）。",
+      "evidence_ids": [
+        "wrd-009",
+        "wrd-011",
+        "wr-pubworks-03",
+        "wr-pubworks-04",
+        "wr-tl-07",
+        "wr-tl-08",
+        "wr-comm-05"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2024–2026",
+      "stage": "平台级未公开机制逆向与攻防工具双轨",
+      "capability_change": "方法从已知机制绕过转向未公开平台机制逆向（strings/grep 提取 /usr/libexec/sandboxd 硬编码 allowlist、XProtect 实时更新规则 AppProtectionRules.plist，识别新 TCC 服务 kTCCServiceSystemPolicyAppDataDetailed）；工具建设形成攻击侧（NoMADCredentialsStealer）、防御侧（IOSSecuritySuite，含第三方贡献回流）、教学侧（SimpleXPCApp、商业课程）三轨并行，研究与开源工具互为输入。",
+      "evidence_ids": [
+        "wr-pubworks-05",
+        "wr-pubworks-06",
+        "wr-comm-04",
+        "wr-ext-02",
+        "wrd-010",
+        "wr-tl-09"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "社区提问与会议反馈驱动的系统化教学写作",
+      "starting_conditions": "Objective by the Sea v3 演讲后收到大量关于 XPC 利用的问题，作者判断将其整理为系列博客 \"is a good idea\"。",
+      "repeated_practice": "把演讲反馈与社区提问整理为多段式系列 writeup（Learn XPC exploitation 三部曲：Broken cryptography、Say no to the PID!、Code injections），并以 SimpleXPCApp 示例仓库与 iOS security 课程延续该模式。",
+      "feedback": "社区提问成为系列写作的直接动因；会议录用与博客读者回流构成持续反馈渠道。",
+      "intermediate_capability": "把单点漏洞逆向沉淀为可复用的教学性体系，建立 class-dump-swift/Hopper 稳定逆向工具链。",
+      "observed_outcomes": [
+        "Learn XPC exploitation 三部曲（2020-03 至 2020-06）",
+        "SimpleXPCApp 示例仓库（GitHub securing）",
+        "iOS security 商业课程（courses.securing.pl）"
+      ],
+      "evidence_ids": [
+        "wr-pubworks-02",
+        "wrd-006",
+        "wr-tl-04",
+        "wr-comm-01",
+        "wr-ext-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "系列写作与课程产出也可能出于教学产品化的商业动机（courses.securing.pl 为付费课程），而非纯粹的社区反馈驱动；反馈驱动与商业驱动可能并存。"
+    },
+    {
+      "name": "厂商驳回—同行验证—复盘再利用的反馈修正闭环",
+      "starting_conditions": "2020 年发现沙箱化 macOS 应用可启动不继承沙箱 profile 的进程并以环境变量注入，报告 Apple 后被告知 \"expected behavior\"。",
+      "repeated_practice": "持续跟踪同类行为的公开披露，在同行以 CVE 与会议演讲公开同类行为后，复盘并写出自己的变体。",
+      "feedback": "Apple 初次驳回为 expected behavior；其后 Jonathan Bar Or 的 CVE-2022-26706 与 Ron Waisberg 在 Objective by the Sea v4 的演讲 \"Environmental Disaster: A LaunchServices Tale\" 反向验证其先前判断。",
+      "intermediate_capability": "把曾被判定为非漏洞的行为重新技术定位为可武器化逃逸，并明确引用同行 CVE 与演讲作为再发现的触发条件。",
+      "observed_outcomes": [
+        "macOS Sandbox Escape vulnerability via Terminal（2022-11-18，Word 宏 + Mythic JXA 武器化）"
+      ],
+      "evidence_ids": [
+        "wr-comm-05",
+        "wr-pubworks-03",
+        "wr-comm-03"
+      ],
+      "validation_tests": [
+        "distinctive",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "复盘再发表也可能仅是借同行公开话题延续自身写作节奏，而非独立的反馈修正方法论；现有材料仅记录一次完整闭环，反复性证据不足。"
+    },
+    {
+      "name": "历史资料缺陷模式作攻击面模板",
+      "starting_conditions": "阅读 2010 年出版的 Professional Cocoa Application Security 一书，第 10 章给出缺少 anchor apple generic 要求的缺陷 Info.plist 例子。",
+      "repeated_practice": "把书中的缺陷模式作为可复用原语，立即检查本机应用以验证该模式是否在当代产品中复现。",
+      "feedback": "本人称该书 \"a really good book about macOS #appsec\"，并自述此前曾 deeply researched XPC 与自建 secure XPC service 示例；书中模式映射到 Docker for macOS 即触发本地提权发现。",
+      "intermediate_capability": "形成 阅读→类比→验证 的可复用发现路径，把历史资料而非仅新 CVE 跟踪作为攻击面来源。",
+      "observed_outcomes": [
+        "Docker for macOS 本地提权 CVE-2021-3162（2021-01-21 writeup）"
+      ],
+      "evidence_ids": [
+        "wrd-007"
+      ],
+      "validation_tests": [
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "该机制仅由单一证据支撑，单次成功难以证明是稳定可复用方法；可能为偶然发现，需后续同类历史资料→当代产品映射的发现佐证其可重复性。"
+    },
+    {
+      "name": "攻击/防御/教学三轨工具并行输出",
+      "starting_conditions": "个人 GitHub 账号 r3ggi 与组织 securing 并存，pinned 仓库覆盖三类工具。",
+      "repeated_practice": "同时维护攻击侧（NoMADCredentialsStealer，对应 macOS red teaming 文章）、防御侧（IOSSecuritySuite，对齐 OWASP MASVS v8）、教学侧（SimpleXPCApp，对应 XPC 教程系列与课程）仓库，使工具与博客研究互为输入。",
+      "feedback": "IOSSecuritySuite README 的 Special Thanks 段列具名第三方贡献者 20 人并标注贡献类型（kubajakowski 指出 canOpenURL 方法缺陷、TannerJin 贡献 MSHook/RuntimeHook/SymbolHook/Watchpoint 检测模块、NikoXu 贡献文件完整性模块、mkj-is 提交性能改进 PR），README 明示 \"Pull requests are more than welcome!\"。",
+      "intermediate_capability": "工具建设形成研究—建设—公开—接收反馈—改进循环；攻击侧与防御侧构成攻防闭环。",
+      "observed_outcomes": [
+        "IOSSecuritySuite（约 2.7k stars、347 forks、266 commits）",
+        "SimpleXPCApp（约 108 stars）",
+        "NoMADCredentialsStealer（对应 2022-03 macOS red teaming 系列）",
+        "iOS Application Security Engineer 认证与商业课程"
+      ],
+      "evidence_ids": [
+        "wr-pubworks-06",
+        "wr-comm-04",
+        "wr-ext-02",
+        "wrd-010",
+        "wr-tl-09",
+        "wr-comm-07"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "高 star 数与第三方贡献回流主要反映开源项目的维护质量与采用规模，不直接等同于个人研究能力的增长；贡献者回流体现项目生命力而非研究者本人方法论迭代。"
+    }
+  ],
+  "tensions": [
+    "person_json 将 selected_conference_evidence 记为 \"Black Hat US/Asia\"，而一手博客文章（wr-pubworks-04，2024-10-20）自述相关 TCC bypass 成果在 Black Hat Europe 2022 披露；二者不一致，本报告按一手资料采 Black Hat Europe 2022，Black Hat US/Asia 列为未核实。",
+    "WebSearch 返回的训练数据型摘要将其署名标为 @r3dWolFone，并指向 thesecmaster.com、secretsof.sh 等域名，与一手来源（wojciechregula.blog、GitHub r3ggi、X @_r3ggi）矛盾；冲突署名弃用，仅采一手来源。",
+    "WebSearch 摘要称其为 SecuRing 的 founder/lead researcher，但 SecuRing 官方 About us 页面显示管理合伙人为 Wojciech Dworakowski 与 Adam Zachara，本人职衔为 Principal IT Security Consultant / Head of Mobile Security；本报告采信公司官方页面。",
+    "厂商反馈不一致：CVE-2020-29621 经 Apple 裁定符合 Apple Security Bounty，CVE-2021-30658 经裁定不符合（2021-08-19），显示厂商判定标准对同类 TCC/GateKeeper 研究存在差异。",
+    "自述 \"All of the research presented here is done in my free time\"（业余研究）与其 Principal Security Consultant / Head of Mobile Security 职衔并存，研究产出与本职工作的边界未在一手材料中明确。"
+  ],
+  "transferable_practices": [
+    "把演讲/会议反馈与社区提问转化为多段式系列 writeup，使单点发现沉淀为可教学体系（Learn XPC exploitation 三部曲模式）。",
+    "把被厂商驳回的行为持续跟踪同行公开披露，在同类 CVE/演讲出现后复盘并重新定位为可利用变体。",
+    "以历史书/旧资料中的缺陷模式作为攻击面模板，做 阅读→类比→验证 的横向映射（Professional Cocoa Application Security → Docker CVE-2021-3162）。",
+    "工具建设沿攻击/防御/教学三轨并行，使研究、开源工具与课程互为输入与反馈来源。",
+    "记录完整披露时间线（报告→确认→修复→赏金裁定），把负责任披露流程本身作为可复用实践。",
+    "致谢同行 gist/CVE 并把发现整合进会议演讲，以同行工作作为再发现的触发条件（TCC bypass via launch services 致谢 Scott Knight gist）。"
+  ],
+  "non_transferable_conditions": [
+    "SecuRing（自 2003 年起开展安全测试的波兰公司）的顾问职位与 Head of Mobile Security 角色，提供移动应用审计的工作场景，使其能从客户审计反推研究选题（Cordova keychain leak 来自审计工作）。",
+    "与同事 Damian Rusinek 的长期协作关系（AppSec EU 同台、共同 Apple 平台研究），属个人网络特有条件。",
+    "主流安全会议（Black Hat、DEF CON、OBTS、AppSec、CONFidence、BSides）的反复录用属平台资源，非纯个人能力可直接复制。",
+    "Apple 平台 Bug Bounty 与 Bugcrowd MVP 等级构成外部验证渠道，依赖厂商反馈机制可用，非个人可复制的条件。",
+    "波兰克拉科夫本地会议（CONFidence）与本地安全社区的地缘条件。"
+  ],
+  "open_questions": [
+    "DEF CON 31、Objective by the Sea、TyphoonCon 等会议的独立议程页/speaker bio 未能抓取（OBTS 主页返回空体、Black Hat 返回 HTTP 403）；演讲年份与议题细节未能一手核验，wr-comm-02、wr-comm-06 标记未核验已排除，DEF CON 31/OBTS 事实改由 wrd-011 博客归档条目间接支撑。",
+    "iOS Security Suite 项目创建年份与版本时间表未知（wrd-010、wr-tl-09 date 为 YYYY/unknown），无法精确纳入时间线。",
+    "入职 SecuRing 的年份、教育背景、转向 Apple 平台安全的触发事件或导师均无公开材料；2017-2018 年初博客内容（archive page/5 返回 404）存在资料缺口。",
+    "缺乏长访谈、播客、AMA 或演讲问答实录，入门路径、失败经历、学习过程未由第三方交叉验证。",
+    "Apple Security Bounty 累计金额、CVE 总数与赏金裁定分布无汇总性一手来源；仅两份 writeup（CVE-2020-29621、CVE-2021-30658）内的时间线为局部证据。",
+    "Pull Shark 徽章仅证明存在被合并 PR，目标仓库与 PR 内容未定位，其向外贡献的技术领域与频率未知。",
+    "2018→2019 由通用漏洞转向 macOS 专注方向的明确动机陈述未在一手正文中找到，该转折为基于主题分布的 inferred。",
+    "未取得 Apple 官方致谢列表或第三方研究者引用列表的一手页面，缺乏对其 TCC/沙箱研究被引用情况的系统核验。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/wojciech-regu-a-synthesis-v1-20260927-212653-950",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790516010945174000-wojciech-regu-a-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "712c0ecb-9f9c-456d-99b3-a532738a3a84",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_vl7ssvwonxpovp6h6grmb9hr",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/wojciech-regu-a-synthesis-v1-20260927-212653-950/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T13:33:30.993085+00:00"
+      },
+      {
+        "tool_use_id": "call_n1nn893r41tfr4lr7hdu9ar7",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/wojciech-regu-a-synthesis-v1-20260927-212653-950/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T13:33:30.993118+00:00"
+      },
+      {
+        "tool_use_id": "call_q5z5qjhf0yu7nh5m4lgfyrgl",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/wojciech-regu-a-synthesis-v1-20260927-212653-950/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "c855f54e05d73709ba5b83a8a8542372f5e843777725a5f6b3a9c17374bccac6",
+        "accessed_at": "2026-09-27T13:33:30.993131+00:00"
+      },
+      {
+        "tool_use_id": "call_r1rjpcpij7ldkcty1vsbmcns",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/wojciech-regu-a-synthesis-v1-20260927-212653-950/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "d7f4039a51a838284d7c1cc33c6ae79f9c320bf542c5211ffaf81785d65026b0",
+        "accessed_at": "2026-09-27T13:33:30.993140+00:00"
+      },
+      {
+        "tool_use_id": "call_2hi3akvbdhkejx3ifw4epfmz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/wojciech-regu-a-synthesis-v1-20260927-212653-950/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "a4a08ff343de0c2c5c553edd9ca94826da05e3c3e228b4a8f4574f0c1f5c19fe",
+        "accessed_at": "2026-09-27T13:33:30.993214+00:00"
+      },
+      {
+        "tool_use_id": "call_3yoh3if0gpl5rvfv3tuhfad2",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/wojciech-regu-a-synthesis-v1-20260927-212653-950/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-27T13:33:30.993218+00:00"
+      },
+      {
+        "tool_use_id": "call_eas64yp05hxx7sw5q6v4ko1y",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/wojciech-regu-a-synthesis-v1-20260927-212653-950/inputs/evidence_json.json",
+          "offset": 882,
+          "limit": 200
+        },
+        "success": true,
+        "content_sha256": "63569403c1e3129d5def100caa2d9d8da2e41579663df2b819111dc79ccf53da",
+        "accessed_at": "2026-09-27T13:33:30.993245+00:00"
+      },
+      {
+        "tool_use_id": "call_79drs1i5a0ylf5w8pzh8928q",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/wojciech-regu-a-synthesis-v1-20260927-212653-950/checkpoint.md",
+          "content": "# 检查点 — Wojciech Reguła 综合分析\n\n## 任务状态\n- 节点：综合分析师（首次综合，revision_context 为空）\n- 已读：task.md、output.schema.json、person_json.json、evidence_json.json（全部六维 + targeted 空）、revision_context.json（空）\n\n## 证据有效性判定\n- 可用（verified_in_run=true）：wr-pubworks-01..07、wr-deep-about-freetime/conferences/github-tools、wr-comm-01/03/04/05/07、wr-ext-01..05（04/05 为抓取失败页，作缺口旁证）、wrd-001..011、wr-tl-01..10\n- 排除（verified_in_run=false，不作支撑）：wr-comm-02、wr-comm-06\n  - DEF CON 31/OBTS 演讲事实改用 wrd-011（博客归档注明，documented, verified）支撑\n  - TyphoonCon/iCloud 演讲事实无替代核验来源，列入 open_questions\n\n## 阶段划分（5 段，均含 verified 证据）\n1. 2017–2018 通用漏洞与负责任披露流程起点\n2. 2018–2019 向 macOS 隐私机制迁移与会议参与\n3. 2019–2021 XPC/TCC 主轴确立与体系化教学\n4. 2022–2024 红队全链路与会议级议题整合\n5. 2024–2026 平台级未公开机制逆向与攻防工具双轨\n\n## 主机制（4 项，均满足 ≥2/3 阈值）\n1. 社区提问与会议反馈驱动的系统化教学写作 [repeated, generative] high\n2. 厂商驳回—同行验证—复盘再利用的反馈修正 [distinctive, generative] medium\n3. 历史资料缺陷模式作攻击面模板 [generative, distinctive] medium\n4. 攻击/防御/教学三轨工具并行输出 [repeated, distinctive] high\n\n## 关键矛盾/缺口（写入 tensions 与 open_questions）\n- person_json 记 Black Hat US/Asia，一手博客为 Black Hat Europe 2022（wr-pubworks-04 contradictions）\n- WebSearch 训练数据型署名（@r3dWolFone、Securitum）与一手来源矛盾\n- WebSearch 称 founder，公司官方页管理合伙人为 Dworakowski/Zachara，本人为 Principal Consultant\n- CVE-2020-29621 裁定符合赏金，CVE-2021-30658 裁定不符合（厂商反馈不一致）\n- DEF CON 31/OBTS/TyphoonCon 会议独立页面未抓取\n- iOS Security Suite 创建年份未知（wrd-010/wr-tl-09 date=YYYY/unknown）\n- 入职 SecuRing 时间、教育背景、转向 Apple 的触发事件/导师均未知\n- 无长访谈/播客/AMA，入门路径与失败经历未交叉验证\n\n## 下一步\n- 对照 output.schema.json 逐字段校验后写入 output.json\n- 不填写 _run / verification\n"
+        },
+        "success": true,
+        "content_sha256": "cea3159cb0f94f58d246ed189344252073474dbff9bbedec61d672b4a8c5c55e",
+        "accessed_at": "2026-09-27T13:33:30.993668+00:00"
+      },
+      {
+        "tool_use_id": "call_uxpgfni954up1j5aevq3r6me",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/wojciech-regu-a-synthesis-v1-20260927-212653-950/output.json",
+          "content": "{\n  \"person\": \"Wojciech Reguła\",\n  \"expertise\": [\n    \"macOS TCC 隐私保护机制绕过\",\n    \"macOS 沙箱逃逸\",\n    \"macOS/iOS XPC 进程间通信攻击面\",\n    \"macOS 红队方法（初始访问、凭据提取、环境变量注入）\",\n    \"iOS 应用安全与反篡改检测（IOSSecuritySuite）\",\n    \"Apple 平台漏洞负责任披露流程\",\n    \"Apple Silicon 迁移期新攻击面跟进（M1 GateKeeper）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2017–2018\",\n      \"stage\": \"通用应用层漏洞与负责任披露流程起点\",\n      \"capability_change\": \"以个人博客 wojciechregula.blog 作为公开输出渠道，题材覆盖 FreePlane XXE、DASAN 路由器命令注入、Cordova iOS keychain 泄漏等通用应用层漏洞，尚未聚焦 Apple 平台；初步实践先报告、等待、厂商失联后再公开披露的负责任披露流程，并记录时间线。Cordova keychain leak 一文首次把日常工作场景（移动应用审计）与公开研究关联，显示以工作场景作为研究选题来源的早期模式。\",\n      \"evidence_ids\": [\n        \"wrd-001\",\n        \"wrd-002\",\n        \"wrd-003\",\n        \"wr-tl-01\",\n        \"wr-tl-02\",\n        \"wr-pubworks-01\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2018–2019\",\n      \"stage\": \"向 macOS 隐私机制迁移与会议参与起步\",\n      \"capability_change\": \"题材由通用应用漏洞转向 macOS 系统级隐私泄漏（Quick Look 缓存暴露加密容器路径）；首次以参会兼演讲身份出席 OWASP AppSec EU 并与同事 Damian Rusinek 同台；权威媒体 9to5Mac 以 \\\"security researcher\\\" 与发现者署名引用其发现，并复述其 PoC 方法论，构成外部对研究者身份与工作可信度的反馈。\",\n      \"evidence_ids\": [\n        \"wr-tl-03\",\n        \"wr-ext-01\",\n        \"wr-pubworks-07\",\n        \"wrd-004\",\n        \"wrd-005\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2019–2021\",\n      \"stage\": \"XPC/TCC 主轴确立与体系化教学沉淀\",\n      \"capability_change\": \"以 Learn XPC exploitation 三部曲把单点漏洞沉淀为系统化教学，建立 class-dump-swift/Hopper 稳定逆向工具链；确立 TCC 绕过为可长期深耕的主轴，连续产出 CVE-2020-29621（coreaudiod 经 HAL 音频插件实现 TCC 全盘访问）、CVE-2021-3162（Docker for macOS 本地提权）等多个 CVE；引入以历史纸质书（Professional Cocoa Application Security）缺陷模式作为攻击面模板的方法，形成 阅读→类比→验证 的发现路径。\",\n      \"evidence_ids\": [\n        \"wrd-005\",\n        \"wrd-006\",\n        \"wrd-007\",\n        \"wrd-008\",\n        \"wr-pubworks-02\",\n        \"wr-tl-04\",\n        \"wr-tl-05\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022–2024\",\n      \"stage\": \"红队全链路与会议级议题整合\",\n      \"capability_change\": \"研究范围由单点绕过扩展到 macOS 红队全链路（AppleScript URL 初始访问、NoMAD AD 凭据提取、沙箱逃逸、环境变量注入）；把多个 TCC 绕过整合为 Black Hat 级别系统性议题（20+ ways to bypass）；建立被厂商驳回行为→同行 CVE/演讲反向验证→复盘并重新定位为可武器化变体的闭环（macOS Sandbox Escape via Terminal，Word 宏 + Mythic JXA 武器化）。\",\n      \"evidence_ids\": [\n        \"wrd-009\",\n        \"wrd-011\",\n        \"wr-pubworks-03\",\n        \"wr-pubworks-04\",\n        \"wr-tl-07\",\n        \"wr-tl-08\",\n        \"wr-comm-05\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2024–2026\",\n      \"stage\": \"平台级未公开机制逆向与攻防工具双轨\",\n      \"capability_change\": \"方法从已知机制绕过转向未公开平台机制逆向（strings/grep 提取 /usr/libexec/sandboxd 硬编码 allowlist、XProtect 实时更新规则 AppProtectionRules.plist，识别新 TCC 服务 kTCCServiceSystemPolicyAppDataDetailed）；工具建设形成攻击侧（NoMADCredentialsStealer）、防御侧（IOSSecuritySuite，含第三方贡献回流）、教学侧（SimpleXPCApp、商业课程）三轨并行，研究与开源工具互为输入。\",\n      \"evidence_ids\": [\n        \"wr-pubworks-05\",\n        \"wr-pubworks-06\",\n        \"wr-comm-04\",\n        \"wr-ext-02\",\n        \"wrd-010\",\n        \"wr-tl-09\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"社区提问与会议反馈驱动的系统化教学写作\",\n      \"starting_conditions\": \"Objective by the Sea v3 演讲后收到大量关于 XPC 利用的问题，作者判断将其整理为系列博客 \\\"is a good idea\\\"。\",\n      \"repeated_practice\": \"把演讲反馈与社区提问整理为多段式系列 writeup（Learn XPC exploitation 三部曲：Broken cryptography、Say no to the PID!、Code injections），并以 SimpleXPCApp 示例仓库与 iOS security 课程延续该模式。\",\n      \"feedback\": \"社区提问成为系列写作的直接动因；会议录用与博客读者回流构成持续反馈渠道。\",\n      \"intermediate_capability\": \"把单点漏洞逆向沉淀为可复用的教学性体系，建立 class-dump-swift/Hopper 稳定逆向工具链。\",\n      \"observed_outcomes\": [\n        \"Learn XPC exploitation 三部曲（2020-03 至 2020-06）\",\n        \"SimpleXPCApp 示例仓库（GitHub securing）\",\n        \"iOS security 商业课程（courses.securing.pl）\"\n      ],\n      \"evidence_ids\": [\n        \"wr-pubworks-02\",\n        \"wrd-006\",\n        \"wr-tl-04\",\n        \"wr-comm-01\",\n        \"wr-ext-03\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"系列写作与课程产出也可能出于教学产品化的商业动机（courses.securing.pl 为付费课程），而非纯粹的社区反馈驱动；反馈驱动与商业驱动可能并存。\"\n    },\n    {\n      \"name\": \"厂商驳回—同行验证—复盘再利用的反馈修正闭环\",\n      \"starting_conditions\": \"2020 年发现沙箱化 macOS 应用可启动不继承沙箱 profile 的进程并以环境变量注入，报告 Apple 后被告知 \\\"expected behavior\\\"。\",\n      \"repeated_practice\": \"持续跟踪同类行为的公开披露，在同行以 CVE 与会议演讲公开同类行为后，复盘并写出自己的变体。\",\n      \"feedback\": \"Apple 初次驳回为 expected behavior；其后 Jonathan Bar Or 的 CVE-2022-26706 与 Ron Waisberg 在 Objective by the Sea v4 的演讲 \\\"Environmental Disaster: A LaunchServices Tale\\\" 反向验证其先前判断。\",\n      \"intermediate_capability\": \"把曾被判定为非漏洞的行为重新技术定位为可武器化逃逸，并明确引用同行 CVE 与演讲作为再发现的触发条件。\",\n      \"observed_outcomes\": [\n        \"macOS Sandbox Escape vulnerability via Terminal（2022-11-18，Word 宏 + Mythic JXA 武器化）\"\n      ],\n      \"evidence_ids\": [\n        \"wr-comm-05\",\n        \"wr-pubworks-03\",\n        \"wr-comm-03\"\n      ],\n      \"validation_tests\": [\n        \"distinctive\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"复盘再发表也可能仅是借同行公开话题延续自身写作节奏，而非独立的反馈修正方法论；现有材料仅记录一次完整闭环，反复性证据不足。\"\n    },\n    {\n      \"name\": \"历史资料缺陷模式作攻击面模板\",\n      \"starting_conditions\": \"阅读 2010 年出版的 Professional Cocoa Application Security 一书，第 10 章给出缺少 anchor apple generic 要求的缺陷 Info.plist 例子。\",\n      \"repeated_practice\": \"把书中的缺陷模式作为可复用原语，立即检查本机应用以验证该模式是否在当代产品中复现。\",\n      \"feedback\": \"本人称该书 \\\"a really good book about macOS #appsec\\\"，并自述此前曾 deeply researched XPC 与自建 secure XPC service 示例；书中模式映射到 Docker for macOS 即触发本地提权发现。\",\n      \"intermediate_capability\": \"形成 阅读→类比→验证 的可复用发现路径，把历史资料而非仅新 CVE 跟踪作为攻击面来源。\",\n      \"observed_outcomes\": [\n        \"Docker for macOS 本地提权 CVE-2021-3162（2021-01-21 writeup）\"\n      ],\n      \"evidence_ids\": [\n        \"wrd-007\"\n      ],\n      \"validation_tests\": [\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"该机制仅由单一证据支撑，单次成功难以证明是稳定可复用方法；可能为偶然发现，需后续同类历史资料→当代产品映射的发现佐证其可重复性。\"\n    },\n    {\n      \"name\": \"攻击/防御/教学三轨工具并行输出\",\n      \"starting_conditions\": \"个人 GitHub 账号 r3ggi 与组织 securing 并存，pinned 仓库覆盖三类工具。\",\n      \"repeated_practice\": \"同时维护攻击侧（NoMADCredentialsStealer，对应 macOS red teaming 文章）、防御侧（IOSSecuritySuite，对齐 OWASP MASVS v8）、教学侧（SimpleXPCApp，对应 XPC 教程系列与课程）仓库，使工具与博客研究互为输入。\",\n      \"feedback\": \"IOSSecuritySuite README 的 Special Thanks 段列具名第三方贡献者 20 人并标注贡献类型（kubajakowski 指出 canOpenURL 方法缺陷、TannerJin 贡献 MSHook/RuntimeHook/SymbolHook/Watchpoint 检测模块、NikoXu 贡献文件完整性模块、mkj-is 提交性能改进 PR），README 明示 \\\"Pull requests are more than welcome!\\\"。\",\n      \"intermediate_capability\": \"工具建设形成研究—建设—公开—接收反馈—改进循环；攻击侧与防御侧构成攻防闭环。\",\n      \"observed_outcomes\": [\n        \"IOSSecuritySuite（约 2.7k stars、347 forks、266 commits）\",\n        \"SimpleXPCApp（约 108 stars）\",\n        \"NoMADCredentialsStealer（对应 2022-03 macOS red teaming 系列）\",\n        \"iOS Application Security Engineer 认证与商业课程\"\n      ],\n      \"evidence_ids\": [\n        \"wr-pubworks-06\",\n        \"wr-comm-04\",\n        \"wr-ext-02\",\n        \"wrd-010\",\n        \"wr-tl-09\",\n        \"wr-comm-07\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"高 star 数与第三方贡献回流主要反映开源项目的维护质量与采用规模，不直接等同于个人研究能力的增长；贡献者回流体现项目生命力而非研究者本人方法论迭代。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 将 selected_conference_evidence 记为 \\\"Black Hat US/Asia\\\"，而一手博客文章（wr-pubworks-04，2024-10-20）自述相关 TCC bypass 成果在 Black Hat Europe 2022 披露；二者不一致，本报告按一手资料采 Black Hat Europe 2022，Black Hat US/Asia 列为未核实。\",\n    \"WebSearch 返回的训练数据型摘要将其署名标为 @r3dWolFone，并指向 thesecmaster.com、secretsof.sh 等域名，与一手来源（wojciechregula.blog、GitHub r3ggi、X @_r3ggi）矛盾；冲突署名弃用，仅采一手来源。\",\n    \"WebSearch 摘要称其为 SecuRing 的 founder/lead researcher，但 SecuRing 官方 About us 页面显示管理合伙人为 Wojciech Dworakowski 与 Adam Zachara，本人职衔为 Principal IT Security Consultant / Head of Mobile Security；本报告采信公司官方页面。\",\n    \"厂商反馈不一致：CVE-2020-29621 经 Apple 裁定符合 Apple Security Bounty，CVE-2021-30658 经裁定不符合（2021-08-19），显示厂商判定标准对同类 TCC/GateKeeper 研究存在差异。\",\n    \"自述 \\\"All of the research presented here is done in my free time\\\"（业余研究）与其 Principal Security Consultant / Head of Mobile Security 职衔并存，研究产出与本职工作的边界未在一手材料中明确。\"\n  ],\n  \"transferable_practices\": [\n    \"把演讲/会议反馈与社区提问转化为多段式系列 writeup，使单点发现沉淀为可教学体系（Learn XPC exploitation 三部曲模式）。\",\n    \"把被厂商驳回的行为持续跟踪同行公开披露，在同类 CVE/演讲出现后复盘并重新定位为可利用变体。\",\n    \"以历史书/旧资料中的缺陷模式作为攻击面模板，做 阅读→类比→验证 的横向映射（Professional Cocoa Application Security → Docker CVE-2021-3162）。\",\n    \"工具建设沿攻击/防御/教学三轨并行，使研究、开源工具与课程互为输入与反馈来源。\",\n    \"记录完整披露时间线（报告→确认→修复→赏金裁定），把负责任披露流程本身作为可复用实践。\",\n    \"致谢同行 gist/CVE 并把发现整合进会议演讲，以同行工作作为再发现的触发条件（TCC bypass via launch services 致谢 Scott Knight gist）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"SecuRing（自 2003 年起开展安全测试的波兰公司）的顾问职位与 Head of Mobile Security 角色，提供移动应用审计的工作场景，使其能从客户审计反推研究选题（Cordova keychain leak 来自审计工作）。\",\n    \"与同事 Damian Rusinek 的长期协作关系（AppSec EU 同台、共同 Apple 平台研究），属个人网络特有条件。\",\n    \"主流安全会议（Black Hat、DEF CON、OBTS、AppSec、CONFidence、BSides）的反复录用属平台资源，非纯个人能力可直接复制。\",\n    \"Apple 平台 Bug Bounty 与 Bugcrowd MVP 等级构成外部验证渠道，依赖厂商反馈机制可用，非个人可复制的条件。\",\n    \"波兰克拉科夫本地会议（CONFidence）与本地安全社区的地缘条件。\"\n  ],\n  \"open_questions\": [\n    \"DEF CON 31、Objective by the Sea、TyphoonCon 等会议的独立议程页/speaker bio 未能抓取（OBTS 主页返回空体、Black Hat 返回 HTTP 403）；演讲年份与议题细节未能一手核验，wr-comm-02、wr-comm-06 标记未核验已排除，DEF CON 31/OBTS 事实改由 wrd-011 博客归档条目间接支撑。\",\n    \"iOS Security Suite 项目创建年份与版本时间表未知（wrd-010、wr-tl-09 date 为 YYYY/unknown），无法精确纳入时间线。\",\n    \"入职 SecuRing 的年份、教育背景、转向 Apple 平台安全的触发事件或导师均无公开材料；2017-2018 年初博客内容（archive page/5 返回 404）存在资料缺口。\",\n    \"缺乏长访谈、播客、AMA 或演讲问答实录，入门路径、失败经历、学习过程未由第三方交叉验证。\",\n    \"Apple Security Bounty 累计金额、CVE 总数与赏金裁定分布无汇总性一手来源；仅两份 writeup（CVE-2020-29621、CVE-2021-30658）内的时间线为局部证据。\",\n    \"Pull Shark 徽章仅证明存在被合并 PR，目标仓库与 PR 内容未定位，其向外贡献的技术领域与频率未知。\",\n    \"2018→2019 由通用漏洞转向 macOS 专注方向的明确动机陈述未在一手正文中找到，该转折为基于主题分布的 inferred。\",\n    \"未取得 Apple 官方致谢列表或第三方研究者引用列表的一手页面，缺乏对其 TCC/沙箱研究被引用情况的系统核验。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "4bbe7c6e1d16548da6888b4b71a826e855dbb820e23d3c8beeaa0a8f38d75baa",
+        "accessed_at": "2026-09-27T13:33:30.993832+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790516010993845000-wojciech-regu-a-synthesis-v1.json",
+    "label": "Wojciech Reguła:synthesis:v1",
+    "elapsed_seconds": 397.04,
+    "prompt_sha256": "a637c006808ffbfda5fa7ee8e8498f4aaf989d2f1c07f8720235cac44727d71f",
+    "num_turns": 10,
+    "total_cost_usd": 0.759582,
+    "usage": {
+      "input_tokens": 40904,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 133824,
+      "output_tokens": 19526,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 40904,
+        "outputTokens": 19526,
+        "cacheReadInputTokens": 133824,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.759582,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

@@ -1,0 +1,434 @@
+{
+  "person": "Bill Demirkapi",
+  "expertise": [
+    "Windows 用户态与内核态漏洞逆向及利用（.NET 逆向、内核驱动 IOCTL 分发表测绘、异常导向执行 Exception Oriented Programming）",
+    "OEM 预装软件（bloatware）攻击面研究：Dell SupportAssist、HP Support Assistant、Trend Micro RootkitBuster",
+    "协调披露与厂商补丁独立复审",
+    "数据驱动的规模化漏洞发现：云 IP 池枚举、被动 DNS、VirusTotal Retrohunt、AWS Lambda 并行扫描、密钥泄露验证",
+    "Windows 内核工具与 PoC 建设（spectre、PeaceMaker、ForkPlayground、ExceptionOrientedProgramming）"
+  ],
+  "stages": [
+    {
+      "period": "2015–2018",
+      "stage": "CyberPatriot 竞赛参与期：从使用工具到审视工具",
+      "capability_change": "通过连续参加 CyberPatriot VIII 至 X（2015–2018 赛季）进行结构化重复练习，获得 Windows 防御与逆向基础。其时自评逆向能力有限。后期清理硬盘时发现旧竞赛镜像，以现状能力复盘评分引擎 CCSClient.exe，完成由参赛者到对竞赛基础设施本身做安全分析的视角转变。",
+      "evidence_ids": [
+        "bd-works-02-cyberpatriot",
+        "bill-timeline-cyberpatriot-2015-2018",
+        "bill-community-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2019",
+      "stage": "高中生末期：建立公开披露与失败转向的实践",
+      "capability_change": "在大学申请期内发布 Hacking College Admissions 与 Dell SupportAssist 远程代码执行研究，并在赛后复盘 CyberPatriot 评分引擎。建立逐日协调披露时间线，记录由 open redirect 未果到 DNS 中间人攻击的失败—转向路径，形成可重复的披露博弈与解题调整实践。",
+      "evidence_ids": [
+        "bd-works-01-dell-rce",
+        "bd-works-02-cyberpatriot",
+        "bill-timeline-college-admissions-2019",
+        "bill-timeline-dell-rce-disclosure-2018-2019",
+        "bill-community-01",
+        "bill-decisions-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2020",
+      "stage": "预装软件攻击面跨厂商扩展与内核驱动进入",
+      "capability_change": "将 OEM 预装软件方法论由 Dell 迁移到 HP，并在 HP 声称修复后独立复测发现补丁不完整且引入新漏洞，把补丁审计纳入反馈回路。同期由用户态 .NET 逆向转向 Trend Micro RootkitBuster 内核驱动 tmcomm.sys 的 IOCTL 分发表测绘，技术栈扩展到内核利用原语组合，并出现 named mentor Alex Ionescu 的方向指引。",
+      "evidence_ids": [
+        "bd-works-03-hp-bloatware",
+        "bill-community-03",
+        "bill-community-04",
+        "bill-timeline-hp-psirt-2019-2020",
+        "bill-timeline-trend-micro-mentor-2020",
+        "bill-decisions-02",
+        "bill-decisions-03",
+        "demirkapi-ext-002"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2021–2023",
+      "stage": "由单点目标逆向转向漏洞类驱动的规模化发现，并完成职业节点",
+      "capability_change": "受 Matt Bryant 2015 年博客触发，自 2021 年起由目标导向漏洞挖掘转向漏洞类驱动的大规模发现，本地扫描 impractical 反馈促使其转向 AWS Lambda serverless 并行扫描。同期发布 Exception Oriented Programming Part 1 并配套 GitHub PoC 仓库，公开 writeup 直接对应 Microsoft 录用（Part 2 自述），形成公开发表—行业可见度—录用的反馈回路。",
+      "evidence_ids": [
+        "bd-works-04-cve-2021-40444",
+        "bill-timeline-eop-part1-2022",
+        "bill-timeline-microsoft-hire-2023",
+        "bill-timeline-bigdata-2021-2024",
+        "bill-timeline-github-d4stiny",
+        "bill-decisions-04",
+        "bill-decisions-05"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2024",
+      "stage": "规模化研究产出与方法论由执行层迁移到设计批判层",
+      "capability_change": "发布 Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale，跨约三年累计扫描超 500 万文件、验证 15000 余密钥。由具体漏洞发现提炼到平台设计激励机制的方法论论点（以 AWS 与 GCP 默认配置对比支撑），并扩展协调披露对象至州政府官员与多厂商。研究独立于雇主进行，并要求被引用为 Independent Security Researcher。",
+      "evidence_ids": [
+        "bd-works-05-bigdata-cloud",
+        "bill-community-06",
+        "bill-timeline-bigdata-2021-2024",
+        "bill-decisions-06",
+        "demirkapi-ext-004"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "OEM 预装软件攻击面的跨厂商重复练习与方法迁移",
+      "starting_conditions": "起点为一次个人消费场景：2018 年购入 Dell G3 15 后对 Dell 经网页 Detect PC 向本地 8884 端口发起请求的能力产生怀疑，进而安装 SupportAssist 逆向。",
+      "repeated_practice": "将同一套预装软件攻击面方法论由 Dell（2019）迁移到 HP（2020），工具栈从 .NET 逆向扩展到 de4dot 解混淆、WCF 命名管道服务枚举、URL 协议处理程序与 DLL 劫持，并把同一攻击面选择表述为长期判断。",
+      "feedback": "厂商补丁结果作为下一轮研究输入：Dell 单漏洞约六个月才修补，HP 首轮补丁声称修复但仅 4/10 完全修补、3 个 LPE 未修，且补丁引入新漏洞（硬编码临时目录改为客户端输入后服务转而信任攻击者可控路径）。",
+      "intermediate_capability": "形成对预装软件这一稳定攻击面的系统性测绘与跨厂商复用能力，能基于前一厂商的补丁失败经验设计后续验证用例。",
+      "observed_outcomes": [
+        "Dell SupportAssist 远程代码执行研究及 DSA-2019-051 协调披露",
+        "HP Support Assistant 多项高危漏洞研究（5 个本地提权、2 个任意文件删除、3 个远程代码执行变体）",
+        "补丁复审发现 HP 补丁不完整并引入新漏洞"
+      ],
+      "evidence_ids": [
+        "bd-works-01-dell-rce",
+        "bd-works-03-hp-bloatware",
+        "bill-decisions-01",
+        "bill-decisions-02",
+        "bill-community-03",
+        "demirkapi-ext-001"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "跨厂商延续也可能部分源于 2019 年首次披露后行业可见度带来的同类目标机会与厂商响应接触，而非纯由研究者主动选择；但方法栈的系统性迁移与补丁复审反馈回路的存在，支持重复练习为主因。"
+    },
+    {
+      "name": "失败—转向—替代技术栈的系统性解题路径",
+      "starting_conditions": "面对具体技术阻塞时记录接近放弃的转折点，而非直接放弃或寻求外部现成解。",
+      "repeated_practice": "在 Dell 研究中 open redirect 未果后转向 ARP/DNS 欺骗中间人攻击，并以 PHP 代理脚本解决签名、URL 前导空格绕过 StartsWith 校验；在大数据研究中本地扫描 impractical 转向 serverless，std::regex 性能不足转 Intel hyperscan，GitHub Gist API 账号暂停转 Selenium Web UI。",
+      "feedback": "工程反馈直接驱动技术替换：本地扫描规模反馈 impractical、std::regex 性能基准反馈不足、平台封禁反馈触发自动化绕过路径。",
+      "intermediate_capability": "形成对工程约束的迭代式技术栈重组能力，能将单一阻塞分解为可替换组件并逐项工程化绕过。",
+      "observed_outcomes": [
+        "Dell 利用链通过 DNS 劫持随机 .dell.com 子域与 URL 前导空格绕过完成",
+        "大数据扫描管道含 Python 协调器（自动拆分接近 10000 上限的 Retrohunt 任务）、C++ AWS Lambda 扫描器采用 Intel hyperscan、消息队列与 MySQL",
+        "GitHub Gist 自动触发密钥撤销管道与 Selenium 绕过 shadow ban"
+      ],
+      "evidence_ids": [
+        "bd-works-01-dell-rce",
+        "bd-works-05-bigdata-cloud",
+        "bill-decisions-04",
+        "bill-decisions-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "多次失败—转向记录集中于长篇 writeup 的叙事部分，存在作者选择性强调成功转折的发表偏向；未记录的失败案例可能未进入公开材料，故该机制的频次可能被高估。"
+    },
+    {
+      "name": "厂商补丁独立复审作为披露后的反馈回路",
+      "starting_conditions": "在厂商声称修复后不终止研究，而是重新测试补丁完整性。",
+      "repeated_practice": "HP 声称 2019-12-19 修复后作者复测发现仍未修补，2020-01-01 提交更新报告；复审后公开发表补丁质量评估，质疑 HP 是否进行代码审查；在 Trend Micro 研究中指出该驱动在被 Driver Verifier 监控时才使用 NonPagedPoolNx、平时绕过测试环境。",
+      "feedback": "补丁复审结果作为下一轮研究输入与公开发表素材，形成 reported→vendor claims fixed→re-test fails→re-report→public critique 的迭代。",
+      "intermediate_capability": "形成对补丁有效性独立验证的习惯，而非止步于披露。",
+      "observed_outcomes": [
+        "HP 补丁复审发现 4/10 完全修补、3 个 LPE 未修并引入新漏洞",
+        "公开质疑 HP 代码审查流程",
+        "Trend Micro 驱动反测试环境行为的公开归因"
+      ],
+      "evidence_ids": [
+        "bd-works-03-hp-bloatware",
+        "bill-timeline-hp-psirt-2019-2020",
+        "bill-community-03",
+        "demirkapi-ext-002",
+        "bill-decisions-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "补丁复审也可能受协调披露节奏约束（COVID-19 延期）被动延长观察期所致，而非纯由研究者主动设计；但补丁引入新漏洞的独立归因支持主动复审判断。"
+    },
+    {
+      "name": "协调披露节奏管理与披露时机博弈",
+      "starting_conditions": "2018-10-26 首次向 Dell 报告时即建立逐日披露时间线，并把厂商延期与研究者设定边界纳入公开记录。",
+      "repeated_practice": "在 Dell、HP、CyberPatriot、fork 读内存、大数据研究中反复使用逐日披露时间线模板；在厂商长期沉默时以 CC 上级、设定发布期限施加压力；在同行独立重复发现时以 GitHub gist 预签哈希建立优先权；在 CyberPatriot 案例按开发者请求主动下架至赛后再发布。",
+      "feedback": "厂商响应、同行公开节奏、利益相关方请求共同构成披露时机的多向反馈，研究者据此调整发布而非单向公开。",
+      "intermediate_capability": "形成处理厂商延期、同行竞争与利益相关方冲突的稳定披露实践，而非临时应对。",
+      "observed_outcomes": [
+        "Dell DSA-2019-051 约 6 个月协调披露周期（2018-10-26 至 2019-04-18）",
+        "CyberPatriot 评分引擎研究主动下架至赛后再发布",
+        "fork 读内存研究以 2021-06-19 预签哈希建立优先权并在 diversenok 公开后解禁",
+        "大数据研究扩展协调对象至州政府官员与多厂商"
+      ],
+      "evidence_ids": [
+        "bill-community-01",
+        "bill-community-02",
+        "bill-community-05",
+        "bill-community-06",
+        "bill-timeline-dell-rce-disclosure-2018-2019",
+        "bill-timeline-college-admissions-2019",
+        "bill-timeline-hp-psirt-2019-2020"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "披露时间线模板的复用也可能部分由 Dell 首次披露的可见度引导后续厂商主动建立沟通通道所致；但预签哈希与主动下架两类行为无法由厂商通道解释，支持研究者主动设计为主因。"
+    },
+    {
+      "name": "工具与 PoC 配套公开发表习惯",
+      "starting_conditions": "GitHub 账号 D4stiny 长期维护覆盖攻击与防御双向的仓库（spectre、PeaceMaker、ForkPlayground、ExceptionOrientedProgramming）。",
+      "repeated_practice": "writeup 与可复现代码配套发布，并在大数据研究中构建并长期维护多组件工具系统（CloudRot 枚举器、Python 协调器、C++ Lambda 扫描器、消息队列、MySQL）。",
+      "feedback": "公开仓库获得社区关注（star 数）形成影响力回路，且配套工具建设作为研究能力放大器被作者明确表述为规模化研究的必要代价。",
+      "intermediate_capability": "形成研究→工具→发布的产出闭环，工具建设作为研究能力放大器。",
+      "observed_outcomes": [
+        "ExceptionOrientedProgramming GitHub 仓库与 writeup 配套",
+        "spectre（723 stars）、PeaceMaker（430 stars）、ForkPlayground（230 stars）等仓库获社区关注",
+        "CloudRot 枚举 AWS 与 GCP 公网 IP 池捕获 1770495 个 IP、66000 余唯一 TLD 下 78000 余悬空资源"
+      ],
+      "evidence_ids": [
+        "bill-timeline-github-d4stiny",
+        "bill-timeline-eop-part1-2022",
+        "bd-works-05-bigdata-cloud",
+        "bill-decisions-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "配套 PoC 发布在 Windows 利用社区属较普遍实践，区分度受限；但覆盖攻击—防御双向（spectre 与 PeaceMaker）且维护长达数年的仓库组合，支持该机制的个人持续性。GitHub 仓库创建与首次提交日期未在 profile 页面显示，时间线精确性受限。"
+    },
+    {
+      "name": "由前辈 writeup 触发的漏洞类方向转型",
+      "starting_conditions": "受 Matt Bryant 2015 年博客 Fishing the AWS IP Pool for Dangling Domains 启发，作者称该文 pivotal to our understanding of the bug class，据此形成 security at scale mindset。",
+      "repeated_practice": "由前辈一手 writeup 而非抽象兴趣触发方向转型；同期在 Trend Micro 研究中引用 j00ru 2010 年 HackInTheBox Magazine 关于 Reserve Objects 的文章作为方法学基础，显示回溯阅读经典技术文献的习惯。",
+      "feedback": "工程反馈（本地扫描 impractical）作为转型后的具体转折点，促使转向 AWS Lambda serverless 并行扫描。",
+      "intermediate_capability": "由单点目标逆向迁移到漏洞类驱动的规模化发现，并形成 platform-design-incentivizes-bugs 的方法论论点。",
+      "observed_outcomes": [
+        "自 2021 年起转向以 bug class 驱动的大规模漏洞发现，并自陈选择与行业偏向目标导向漏洞挖掘相反方向",
+        "形成 When it's easy to hardcode secrets, developers will hardcode secrets 的平台设计激励机制论点"
+      ],
+      "evidence_ids": [
+        "bill-decisions-04",
+        "bill-decisions-06",
+        "bill-community-04",
+        "bd-works-05-bigdata-cloud"
+      ],
+      "validation_tests": [
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "转型也可能部分由 2020 年内核驱动研究触及测试环境规避问题后对规模化检测需求的延伸所致；但作者明确将触发归因于特定前辈 writeup，且 j00ru 旧文引用支持文献驱动习惯，支持 writeup 触发为主因。"
+    },
+    {
+      "name": "公开发表—行业可见度—录用与影响力反馈回路",
+      "starting_conditions": "持续在个人博客公开发表 writeup 并配套 GitHub PoC，且要求被引用为 Independent Security Researcher。",
+      "repeated_practice": "以公开 writeup 作为行业可见度渠道，并将公开研究与雇主关系主动切割；大数据研究中以公开点名 AWS 处理不力（约 32% 已报告密钥 2-3 个月后未撤销）作为研究输出的一部分。",
+      "feedback": "公开 writeup 直接带来招聘邀约：Exception Oriented Programming Part 2 自述 Microsoft hired me following part 1 of this series。",
+      "intermediate_capability": "形成公开发表—行业可见度—录用/影响力的可持续反馈回路，同时维护公开研究独立性边界。",
+      "observed_outcomes": [
+        "EOP Part 1 发布后被 Microsoft 录用",
+        "大数据研究公开问责 AWS 并致谢配合厂商，构成可持续披露生态",
+        "明确要求被引用为 Independent Security Researcher 并声明研究独立于雇主"
+      ],
+      "evidence_ids": [
+        "bill-timeline-microsoft-hire-2023",
+        "bill-community-06",
+        "demirkapi-ext-004",
+        "bill-decisions-06"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "Microsoft 录用与 EOP Part 1 的时间先后由作者自述，可能存在其他未公开的招聘渠道（如内部推荐）共同作用；但作者明确将录用归因于 Part 1 发布，且该自述与公开时间线一致，支持公开 writeup 为可见主因。"
+    }
+  ],
+  "tensions": [
+    "年龄/学生身份叙事与练习方法叙事之间的张力：二手媒体与搜索摘要普遍以 teenager、RPI/RIT 学生等标签描述其早期身份，可能引导将其成长归因于天赋或年龄亮点；但本人一手 writeup 的成长信号集中于失败—转向、补丁复审、披露博弈等可核验行为，二者叙事路径不同，本报告以一手 writeup 为准。",
+    "独立研究自述与 mentor 关系并存：一手文章多处声明 All research was conducted independently 与研究独立于雇主，但 Trend Micro 研究明确致谢 mentor Alex Ionescu 给予方向指引，且 HP 研究致谢 Matt Graeber 提供关键提示。独立研究者身份与存在可识别 mentor/同伴网络并不冲突，但二者并存表明其能力成长并非纯孤立自学，也不能简单归因于单一导师。",
+    "person_json 的 UEFI 方向与一手作品缺失之间的张力：person_json 将 primary_focus 记为 Windows/UEFI/供应链漏洞，但抓取到的 16 篇公开作品与 5 篇全文中未出现 UEFI 专项一手 writeup，UEFI 方向无一手作品证据支撑。",
+    "会议演讲资格的来源层级差异：person_json 的 selected_conference_evidence 记为 Black Hat US / POC，但 blackhat.com 议程页对自动抓取返回 403，DEF CON 2019 与 Black Hat 2020 演讲仅见于 WebSearch 综述（不可信）而非一手抓取页面，会议参与事实未获一手确认。"
+  ],
+  "transferable_practices": [
+    "面对新漏洞时以构造最小复现用例为首要步骤，并对成功与失败 payload 执行路径做双向对照（ProcMon/IDA），而非仅分析成功路径",
+    "对厂商补丁进行独立复审，将补丁不完整或引入新漏洞作为下一轮研究输入与公开发表素材",
+    "建立逐日协调披露时间线模板，在厂商延期时设定明确发布期限，在同行独立重复发现时以预签哈希建立优先权",
+    "面对工程约束（性能、规模、平台封禁）采用迭代式技术栈重组，逐项工程化绕过而非依赖现成工具",
+    "writeup 与可复现 PoC 仓库配套发布，形成研究→工具→发布的产出闭环",
+    "由具体漏洞发现提炼到 bug class 或平台设计激励机制层面的方法论归纳"
+  ],
+  "non_transferable_conditions": [
+    "2019 年研究产出期处于美国高中末期与大学申请阶段，且 CyberPatriot 全国竞赛生态为其提供了 2015–2018 连续三年的结构化逆向练习入口——该竞赛生态与美国中学阶段为个人特有条件，非可迁移方法",
+    "named mentor Alex Ionescu 在 Windows 内核/底层方向的具体指引为个人可识别的外部资源，非通用可复制条件",
+    "受 Matt Bryant 2015 年博客与 j00ru 2010 年旧文等特定前辈 writeup 触发的方向转型，依赖特定时间窗口内对该类文献的接触，属个人阅读路径而非可推广步骤",
+    "Microsoft 录用与公开 writeup 之间的因果由作者自述，且依赖 2022 年 Windows 利用社区对 EOP 系列的具体需求，时点与行业需求为个人特有条件",
+    "大数据研究跨约三年的迭代周期与 AWS Lambda、VirusTotal Retrohunt 等平台的可用性及配额，依赖 2021–2024 年特定云平台能力窗口，属时期外部条件"
+  ],
+  "open_questions": [
+    "UEFI/BIOS/bootkit 专项研究：person_json 将 UEFI 列入 primary_focus，但一手 writeup 中未见 UEFI 专项研究，UEFI 方向的公开作品证据缺口未闭合",
+    "Black Hat US / POC 会议参与事实：blackhat.com 议程页返回 403，POC 议程未检索，会议演讲事实未获一手确认",
+    "教育背景冲突：二手搜索摘要存在 RIT 与 RPI 两说，均未一手核实，与 person_json 无字段佐证",
+    "雇主身份与职业转折：自 2020-05 起博客声明有雇主但始终未公开指明，2020-05 至 2024-09 间雇主是否变化及是否构成职业转折未知；Microsoft 录用确切日期仅由 Part 2 自述推断在 2022-02-14 之后至 2023-01-30 之前",
+    "2020-09-16 至 2021-11-25 约 14 个月发文间隔期及 2022-01-07 至 2024-09-27 间约两年八个月的主线研究过渡路径：仅有起止两端证据，中间工具建设迭代记录未获取",
+    "GitHub 仓库（spectre/PeaceMaker/ForkPlayground/ExceptionOrientedProgramming）创建与首次提交日期未在 profile 页面显示，工具建设的精确时间线未建立",
+    "fork 读内存研究 2021-06-19 预签哈希：博文转述其存在，但未直接抓取 gist 原始 URL 核对哈希内容与时间戳，优先权机制本身为 reported 而非一手核验"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/bill-demirkapi-synthesis-v1-20260927-165033-590",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790499244967631000-bill-demirkapi-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "stdout",
+    "session_id": "273506c0-6698-434d-a5d3-bc597d317f23",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_h5thdb26vbozwxyzphtfjve5",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/bill-demirkapi-synthesis-v1-20260927-165033-590/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T08:54:04.973506+00:00"
+      },
+      {
+        "tool_use_id": "call_58dfn4ccmoibxjnenb74kggd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/bill-demirkapi-synthesis-v1-20260927-165033-590/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "0ef0d2309a64c664ff31e2d0abbd34897b7f8fb5d10edd3ddfd03a3dc9612ec9",
+        "accessed_at": "2026-09-27T08:54:04.973541+00:00"
+      },
+      {
+        "tool_use_id": "call_0js3t40a7k9vizqqtn6zzs8d",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/bill-demirkapi-synthesis-v1-20260927-165033-590/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T08:54:04.973587+00:00"
+      },
+      {
+        "tool_use_id": "call_0wio3rclr882j56v8ka60jq4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/bill-demirkapi-synthesis-v1-20260927-165033-590/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "925387387d71bd0668e4fe5625ca8784f77dde93bb6e3ebc2b77bc5facad09c0",
+        "accessed_at": "2026-09-27T08:54:04.973598+00:00"
+      },
+      {
+        "tool_use_id": "call_s63jjgqou4ku0gc31kshfeev",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/bill-demirkapi-synthesis-v1-20260927-165033-590/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "d5503d852e8f3c83885a866cf1499e1fc4e9c61b8db703113e6d3e2a33fe48db",
+        "accessed_at": "2026-09-27T08:54:04.973729+00:00"
+      },
+      {
+        "tool_use_id": "call_5b6kvqkduuxllntx7owljxxv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/bill-demirkapi-synthesis-v1-20260927-165033-590/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-27T08:54:04.973737+00:00"
+      },
+      {
+        "tool_use_id": "call_x9ftw3sdm2olakww3kvd7fky",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/bill-demirkapi-synthesis-v1-20260927-165033-590/inputs/evidence_json.json",
+          "offset": 861,
+          "limit": 236
+        },
+        "success": true,
+        "content_sha256": "36e6a854902dec75ca3f444c6811fef63ce977308a8e200b8cefe1bca7f05fe0",
+        "accessed_at": "2026-09-27T08:54:04.973787+00:00"
+      },
+      {
+        "tool_use_id": "call_vkx9f0i4xk3bpugo8a6ekh65",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/bill-demirkapi-synthesis-v1-20260927-165033-590/checkpoint.md",
+          "content": "# Bill Demirkapi 综合节点 — 检查点\n\n## 输入确认\n- person_json.json：rank 36，Bill Demirkapi，primary_focus=Windows/UEFI/供应链漏洞，writeup=https://billdemirkapi.me/，selected_conference_evidence=Black Hat US / POC，qualification=直接漏洞发现与利用。\n- evidence_json.json：六维材料 works/conversations/community/external/decisions/timeline，外加 targeted.items=[]（首次综合，无定向补证）。\n- revision_context.json：[]（空），无补证纠错；所有作废/无效 evidence id 须禁用。\n\n## 有效证据状态评估\n### documented + verified_in_run=true（可作主支撑）\n- works: bd-works-01-dell-rce / 02-cyberpatriot / 03-hp-bloatware / 04-cve-2021-40444 / 05-bigdata-cloud / 06-blog-bibliography\n- conversations: bill-deep-self-about\n- community: bill-community-01 ~ 06（07=unknown/unverified，报告类不可信）\n- external: demirkapi-ext-001 ~ 004（005/006=unknown/inferred 不可作主支撑）\n- decisions: bill-decisions-01 ~ 06（全部 documented+verified）\n- timeline: bill-timeline-cyberpatriot-2015-2018 / dell-rce-disclosure-2018-2019 / college-admissions-2019 / hp-psirt-2019-2020 / trend-micro-mentor-2020 / eop-part1-2022 / microsoft-hire-2023 / bigdata-2021-2024 / github-d4stiny\n  - timeline 内 carbon-black-2018-09、defcon-2019-reported、blackhat-2020-reported = unverified/lead_only，不单独支撑结论\n\n### inferred / unknown / unverified（不得作主机制证据）\n- bill-deep-research-iteration-dell-lpe (unknown/unverified)\n- bill-deep-self-directed-learning-vba (unknown/unverified)\n- bill-deep-stable-attack-surface-bloatware (unknown/unverified)\n- bill-deep-disclosure-ethics-cyberpatriot (unknown/unverified)\n- bill-deep-high-school-stage-2019 (inferred/unverified)\n- bill-deep-podcast-* (verified 但内容是\"未检索到\"，不能作证据支撑)\n- bill-community-07 (unknown/unverified)\n- demirkapi-ext-005 / 006 (unknown/inferred/unverified)\n- bill-timeline-carbon-black-2018-09 / defcon-2019 / blackhat-2020 (unverified)\n\n注意：多个 unknown/unverified 条目内容与 documented 条目重叠（同一篇 HP/college-admissions/Trend Micro/Dell 文章的 lead_only 旁系记录），主支撑一律采用其 documented+verified 版本，避免重复引用低等级条目。\n\n## 阶段划分（按 capability_change 演化，非成就罗列）\n1. 2015–2018 CyberPatriot 参赛期：重复练习起点，逆向经验由使用工具转向审视工具。\n2. 2019 Hacking College Admissions / Dell RCE / CyberPatriot 评分引擎复盘：高中生末期，从参与者转为公开披露者，建立披露时间线与失败—转向机制。\n3. 2020 HP / Trend Micro：预装软件攻击面跨厂商复用，进入内核驱动 IOCTL，引入 mentor Alex Ionescu，出现补丁复审反馈回路。\n4. 2021–2023 Exception Oriented Programming 系列 + 大数据研究起步：单点逆向→漏洞类驱动规模化；公开 writeup 直接导致 Microsoft 录用。\n5. 2024 Secrets and Shadows 发布：完成单点→规模化转型，方法论由技术执行层迁移到设计批判层。\n\n## 主机制候选（需满足至少 2/3：跨材料跨期重复 + 解释多个结果 + 区分度）\n- M1 OEM 预装软件攻击面反复练习（Dell 2019→HP 2020，bd-works-01/03, decisions-01/02, community-03）\n- M2 失败→转向→替代技术栈的解题路径（Dell open-redirect→DNS MITM；大数据 local→serverless→hyperscan；GitHub Gist→Selenium；bd-works-01/05, decisions-04/05）\n- M3 厂商补丁独立复审作为反馈回路（HP 4/10 修补 + 引入新漏洞；社区-03, decisions-02, timeline-hp-psirt）\n- M4 协调披露节奏管理（Dell 六个月时间线、HP 延期、CyberPatriot 主动下架、fork 哈希预签、大数据多厂商协同；community-01/02/05/06, timeline-dell）\n- M5 工具/PoC 配套公开发表习惯（EOP GitHub 仓库、spectre/PeaceMaker/ForkPlayground、CloudRot；timeline-github-d4stiny, decisions-05, timeline-eop-part1）\n- M6 由前辈 writeup 触发的方向转型（Matt Bryant→大数据；社区 j00ru 文献引用；decisions-04）\n- M7 公开发表→行业可见度→录用/影响力反馈回路（EOP Part1→Microsoft；timeline-microsoft-hire, external-004）\n\n## 验证测试映射\n- repeated：跨期跨厂商/跨文章重复（M1/M3/M4）\n- generative：迁移到新对象/新规模（M1 Dell→HP→Trend→大数据；M2 多次失败转向；M7 writeup→录用→大数据问责）\n- distinctive：区分度（M5 配套工具仓、M6 由特定旧文触发转型、M2 系统性失败—转向）\n\n## 待确认事项\n- 所有 evidence id 引用前再核对 verified_in_run=true 且非作废。\n- tensions 需含至少一条竞争性解释（如年龄/学生身份媒体叙事 vs 练习方法；导师 mentor vs 独立自学）。\n- transferable vs non_transferable 须区分可迁移做法与个人特有条件（早期年龄+CyberPatriot+美国中学竞赛生态为非迁移条件）。\n- UEFI 方向缺口：person_json 声称 UEFI，一手 writeup 无对应，列入 open_questions/tensions，不补造。\n- 不要发明 evidence id；targeted.items 为空，不引用不存在的定向补证。\n"
+        },
+        "success": true,
+        "content_sha256": "f1448ed1ca168cb243ae3652c7e71be29656ed19ae969f4f6730d147e3fcddb8",
+        "accessed_at": "2026-09-27T08:54:04.973799+00:00"
+      },
+      {
+        "tool_use_id": "call_doqkywbbf2rititso2rznogl",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/bill-demirkapi-synthesis-v1-20260927-165033-590/output.json",
+          "content": "{\n  \"person\": \"Bill Demirkapi\",\n  \"expertise\": [\n    \"Windows 用户态与内核态漏洞逆向及利用（.NET 逆向、内核驱动 IOCTL 分发表测绘、异常导向执行 Exception Oriented Programming）\",\n    \"OEM 预装软件（bloatware）攻击面研究：Dell SupportAssist、HP Support Assistant、Trend Micro RootkitBuster\",\n    \"协调披露与厂商补丁独立复审\",\n    \"数据驱动的规模化漏洞发现：云 IP 池枚举、被动 DNS、VirusTotal Retrohunt、AWS Lambda 并行扫描、密钥泄露验证\",\n    \"Windows 内核工具与 PoC 建设（spectre、PeaceMaker、ForkPlayground、ExceptionOrientedProgramming）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2015–2018\",\n      \"stage\": \"CyberPatriot 竞赛参与期：从使用工具到审视工具\",\n      \"capability_change\": \"通过连续参加 CyberPatriot VIII 至 X（2015–2018 赛季）进行结构化重复练习，获得 Windows 防御与逆向基础。其时自评逆向能力有限。后期清理硬盘时发现旧竞赛镜像，以现状能力复盘评分引擎 CCSClient.exe，完成由参赛者到对竞赛基础设施本身做安全分析的视角转变。\",\n      \"evidence_ids\": [\n        \"bd-works-02-cyberpatriot\",\n        \"bill-timeline-cyberpatriot-2015-2018\",\n        \"bill-community-02\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2019\",\n      \"stage\": \"高中生末期：建立公开披露与失败转向的实践\",\n      \"capability_change\": \"在大学申请期内发布 Hacking College Admissions 与 Dell SupportAssist 远程代码执行研究，并在赛后复盘 CyberPatriot 评分引擎。建立逐日协调披露时间线，记录由 open redirect 未果到 DNS 中间人攻击的失败—转向路径，形成可重复的披露博弈与解题调整实践。\",\n      \"evidence_ids\": [\n        \"bd-works-01-dell-rce\",\n        \"bd-works-02-cyberpatriot\",\n        \"bill-timeline-college-admissions-2019\",\n        \"bill-timeline-dell-rce-disclosure-2018-2019\",\n        \"bill-community-01\",\n        \"bill-decisions-01\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020\",\n      \"stage\": \"预装软件攻击面跨厂商扩展与内核驱动进入\",\n      \"capability_change\": \"将 OEM 预装软件方法论由 Dell 迁移到 HP，并在 HP 声称修复后独立复测发现补丁不完整且引入新漏洞，把补丁审计纳入反馈回路。同期由用户态 .NET 逆向转向 Trend Micro RootkitBuster 内核驱动 tmcomm.sys 的 IOCTL 分发表测绘，技术栈扩展到内核利用原语组合，并出现 named mentor Alex Ionescu 的方向指引。\",\n      \"evidence_ids\": [\n        \"bd-works-03-hp-bloatware\",\n        \"bill-community-03\",\n        \"bill-community-04\",\n        \"bill-timeline-hp-psirt-2019-2020\",\n        \"bill-timeline-trend-micro-mentor-2020\",\n        \"bill-decisions-02\",\n        \"bill-decisions-03\",\n        \"demirkapi-ext-002\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2021–2023\",\n      \"stage\": \"由单点目标逆向转向漏洞类驱动的规模化发现，并完成职业节点\",\n      \"capability_change\": \"受 Matt Bryant 2015 年博客触发，自 2021 年起由目标导向漏洞挖掘转向漏洞类驱动的大规模发现，本地扫描 impractical 反馈促使其转向 AWS Lambda serverless 并行扫描。同期发布 Exception Oriented Programming Part 1 并配套 GitHub PoC 仓库，公开 writeup 直接对应 Microsoft 录用（Part 2 自述），形成公开发表—行业可见度—录用的反馈回路。\",\n      \"evidence_ids\": [\n        \"bd-works-04-cve-2021-40444\",\n        \"bill-timeline-eop-part1-2022\",\n        \"bill-timeline-microsoft-hire-2023\",\n        \"bill-timeline-bigdata-2021-2024\",\n        \"bill-timeline-github-d4stiny\",\n        \"bill-decisions-04\",\n        \"bill-decisions-05\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2024\",\n      \"stage\": \"规模化研究产出与方法论由执行层迁移到设计批判层\",\n      \"capability_change\": \"发布 Secrets and Shadows: Leveraging Big Data for Vulnerability Discovery at Scale，跨约三年累计扫描超 500 万文件、验证 15000 余密钥。由具体漏洞发现提炼到平台设计激励机制的方法论论点（以 AWS 与 GCP 默认配置对比支撑），并扩展协调披露对象至州政府官员与多厂商。研究独立于雇主进行，并要求被引用为 Independent Security Researcher。\",\n      \"evidence_ids\": [\n        \"bd-works-05-bigdata-cloud\",\n        \"bill-community-06\",\n        \"bill-timeline-bigdata-2021-2024\",\n        \"bill-decisions-06\",\n        \"demirkapi-ext-004\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"OEM 预装软件攻击面的跨厂商重复练习与方法迁移\",\n      \"starting_conditions\": \"起点为一次个人消费场景：2018 年购入 Dell G3 15 后对 Dell 经网页 Detect PC 向本地 8884 端口发起请求的能力产生怀疑，进而安装 SupportAssist 逆向。\",\n      \"repeated_practice\": \"将同一套预装软件攻击面方法论由 Dell（2019）迁移到 HP（2020），工具栈从 .NET 逆向扩展到 de4dot 解混淆、WCF 命名管道服务枚举、URL 协议处理程序与 DLL 劫持，并把同一攻击面选择表述为长期判断。\",\n      \"feedback\": \"厂商补丁结果作为下一轮研究输入：Dell 单漏洞约六个月才修补，HP 首轮补丁声称修复但仅 4/10 完全修补、3 个 LPE 未修，且补丁引入新漏洞（硬编码临时目录改为客户端输入后服务转而信任攻击者可控路径）。\",\n      \"intermediate_capability\": \"形成对预装软件这一稳定攻击面的系统性测绘与跨厂商复用能力，能基于前一厂商的补丁失败经验设计后续验证用例。\",\n      \"observed_outcomes\": [\n        \"Dell SupportAssist 远程代码执行研究及 DSA-2019-051 协调披露\",\n        \"HP Support Assistant 多项高危漏洞研究（5 个本地提权、2 个任意文件删除、3 个远程代码执行变体）\",\n        \"补丁复审发现 HP 补丁不完整并引入新漏洞\"\n      ],\n      \"evidence_ids\": [\n        \"bd-works-01-dell-rce\",\n        \"bd-works-03-hp-bloatware\",\n        \"bill-decisions-01\",\n        \"bill-decisions-02\",\n        \"bill-community-03\",\n        \"demirkapi-ext-001\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"跨厂商延续也可能部分源于 2019 年首次披露后行业可见度带来的同类目标机会与厂商响应接触，而非纯由研究者主动选择；但方法栈的系统性迁移与补丁复审反馈回路的存在，支持重复练习为主因。\"\n    },\n    {\n      \"name\": \"失败—转向—替代技术栈的系统性解题路径\",\n      \"starting_conditions\": \"面对具体技术阻塞时记录接近放弃的转折点，而非直接放弃或寻求外部现成解。\",\n      \"repeated_practice\": \"在 Dell 研究中 open redirect 未果后转向 ARP/DNS 欺骗中间人攻击，并以 PHP 代理脚本解决签名、URL 前导空格绕过 StartsWith 校验；在大数据研究中本地扫描 impractical 转向 serverless，std::regex 性能不足转 Intel hyperscan，GitHub Gist API 账号暂停转 Selenium Web UI。\",\n      \"feedback\": \"工程反馈直接驱动技术替换：本地扫描规模反馈 impractical、std::regex 性能基准反馈不足、平台封禁反馈触发自动化绕过路径。\",\n      \"intermediate_capability\": \"形成对工程约束的迭代式技术栈重组能力，能将单一阻塞分解为可替换组件并逐项工程化绕过。\",\n      \"observed_outcomes\": [\n        \"Dell 利用链通过 DNS 劫持随机 .dell.com 子域与 URL 前导空格绕过完成\",\n        \"大数据扫描管道含 Python 协调器（自动拆分接近 10000 上限的 Retrohunt 任务）、C++ AWS Lambda 扫描器采用 Intel hyperscan、消息队列与 MySQL\",\n        \"GitHub Gist 自动触发密钥撤销管道与 Selenium 绕过 shadow ban\"\n      ],\n      \"evidence_ids\": [\n        \"bd-works-01-dell-rce\",\n        \"bd-works-05-bigdata-cloud\",\n        \"bill-decisions-04\",\n        \"bill-decisions-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"多次失败—转向记录集中于长篇 writeup 的叙事部分，存在作者选择性强调成功转折的发表偏向；未记录的失败案例可能未进入公开材料，故该机制的频次可能被高估。\"\n    },\n    {\n      \"name\": \"厂商补丁独立复审作为披露后的反馈回路\",\n      \"starting_conditions\": \"在厂商声称修复后不终止研究，而是重新测试补丁完整性。\",\n      \"repeated_practice\": \"HP 声称 2019-12-19 修复后作者复测发现仍未修补，2020-01-01 提交更新报告；复审后公开发表补丁质量评估，质疑 HP 是否进行代码审查；在 Trend Micro 研究中指出该驱动在被 Driver Verifier 监控时才使用 NonPagedPoolNx、平时绕过测试环境。\",\n      \"feedback\": \"补丁复审结果作为下一轮研究输入与公开发表素材，形成 reported→vendor claims fixed→re-test fails→re-report→public critique 的迭代。\",\n      \"intermediate_capability\": \"形成对补丁有效性独立验证的习惯，而非止步于披露。\",\n      \"observed_outcomes\": [\n        \"HP 补丁复审发现 4/10 完全修补、3 个 LPE 未修并引入新漏洞\",\n        \"公开质疑 HP 代码审查流程\",\n        \"Trend Micro 驱动反测试环境行为的公开归因\"\n      ],\n      \"evidence_ids\": [\n        \"bd-works-03-hp-bloatware\",\n        \"bill-timeline-hp-psirt-2019-2020\",\n        \"bill-community-03\",\n        \"demirkapi-ext-002\",\n        \"bill-decisions-02\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"补丁复审也可能受协调披露节奏约束（COVID-19 延期）被动延长观察期所致，而非纯由研究者主动设计；但补丁引入新漏洞的独立归因支持主动复审判断。\"\n    },\n    {\n      \"name\": \"协调披露节奏管理与披露时机博弈\",\n      \"starting_conditions\": \"2018-10-26 首次向 Dell 报告时即建立逐日披露时间线，并把厂商延期与研究者设定边界纳入公开记录。\",\n      \"repeated_practice\": \"在 Dell、HP、CyberPatriot、fork 读内存、大数据研究中反复使用逐日披露时间线模板；在厂商长期沉默时以 CC 上级、设定发布期限施加压力；在同行独立重复发现时以 GitHub gist 预签哈希建立优先权；在 CyberPatriot 案例按开发者请求主动下架至赛后再发布。\",\n      \"feedback\": \"厂商响应、同行公开节奏、利益相关方请求共同构成披露时机的多向反馈，研究者据此调整发布而非单向公开。\",\n      \"intermediate_capability\": \"形成处理厂商延期、同行竞争与利益相关方冲突的稳定披露实践，而非临时应对。\",\n      \"observed_outcomes\": [\n        \"Dell DSA-2019-051 约 6 个月协调披露周期（2018-10-26 至 2019-04-18）\",\n        \"CyberPatriot 评分引擎研究主动下架至赛后再发布\",\n        \"fork 读内存研究以 2021-06-19 预签哈希建立优先权并在 diversenok 公开后解禁\",\n        \"大数据研究扩展协调对象至州政府官员与多厂商\"\n      ],\n      \"evidence_ids\": [\n        \"bill-community-01\",\n        \"bill-community-02\",\n        \"bill-community-05\",\n        \"bill-community-06\",\n        \"bill-timeline-dell-rce-disclosure-2018-2019\",\n        \"bill-timeline-college-admissions-2019\",\n        \"bill-timeline-hp-psirt-2019-2020\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"披露时间线模板的复用也可能部分由 Dell 首次披露的可见度引导后续厂商主动建立沟通通道所致；但预签哈希与主动下架两类行为无法由厂商通道解释，支持研究者主动设计为主因。\"\n    },\n    {\n      \"name\": \"工具与 PoC 配套公开发表习惯\",\n      \"starting_conditions\": \"GitHub 账号 D4stiny 长期维护覆盖攻击与防御双向的仓库（spectre、PeaceMaker、ForkPlayground、ExceptionOrientedProgramming）。\",\n      \"repeated_practice\": \"writeup 与可复现代码配套发布，并在大数据研究中构建并长期维护多组件工具系统（CloudRot 枚举器、Python 协调器、C++ Lambda 扫描器、消息队列、MySQL）。\",\n      \"feedback\": \"公开仓库获得社区关注（star 数）形成影响力回路，且配套工具建设作为研究能力放大器被作者明确表述为规模化研究的必要代价。\",\n      \"intermediate_capability\": \"形成研究→工具→发布的产出闭环，工具建设作为研究能力放大器。\",\n      \"observed_outcomes\": [\n        \"ExceptionOrientedProgramming GitHub 仓库与 writeup 配套\",\n        \"spectre（723 stars）、PeaceMaker（430 stars）、ForkPlayground（230 stars）等仓库获社区关注\",\n        \"CloudRot 枚举 AWS 与 GCP 公网 IP 池捕获 1770495 个 IP、66000 余唯一 TLD 下 78000 余悬空资源\"\n      ],\n      \"evidence_ids\": [\n        \"bill-timeline-github-d4stiny\",\n        \"bill-timeline-eop-part1-2022\",\n        \"bd-works-05-bigdata-cloud\",\n        \"bill-decisions-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"配套 PoC 发布在 Windows 利用社区属较普遍实践，区分度受限；但覆盖攻击—防御双向（spectre 与 PeaceMaker）且维护长达数年的仓库组合，支持该机制的个人持续性。GitHub 仓库创建与首次提交日期未在 profile 页面显示，时间线精确性受限。\"\n    },\n    {\n      \"name\": \"由前辈 writeup 触发的漏洞类方向转型\",\n      \"starting_conditions\": \"受 Matt Bryant 2015 年博客 Fishing the AWS IP Pool for Dangling Domains 启发，作者称该文 pivotal to our understanding of the bug class，据此形成 security at scale mindset。\",\n      \"repeated_practice\": \"由前辈一手 writeup 而非抽象兴趣触发方向转型；同期在 Trend Micro 研究中引用 j00ru 2010 年 HackInTheBox Magazine 关于 Reserve Objects 的文章作为方法学基础，显示回溯阅读经典技术文献的习惯。\",\n      \"feedback\": \"工程反馈（本地扫描 impractical）作为转型后的具体转折点，促使转向 AWS Lambda serverless 并行扫描。\",\n      \"intermediate_capability\": \"由单点目标逆向迁移到漏洞类驱动的规模化发现，并形成 platform-design-incentivizes-bugs 的方法论论点。\",\n      \"observed_outcomes\": [\n        \"自 2021 年起转向以 bug class 驱动的大规模漏洞发现，并自陈选择与行业偏向目标导向漏洞挖掘相反方向\",\n        \"形成 When it's easy to hardcode secrets, developers will hardcode secrets 的平台设计激励机制论点\"\n      ],\n      \"evidence_ids\": [\n        \"bill-decisions-04\",\n        \"bill-decisions-06\",\n        \"bill-community-04\",\n        \"bd-works-05-bigdata-cloud\"\n      ],\n      \"validation_tests\": [\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"转型也可能部分由 2020 年内核驱动研究触及测试环境规避问题后对规模化检测需求的延伸所致；但作者明确将触发归因于特定前辈 writeup，且 j00ru 旧文引用支持文献驱动习惯，支持 writeup 触发为主因。\"\n    },\n    {\n      \"name\": \"公开发表—行业可见度—录用与影响力反馈回路\",\n      \"starting_conditions\": \"持续在个人博客公开发表 writeup 并配套 GitHub PoC，且要求被引用为 Independent Security Researcher。\",\n      \"repeated_practice\": \"以公开 writeup 作为行业可见度渠道，并将公开研究与雇主关系主动切割；大数据研究中以公开点名 AWS 处理不力（约 32% 已报告密钥 2-3 个月后未撤销）作为研究输出的一部分。\",\n      \"feedback\": \"公开 writeup 直接带来招聘邀约：Exception Oriented Programming Part 2 自述 Microsoft hired me following part 1 of this series。\",\n      \"intermediate_capability\": \"形成公开发表—行业可见度—录用/影响力的可持续反馈回路，同时维护公开研究独立性边界。\",\n      \"observed_outcomes\": [\n        \"EOP Part 1 发布后被 Microsoft 录用\",\n        \"大数据研究公开问责 AWS 并致谢配合厂商，构成可持续披露生态\",\n        \"明确要求被引用为 Independent Security Researcher 并声明研究独立于雇主\"\n      ],\n      \"evidence_ids\": [\n        \"bill-timeline-microsoft-hire-2023\",\n        \"bill-community-06\",\n        \"demirkapi-ext-004\",\n        \"bill-decisions-06\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"Microsoft 录用与 EOP Part 1 的时间先后由作者自述，可能存在其他未公开的招聘渠道（如内部推荐）共同作用；但作者明确将录用归因于 Part 1 发布，且该自述与公开时间线一致，支持公开 writeup 为可见主因。\"\n    }\n  ],\n  \"tensions\": [\n    \"年龄/学生身份叙事与练习方法叙事之间的张力：二手媒体与搜索摘要普遍以 teenager、RPI/RIT 学生等标签描述其早期身份，可能引导将其成长归因于天赋或年龄亮点；但本人一手 writeup 的成长信号集中于失败—转向、补丁复审、披露博弈等可核验行为，二者叙事路径不同，本报告以一手 writeup 为准。\",\n    \"独立研究自述与 mentor 关系并存：一手文章多处声明 All research was conducted independently 与研究独立于雇主，但 Trend Micro 研究明确致谢 mentor Alex Ionescu 给予方向指引，且 HP 研究致谢 Matt Graeber 提供关键提示。独立研究者身份与存在可识别 mentor/同伴网络并不冲突，但二者并存表明其能力成长并非纯孤立自学，也不能简单归因于单一导师。\",\n    \"person_json 的 UEFI 方向与一手作品缺失之间的张力：person_json 将 primary_focus 记为 Windows/UEFI/供应链漏洞，但抓取到的 16 篇公开作品与 5 篇全文中未出现 UEFI 专项一手 writeup，UEFI 方向无一手作品证据支撑。\",\n    \"会议演讲资格的来源层级差异：person_json 的 selected_conference_evidence 记为 Black Hat US / POC，但 blackhat.com 议程页对自动抓取返回 403，DEF CON 2019 与 Black Hat 2020 演讲仅见于 WebSearch 综述（不可信）而非一手抓取页面，会议参与事实未获一手确认。\"\n  ],\n  \"transferable_practices\": [\n    \"面对新漏洞时以构造最小复现用例为首要步骤，并对成功与失败 payload 执行路径做双向对照（ProcMon/IDA），而非仅分析成功路径\",\n    \"对厂商补丁进行独立复审，将补丁不完整或引入新漏洞作为下一轮研究输入与公开发表素材\",\n    \"建立逐日协调披露时间线模板，在厂商延期时设定明确发布期限，在同行独立重复发现时以预签哈希建立优先权\",\n    \"面对工程约束（性能、规模、平台封禁）采用迭代式技术栈重组，逐项工程化绕过而非依赖现成工具\",\n    \"writeup 与可复现 PoC 仓库配套发布，形成研究→工具→发布的产出闭环\",\n    \"由具体漏洞发现提炼到 bug class 或平台设计激励机制层面的方法论归纳\"\n  ],\n  \"non_transferable_conditions\": [\n    \"2019 年研究产出期处于美国高中末期与大学申请阶段，且 CyberPatriot 全国竞赛生态为其提供了 2015–2018 连续三年的结构化逆向练习入口——该竞赛生态与美国中学阶段为个人特有条件，非可迁移方法\",\n    \"named mentor Alex Ionescu 在 Windows 内核/底层方向的具体指引为个人可识别的外部资源，非通用可复制条件\",\n    \"受 Matt Bryant 2015 年博客与 j00ru 2010 年旧文等特定前辈 writeup 触发的方向转型，依赖特定时间窗口内对该类文献的接触，属个人阅读路径而非可推广步骤\",\n    \"Microsoft 录用与公开 writeup 之间的因果由作者自述，且依赖 2022 年 Windows 利用社区对 EOP 系列的具体需求，时点与行业需求为个人特有条件\",\n    \"大数据研究跨约三年的迭代周期与 AWS Lambda、VirusTotal Retrohunt 等平台的可用性及配额，依赖 2021–2024 年特定云平台能力窗口，属时期外部条件\"\n  ],\n  \"open_questions\": [\n    \"UEFI/BIOS/bootkit 专项研究：person_json 将 UEFI 列入 primary_focus，但一手 writeup 中未见 UEFI 专项研究，UEFI 方向的公开作品证据缺口未闭合\",\n    \"Black Hat US / POC 会议参与事实：blackhat.com 议程页返回 403，POC 议程未检索，会议演讲事实未获一手确认\",\n    \"教育背景冲突：二手搜索摘要存在 RIT 与 RPI 两说，均未一手核实，与 person_json 无字段佐证\",\n    \"雇主身份与职业转折：自 2020-05 起博客声明有雇主但始终未公开指明，2020-05 至 2024-09 间雇主是否变化及是否构成职业转折未知；Microsoft 录用确切日期仅由 Part 2 自述推断在 2022-02-14 之后至 2023-01-30 之前\",\n    \"2020-09-16 至 2021-11-25 约 14 个月发文间隔期及 2022-01-07 至 2024-09-27 间约两年八个月的主线研究过渡路径：仅有起止两端证据，中间工具建设迭代记录未获取\",\n    \"GitHub 仓库（spectre/PeaceMaker/ForkPlayground/ExceptionOrientedProgramming）创建与首次提交日期未在 profile 页面显示，工具建设的精确时间线未建立\",\n    \"fork 读内存研究 2021-06-19 预签哈希：博文转述其存在，但未直接抓取 gist 原始 URL 核对哈希内容与时间戳，优先权机制本身为 reported 而非一手核验\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "bee01d019d62dc1af00eaa1372611f4929c323a1262c0a8a461f506a32531b7a",
+        "accessed_at": "2026-09-27T08:54:04.973807+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790499244973825000-bill-demirkapi-synthesis-v1.json",
+    "label": "Bill Demirkapi:synthesis:v1",
+    "elapsed_seconds": 211.38,
+    "prompt_sha256": "6c3033fdc69ab325aba6160651c87c5662ea3130d0f624e61f97620c845e296b",
+    "num_turns": 10,
+    "total_cost_usd": 0.620752,
+    "usage": {
+      "input_tokens": 43228,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 137024,
+      "output_tokens": 13444,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 43228,
+        "outputTokens": 13444,
+        "cacheReadInputTokens": 137024,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.620752,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

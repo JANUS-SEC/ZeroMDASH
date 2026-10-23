@@ -1,0 +1,362 @@
+{
+  "person": "James Kettle (albinowax)",
+  "expertise": [
+    "HTTP request smuggling / HTTP desync（CL.TE、TE.CL、H2.CL、H2.TE、H2.X、client-side desync、pause-based desync、MITM-powered desync）",
+    "Web cache poisoning（unkeyed input 识别、cache entanglement）",
+    "Server-side template injection (SSTI)",
+    "Web race conditions（single-packet attack、limit-overrun、多端点、单端点、对象遮蔽、延迟碰撞）",
+    "HTTP/2 协议级漏洞",
+    "差分与异常驱动的漏洞扫描",
+    "Burp Suite 扩展开发（ActiveScan++、HTTP Request Smuggler、Backslash Powered Scanner、Param Miner、Turbo Intruder、Collaborator Everywhere）",
+    "被忽视攻击面发现（以主动回连载荷探测反向代理、负载均衡与后端分析系统）",
+    "以 bug bounty 真实目标校准研究有效性"
+  ],
+  "stages": [
+    {
+      "period": "大学阶段至 2015 年前",
+      "stage": "入行转向",
+      "capability_change": "由对电子竞技游戏 Counter-Strike 失去兴趣而转向黑客技术，并以一笔漏洞赏金收入购置研究用计算机；此阶段尚未形成可识别的方法论，仅完成兴趣与资源的初步转移。具体校名、专业与年份在 first-party 资料中未给出，该转向仅由 PortSwigger 官方资料页转述。",
+      "evidence_ids": [
+        "jkt-tl-university",
+        "james-kettle-convo-01",
+        "jk-dec-entry-bored-of-counterstrike"
+      ],
+      "confidence": "low"
+    },
+    {
+      "period": "2015–2016",
+      "stage": "组织研究角色确立与首次方法论转向",
+      "capability_change": "2015 年加入 PortSwigger 并主导其研究线，发表 server-side template injection 原创研究；2016 年发表 Backslash Powered Scanning，放弃以技术专属 payload 列表逐项匹配已知漏洞的范式，改为发送通用探针并比对响应属性（状态码、行数、词数、HTML 结构、反射计数），将输入分为 boring/interesting/promising 三类后迭代调查，明确建模为对资深手工测试者思路的模仿；同期完成 ActiveScan++、HTTP Request Smuggler、Backslash Powered Scanner 等 Burp 扩展。文中记录 2013 年曾尝试基于最长公共子序列生成正则做响应比对，因 O(n²) 复杂度与自我拒绝服务问题被放弃，体现显式的试错与淘汰。",
+      "evidence_ids": [
+        "ext-identity-01",
+        "albinowax-works-001",
+        "jk-dec-2016-backslash-behaviour-scanning",
+        "jkt-tl-2016",
+        "jkt-tl-ext-2016",
+        "james-kettle-convo-03"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017–2018",
+      "stage": "被忽视攻击面选取与既有管线复用",
+      "capability_change": "2017 年选取反向代理、负载均衡与后端分析系统构成的几乎不可见的攻击面，因其设计为不可见、无法依赖响应内容审计，改为发送令目标主动回连的载荷，借助 Burp Collaborator 记录回调，并以 ZMap/ZGrab 对约 5 万台服务器规模化扫描，固化为 Collaborator Everywhere 扩展；2018 年 Practical Web Cache Poisoning 明确复用 Cracking the Lens 建立的研究管线，将识别 unkeyed input 这一手工步骤工具化为 Param Miner，并下载 GitHub 前 2 万个 PHP 项目提取 header 名称以扩充字典，发现 X-Original-URL、X-Rewrite-URL 等跨框架 header；另以 hackxor.net 悬赏众筹难题解法。",
+      "evidence_ids": [
+        "jk-dec-2017-cracking-the-lens-hidden-surface",
+        "jk-dec-2018-cache-poisoning-pipeline-reuse",
+        "jkt-tl-2018"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2019–2021",
+      "stage": "协议级系统化与底层基础设施自建",
+      "capability_change": "2019 年复活 Watchfire 于 2005 年文档化但因难度与附带损害被长期搁置的 HTTP Request Smuggling，重构为 Detect/Confirm/Explore/Exploit/Store/Attack 的方法论（图标签合并末段为 Store/Attack），区分 CL.TE 与 TE.CL，以超时探测降低误报与对他人影响，发布 HTTP Request Smuggler 并将检测并入 Burp 核心扫描器；2020 年 Web Cache Entanglement 在 2018 缓存投毒基础上深化；2021 年因 HTTP/2 二进制成帧消解旧走私条件，从零编写 HTTP/2 客户端集成进 Turbo Intruder，定义 H2.CL、H2.TE、H2.X，并复用 2019 年超时检测的改造版本扫描 bug bounty 管线。",
+      "evidence_ids": [
+        "albinowax-works-002",
+        "albinowax-works-003",
+        "jk-dec-2019-revive-forgotten-smuggling",
+        "jk-dec-2021-http2-from-scratch-and-reapply",
+        "jkt-tl-2020",
+        "jkt-tl-2021",
+        "r1-ev-001",
+        "r1-ev-002",
+        "JK-COM-01",
+        "JK-COM-02",
+        "JK-COM-03"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022–2023",
+      "stage": "客户端前移与跨域原语借用",
+      "capability_change": "2022 年因 amazon.com 上一次偶然发现的 CL.0 desync（规范化请求竟被浏览器 fetch() 直接触发）而主动系统化扫描，将走私点前移至受害者浏览器与前端之间，定义 client-side desync (CSD)，涵盖 CL.0/H2.0、pause-based desync、MITM-powered desync；2023 年由 2016 年 Josip Franjković 报告的 Facebook 竞态这一七年悬案驱动，放弃请求原子与 GET 不改状态两个假设，借鉴 2020 USENIX Timeless Timing Attacks 的单包思路结合 Nagle 算法自创 single-packet attack，将中位时延抖动从约 4ms 降至约 1ms。",
+      "evidence_ids": [
+        "albinowax-works-004",
+        "albinowax-works-005",
+        "jk-dec-2022-accident-driven-scope-expansion",
+        "jk-dec-2023-drop-atomicity-single-packet",
+        "jkt-tl-2022",
+        "jkt-tl-2023"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "差分与异常驱动的检测范式",
+      "starting_conditions": "2013 年曾尝试基于最长公共子序列生成正则做响应比对，因 O(n²) 复杂度与自我拒绝服务问题被放弃；该次失败由 2016 年 writeup 转述，无独立公开链接可核验。",
+      "repeated_practice": "2016 年改为基于响应属性（状态码、行数、词数、HTML 结构、反射计数）的差分；2019 年将差分迁移到超时差分以探测协议解析分歧；2022 年以行为差异识别客户端反同步；2023 年将识别异常自述为发现竞态最重要的技能。",
+      "feedback": "响应或时延差异揭示有趣行为，再以 bug bounty 真实目标（New Relic、Trello、Red Hat、PayPal、Netflix、Atlassian、Verizon、Amazon 等）的赏金与厂商补丁校准检测有效性。",
+      "intermediate_capability": "把资深手工测试者对异常响应的直觉转化为可重复、可分类（boring/interesting/promising）的检测信号，进而可自动化。",
+      "observed_outcomes": [
+        "Backslash Powered Scanner",
+        "HTTP Request Smuggler 的超时检测",
+        "Browser-Powered Desync 的 CSD 与 connection-state probe 检测",
+        "single-packet attack 触发的竞态检测"
+      ],
+      "evidence_ids": [
+        "albinowax-works-001",
+        "albinowax-works-002",
+        "albinowax-works-004",
+        "albinowax-works-005",
+        "jk-dec-2016-backslash-behaviour-scanning",
+        "jk-dec-2023-drop-atomicity-single-packet"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "差分可能是在事后写作时对各次独立研究的统合叙事，而非当时即被自觉执行的方法；2013 年失败到 2016 年成形之间的学习路径无公开一手记录，不能排除该范式是事后归纳。"
+    },
+    {
+      "name": "研究即工具与社区反馈回路",
+      "starting_conditions": "2015 年加入 PortSwigger 并主导研究线，处于 Burp Suite 扩展生态与商业扫描器产品线内部，具备工具集成与分发的组织条件。",
+      "repeated_practice": "每篇 writeup 配套工具升级——Turbo Intruder（2021 自写 HTTP/2 栈、2022 pause 参数、2023 single-packet）、HTTP Request Smuggler（2019 创建、2021 H2 检测、2022 CSD 检测）、Param Miner（2021）、Backslash Powered Scanner（2016）；多项检测能力并入 Burp 核心扫描器，并以 Web Security Academy 免费 lab 复现。",
+      "feedback": "社区研究者使用其技术发现新漏洞形成回授；GitHub 仓库 PortSwigger/http-request-smuggler 显示 1.2k stars、128 forks、11 open issues、2 PRs、359 commits；bug bounty 赏金多笔捐出。",
+      "intermediate_capability": "使研究产出沉淀为可复用基础设施，反过来支撑下一轮更难目标。",
+      "observed_outcomes": [
+        "三个最流行 Burp 扩展（ActiveScan++、HTTP Request Smuggler、Backslash Powered Scanner）",
+        "年度工具升级与研究方向对齐",
+        "Burp Scanner 集成使方法论被规模化采用"
+      ],
+      "evidence_ids": [
+        "albinowax-works-006",
+        "JK-COM-01",
+        "JK-COM-03",
+        "ext-tools-01",
+        "ext-role-01",
+        "jkt-tl-ext-2016"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "该回路可能主要由 PortSwigger 的商业模型（Burp 生态需持续集成新检测）结构性要求驱动，而非个人选择；多数从业者缺乏全职带薪研究岗位与产品线，难以复现此回路，属组织资源条件而非可迁移个人习惯。"
+    },
+    {
+      "name": "被忽视面选取与既有管线复用",
+      "starting_conditions": "2017 年识别出反向代理、负载均衡与后端分析系统构成的几乎不可见的攻击面长期被忽视。",
+      "repeated_practice": "2017 年以主动回连载荷加 Burp Collaborator 加 ZMap/ZGrab 约 5 万台服务器规模化扫描，固化为 Collaborator Everywhere；2018 年复用该管线做 Web Cache Poisoning，并将识别 unkeyed input 工具化为 Param Miner；2019 年复活 2005 年 Watchfire 文档化后被搁置的 request smuggling；2022 年由 amazon.com 偶然 CL.0 发现转向主动系统化扫描。",
+      "feedback": "被忽视面竞争门槛低、单次产出高；bug bounty 真实目标与厂商补丁确认有效。",
+      "intermediate_capability": "以选低竞争面加复用既有工具链替代逐次从零选题，形成可迁移的选题与建管线习惯。",
+      "observed_outcomes": [
+        "Collaborator Everywhere",
+        "Param Miner",
+        "HTTP Request Smuggler",
+        "CSD 检测"
+      ],
+      "evidence_ids": [
+        "jk-dec-2017-cracking-the-lens-hidden-surface",
+        "jk-dec-2018-cache-poisoning-pipeline-reuse",
+        "jk-dec-2019-revive-forgotten-smuggling",
+        "jk-dec-2022-accident-driven-scope-expansion",
+        "r1-ev-002"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "选被忽视面是安全研究的常见启发式，并非 Kettle 独有；该模式也可能是由各自独立的机会性发现事后归纳而成，而非事先自觉执行的选题策略。"
+    },
+    {
+      "name": "新协议/新假设边界下自建原语与跨域借用",
+      "starting_conditions": "2021 年 HTTP/2 二进制成帧消解了 HTTP/1.1 走私的旧失效条件；2023 年竞态研究受困于网络抖动掩盖 sub-state。",
+      "repeated_practice": "2021 年从零编写 HTTP/2 客户端以触达协议降级边界；2023 年放弃请求原子与 GET 不改状态假设，借鉴 2020 USENIX Timeless Timing Attacks 的单包思路结合 Nagle 算法自创 single-packet attack。",
+      "feedback": "既有工具无法触达新边界时即自建原语补盲；single-packet attack 将中位时延抖动从约 4ms 降至约 1ms，此前被掩盖的 sub-state 可被可靠触发。",
+      "intermediate_capability": "当领域默认假设失效时，以自建或借用跨域原语触达新的可利用边界。",
+      "observed_outcomes": [
+        "H2.CL/H2.TE/H2.X 检测",
+        "single-packet race condition"
+      ],
+      "evidence_ids": [
+        "albinowax-works-003",
+        "albinowax-works-005",
+        "jk-dec-2021-http2-from-scratch-and-reapply",
+        "jk-dec-2023-drop-atomicity-single-packet"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "两次实例可能是对两个不相关协议问题的独立反应，而非被自觉执行的方法；样本仅两次，自建原语与跨域借用是否构成稳定习惯尚需更多实例。"
+    }
+  ],
+  "tensions": [
+    "evidence 内部年份冲突：jkt-tl-2019 short_quote 记 first documented in 2004 与 albinowax-works-002 记 first documented back in 2005 by Watchfire 不一致；经抓取核验来源正文逐字为 HTTP Request Smuggling was first documented back in 2005 by Watchfire，jkt-tl-2019 的 2004 引文与来源不符、已作废并由 r1-ev-002 替代，综合以 2005 by Watchfire 为准。",
+    "方法论阶段数目口径：综合初稿称 Detect/Confirm/Explore/Exploit 四阶段，数目无来源支撑；经核验图标签为 Detect-Confirm-Explore-Store/Attack（5 阶段，末段合并），正文 H2 章节逐字为 Detect/Confirm/Explore/Exploit/Store/Attack 共 6 个独立标题（Exploit 为正文独立章节）；本综合据 r1-ev-001 采用正文六阶段表述并保留 Exploit。",
+    "头衔表述冲突：PortSwigger 官方 profile 写 Director of Research，第三方搜索摘要写 Head of Research；未见公开晋升时间证据，综合以 first-party 的 Director of Research 为准。",
+    "同名歧义：Wikipedia 的 James Kettle 条目描述英国 slalom canoeist，与本研究对象无关；本研究以 PortSwigger 官方页面与 @albinowax handle 为身份锚点。",
+    "幸存者偏差（发表样本）：所有机制与阶段均从 2016–2023 年已公开发表的 writeup 推断，研究对象未发表的研究尝试、被放弃的方向与失败项目不可见，构成发表幸存偏差，限制机制可推广性的内部效度。",
+    "组织宣传性偏差：一手来源大量为 PortSwigger 官方 profile 页与 PortSwigger blog，属雇主自有渠道，对员工角色与成果的描述具宣传性倾向。",
+    "深度对话维度材料不对称：仅取得一句入行自述（厌倦 Counter-Strike）与若干标题级演讲索引，方法论成长的内部失败-反馈-转型因果链无长访谈或播客一手自述支撑；不应据此推断其成长机制已充分记录。",
+    "偶然机会与系统尝试并存：2021 年 HEAD 方法突破自述为 blind luck，2022 年 amazon.com CL.0 系偶然发现后转为主动扫描，2018 年 Mozilla SHIELD 一例由既有规则副作用偶然触发；这些偶然点与系统化扫描叙事并存，区分系统尝试与运气成分时需保留二者。"
+  ],
+  "transferable_practices": [
+    "以响应/时延差分替代已知签名匹配，将有趣行为作为检测目标。",
+    "选取被忽视或被遗忘的攻击面与研究以降低竞争门槛。",
+    "复用既有研究管线与工具链进入新方向，而非每次从零选题。",
+    "当既有工具无法触达新边界时，自建底层原语（如自写协议客户端）补盲。",
+    "将关键手工步骤工具化为可复用扩展，使方法可传播、可迭代。",
+    "显式记录失败路径与被放弃方向（如 LCS-regex、七年悬案），保留试错与淘汰过程。",
+    "借用跨域学术成果（如 USENIX Timeless Timing Attacks）迁移到新问题。",
+    "以数据规模（GitHub 大规模爬取）与外部协作（hackxor 悬赏）替代纯个人灵感。"
+  ],
+  "non_transferable_conditions": [
+    "PortSwigger Director of Research 全职带薪研究岗位与 Burp Suite 产品线，使研究、工具集成、社区采用的闭环在组织层面被结构性支持。",
+    "bug bounty 管线（New Relic、Trello、Red Hat、PayPal、Netflix、Atlassian、Verizon、Amazon 等真实目标）作为反馈与资金来源。",
+    "早期以比特币计价赏金购置研究用计算机的时期特定条件。",
+    "Black Hat USA、DEF CON、Nullcon 作为固定公开发表渠道。",
+    "Web Security Academy 免费 lab 等 PortSwigger 自有传播资源。"
+  ],
+  "open_questions": [
+    "入行细节（校名、专业、年份）在 first-party 资料中未给出；第三方摘要称 University of Bristol 哲学专业但未在 first-party 抓取页确认。",
+    "加入 PortSwigger 的精确日期与 Head→Director 职衔变动时间线无一手记录。",
+    "2024–2026 年最新 writeup（如 The Fragile Lock、CSS: the bomb inside your inbox）作者署名未逐一核验，不能据此归到 Kettle 名下。",
+    "导师或长期合作者关系仅局部证实（Gareth Heyes、regilero），覆盖面有限。",
+    "长访谈、播客、AMA 等一手自述材料缺失，方法论成长的内部因果链无自述支撑。",
+    "2013 年 LCS-regex 差分原型无公开链接，仅在 2016 writeup 中转述，无法独立核验其细节与失败原因。",
+    "年度发表节奏的成因（刻意训练、机构安排或会议周期驱动）无直接一手陈述，仅能从发表日期序列推断。",
+    "Pwnie Awards 是否曾获提名无法从 winners 页确认，曾获奖缺乏证据。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-synthesis-v2-20260927-122855-460",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790483632377763000-james-kettle-albinowax-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "52d5809f-0389-42ac-8113-7df1c2cf81e6",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_w57uibkj5k369mzav75j9lku",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-synthesis-v2-20260927-122855-460/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T04:33:52.423961+00:00"
+      },
+      {
+        "tool_use_id": "call_6fuo2vl5wuxwqnf221tngrbz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-synthesis-v2-20260927-122855-460/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T04:33:52.423991+00:00"
+      },
+      {
+        "tool_use_id": "call_47lwn26emi3bu61hmv9h3n5a",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-synthesis-v2-20260927-122855-460/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "620b6d32698cf1ae7ff1ed90be679e23104c3153d045613ee8580441ac94d226",
+        "accessed_at": "2026-09-27T04:33:52.423997+00:00"
+      },
+      {
+        "tool_use_id": "call_v1u3p4bq9h0hfs5u0wmz5xwd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-synthesis-v2-20260927-122855-460/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "eccd442dbfddb55a2303fdfb6293767e1985a741efaa75cf0b7a2a894c70a92b",
+        "accessed_at": "2026-09-27T04:33:52.424008+00:00"
+      },
+      {
+        "tool_use_id": "call_djjm2wax3lxri22nak0l85no",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-synthesis-v2-20260927-122855-460/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "616a4a33c7deee808197c0a153006af7e92acf2c280562114b72a8d6520873ef",
+        "accessed_at": "2026-09-27T04:33:52.424093+00:00"
+      },
+      {
+        "tool_use_id": "call_4pbnxc255y0m2d3ovbzo7bbr",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-synthesis-v2-20260927-122855-460/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "867f5810d93f74c55d46f347db5a1b65cd805cf6d444c91c6bb8e24af998fbc7",
+        "accessed_at": "2026-09-27T04:33:52.424139+00:00"
+      },
+      {
+        "tool_use_id": "call_p1idwidvsmma93q60kkb5k6c",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-synthesis-v2-20260927-122855-460/checkpoint.md",
+          "content": "# 综合 checkpoint — James Kettle (albinowax) synthesis v2\n\n## 输入\n- person_json: rank 23, handle albinowax, 主攻 HTTP/Web, writeup 证据指向 portswigger.net/research\n- evidence_json: 六维 (works/conversations/community/external/decisions/timeline) + targeted (r1-ev-001, r1-ev-002)\n- revision_context: round 1, 4 条 review issues (RR1-RR4)，新增 r1-ev-001/r1-ev-002，作废 jkt-tl-2019\n\n## 关键综合决策\n1. RR1（方法论阶段结构）: 据 r1-ev-001 采用正文六阶段 Detect/Confirm/Explore/Exploit/Store/Attack，保留 Exploit（正文独立 H2 章节），去除无来源支撑的\"四阶段\"数目；不采用复核给出的\"五阶段 Detect/Confirm/Explore/Store/Attack\"（漏 Exploit）。\n2. RR2（年份冲突）: 据 r1-ev-002 以 2005 by Watchfire 为准；jkt-tl-2019 不再引用，改引 r1-ev-002；tensions 标注 evidence 内部年份冲突。\n3. RR3/RR4（偏差声明）: output.schema.json 无 biases 字段且 additionalProperties:false，将\"幸存者偏差（发表样本）\"与\"组织宣传性偏差\"写入 tensions，满足声明偏差的意图同时符合 schema。\n4. 阶段划分 5 段: 入行(大学-2015前) → 2015-16 组织角色确立+首次方法论转向 → 2017-18 被忽视面+管线复用 → 2019-21 协议级+底层自建 → 2022-23 客户端前移+跨域借用。\n5. 机制 4 个: (A) 差分/异常驱动检测；(B) 研究即工具+社区反馈回路；(C) 被忽视面选取+管线复用；(D) 新边界下自建原语+跨域借用。\n6. 所有引用 evidence id 均 verified_in_run=true；jkt-tl-2019 已排除。\n\n## 待复核 / 限制\n- 机制 D 仅 2 实例（2021 HTTP/2、2023 race），confidence=medium，alternative_explanation 注明样本不足。\n- 入行阶段单源 (PortSwigger profile, reported)，confidence=low。\n- 2024-2026 最新 writeup 作者署名未逐一核验，列为 open question。\n- 长访谈/播客/AMA 缺失，方法论成长内部因果链无自述支撑，tensions 已声明。\n"
+        },
+        "success": true,
+        "content_sha256": "67ba3e34fa504fe20ba374ed7c1c7a56b0c572e646618105cf2595f2aec08b77",
+        "accessed_at": "2026-09-27T04:33:52.424696+00:00"
+      },
+      {
+        "tool_use_id": "call_bu0fn4dxlhzh4lh7hl424p77",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/james-kettle-albinowax-synthesis-v2-20260927-122855-460/output.json",
+          "content": "{\n  \"person\": \"James Kettle (albinowax)\",\n  \"expertise\": [\n    \"HTTP request smuggling / HTTP desync（CL.TE、TE.CL、H2.CL、H2.TE、H2.X、client-side desync、pause-based desync、MITM-powered desync）\",\n    \"Web cache poisoning（unkeyed input 识别、cache entanglement）\",\n    \"Server-side template injection (SSTI)\",\n    \"Web race conditions（single-packet attack、limit-overrun、多端点、单端点、对象遮蔽、延迟碰撞）\",\n    \"HTTP/2 协议级漏洞\",\n    \"差分与异常驱动的漏洞扫描\",\n    \"Burp Suite 扩展开发（ActiveScan++、HTTP Request Smuggler、Backslash Powered Scanner、Param Miner、Turbo Intruder、Collaborator Everywhere）\",\n    \"被忽视攻击面发现（以主动回连载荷探测反向代理、负载均衡与后端分析系统）\",\n    \"以 bug bounty 真实目标校准研究有效性\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"大学阶段至 2015 年前\",\n      \"stage\": \"入行转向\",\n      \"capability_change\": \"由对电子竞技游戏 Counter-Strike 失去兴趣而转向黑客技术，并以一笔漏洞赏金收入购置研究用计算机；此阶段尚未形成可识别的方法论，仅完成兴趣与资源的初步转移。具体校名、专业与年份在 first-party 资料中未给出，该转向仅由 PortSwigger 官方资料页转述。\",\n      \"evidence_ids\": [\"jkt-tl-university\", \"james-kettle-convo-01\", \"jk-dec-entry-bored-of-counterstrike\"],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2015–2016\",\n      \"stage\": \"组织研究角色确立与首次方法论转向\",\n      \"capability_change\": \"2015 年加入 PortSwigger 并主导其研究线，发表 server-side template injection 原创研究；2016 年发表 Backslash Powered Scanning，放弃以技术专属 payload 列表逐项匹配已知漏洞的范式，改为发送通用探针并比对响应属性（状态码、行数、词数、HTML 结构、反射计数），将输入分为 boring/interesting/promising 三类后迭代调查，明确建模为对资深手工测试者思路的模仿；同期完成 ActiveScan++、HTTP Request Smuggler、Backslash Powered Scanner 等 Burp 扩展。文中记录 2013 年曾尝试基于最长公共子序列生成正则做响应比对，因 O(n²) 复杂度与自我拒绝服务问题被放弃，体现显式的试错与淘汰。\",\n      \"evidence_ids\": [\"ext-identity-01\", \"albinowax-works-001\", \"jk-dec-2016-backslash-behaviour-scanning\", \"jkt-tl-2016\", \"jkt-tl-ext-2016\", \"james-kettle-convo-03\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017–2018\",\n      \"stage\": \"被忽视攻击面选取与既有管线复用\",\n      \"capability_change\": \"2017 年选取反向代理、负载均衡与后端分析系统构成的几乎不可见的攻击面，因其设计为不可见、无法依赖响应内容审计，改为发送令目标主动回连的载荷，借助 Burp Collaborator 记录回调，并以 ZMap/ZGrab 对约 5 万台服务器规模化扫描，固化为 Collaborator Everywhere 扩展；2018 年 Practical Web Cache Poisoning 明确复用 Cracking the Lens 建立的研究管线，将识别 unkeyed input 这一手工步骤工具化为 Param Miner，并下载 GitHub 前 2 万个 PHP 项目提取 header 名称以扩充字典，发现 X-Original-URL、X-Rewrite-URL 等跨框架 header；另以 hackxor.net 悬赏众筹难题解法。\",\n      \"evidence_ids\": [\"jk-dec-2017-cracking-the-lens-hidden-surface\", \"jk-dec-2018-cache-poisoning-pipeline-reuse\", \"jkt-tl-2018\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2019–2021\",\n      \"stage\": \"协议级系统化与底层基础设施自建\",\n      \"capability_change\": \"2019 年复活 Watchfire 于 2005 年文档化但因难度与附带损害被长期搁置的 HTTP Request Smuggling，重构为 Detect/Confirm/Explore/Exploit/Store/Attack 的方法论（图标签合并末段为 Store/Attack），区分 CL.TE 与 TE.CL，以超时探测降低误报与对他人影响，发布 HTTP Request Smuggler 并将检测并入 Burp 核心扫描器；2020 年 Web Cache Entanglement 在 2018 缓存投毒基础上深化；2021 年因 HTTP/2 二进制成帧消解旧走私条件，从零编写 HTTP/2 客户端集成进 Turbo Intruder，定义 H2.CL、H2.TE、H2.X，并复用 2019 年超时检测的改造版本扫描 bug bounty 管线。\",\n      \"evidence_ids\": [\"albinowax-works-002\", \"albinowax-works-003\", \"jk-dec-2019-revive-forgotten-smuggling\", \"jk-dec-2021-http2-from-scratch-and-reapply\", \"jkt-tl-2020\", \"jkt-tl-2021\", \"r1-ev-001\", \"r1-ev-002\", \"JK-COM-01\", \"JK-COM-02\", \"JK-COM-03\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022–2023\",\n      \"stage\": \"客户端前移与跨域原语借用\",\n      \"capability_change\": \"2022 年因 amazon.com 上一次偶然发现的 CL.0 desync（规范化请求竟被浏览器 fetch() 直接触发）而主动系统化扫描，将走私点前移至受害者浏览器与前端之间，定义 client-side desync (CSD)，涵盖 CL.0/H2.0、pause-based desync、MITM-powered desync；2023 年由 2016 年 Josip Franjković 报告的 Facebook 竞态这一七年悬案驱动，放弃请求原子与 GET 不改状态两个假设，借鉴 2020 USENIX Timeless Timing Attacks 的单包思路结合 Nagle 算法自创 single-packet attack，将中位时延抖动从约 4ms 降至约 1ms。\",\n      \"evidence_ids\": [\"albinowax-works-004\", \"albinowax-works-005\", \"jk-dec-2022-accident-driven-scope-expansion\", \"jk-dec-2023-drop-atomicity-single-packet\", \"jkt-tl-2022\", \"jkt-tl-2023\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"差分与异常驱动的检测范式\",\n      \"starting_conditions\": \"2013 年曾尝试基于最长公共子序列生成正则做响应比对，因 O(n²) 复杂度与自我拒绝服务问题被放弃；该次失败由 2016 年 writeup 转述，无独立公开链接可核验。\",\n      \"repeated_practice\": \"2016 年改为基于响应属性（状态码、行数、词数、HTML 结构、反射计数）的差分；2019 年将差分迁移到超时差分以探测协议解析分歧；2022 年以行为差异识别客户端反同步；2023 年将识别异常自述为发现竞态最重要的技能。\",\n      \"feedback\": \"响应或时延差异揭示有趣行为，再以 bug bounty 真实目标（New Relic、Trello、Red Hat、PayPal、Netflix、Atlassian、Verizon、Amazon 等）的赏金与厂商补丁校准检测有效性。\",\n      \"intermediate_capability\": \"把资深手工测试者对异常响应的直觉转化为可重复、可分类（boring/interesting/promising）的检测信号，进而可自动化。\",\n      \"observed_outcomes\": [\n        \"Backslash Powered Scanner\",\n        \"HTTP Request Smuggler 的超时检测\",\n        \"Browser-Powered Desync 的 CSD 与 connection-state probe 检测\",\n        \"single-packet attack 触发的竞态检测\"\n      ],\n      \"evidence_ids\": [\"albinowax-works-001\", \"albinowax-works-002\", \"albinowax-works-004\", \"albinowax-works-005\", \"jk-dec-2016-backslash-behaviour-scanning\", \"jk-dec-2023-drop-atomicity-single-packet\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"差分可能是在事后写作时对各次独立研究的统合叙事，而非当时即被自觉执行的方法；2013 年失败到 2016 年成形之间的学习路径无公开一手记录，不能排除该范式是事后归纳。\"\n    },\n    {\n      \"name\": \"研究即工具与社区反馈回路\",\n      \"starting_conditions\": \"2015 年加入 PortSwigger 并主导研究线，处于 Burp Suite 扩展生态与商业扫描器产品线内部，具备工具集成与分发的组织条件。\",\n      \"repeated_practice\": \"每篇 writeup 配套工具升级——Turbo Intruder（2021 自写 HTTP/2 栈、2022 pause 参数、2023 single-packet）、HTTP Request Smuggler（2019 创建、2021 H2 检测、2022 CSD 检测）、Param Miner（2021）、Backslash Powered Scanner（2016）；多项检测能力并入 Burp 核心扫描器，并以 Web Security Academy 免费 lab 复现。\",\n      \"feedback\": \"社区研究者使用其技术发现新漏洞形成回授；GitHub 仓库 PortSwigger/http-request-smuggler 显示 1.2k stars、128 forks、11 open issues、2 PRs、359 commits；bug bounty 赏金多笔捐出。\",\n      \"intermediate_capability\": \"使研究产出沉淀为可复用基础设施，反过来支撑下一轮更难目标。\",\n      \"observed_outcomes\": [\n        \"三个最流行 Burp 扩展（ActiveScan++、HTTP Request Smuggler、Backslash Powered Scanner）\",\n        \"年度工具升级与研究方向对齐\",\n        \"Burp Scanner 集成使方法论被规模化采用\"\n      ],\n      \"evidence_ids\": [\"albinowax-works-006\", \"JK-COM-01\", \"JK-COM-03\", \"ext-tools-01\", \"ext-role-01\", \"jkt-tl-ext-2016\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"该回路可能主要由 PortSwigger 的商业模型（Burp 生态需持续集成新检测）结构性要求驱动，而非个人选择；多数从业者缺乏全职带薪研究岗位与产品线，难以复现此回路，属组织资源条件而非可迁移个人习惯。\"\n    },\n    {\n      \"name\": \"被忽视面选取与既有管线复用\",\n      \"starting_conditions\": \"2017 年识别出反向代理、负载均衡与后端分析系统构成的几乎不可见的攻击面长期被忽视。\",\n      \"repeated_practice\": \"2017 年以主动回连载荷加 Burp Collaborator 加 ZMap/ZGrab 约 5 万台服务器规模化扫描，固化为 Collaborator Everywhere；2018 年复用该管线做 Web Cache Poisoning，并将识别 unkeyed input 工具化为 Param Miner；2019 年复活 2005 年 Watchfire 文档化后被搁置的 request smuggling；2022 年由 amazon.com 偶然 CL.0 发现转向主动系统化扫描。\",\n      \"feedback\": \"被忽视面竞争门槛低、单次产出高；bug bounty 真实目标与厂商补丁确认有效。\",\n      \"intermediate_capability\": \"以选低竞争面加复用既有工具链替代逐次从零选题，形成可迁移的选题与建管线习惯。\",\n      \"observed_outcomes\": [\n        \"Collaborator Everywhere\",\n        \"Param Miner\",\n        \"HTTP Request Smuggler\",\n        \"CSD 检测\"\n      ],\n      \"evidence_ids\": [\"jk-dec-2017-cracking-the-lens-hidden-surface\", \"jk-dec-2018-cache-poisoning-pipeline-reuse\", \"jk-dec-2019-revive-forgotten-smuggling\", \"jk-dec-2022-accident-driven-scope-expansion\", \"r1-ev-002\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"选被忽视面是安全研究的常见启发式，并非 Kettle 独有；该模式也可能是由各自独立的机会性发现事后归纳而成，而非事先自觉执行的选题策略。\"\n    },\n    {\n      \"name\": \"新协议/新假设边界下自建原语与跨域借用\",\n      \"starting_conditions\": \"2021 年 HTTP/2 二进制成帧消解了 HTTP/1.1 走私的旧失效条件；2023 年竞态研究受困于网络抖动掩盖 sub-state。\",\n      \"repeated_practice\": \"2021 年从零编写 HTTP/2 客户端以触达协议降级边界；2023 年放弃请求原子与 GET 不改状态假设，借鉴 2020 USENIX Timeless Timing Attacks 的单包思路结合 Nagle 算法自创 single-packet attack。\",\n      \"feedback\": \"既有工具无法触达新边界时即自建原语补盲；single-packet attack 将中位时延抖动从约 4ms 降至约 1ms，此前被掩盖的 sub-state 可被可靠触发。\",\n      \"intermediate_capability\": \"当领域默认假设失效时，以自建或借用跨域原语触达新的可利用边界。\",\n      \"observed_outcomes\": [\n        \"H2.CL/H2.TE/H2.X 检测\",\n        \"single-packet race condition\"\n      ],\n      \"evidence_ids\": [\"albinowax-works-003\", \"albinowax-works-005\", \"jk-dec-2021-http2-from-scratch-and-reapply\", \"jk-dec-2023-drop-atomicity-single-packet\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"两次实例可能是对两个不相关协议问题的独立反应，而非被自觉执行的方法；样本仅两次，自建原语与跨域借用是否构成稳定习惯尚需更多实例。\"\n    }\n  ],\n  \"tensions\": [\n    \"evidence 内部年份冲突：jkt-tl-2019 short_quote 记 first documented in 2004 与 albinowax-works-002 记 first documented back in 2005 by Watchfire 不一致；经抓取核验来源正文逐字为 HTTP Request Smuggling was first documented back in 2005 by Watchfire，jkt-tl-2019 的 2004 引文与来源不符、已作废并由 r1-ev-002 替代，综合以 2005 by Watchfire 为准。\",\n    \"方法论阶段数目口径：综合初稿称 Detect/Confirm/Explore/Exploit 四阶段，数目无来源支撑；经核验图标签为 Detect-Confirm-Explore-Store/Attack（5 阶段，末段合并），正文 H2 章节逐字为 Detect/Confirm/Explore/Exploit/Store/Attack 共 6 个独立标题（Exploit 为正文独立章节）；本综合据 r1-ev-001 采用正文六阶段表述并保留 Exploit。\",\n    \"头衔表述冲突：PortSwigger 官方 profile 写 Director of Research，第三方搜索摘要写 Head of Research；未见公开晋升时间证据，综合以 first-party 的 Director of Research 为准。\",\n    \"同名歧义：Wikipedia 的 James Kettle 条目描述英国 slalom canoeist，与本研究对象无关；本研究以 PortSwigger 官方页面与 @albinowax handle 为身份锚点。\",\n    \"幸存者偏差（发表样本）：所有机制与阶段均从 2016–2023 年已公开发表的 writeup 推断，研究对象未发表的研究尝试、被放弃的方向与失败项目不可见，构成发表幸存偏差，限制机制可推广性的内部效度。\",\n    \"组织宣传性偏差：一手来源大量为 PortSwigger 官方 profile 页与 PortSwigger blog，属雇主自有渠道，对员工角色与成果的描述具宣传性倾向。\",\n    \"深度对话维度材料不对称：仅取得一句入行自述（厌倦 Counter-Strike）与若干标题级演讲索引，方法论成长的内部失败-反馈-转型因果链无长访谈或播客一手自述支撑；不应据此推断其成长机制已充分记录。\",\n    \"偶然机会与系统尝试并存：2021 年 HEAD 方法突破自述为 blind luck，2022 年 amazon.com CL.0 系偶然发现后转为主动扫描，2018 年 Mozilla SHIELD 一例由既有规则副作用偶然触发；这些偶然点与系统化扫描叙事并存，区分系统尝试与运气成分时需保留二者。\"\n  ],\n  \"transferable_practices\": [\n    \"以响应/时延差分替代已知签名匹配，将有趣行为作为检测目标。\",\n    \"选取被忽视或被遗忘的攻击面与研究以降低竞争门槛。\",\n    \"复用既有研究管线与工具链进入新方向，而非每次从零选题。\",\n    \"当既有工具无法触达新边界时，自建底层原语（如自写协议客户端）补盲。\",\n    \"将关键手工步骤工具化为可复用扩展，使方法可传播、可迭代。\",\n    \"显式记录失败路径与被放弃方向（如 LCS-regex、七年悬案），保留试错与淘汰过程。\",\n    \"借用跨域学术成果（如 USENIX Timeless Timing Attacks）迁移到新问题。\",\n    \"以数据规模（GitHub 大规模爬取）与外部协作（hackxor 悬赏）替代纯个人灵感。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"PortSwigger Director of Research 全职带薪研究岗位与 Burp Suite 产品线，使研究、工具集成、社区采用的闭环在组织层面被结构性支持。\",\n    \"bug bounty 管线（New Relic、Trello、Red Hat、PayPal、Netflix、Atlassian、Verizon、Amazon 等真实目标）作为反馈与资金来源。\",\n    \"早期以比特币计价赏金购置研究用计算机的时期特定条件。\",\n    \"Black Hat USA、DEF CON、Nullcon 作为固定公开发表渠道。\",\n    \"Web Security Academy 免费 lab 等 PortSwigger 自有传播资源。\"\n  ],\n  \"open_questions\": [\n    \"入行细节（校名、专业、年份）在 first-party 资料中未给出；第三方摘要称 University of Bristol 哲学专业但未在 first-party 抓取页确认。\",\n    \"加入 PortSwigger 的精确日期与 Head→Director 职衔变动时间线无一手记录。\",\n    \"2024–2026 年最新 writeup（如 The Fragile Lock、CSS: the bomb inside your inbox）作者署名未逐一核验，不能据此归到 Kettle 名下。\",\n    \"导师或长期合作者关系仅局部证实（Gareth Heyes、regilero），覆盖面有限。\",\n    \"长访谈、播客、AMA 等一手自述材料缺失，方法论成长的内部因果链无自述支撑。\",\n    \"2013 年 LCS-regex 差分原型无公开链接，仅在 2016 writeup 中转述，无法独立核验其细节与失败原因。\",\n    \"年度发表节奏的成因（刻意训练、机构安排或会议周期驱动）无直接一手陈述，仅能从发表日期序列推断。\",\n    \"Pwnie Awards 是否曾获提名无法从 winners 页确认，曾获奖缺乏证据。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "24586f1abe4a819a1f96c5be65b7f1cb26ce0b95284def2cc4d64835ccf42d27",
+        "accessed_at": "2026-09-27T04:33:52.424704+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790483632424726000-james-kettle-albinowax-synthesis-v2.json",
+    "label": "James Kettle (albinowax):synthesis:v2",
+    "elapsed_seconds": 296.96,
+    "prompt_sha256": "19187ef5dcbd5e359397c37f9fc51e619ee8279ad0ec6c26149daca51e39a357",
+    "num_turns": 9,
+    "total_cost_usd": 0.7669150000000001,
+    "usage": {
+      "input_tokens": 49812,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 72960,
+      "output_tokens": 19255,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 49812,
+        "outputTokens": 19255,
+        "cacheReadInputTokens": 72960,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.7669150000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

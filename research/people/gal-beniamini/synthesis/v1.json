@@ -1,0 +1,322 @@
+{
+  "person": "Gal Beniamini",
+  "expertise": [
+    "移动 SoC 固件逆向（FullMAC Wi-Fi 芯片 ROM/RAM 提取与 Thumb-2 二进制分析）",
+    "Wi-Fi 协议栈漏洞分析（TDLS/FT-IE 解析、管理帧字段长度校验缺陷）",
+    "嵌入式堆利用（堆溢出链式转化为空闲块重叠、freelist 劫持、函数指针表覆写、stack pivot 与 ROP）",
+    "固件到主机内核横向提权（驱动事件通道内核堆溢出、SLUB slab 整形、内核结构体回收覆写）",
+    "硬件 DMA 攻击面分析（Wi-Fi PCIe 接口 SMMU 缺失检验、DMA 环缓冲地址覆写、任意物理内存写）",
+    "IOMMU/地址转换机制逆向（Apple DART 三级转换、共享环索引校验缺陷、自指映射构造）",
+    "硬件安全机制作为信息侧信道（KTRR 寄存器作为 KASLR 预言机）",
+    "可信执行环境漏洞研究（Qualcomm QSEE、Trustonic Kinibi；trustlet 签名撤销失效与版本回退）",
+    "跨平台研究方法迁移（Android 至 Apple iOS；复用同伴内核漏洞作为研究原语）",
+    "自建研究工具链（malloc/free hook、堆可视化器、基于 RAM 的固件 ROM 提取钩子、Wi-Fi 固件调试器）",
+    "结构化攻击面选题（按防御加固程度反向迁移、部署广度、专有代码复杂度与受审视程度之差筛选研究对象）",
+    "Project Zero 90 天披露流程下的研究—披露—公开发表循环"
+  ],
+  "stages": [
+    {
+      "period": "2017-04（4 月）",
+      "stage": "Wi-Fi SoC 固件内部漏洞发现与利用的公开起点",
+      "capability_change": "在 2017-04-04 的 Project Zero 博客上，以独立长篇 writeup 形式公开 Broadcom FullMAC Wi-Fi SoC（BCM4358）的 TDLS 管理帧堆溢出与 Wi-Fi 邻近、无需用户交互的远程代码执行。该阶段显示其已具备芯片级固件逆向能力（dhdutil 提取 ROM、IDA 分析 Thumb-2 二进制、以 NexMon 符号与开源 brcmsmac 驱动对照定位 bcm_parse_tlvs 及其 110 余处交叉引用）与嵌入式堆利用能力（hook malloc/free 追踪堆操作、自建堆可视化器、将堆溢出链式转化为重叠空闲块、重定向 freelist 覆盖 timer 结构函数指针）。此阶段同时显示其在 Project Zero 博客公开发表深度技术 writeup 的习惯，构成后续连续发表的工作模式起点。",
+      "evidence_ids": [
+        "galbeniamini-works-001",
+        "galbeniamini-works-002",
+        "galbeniamini-works-003",
+        "gb-community-001",
+        "gb-community-002",
+        "gb-dec-01",
+        "gb-timeline-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017-04（同月内推进）",
+      "stage": "由单固件 RCE 向固件—主机内核横向提权与硬件 DMA 攻击面扩展",
+      "capability_change": "在 2017-04-11 的续篇中，研究目标由'单固件 RCE'扩展为'固件控制提权至主机内核代码执行'，提出软件与硬件两条路径。软件路径利用 bcmdhd 驱动与固件间 EtherType 0x886C 事件通道，在 WLC_E_PFN_SWC 事件处理（dhd_handle_swc_evt，Issue #1061）中因 total_count 与 pkt_count 关系未校验导致内核堆溢出，经 SLUB slab 整形后释放含 evt_handler 函数指针表的 wl_priv 结构并回收覆写，借 stack pivot（无 KASLR）执行 ROP 链。硬件路径利用 PCIe DMA：修改固件 RAM 中 DMA 环缓冲地址指向内核代码段，并在 Snapdragon 810（Nexus 6P）与 Exynos 8890（Galaxy S7 Edge）两平台验证 Wi-Fi PCIe 接口 SMMU 缺失或未配置，进而逆向 dma_info 结构、hook ROM 中 dma64_txfast 实现任意物理地址写。能力栈由此由纯软件漏洞链扩展至硬件 DMA 攻击面，并由单平台推进至跨平台验证。",
+      "evidence_ids": [
+        "galbeniamini-works-002",
+        "galbeniamini-works-003"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017-07",
+      "stage": "攻击面跨子系统迁移至 TrustZone TEE",
+      "capability_change": "在 2017-07-24 的 Project Zero 博客上，研究目标由 Wi-Fi 固件转向 Android TrustZone 可信执行环境，覆盖 Qualcomm QSEE 与 Trustonic Kinibi 两类主流实现。其选题依据仍为可迁移的标准：TEE 处理生物特征、支付、DRM 与全盘加密密钥等高价值数据，但 ASLR、栈 cookie、守护页等缓解措施显著滞后于常规操作系统；同时厂商几乎不撤销已签名 trustlet（版本计数器普遍停留在零），使已修补漏洞可经加载旧且仍签名二进制绕过。研究在 Galaxy S7 Edge 上以 Samsung OTP trustlet 已知栈溢出达成 Kinibi 内任意代码执行。此阶段显示其选题框架可跨子系统复用，并具备跨厂商对比分析能力。",
+      "evidence_ids": [
+        "gb-dec-02",
+        "gb-community-003",
+        "gb-community-004"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017-09 至 2017-10",
+      "stage": "研究方法跨平台迁移至 Apple 生态并完成端到端利用链",
+      "capability_change": "在 2017-09-28 至 2017-10-11 的 Over The Air Vol.2 三部曲中，研究平台由 Android 迁移至 Apple，以'更完整描绘移动生态 Wi-Fi 安全状态'。为克服 iOS 闭源与缺少研究平台的约束，复用同伴 Ian Beer 的内核漏洞获取内存读写原语，逆向 Apple 专有 Wi-Fi 驱动（AppleBCMWLANCore、AppleBCMWLANBusInterfacePCIe），通过 kalloc zone 分析定位 Wi-Fi 芯片 TCM 在内核地址空间的映射，并以基于 RAM 的钩子提取固件 ROM、自建 Wi-Fi 固件调试器。至 2017-10-11 在 iPhone 7（iOS 10.2）上由 Wi-Fi 固件代码执行经 PCIe/DART IOMMU 达到主机内核任意代码执行：逆向 Apple 专有 DART 三级转换机制，发现主机以固定上界 0x10000 校验共享环索引而非实际环容量导致可靠越界写，经 flow ring 删除响应泄露塑形 IO-Space，覆写 DART 描述符并构造自指映射（作者命名 'Inception'）使 Wi-Fi 芯片获得对全部主机物理内存的永久 DMA 访问，最后将 KTRR 硬件寄存器映射入 IO-Space 直接读取，以 KTRR 作预言机击败 KASLR。该阶段完成由单组件漏洞到端到端利用链的工程化能力闭合，并向 Apple 报告 7 个漏洞（iOS 11 修复）。",
+      "evidence_ids": [
+        "gb-dec-03",
+        "gb-dec-04",
+        "gb-dec-05"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "结构化攻击面选题：按防御加固反向迁移、部署广度与专有代码复杂度之差筛选目标",
+      "starting_conditions": "加入 Google Project Zero 后，面对移动应用处理器已被广泛研究的既有格局，需在受审视较少的组件中确定研究对象；2017-04 的 Broadcom Wi-Fi 研究明确记录该选择标准：应用处理器代码已被充分研究，其他组件鲜受同等审视，Broadcom Wi-Fi 芯片部署最广（Nexus、三星旗舰及 iPhone 4 以来全部 iPhone），FullMAC SoC 引入运行于独立低功耗处理器上的专有复杂代码库。",
+      "repeated_practice": "在半年内三次重复套用同一选题框架：Wi-Fi SoC（2017-04，以 Broadcom FullMAC 专有固件为受审视不足目标）、TrustZone TEE（2017-07，以 ASLR/栈 cookie/守护页滞后与 trustlet 撤销失效为防御滞后标志）、Apple Wi-Fi（2017-09 至 10，以 iOS 闭源与缺少研究平台为约束下复用 Broadcom 研究方法）。",
+      "feedback": "反馈来源为厂商响应与公开披露结果：Broadcom 被记录为高度响应并反馈新版 SoC 改用 MPU 等硬件安全机制，作者据厂商回应评估缓解方向（记为 'a step in the right direction'）并影响后续判断；向 Apple 报告 7 个漏洞并在 iOS 11 修复，形成披露—厂商响应—研究调整闭环。",
+      "intermediate_capability": "形成可在不同子系统间迁移的攻击面评估方法：以防御加固程度反向迁移、部署广度、专有代码复杂度与受审视程度之差三项可核验标准筛选目标，而非依主题偏好选题。",
+      "observed_outcomes": [
+        "2017-04 选中 Broadcom Wi-Fi SoC 作为首个 Project Zero 深度研究对象，结论适用于任何采用相同芯片组的系统。",
+        "2017-07 转向 TrustZone TEE，同一框架识别出 trustlet 签名撤销失效与版本回退作为系统性缺陷，并在 Galaxy S7 Edge 上达成 Kinibi 任意代码执行。",
+        "2017-09 至 10 跨平台迁移至 Apple，将同一 Wi-Fi 研究方法在 iOS 闭源约束下复用并闭合端到端链。"
+      ],
+      "evidence_ids": [
+        "gb-dec-01",
+        "gb-dec-02",
+        "gb-dec-03",
+        "gb-community-002",
+        "gb-community-003"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "该选题连续性也可能由 Project Zero 团队层面的选题机制与 90 天披露政策驱动，而非纯个人方法论迁移；内部动因未在一手 writeup 中直接陈述，故选题框架的'可迁移性'部分属推断。"
+    },
+    {
+      "name": "自建可复用底层工具链：固件提取、堆追踪、跨平台调试器",
+      "starting_conditions": "面对 FullMAC Wi-Fi SoC 闭源固件、缺少公开符号与既有调试平台的研究起点，需以逆向工具链才能进入固件内部。",
+      "repeated_practice": "在 Android 与 Apple 两个平台重复构建同类研究基础设施：通过 dhdutil 提取固件 ROM、以 IDA 分析 Thumb-2 二进制、借用 NexMon 符号与开源 brcmsmac 驱动对照定位 bcm_parse_tlvs 及其 110 余处交叉引用；hook malloc/free 追踪堆操作并自建堆可视化器；在 Apple 平台复用 Ian Beer 内核漏洞作为内存读写原语，逆向 AppleBCMWLANCore 与 AppleBCMWLANBusInterfacePCIe，以基于 RAM 的钩子提取固件 ROM，自建 Wi-Fi 固件调试器。",
+      "feedback": "反馈来源为工具在后续漏洞发现与利用构造中的直接可用性：自建堆可视化器支撑了 TDLS 堆溢出链式转化为空闲块重叠与 freelist 覆写；DMA 逆向支撑 Snapdragon 810 与 Exynos 8890 双平台的任意物理写；iOS 调试器与 ROM 提取钩子支撑 Vol.2 三部曲的连续推进。",
+      "intermediate_capability": "形成以自建工具进入闭源/无符号固件环境、并将同一工具范式跨平台移植的能力，区别于依赖既有平台的单点漏洞研究。",
+      "observed_outcomes": [
+        "2017-04 完成 BCM4358 固件逆向并以堆溢出实现 Wi-Fi 邻近无交互 RCE。",
+        "2017-04 完成 bcmdhd 内核堆溢出至 ROP 的提权与跨平台 DMA 任意物理写。",
+        "2017-09 至 10 在 iOS 闭源约束下复用 Broadcom 研究方法并完成端到端内核链。"
+      ],
+      "evidence_ids": [
+        "galbeniamini-works-001",
+        "galbeniamini-works-002",
+        "gb-dec-03",
+        "gb-dec-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "工具建设可能受 Project Zero 团队既有基础设施与同伴成果（Ian Beer 内核漏洞）支撑，而非完全个人产出；其跨平台复用至少部分依赖该外部原语，故'可复用'属性含组织资源成分。"
+    },
+    {
+      "name": "由单组件漏洞向端到端利用链的逐层逼近",
+      "starting_conditions": "2017-04 起点为单固件 RCE；移动设备攻击面呈'固件—驱动—内核—IOMMU—硬件保护'分层结构。",
+      "repeated_practice": "在半年内逐层推进：固件内堆溢出 RCE（2017-04）→ 固件到主机内核提权（软件路径内核堆溢出 + ROP；硬件路径 PCIe DMA 任意物理写，2017-04）→ 端到端 Apple iOS 链（DART 三级转换逆向 + 共享环越界写 + flow ring 塑形 + 自指映射 + KTRR 作 KASLR 预言机，2017-10）。",
+      "feedback": "反馈来源为分层验证结果：SLUB slab 整形与 wl_priv 回收覆写在 Nexus 6P 上验证内核控制；DART 自指映射与 KTRR 读取在 iPhone 7 上验证全主机物理内存访问；向 Apple 报告 7 漏洞并 iOS 11 修复，向 Broadcom/Samsung 获得厂商书面回应。",
+      "intermediate_capability": "形成以分层利用构造端到端攻击链的工程化能力，并养成对硬件保护机制本身作为攻击面与信息侧信道的二次审视（KTRR 作 KASLR 预言机）。",
+      "observed_outcomes": [
+        "2017-04 完成单固件 RCE。",
+        "2017-04 同月完成固件→内核提权双路径与跨平台 DMA 任意物理写。",
+        "2017-10 在 iPhone 7（iOS 10.2）完成 Wi-Fi 邻近至主机内核任意代码执行的端到端链。"
+      ],
+      "evidence_ids": [
+        "galbeniamini-works-001",
+        "galbeniamini-works-002",
+        "gb-dec-04",
+        "gb-dec-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "逐层推进的时间序列本身可作为'连续、有规划的研究推进'的推断依据，但其内部动因（团队选题机制、同伴反馈、厂商响应、披露政策对选题的影响）未在一手来源中直接陈述，故部分属 inferred。"
+    },
+    {
+      "name": "基于公开同行成果的迭代式研究定位与同行/厂商反馈回路",
+      "starting_conditions": "研究启动阶段即处于 Project Zero 团队与更广安全研究社区之中，而非孤立完成。",
+      "repeated_practice": "在研究启动与披露各环节引入同行与厂商反馈：2017-04 致谢 Thomas Dullien（@halvarflake）协助启动研究、头脑风暴与文献检索，伦敦办公室同事协助理解利用约束并作为讨论对象；2017-07 在 TrustZone writeup 中引用 Quarkslab Fernand Lone Sang 对 Samsung SBOOT 的逆向研究与本人先前 QSEE/Widevine 工作标定自身坐标；披露后主动纳入厂商书面回应（Samsung 关于 kinibi 400 rollback prevention 的官方回复）。",
+      "feedback": "反馈来源为资深同行方向性反馈、同事讨论、社区既有成果坐标与厂商官方回应；作者据厂商回应评估缓解方向并影响后续研究判断。",
+      "intermediate_capability": "形成以公开同行成果定位自身工作坐标、以同行与厂商反馈作为披露回路组成部分的研究组织能力，而非独立重启每一课题。",
+      "observed_outcomes": [
+        "2017-04 研究启动阶段引入资深同行反馈与同事讨论网络。",
+        "2017-07 TrustZone 研究明确标定 Quarkslab 既有 SBOOT 逆向与本人先前 QSEE/Widevine 工作为前序成果。",
+        "2017-07 将 Samsung 官方书面回应直接纳入公开披露报告。"
+      ],
+      "evidence_ids": [
+        "gb-community-001",
+        "gb-community-002",
+        "gb-community-003",
+        "gb-community-004"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "致谢与引用可能部分为 Project Zero 团队披露规范要求，而非个人反馈回路习惯；同事与厂商互动的具体深度在一手材料中记录有限，故置信度为 medium。"
+    }
+  ],
+  "tensions": [
+    "person_json 的 primary_focus 含 'baseband'，但 2023-03-16 projectzero.google 的 Exynos baseband writeup 一手署名为 Tim Willis 而非 Gal Beniamini；本人是否参与基带研究链条未经一手来源证实，存在人物归因混淆。",
+    "一手抓取前 WebSearch 对其研究方向给出相互不一致的二手描述（Qualcomm TrustZone/QSEE KeyMaster 与 iOS/Broadcom Wi-Fi/Bluetooth LE），蓝牙/BLE 与 BootStomp 等关联未在任何抓取页面证实，已不采信。",
+    "从属机构在二手摘要中称 NVIDIA / Zimperium / 独立研究员，与一手博客署名 'Posted by Gal Beniamini, Project Zero' 不一致；NVIDIA 归属无任何抓取页面支持，疑为搜索引擎幻觉。",
+    "研究能力发展依赖组织资源与同伴成果：iOS 研究复用 Ian Beer 内核漏洞作为内存读写原语，研究启动依赖 Thomas Dullien 协助；这些外部条件使个人能力与团队/同伴支持难以完全分离，存在幸存者偏差风险。",
+    "研究得以推进部分受该硬件代际外部条件支撑：Snapdragon 810（Nexus 6P）与 Exynos 8890（Galaxy S7 Edge）Wi-Fi PCIe 接口 SMMU 缺失或未配置、KTRR 寄存器可经 IO-Space 读取；这些条件在后续硬件代际可能已被厂商缓解，削弱同期方法在新代际的可复现性。",
+    "Project Zero 90 天披露政策对选题节奏与公开发表循环的驱动作用未在一手 writeup 中直接陈述，个人研究习惯与机构制度的相对贡献难以区分。"
+  ],
+  "transferable_practices": [
+    "以三项可核验标准筛选研究对象：防御加固程度反向迁移、部署广度、专有代码复杂度与受审视程度之差，而非依主题偏好选题。",
+    "为闭源/无符号固件环境自建研究基础设施（ROM/RAM 提取钩子、malloc/free 追踪、堆可视化器、平台调试器），并以同一工具范式跨平台移植。",
+    "将单组件漏洞逐层推进为端到端利用链，并对硬件保护机制本身进行二次审视，将其视为攻击面与信息侧信道（如 KTRR 作 KASLR 预言机）。",
+    "在研究启动阶段引入资深同行方向性反馈，以公开同行既有成果标定自身工作坐标，避免独立重启课题。",
+    "披露环节主动纳入厂商书面回应并以原文形式留痕，形成可核验的披露—厂商反馈回路。"
+  ],
+  "non_transferable_conditions": [
+    "Google Project Zero 团队成员身份与 90 天披露制度、机构博客发表渠道，构成特定组织资源，非个人可复制条件。",
+    "同伴 Ian Beer 的 iOS 内核漏洞作为内存读写原语、Thomas Dullien 的研究启动协助，均为同期 Project Zero 团队内部可获得的特定同伴成果，外部研究者难以直接复用。",
+    "Snapdragon 810 / Exynos 8890 代际 Wi-Fi PCIe 接口 SMMU 缺失、KTRR 寄存器可经 IO-Space 读取等硬件代际条件，已被厂商在后续代际以 MPU 等机制缓解，限制了同期方法在新硬件上的可复现性。",
+    "研究材料中显式的失败、转向与重复练习节奏记录有限，工具建设与公开发表习惯仅构成间接成长信号，非可直接复制的个人成长路径。"
+  ],
+  "open_questions": [
+    "Qualcomm TrustZone/QSEE 与 KeyMaster 密钥提取系列文章（推断 2017 年）的确切标题、URL 与发布日期未一手核验（尝试 /2017/06/extracting-qualcomms-keymaster-keys.html 返回 404），仅以 WebSearch 摘要存在，无法作为 documented 事实；其与 2017-07 TrustZone writeup 的关系需后续补证。",
+    "Black Hat US 2017 'Exploiting The Qualcomm Baseband' 演讲因 blackhat.com 议程页与 i.blackhat.com PDF 返回 403，未一手确认演讲事实、byline 与日期；'writeup + 会议演讲'发表模式仅由二手线索支撑。",
+    "加入与离开 Google Project Zero 的具体时间无一手来源；2017-04-04 byline 为当时在职的下界推断，离职时间因新博客首页未见其署名但不等同于确证离职，列为缺口。",
+    "教育背景（学位、院校、毕业年份）无任何公开一手来源，无法核验。",
+    "Project Zero issue tracker（bugs.chromium.org）中与本人在研漏洞对应的披露时间线、同行评论与厂商交互细节未抓取；邮件列表/issue 层面的具体同行反馈记录缺失。",
+    "X/Twitter 账号 @laginimaineb 返回 HTTP 402，社交互动、同行公开回复与社区讨论内容未抓取，社交媒体层面的同伴网络缺证。",
+    "是否与 Project Zero 同期同事（Ian Beer、Mark Brand、Natalie Silvanovich 等）存在具体协作或互评的成文记录未取证，当前仅推断其在团队框架内工作。",
+    "个人研究站点 beniaminigal.net 的 /trustzone.html 与 /tz_research.html 返回 404，研究编年、合著者与发表习惯信息缺证。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-synthesis-v1-20260927-014231-260",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790444877468247000-gal-beniamini-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "66e9fd90-0282-4440-a9e5-c2c6c166a81c",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_3btnrgt5zdo8hshcduebnikm",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-synthesis-v1-20260927-014231-260/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-26T17:47:57.505973+00:00"
+      },
+      {
+        "tool_use_id": "call_k7b8gbg9xcz8g17fl44kokfk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-synthesis-v1-20260927-014231-260/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "df812ba2cd023ade206d812fa3ccdcb49385736692eee1703126a7a359e72586",
+        "accessed_at": "2026-09-26T17:47:57.505996+00:00"
+      },
+      {
+        "tool_use_id": "call_amqn02zw2gti6jw7f5use1gh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-synthesis-v1-20260927-014231-260/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "14beb476b80e6039b3508b7cd68ed19fbd066960aac6b3afc4280c8c2948401b",
+        "accessed_at": "2026-09-26T17:47:57.506002+00:00"
+      },
+      {
+        "tool_use_id": "call_qyc18cvaf1rjtt3h5a1vlc0k",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-synthesis-v1-20260927-014231-260/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-26T17:47:57.506006+00:00"
+      },
+      {
+        "tool_use_id": "call_cajd8pz0as1py3srlh6nl96q",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-synthesis-v1-20260927-014231-260/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "4cf3e0375733ff97ad0a0172f5894a195a1d8ad804d9029854fb8205d26cd839",
+        "accessed_at": "2026-09-26T17:47:57.506062+00:00"
+      },
+      {
+        "tool_use_id": "call_vavnhkwcrknn1twlia1lfcow",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-synthesis-v1-20260927-014231-260/checkpoint.md",
+          "content": "# Checkpoint — Gal Beniamini 综合（首次综合）\n\n## 任务状态\n首次综合（revision_context 为空，targeted.items 为空）。单回合内完成，无待续跑项。\n\n## 已确认来源（verified_in_run=true，作为阶段/机制依据）\n- galbeniamini-works-001（2017-04-04，documented）：Broadcom Wi-Fi SoC BCM4358 TDLS 堆溢出 RCE；dhdutil 提 ROM、IDA Thumb-2、NexMon 符号、brcmsmac 对照、malloc/free hook、自建堆可视化器；MPU=RWX。\n- galbeniamini-works-002（2017-04-11，documented）：固件→主机内核提权；bcmdhd EtherType 0x886C / WLC_E_PFN_SWC 事件（Issue #1061）total_count vs pkt_count 内核堆溢出→SLUB 整形→wl_priv 函数指针表覆写→stack pivot→ROP；硬件路径 PCIe DMA，Snapdragon 810 / Exynos 8890 Wi-Fi PCIe SMMU 缺失，逆向 dma_info、hook ROM dma64_txfast 任意物理写。\n- galbeniamini-works-003（2017-04，inferred）：纵向演化（固件内→固件→内核；软件→硬件 DMA）；补丁时间线与绕过记录（RWX 可 patch 校验）。\n- gb-community-001（2017-04-04，documented）：致谢 Thomas Dullien（@halvarflake）启动研究、头脑风暴、文献检索；伦敦办公室同事讨论。\n- gb-community-002（2017-04-04，documented）：Broadcom 厂商反馈新版 SoC 改用 MPU 等硬件安全机制；作者评估为 'a step in the right direction'。\n- gb-community-003（2017-07-24，documented）：TrustZone writeup 引用 Quarkslab Fernand Lone Sang 的 Samsung SBOOT 逆向与本人先前 QSEE/Widevine 工作标定坐标。\n- gb-community-004（2017-07-24，documented）：Samsung 官方书面回复（kinibi 400 rollback prevention）纳入披露报告。\n- gb-dec-01（2017-04-04，documented）：选题三要素——防御加固反向迁移、部署广度、专有代码复杂度与受审视程度之差；Android 为演示平台。\n- gb-dec-02（2017-07-24，documented）：转向 TrustZone TEE（Qualcomm QSEE + Trustonic Kinibi）；TEE 防御滞后、trustlet 版本计数器停留零；Galaxy S7 Edge 上 Samsung OTP trustlet 栈溢出达成 Kinibi 任意代码执行。\n- gb-dec-03（2017-09-28，documented）：迁移至 Apple 生态；复用 Ian Beer 内核漏洞为内存读写原语；逆向 AppleBCMWLANCore / AppleBCMWLANBusInterfacePCIe；kalloc zone 分析定位 TCM 映射；基于 RAM 的 hook 提取固件 ROM；自建 Wi-Fi 固件调试器。\n- gb-dec-04（2017-10-11，documented）：iPhone 7（iOS 10.2）端到端 OTA 链；DART 三级转换逆向；共享环索引固定上界 0x10000 校验导致越界写；flow ring 塑形；DART 描述符覆写 + 自指映射（作者命名 'Inception'）；KTRR 映射入 IO-Space 作 KASLR 预言机；7 漏洞报告 Apple，iOS 11 修复。\n- gb-dec-05（2017，inferred）：半年路径 Broadcom Wi-Fi（Android）→ TrustZone TEE → Broadcom Wi-Fi（Apple Vol.2 三部曲）→ 端到端 iOS 内核链。\n- gb-timeline-01（2017-04-04，documented）：与 works-001 同源，公开研究活动起点。\n\n## 未作为依据的来源（status=unknown / lead_only / verified_in_run=false → 仅入 tensions/open_questions）\n- gb-timeline-02（unknown）：Qualcomm TrustZone/QSEE/KeyMaster 系列仅 WebSearch 摘要，标题/URL/日期未一手核验（/2017/06/extracting-qualcomms-keymaster-keys.html 返回 404）。\n- gb-timeline-03（unknown）：Black Hat US 2017 'Exploiting The Qualcomm Baseband'，blackhat.com 议程页与 i.blackhat.com PDF 返回 403。\n- gb-ext-identity（inferred，verified_in_run=false）：外部身份线索未抓取确认。\n- gb-ext-p0-broadcom-wifi / gb-ext-p0-s8-secureboot（unknown）：旧 blogspot URL 返回 404/ECONNREFUSED。\n\n## 已记录的矛盾/张力\n- person_json primary_focus 含 'baseband'，但 2023-03-16 Exynos baseband writeup 一手署名为 Tim Willis 而非本人；基带研究链条未经一手证实。\n- 一手抓取前 WebSearch 对研究方向给出相互不一致二手描述（Qualcomm TrustZone/QSEE KeyMaster 与 iOS/Broadcom Wi-Fi/Bluetooth LE）。\n- 从属机构歧义：二手摘要称 NVIDIA / Zimperium / 独立研究员，与一手署名 'Project Zero' 不一致。\n- 组织资源依赖：iOS 研究依赖 Ian Beer 内核漏洞；研究启动依赖 Thomas Dullien。\n- 时期外部条件：Wi-Fi PCIe SMMU 缺失（Snapdragon 810 / Exynos 8890）与 KTRR 寄存器暴露为该硬件代际条件。\n\n## 未完成事项\n- 无续跑项；output.json 已按 schema 写入。\n"
+        },
+        "success": true,
+        "content_sha256": "f2b2b6a36e516b9e8fd83a3306301687ee902d11b99cfd52e90dd8a6bda9fc2a",
+        "accessed_at": "2026-09-26T17:47:57.506530+00:00"
+      },
+      {
+        "tool_use_id": "call_pr4mde6fctcxp29na4tv43rh",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gal-beniamini-synthesis-v1-20260927-014231-260/output.json",
+          "content": "{\n  \"person\": \"Gal Beniamini\",\n  \"expertise\": [\n    \"移动 SoC 固件逆向（FullMAC Wi-Fi 芯片 ROM/RAM 提取与 Thumb-2 二进制分析）\",\n    \"Wi-Fi 协议栈漏洞分析（TDLS/FT-IE 解析、管理帧字段长度校验缺陷）\",\n    \"嵌入式堆利用（堆溢出链式转化为空闲块重叠、freelist 劫持、函数指针表覆写、stack pivot 与 ROP）\",\n    \"固件到主机内核横向提权（驱动事件通道内核堆溢出、SLUB slab 整形、内核结构体回收覆写）\",\n    \"硬件 DMA 攻击面分析（Wi-Fi PCIe 接口 SMMU 缺失检验、DMA 环缓冲地址覆写、任意物理内存写）\",\n    \"IOMMU/地址转换机制逆向（Apple DART 三级转换、共享环索引校验缺陷、自指映射构造）\",\n    \"硬件安全机制作为信息侧信道（KTRR 寄存器作为 KASLR 预言机）\",\n    \"可信执行环境漏洞研究（Qualcomm QSEE、Trustonic Kinibi；trustlet 签名撤销失效与版本回退）\",\n    \"跨平台研究方法迁移（Android 至 Apple iOS；复用同伴内核漏洞作为研究原语）\",\n    \"自建研究工具链（malloc/free hook、堆可视化器、基于 RAM 的固件 ROM 提取钩子、Wi-Fi 固件调试器）\",\n    \"结构化攻击面选题（按防御加固程度反向迁移、部署广度、专有代码复杂度与受审视程度之差筛选研究对象）\",\n    \"Project Zero 90 天披露流程下的研究—披露—公开发表循环\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2017-04（4 月）\",\n      \"stage\": \"Wi-Fi SoC 固件内部漏洞发现与利用的公开起点\",\n      \"capability_change\": \"在 2017-04-04 的 Project Zero 博客上，以独立长篇 writeup 形式公开 Broadcom FullMAC Wi-Fi SoC（BCM4358）的 TDLS 管理帧堆溢出与 Wi-Fi 邻近、无需用户交互的远程代码执行。该阶段显示其已具备芯片级固件逆向能力（dhdutil 提取 ROM、IDA 分析 Thumb-2 二进制、以 NexMon 符号与开源 brcmsmac 驱动对照定位 bcm_parse_tlvs 及其 110 余处交叉引用）与嵌入式堆利用能力（hook malloc/free 追踪堆操作、自建堆可视化器、将堆溢出链式转化为重叠空闲块、重定向 freelist 覆盖 timer 结构函数指针）。此阶段同时显示其在 Project Zero 博客公开发表深度技术 writeup 的习惯，构成后续连续发表的工作模式起点。\",\n      \"evidence_ids\": [\n        \"galbeniamini-works-001\",\n        \"galbeniamini-works-002\",\n        \"galbeniamini-works-003\",\n        \"gb-community-001\",\n        \"gb-community-002\",\n        \"gb-dec-01\",\n        \"gb-timeline-01\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017-04（同月内推进）\",\n      \"stage\": \"由单固件 RCE 向固件—主机内核横向提权与硬件 DMA 攻击面扩展\",\n      \"capability_change\": \"在 2017-04-11 的续篇中，研究目标由'单固件 RCE'扩展为'固件控制提权至主机内核代码执行'，提出软件与硬件两条路径。软件路径利用 bcmdhd 驱动与固件间 EtherType 0x886C 事件通道，在 WLC_E_PFN_SWC 事件处理（dhd_handle_swc_evt，Issue #1061）中因 total_count 与 pkt_count 关系未校验导致内核堆溢出，经 SLUB slab 整形后释放含 evt_handler 函数指针表的 wl_priv 结构并回收覆写，借 stack pivot（无 KASLR）执行 ROP 链。硬件路径利用 PCIe DMA：修改固件 RAM 中 DMA 环缓冲地址指向内核代码段，并在 Snapdragon 810（Nexus 6P）与 Exynos 8890（Galaxy S7 Edge）两平台验证 Wi-Fi PCIe 接口 SMMU 缺失或未配置，进而逆向 dma_info 结构、hook ROM 中 dma64_txfast 实现任意物理地址写。能力栈由此由纯软件漏洞链扩展至硬件 DMA 攻击面，并由单平台推进至跨平台验证。\",\n      \"evidence_ids\": [\n        \"galbeniamini-works-002\",\n        \"galbeniamini-works-003\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017-07\",\n      \"stage\": \"攻击面跨子系统迁移至 TrustZone TEE\",\n      \"capability_change\": \"在 2017-07-24 的 Project Zero 博客上，研究目标由 Wi-Fi 固件转向 Android TrustZone 可信执行环境，覆盖 Qualcomm QSEE 与 Trustonic Kinibi 两类主流实现。其选题依据仍为可迁移的标准：TEE 处理生物特征、支付、DRM 与全盘加密密钥等高价值数据，但 ASLR、栈 cookie、守护页等缓解措施显著滞后于常规操作系统；同时厂商几乎不撤销已签名 trustlet（版本计数器普遍停留在零），使已修补漏洞可经加载旧且仍签名二进制绕过。研究在 Galaxy S7 Edge 上以 Samsung OTP trustlet 已知栈溢出达成 Kinibi 内任意代码执行。此阶段显示其选题框架可跨子系统复用，并具备跨厂商对比分析能力。\",\n      \"evidence_ids\": [\n        \"gb-dec-02\",\n        \"gb-community-003\",\n        \"gb-community-004\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017-09 至 2017-10\",\n      \"stage\": \"研究方法跨平台迁移至 Apple 生态并完成端到端利用链\",\n      \"capability_change\": \"在 2017-09-28 至 2017-10-11 的 Over The Air Vol.2 三部曲中，研究平台由 Android 迁移至 Apple，以'更完整描绘移动生态 Wi-Fi 安全状态'。为克服 iOS 闭源与缺少研究平台的约束，复用同伴 Ian Beer 的内核漏洞获取内存读写原语，逆向 Apple 专有 Wi-Fi 驱动（AppleBCMWLANCore、AppleBCMWLANBusInterfacePCIe），通过 kalloc zone 分析定位 Wi-Fi 芯片 TCM 在内核地址空间的映射，并以基于 RAM 的钩子提取固件 ROM、自建 Wi-Fi 固件调试器。至 2017-10-11 在 iPhone 7（iOS 10.2）上由 Wi-Fi 固件代码执行经 PCIe/DART IOMMU 达到主机内核任意代码执行：逆向 Apple 专有 DART 三级转换机制，发现主机以固定上界 0x10000 校验共享环索引而非实际环容量导致可靠越界写，经 flow ring 删除响应泄露塑形 IO-Space，覆写 DART 描述符并构造自指映射（作者命名 'Inception'）使 Wi-Fi 芯片获得对全部主机物理内存的永久 DMA 访问，最后将 KTRR 硬件寄存器映射入 IO-Space 直接读取，以 KTRR 作预言机击败 KASLR。该阶段完成由单组件漏洞到端到端利用链的工程化能力闭合，并向 Apple 报告 7 个漏洞（iOS 11 修复）。\",\n      \"evidence_ids\": [\n        \"gb-dec-03\",\n        \"gb-dec-04\",\n        \"gb-dec-05\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"结构化攻击面选题：按防御加固反向迁移、部署广度与专有代码复杂度之差筛选目标\",\n      \"starting_conditions\": \"加入 Google Project Zero 后，面对移动应用处理器已被广泛研究的既有格局，需在受审视较少的组件中确定研究对象；2017-04 的 Broadcom Wi-Fi 研究明确记录该选择标准：应用处理器代码已被充分研究，其他组件鲜受同等审视，Broadcom Wi-Fi 芯片部署最广（Nexus、三星旗舰及 iPhone 4 以来全部 iPhone），FullMAC SoC 引入运行于独立低功耗处理器上的专有复杂代码库。\",\n      \"repeated_practice\": \"在半年内三次重复套用同一选题框架：Wi-Fi SoC（2017-04，以 Broadcom FullMAC 专有固件为受审视不足目标）、TrustZone TEE（2017-07，以 ASLR/栈 cookie/守护页滞后与 trustlet 撤销失效为防御滞后标志）、Apple Wi-Fi（2017-09 至 10，以 iOS 闭源与缺少研究平台为约束下复用 Broadcom 研究方法）。\",\n      \"feedback\": \"反馈来源为厂商响应与公开披露结果：Broadcom 被记录为高度响应并反馈新版 SoC 改用 MPU 等硬件安全机制，作者据厂商回应评估缓解方向（记为 'a step in the right direction'）并影响后续判断；向 Apple 报告 7 个漏洞并在 iOS 11 修复，形成披露—厂商响应—研究调整闭环。\",\n      \"intermediate_capability\": \"形成可在不同子系统间迁移的攻击面评估方法：以防御加固程度反向迁移、部署广度、专有代码复杂度与受审视程度之差三项可核验标准筛选目标，而非依主题偏好选题。\",\n      \"observed_outcomes\": [\n        \"2017-04 选中 Broadcom Wi-Fi SoC 作为首个 Project Zero 深度研究对象，结论适用于任何采用相同芯片组的系统。\",\n        \"2017-07 转向 TrustZone TEE，同一框架识别出 trustlet 签名撤销失效与版本回退作为系统性缺陷，并在 Galaxy S7 Edge 上达成 Kinibi 任意代码执行。\",\n        \"2017-09 至 10 跨平台迁移至 Apple，将同一 Wi-Fi 研究方法在 iOS 闭源约束下复用并闭合端到端链。\"\n      ],\n      \"evidence_ids\": [\n        \"gb-dec-01\",\n        \"gb-dec-02\",\n        \"gb-dec-03\",\n        \"gb-community-002\",\n        \"gb-community-003\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"该选题连续性也可能由 Project Zero 团队层面的选题机制与 90 天披露政策驱动，而非纯个人方法论迁移；内部动因未在一手 writeup 中直接陈述，故选题框架的'可迁移性'部分属推断。\"\n    },\n    {\n      \"name\": \"自建可复用底层工具链：固件提取、堆追踪、跨平台调试器\",\n      \"starting_conditions\": \"面对 FullMAC Wi-Fi SoC 闭源固件、缺少公开符号与既有调试平台的研究起点，需以逆向工具链才能进入固件内部。\",\n      \"repeated_practice\": \"在 Android 与 Apple 两个平台重复构建同类研究基础设施：通过 dhdutil 提取固件 ROM、以 IDA 分析 Thumb-2 二进制、借用 NexMon 符号与开源 brcmsmac 驱动对照定位 bcm_parse_tlvs 及其 110 余处交叉引用；hook malloc/free 追踪堆操作并自建堆可视化器；在 Apple 平台复用 Ian Beer 内核漏洞作为内存读写原语，逆向 AppleBCMWLANCore 与 AppleBCMWLANBusInterfacePCIe，以基于 RAM 的钩子提取固件 ROM，自建 Wi-Fi 固件调试器。\",\n      \"feedback\": \"反馈来源为工具在后续漏洞发现与利用构造中的直接可用性：自建堆可视化器支撑了 TDLS 堆溢出链式转化为空闲块重叠与 freelist 覆写；DMA 逆向支撑 Snapdragon 810 与 Exynos 8890 双平台的任意物理写；iOS 调试器与 ROM 提取钩子支撑 Vol.2 三部曲的连续推进。\",\n      \"intermediate_capability\": \"形成以自建工具进入闭源/无符号固件环境、并将同一工具范式跨平台移植的能力，区别于依赖既有平台的单点漏洞研究。\",\n      \"observed_outcomes\": [\n        \"2017-04 完成 BCM4358 固件逆向并以堆溢出实现 Wi-Fi 邻近无交互 RCE。\",\n        \"2017-04 完成 bcmdhd 内核堆溢出至 ROP 的提权与跨平台 DMA 任意物理写。\",\n        \"2017-09 至 10 在 iOS 闭源约束下复用 Broadcom 研究方法并完成端到端内核链。\"\n      ],\n      \"evidence_ids\": [\n        \"galbeniamini-works-001\",\n        \"galbeniamini-works-002\",\n        \"gb-dec-03\",\n        \"gb-dec-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"工具建设可能受 Project Zero 团队既有基础设施与同伴成果（Ian Beer 内核漏洞）支撑，而非完全个人产出；其跨平台复用至少部分依赖该外部原语，故'可复用'属性含组织资源成分。\"\n    },\n    {\n      \"name\": \"由单组件漏洞向端到端利用链的逐层逼近\",\n      \"starting_conditions\": \"2017-04 起点为单固件 RCE；移动设备攻击面呈'固件—驱动—内核—IOMMU—硬件保护'分层结构。\",\n      \"repeated_practice\": \"在半年内逐层推进：固件内堆溢出 RCE（2017-04）→ 固件到主机内核提权（软件路径内核堆溢出 + ROP；硬件路径 PCIe DMA 任意物理写，2017-04）→ 端到端 Apple iOS 链（DART 三级转换逆向 + 共享环越界写 + flow ring 塑形 + 自指映射 + KTRR 作 KASLR 预言机，2017-10）。\",\n      \"feedback\": \"反馈来源为分层验证结果：SLUB slab 整形与 wl_priv 回收覆写在 Nexus 6P 上验证内核控制；DART 自指映射与 KTRR 读取在 iPhone 7 上验证全主机物理内存访问；向 Apple 报告 7 漏洞并 iOS 11 修复，向 Broadcom/Samsung 获得厂商书面回应。\",\n      \"intermediate_capability\": \"形成以分层利用构造端到端攻击链的工程化能力，并养成对硬件保护机制本身作为攻击面与信息侧信道的二次审视（KTRR 作 KASLR 预言机）。\",\n      \"observed_outcomes\": [\n        \"2017-04 完成单固件 RCE。\",\n        \"2017-04 同月完成固件→内核提权双路径与跨平台 DMA 任意物理写。\",\n        \"2017-10 在 iPhone 7（iOS 10.2）完成 Wi-Fi 邻近至主机内核任意代码执行的端到端链。\"\n      ],\n      \"evidence_ids\": [\n        \"galbeniamini-works-001\",\n        \"galbeniamini-works-002\",\n        \"gb-dec-04\",\n        \"gb-dec-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"逐层推进的时间序列本身可作为'连续、有规划的研究推进'的推断依据，但其内部动因（团队选题机制、同伴反馈、厂商响应、披露政策对选题的影响）未在一手来源中直接陈述，故部分属 inferred。\"\n    },\n    {\n      \"name\": \"基于公开同行成果的迭代式研究定位与同行/厂商反馈回路\",\n      \"starting_conditions\": \"研究启动阶段即处于 Project Zero 团队与更广安全研究社区之中，而非孤立完成。\",\n      \"repeated_practice\": \"在研究启动与披露各环节引入同行与厂商反馈：2017-04 致谢 Thomas Dullien（@halvarflake）协助启动研究、头脑风暴与文献检索，伦敦办公室同事协助理解利用约束并作为讨论对象；2017-07 在 TrustZone writeup 中引用 Quarkslab Fernand Lone Sang 对 Samsung SBOOT 的逆向研究与本人先前 QSEE/Widevine 工作标定自身坐标；披露后主动纳入厂商书面回应（Samsung 关于 kinibi 400 rollback prevention 的官方回复）。\",\n      \"feedback\": \"反馈来源为资深同行方向性反馈、同事讨论、社区既有成果坐标与厂商官方回应；作者据厂商回应评估缓解方向并影响后续研究判断。\",\n      \"intermediate_capability\": \"形成以公开同行成果定位自身工作坐标、以同行与厂商反馈作为披露回路组成部分的研究组织能力，而非独立重启每一课题。\",\n      \"observed_outcomes\": [\n        \"2017-04 研究启动阶段引入资深同行反馈与同事讨论网络。\",\n        \"2017-07 TrustZone 研究明确标定 Quarkslab 既有 SBOOT 逆向与本人先前 QSEE/Widevine 工作为前序成果。\",\n        \"2017-07 将 Samsung 官方书面回应直接纳入公开披露报告。\"\n      ],\n      \"evidence_ids\": [\n        \"gb-community-001\",\n        \"gb-community-002\",\n        \"gb-community-003\",\n        \"gb-community-004\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"致谢与引用可能部分为 Project Zero 团队披露规范要求，而非个人反馈回路习惯；同事与厂商互动的具体深度在一手材料中记录有限，故置信度为 medium。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 的 primary_focus 含 'baseband'，但 2023-03-16 projectzero.google 的 Exynos baseband writeup 一手署名为 Tim Willis 而非 Gal Beniamini；本人是否参与基带研究链条未经一手来源证实，存在人物归因混淆。\",\n    \"一手抓取前 WebSearch 对其研究方向给出相互不一致的二手描述（Qualcomm TrustZone/QSEE KeyMaster 与 iOS/Broadcom Wi-Fi/Bluetooth LE），蓝牙/BLE 与 BootStomp 等关联未在任何抓取页面证实，已不采信。\",\n    \"从属机构在二手摘要中称 NVIDIA / Zimperium / 独立研究员，与一手博客署名 'Posted by Gal Beniamini, Project Zero' 不一致；NVIDIA 归属无任何抓取页面支持，疑为搜索引擎幻觉。\",\n    \"研究能力发展依赖组织资源与同伴成果：iOS 研究复用 Ian Beer 内核漏洞作为内存读写原语，研究启动依赖 Thomas Dullien 协助；这些外部条件使个人能力与团队/同伴支持难以完全分离，存在幸存者偏差风险。\",\n    \"研究得以推进部分受该硬件代际外部条件支撑：Snapdragon 810（Nexus 6P）与 Exynos 8890（Galaxy S7 Edge）Wi-Fi PCIe 接口 SMMU 缺失或未配置、KTRR 寄存器可经 IO-Space 读取；这些条件在后续硬件代际可能已被厂商缓解，削弱同期方法在新代际的可复现性。\",\n    \"Project Zero 90 天披露政策对选题节奏与公开发表循环的驱动作用未在一手 writeup 中直接陈述，个人研究习惯与机构制度的相对贡献难以区分。\"\n  ],\n  \"transferable_practices\": [\n    \"以三项可核验标准筛选研究对象：防御加固程度反向迁移、部署广度、专有代码复杂度与受审视程度之差，而非依主题偏好选题。\",\n    \"为闭源/无符号固件环境自建研究基础设施（ROM/RAM 提取钩子、malloc/free 追踪、堆可视化器、平台调试器），并以同一工具范式跨平台移植。\",\n    \"将单组件漏洞逐层推进为端到端利用链，并对硬件保护机制本身进行二次审视，将其视为攻击面与信息侧信道（如 KTRR 作 KASLR 预言机）。\",\n    \"在研究启动阶段引入资深同行方向性反馈，以公开同行既有成果标定自身工作坐标，避免独立重启课题。\",\n    \"披露环节主动纳入厂商书面回应并以原文形式留痕，形成可核验的披露—厂商反馈回路。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Google Project Zero 团队成员身份与 90 天披露制度、机构博客发表渠道，构成特定组织资源，非个人可复制条件。\",\n    \"同伴 Ian Beer 的 iOS 内核漏洞作为内存读写原语、Thomas Dullien 的研究启动协助，均为同期 Project Zero 团队内部可获得的特定同伴成果，外部研究者难以直接复用。\",\n    \"Snapdragon 810 / Exynos 8890 代际 Wi-Fi PCIe 接口 SMMU 缺失、KTRR 寄存器可经 IO-Space 读取等硬件代际条件，已被厂商在后续代际以 MPU 等机制缓解，限制了同期方法在新硬件上的可复现性。\",\n    \"研究材料中显式的失败、转向与重复练习节奏记录有限，工具建设与公开发表习惯仅构成间接成长信号，非可直接复制的个人成长路径。\"\n  ],\n  \"open_questions\": [\n    \"Qualcomm TrustZone/QSEE 与 KeyMaster 密钥提取系列文章（推断 2017 年）的确切标题、URL 与发布日期未一手核验（尝试 /2017/06/extracting-qualcomms-keymaster-keys.html 返回 404），仅以 WebSearch 摘要存在，无法作为 documented 事实；其与 2017-07 TrustZone writeup 的关系需后续补证。\",\n    \"Black Hat US 2017 'Exploiting The Qualcomm Baseband' 演讲因 blackhat.com 议程页与 i.blackhat.com PDF 返回 403，未一手确认演讲事实、byline 与日期；'writeup + 会议演讲'发表模式仅由二手线索支撑。\",\n    \"加入与离开 Google Project Zero 的具体时间无一手来源；2017-04-04 byline 为当时在职的下界推断，离职时间因新博客首页未见其署名但不等同于确证离职，列为缺口。\",\n    \"教育背景（学位、院校、毕业年份）无任何公开一手来源，无法核验。\",\n    \"Project Zero issue tracker（bugs.chromium.org）中与本人在研漏洞对应的披露时间线、同行评论与厂商交互细节未抓取；邮件列表/issue 层面的具体同行反馈记录缺失。\",\n    \"X/Twitter 账号 @laginimaineb 返回 HTTP 402，社交互动、同行公开回复与社区讨论内容未抓取，社交媒体层面的同伴网络缺证。\",\n    \"是否与 Project Zero 同期同事（Ian Beer、Mark Brand、Natalie Silvanovich 等）存在具体协作或互评的成文记录未取证，当前仅推断其在团队框架内工作。\",\n    \"个人研究站点 beniaminigal.net 的 /trustzone.html 与 /tz_research.html 返回 404，研究编年、合著者与发表习惯信息缺证。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "34a11f11ddda6930e2aaf0fcf6f0d4ee2f285899779b3de14e5cf9b859a5a1c1",
+        "accessed_at": "2026-09-26T17:47:57.506534+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790444877506546000-gal-beniamini-synthesis-v1.json",
+    "label": "Gal Beniamini:synthesis:v1",
+    "elapsed_seconds": 326.24,
+    "prompt_sha256": "2c5063212f2fc0dd0d2416711a255e08848a1314399da503647ea01c8c50c995",
+    "num_turns": 8,
+    "total_cost_usd": 0.6589409999999999,
+    "usage": {
+      "input_tokens": 30856,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 92672,
+      "output_tokens": 18333,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 30856,
+        "outputTokens": 18333,
+        "cacheReadInputTokens": 92672,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.6589409999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

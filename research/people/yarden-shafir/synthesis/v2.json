@@ -1,0 +1,317 @@
+{
+  "person": "Yarden Shafir",
+  "expertise": [
+    "Windows 内核漏洞研究与利用",
+    "Windows 内部结构逆向（ntoskrnl.exe、内核对象、过滤驱动通信端口）",
+    "内核利用原语构造与 data-only 攻击路径",
+    "内核缓解机制分析（KASLR、CFG、Module Tampering Protection、KDP/Secure Pool、PreviousMode、CET）",
+    "Windows 调试方法与工具建设（WinDbg、LiveCloudKd、PoolViewer）",
+    "Secure Kernel / VBS 研究与培训"
+  ],
+  "stages": [
+    {
+      "period": "约 2010—2018（进入 Winsider 之前的十年）",
+      "stage": "跨机构 Windows 安全岗位积累期",
+      "capability_change": "依据第三方简介页面转述，Yarden Shafir 先后在 SentinelOne（安全研究员与 QA 工程师）、CrowdStrike（高级安全工程师）、Trail of Bits 任职，约十年网络安全行业经验，方向集中于 Windows 内部结构。该阶段为后续合伙人转型与公开深度 writeup 输出提供了技术与履历基础。该转述未提供各段任职的起止时间、所在团队与产出，故各岗位能力增量无法精细重建，仅作为可核验的职业序列。",
+      "evidence_ids": [
+        "ys-conv-01",
+        "ys-conv-02",
+        "ys-timeline-01",
+        "ys-timeline-02",
+        "ys-timeline-03",
+        "ys-decisions-02"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2019",
+      "stage": "由雇员向合伙人/培训提供方的转型",
+      "capability_change": "2019 年以 co-partner 身份加入 Alex Ionescu 于 2009 年创立的 Winsider Seminars & Solutions, Inc.，承担公开培训、主题演讲与 Windows 内核底层系统内部机制讲座，并撰写白皮书。该转型以既有约十年 Windows 安全开发与逆向经验为前提，将个人研究能力转化为可规模化交付的训练与咨询输出，并确立与 Alex Ionescu 的长期协作关系。",
+      "evidence_ids": [
+        "ys-community-01",
+        "ys-conv-01",
+        "ys-decisions-01",
+        "ys-timeline-17",
+        "ys-r1-001"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2020",
+      "stage": "漏洞 PoC 与配套工具的公开化",
+      "capability_change": "公开发布 CVE-2020-1034 提权 PoC（GitHub 仓库 yardenshafir/CVE-2020-1034，配套 windows-internals.com 多部分 writeup），并在 GitHub 维护 PoolViewer、WinDbg_Scripts、SymlinkCallback 等内核池分析、调试与文件系统访问追踪工具。形成研究产出配套公开可复用工具的习惯，研究不止于 writeup，而同步产出供他人复现与分析的脚本与样本。",
+      "evidence_ids": [
+        "ys-decisions-03",
+        "ys-community-04",
+        "ys-timeline-05",
+        "ys-timeline-16",
+        "ys-works-004"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022",
+      "stage": "内核任意写升级为完整读写原语并转向 data-only 路径",
+      "capability_change": "2022-07-05 在 windows-internals.com 发表 I/O Ring 研究：通过逆向 Windows 11 22H2+ 的 I/O Ring 子系统并利用 ntoskrnl.exe 公共符号，发现可重定向 IoRing->RegBuffers 指针，将一次任意内核写（或任意递增）升级为完整内核读写 primitive，属 data-only 攻击路径，规避传统内核利用被缓解机制压缩的难点。研究先在 TyphoonCon 2022 演讲，再发表博客与 PoC，形成 writeup→PoC→会议演讲的公开闭环。后续 2022-08 与 2022-11 又相继发表 Module Tampering Protection 缓解分析与 KASLR 检测分析，研究主题由利用原语构造扩展到缓解机制分析。",
+      "evidence_ids": [
+        "ys-works-001",
+        "ys-works-002",
+        "ys-works-005",
+        "ys-community-02",
+        "ys-community-03",
+        "ys-decisions-04"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2023—2026",
+      "stage": "研究主题扩展至 Secure Kernel、KDP Pool 与缓解机制序列化",
+      "capability_change": "依据 windows-internals.com blog feed 与多篇 writeup，公开输出序列在 2023-01 起扩展到 Filter Communication Ports 内核对象分析、2023-11 与 2022-11 形成同主题迭代（KASLR），2024-05 转向 Secure Kernel Research with LiveCloudKd 调试方法，2026 转向 KDP Pool、PreviousMode Mitigation、Clipboard 数据行为等内核机制与缓解。技术栈由攻击利用与缓解分析，进一步扩展到 Secure Kernel 调试工具与方法建设，呈现持续 4 年以上的稳定深度发表节奏与多部分系列（Part 1/Part 2）输出习惯。",
+      "evidence_ids": [
+        "ys-works-003",
+        "ys-community-03",
+        "ys-timeline-12",
+        "ys-timeline-13",
+        "ys-timeline-14",
+        "ys-timeline-15"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "逆向 ntoskrnl + WinDbg 实证的内核机制研究路径",
+      "starting_conditions": "约十年 Windows 安全开发与逆向经验（据第三方简介转述），加入 Winsider 后获得稳定的公开训练与咨询输出渠道，以及与 Alex Ionescu 的长期协作环境。",
+      "repeated_practice": "对每个研究主题重复执行同一方法链：利用 ntoskrnl.exe 公共符号与手动逆向重建内核子系统结构（如 IoRing->RegBuffers、Filter Communication Ports、EPROCESS.SyscallUsage），用 WinDbg dx 命令检查内核字段，以自有 exploit 作为对照实验基准检验新检测机制，再以逆向结果与实证数据撰写深度 writeup。",
+      "feedback": "I/O Ring writeup 中记录了 Alex Ionescu 一次具名管道建议（改用具名管道以降低可见性），经该建议后定稿；其余同伴反馈、读者反馈与 issue/PR 历史未在抓取材料中可见，反馈回路主要属推断。",
+      "intermediate_capability": "形成以一手逆向与调试实证为内核机制结论支撑的研究习惯，结论区分机制能力与实际防护效果，不夸大单点缓解价值（如 KASLR writeup 明确该机制为增量而非终结）。",
+      "observed_outcomes": [
+        "2022-07-05 I/O Ring 完整读写原语 writeup",
+        "2022-11-23 KASLR 检测机制分析（以自家 I/O Ring exploit 作对照实验）",
+        "2023-01 Filter Communication Ports 内核对象分析",
+        "2026 KDP Pool、PreviousMode、Clipboard 系列写文"
+      ],
+      "evidence_ids": [
+        "ys-works-001",
+        "ys-works-002",
+        "ys-works-003",
+        "ys-community-02",
+        "ys-community-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "该路径的高频复现部分受 Winsider 培训/咨询商业模式驱动：公开 writeup 与培训内容互为沉淀，研究—训练双轨使深度内核机制 writeup 既是研究产出也是培训材料，故发表节奏与研究方法不能完全归因于个人能力，亦受商业模式与公开输出渠道约束。此外主要来源为本人联合维护的 windows-internals.com，存在自发布/平台偏差。"
+    },
+    {
+      "name": "研究产出配套公开可复用工具的工具建设路径",
+      "starting_conditions": "在 CVE-2020-1034 等单点漏洞研究之外，存在对 Windows 内核池结构与调试流程的长期投入需求，以及 GitHub 公开平台的可达性。",
+      "repeated_practice": "与 PoolViewer（从内存 dump 查看/过滤 pool 分配，附 WinDbg 扩展）、WinDbg_Scripts 工具建设采用相同的逆向加数据模型实证路径：研究内核机制时同步产出调试脚本、结构查看器或 PoC，并将其在 GitHub 公开维护，使工具建设与 writeup 互为支撑。PoolViewer、WinDbg_Scripts、IoRingReadWritePrimitive、cet-research、SymlinkCallback、CVE-2020-1034 等多工具围绕同一 Windows 内核主题。",
+      "feedback": "GitHub 工具获数百星（WinDbg_Scripts 约 435★、IoRingReadWritePrimitive 约 259★、PoolViewer 约 156★ 等），星标数据支撑工具被采用与可见度，但不直接支撑对研究者个人声誉或能力的评价；issue/PR 历史在抓取材料中为 0 open，社区反馈记录不可见，故反馈回路属推断。",
+      "intermediate_capability": "形成研究副产品系统化整理并公开发布的习惯，工具被社区复用，构成输出—采用—下一研究的循环。",
+      "observed_outcomes": [
+        "PoolViewer 与 WinDbg 扩展",
+        "WinDbg_Scripts 调试器数据模型脚本",
+        "CVE-2020-1034 提权 PoC",
+        "IoRingReadWritePrimitive 与 cet-research 仓库"
+      ],
+      "evidence_ids": [
+        "ys-works-004",
+        "ys-community-04",
+        "ys-decisions-03",
+        "ys-decisions-04",
+        "ys-timeline-16"
+      ],
+      "validation_tests": [
+        "repeated"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "多工具围绕同一主题的集中出现，亦可由 Windows 内核研究本身工具链稀缺、研究者需自建调试与结构查看工具这一领域共性解释，而非个人特有方法论；配套 PoC 的公开发布部分可能受 Winsider 训练/咨询业务对可演示材料的需求驱动。星标数为采用度指标，受平台算法与时间影响，存在幸存者偏差。"
+    },
+    {
+      "name": "将单一 bug class 系统化为可复用 primitive 的 data-only 攻击路径",
+      "starting_conditions": "在 CFG、KASLR、内核池保护等缓解机制约束下，传统内核利用路径难度上升，研究者转向 data-only 路径属可推断的环境背景；该推断基于 2020 年代前后缓解机制收紧的时期背景，非可直接复现的机制。",
+      "repeated_practice": "在 I/O Ring 研究中，将一次任意内核写（或任意递增）通过重定向 IoRing->RegBuffers 指针升级为完整内核读写 primitive，并在 writeup 正文与 PoC 中记录该思路；作者自述该项目使其对该 bug class 的利用方式产生兴趣（'That project made me interested in other ways to exploit that specific bug class.'）。",
+      "feedback": "TyphoonCon 2022 演讲与 Alex Ionescu 的具名管道建议构成可核验反馈事件，但仅覆盖该单一原语，无系统性同伴评审制度证据。",
+      "intermediate_capability": "形成将单一 bug class 系统化为可复用 primitive 的思路，并以 writeup→PoC→会议演讲闭环公开发表。",
+      "observed_outcomes": [
+        "I/O Ring 完整读写原语 writeup 与 PoC（2022-07-05）",
+        "TyphoonCon 2022 演讲"
+      ],
+      "evidence_ids": [
+        "ys-works-001",
+        "ys-works-005",
+        "ys-community-02"
+      ],
+      "validation_tests": [
+        "repeated"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "该机制仅覆盖 I/O Ring 一个原语，属单实例样本，缺乏跨实例证据与失败/转向证据；data-only 攻击路径在 2020 年代为行业内多名研究者共同关注的方向，该时期的转向可由行业趋势共同解释，而非个人特有能力。结论受幸存者偏差约束：仅观察到成功发表的 primitive，未观察到未发表或失败的尝试。"
+    }
+  ],
+  "tensions": [
+    "主要公开来源为 Yarden Shafir 联合维护的 windows-internals.com 与自维护的 GitHub，存在自发布与平台偏差，研究方法与发表节奏的归因需扣除商业与平台因素。",
+    "research—training 双轨使深度内核机制 writeup 既是研究产出也是 Winsider 培训材料，个人研究能力与商业模式输出难以完全分离。",
+    "GitHub 星标仅支撑工具采用度与可见度，但 issue/PR 历史在抓取材料中为 0 open，社区反馈回路不可见，反馈机制主要属推断。",
+    "Alex Ionescu 2009 年创立 Winsider 与其个人外部认定（Alien of Extraordinary Ability、《Windows Internals, 7th Edition》合著）属另一人，不可迁移为对 Yarden Shafir 个人能力或成长机制的评价。",
+    "ys-ext-05 三条课程评价未归因到具体讲师，不能作为对 Yarden Shafir 个人的外部评价使用。"
+  ],
+  "transferable_practices": [
+    "对每个内核研究主题重复执行 ntoskrnl 公共符号逆向 + WinDbg dx 字段检查 + 自有 exploit 对照实验的方法链，以一手逆向与调试实证支撑结论。",
+    "以自有前序工作作为对照实验基准检验新检测/缓解机制的有效性，并明确区分机制能力与实际防护效果，不夸大单点缓解价值。",
+    "研究产出同步配套公开可复用工具（调试脚本、结构查看器、PoC），使工具建设与 writeup 互为支撑。",
+    "采用 writeup→PoC→会议演讲的多渠道公开发表闭环，并以多部分系列（Part 1/Part 2）组织同一研究主题的迭代输出。"
+  ],
+  "non_transferable_conditions": [
+    "约十年 Windows 安全开发与逆向经验的岗位积累（SentinelOne、CrowdStrike、Trail of Bits）为 2019 年合伙人转型的前提，属个人履历特有条件；各段任职起止时间、团队与产出未在材料中提供。",
+    "2019 年以 co-partner 身份加入 Alex Ionescu 于 2009 年创立的 Winsider，所获得的长期协作、公开训练渠道与培训/咨询商业模式，属组织资源特有条件，非可迁移的个人方法。",
+    "2020 年代前后缓解机制收紧，data-only 攻击路径在该时期成为研究者的可行选项之一，属时期背景而非可复现机制。",
+    "Black Hat / OffensiveCon / TyphoonCon 等会议邀请与培训资格，以及 Vigilant Labs 漏洞研究员岗位，属机构性外部认定，非可迁移的方法论。"
+  ],
+  "open_questions": [
+    "进入 Windows 内部原理领域的起点（首次接触、自学路径或导师）无一手证据；about 页未说明其如何入行。",
+    "Trail of Bits、CrowdStrike、SentinelOne 三段任职的起止时间、所在团队、在岗研究产出均未取得一手页面，各岗位能力增量无法精细重建。",
+    "2019 年加入 Winsider 的具体决策动因（为何选择合伙人/训练赛道而非继续雇员研究岗）无一手叙述。",
+    "本人一手访谈/播客/AMA 正文未能获取（offsecbymail.com 返回 ECONNREFUSED，FIRST Malware SIG AMA 返回 404），入门、学习、失败、导师、转折动机等维度缺乏自述。",
+    "早期作品（约 2018—2021）线索缺失：feed 仅显示最近 10 篇，是否存在更早期 writeup 未确认；windows-internals.com IoRing 正文页曾返回 404。",
+    "Black Hat USA 2023 (Zeus) 与 Microsoft BlueHat 议程一手页面返回 HTTP 403，议题标题/合作者分工仅来自搜索摘要，未能标记为 documented；Ofir Matyas 与 Yarden Shafir 在 Zeus 议题上的具体协作机制未知。",
+    "PoolViewer 等工具的 GitHub 维护活跃度（最近提交日期）未知；Medium @yardenshafir2 返回 403，跨平台输出范围无法核实。",
+    "data-only 攻击路径机制仅覆盖 I/O Ring 一个原语，受幸存者偏差约束（无失败/转向/负面反馈证据），跨实例可推广性待后续证据。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yarden-shafir-synthesis-v2-20260927-152346-410",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790494101903607000-yarden-shafir-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "ce97176b-41f3-47bd-ab0b-d5048de72f82",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_4w5yzdxolwt63lyemy75mnwd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yarden-shafir-synthesis-v2-20260927-152346-410/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-27T07:28:21.934571+00:00"
+      },
+      {
+        "tool_use_id": "call_ygsu2gunh9mngdjix3f6x9yz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yarden-shafir-synthesis-v2-20260927-152346-410/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T07:28:21.934598+00:00"
+      },
+      {
+        "tool_use_id": "call_rjquoek43nowvuhmfakwflnc",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yarden-shafir-synthesis-v2-20260927-152346-410/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "5796664523fc891128926f7b235ee17a166f7db302f386f7e9f1b3a84c134748",
+        "accessed_at": "2026-09-27T07:28:21.934605+00:00"
+      },
+      {
+        "tool_use_id": "call_u7drncr1mhs80jc3c9w0ujeo",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yarden-shafir-synthesis-v2-20260927-152346-410/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "a495446b3bac0f14b4a879c285745c2a3bf4b692cd422f35ca9b818c201ca800",
+        "accessed_at": "2026-09-27T07:28:21.934617+00:00"
+      },
+      {
+        "tool_use_id": "call_458uy2s59slx9z9gampvcuam",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yarden-shafir-synthesis-v2-20260927-152346-410/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "052019998833c576f6728743af5e3ee58efeb00d31cc071a20249ae17d8dff34",
+        "accessed_at": "2026-09-27T07:28:21.934724+00:00"
+      },
+      {
+        "tool_use_id": "call_hryx889wpienjrmc81sruw0m",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yarden-shafir-synthesis-v2-20260927-152346-410/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "70cc420605851dacfb652b1745914d780be8d07ac81e63bd987173ce68acef74",
+        "accessed_at": "2026-09-27T07:28:21.934768+00:00"
+      },
+      {
+        "tool_use_id": "call_86vkt043tiqsuislgdqhw2kj",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yarden-shafir-synthesis-v2-20260927-152346-410/checkpoint.md",
+          "content": "# Checkpoint — Yarden Shafir 综合 v2\n\n## 输入核验\n- person_json: Yarden Shafir, Windows 内核漏洞, windows-internals.com, Black Hat US / BlueHat.\n- evidence_json: 六维材料。verified_in_run=true 的有效证据:\n  - works: ys-works-001 (I/O Ring 2022-07-05), ys-works-002 (KASLR 2022-11-23), ys-works-003 (feed 序列 2022-07 至 2026-07), ys-works-004 (PoolViewer), ys-works-005 (TyphoonCon 2022 自述).\n  - conversations: ys-conv-01 (团队简介 ~10 年经验), ys-conv-02 (Vigilant Labs + 前雇主).\n  - community: ys-community-01 (2019 Winsider co-partner), ys-community-02 (Alex 具名管道建议), ys-community-03 (10+ writeups), ys-community-04 (GitHub 工具集), ys-community-05 (Black Hat 2023 Zeus, reported).\n  - external: ys-ext-01..06.\n  - decisions: ys-decisions-01..05.\n  - timeline: ys-timeline-01..05 (雇主任职 reported), ys-timeline-16/17/18 (documented/reported). ys-timeline-06..15 verified_in_run=FALSE (lead_only), 仅作辅助, 不作主支撑.\n- revision_context: round 1, 8 条 synthesis_instructions, 1 条新证据 ys-r1-001 (Winsider 2009 年创立, /about/ 一手陈述), invalid_evidence_ids 为空.\n\n## 已应用的修订指令\n1. 删除 mechanisms[1].repeated_practice 成语 \"一脉相承\" → 改为 \"与 PoolViewer、WinDbg_Scripts 工具建设采用相同的逆向加数据模型实证路径\".\n2. mechanisms[2].starting_conditions 删除拟人 \"客观上推动\" → 改为环境背景推断标注.\n3. non_transferable_conditions[2] 删除 \"倒逼\" → 改为时期背景.\n4. 用 ys-r1-001 支撑 \"Alex Ionescu 2009 年创立 Winsider\", 并入 stage 2 与 non_transferable_conditions[1] 证据.\n5. mechanisms[0].feedback GitHub 星标限定为采用度/可见度, 删除 \"研究者声誉\".\n6. mechanisms[1].feedback 同伴反馈限定为 Alex Ionescu 一次具名管道建议, 删除 \"评审\" 暗示.\n7. validation_tests 下调 distinctive → repeated (mech 0/2 均不再标 distinctive).\n8. confidence 约束: mech 2 单实例 + 幸存者偏差 → low; mech 0/1 商业模式 + 自发布偏差 → medium; alternative_explanation 显式纳入 Winsider 商业模式与 data-only 行业趋势替代解释.\n9. 偏差处理: 幸存者偏差/自发布偏差/商业模式偏差显式计入 confidence、alternative_explanation 与 tensions.\n\n## 输出结构\n- 5 stages (2019前岗位积累 / 2019 Winsider 转型 / 2020 CVE+工具 / 2022 I/O Ring / 2022-2026 扩展), 各 stage 至少 1 个 verified 证据.\n- 3 mechanisms (逆向+WinDbg 实证路径 / 工具建设伴随研究 / data-only 原语单实例), 各 mechanism 至少 1 个 verified 证据.\n- tensions / transferable_practices / non_transferable_conditions / open_questions 均按修订指令处理.\n\n## 未完成\n- 待写 output.json.\n"
+        },
+        "success": true,
+        "content_sha256": "1e75be1865a85ea14eb18f8b834cd6a81f1b0505d35af3fdb4c4fb4f7e23efb9",
+        "accessed_at": "2026-09-27T07:28:21.935218+00:00"
+      },
+      {
+        "tool_use_id": "call_sntossrdjmyy8qlr9bnavsbh",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/yarden-shafir-synthesis-v2-20260927-152346-410/output.json",
+          "content": "{\n  \"person\": \"Yarden Shafir\",\n  \"expertise\": [\n    \"Windows 内核漏洞研究与利用\",\n    \"Windows 内部结构逆向（ntoskrnl.exe、内核对象、过滤驱动通信端口）\",\n    \"内核利用原语构造与 data-only 攻击路径\",\n    \"内核缓解机制分析（KASLR、CFG、Module Tampering Protection、KDP/Secure Pool、PreviousMode、CET）\",\n    \"Windows 调试方法与工具建设（WinDbg、LiveCloudKd、PoolViewer）\",\n    \"Secure Kernel / VBS 研究与培训\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"约 2010—2018（进入 Winsider 之前的十年）\",\n      \"stage\": \"跨机构 Windows 安全岗位积累期\",\n      \"capability_change\": \"依据第三方简介页面转述，Yarden Shafir 先后在 SentinelOne（安全研究员与 QA 工程师）、CrowdStrike（高级安全工程师）、Trail of Bits 任职，约十年网络安全行业经验，方向集中于 Windows 内部结构。该阶段为后续合伙人转型与公开深度 writeup 输出提供了技术与履历基础。该转述未提供各段任职的起止时间、所在团队与产出，故各岗位能力增量无法精细重建，仅作为可核验的职业序列。\",\n      \"evidence_ids\": [\"ys-conv-01\", \"ys-conv-02\", \"ys-timeline-01\", \"ys-timeline-02\", \"ys-timeline-03\", \"ys-decisions-02\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2019\",\n      \"stage\": \"由雇员向合伙人/培训提供方的转型\",\n      \"capability_change\": \"2019 年以 co-partner 身份加入 Alex Ionescu 于 2009 年创立的 Winsider Seminars & Solutions, Inc.，承担公开培训、主题演讲与 Windows 内核底层系统内部机制讲座，并撰写白皮书。该转型以既有约十年 Windows 安全开发与逆向经验为前提，将个人研究能力转化为可规模化交付的训练与咨询输出，并确立与 Alex Ionescu 的长期协作关系。\",\n      \"evidence_ids\": [\"ys-community-01\", \"ys-conv-01\", \"ys-decisions-01\", \"ys-timeline-17\", \"ys-r1-001\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2020\",\n      \"stage\": \"漏洞 PoC 与配套工具的公开化\",\n      \"capability_change\": \"公开发布 CVE-2020-1034 提权 PoC（GitHub 仓库 yardenshafir/CVE-2020-1034，配套 windows-internals.com 多部分 writeup），并在 GitHub 维护 PoolViewer、WinDbg_Scripts、SymlinkCallback 等内核池分析、调试与文件系统访问追踪工具。形成研究产出配套公开可复用工具的习惯，研究不止于 writeup，而同步产出供他人复现与分析的脚本与样本。\",\n      \"evidence_ids\": [\"ys-decisions-03\", \"ys-community-04\", \"ys-timeline-05\", \"ys-timeline-16\", \"ys-works-004\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022\",\n      \"stage\": \"内核任意写升级为完整读写原语并转向 data-only 路径\",\n      \"capability_change\": \"2022-07-05 在 windows-internals.com 发表 I/O Ring 研究：通过逆向 Windows 11 22H2+ 的 I/O Ring 子系统并利用 ntoskrnl.exe 公共符号，发现可重定向 IoRing->RegBuffers 指针，将一次任意内核写（或任意递增）升级为完整内核读写 primitive，属 data-only 攻击路径，规避传统内核利用被缓解机制压缩的难点。研究先在 TyphoonCon 2022 演讲，再发表博客与 PoC，形成 writeup→PoC→会议演讲的公开闭环。后续 2022-08 与 2022-11 又相继发表 Module Tampering Protection 缓解分析与 KASLR 检测分析，研究主题由利用原语构造扩展到缓解机制分析。\",\n      \"evidence_ids\": [\"ys-works-001\", \"ys-works-002\", \"ys-works-005\", \"ys-community-02\", \"ys-community-03\", \"ys-decisions-04\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023—2026\",\n      \"stage\": \"研究主题扩展至 Secure Kernel、KDP Pool 与缓解机制序列化\",\n      \"capability_change\": \"依据 windows-internals.com blog feed 与多篇 writeup，公开输出序列在 2023-01 起扩展到 Filter Communication Ports 内核对象分析、2023-11 与 2022-11 形成同主题迭代（KASLR），2024-05 转向 Secure Kernel Research with LiveCloudKd 调试方法，2026 转向 KDP Pool、PreviousMode Mitigation、Clipboard 数据行为等内核机制与缓解。技术栈由攻击利用与缓解分析，进一步扩展到 Secure Kernel 调试工具与方法建设，呈现持续 4 年以上的稳定深度发表节奏与多部分系列（Part 1/Part 2）输出习惯。\",\n      \"evidence_ids\": [\"ys-works-003\", \"ys-community-03\", \"ys-timeline-12\", \"ys-timeline-13\", \"ys-timeline-14\", \"ys-timeline-15\"],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"逆向 ntoskrnl + WinDbg 实证的内核机制研究路径\",\n      \"starting_conditions\": \"约十年 Windows 安全开发与逆向经验（据第三方简介转述），加入 Winsider 后获得稳定的公开训练与咨询输出渠道，以及与 Alex Ionescu 的长期协作环境。\",\n      \"repeated_practice\": \"对每个研究主题重复执行同一方法链：利用 ntoskrnl.exe 公共符号与手动逆向重建内核子系统结构（如 IoRing->RegBuffers、Filter Communication Ports、EPROCESS.SyscallUsage），用 WinDbg dx 命令检查内核字段，以自有 exploit 作为对照实验基准检验新检测机制，再以逆向结果与实证数据撰写深度 writeup。\",\n      \"feedback\": \"I/O Ring writeup 中记录了 Alex Ionescu 一次具名管道建议（改用具名管道以降低可见性），经该建议后定稿；其余同伴反馈、读者反馈与 issue/PR 历史未在抓取材料中可见，反馈回路主要属推断。\",\n      \"intermediate_capability\": \"形成以一手逆向与调试实证为内核机制结论支撑的研究习惯，结论区分机制能力与实际防护效果，不夸大单点缓解价值（如 KASLR writeup 明确该机制为增量而非终结）。\",\n      \"observed_outcomes\": [\n        \"2022-07-05 I/O Ring 完整读写原语 writeup\",\n        \"2022-11-23 KASLR 检测机制分析（以自家 I/O Ring exploit 作对照实验）\",\n        \"2023-01 Filter Communication Ports 内核对象分析\",\n        \"2026 KDP Pool、PreviousMode、Clipboard 系列写文\"\n      ],\n      \"evidence_ids\": [\"ys-works-001\", \"ys-works-002\", \"ys-works-003\", \"ys-community-02\", \"ys-community-03\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"该路径的高频复现部分受 Winsider 培训/咨询商业模式驱动：公开 writeup 与培训内容互为沉淀，研究—训练双轨使深度内核机制 writeup 既是研究产出也是培训材料，故发表节奏与研究方法不能完全归因于个人能力，亦受商业模式与公开输出渠道约束。此外主要来源为本人联合维护的 windows-internals.com，存在自发布/平台偏差。\"\n    },\n    {\n      \"name\": \"研究产出配套公开可复用工具的工具建设路径\",\n      \"starting_conditions\": \"在 CVE-2020-1034 等单点漏洞研究之外，存在对 Windows 内核池结构与调试流程的长期投入需求，以及 GitHub 公开平台的可达性。\",\n      \"repeated_practice\": \"与 PoolViewer（从内存 dump 查看/过滤 pool 分配，附 WinDbg 扩展）、WinDbg_Scripts 工具建设采用相同的逆向加数据模型实证路径：研究内核机制时同步产出调试脚本、结构查看器或 PoC，并将其在 GitHub 公开维护，使工具建设与 writeup 互为支撑。PoolViewer、WinDbg_Scripts、IoRingReadWritePrimitive、cet-research、SymlinkCallback、CVE-2020-1034 等多工具围绕同一 Windows 内核主题。\",\n      \"feedback\": \"GitHub 工具获数百星（WinDbg_Scripts 约 435★、IoRingReadWritePrimitive 约 259★、PoolViewer 约 156★ 等），星标数据支撑工具被采用与可见度，但不直接支撑对研究者个人声誉或能力的评价；issue/PR 历史在抓取材料中为 0 open，社区反馈记录不可见，故反馈回路属推断。\",\n      \"intermediate_capability\": \"形成研究副产品系统化整理并公开发布的习惯，工具被社区复用，构成输出—采用—下一研究的循环。\",\n      \"observed_outcomes\": [\n        \"PoolViewer 与 WinDbg 扩展\",\n        \"WinDbg_Scripts 调试器数据模型脚本\",\n        \"CVE-2020-1034 提权 PoC\",\n        \"IoRingReadWritePrimitive 与 cet-research 仓库\"\n      ],\n      \"evidence_ids\": [\"ys-works-004\", \"ys-community-04\", \"ys-decisions-03\", \"ys-decisions-04\", \"ys-timeline-16\"],\n      \"validation_tests\": [\"repeated\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"多工具围绕同一主题的集中出现，亦可由 Windows 内核研究本身工具链稀缺、研究者需自建调试与结构查看工具这一领域共性解释，而非个人特有方法论；配套 PoC 的公开发布部分可能受 Winsider 训练/咨询业务对可演示材料的需求驱动。星标数为采用度指标，受平台算法与时间影响，存在幸存者偏差。\"\n    },\n    {\n      \"name\": \"将单一 bug class 系统化为可复用 primitive 的 data-only 攻击路径\",\n      \"starting_conditions\": \"在 CFG、KASLR、内核池保护等缓解机制约束下，传统内核利用路径难度上升，研究者转向 data-only 路径属可推断的环境背景；该推断基于 2020 年代前后缓解机制收紧的时期背景，非可直接复现的机制。\",\n      \"repeated_practice\": \"在 I/O Ring 研究中，将一次任意内核写（或任意递增）通过重定向 IoRing->RegBuffers 指针升级为完整内核读写 primitive，并在 writeup 正文与 PoC 中记录该思路；作者自述该项目使其对该 bug class 的利用方式产生兴趣（'That project made me interested in other ways to exploit that specific bug class.'）。\",\n      \"feedback\": \"TyphoonCon 2022 演讲与 Alex Ionescu 的具名管道建议构成可核验反馈事件，但仅覆盖该单一原语，无系统性同伴评审制度证据。\",\n      \"intermediate_capability\": \"形成将单一 bug class 系统化为可复用 primitive 的思路，并以 writeup→PoC→会议演讲闭环公开发表。\",\n      \"observed_outcomes\": [\n        \"I/O Ring 完整读写原语 writeup 与 PoC（2022-07-05）\",\n        \"TyphoonCon 2022 演讲\"\n      ],\n      \"evidence_ids\": [\"ys-works-001\", \"ys-works-005\", \"ys-community-02\"],\n      \"validation_tests\": [\"repeated\"],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"该机制仅覆盖 I/O Ring 一个原语，属单实例样本，缺乏跨实例证据与失败/转向证据；data-only 攻击路径在 2020 年代为行业内多名研究者共同关注的方向，该时期的转向可由行业趋势共同解释，而非个人特有能力。结论受幸存者偏差约束：仅观察到成功发表的 primitive，未观察到未发表或失败的尝试。\"\n    }\n  ],\n  \"tensions\": [\n    \"主要公开来源为 Yarden Shafir 联合维护的 windows-internals.com 与自维护的 GitHub，存在自发布与平台偏差，研究方法与发表节奏的归因需扣除商业与平台因素。\",\n    \"research—training 双轨使深度内核机制 writeup 既是研究产出也是 Winsider 培训材料，个人研究能力与商业模式输出难以完全分离。\",\n    \"GitHub 星标仅支撑工具采用度与可见度，但 issue/PR 历史在抓取材料中为 0 open，社区反馈回路不可见，反馈机制主要属推断。\",\n    \"Alex Ionescu 2009 年创立 Winsider 与其个人外部认定（Alien of Extraordinary Ability、《Windows Internals, 7th Edition》合著）属另一人，不可迁移为对 Yarden Shafir 个人能力或成长机制的评价。\",\n    \"ys-ext-05 三条课程评价未归因到具体讲师，不能作为对 Yarden Shafir 个人的外部评价使用。\"\n  ],\n  \"transferable_practices\": [\n    \"对每个内核研究主题重复执行 ntoskrnl 公共符号逆向 + WinDbg dx 字段检查 + 自有 exploit 对照实验的方法链，以一手逆向与调试实证支撑结论。\",\n    \"以自有前序工作作为对照实验基准检验新检测/缓解机制的有效性，并明确区分机制能力与实际防护效果，不夸大单点缓解价值。\",\n    \"研究产出同步配套公开可复用工具（调试脚本、结构查看器、PoC），使工具建设与 writeup 互为支撑。\",\n    \"采用 writeup→PoC→会议演讲的多渠道公开发表闭环，并以多部分系列（Part 1/Part 2）组织同一研究主题的迭代输出。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"约十年 Windows 安全开发与逆向经验的岗位积累（SentinelOne、CrowdStrike、Trail of Bits）为 2019 年合伙人转型的前提，属个人履历特有条件；各段任职起止时间、团队与产出未在材料中提供。\",\n    \"2019 年以 co-partner 身份加入 Alex Ionescu 于 2009 年创立的 Winsider，所获得的长期协作、公开训练渠道与培训/咨询商业模式，属组织资源特有条件，非可迁移的个人方法。\",\n    \"2020 年代前后缓解机制收紧，data-only 攻击路径在该时期成为研究者的可行选项之一，属时期背景而非可复现机制。\",\n    \"Black Hat / OffensiveCon / TyphoonCon 等会议邀请与培训资格，以及 Vigilant Labs 漏洞研究员岗位，属机构性外部认定，非可迁移的方法论。\"\n  ],\n  \"open_questions\": [\n    \"进入 Windows 内部原理领域的起点（首次接触、自学路径或导师）无一手证据；about 页未说明其如何入行。\",\n    \"Trail of Bits、CrowdStrike、SentinelOne 三段任职的起止时间、所在团队、在岗研究产出均未取得一手页面，各岗位能力增量无法精细重建。\",\n    \"2019 年加入 Winsider 的具体决策动因（为何选择合伙人/训练赛道而非继续雇员研究岗）无一手叙述。\",\n    \"本人一手访谈/播客/AMA 正文未能获取（offsecbymail.com 返回 ECONNREFUSED，FIRST Malware SIG AMA 返回 404），入门、学习、失败、导师、转折动机等维度缺乏自述。\",\n    \"早期作品（约 2018—2021）线索缺失：feed 仅显示最近 10 篇，是否存在更早期 writeup 未确认；windows-internals.com IoRing 正文页曾返回 404。\",\n    \"Black Hat USA 2023 (Zeus) 与 Microsoft BlueHat 议程一手页面返回 HTTP 403，议题标题/合作者分工仅来自搜索摘要，未能标记为 documented；Ofir Matyas 与 Yarden Shafir 在 Zeus 议题上的具体协作机制未知。\",\n    \"PoolViewer 等工具的 GitHub 维护活跃度（最近提交日期）未知；Medium @yardenshafir2 返回 403，跨平台输出范围无法核实。\",\n    \"data-only 攻击路径机制仅覆盖 I/O Ring 一个原语，受幸存者偏差约束（无失败/转向/负面反馈证据），跨实例可推广性待后续证据。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "33b9a493703185f997db2c7a913f3d903bacee9ff1aadb550744a339c1f5b215",
+        "accessed_at": "2026-09-27T07:28:21.935223+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790494101935244000-yarden-shafir-synthesis-v2.json",
+    "label": "Yarden Shafir:synthesis:v2",
+    "elapsed_seconds": 275.52,
+    "prompt_sha256": "7903e0c69a444e497a018fa3f3ec773302d7753b4e9c180f814aef5a47994c26",
+    "num_turns": 9,
+    "total_cost_usd": 0.66881,
+    "usage": {
+      "input_tokens": 46436,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 114560,
+      "output_tokens": 15174,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 46436,
+        "outputTokens": 15174,
+        "cacheReadInputTokens": 114560,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.66881,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

@@ -1,0 +1,390 @@
+{
+  "person": "HeeChan Kim",
+  "expertise": [
+    "Windows 第三方软件安装器与驱动的本地提权（LPE）漏洞研究",
+    "DLL 搜索顺序劫持（WinSxS/.Local、环境变量目录、temp 目录）",
+    "Windows 逻辑漏洞原语：junction 加 native symbolic link 经 \\RPC Control 的 reparse 点链",
+    "安装器随机路径竞态（Python 日志轮询加 GUID 解析）",
+    "SYSTEM 提权 PoC 模板（SeDebugPrivilege 打开 winlogon 复制 token）",
+    "第三方内核驱动栈溢出利用（ROP、SMEP bypass、EPROCESS token stealing，单点）",
+    "厂商协调披露与披露时间线记录"
+  ],
+  "stages": [
+    {
+      "period": "2020 年 6–12 月",
+      "stage": "通用编程向安全学习过渡",
+      "capability_change": "GitHub 仓库时间线显示从 Python 通用项目（auto_mouse_python、socket_python_backdoor）起步，2020 年 9–12 月转向 universal_shell_code（C）、reversing-problems（C）等逆向与安全学习仓库；可见代码侧学习曲线由 Python 过渡到 C 与逆向。仓库缺乏学习意图自述，转向动机不可从来源证实。",
+      "evidence_ids": [
+        "hc-identity-github",
+        "hck-dec-01"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2021–2022 年初",
+      "stage": "制度化训练入口与早期公开披露",
+      "capability_change": "自述参加 KITRI Best of the Best 第 10 期漏洞分析方向、加入校内 TeamSCA 与 TeamH4C，并以队名参加 2021–2023 韩国青少年 CTF；同期在个人博客以 CVE 编号公开发布最早 writeup（archives 记录最早日期 2021-11-30）。CTF 名次与 BoB 参与均为自述，未获第三方赛事档案独立印证。",
+      "evidence_ids": [
+        "hc-deep-01",
+        "hc-deep-02",
+        "hc-community-04",
+        "heegong-ext-kitri-bob-v10",
+        "heegong-ext-ctf-2021-2023",
+        "hc-deep-06",
+        "hck-dec-02"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2022 年 6–9 月",
+      "stage": "Windows 安装程序 LPE 方法与 token 提权模板成形",
+      "capability_change": "连续发布 CVE-2022-4956（Advanced Installer 经 Proton VPN 安装器的 WinSxS/.Local 目录 DLL 劫持）、CVE-2022-39846（Samsung Smart Switch，引入 Python 轮询日志解析随机 GUID 路径的竞态）、CVE-2022-45422（LG Smart Share，环境变量目录 DLL 劫持）；发现路径以 Process Monitor 观察安装器 DLL 搜索顺序为主，并以 SeDebugPrivilege 打开 winlogon.exe、复制 token、经 CreateProcessWithTokenW 提升至 SYSTEM 的 PoC 模板跨漏洞复用。CVE-2022-4956 自述为审查 Proton VPN 安装器时偶然发现，经供应链依赖回溯到上游安装器框架根因。",
+      "evidence_ids": [
+        "hc-publication-2022-4956",
+        "hc-publication-2022-39846",
+        "hc-publication-2022-45422",
+        "hc-deep-03",
+        "hc-deep-05"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022 年 11 月",
+      "stage": "单点内核态利用",
+      "capability_change": "CVE-2022-44898（ASUS AuraSync 内核驱动 MsIo64.sys 栈缓冲区溢出）是所抓取作品中唯一内核态利用条目；利用 IOCTL 0x80102040 触发未校验长度的 memmove 栈溢出，经 ROP 写 CR4 关闭 SMEP、wbinvd 后跳转用户态 shellcode，遍历 ActiveProcessLinks 定位 PID 4 的 EPROCESS、复制 +70h 偏移 token 完成提权并恢复 SMEP 与栈。所抓取作品中未出现其他内核态利用，无法据以判断内核态利用是否为持续方向。",
+      "evidence_ids": [
+        "hc-publication-2022-44898-kernel",
+        "hc-deep-04",
+        "hck-dec-04",
+        "heegong-ext-cve-2022-44898"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2022 年 12 月 – 2023 年 9 月",
+      "stage": "junction 与 symlink 原语固化及产品线扫描",
+      "capability_change": "将 junction 加 native symbolic link 经 \\RPC Control 的 reparse 点链手法在 Samsung 系列产品上重复应用，效果从任意文件创建与永久 DoS（CVE-2022-39909 Gear IconX、CVE-2023-30672 Smart Switch）扩展到任意文件删除（CVE-2023-30673），并在厂商部署 DLL 完整性检查导致直接劫持失败时改用同一原语绕过（CVE-2023-41929 Card-UFD）；CVE-2022-4894 将 DLL 劫持加竞态方法批量化覆盖四款 Samsung 与 HP 打印机软件，显示从单漏洞到产品线扫描的方法演化。",
+      "evidence_ids": [
+        "hc-publication-2022-39909-junction",
+        "hc-publication-2023-30672",
+        "hc-publication-2023-30673",
+        "hc-publication-2023-41929",
+        "hc-publication-2022-4894",
+        "hc-publication-2023-37849",
+        "hc-community-02"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "制度化竞赛训练与公开披露产出的并行",
+      "starting_conditions": "高中计算机科班（Semyeong Computer High School）环境与校内 CTF 社团（TeamSCA、TeamH4C）提供同伴结构与参赛出口；KITRI Best of the Best 第 10 期漏洞分析方向提供制度化训练入口。",
+      "repeated_practice": "2021–2023 以队名参加韩国青少年 CTF（ShaktiCTF、Codegate Junior、Wacon Junior、CCE Junior、White Hat Contest Junior 等），并按 CVE 编号在个人博客公开发布 writeup，形成约 22 个月跨多厂商的持续披露节奏。",
+      "feedback": "赛事名次（自述 2021 YISF 第二、2022 ELECONN 第一、2022 Gifted Learning Institute Contest 第一）与厂商致谢及分级（Samsung High/CVSS 7.3、ASUS Hall of Fame）均为自述名次，未获 CTFtime 等第三方赛事档案独立印证；机构参与（KITRI BoB）与厂商致谢本身不构成独立能力印证。",
+      "intermediate_capability": "由竞赛题解训练向真实厂商 0-day 披露过渡的结构性入口，形成可核验的公开产出习惯。",
+      "observed_outcomes": [
+        "11 篇 CVE writeup（2021-11-30 至 2023-09-24），覆盖 Samsung、HP、LG、ASUS、Panda Security、Advanced Installer 等厂商",
+        "博客 writeup 加 GitHub PoC 的复合输出渠道，团队标签在 GitHub 与博客两处一致"
+      ],
+      "evidence_ids": [
+        "hc-deep-01",
+        "hc-deep-02",
+        "hc-community-01",
+        "hc-community-03",
+        "hc-community-04",
+        "heegong-ext-kitri-bob-v10",
+        "heegong-ext-ctf-2021-2023",
+        "hc-deep-06"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "CTF 参赛与漏洞披露可能为并行活动而非因果关系；KITRI BoB 项目的课程结构可能比 CTF 赛事更能解释能力转化，且赛事成绩为自述、未获第三方赛事档案独立印证；机构参与（KITRI BoB）与厂商致谢本身不构成独立能力印证。"
+    },
+    {
+      "name": "Process Monitor 驱动的安装器 DLL 搜索顺序发现",
+      "starting_conditions": "Windows 第三方安装器普遍从可预测路径加载 DLL 且依赖用户可写目录；Sysinternals Process Monitor 可观察文件与注册表访问序列。最早一篇（CVE-2022-4956）自述为审查 Proton VPN 安装器时偶然发现，经供应链依赖回溯到上游安装器框架根因。",
+      "repeated_practice": "在 CVE-2022-4956、CVE-2022-45422、CVE-2022-39846、CVE-2022-4894 中以 Process Monitor 观察安装器加载顺序，定位用户可写目录（WinSxS/.Local、环境变量目录、日志记录的随机 temp 目录）作为 DLL 劫持落点。",
+      "feedback": "writeup 明确自述以 Process Monitor 作为发现工具（CVE-2022-4956、CVE-2022-45422）；PoC 植入恶意 DLL 后达成 SYSTEM 提权。",
+      "intermediate_capability": "以动态行为观察定位安装器从用户可写路径加载 DLL 这一可重复漏洞模式，而非纯静态审阅。",
+      "observed_outcomes": [
+        "多篇 DLL 劫持 LPE writeup（CVE-2022-4956、CVE-2022-45422、CVE-2022-39846、CVE-2022-4894）"
+      ],
+      "evidence_ids": [
+        "hc-publication-2022-4956",
+        "hc-publication-2022-45422",
+        "hc-publication-2022-39846",
+        "hc-publication-2022-4894",
+        "hc-deep-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "Process Monitor 是 Windows LPE 研究通用工具，其使用不构成个人特有能力；同一发现路径可能源于公开 DLL 劫持研究方法的广泛传播而非个人方法论创新。"
+    },
+    {
+      "name": "SYSTEM 提权 PoC 模板与随机路径竞态自动化",
+      "starting_conditions": "SeDebugPrivilege 可打开 winlogon.exe 并复制其 token；部分安装器将含随机 GUID 的子目录路径写入用户可写 temp 日志，直接预置 DLL 无法命中随机路径。",
+      "repeated_practice": "以 OpenProcessToken、DuplicateTokenEx、CreateProcessWithTokenW 复制 winlogon token 提升至 SYSTEM 的模板在多个漏洞中复用；针对随机 GUID 路径的安装器（CVE-2022-39846、CVE-2022-4894）使用 Python 脚本轮询日志、解析 GUID 目录、在安装器加载前植入 DLL。",
+      "feedback": "该模板在 CVE-2022-39846、CVE-2022-45422、CVE-2023-37849、CVE-2022-4894 中被复用；针对随机 GUID 路径的安装器使用 Python 脚本轮询日志、解析路径并植入 DLL。模板复用与能力强化之间的因果无法从公开 writeup 直接证实。",
+      "intermediate_capability": "形成可跨漏洞搬运的 SYSTEM 提权 PoC 模板与随机路径竞态自动化脚本。",
+      "observed_outcomes": [
+        "多篇 writeup 的 PoC 复用同一 token impersonation 收尾路径",
+        "CVE-2022-39846、CVE-2022-4894 引入 Python 轮询脚本处理随机化路径"
+      ],
+      "evidence_ids": [
+        "hc-publication-2022-4956",
+        "hc-publication-2022-39846",
+        "hc-publication-2022-45422",
+        "hc-publication-2023-37849",
+        "hc-publication-2022-4894"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "token impersonation 是 Windows LPE PoC 的通用提权收尾手法，复用可能源于该手法为社区常识而非个人能力沉淀；Python 轮询脚本亦为竞态利用的常规实现，不必然反映独创工具建设。"
+    },
+    {
+      "name": "junction 加 native symbolic link reparse 点链的原语化与多用途改造",
+      "starting_conditions": "管理员权限安装器在用户可写目录（Quick Launch、AppData）创建文件，且 \\RPC Control 可作为 reparse 点中介；NT API（NtCreateFile、NtCreateSymbolicLinkObject）可用。",
+      "repeated_practice": "在 Samsung 系列（CVE-2022-39909 Gear IconX、CVE-2023-30672 Smart Switch、CVE-2023-30673 Smart Switch、CVE-2023-41929 Card-UFD）中重复使用用户可写目录到 \\RPC Control 的 junction 加 native symbolic link 到目标系统文件的 reparse 点链。",
+      "feedback": "在 DLL 完整性检查使直接劫持失败的情况下，研究者改用 junction 加 native symbolic link 经 reparse 点链绕过；方法随目标软件已部署的防御措施而变化，但该变化是否构成可迁移的方法适应能力无法从单一案例证实。",
+      "intermediate_capability": "将同一 reparse 点链原语改造为不同效果，覆盖任意文件创建与永久 DoS、任意文件删除、绕过 DLL 完整性检查。",
+      "observed_outcomes": [
+        "Samsung 系列四篇 writeup 共用同一 reparse 点链原语",
+        "CVE-2023-41929 在厂商已部署 DLL 完整性检查时切换为 reparse 点链绕过"
+      ],
+      "evidence_ids": [
+        "hc-publication-2022-39909-junction",
+        "hc-publication-2023-30672",
+        "hc-publication-2023-30673",
+        "hc-publication-2023-41929"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "junction 与 symlink 任意文件操作是 Windows 逻辑漏洞研究的成熟原语，其重复使用可能反映对公开方法的采纳而非个人原创；多用途改造亦可能因 Samsung 安装器行为相似而顺带可得。"
+    },
+    {
+      "name": "单一厂商与产品线的系统性扫描",
+      "starting_conditions": "Samsung 在 Windows 桌面侧有多款带特权安装器的产品（Smart Switch、Gear IconX、打印机软件、Card-UFD 认证工具），共享相似的安装行为与可写目录结构。",
+      "repeated_practice": "对 Samsung 产品线重复扫描同一类漏洞模式：Smart Switch（CVE-2022-39846 竞态、CVE-2023-30672 junction、CVE-2023-30673 任意删除）、Gear IconX（CVE-2022-39909）、打印机软件（CVE-2022-4894 四款）、Card-UFD（CVE-2023-41929）。",
+      "feedback": "同一厂商多次接收报告并分级修复（Samsung Mobile Security 与 Device Solution Product Security Team，CVE-2023-41929 评为 High、CVSS 7.3）；CVE-2022-4894 中 Samsung 转交 HP 处理，暴露跨厂商协调。",
+      "intermediate_capability": "围绕单一厂商产品线建立可重复的漏洞模式扫描与多产品批量化披露能力。",
+      "observed_outcomes": [
+        "Samsung 系列多篇 writeup 覆盖同一厂商多款产品",
+        "CVE-2022-4894 单篇覆盖四款 Samsung 与 HP 打印机软件"
+      ],
+      "evidence_ids": [
+        "hc-publication-2022-39846",
+        "hc-publication-2022-39909-junction",
+        "hc-publication-2023-30672",
+        "hc-publication-2023-30673",
+        "hc-publication-2022-4894",
+        "hc-publication-2023-41929",
+        "hc-community-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "产品线集中可能源于 Samsung 安装器框架共性而非研究者主动产品线扫描；跨厂商转交（Samsung 转 HP）由厂商内部归属决定，不反映研究者协调能力。"
+    },
+    {
+      "name": "厂商协调披露流程的重复执行与回馈记录",
+      "starting_conditions": "CVE-2022-4956 的 writeup 记录了从发现、Proton VPN 转交 Advanced Installer、修复到赠送 license key 的完整时间线；研究对象为闭源厂商安装器与驱动，反馈渠道以厂商安全团队为主。",
+      "repeated_practice": "对 Samsung Mobile Security、ASUS、HP、Panda Security、Advanced Installer 等厂商重复执行首次联系、转交或分级、补丁、CVE、公开 writeup 的流程，并在 writeup 中记录披露时间线。",
+      "feedback": "上述厂商回馈为可核验事实；其与持续披露行为之间的因果驱动关系无法从材料中证实，时间先后不等于因果，内在动机（如排名、社区可见度）无法排除。",
+      "intermediate_capability": "形成可重复的协调披露操作习惯与时间线记录惯例。",
+      "observed_outcomes": [
+        "多篇 writeup 含完整披露时间线（CVE-2022-4956、CVE-2022-44898、CVE-2023-41929 等）",
+        "厂商回馈含 license key（Advanced Installer）、Hall of Fame（ASUS）、High 与 CVSS 7.3 分级（Samsung）"
+      ],
+      "evidence_ids": [
+        "hc-publication-2022-4956",
+        "hc-publication-2022-44898-kernel",
+        "hc-publication-2023-41929",
+        "hc-deep-04",
+        "hc-deep-05",
+        "hc-community-02",
+        "hc-community-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "协调披露是行业惯例，时间线记录可能源于模板化写作而非个人能力；厂商回馈的存在不证明其对持续披露的驱动作用。"
+    }
+  ],
+  "tensions": [
+    "person_json 将 primary_focus 标注为 Windows 内核与 LPE 漏洞，但所抓取公开作品以第三方软件安装器与驱动的用户态 LPE 及逻辑漏洞为主，唯一内核态利用为第三方驱动 ASUS MsIo64.sys 栈溢出（CVE-2022-44898），未发现 ntoskrnl 或 win32k 等 Windows 内核本身的 LPE writeup，GitHub 仓库亦无内核 LPE 代码；该标注与公开作品证据存在范围张力。",
+    "person_json 的 selected_conference_evidence 记为 OffByOne 2026 与 POC，但多次 WebSearch 与 WebFetch 未能取得任何含 HeeChan Kim 名字的 OffByOne 或 POC（Power of Community）议程或演讲者页面；该会议参与事实仅以本地种子存在，未获一手议程印证，不计入已证事实。",
+    "博客 archives 止于 2023-09-24，GitHub 仓库最新更新为 2025-11（ssu_p5js_pages，非安全研究），2024 至 2026 年的公开研究产出缺失，无法判断其研究方向是否仍为 Windows LPE 或已转向内核或其他方向。",
+    "CTF 名次（2021 YISF 第二、2022 ELECONN 第一、2022 Gifted Learning 第一）与 KITRI BoB 参与均为 About 页自述，CTFtime 等第三方赛事档案未取得可访问页面（404 或无果），无法独立印证。",
+    "TeamH4C 与 TeamSCA 仅以 affiliation 形式出现于 profile 与 writeup 署名，团队内部协作、code review、mentorship 的一手材料缺失，团队对研究方法与决策的具体影响无法证实。",
+    "已抓取作品为已公开且已获 CVE 编号或厂商确认的成功披露样本，未披露、未获修复或未通过厂商协调的研究不在证据中，相关机制的解释力受幸存者偏差限制。",
+    "CVE-2022-44898 writeup 未说明其如何定位到 vulnerable memmove 调用、使用何种逆向工具或获得何种洞见，方法论细节缺失；单点内核利用无法据以判断内核态利用是否为持续方向。",
+    "披露时间管理出现延迟模式（CVE-2023-37849 补丁早已就绪但延后约一年公开，CVE 在披露后才申请），公开作品发布节奏与厂商修复节奏脱钩，动机不明。"
+  ],
+  "transferable_practices": [
+    "以 Process Monitor 等动态行为监控工具观察安装器文件与注册表访问序列，定位用户可写路径上的 DLL 搜索顺序问题，作为 Windows 第三方软件 LPE 的发现路径。",
+    "将 SYSTEM 提权收尾（SeDebugPrivilege 打开 winlogon、复制 token、CreateProcessWithTokenW）封装为可跨漏洞搬运的 PoC 模板，降低单漏洞 PoC 成本。",
+    "对随机化路径（GUID temp 目录）使用脚本轮询日志、解析路径并在加载窗口内植入 payload 的竞态自动化做法。",
+    "对单一厂商或产品线按共享安装行为重复扫描同类漏洞模式，将单漏洞方法批量化覆盖多款产品。",
+    "在 writeup 中记录首次联系、转交或分级、补丁、CVE、公开的完整披露时间线，形成可追溯的协调披露惯例。"
+  ],
+  "non_transferable_conditions": [
+    "韩国青少年 CTF 赛事体系（Codegate Junior、Wacon Junior、CCE Junior、White Hat Contest Junior）与 KITRI Best of the Best 漏洞分析方向等制度化训练入口属特定时期、地区与年龄段的资源，非研究者个人方法。",
+    "Semyeong Computer High School 计算机科班与校内 TeamSCA、TeamH4C 社团提供的同伴结构为个人所处组织条件，不可迁移。",
+    "所抓取成果集中于一类目标（Windows 第三方安装器与驱动）与一类手法（DLL 劫持与 junction 加 symlink 逻辑漏洞），该目标集中度部分源于 2021 至 2023 年 Samsung 等厂商安装器行为的共性，属外部目标供给条件而非通用方法。",
+    "厂商回馈（Advanced Installer license key、ASUS Hall of Fame、Samsung High 与 CVSS 7.3 分级）依赖具体厂商的致谢与分级政策，非可复制的研究能力。",
+    "CVE-2022-44898 的内核态利用（ROP、SMEP bypass、EPROCESS token stealing）在所抓取作品中为单点，无法证明该能力已沉淀为可迁移的内核利用方法。"
+  ],
+  "open_questions": [
+    "内核态利用是否为持续方向：仅 CVE-2022-44898 一篇，无后续内核利用 writeup，无法判断内核态利用是否构成稳定能力。",
+    "2024 至 2026 年研究方向与产出：博客与 GitHub 均无该时段安全研究一手来源，方向是否转向内核或其他领域未知。",
+    "OffByOne 2026 与 POC 会议演讲事实：无议程或演讲者页面印证，仅余本地种子。",
+    "TeamH4C 与 TeamSCA 内部协作及 mentorship 对研究方法的具体影响：无一手材料。",
+    "KITRI BoB 第 10 期的具体课程产出、指导人与同伴名单：自述仅记录参与，无展开。",
+    "CTF 名次的第三方独立印证：CTFtime 等赛事档案未取得可访问页面。",
+    "披露延后（CVE-2023-37849）与 CVE 申请节奏（披露后才申请）的动机：writeup 未说明。",
+    "CVE-2022-44898 的逆向定位方法与洞见来源：writeup 缺方法论细节。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-synthesis-v2-20260928-151858-822",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790580328045370000-heechan-kim-synthesis-v2.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "345a54ec-724b-42f0-ab07-e74c9f5592cc",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_y03eaprw1n6exq3lgehlktjv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-synthesis-v2-20260928-151858-822/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T07:25:28.089668+00:00"
+      },
+      {
+        "tool_use_id": "call_ean3bh9uhm4ckv1r1pxcc1ra",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-synthesis-v2-20260928-151858-822/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "eea587a3423c819bd4cef6fb301ac13a42c2a00c14f2abba70b68b240d6507d3",
+        "accessed_at": "2026-09-28T07:25:28.089695+00:00"
+      },
+      {
+        "tool_use_id": "call_ybz3x73b7mtwmzladzor04fx",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-synthesis-v2-20260928-151858-822/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "5e80dd43bfa3debe6dec6cf287369d016ad2b4ec408e5c13e2cb1a12b5457864",
+        "accessed_at": "2026-09-28T07:25:28.089708+00:00"
+      },
+      {
+        "tool_use_id": "call_58pstj1hdtrevs01wt8xizux",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-synthesis-v2-20260928-151858-822/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "61b69289d2db9ff15b301dfc633106d93bea16beb7c8b993912b58fab0ca8f97",
+        "accessed_at": "2026-09-28T07:25:28.089789+00:00"
+      },
+      {
+        "tool_use_id": "call_tvdy2ov53ny4zy3gkbfxhngy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-synthesis-v2-20260928-151858-822/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "c85907e040a9f73d66a0364361889652e9376cbc592b8c56b25d1493fa5910e8",
+        "accessed_at": "2026-09-28T07:25:28.089837+00:00"
+      },
+      {
+        "tool_use_id": "call_07c5esiius6k7a92q7y7gl76",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-synthesis-v2-20260928-151858-822/checkpoint.md",
+          "content": "# Checkpoint — HeeChan Kim 综合（synthesis v2）\n\n## 输入状态\n- person_json：rank 88，HeeChan Kim，primary_focus \"Windows 内核与 LPE 漏洞\"，selected_conference_evidence \"OffByOne 2026 / POC\"。\n- evidence_json：六维材料（works/conversations/community/external/decisions/timeline），targeted.items 为空。\n- revision_context：round 1，7 条 required_revisions 全部判定为 overclaim；new_evidence=[]、invalid_evidence_ids=[]；7 条 synthesis_instructions 为字段级改写指令（不新增/作废证据）。\n\n## 证据可用性判定\n可用（verified_in_run=true）：\n- works：hc-publication-2022-4956、-39846、-44898-kernel、-45422、-39909-junction、-37849、-30672、-30673、-4894、-41929；hc-identity-github。\n- conversations：hc-deep-01..06。\n- community：hc-community-01..05（05=inferred）。\n- external：heegong-ext-kitri-bob-v10、-team-affiliation、-ctf-2021-2023、-cve-writeup-series、-cve-2022-44898。\n- decisions：hck-dec-01..05（05=inferred）。\n\n不可用作阶段/机制支撑（verified_in_run=false，status=unknown/lead_only）：\n- hc-publication-2022-24924-android、hc-conference-offbyone-poc、hck-dec-06、hc-timeline-lead-github-handle、hc-timeline-lead-conference-evidence。\n（hc-timeline-lead-x-handle 与 hc-timeline-fetch-msrc-acknowledgement 虽 verified=true 但内容为空/402，不采用。）\n\n## 已应用 revision_context 改写\n1. stages[3]（内核）capability_change：删除\"难度最高\"价值判断 → \"唯一内核态利用条目…无法据以判断是否为持续方向\"。\n2. mechanisms[2] feedback：删循环论证 → 描述性\"模板被复用…因果无法从 writeup 证实\"。\n3. mechanisms[5] starting_conditions：删\"闭环\"因果暗示 → 时间线描述。\n4. mechanisms[5] feedback：时间先后≠因果，显式排除内在动机。\n5. mechanisms[3] feedback：删\"反馈式适应\"拟人 → 描述性 + 单案例限制。\n6. mechanisms[0] feedback/alternative_explanation：CTF 名次标注为自述未印证；补\"机构参与与厂商致谢本身不构成独立能力印证\"。\n7. tensions：补幸存者偏差声明。\n\n## 输出结构\n- 5 stages（0–4），stages[3]=内核单点。\n- 6 mechanisms（0–5），索引与 revision 指令对齐。\n- tensions 8 条（含幸存者偏差、primary_focus 张力、会议未证、2024–2026 缺口、CTF 自述、团队内部缺失、内核方法论缺失、披露延迟）。\n- transferable_practices 5 条；non_transferable_conditions 5 条；open_questions 8 条；expertise 7 条。\n\n## 未完成事项\n- output.json 待写入（随后写入）。\n"
+        },
+        "success": true,
+        "content_sha256": "5aac30f293b7f40763d2bf2f8a92cf0d6efc32bc0eafb58b7dfc54e2f75b389b",
+        "accessed_at": "2026-09-28T07:25:28.090457+00:00"
+      },
+      {
+        "tool_use_id": "call_wkx6l11727lbnd7yfd25h1uc",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/heechan-kim-synthesis-v2-20260928-151858-822/output.json",
+          "content": "{\n  \"person\": \"HeeChan Kim\",\n  \"expertise\": [\n    \"Windows 第三方软件安装器与驱动的本地提权（LPE）漏洞研究\",\n    \"DLL 搜索顺序劫持（WinSxS/.Local、环境变量目录、temp 目录）\",\n    \"Windows 逻辑漏洞原语：junction 加 native symbolic link 经 \\\\RPC Control 的 reparse 点链\",\n    \"安装器随机路径竞态（Python 日志轮询加 GUID 解析）\",\n    \"SYSTEM 提权 PoC 模板（SeDebugPrivilege 打开 winlogon 复制 token）\",\n    \"第三方内核驱动栈溢出利用（ROP、SMEP bypass、EPROCESS token stealing，单点）\",\n    \"厂商协调披露与披露时间线记录\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2020 年 6–12 月\",\n      \"stage\": \"通用编程向安全学习过渡\",\n      \"capability_change\": \"GitHub 仓库时间线显示从 Python 通用项目（auto_mouse_python、socket_python_backdoor）起步，2020 年 9–12 月转向 universal_shell_code（C）、reversing-problems（C）等逆向与安全学习仓库；可见代码侧学习曲线由 Python 过渡到 C 与逆向。仓库缺乏学习意图自述，转向动机不可从来源证实。\",\n      \"evidence_ids\": [\"hc-identity-github\", \"hck-dec-01\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2021–2022 年初\",\n      \"stage\": \"制度化训练入口与早期公开披露\",\n      \"capability_change\": \"自述参加 KITRI Best of the Best 第 10 期漏洞分析方向、加入校内 TeamSCA 与 TeamH4C，并以队名参加 2021–2023 韩国青少年 CTF；同期在个人博客以 CVE 编号公开发布最早 writeup（archives 记录最早日期 2021-11-30）。CTF 名次与 BoB 参与均为自述，未获第三方赛事档案独立印证。\",\n      \"evidence_ids\": [\"hc-deep-01\", \"hc-deep-02\", \"hc-community-04\", \"heegong-ext-kitri-bob-v10\", \"heegong-ext-ctf-2021-2023\", \"hc-deep-06\", \"hck-dec-02\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2022 年 6–9 月\",\n      \"stage\": \"Windows 安装程序 LPE 方法与 token 提权模板成形\",\n      \"capability_change\": \"连续发布 CVE-2022-4956（Advanced Installer 经 Proton VPN 安装器的 WinSxS/.Local 目录 DLL 劫持）、CVE-2022-39846（Samsung Smart Switch，引入 Python 轮询日志解析随机 GUID 路径的竞态）、CVE-2022-45422（LG Smart Share，环境变量目录 DLL 劫持）；发现路径以 Process Monitor 观察安装器 DLL 搜索顺序为主，并以 SeDebugPrivilege 打开 winlogon.exe、复制 token、经 CreateProcessWithTokenW 提升至 SYSTEM 的 PoC 模板跨漏洞复用。CVE-2022-4956 自述为审查 Proton VPN 安装器时偶然发现，经供应链依赖回溯到上游安装器框架根因。\",\n      \"evidence_ids\": [\"hc-publication-2022-4956\", \"hc-publication-2022-39846\", \"hc-publication-2022-45422\", \"hc-deep-03\", \"hc-deep-05\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022 年 11 月\",\n      \"stage\": \"单点内核态利用\",\n      \"capability_change\": \"CVE-2022-44898（ASUS AuraSync 内核驱动 MsIo64.sys 栈缓冲区溢出）是所抓取作品中唯一内核态利用条目；利用 IOCTL 0x80102040 触发未校验长度的 memmove 栈溢出，经 ROP 写 CR4 关闭 SMEP、wbinvd 后跳转用户态 shellcode，遍历 ActiveProcessLinks 定位 PID 4 的 EPROCESS、复制 +70h 偏移 token 完成提权并恢复 SMEP 与栈。所抓取作品中未出现其他内核态利用，无法据以判断内核态利用是否为持续方向。\",\n      \"evidence_ids\": [\"hc-publication-2022-44898-kernel\", \"hc-deep-04\", \"hck-dec-04\", \"heegong-ext-cve-2022-44898\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2022 年 12 月 – 2023 年 9 月\",\n      \"stage\": \"junction 与 symlink 原语固化及产品线扫描\",\n      \"capability_change\": \"将 junction 加 native symbolic link 经 \\\\RPC Control 的 reparse 点链手法在 Samsung 系列产品上重复应用，效果从任意文件创建与永久 DoS（CVE-2022-39909 Gear IconX、CVE-2023-30672 Smart Switch）扩展到任意文件删除（CVE-2023-30673），并在厂商部署 DLL 完整性检查导致直接劫持失败时改用同一原语绕过（CVE-2023-41929 Card-UFD）；CVE-2022-4894 将 DLL 劫持加竞态方法批量化覆盖四款 Samsung 与 HP 打印机软件，显示从单漏洞到产品线扫描的方法演化。\",\n      \"evidence_ids\": [\"hc-publication-2022-39909-junction\", \"hc-publication-2023-30672\", \"hc-publication-2023-30673\", \"hc-publication-2023-41929\", \"hc-publication-2022-4894\", \"hc-publication-2023-37849\", \"hc-community-02\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"制度化竞赛训练与公开披露产出的并行\",\n      \"starting_conditions\": \"高中计算机科班（Semyeong Computer High School）环境与校内 CTF 社团（TeamSCA、TeamH4C）提供同伴结构与参赛出口；KITRI Best of the Best 第 10 期漏洞分析方向提供制度化训练入口。\",\n      \"repeated_practice\": \"2021–2023 以队名参加韩国青少年 CTF（ShaktiCTF、Codegate Junior、Wacon Junior、CCE Junior、White Hat Contest Junior 等），并按 CVE 编号在个人博客公开发布 writeup，形成约 22 个月跨多厂商的持续披露节奏。\",\n      \"feedback\": \"赛事名次（自述 2021 YISF 第二、2022 ELECONN 第一、2022 Gifted Learning Institute Contest 第一）与厂商致谢及分级（Samsung High/CVSS 7.3、ASUS Hall of Fame）均为自述名次，未获 CTFtime 等第三方赛事档案独立印证；机构参与（KITRI BoB）与厂商致谢本身不构成独立能力印证。\",\n      \"intermediate_capability\": \"由竞赛题解训练向真实厂商 0-day 披露过渡的结构性入口，形成可核验的公开产出习惯。\",\n      \"observed_outcomes\": [\n        \"11 篇 CVE writeup（2021-11-30 至 2023-09-24），覆盖 Samsung、HP、LG、ASUS、Panda Security、Advanced Installer 等厂商\",\n        \"博客 writeup 加 GitHub PoC 的复合输出渠道，团队标签在 GitHub 与博客两处一致\"\n      ],\n      \"evidence_ids\": [\"hc-deep-01\", \"hc-deep-02\", \"hc-community-01\", \"hc-community-03\", \"hc-community-04\", \"heegong-ext-kitri-bob-v10\", \"heegong-ext-ctf-2021-2023\", \"hc-deep-06\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"CTF 参赛与漏洞披露可能为并行活动而非因果关系；KITRI BoB 项目的课程结构可能比 CTF 赛事更能解释能力转化，且赛事成绩为自述、未获第三方赛事档案独立印证；机构参与（KITRI BoB）与厂商致谢本身不构成独立能力印证。\"\n    },\n    {\n      \"name\": \"Process Monitor 驱动的安装器 DLL 搜索顺序发现\",\n      \"starting_conditions\": \"Windows 第三方安装器普遍从可预测路径加载 DLL 且依赖用户可写目录；Sysinternals Process Monitor 可观察文件与注册表访问序列。最早一篇（CVE-2022-4956）自述为审查 Proton VPN 安装器时偶然发现，经供应链依赖回溯到上游安装器框架根因。\",\n      \"repeated_practice\": \"在 CVE-2022-4956、CVE-2022-45422、CVE-2022-39846、CVE-2022-4894 中以 Process Monitor 观察安装器加载顺序，定位用户可写目录（WinSxS/.Local、环境变量目录、日志记录的随机 temp 目录）作为 DLL 劫持落点。\",\n      \"feedback\": \"writeup 明确自述以 Process Monitor 作为发现工具（CVE-2022-4956、CVE-2022-45422）；PoC 植入恶意 DLL 后达成 SYSTEM 提权。\",\n      \"intermediate_capability\": \"以动态行为观察定位安装器从用户可写路径加载 DLL 这一可重复漏洞模式，而非纯静态审阅。\",\n      \"observed_outcomes\": [\n        \"多篇 DLL 劫持 LPE writeup（CVE-2022-4956、CVE-2022-45422、CVE-2022-39846、CVE-2022-4894）\"\n      ],\n      \"evidence_ids\": [\"hc-publication-2022-4956\", \"hc-publication-2022-45422\", \"hc-publication-2022-39846\", \"hc-publication-2022-4894\", \"hc-deep-03\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"Process Monitor 是 Windows LPE 研究通用工具，其使用不构成个人特有能力；同一发现路径可能源于公开 DLL 劫持研究方法的广泛传播而非个人方法论创新。\"\n    },\n    {\n      \"name\": \"SYSTEM 提权 PoC 模板与随机路径竞态自动化\",\n      \"starting_conditions\": \"SeDebugPrivilege 可打开 winlogon.exe 并复制其 token；部分安装器将含随机 GUID 的子目录路径写入用户可写 temp 日志，直接预置 DLL 无法命中随机路径。\",\n      \"repeated_practice\": \"以 OpenProcessToken、DuplicateTokenEx、CreateProcessWithTokenW 复制 winlogon token 提升至 SYSTEM 的模板在多个漏洞中复用；针对随机 GUID 路径的安装器（CVE-2022-39846、CVE-2022-4894）使用 Python 脚本轮询日志、解析 GUID 目录、在安装器加载前植入 DLL。\",\n      \"feedback\": \"该模板在 CVE-2022-39846、CVE-2022-45422、CVE-2023-37849、CVE-2022-4894 中被复用；针对随机 GUID 路径的安装器使用 Python 脚本轮询日志、解析路径并植入 DLL。模板复用与能力强化之间的因果无法从公开 writeup 直接证实。\",\n      \"intermediate_capability\": \"形成可跨漏洞搬运的 SYSTEM 提权 PoC 模板与随机路径竞态自动化脚本。\",\n      \"observed_outcomes\": [\n        \"多篇 writeup 的 PoC 复用同一 token impersonation 收尾路径\",\n        \"CVE-2022-39846、CVE-2022-4894 引入 Python 轮询脚本处理随机化路径\"\n      ],\n      \"evidence_ids\": [\"hc-publication-2022-4956\", \"hc-publication-2022-39846\", \"hc-publication-2022-45422\", \"hc-publication-2023-37849\", \"hc-publication-2022-4894\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"token impersonation 是 Windows LPE PoC 的通用提权收尾手法，复用可能源于该手法为社区常识而非个人能力沉淀；Python 轮询脚本亦为竞态利用的常规实现，不必然反映独创工具建设。\"\n    },\n    {\n      \"name\": \"junction 加 native symbolic link reparse 点链的原语化与多用途改造\",\n      \"starting_conditions\": \"管理员权限安装器在用户可写目录（Quick Launch、AppData）创建文件，且 \\\\RPC Control 可作为 reparse 点中介；NT API（NtCreateFile、NtCreateSymbolicLinkObject）可用。\",\n      \"repeated_practice\": \"在 Samsung 系列（CVE-2022-39909 Gear IconX、CVE-2023-30672 Smart Switch、CVE-2023-30673 Smart Switch、CVE-2023-41929 Card-UFD）中重复使用用户可写目录到 \\\\RPC Control 的 junction 加 native symbolic link 到目标系统文件的 reparse 点链。\",\n      \"feedback\": \"在 DLL 完整性检查使直接劫持失败的情况下，研究者改用 junction 加 native symbolic link 经 reparse 点链绕过；方法随目标软件已部署的防御措施而变化，但该变化是否构成可迁移的方法适应能力无法从单一案例证实。\",\n      \"intermediate_capability\": \"将同一 reparse 点链原语改造为不同效果，覆盖任意文件创建与永久 DoS、任意文件删除、绕过 DLL 完整性检查。\",\n      \"observed_outcomes\": [\n        \"Samsung 系列四篇 writeup 共用同一 reparse 点链原语\",\n        \"CVE-2023-41929 在厂商已部署 DLL 完整性检查时切换为 reparse 点链绕过\"\n      ],\n      \"evidence_ids\": [\"hc-publication-2022-39909-junction\", \"hc-publication-2023-30672\", \"hc-publication-2023-30673\", \"hc-publication-2023-41929\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"junction 与 symlink 任意文件操作是 Windows 逻辑漏洞研究的成熟原语，其重复使用可能反映对公开方法的采纳而非个人原创；多用途改造亦可能因 Samsung 安装器行为相似而顺带可得。\"\n    },\n    {\n      \"name\": \"单一厂商与产品线的系统性扫描\",\n      \"starting_conditions\": \"Samsung 在 Windows 桌面侧有多款带特权安装器的产品（Smart Switch、Gear IconX、打印机软件、Card-UFD 认证工具），共享相似的安装行为与可写目录结构。\",\n      \"repeated_practice\": \"对 Samsung 产品线重复扫描同一类漏洞模式：Smart Switch（CVE-2022-39846 竞态、CVE-2023-30672 junction、CVE-2023-30673 任意删除）、Gear IconX（CVE-2022-39909）、打印机软件（CVE-2022-4894 四款）、Card-UFD（CVE-2023-41929）。\",\n      \"feedback\": \"同一厂商多次接收报告并分级修复（Samsung Mobile Security 与 Device Solution Product Security Team，CVE-2023-41929 评为 High、CVSS 7.3）；CVE-2022-4894 中 Samsung 转交 HP 处理，暴露跨厂商协调。\",\n      \"intermediate_capability\": \"围绕单一厂商产品线建立可重复的漏洞模式扫描与多产品批量化披露能力。\",\n      \"observed_outcomes\": [\n        \"Samsung 系列多篇 writeup 覆盖同一厂商多款产品\",\n        \"CVE-2022-4894 单篇覆盖四款 Samsung 与 HP 打印机软件\"\n      ],\n      \"evidence_ids\": [\"hc-publication-2022-39846\", \"hc-publication-2022-39909-junction\", \"hc-publication-2023-30672\", \"hc-publication-2023-30673\", \"hc-publication-2022-4894\", \"hc-publication-2023-41929\", \"hc-community-02\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"产品线集中可能源于 Samsung 安装器框架共性而非研究者主动产品线扫描；跨厂商转交（Samsung 转 HP）由厂商内部归属决定，不反映研究者协调能力。\"\n    },\n    {\n      \"name\": \"厂商协调披露流程的重复执行与回馈记录\",\n      \"starting_conditions\": \"CVE-2022-4956 的 writeup 记录了从发现、Proton VPN 转交 Advanced Installer、修复到赠送 license key 的完整时间线；研究对象为闭源厂商安装器与驱动，反馈渠道以厂商安全团队为主。\",\n      \"repeated_practice\": \"对 Samsung Mobile Security、ASUS、HP、Panda Security、Advanced Installer 等厂商重复执行首次联系、转交或分级、补丁、CVE、公开 writeup 的流程，并在 writeup 中记录披露时间线。\",\n      \"feedback\": \"上述厂商回馈为可核验事实；其与持续披露行为之间的因果驱动关系无法从材料中证实，时间先后不等于因果，内在动机（如排名、社区可见度）无法排除。\",\n      \"intermediate_capability\": \"形成可重复的协调披露操作习惯与时间线记录惯例。\",\n      \"observed_outcomes\": [\n        \"多篇 writeup 含完整披露时间线（CVE-2022-4956、CVE-2022-44898、CVE-2023-41929 等）\",\n        \"厂商回馈含 license key（Advanced Installer）、Hall of Fame（ASUS）、High 与 CVSS 7.3 分级（Samsung）\"\n      ],\n      \"evidence_ids\": [\"hc-publication-2022-4956\", \"hc-publication-2022-44898-kernel\", \"hc-publication-2023-41929\", \"hc-deep-04\", \"hc-deep-05\", \"hc-community-02\", \"hc-community-05\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"协调披露是行业惯例，时间线记录可能源于模板化写作而非个人能力；厂商回馈的存在不证明其对持续披露的驱动作用。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 将 primary_focus 标注为 Windows 内核与 LPE 漏洞，但所抓取公开作品以第三方软件安装器与驱动的用户态 LPE 及逻辑漏洞为主，唯一内核态利用为第三方驱动 ASUS MsIo64.sys 栈溢出（CVE-2022-44898），未发现 ntoskrnl 或 win32k 等 Windows 内核本身的 LPE writeup，GitHub 仓库亦无内核 LPE 代码；该标注与公开作品证据存在范围张力。\",\n    \"person_json 的 selected_conference_evidence 记为 OffByOne 2026 与 POC，但多次 WebSearch 与 WebFetch 未能取得任何含 HeeChan Kim 名字的 OffByOne 或 POC（Power of Community）议程或演讲者页面；该会议参与事实仅以本地种子存在，未获一手议程印证，不计入已证事实。\",\n    \"博客 archives 止于 2023-09-24，GitHub 仓库最新更新为 2025-11（ssu_p5js_pages，非安全研究），2024 至 2026 年的公开研究产出缺失，无法判断其研究方向是否仍为 Windows LPE 或已转向内核或其他方向。\",\n    \"CTF 名次（2021 YISF 第二、2022 ELECONN 第一、2022 Gifted Learning 第一）与 KITRI BoB 参与均为 About 页自述，CTFtime 等第三方赛事档案未取得可访问页面（404 或无果），无法独立印证。\",\n    \"TeamH4C 与 TeamSCA 仅以 affiliation 形式出现于 profile 与 writeup 署名，团队内部协作、code review、mentorship 的一手材料缺失，团队对研究方法与决策的具体影响无法证实。\",\n    \"已抓取作品为已公开且已获 CVE 编号或厂商确认的成功披露样本，未披露、未获修复或未通过厂商协调的研究不在证据中，相关机制的解释力受幸存者偏差限制。\",\n    \"CVE-2022-44898 writeup 未说明其如何定位到 vulnerable memmove 调用、使用何种逆向工具或获得何种洞见，方法论细节缺失；单点内核利用无法据以判断内核态利用是否为持续方向。\",\n    \"披露时间管理出现延迟模式（CVE-2023-37849 补丁早已就绪但延后约一年公开，CVE 在披露后才申请），公开作品发布节奏与厂商修复节奏脱钩，动机不明。\"\n  ],\n  \"transferable_practices\": [\n    \"以 Process Monitor 等动态行为监控工具观察安装器文件与注册表访问序列，定位用户可写路径上的 DLL 搜索顺序问题，作为 Windows 第三方软件 LPE 的发现路径。\",\n    \"将 SYSTEM 提权收尾（SeDebugPrivilege 打开 winlogon、复制 token、CreateProcessWithTokenW）封装为可跨漏洞搬运的 PoC 模板，降低单漏洞 PoC 成本。\",\n    \"对随机化路径（GUID temp 目录）使用脚本轮询日志、解析路径并在加载窗口内植入 payload 的竞态自动化做法。\",\n    \"对单一厂商或产品线按共享安装行为重复扫描同类漏洞模式，将单漏洞方法批量化覆盖多款产品。\",\n    \"在 writeup 中记录首次联系、转交或分级、补丁、CVE、公开的完整披露时间线，形成可追溯的协调披露惯例。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"韩国青少年 CTF 赛事体系（Codegate Junior、Wacon Junior、CCE Junior、White Hat Contest Junior）与 KITRI Best of the Best 漏洞分析方向等制度化训练入口属特定时期、地区与年龄段的资源，非研究者个人方法。\",\n    \"Semyeong Computer High School 计算机科班与校内 TeamSCA、TeamH4C 社团提供的同伴结构为个人所处组织条件，不可迁移。\",\n    \"所抓取成果集中于一类目标（Windows 第三方安装器与驱动）与一类手法（DLL 劫持与 junction 加 symlink 逻辑漏洞），该目标集中度部分源于 2021 至 2023 年 Samsung 等厂商安装器行为的共性，属外部目标供给条件而非通用方法。\",\n    \"厂商回馈（Advanced Installer license key、ASUS Hall of Fame、Samsung High 与 CVSS 7.3 分级）依赖具体厂商的致谢与分级政策，非可复制的研究能力。\",\n    \"CVE-2022-44898 的内核态利用（ROP、SMEP bypass、EPROCESS token stealing）在所抓取作品中为单点，无法证明该能力已沉淀为可迁移的内核利用方法。\"\n  ],\n  \"open_questions\": [\n    \"内核态利用是否为持续方向：仅 CVE-2022-44898 一篇，无后续内核利用 writeup，无法判断内核态利用是否构成稳定能力。\",\n    \"2024 至 2026 年研究方向与产出：博客与 GitHub 均无该时段安全研究一手来源，方向是否转向内核或其他领域未知。\",\n    \"OffByOne 2026 与 POC 会议演讲事实：无议程或演讲者页面印证，仅余本地种子。\",\n    \"TeamH4C 与 TeamSCA 内部协作及 mentorship 对研究方法的具体影响：无一手材料。\",\n    \"KITRI BoB 第 10 期的具体课程产出、指导人与同伴名单：自述仅记录参与，无展开。\",\n    \"CTF 名次的第三方独立印证：CTFtime 等赛事档案未取得可访问页面。\",\n    \"披露延后（CVE-2023-37849）与 CVE 申请节奏（披露后才申请）的动机：writeup 未说明。\",\n    \"CVE-2022-44898 的逆向定位方法与洞见来源：writeup 缺方法论细节。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "f5852c05627da7dc75f10b5c53a8781f5759350c88fc3a1652409ab239be2852",
+        "accessed_at": "2026-09-28T07:25:28.090461+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790580328090479000-heechan-kim-synthesis-v2.json",
+    "label": "HeeChan Kim:synthesis:v2",
+    "elapsed_seconds": 389.26,
+    "prompt_sha256": "dc1a845c971a072178811a1f1db35a8ab18f628368ad3eba3511ffc988c7c0a2",
+    "num_turns": 8,
+    "total_cost_usd": 0.7828750000000001,
+    "usage": {
+      "input_tokens": 49055,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 67200,
+      "output_tokens": 20160,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 49055,
+        "outputTokens": 20160,
+        "cacheReadInputTokens": 67200,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.7828750000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

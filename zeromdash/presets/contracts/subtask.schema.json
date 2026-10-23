@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "zeromdash://contracts/subtask.schema.json",
+  "title": "Subtask",
+  "description": "One unit of work spawned by a fanout planner. Mirrors zeromdash.state.Subtask.",
+  "type": "object",
+  "required": ["id", "bucket", "objective", "hints", "coverage_obligations", "seed_hypotheses"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable subtask identifier (e.g. 'spec-001', 'vuln-042', 'feat-003')."
+    },
+    "bucket": {
+      "type": "string",
+      "enum": ["spec", "vuln", "patch_miss", "feature"],
+      "description": "Which output channel the eventual finding lands in."
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Falsifiable natural-language goal handed to the investigator."
+    },
+    "coverage_obligations": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Agent-defined checks that must all be semantically assessed before the work package can close.",
+      "items": {
+        "type": "object",
+        "required": ["obligation_id", "statement"],
+        "additionalProperties": true,
+        "properties": {
+          "obligation_id": { "type": "string", "minLength": 1 },
+          "statement": { "type": "string", "minLength": 1 },
+          "domain_refs": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string", "minLength": 1 } } },
+          "candidate_code_locations": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "seed_hypotheses": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Initial atomic hypotheses. The investigator may append newly discovered hypotheses inside this package.",
+      "items": {
+        "type": "object",
+        "required": ["hypothesis_id", "statement", "obligation_ids"],
+        "additionalProperties": true,
+        "properties": {
+          "hypothesis_id": { "type": "string", "minLength": 1 },
+          "statement": { "type": "string", "minLength": 1 },
+          "obligation_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "domain_refs": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string", "minLength": 1 } } },
+          "candidate_code_locations": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "hints": {
+      "type": "object",
+      "description": "Free-form hints (line numbers, spec clauses, CVE ids, ...).",
+      "required": ["priority_reason", "domain_refs"],
+      "additionalProperties": true,
+      "properties": {
+        "priority_reason": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Why this subtask ranks where it does for common_focus match and attack-surface reachability."
+        },
+        "domain_refs": {
+          "type": "object",
+          "description": "Stable Domain Model and Invariant Registry references relevant to this hypothesis. References guide investigation but do not prove a finding.",
+          "additionalProperties": false,
+          "properties": {
+            "entity_ids": { "type": "array", "items": { "type": "string" } },
+            "representation_ids": { "type": "array", "items": { "type": "string" } },
+            "invariant_ids": { "type": "array", "items": { "type": "string" } },
+            "transition_ids": { "type": "array", "items": { "type": "string" } },
+            "seam_ids": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    }
+  }
+}

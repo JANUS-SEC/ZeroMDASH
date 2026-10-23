@@ -1,0 +1,466 @@
+{
+  "person": "Adam Chester (xpn)",
+  "expertise": [
+    "Active Directory / Kerberos 凭据攻击与红队方法（含 Kerberoasting、Azure AD Connect、ADFS/DRS/PRT）",
+    "身份提供商攻击（Azure AD/Entra ID、ADFS/DRS、Okta、Ping、OneLogin）与 PRT/DRS 内部机制",
+    "Windows 与 .NET（CLR/ETW、AMSI）、macOS（SIP、NIB、Launch Constraints）防御规避与漏洞利用",
+    "EDR 规则集逆向与规避（YARA、DSE/BIOC、CLIPS、本地 ML 模型）",
+    "LLM/Agent 安全评测与提示工程（MCP/Claude Code、GEPA 可度量提示工程、LLM 驱动逆向）",
+    "逆向工程方法论（PDB/xref/CFG、API Monitor、WinDBG、Binary Ninja over MCP）"
+  ],
+  "stages": [
+    {
+      "period": "2017-03 至 2017-09",
+      "stage": "公开写作起点与多方向探索期",
+      "capability_change": "2017-03-05 同日批次公开 Linux USBIP overflow、Foomatic-RIP、Kentico CMS SQLi、GitHub Desktop RCE/XSS、Extracting SQL Server Hashes、Bettercap NTLM Capturing、Offensive Forensics、Xbox One Controller Hacking 等多方向 writeup，2017-04-24 发布 PlaidCTF no_mo_flo writeup，2017-09-30 发布 Kerberos AD Attacks - Kerberoasting。研究主题横跨 Linux 内核、Web、Windows/SQL Server、CTF 与硬件改机，尚未聚焦单一方向；此阶段建立以引用 CVE 编号、附 PoC 的技术 writeup 形式公开发表的习惯，构成后续持续公开输出的起点。",
+      "evidence_ids": [
+        "xpn-dec-001",
+        "xpn-tl-001",
+        "xpn-r2-001",
+        "xpn-tl-002",
+        "xpn-tl-r1-001"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017-11 至 2018",
+      "stage": "雇主变更与漏洞利用、防御规避横向扩展期",
+      "capability_change": "2017-11 Defcon 25 in Review 自述居住于英国、本职为渗透测试员、当年为第二次参加 Defcon；2018-02-15《Moving jobs and exploiting flash (CVE-2018-4878)》自述因见到 MDSec 团队对社区的贡献而由 Secarma 更换至 MDSec，以期掌握 MDSec 团队成员的技能（原文 verbatim：Recently I joined the MDSec team after seeing many of the cool things that they had contributed to the community, and to hopefully pick up some of their awesome skills）。同年集中产出 CVE-2018-4878 Flash、CVE-2018-1038 Total Meltdown、Get-InjectedThread 线程注入检测规避、PowerShell AMSI 规避、macOS SIP 经 VirtualBox kext 漏洞绕过；技术栈从单一红队凭据攻击横向扩展到内核漏洞利用与防御规避，平台从 Windows 延伸到 macOS。",
+      "evidence_ids": [
+        "xpn-tl-003",
+        "xpn-tl-004",
+        "xpn-r4-001",
+        "xpn-works-002",
+        "xpn-tl-005",
+        "xpn-tl-006"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2020-02 至 2020-06",
+      "stage": "方法论成型与可复用逆向工作流期",
+      "capability_change": "2020-02 AWS Lambda Redirector、2020-04 Designing The Adversary Simulation Lab 显示从单点 writeup 转向可复用红队基础设施（C2 redirector、对抗仿真实验室）的工程化输出；2020-06-06《Hiding your .NET - COMPlus_ETWEnabled》呈现稳定的逆向工作流（源码 clrconfigvalues.h 枚举 COMPlus_ 前缀设置 → Microsoft PDB → IDA xref 定位 CLRConfig::GetConfigValue → CFG 分析发现 COMPlus_ETWEnabled=0 令 CLR 跳过 ETW 注册 → 附环境变量伪造 POC），并开始系统性发布规避技术配套的防御检测引用（Roberto Rodriguez）。",
+      "evidence_ids": [
+        "xpn-tl-007",
+        "xpn-works-003"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2023-10 至 2024-03",
+      "stage": "身份提供商专题研究与会议-博客并行输出起点",
+      "capability_change": "2023-10-02《Okta for Red Teamers》覆盖 Okta Delegated Authentication via Kerberos、劫持 Okta AD Agent 捕获凭据或注入 skeleton key、注册恶意 AD Agent、部署伪造 SAML 身份提供商冒充任意用户；2024-03-18《Identity Providers for RedTeamers》标注 Originally presented at SOCON-2024，覆盖 Ping、OneLogin、Entra ID，将 Okta 阶段的方法迁移到其他 IdP。会议演讲与博客长文并行、并视议题配套公开工具的输出模式最早可见于 SOCON-2024 起的 Identity Providers for RedTeamers，其工具发布为预告、未一手证实发布。",
+      "evidence_ids": [
+        "xpn-r2-002",
+        "ac-comm-01",
+        "xpn-tl-008"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2025-01 至 2025-04",
+      "stage": "ADFS/DRS 与 SQL Server 加密研究期",
+      "capability_change": "2025-01-12《ADFS - Living in the Legacy of DRS》逆向 ADFS 的 OAuth2/DRS 设备注册，发现内嵌 OAuth2 Client ID、PRT/Golden JWT，将 Entra ID 的 PRT 技术移植到本地 ADFS，发布 adfstoolkit，正文显式致谢并依赖 @_dirkjan (Dirk-jan Mollema) 的 ROADTools 与 DrAzureAD (Nestori Syynimaa) 的 AADInternals，同事 @hotnops 提出术语 Microsoft Stank。2025-04-16《The SQL Server Crypto Detour》用 API Monitor 钩 Windows Crypto API、WinDBG 反汇编 sqllang.dll/sqlmin.dll 还原 SMK/DMK 加密链，发现 ManageEngine ADSelfService Plus 使用微软文档示例硬编码密码，研究在 SOCON 2025 发表。SpecterOps 任职最早一手证实为 2025-04-16，2025-01-12 ADFS 博客所属雇主未证实；About 页自述现任 SpecterOps Senior Offensive Security Engineer，《The SQL Server Crypto Detour》正文另称 Service Architect，两处头衔来自不同来源，其时间或职责差异未在一手来源中澄清。",
+      "evidence_ids": [
+        "xpn-works-005",
+        "ac-comm-02",
+        "ac-comm-03",
+        "xpn-works-006",
+        "ac-comm-04",
+        "xpn-dec-002",
+        "xpn-tl-011"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2025-06 至 2026-07",
+      "stage": "LLM/AI Agent 安全转向与可度量提示工程期",
+      "capability_change": "2025-11-29《An Evening with Claude (Code)》披露 Claude Code v2.0.25 sed 表达式解析缺陷（CVE-2025-64755），研究由客户开放授权评估 MCP server 风险驱动，采用 WebCrack 去混淆、DevTools 反反调试、缩短反馈循环聚焦最弱环节（sed）；2026-07-29《Prompt Engineering for Security Agents - A Measurable Approach with GEPA》提出可度量提示工程方法，将攻防与评测思维迁移到 LLM/Agent 新技术域；2026-07-30《Accelerating EDR Evasion with LLM-Driven Analysis》构建 Day Shift harness 以 LLM 驱动的自动化逆向取代人工逐夜反汇编步骤。Day Shift harness 采用 REPORT.md/STATE.md/CODEMAP.md/AGENTS.md 持久化与刻意简单的循环重启方式。",
+      "evidence_ids": [
+        "xpn-tl-009",
+        "ac-comm-05",
+        "xpn-self-001",
+        "xpn-self-002",
+        "xpn-self-003",
+        "xpn-self-004",
+        "xpn-self-005",
+        "xpn-self-006",
+        "xpn-self-007",
+        "xpn-self-008",
+        "xpn-works-007",
+        "xpn-tl-010",
+        "xpn-dec-003"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "源码→PDB→反汇编 xref→CFG 分析→POC 五步逆向工作流",
+      "starting_conditions": "2020-06 前，研究目标多为已有 PoC 或可经文档/源码直接定位的漏洞；对 .NET CLR、SQL Server 加密链等需要从二进制还原内部逻辑的目标，缺乏可重复的逆向工作流。",
+      "repeated_practice": "《Hiding your .NET - COMPlus_ETWEnabled》(xpn-works-003) 与《The SQL Server Crypto Detour》(xpn-works-006) 两项研究中，反复执行同一五步流程：从源码枚举配置前缀或入口（clrconfigvalues.h 枚举 COMPlus_ 前缀 / SQL Server Crypto API 入口）→ 结合 Microsoft PDB 还原符号 → IDA xref 定位调用点（CLRConfig::GetConfigValue / sqllang.dll 与 sqlmin.dll 加密函数）→ CFG 分析发现触发条件（COMPlus_ETWEnabled=0 令 CLR 跳过 ETW 注册 / ESKP MD5+4字节盐与 ESP2 SHA-512+8字节盐两种 DMK 哈希方案）→ 附环境变量伪造或破解配置 POC。SQL Server 一例进一步组合 API Monitor 钩点与 WinDBG 断点，并产出可复用的 JtR dynamic_2020 规则与 Hashcat mode 30 映射。该五步流程仅清晰见于这两项研究；Claude Code 研究（xpn-tl-009）采用 WebCrack 去混淆、DevTools 反反调试、缩短反馈循环聚焦 sed 表达式解析缺陷，并非该五步流程。",
+      "feedback": "POC 可触发（COMPlus_ETWEnabled=0 实际令 CLR 跳过 ETW 注册）与破解配置可复现（Hashcat mode 30 对 ManageEngine ADSelfService Plus 硬编码密码生效）为方法是否成立的反馈来源；防御检测引用（Roberto Rodriguez）提供攻防双向反馈。",
+      "intermediate_capability": "形成可迁移到任一需要从二进制还原内部逻辑的目标（.NET CLR 内部、SQL Server 加密链）的稳定逆向工作流，并将发现转化为可复现的破解配置或环境变量 POC。",
+      "observed_outcomes": [
+        "2020-06 COMPlus_ETWEnabled 规避方法与 POC",
+        "2025-04 SQL Server DMK 两种哈希方案识别（ESKP Hashcat mode 30、ESP2 SHA-512+8字节盐）与 ManageEngine ADSelfService Plus 硬编码密码发现",
+        "JtR dynamic_2020 规则与 Hashcat mode 30 映射的公开发布"
+      ],
+      "evidence_ids": [
+        "xpn-works-003",
+        "xpn-works-006"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "两项研究间隔近五年，无法排除五步流程的相似性来自二进制逆向的通用惯例而非个人稳定方法论；亦无法排除 SQL Server 一例是客户评估偶然触发的议题而非主动迁移。Claude Code 研究未沿用此流程，提示该工作流依赖可获取 PDB 与源码的目标类型。"
+    },
+    {
+      "name": "会议演讲与博客长文并行、并视议题配套公开工具的输出模式",
+      "starting_conditions": "2024-03 前，公开输出以博客 writeup 为主；SOCON-2024 起，会议演讲成为研究产出的另一渠道，需要将演讲议题扩展为可复现的博客长文与配套工具。",
+      "repeated_practice": "对多项议题并行产出会议演讲与博客长文，并视议题配套公开工具，各段是否被一手证实按实例分别标注：Identity Providers for RedTeamers（ac-comm-01）= 会议（SOCON-2024）+ 博客已证实，工具为预告发布新的后渗透工具、未一手证实发布；The SQL Server Crypto Detour（ac-comm-04）= 会议（SOCON 2025）+ 博客已证实，无配套工具一手证据；ADFS - Living in the Legacy of DRS（ac-comm-02/03）= 博客+工具（adfstoolkit register_device.py/access_token.py/eprt.py/golden_jwt.py）已证实，无会议演讲一手证据；MacOS DirtyNIB（xpn-works-004）= 博客+工具（extract_trustcache.py）已证实，无会议演讲一手证据。任一实例均未被一手证据完整证实会议+博客+工具三段。CVE-2018-4878《Moving jobs and exploiting flash》（xpn-r4-001）仅为博客 writeup，未含会议演讲与配套工具环节，不构成会议-博客-工具输出模式的实例。",
+      "feedback": "会议采纳（SOCON-2024、SOCON 2025）提供议题被议程接受的反馈；GitHub star/fork 数（ac-comm-06：RandomTSScripts 214、OktaPostExToolkit 200、ssh-inject 191 等）为工具被社区采用的可观察指标，仅证明工具被采用，不证明会议-博客-工具输出循环的稳定性；RastaMouse 对 SQL Server 演讲制作 abridged copy 戏仿版本为可观察的同行公开反馈信号。",
+      "intermediate_capability": "形成将一项研究同时服务于会议演讲、博客长文深度化与配套工具公开的多渠道输出能力，使演讲议题可被同行复现与二次开发。",
+      "observed_outcomes": [
+        "SOCON-2024 Identity Providers for RedTeamers 议程采纳与博客长文",
+        "SOCON 2025 The SQL Server Crypto Detour 议程采纳与博客长文",
+        "adfstoolkit 与 extract_trustcache.py 工具公开",
+        "RastaMouse 对 SQL Server 演讲的戏仿版本"
+      ],
+      "evidence_ids": [
+        "ac-comm-01",
+        "ac-comm-02",
+        "ac-comm-03",
+        "ac-comm-04",
+        "ac-comm-06",
+        "xpn-works-004",
+        "xpn-r2-002",
+        "xpn-r4-001"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "会议-博客-工具的多渠道输出可能是议题类型（如身份、SQL Server）适合长文与工具化的结果，而非个人稳定方法论；GitHub star/fork 数与议程采纳均为结果指标，无法直接证明稳定的输出循环已内化为方法论。SOCON 议程页未独立抓取，会议归属仅依据博客自述。"
+    },
+    {
+      "name": "借助前人公开成果起步并以披露流程摩擦为反馈",
+      "starting_conditions": "跨入新议题时，缺乏从零开始的依据；以社区既有公开成果（Dave Schumaker 的 blog、Elad Beber 的 CVE writeup、@_dirkjan 的 ROADTools、DrAzureAD 的 AADInternals）作为起步基线。",
+      "repeated_practice": "2025-11 Claude Code 研究先借助 Dave Schumaker 的 blog 与 Elad Beber 的 CVE writeup 起步（xpn-self-003）；2025-01 ADFS 研究显式致谢并依赖 @_dirkjan 的 ROADTools 与 DrAzureAD 的 AADInternals 提供大量示例与代码（ac-comm-02）；2026-07 GEPA 研究在与 Dreadnode 交流时首次接触 GEPA，随后亲手重建以理解其高层工作方式而非直接套用（xpn-self-004）。披露环节以流程摩擦为反馈：2025-10 Claude Code 漏洞首次联系 Anthropic 安全邮箱被自动回复导向 HackerOne，随后改走内部团队路径获得快速修复（ac-comm-05）。",
+      "feedback": "披露流程的摩擦（标准入口失效 → 内部联系人路径生效）为披露渠道选择的反馈；前人成果的可用性与引用关系为新议题起步可行性的反馈。",
+      "intermediate_capability": "形成以社区既有公开成果为起步基线、以披露流程摩擦为渠道经验积累的协作型研究习惯。",
+      "observed_outcomes": [
+        "Claude Code CVE-2025-64755 经 Anthropic 内部团队路径修复并分配 CVE",
+        "ADFS 研究对 ROADTools 与 AADInternals 的引用与工具链复用",
+        "GEPA 概念的亲手重建以验证理解"
+      ],
+      "evidence_ids": [
+        "xpn-self-003",
+        "xpn-self-004",
+        "ac-comm-02",
+        "ac-comm-05"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "借助前人成果是安全研究的普遍惯例，区分度可能有限；披露流程摩擦仅在 Claude Code 一例中一手叙述，其在其他研究（DirtyNIB 2021-11 向 Apple 报告）中是否重复未一手证实。"
+    },
+    {
+      "name": "不满驱动的可度量工具化建设",
+      "starting_conditions": "面对反复出现且不可测量的研究问题，依赖主观判断的方法被认为不可接受。",
+      "repeated_practice": "2026-07 GEPA 研究中，对 LLM prompt 修改不可测量感到困扰，认为依赖主观判断不可接受，因此寻找结构化、可度量的方法；将反复出现的问题（不可测量）转化为可工程化解决的子问题（xpn-self-006）。同时采集高分与低分运行 trace 作为优化器的负样本依据，并以同一视角用于自身实验（xpn-self-005）；对 CLIPS（LISP 风格语言）采用购书系统学习的固定动作（xpn-self-007）。2026-07 Day Shift harness 针对 LLM 常提前退出任务或未用尽采集数据的缺陷，采用刻意简单的循环重启方式与循环间状态文件共享（xpn-self-008）。",
+      "feedback": "低分 trace 反例、朴素 reward function 的过拟合自承，以及对实验局限的诚实自我评估为方法改进的反馈来源。",
+      "intermediate_capability": "形成将不可测量的问题转化为可工程化、可度量子问题并以工具化解决的稳定习惯，并保留对自身实验局限的诚实自我评估。",
+      "observed_outcomes": [
+        "GEPA 可度量提示工程方法的提出",
+        "Day Shift harness 的 LLM 驱动自动化逆向与循环重启设计",
+        "对自身 reward function 极度朴素与部分 prompt 过拟合的自承"
+      ],
+      "evidence_ids": [
+        "xpn-self-004",
+        "xpn-self-005",
+        "xpn-self-006",
+        "xpn-self-007",
+        "xpn-self-008",
+        "xpn-works-007"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "不满驱动的工具化建设仅见于 2026-07 LLM 期一手自述，无法证明其为贯穿全程的稳定机制；可度量方法可能是 GEPA 议题本身的要求而非个人方法论。转向 LLM 的具体触发事件在一手来源中未直接说明，当前为基于发布时间线的推断。"
+    }
+  ],
+  "tensions": [
+    "MDSec→SpecterOps 的雇主变更节点具体日期未在一手来源中披露（LinkedIn 抓取返回 999、SpecterOps who-we-are 返回 404，见 adam-ext-05 与 decisions gaps）；SpecterOps 任职最早一手证实为 2025-04-16《The SQL Server Crypto Detour》，2025-01-12 ADFS 博客所属雇主未证实，SpecterOps 阶段精确边界无法划定。",
+    "About 页自述现任 SpecterOps Senior Offensive Security Engineer，《The SQL Server Crypto Detour》正文另称 Service Architect；两处头衔来自不同来源，其时间或职责差异未在一手来源中澄清。",
+    "person_json 标注 selected_conference_evidence 为 Black Hat US/EU，但 blackhat.com 个人 speaker 页返回 403，WebSearch 仅以摘要形式转述，Black Hat 出席的具体年份与题目未一手核验；与已一手确认的 SOCON-2024 / SOCON 2025 演讲并存，未直接冲突但 Black Hat 演讲事实尚未独立证实。",
+    "长期夜间人工逆向 EDR 的持续工作习惯与截止日期压力（自述缓慢的反复逆向过程令人挫败）转化为对 LLM 加速的采纳；但转向 LLM 的具体触发事件在一手来源中未直接说明，当前为基于发布时间线的推断。",
+    "CVE-2018-4878《Moving jobs and exploiting flash》帖文在 2018-02 同时记录雇主变更与漏洞利用研究，二者在时间上同步但其因果关系（因加入 MDSec 而接触该研究，或同篇帖文独立承载两事）未由原文澄清；xpn-r4-001 仅 verbatim 记录加入 MDSec 的两句动机，不涉及研究议题与雇主变更的因果链。"
+  ],
+  "transferable_practices": [
+    "对需要从二进制还原内部逻辑的目标，采用源码→PDB→反汇编 xref→CFG 分析→POC 的逆向工作流，并将发现转化为可复现的破解配置或环境变量 POC。",
+    "将低分运行 trace 作为优化器的负样本依据，显式从负面样本提取规则并用于自身实验的诚实自我评估。",
+    "研究路径依赖并引用同行公开成果（ROADTools、AADInternals、前人 CVE writeup）作为起步基线，而非从零开始。",
+    "披露环节当标准入口失效时转向内部联系人路径，并以公开时间线标注厂商响应速度，形成可复用的披露规范范例。",
+    "将反复出现的问题（不可测量）转化为可工程化解决的子问题，以结构化、可度量的方法替代主观判断。",
+    "面对新领域采用购书系统学习的固定动作，随后亲手重建以验证理解而非直接套用。",
+    "会议演讲与博客长文并行产出，使议题可被同行复现与二次开发；GitHub star/fork 数仅作为工具被社区采用的可观察指标，不作为输出循环稳定性的支撑。",
+    "明示知道何时需逐行审查代码，并在静态分析与动态分析之间作出混合选择的判断（I prefer a hybrid approach of static and dynamic analysis）。",
+    "缩短反馈循环作为研究的关键转折点：把大问题拆为可单元测试的小函数以加速验证。"
+  ],
+  "non_transferable_conditions": [
+    "SpecterOps 雇主身份提供的非标准评估类型与客户素材（如 ManageEngine ADSelfService Plus .bak 备份）构成特定议题来源，非个人方法论可迁移。",
+    "SpecterOps 同事网络（@hotnops 术语共创、内部线程共享 EDR 规则）为组织内部资源；Justin Elze 为 TrustedSec 平行工作者而非 SpecterOps 同事，外部同行不并入组织内部网络。",
+    "EDR 长期夜间人工持续逆向的累积经验为特定时期、特定目标的累积，无法被新研究者短期复制；Day Shift harness 以 LLM 驱动的自动化逆向取代该步骤，但二者关系为基础推断而非一手陈述。",
+    "跨约 9 年的持续公开发表与博客基础设施（blog.xpnsec.com 自 2017-03 起的累积公开记录）为长期个人输出渠道，新研究者无法短期建立等价渠道。",
+    "DirtyNIB 漏洞 2021-11 即向 Apple 报告，经多轮邮件与 CVE 分配后至 2023-10 仍未修复，逐版本对抗（macOS Ventura Launch Constraints 用 img4tool 解析 trust cache、macOS Sonoma bundle 限制用重命名 Contents 目录绕过）依赖与厂商反馈的具体交互时间线，不可迁移。"
+  ],
+  "open_questions": [
+    "MDSec→SpecterOps 的雇主变更节点具体日期未在一手来源中披露，SpecterOps 阶段精确边界无法划定；2025-01-12 ADFS 博客所属雇主未证实。",
+    "Black Hat US/EU 演讲的年份、题目与同场讲者未被一手 speaker 页核验（页面 403），person_json 标注仅作线索；SOCON-2024/2025 议程页未独立抓取，会议归属仅依据博客自述。",
+    "教育背景、出生年份、最早接触安全的时间、入行起点在一手来源（About 页与多页 blog）中完全缺失。",
+    "是否有导师或固定协作同伴的一手证据缺失；自述中出现的他人均为前人公开成果、同事线索共享、同行平行工作与外部接触，无明确的师徒式指导关系。",
+    "2025 年中研究转向 LLM/AI 的具体触发因素（项目需求、客户场景或个人选题）在一手来源中未直接说明，当前为基于发布时间线的推断。",
+    "独立长访谈/播客/AMA/演讲问答的一手材料缺失（X 个人页 402、博客未列出 podcast/AMA 链接）；本节点深度对话维度主要取自本人技术 blog 中嵌入的第一人称自述。",
+    "About 页自述现任 SpecterOps Senior Offensive Security Engineer 与《The SQL Server Crypto Detour》正文 Service Architect 两处头衔的时间或职责差异未在一手来源中澄清。",
+    "2017-03 至 2024-03 之间的中间年份博文（博客 pages 2-9）未读取，早期研究方向演变的中间过渡未知；2025-06《Tokenization Confusion》《Administrator Protection Review》正文未抓取，技术细节未核实。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790703577414898000-adam-chester-xpn-synthesis-v5.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "ea5bfaf4-a3af-476f-a1ac-bdd3774c837f",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_8lyyyky5j2tebspn9dispu5n",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-29T17:39:37.467217+00:00"
+      },
+      {
+        "tool_use_id": "call_uegby74gpyjxpvqzb8h3uliw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "ca032e12895b5a8739bc0d7401237e25e7f31b133287f108e92515072d509563",
+        "accessed_at": "2026-09-29T17:39:37.467265+00:00"
+      },
+      {
+        "tool_use_id": "call_1fsg8xwhjn4ck3vfjyoyl3pw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "b18b0fa999e908dddbdb807d2f5193ea8703a4bd23d834cddd35aaa103135678",
+        "accessed_at": "2026-09-29T17:39:37.467273+00:00"
+      },
+      {
+        "tool_use_id": "call_g1ov7qm33pgxvgz6uucsufdx",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "9519d6ece43199aa624b3ab57d7448b6b329491518d8e25478ebbe7cb0f34212",
+        "accessed_at": "2026-09-29T17:39:37.467332+00:00"
+      },
+      {
+        "tool_use_id": "call_ek3nhkrgux06j2eolthg28qv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/inputs/revision_context.json",
+          "offset": 496,
+          "limit": 495
+        },
+        "success": false,
+        "content_sha256": "cadb947bd4cb4ae83b22303b6d05e37774e29fff1b15dc907dad9ee21e0cdb08",
+        "accessed_at": "2026-09-29T17:39:37.467339+00:00"
+      },
+      {
+        "tool_use_id": "call_w56b4p3n73kaje6u0eqkuupm",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/inputs/revision_context.json",
+          "limit": 300,
+          "offset": 496
+        },
+        "success": true,
+        "content_sha256": "4064894f9def70c7296bebce0c2abfc1d5c6ce56a5d26f6436e888b4774157a5",
+        "accessed_at": "2026-09-29T17:39:37.467407+00:00"
+      },
+      {
+        "tool_use_id": "call_0ehrqy9lg7nizugfetyrihm2",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/inputs/revision_context.json",
+          "limit": 220,
+          "offset": 795
+        },
+        "success": true,
+        "content_sha256": "320037189d8548f424fbae0fd903ca85ca6119c72b335fd3ad60b2346f0ee32d",
+        "accessed_at": "2026-09-29T17:39:37.467437+00:00"
+      },
+      {
+        "tool_use_id": "call_ygscqqh2ble1wddeuucwoyef",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "b36425fd9e9150231bdb14a5da7ead6585500a27b54590c85ed35a04946f54be",
+        "accessed_at": "2026-09-29T17:39:37.467527+00:00"
+      },
+      {
+        "tool_use_id": "call_gp3i43rkviouwcqyghs67u91",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/inputs/evidence_json.json",
+          "limit": 200,
+          "offset": 900
+        },
+        "success": true,
+        "content_sha256": "b60648f94773d6e62739363051e51913c1a3b010ee1b62a923a3c1e74a5f49af",
+        "accessed_at": "2026-09-29T17:39:37.467547+00:00"
+      },
+      {
+        "tool_use_id": "call_x1bc5vv14fzg2g1pqtppmm78",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/checkpoint.md",
+          "content": "# 研究进度检查点 — Adam Chester (xpn) 综合 v5\n\n## 任务状态\n综合分析节点（synthesis v5，第5次综合）。已读取 CLAUDE.md、task.md、output.schema.json、inputs/person_json.json、inputs/evidence_json.json（1088 行，6 维 + targeted 4 条）、inputs/revision_context.json（4 轮定向补证与纠错记录，round 1-4）。\n\n## 输入材料总览\n- person_json: rank=54, Adam Chester (xpn), primary_focus=Windows/云/身份漏洞, Black Hat US/EU\n- evidence_json: 6 维（works/conversations/community/external/decisions/timeline）+ targeted（xpn-tl-r1-001, xpn-r2-001, xpn-r2-002, xpn-r4-001）\n- revision_context: 4 轮定向补证的 synthesis_instructions 累积\n\n## 作废证据\n- xpn-works-001（Kerberoasting，status=unknown、verified_in_run=false，round 2 由 xpn-r2-001 替换）→ 不得继续引用\n\n## 4 轮 synthesis_instructions 落实清单\n\n### Round 1\n1. stages[4].stage：去\"身份深水区\"比喻 → \"身份攻击深入研究与数据库加密分析\"（本轮采\"ADFS/DRS与SQL Server加密研究期\"中性表述）\n2. mechanism3.starting_conditions：去\"grind\"/\"慢grind\"俚语 → \"持续工作习惯\"/\"缓慢的反复逆向过程令人挫败\"\n3. non_transferable_conditions：去\"grind\" → \"持续人工逆向\"\n4. stages[4].capability_change：区分 About 页(Senior Offensive Security Engineer) 与 SQL Server Crypto Detour(Service Architect) 两来源\n5. xpn-tl-002：短引文出处为 page/8 索引摘要，已由 xpn-tl-r1-001 交叉复验\n\n### Round 2\n1. expertise：移除 xpn-works-006 自身份提供商条目，改由 xpn-works-005+ac-comm-01+xpn-r2-002 支撑；xpn-works-006 改挂 SQL Server 条目\n2. expertise：以 xpn-r2-001 替换 xpn-works-001 支撑 Kerberos 条目\n3. tensions/open_questions：\"跳槽节点\"→\"雇主变更节点\"\n4. transferable_practices：\"逐行翻代码\"→\"逐行审查代码\"\n5. transferable_practices：\"痛点工具化\"→\"将反复出现的问题(不可测量)转化为可工程化解决的子问题\"\n6. transferable_practices：\"以让优化器理解什么不该做\"→\"将低分运行trace作为优化器的负样本依据\"（去拟人）\n7. stages[1].capability_change：删\"主动更换雇主以接触更广研究面\"动机归因\n8. mechanisms[1].alternative_explanation：删\"该循环在MDSec期CVE-2018-4878帖已见雏形\"\n9. stages[1].capability_change：\"反调试\"→\"线程注入检测规避\"/\"防御规避\"；\"macOS提权\"→\"macOS SIP绕过\"\n\n### Round 3\n1. mechanisms[1].name：删\"三段式循环\"/\"稳定三段式循环\" → \"会议演讲与博客长文并行、并视议题配套公开工具的输出模式\"\n2. mechanisms[1].repeated_practice：按实例分别标注各段是否被一手证实（Identity Providers/SQL Server Crypto/ADFS/DirtyNIB 无一完整三段）\n3. mechanisms[1].alternative_explanation、stages[3]/[4].capability_change：删\"三段式循环最早完整实例为SOCON-2024\" → \"最早可见于SOCON-2024，其工具发布为预告、未一手证实\"\n4. mechanisms[0].name/repeated_practice：五步流程收敛至 .NET(xpn-works-003)+SQL Server(xpn-works-006)；Claude Code(xpn-tl-009)单独表述为 WebCrack去混淆+DevTools反反调试+缩短反馈循环聚焦sed\n5. mechanisms[0].observed_outcomes：删\"方法论迁移到LLM期成为Day Shift基础\" → \"Day Shift harness以LLM驱动自动化逆向取代人工逐夜反汇编\"\n6. non_transferable_conditions：Justin Elze 移出\"同事\"，区分 SpecterOps同事 vs TrustedSec同行\n7. stages[5].evidence_ids：补入 xpn-self-006（GEPA 可度量提示工程方法）\n8. stages[4].period：改为\"2025-01至2025-04（ADFS/DRS与SQL Server加密研究期；SpecterOps任职最早一手证实为2025-04-16，2025-01 ADFS博客雇主未证实）\"\n9. mechanisms[1].feedback/transferable_practices：star/fork数仅证明工具被采用，不证明三段循环稳定性\n\n### Round 4\n1. stages[3].stage：去\"深耕\"比喻 → \"专题研究\"\n2. stages[1].capability_change：精确转述MDSec加入动机，引用 xpn-r4-001 两句 verbatim，删\"依据xpn-tl-004原文，不附加未述动机\"自我声明\n\n## 阶段划分（6 阶段）\n- Stage 0 (2017-03至2017-09)：早期公开写作起点与多方向探索期\n- Stage 1 (2017-11至2018)：雇主变更与漏洞利用/防御规避横向扩展期\n- Stage 2 (2020-02至2020-06)：方法论成型与可复用逆向工作流期\n- Stage 3 (2023-10至2024-03)：身份提供商专题研究与会议-博客并行输出起点\n- Stage 4 (2025-01至2025-04)：ADFS/DRS与SQL Server加密研究期\n- Stage 5 (2025-06至2026-07)：LLM/AI Agent安全转向与可度量提示工程期\n\n## 主机制（4 个，均满足≥2项判定标准）\n1. 源码→PDB→反汇编xref→CFG分析→POC五步逆向工作流（.NET+SQL Server，repeated+generative）\n2. 会议演讲与博客长文并行、并视议题配套公开工具的输出模式（repeated+distinctive）\n3. 借助前人公开成果起步并以披露流程摩擦为反馈（repeated+generative+distinctive）\n4. 不满驱动的可度量工具化建设（repeated+distinctive）\n\n## 待办\n- 撰写 output.json，对照 schema 逐字段检查\n- 确保不引用 xpn-works-001\n- 确保所有自撰字段使用专业书面语，无比喻/俚语/拟人/宣传\n- 确保 documented/reported/inferred/unknown 分开\n\n## 预算\n本节点为综合节点，不进行新搜索；所有结论基于已核验证据。\n"
+        },
+        "success": true,
+        "content_sha256": "bc132f844bb5f2b84e0ebfa1f405ef81ae38af77a4c6e0a602a06fa06b0b9616",
+        "accessed_at": "2026-09-29T17:39:37.468143+00:00"
+      },
+      {
+        "tool_use_id": "call_xmx5lmhxgy04tabp6k9nnadd",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/output.json",
+          "content": "{\n  \"person\": \"Adam Chester (xpn)\",\n  \"expertise\": [\n    \"Active Directory / Kerberos 凭据攻击与红队方法（含 Kerberoasting、Azure AD Connect、ADFS/DRS/PRT）\",\n    \"身份提供商攻击（Azure AD/Entra ID、ADFS/DRS、Okta、Ping、OneLogin）与 PRT/DRS 内部机制\",\n    \"Windows 与 .NET（CLR/ETW、AMSI）、macOS（SIP、NIB、Launch Constraints）防御规避与漏洞利用\",\n    \"EDR 规则集逆向与规避（YARA、DSE/BIOC、CLIPS、本地 ML 模型）\",\n    \"LLM/Agent 安全评测与提示工程（MCP/Claude Code、GEPA 可度量提示工程、LLM 驱动逆向）\",\n    \"逆向工程方法论（PDB/xref/CFG、API Monitor、WinDBG、Binary Ninja over MCP）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2017-03 至 2017-09\",\n      \"stage\": \"公开写作起点与多方向探索期\",\n      \"capability_change\": \"2017-03-05 同日批次公开 Linux USBIP overflow、Foomatic-RIP、Kentico CMS SQLi、GitHub Desktop RCE/XSS、Extracting SQL Server Hashes、Bettercap NTLM Capturing、Offensive Forensics、Xbox One Controller Hacking 等多方向 writeup，2017-04-24 发布 PlaidCTF no_mo_flo writeup，2017-09-30 发布 Kerberos AD Attacks - Kerberoasting。研究主题横跨 Linux 内核、Web、Windows/SQL Server、CTF 与硬件改机，尚未聚焦单一方向；此阶段建立以引用 CVE 编号、附 PoC 的技术 writeup 形式公开发表的习惯，构成后续持续公开输出的起点。\",\n      \"evidence_ids\": [\n        \"xpn-dec-001\",\n        \"xpn-tl-001\",\n        \"xpn-r2-001\",\n        \"xpn-tl-002\",\n        \"xpn-tl-r1-001\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017-11 至 2018\",\n      \"stage\": \"雇主变更与漏洞利用、防御规避横向扩展期\",\n      \"capability_change\": \"2017-11 Defcon 25 in Review 自述居住于英国、本职为渗透测试员、当年为第二次参加 Defcon；2018-02-15《Moving jobs and exploiting flash (CVE-2018-4878)》自述因见到 MDSec 团队对社区的贡献而由 Secarma 更换至 MDSec，以期掌握 MDSec 团队成员的技能（原文 verbatim：Recently I joined the MDSec team after seeing many of the cool things that they had contributed to the community, and to hopefully pick up some of their awesome skills）。同年集中产出 CVE-2018-4878 Flash、CVE-2018-1038 Total Meltdown、Get-InjectedThread 线程注入检测规避、PowerShell AMSI 规避、macOS SIP 经 VirtualBox kext 漏洞绕过；技术栈从单一红队凭据攻击横向扩展到内核漏洞利用与防御规避，平台从 Windows 延伸到 macOS。\",\n      \"evidence_ids\": [\n        \"xpn-tl-003\",\n        \"xpn-tl-004\",\n        \"xpn-r4-001\",\n        \"xpn-works-002\",\n        \"xpn-tl-005\",\n        \"xpn-tl-006\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020-02 至 2020-06\",\n      \"stage\": \"方法论成型与可复用逆向工作流期\",\n      \"capability_change\": \"2020-02 AWS Lambda Redirector、2020-04 Designing The Adversary Simulation Lab 显示从单点 writeup 转向可复用红队基础设施（C2 redirector、对抗仿真实验室）的工程化输出；2020-06-06《Hiding your .NET - COMPlus_ETWEnabled》呈现稳定的逆向工作流（源码 clrconfigvalues.h 枚举 COMPlus_ 前缀设置 → Microsoft PDB → IDA xref 定位 CLRConfig::GetConfigValue → CFG 分析发现 COMPlus_ETWEnabled=0 令 CLR 跳过 ETW 注册 → 附环境变量伪造 POC），并开始系统性发布规避技术配套的防御检测引用（Roberto Rodriguez）。\",\n      \"evidence_ids\": [\n        \"xpn-tl-007\",\n        \"xpn-works-003\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023-10 至 2024-03\",\n      \"stage\": \"身份提供商专题研究与会议-博客并行输出起点\",\n      \"capability_change\": \"2023-10-02《Okta for Red Teamers》覆盖 Okta Delegated Authentication via Kerberos、劫持 Okta AD Agent 捕获凭据或注入 skeleton key、注册恶意 AD Agent、部署伪造 SAML 身份提供商冒充任意用户；2024-03-18《Identity Providers for RedTeamers》标注 Originally presented at SOCON-2024，覆盖 Ping、OneLogin、Entra ID，将 Okta 阶段的方法迁移到其他 IdP。会议演讲与博客长文并行、并视议题配套公开工具的输出模式最早可见于 SOCON-2024 起的 Identity Providers for RedTeamers，其工具发布为预告、未一手证实发布。\",\n      \"evidence_ids\": [\n        \"xpn-r2-002\",\n        \"ac-comm-01\",\n        \"xpn-tl-008\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2025-01 至 2025-04\",\n      \"stage\": \"ADFS/DRS 与 SQL Server 加密研究期\",\n      \"capability_change\": \"2025-01-12《ADFS - Living in the Legacy of DRS》逆向 ADFS 的 OAuth2/DRS 设备注册，发现内嵌 OAuth2 Client ID、PRT/Golden JWT，将 Entra ID 的 PRT 技术移植到本地 ADFS，发布 adfstoolkit，正文显式致谢并依赖 @_dirkjan (Dirk-jan Mollema) 的 ROADTools 与 DrAzureAD (Nestori Syynimaa) 的 AADInternals，同事 @hotnops 提出术语 Microsoft Stank。2025-04-16《The SQL Server Crypto Detour》用 API Monitor 钩 Windows Crypto API、WinDBG 反汇编 sqllang.dll/sqlmin.dll 还原 SMK/DMK 加密链，发现 ManageEngine ADSelfService Plus 使用微软文档示例硬编码密码，研究在 SOCON 2025 发表。SpecterOps 任职最早一手证实为 2025-04-16，2025-01-12 ADFS 博客所属雇主未证实；About 页自述现任 SpecterOps Senior Offensive Security Engineer，《The SQL Server Crypto Detour》正文另称 Service Architect，两处头衔来自不同来源，其时间或职责差异未在一手来源中澄清。\",\n      \"evidence_ids\": [\n        \"xpn-works-005\",\n        \"ac-comm-02\",\n        \"ac-comm-03\",\n        \"xpn-works-006\",\n        \"ac-comm-04\",\n        \"xpn-dec-002\",\n        \"xpn-tl-011\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2025-06 至 2026-07\",\n      \"stage\": \"LLM/AI Agent 安全转向与可度量提示工程期\",\n      \"capability_change\": \"2025-11-29《An Evening with Claude (Code)》披露 Claude Code v2.0.25 sed 表达式解析缺陷（CVE-2025-64755），研究由客户开放授权评估 MCP server 风险驱动，采用 WebCrack 去混淆、DevTools 反反调试、缩短反馈循环聚焦最弱环节（sed）；2026-07-29《Prompt Engineering for Security Agents - A Measurable Approach with GEPA》提出可度量提示工程方法，将攻防与评测思维迁移到 LLM/Agent 新技术域；2026-07-30《Accelerating EDR Evasion with LLM-Driven Analysis》构建 Day Shift harness 以 LLM 驱动的自动化逆向取代人工逐夜反汇编步骤。Day Shift harness 采用 REPORT.md/STATE.md/CODEMAP.md/AGENTS.md 持久化与刻意简单的循环重启方式。\",\n      \"evidence_ids\": [\n        \"xpn-tl-009\",\n        \"ac-comm-05\",\n        \"xpn-self-001\",\n        \"xpn-self-002\",\n        \"xpn-self-003\",\n        \"xpn-self-004\",\n        \"xpn-self-005\",\n        \"xpn-self-006\",\n        \"xpn-self-007\",\n        \"xpn-self-008\",\n        \"xpn-works-007\",\n        \"xpn-tl-010\",\n        \"xpn-dec-003\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"源码→PDB→反汇编 xref→CFG 分析→POC 五步逆向工作流\",\n      \"starting_conditions\": \"2020-06 前，研究目标多为已有 PoC 或可经文档/源码直接定位的漏洞；对 .NET CLR、SQL Server 加密链等需要从二进制还原内部逻辑的目标，缺乏可重复的逆向工作流。\",\n      \"repeated_practice\": \"《Hiding your .NET - COMPlus_ETWEnabled》(xpn-works-003) 与《The SQL Server Crypto Detour》(xpn-works-006) 两项研究中，反复执行同一五步流程：从源码枚举配置前缀或入口（clrconfigvalues.h 枚举 COMPlus_ 前缀 / SQL Server Crypto API 入口）→ 结合 Microsoft PDB 还原符号 → IDA xref 定位调用点（CLRConfig::GetConfigValue / sqllang.dll 与 sqlmin.dll 加密函数）→ CFG 分析发现触发条件（COMPlus_ETWEnabled=0 令 CLR 跳过 ETW 注册 / ESKP MD5+4字节盐与 ESP2 SHA-512+8字节盐两种 DMK 哈希方案）→ 附环境变量伪造或破解配置 POC。SQL Server 一例进一步组合 API Monitor 钩点与 WinDBG 断点，并产出可复用的 JtR dynamic_2020 规则与 Hashcat mode 30 映射。该五步流程仅清晰见于这两项研究；Claude Code 研究（xpn-tl-009）采用 WebCrack 去混淆、DevTools 反反调试、缩短反馈循环聚焦 sed 表达式解析缺陷，并非该五步流程。\",\n      \"feedback\": \"POC 可触发（COMPlus_ETWEnabled=0 实际令 CLR 跳过 ETW 注册）与破解配置可复现（Hashcat mode 30 对 ManageEngine ADSelfService Plus 硬编码密码生效）为方法是否成立的反馈来源；防御检测引用（Roberto Rodriguez）提供攻防双向反馈。\",\n      \"intermediate_capability\": \"形成可迁移到任一需要从二进制还原内部逻辑的目标（.NET CLR 内部、SQL Server 加密链）的稳定逆向工作流，并将发现转化为可复现的破解配置或环境变量 POC。\",\n      \"observed_outcomes\": [\n        \"2020-06 COMPlus_ETWEnabled 规避方法与 POC\",\n        \"2025-04 SQL Server DMK 两种哈希方案识别（ESKP Hashcat mode 30、ESP2 SHA-512+8字节盐）与 ManageEngine ADSelfService Plus 硬编码密码发现\",\n        \"JtR dynamic_2020 规则与 Hashcat mode 30 映射的公开发布\"\n      ],\n      \"evidence_ids\": [\n        \"xpn-works-003\",\n        \"xpn-works-006\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"两项研究间隔近五年，无法排除五步流程的相似性来自二进制逆向的通用惯例而非个人稳定方法论；亦无法排除 SQL Server 一例是客户评估偶然触发的议题而非主动迁移。Claude Code 研究未沿用此流程，提示该工作流依赖可获取 PDB 与源码的目标类型。\"\n    },\n    {\n      \"name\": \"会议演讲与博客长文并行、并视议题配套公开工具的输出模式\",\n      \"starting_conditions\": \"2024-03 前，公开输出以博客 writeup 为主；SOCON-2024 起，会议演讲成为研究产出的另一渠道，需要将演讲议题扩展为可复现的博客长文与配套工具。\",\n      \"repeated_practice\": \"对多项议题并行产出会议演讲与博客长文，并视议题配套公开工具，各段是否被一手证实按实例分别标注：Identity Providers for RedTeamers（ac-comm-01）= 会议（SOCON-2024）+ 博客已证实，工具为预告发布新的后渗透工具、未一手证实发布；The SQL Server Crypto Detour（ac-comm-04）= 会议（SOCON 2025）+ 博客已证实，无配套工具一手证据；ADFS - Living in the Legacy of DRS（ac-comm-02/03）= 博客+工具（adfstoolkit register_device.py/access_token.py/eprt.py/golden_jwt.py）已证实，无会议演讲一手证据；MacOS DirtyNIB（xpn-works-004）= 博客+工具（extract_trustcache.py）已证实，无会议演讲一手证据。任一实例均未被一手证据完整证实会议+博客+工具三段。该帖为博客 writeup，未含会议演讲与配套工具环节；CVE-2018-4878《Moving jobs and exploiting flash》仅为博客 writeup，不构成会议-博客-工具三段式循环的实例。\",\n      \"feedback\": \"会议采纳（SOCON-2024、SOCON 2025）提供议题被议程接受的反馈；GitHub star/fork 数（ac-comm-06：RandomTSScripts 214、OktaPostExToolkit 200、ssh-inject 191 等）为工具被社区采用的可观察指标，仅证明工具被采用，不证明会议-博客-工具输出循环的稳定性；RastaMouse 对 SQL Server 演讲制作 abridged copy 戏仿版本为可观察的同行公开反馈信号。\",\n      \"intermediate_capability\": \"形成将一项研究同时服务于会议演讲、博客长文深度化与配套工具公开的多渠道输出能力，使演讲议题可被同行复现与二次开发。\",\n      \"observed_outcomes\": [\n        \"SOCON-2024 Identity Providers for RedTeamers 议程采纳与博客长文\",\n        \"SOCON 2025 The SQL Server Crypto Detour 议程采纳与博客长文\",\n        \"adfstoolkit 与 extract_trustcache.py 工具公开\",\n        \"RastaMouse 对 SQL Server 演讲的戏仿版本\"\n      ],\n      \"evidence_ids\": [\n        \"ac-comm-01\",\n        \"ac-comm-02\",\n        \"ac-comm-03\",\n        \"ac-comm-04\",\n        \"ac-comm-06\",\n        \"xpn-works-004\",\n        \"xpn-r2-002\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"会议-博客-工具的多渠道输出可能是议题类型（如身份、SQL Server）适合长文与工具化的结果，而非个人稳定方法论；GitHub star/fork 数与议程采纳均为结果指标，无法直接证明稳定的输出循环已内化为方法论。SOCON 议程页未独立抓取，会议归属仅依据博客自述。\"\n    },\n    {\n      \"name\": \"借助前人公开成果起步并以披露流程摩擦为反馈\",\n      \"starting_conditions\": \"跨入新议题时，缺乏从零开始的依据；以社区既有公开成果（Dave Schumaker 的 blog、Elad Beber 的 CVE writeup、@_dirkjan 的 ROADTools、DrAzureAD 的 AADInternals）作为起步基线。\",\n      \"repeated_practice\": \"2025-11 Claude Code 研究先借助 Dave Schumaker 的 blog 与 Elad Beber 的 CVE writeup 起步（xpn-self-003）；2025-01 ADFS 研究显式致谢并依赖 @_dirkjan 的 ROADTools 与 DrAzureAD 的 AADInternals 提供大量示例与代码（ac-comm-02）；2026-07 GEPA 研究在与 Dreadnode 交流时首次接触 GEPA，随后亲手重建以理解其高层工作方式而非直接套用（xpn-self-004）。披露环节以流程摩擦为反馈：2025-10 Claude Code 漏洞首次联系 Anthropic 安全邮箱被自动回复导向 HackerOne，随后改走内部团队路径获得快速修复（ac-comm-05）。\",\n      \"feedback\": \"披露流程的摩擦（标准入口失效 → 内部联系人路径生效）为披露渠道选择的反馈；前人成果的可用性与引用关系为新议题起步可行性的反馈。\",\n      \"intermediate_capability\": \"形成以社区既有公开成果为起步基线、以披露流程摩擦为渠道经验积累的协作型研究习惯。\",\n      \"observed_outcomes\": [\n        \"Claude Code CVE-2025-64755 经 Anthropic 内部团队路径修复并分配 CVE\",\n        \"ADFS 研究对 ROADTools 与 AADInternals 的引用与工具链复用\",\n        \"GEPA 概念的亲手重建以验证理解\"\n      ],\n      \"evidence_ids\": [\n        \"xpn-self-003\",\n        \"xpn-self-004\",\n        \"ac-comm-02\",\n        \"ac-comm-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"借助前人成果是安全研究的普遍惯例，区分度可能有限；披露流程摩擦仅在 Claude Code 一例中一手叙述，其在其他研究（DirtyNIB 2021-11 向 Apple 报告）中是否重复未一手证实。\"\n    },\n    {\n      \"name\": \"不满驱动的可度量工具化建设\",\n      \"starting_conditions\": \"面对反复出现且不可测量的研究问题，依赖主观判断的方法被认为不可接受。\",\n      \"repeated_practice\": \"2026-07 GEPA 研究中，对 LLM prompt 修改不可测量感到困扰，认为依赖主观判断不可接受，因此寻找结构化、可度量的方法；将反复出现的问题（不可测量）转化为可工程化解决的子问题（xpn-self-006）。同时采集高分与低分运行 trace 作为优化器的负样本依据，并以同一视角用于自身实验（xpn-self-005）；对 CLIPS（LISP 风格语言）采用购书系统学习的固定动作（xpn-self-007）。2026-07 Day Shift harness 针对LLM常提前退出任务或未用尽采集数据的缺陷，采用刻意简单的循环重启方式与循环间状态文件共享（xpn-self-008）。\",\n      \"feedback\": \"低分 trace 反例、朴素 reward function 的过拟合自承，以及对实验局限的诚实自我评估为方法改进的反馈来源。\",\n      \"intermediate_capability\": \"形成将不可测量的问题转化为可工程化、可度量子问题并以工具化解决的稳定习惯，并保留对自身实验局限的诚实自我评估。\",\n      \"observed_outcomes\": [\n        \"GEPA 可度量提示工程方法的提出\",\n        \"Day Shift harness 的 LLM 驱动自动化逆向与循环重启设计\",\n        \"对自身 reward function 极度朴素与部分 prompt 过拟合的自承\"\n      ],\n      \"evidence_ids\": [\n        \"xpn-self-004\",\n        \"xpn-self-005\",\n        \"xpn-self-006\",\n        \"xpn-self-007\",\n        \"xpn-self-008\",\n        \"xpn-works-007\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"不满驱动的工具化建设仅见于 2026-07 LLM 期一手自述，无法证明其为贯穿全程的稳定机制；可度量方法可能是 GEPA 议题本身的要求而非个人方法论。转向 LLM 的具体触发事件在一手来源中未直接说明，当前为基于发布时间线的推断。\"\n    }\n  ],\n  \"tensions\": [\n    \"MDSec→SpecterOps 的雇主变更节点具体日期未在一手来源中披露（LinkedIn 抓取返回 999、SpecterOps who-we-are 返回 404，见 adam-ext-05 与 decisions gaps）；SpecterOps 任职最早一手证实为 2025-04-16《The SQL Server Crypto Detour》，2025-01-12 ADFS 博客所属雇主未证实，SpecterOps 阶段精确边界无法划定。\",\n    \"About 页自述现任 SpecterOps Senior Offensive Security Engineer，《The SQL Server Crypto Detour》正文另称 Service Architect；两处头衔来自不同来源，其时间或职责差异未在一手来源中澄清。\",\n    \"person_json 标注 selected_conference_evidence 为 Black Hat US/EU，但 blackhat.com 个人 speaker 页返回 403，WebSearch 仅以摘要形式转述，Black Hat 出席的具体年份与题目未一手核验；与已一手确认的 SOCON-2024 / SOCON 2025 演讲并存，未直接冲突但 Black Hat 演讲事实尚未独立证实。\",\n    \"长期夜间人工逆向 EDR 的持续工作习惯与截止日期压力（自述缓慢的反复逆向过程令人挫败）转化为对 LLM 加速的采纳；但转向 LLM 的具体触发事件在一手来源中未直接说明，当前为基于发布时间线的推断。\",\n    \"CVE-2018-4878《Moving jobs and exploiting flash》帖文在 2018-02 同时记录雇主变更与漏洞利用研究，二者在时间上同步但其因果关系（因加入 MDSec 而接触该研究，或同篇帖文独立承载两事）未由原文澄清；xpn-r4-001 仅 verbatim 记录加入 MDSec 的两句动机，不涉及研究议题与雇主变更的因果链。\"\n  ],\n  \"transferable_practices\": [\n    \"对需要从二进制还原内部逻辑的目标，采用源码→PDB→反汇编 xref→CFG 分析→POC 的逆向工作流，并将发现转化为可复现的破解配置或环境变量 POC。\",\n    \"将低分运行 trace 作为优化器的负样本依据，显式从负面样本提取规则并用于自身实验的诚实自我评估。\",\n    \"研究路径依赖并引用同行公开成果（ROADTools、AADInternals、前人 CVE writeup）作为起步基线，而非从零开始。\",\n    \"披露环节当标准入口失效时转向内部联系人路径，并以公开时间线标注厂商响应速度，形成可复用的披露规范范例。\",\n    \"将反复出现的问题（不可测量）转化为可工程化解决的子问题，以结构化、可度量的方法替代主观判断。\",\n    \"面对新领域采用购书系统学习的固定动作，随后亲手重建以验证理解而非直接套用。\",\n    \"会议演讲与博客长文并行产出，使议题可被同行复现与二次开发；GitHub star/fork 数仅作为工具被社区采用的可观察指标，不作为输出循环稳定性的支撑。\",\n    \"明示知道何时需逐行审查代码，并在静态分析与动态分析之间作出混合选择的判断（I prefer a hybrid approach of static and dynamic analysis）。\",\n    \"缩短反馈循环作为研究的关键转折点：把大问题拆为可单元测试的小函数以加速验证。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"SpecterOps 雇主身份提供的非标准评估类型与客户素材（如 ManageEngine ADSelfService Plus .bak 备份）构成特定议题来源，非个人方法论可迁移。\",\n    \"SpecterOps 同事网络（@hotnops 术语共创、内部线程共享 EDR 规则）为组织内部资源；Justin Elze 为 TrustedSec 平行工作者而非 SpecterOps 同事，外部同行不并入组织内部网络。\",\n    \"EDR 长期夜间人工持续逆向的累积经验为特定时期、特定目标的累积，无法被新研究者短期复制；Day Shift harness 以 LLM 驱动的自动化逆向取代该步骤，但二者关系为基础推断而非一手陈述。\",\n    \"跨约 9 年的持续公开发表与博客基础设施（blog.xpnsec.com 自 2017-03 起的累积公开记录）为长期个人输出渠道，新研究者无法短期建立等价渠道。\",\n    \"DirtyNIB 漏洞 2021-11 即向 Apple 报告，经多轮邮件与 CVE 分配后至 2023-10 仍未修复，逐版本对抗（macOS Ventura Launch Constraints 用 img4tool 解析 trust cache、macOS Sonoma bundle 限制用重命名 Contents 目录绕过）依赖与厂商反馈的具体交互时间线，不可迁移。\"\n  ],\n  \"open_questions\": [\n    \"MDSec→SpecterOps 的雇主变更节点具体日期未在一手来源中披露，SpecterOps 阶段精确边界无法划定；2025-01-12 ADFS 博客所属雇主未证实。\",\n    \"Black Hat US/EU 演讲的年份、题目与同场讲者未被一手 speaker 页核验（页面 403），person_json 标注仅作线索；SOCON-2024/2025 议程页未独立抓取，会议归属仅依据博客自述。\",\n    \"教育背景、出生年份、最早接触安全的时间、入行起点在一手来源（About 页与多页 blog）中完全缺失。\",\n    \"是否有导师或固定协作同伴的一手证据缺失；自述中出现的他人均为前人公开成果、同事线索共享、同行平行工作与外部接触，无明确的师徒式指导关系。\",\n    \"2025 年中研究转向 LLM/AI 的具体触发因素（项目需求、客户场景或个人选题）在一手来源中未直接说明，当前为基于发布时间线的推断。\",\n    \"独立长访谈/播客/AMA/演讲问答的一手材料缺失（X 个人页 402、博客未列出 podcast/AMA 链接）；本节点深度对话维度主要取自本人技术 blog 中嵌入的第一人称自述。\",\n    \"About 页自述现任 SpecterOps Senior Offensive Security Engineer 与《The SQL Server Crypto Detour》正文 Service Architect 两处头衔的时间或职责差异未在一手来源中澄清。\",\n    \"2017-03 至 2024-03 之间的中间年份博文（博客 pages 2-9）未读取，早期研究方向演变的中间过渡未知；2025-06《Tokenization Confusion》《Administrator Protection Review》正文未抓取，技术细节未核实。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "d1d4a23deb8f527d9fb56302a0ea05597b4f801467f23677133c0db4a3735b55",
+        "accessed_at": "2026-09-29T17:39:37.468151+00:00"
+      },
+      {
+        "tool_use_id": "call_q8m2oowzhjmwzjj47jeqvbrd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/output.json",
+          "offset": 95,
+          "limit": 10
+        },
+        "success": true,
+        "content_sha256": "549fdd27276749db84b160c98d85aab884d1ac31a63116a4c253eb4e952dd6a9",
+        "accessed_at": "2026-09-29T17:39:37.468352+00:00"
+      },
+      {
+        "tool_use_id": "call_nxb3ehcucd3pb5gohdqjg5kk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/output.json",
+          "limit": 8,
+          "offset": 112
+        },
+        "success": true,
+        "content_sha256": "c99b42cf5c9bd81ce78bd2fc5608d5717a796772071d62bb50f9ed1ec50236e9",
+        "accessed_at": "2026-09-29T17:39:37.468357+00:00"
+      },
+      {
+        "tool_use_id": "call_fw2g91madqpa8oqeuj5w4cbw",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/output.json",
+          "limit": 10,
+          "offset": 122
+        },
+        "success": true,
+        "content_sha256": "ba2094daf8cff088aa69f79048dae47c5c0f3d3af11f5af6d67a530731271b32",
+        "accessed_at": "2026-09-29T17:39:37.468363+00:00"
+      },
+      {
+        "tool_use_id": "call_5228p7ge2vfv3hsad6i9w75j",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/output.json",
+          "limit": 1,
+          "offset": 123
+        },
+        "success": true,
+        "content_sha256": "a70f69bb5e97d16c3867e756174d294e164d445e90972265c24b1a4207f0d290",
+        "accessed_at": "2026-09-29T17:39:37.468367+00:00"
+      },
+      {
+        "tool_use_id": "call_40sg2c46zs5jzng2p1zg729d",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/adam-chester-xpn-synthesis-v5-20260930-013207-700/output.json",
+          "content": "{\n  \"person\": \"Adam Chester (xpn)\",\n  \"expertise\": [\n    \"Active Directory / Kerberos 凭据攻击与红队方法（含 Kerberoasting、Azure AD Connect、ADFS/DRS/PRT）\",\n    \"身份提供商攻击（Azure AD/Entra ID、ADFS/DRS、Okta、Ping、OneLogin）与 PRT/DRS 内部机制\",\n    \"Windows 与 .NET（CLR/ETW、AMSI）、macOS（SIP、NIB、Launch Constraints）防御规避与漏洞利用\",\n    \"EDR 规则集逆向与规避（YARA、DSE/BIOC、CLIPS、本地 ML 模型）\",\n    \"LLM/Agent 安全评测与提示工程（MCP/Claude Code、GEPA 可度量提示工程、LLM 驱动逆向）\",\n    \"逆向工程方法论（PDB/xref/CFG、API Monitor、WinDBG、Binary Ninja over MCP）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2017-03 至 2017-09\",\n      \"stage\": \"公开写作起点与多方向探索期\",\n      \"capability_change\": \"2017-03-05 同日批次公开 Linux USBIP overflow、Foomatic-RIP、Kentico CMS SQLi、GitHub Desktop RCE/XSS、Extracting SQL Server Hashes、Bettercap NTLM Capturing、Offensive Forensics、Xbox One Controller Hacking 等多方向 writeup，2017-04-24 发布 PlaidCTF no_mo_flo writeup，2017-09-30 发布 Kerberos AD Attacks - Kerberoasting。研究主题横跨 Linux 内核、Web、Windows/SQL Server、CTF 与硬件改机，尚未聚焦单一方向；此阶段建立以引用 CVE 编号、附 PoC 的技术 writeup 形式公开发表的习惯，构成后续持续公开输出的起点。\",\n      \"evidence_ids\": [\n        \"xpn-dec-001\",\n        \"xpn-tl-001\",\n        \"xpn-r2-001\",\n        \"xpn-tl-002\",\n        \"xpn-tl-r1-001\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017-11 至 2018\",\n      \"stage\": \"雇主变更与漏洞利用、防御规避横向扩展期\",\n      \"capability_change\": \"2017-11 Defcon 25 in Review 自述居住于英国、本职为渗透测试员、当年为第二次参加 Defcon；2018-02-15《Moving jobs and exploiting flash (CVE-2018-4878)》自述因见到 MDSec 团队对社区的贡献而由 Secarma 更换至 MDSec，以期掌握 MDSec 团队成员的技能（原文 verbatim：Recently I joined the MDSec team after seeing many of the cool things that they had contributed to the community, and to hopefully pick up some of their awesome skills）。同年集中产出 CVE-2018-4878 Flash、CVE-2018-1038 Total Meltdown、Get-InjectedThread 线程注入检测规避、PowerShell AMSI 规避、macOS SIP 经 VirtualBox kext 漏洞绕过；技术栈从单一红队凭据攻击横向扩展到内核漏洞利用与防御规避，平台从 Windows 延伸到 macOS。\",\n      \"evidence_ids\": [\n        \"xpn-tl-003\",\n        \"xpn-tl-004\",\n        \"xpn-r4-001\",\n        \"xpn-works-002\",\n        \"xpn-tl-005\",\n        \"xpn-tl-006\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020-02 至 2020-06\",\n      \"stage\": \"方法论成型与可复用逆向工作流期\",\n      \"capability_change\": \"2020-02 AWS Lambda Redirector、2020-04 Designing The Adversary Simulation Lab 显示从单点 writeup 转向可复用红队基础设施（C2 redirector、对抗仿真实验室）的工程化输出；2020-06-06《Hiding your .NET - COMPlus_ETWEnabled》呈现稳定的逆向工作流（源码 clrconfigvalues.h 枚举 COMPlus_ 前缀设置 → Microsoft PDB → IDA xref 定位 CLRConfig::GetConfigValue → CFG 分析发现 COMPlus_ETWEnabled=0 令 CLR 跳过 ETW 注册 → 附环境变量伪造 POC），并开始系统性发布规避技术配套的防御检测引用（Roberto Rodriguez）。\",\n      \"evidence_ids\": [\n        \"xpn-tl-007\",\n        \"xpn-works-003\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023-10 至 2024-03\",\n      \"stage\": \"身份提供商专题研究与会议-博客并行输出起点\",\n      \"capability_change\": \"2023-10-02《Okta for Red Teamers》覆盖 Okta Delegated Authentication via Kerberos、劫持 Okta AD Agent 捕获凭据或注入 skeleton key、注册恶意 AD Agent、部署伪造 SAML 身份提供商冒充任意用户；2024-03-18《Identity Providers for RedTeamers》标注 Originally presented at SOCON-2024，覆盖 Ping、OneLogin、Entra ID，将 Okta 阶段的方法迁移到其他 IdP。会议演讲与博客长文并行、并视议题配套公开工具的输出模式最早可见于 SOCON-2024 起的 Identity Providers for RedTeamers，其工具发布为预告、未一手证实发布。\",\n      \"evidence_ids\": [\n        \"xpn-r2-002\",\n        \"ac-comm-01\",\n        \"xpn-tl-008\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2025-01 至 2025-04\",\n      \"stage\": \"ADFS/DRS 与 SQL Server 加密研究期\",\n      \"capability_change\": \"2025-01-12《ADFS - Living in the Legacy of DRS》逆向 ADFS 的 OAuth2/DRS 设备注册，发现内嵌 OAuth2 Client ID、PRT/Golden JWT，将 Entra ID 的 PRT 技术移植到本地 ADFS，发布 adfstoolkit，正文显式致谢并依赖 @_dirkjan (Dirk-jan Mollema) 的 ROADTools 与 DrAzureAD (Nestori Syynimaa) 的 AADInternals，同事 @hotnops 提出术语 Microsoft Stank。2025-04-16《The SQL Server Crypto Detour》用 API Monitor 钩 Windows Crypto API、WinDBG 反汇编 sqllang.dll/sqlmin.dll 还原 SMK/DMK 加密链，发现 ManageEngine ADSelfService Plus 使用微软文档示例硬编码密码，研究在 SOCON 2025 发表。SpecterOps 任职最早一手证实为 2025-04-16，2025-01-12 ADFS 博客所属雇主未证实；About 页自述现任 SpecterOps Senior Offensive Security Engineer，《The SQL Server Crypto Detour》正文另称 Service Architect，两处头衔来自不同来源，其时间或职责差异未在一手来源中澄清。\",\n      \"evidence_ids\": [\n        \"xpn-works-005\",\n        \"ac-comm-02\",\n        \"ac-comm-03\",\n        \"xpn-works-006\",\n        \"ac-comm-04\",\n        \"xpn-dec-002\",\n        \"xpn-tl-011\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2025-06 至 2026-07\",\n      \"stage\": \"LLM/AI Agent 安全转向与可度量提示工程期\",\n      \"capability_change\": \"2025-11-29《An Evening with Claude (Code)》披露 Claude Code v2.0.25 sed 表达式解析缺陷（CVE-2025-64755），研究由客户开放授权评估 MCP server 风险驱动，采用 WebCrack 去混淆、DevTools 反反调试、缩短反馈循环聚焦最弱环节（sed）；2026-07-29《Prompt Engineering for Security Agents - A Measurable Approach with GEPA》提出可度量提示工程方法，将攻防与评测思维迁移到 LLM/Agent 新技术域；2026-07-30《Accelerating EDR Evasion with LLM-Driven Analysis》构建 Day Shift harness 以 LLM 驱动的自动化逆向取代人工逐夜反汇编步骤。Day Shift harness 采用 REPORT.md/STATE.md/CODEMAP.md/AGENTS.md 持久化与刻意简单的循环重启方式。\",\n      \"evidence_ids\": [\n        \"xpn-tl-009\",\n        \"ac-comm-05\",\n        \"xpn-self-001\",\n        \"xpn-self-002\",\n        \"xpn-self-003\",\n        \"xpn-self-004\",\n        \"xpn-self-005\",\n        \"xpn-self-006\",\n        \"xpn-self-007\",\n        \"xpn-self-008\",\n        \"xpn-works-007\",\n        \"xpn-tl-010\",\n        \"xpn-dec-003\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"源码→PDB→反汇编 xref→CFG 分析→POC 五步逆向工作流\",\n      \"starting_conditions\": \"2020-06 前，研究目标多为已有 PoC 或可经文档/源码直接定位的漏洞；对 .NET CLR、SQL Server 加密链等需要从二进制还原内部逻辑的目标，缺乏可重复的逆向工作流。\",\n      \"repeated_practice\": \"《Hiding your .NET - COMPlus_ETWEnabled》(xpn-works-003) 与《The SQL Server Crypto Detour》(xpn-works-006) 两项研究中，反复执行同一五步流程：从源码枚举配置前缀或入口（clrconfigvalues.h 枚举 COMPlus_ 前缀 / SQL Server Crypto API 入口）→ 结合 Microsoft PDB 还原符号 → IDA xref 定位调用点（CLRConfig::GetConfigValue / sqllang.dll 与 sqlmin.dll 加密函数）→ CFG 分析发现触发条件（COMPlus_ETWEnabled=0 令 CLR 跳过 ETW 注册 / ESKP MD5+4字节盐与 ESP2 SHA-512+8字节盐两种 DMK 哈希方案）→ 附环境变量伪造或破解配置 POC。SQL Server 一例进一步组合 API Monitor 钩点与 WinDBG 断点，并产出可复用的 JtR dynamic_2020 规则与 Hashcat mode 30 映射。该五步流程仅清晰见于这两项研究；Claude Code 研究（xpn-tl-009）采用 WebCrack 去混淆、DevTools 反反调试、缩短反馈循环聚焦 sed 表达式解析缺陷，并非该五步流程。\",\n      \"feedback\": \"POC 可触发（COMPlus_ETWEnabled=0 实际令 CLR 跳过 ETW 注册）与破解配置可复现（Hashcat mode 30 对 ManageEngine ADSelfService Plus 硬编码密码生效）为方法是否成立的反馈来源；防御检测引用（Roberto Rodriguez）提供攻防双向反馈。\",\n      \"intermediate_capability\": \"形成可迁移到任一需要从二进制还原内部逻辑的目标（.NET CLR 内部、SQL Server 加密链）的稳定逆向工作流，并将发现转化为可复现的破解配置或环境变量 POC。\",\n      \"observed_outcomes\": [\n        \"2020-06 COMPlus_ETWEnabled 规避方法与 POC\",\n        \"2025-04 SQL Server DMK 两种哈希方案识别（ESKP Hashcat mode 30、ESP2 SHA-512+8字节盐）与 ManageEngine ADSelfService Plus 硬编码密码发现\",\n        \"JtR dynamic_2020 规则与 Hashcat mode 30 映射的公开发布\"\n      ],\n      \"evidence_ids\": [\n        \"xpn-works-003\",\n        \"xpn-works-006\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"两项研究间隔近五年，无法排除五步流程的相似性来自二进制逆向的通用惯例而非个人稳定方法论；亦无法排除 SQL Server 一例是客户评估偶然触发的议题而非主动迁移。Claude Code 研究未沿用此流程，提示该工作流依赖可获取 PDB 与源码的目标类型。\"\n    },\n    {\n      \"name\": \"会议演讲与博客长文并行、并视议题配套公开工具的输出模式\",\n      \"starting_conditions\": \"2024-03 前，公开输出以博客 writeup 为主；SOCON-2024 起，会议演讲成为研究产出的另一渠道，需要将演讲议题扩展为可复现的博客长文与配套工具。\",\n      \"repeated_practice\": \"对多项议题并行产出会议演讲与博客长文，并视议题配套公开工具，各段是否被一手证实按实例分别标注：Identity Providers for RedTeamers（ac-comm-01）= 会议（SOCON-2024）+ 博客已证实，工具为预告发布新的后渗透工具、未一手证实发布；The SQL Server Crypto Detour（ac-comm-04）= 会议（SOCON 2025）+ 博客已证实，无配套工具一手证据；ADFS - Living in the Legacy of DRS（ac-comm-02/03）= 博客+工具（adfstoolkit register_device.py/access_token.py/eprt.py/golden_jwt.py）已证实，无会议演讲一手证据；MacOS DirtyNIB（xpn-works-004）= 博客+工具（extract_trustcache.py）已证实，无会议演讲一手证据。任一实例均未被一手证据完整证实会议+博客+工具三段。CVE-2018-4878《Moving jobs and exploiting flash》（xpn-r4-001）仅为博客 writeup，未含会议演讲与配套工具环节，不构成会议-博客-工具输出模式的实例。\",\n      \"feedback\": \"会议采纳（SOCON-2024、SOCON 2025）提供议题被议程接受的反馈；GitHub star/fork 数（ac-comm-06：RandomTSScripts 214、OktaPostExToolkit 200、ssh-inject 191 等）为工具被社区采用的可观察指标，仅证明工具被采用，不证明会议-博客-工具输出循环的稳定性；RastaMouse 对 SQL Server 演讲制作 abridged copy 戏仿版本为可观察的同行公开反馈信号。\",\n      \"intermediate_capability\": \"形成将一项研究同时服务于会议演讲、博客长文深度化与配套工具公开的多渠道输出能力，使演讲议题可被同行复现与二次开发。\",\n      \"observed_outcomes\": [\n        \"SOCON-2024 Identity Providers for RedTeamers 议程采纳与博客长文\",\n        \"SOCON 2025 The SQL Server Crypto Detour 议程采纳与博客长文\",\n        \"adfstoolkit 与 extract_trustcache.py 工具公开\",\n        \"RastaMouse 对 SQL Server 演讲的戏仿版本\"\n      ],\n      \"evidence_ids\": [\n        \"ac-comm-01\",\n        \"ac-comm-02\",\n        \"ac-comm-03\",\n        \"ac-comm-04\",\n        \"ac-comm-06\",\n        \"xpn-works-004\",\n        \"xpn-r2-002\",\n        \"xpn-r4-001\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"会议-博客-工具的多渠道输出可能是议题类型（如身份、SQL Server）适合长文与工具化的结果，而非个人稳定方法论；GitHub star/fork 数与议程采纳均为结果指标，无法直接证明稳定的输出循环已内化为方法论。SOCON 议程页未独立抓取，会议归属仅依据博客自述。\"\n    },\n    {\n      \"name\": \"借助前人公开成果起步并以披露流程摩擦为反馈\",\n      \"starting_conditions\": \"跨入新议题时，缺乏从零开始的依据；以社区既有公开成果（Dave Schumaker 的 blog、Elad Beber 的 CVE writeup、@_dirkjan 的 ROADTools、DrAzureAD 的 AADInternals）作为起步基线。\",\n      \"repeated_practice\": \"2025-11 Claude Code 研究先借助 Dave Schumaker 的 blog 与 Elad Beber 的 CVE writeup 起步（xpn-self-003）；2025-01 ADFS 研究显式致谢并依赖 @_dirkjan 的 ROADTools 与 DrAzureAD 的 AADInternals 提供大量示例与代码（ac-comm-02）；2026-07 GEPA 研究在与 Dreadnode 交流时首次接触 GEPA，随后亲手重建以理解其高层工作方式而非直接套用（xpn-self-004）。披露环节以流程摩擦为反馈：2025-10 Claude Code 漏洞首次联系 Anthropic 安全邮箱被自动回复导向 HackerOne，随后改走内部团队路径获得快速修复（ac-comm-05）。\",\n      \"feedback\": \"披露流程的摩擦（标准入口失效 → 内部联系人路径生效）为披露渠道选择的反馈；前人成果的可用性与引用关系为新议题起步可行性的反馈。\",\n      \"intermediate_capability\": \"形成以社区既有公开成果为起步基线、以披露流程摩擦为渠道经验积累的协作型研究习惯。\",\n      \"observed_outcomes\": [\n        \"Claude Code CVE-2025-64755 经 Anthropic 内部团队路径修复并分配 CVE\",\n        \"ADFS 研究对 ROADTools 与 AADInternals 的引用与工具链复用\",\n        \"GEPA 概念的亲手重建以验证理解\"\n      ],\n      \"evidence_ids\": [\n        \"xpn-self-003\",\n        \"xpn-self-004\",\n        \"ac-comm-02\",\n        \"ac-comm-05\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"借助前人成果是安全研究的普遍惯例，区分度可能有限；披露流程摩擦仅在 Claude Code 一例中一手叙述，其在其他研究（DirtyNIB 2021-11 向 Apple 报告）中是否重复未一手证实。\"\n    },\n    {\n      \"name\": \"不满驱动的可度量工具化建设\",\n      \"starting_conditions\": \"面对反复出现且不可测量的研究问题，依赖主观判断的方法被认为不可接受。\",\n      \"repeated_practice\": \"2026-07 GEPA 研究中，对 LLM prompt 修改不可测量感到困扰，认为依赖主观判断不可接受，因此寻找结构化、可度量的方法；将反复出现的问题（不可测量）转化为可工程化解决的子问题（xpn-self-006）。同时采集高分与低分运行 trace 作为优化器的负样本依据，并以同一视角用于自身实验（xpn-self-005）；对 CLIPS（LISP 风格语言）采用购书系统学习的固定动作（xpn-self-007）。2026-07 Day Shift harness 针对 LLM 常提前退出任务或未用尽采集数据的缺陷，采用刻意简单的循环重启方式与循环间状态文件共享（xpn-self-008）。\",\n      \"feedback\": \"低分 trace 反例、朴素 reward function 的过拟合自承，以及对实验局限的诚实自我评估为方法改进的反馈来源。\",\n      \"intermediate_capability\": \"形成将不可测量的问题转化为可工程化、可度量子问题并以工具化解决的稳定习惯，并保留对自身实验局限的诚实自我评估。\",\n      \"observed_outcomes\": [\n        \"GEPA 可度量提示工程方法的提出\",\n        \"Day Shift harness 的 LLM 驱动自动化逆向与循环重启设计\",\n        \"对自身 reward function 极度朴素与部分 prompt 过拟合的自承\"\n      ],\n      \"evidence_ids\": [\n        \"xpn-self-004\",\n        \"xpn-self-005\",\n        \"xpn-self-006\",\n        \"xpn-self-007\",\n        \"xpn-self-008\",\n        \"xpn-works-007\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"不满驱动的工具化建设仅见于 2026-07 LLM 期一手自述，无法证明其为贯穿全程的稳定机制；可度量方法可能是 GEPA 议题本身的要求而非个人方法论。转向 LLM 的具体触发事件在一手来源中未直接说明，当前为基于发布时间线的推断。\"\n    }\n  ],\n  \"tensions\": [\n    \"MDSec→SpecterOps 的雇主变更节点具体日期未在一手来源中披露（LinkedIn 抓取返回 999、SpecterOps who-we-are 返回 404，见 adam-ext-05 与 decisions gaps）；SpecterOps 任职最早一手证实为 2025-04-16《The SQL Server Crypto Detour》，2025-01-12 ADFS 博客所属雇主未证实，SpecterOps 阶段精确边界无法划定。\",\n    \"About 页自述现任 SpecterOps Senior Offensive Security Engineer，《The SQL Server Crypto Detour》正文另称 Service Architect；两处头衔来自不同来源，其时间或职责差异未在一手来源中澄清。\",\n    \"person_json 标注 selected_conference_evidence 为 Black Hat US/EU，但 blackhat.com 个人 speaker 页返回 403，WebSearch 仅以摘要形式转述，Black Hat 出席的具体年份与题目未一手核验；与已一手确认的 SOCON-2024 / SOCON 2025 演讲并存，未直接冲突但 Black Hat 演讲事实尚未独立证实。\",\n    \"长期夜间人工逆向 EDR 的持续工作习惯与截止日期压力（自述缓慢的反复逆向过程令人挫败）转化为对 LLM 加速的采纳；但转向 LLM 的具体触发事件在一手来源中未直接说明，当前为基于发布时间线的推断。\",\n    \"CVE-2018-4878《Moving jobs and exploiting flash》帖文在 2018-02 同时记录雇主变更与漏洞利用研究，二者在时间上同步但其因果关系（因加入 MDSec 而接触该研究，或同篇帖文独立承载两事）未由原文澄清；xpn-r4-001 仅 verbatim 记录加入 MDSec 的两句动机，不涉及研究议题与雇主变更的因果链。\"\n  ],\n  \"transferable_practices\": [\n    \"对需要从二进制还原内部逻辑的目标，采用源码→PDB→反汇编 xref→CFG 分析→POC 的逆向工作流，并将发现转化为可复现的破解配置或环境变量 POC。\",\n    \"将低分运行 trace 作为优化器的负样本依据，显式从负面样本提取规则并用于自身实验的诚实自我评估。\",\n    \"研究路径依赖并引用同行公开成果（ROADTools、AADInternals、前人 CVE writeup）作为起步基线，而非从零开始。\",\n    \"披露环节当标准入口失效时转向内部联系人路径，并以公开时间线标注厂商响应速度，形成可复用的披露规范范例。\",\n    \"将反复出现的问题（不可测量）转化为可工程化解决的子问题，以结构化、可度量的方法替代主观判断。\",\n    \"面对新领域采用购书系统学习的固定动作，随后亲手重建以验证理解而非直接套用。\",\n    \"会议演讲与博客长文并行产出，使议题可被同行复现与二次开发；GitHub star/fork 数仅作为工具被社区采用的可观察指标，不作为输出循环稳定性的支撑。\",\n    \"明示知道何时需逐行审查代码，并在静态分析与动态分析之间作出混合选择的判断（I prefer a hybrid approach of static and dynamic analysis）。\",\n    \"缩短反馈循环作为研究的关键转折点：把大问题拆为可单元测试的小函数以加速验证。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"SpecterOps 雇主身份提供的非标准评估类型与客户素材（如 ManageEngine ADSelfService Plus .bak 备份）构成特定议题来源，非个人方法论可迁移。\",\n    \"SpecterOps 同事网络（@hotnops 术语共创、内部线程共享 EDR 规则）为组织内部资源；Justin Elze 为 TrustedSec 平行工作者而非 SpecterOps 同事，外部同行不并入组织内部网络。\",\n    \"EDR 长期夜间人工持续逆向的累积经验为特定时期、特定目标的累积，无法被新研究者短期复制；Day Shift harness 以 LLM 驱动的自动化逆向取代该步骤，但二者关系为基础推断而非一手陈述。\",\n    \"跨约 9 年的持续公开发表与博客基础设施（blog.xpnsec.com 自 2017-03 起的累积公开记录）为长期个人输出渠道，新研究者无法短期建立等价渠道。\",\n    \"DirtyNIB 漏洞 2021-11 即向 Apple 报告，经多轮邮件与 CVE 分配后至 2023-10 仍未修复，逐版本对抗（macOS Ventura Launch Constraints 用 img4tool 解析 trust cache、macOS Sonoma bundle 限制用重命名 Contents 目录绕过）依赖与厂商反馈的具体交互时间线，不可迁移。\"\n  ],\n  \"open_questions\": [\n    \"MDSec→SpecterOps 的雇主变更节点具体日期未在一手来源中披露，SpecterOps 阶段精确边界无法划定；2025-01-12 ADFS 博客所属雇主未证实。\",\n    \"Black Hat US/EU 演讲的年份、题目与同场讲者未被一手 speaker 页核验（页面 403），person_json 标注仅作线索；SOCON-2024/2025 议程页未独立抓取，会议归属仅依据博客自述。\",\n    \"教育背景、出生年份、最早接触安全的时间、入行起点在一手来源（About 页与多页 blog）中完全缺失。\",\n    \"是否有导师或固定协作同伴的一手证据缺失；自述中出现的他人均为前人公开成果、同事线索共享、同行平行工作与外部接触，无明确的师徒式指导关系。\",\n    \"2025 年中研究转向 LLM/AI 的具体触发因素（项目需求、客户场景或个人选题）在一手来源中未直接说明，当前为基于发布时间线的推断。\",\n    \"独立长访谈/播客/AMA/演讲问答的一手材料缺失（X 个人页 402、博客未列出 podcast/AMA 链接）；本节点深度对话维度主要取自本人技术 blog 中嵌入的第一人称自述。\",\n    \"About 页自述现任 SpecterOps Senior Offensive Security Engineer 与《The SQL Server Crypto Detour》正文 Service Architect 两处头衔的时间或职责差异未在一手来源中澄清。\",\n    \"2017-03 至 2024-03 之间的中间年份博文（博客 pages 2-9）未读取，早期研究方向演变的中间过渡未知；2025-06《Tokenization Confusion》《Administrator Protection Review》正文未抓取，技术细节未核实。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "9017571fe8f4d8104b78ab0bbf4c300aa76e53dbb62ed2d06a737b6e1756aad6",
+        "accessed_at": "2026-09-29T17:39:37.468381+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790703577468403000-adam-chester-xpn-synthesis-v5.json",
+    "label": "Adam Chester (xpn):synthesis:v5",
+    "elapsed_seconds": 449.76,
+    "prompt_sha256": "1d4783af7962548562fbca3dad6e06fad256eba679be6d08d8ac665d4a0e1078",
+    "num_turns": 17,
+    "total_cost_usd": 2.001255,
+    "usage": {
+      "input_tokens": 177477,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 752640,
+      "output_tokens": 29502,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 177477,
+        "outputTokens": 29502,
+        "cacheReadInputTokens": 752640,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 2.001255,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

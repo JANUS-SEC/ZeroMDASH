@@ -1,0 +1,1002 @@
+{
+  "works": {
+    "person": "Maxime Rossi Bellom",
+    "dimension": "公开作品与技术演化",
+    "identity_check": "person_json 记录的姓名 Maxime Rossi Bellom、primary_focus（Android/启动链/安全芯片漏洞）、writeup_evidence（Quarkslab 作者页）与抓取到的 Quarkslab 作者索引页内容一致：作者页列出 4 篇文章，主题覆盖 MediaTek 内核漏洞（2020）、Titan M 安全芯片（2022）、Android 数据加密（2023）、Samsung 启动链（2024），均属 Android/启动链/安全芯片方向，与 person_json 的 qualification「移动平台漏洞发现与利用」相符。未发现同名歧义。social（x.com/max_r_b）未单独抓取，仅作为身份线索。",
+    "items": [
+      {
+        "id": "mr-works-01",
+        "date": "2020-03-24",
+        "claim": "独立完成（无合著者）的 Quarkslab 博客文章分析 MediaTek CMDQ 驱动漏洞 CVE-2020-0069，证明该驱动对任意应用无权限开放，通过 IOCTL 提交 CMDQ_CODE_MOVE/READ/WRITE 命令可实现内核物理内存任意读写；并在 Xiaomi Redmi 6a（MT6762M）上构建 PoC。这是作者在该作者页上最早可查的公开作品，目标为单一内核驱动 IOCTL 漏洞，方法以阅读开源内核源码与命令格式图为主。",
+        "status": "documented",
+        "growth_signal": "工具建设习惯的起点：除 PoC 外，作者编写 LD_PRELOAD 的 syscall_hook.c 追踪库，拦截并转储 mtk-su root 利用程序的 IOCTL 命令序列，从而独立逆向已存在 rootkit 的底层漏洞，而非直接复现 mtk-su。这种「PoC + 动态追踪」双轨方法在后续作品中反复出现。",
+        "short_quote": "We may wonder why this device driver needs to be accessible to every application and not only to the HAL and media-related processes.",
+        "source": {
+          "title": "CVE-2020-0069: Autopsy of the Most Stable MediaTek Rootkit",
+          "url": "https://blog.quarkslab.com/cve-2020-0069-autopsy-of-the-most-stable-mediatek-rootkit.html",
+          "published": "2020-03-24",
+          "source_type": "一手 writeup（Quarkslab 博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_dnhyb708mefusoe06t9hhwew",
+          "accessed_at": "2026-09-28T00:19:57.682064+00:00",
+          "content_sha256": "72fab7465f1a9bb978d1b156bb92ce145e74d6feb5c8f7842406c12e71d91478"
+        }
+      },
+      {
+        "id": "mr-works-02",
+        "date": "2020-03-24",
+        "claim": "配套开源 PoC 仓库 quarkslab/CVE-2020-0069_poc 提供 kernel_rw.c（内核读写）、poc.sh（将内核数据中 \"Linux\" 改为 \"minix\" 的演示）、syscall_hook.c（追踪 mtk-su），使用 ndk-build 针对 armeabi-v7a 构建。仓库仅单个 commit。",
+        "status": "documented",
+        "growth_signal": "公开作品习惯的早期例证：在 writeup 之外同步开源可复现的 PoC 与自定义追踪工具，建立可被后续研究复用的资产。",
+        "source": {
+          "title": "quarkslab/CVE-2020-0069_poc (GitHub 仓库)",
+          "url": "https://github.com/quarkslab/CVE-2020-0069_poc",
+          "published": "2020-03-24",
+          "source_type": "一手代码仓库（GitHub）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ccgvfcf6ojmh53zvz7e4kd6l",
+          "accessed_at": "2026-09-28T00:19:57.682105+00:00",
+          "content_sha256": "1e4d377cf57082652bbf10395cd5a4011295ed3ffe6f1a917e76bd5376442f11"
+        }
+      },
+      {
+        "id": "mr-works-03",
+        "date": "2022-08-11",
+        "claim": "合著（Damiano Melotti）Quarkslab 博客文章分析 Google Pixel Titan M 安全芯片固件漏洞 CVE-2022-20233（严重级）：Keymaster 任务处理 ImportKey 请求时以攻击者可控整数作为栈缓冲区偏移写出单字节 0x01，构成越界写。作者利用 Black Hat EU 2021 前作中自研的 nosclient 工具发送任意命令，并探索两条模糊测试路径——黑盒（libprotobuf-mutator/Radamsa 经 nosclient 在设备上运行）与模拟化（AFL++ Unicorn 模式在笔记本上模拟固件指令）；新漏洞由模拟化模糊测试中 UC_ERR_WRITE_UNMAPPED 崩溃发现。利用单字节写改写请求存储位置，经多次栈迁移 gadget、替换 DestroyAttestationIds 处理器为 gadget 并写入 trampoline，再用 ROP 调用 memcpy（跳过 null-check 基本块）实现芯片内任意内存读，泄露 StrongBox 密钥。报告日期 2022-03-02，2022 年 6 月修复。",
+        "status": "documented",
+        "growth_signal": "技术栈与方法论的跃迁：从 2020 年的单一内核 IOCTL 漏洞升级到安全芯片固件、单字节越界写与 ROP；显式引入并比较两种模糊测试方法，建立可复用的 nosclient 工具。失败与反馈机制明确：黑盒模糊测试仅复现已知 bug 且状态浅；模拟化模糊测试因缺乏全系统模拟而漏掉一个已知 bug；Google 初期无法复现，经 Titan M 工程团队调查后才确认，赏金从 10000 美元提升至 75000 美元。",
+        "short_quote": "there is always a trade-off between the time spent reverse engineering to identify these patterns, and the time you actually let the fuzzer run freely.",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "一手 writeup（Quarkslab 博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_5syqbwb2l0sp1vkid436021n",
+          "accessed_at": "2026-09-28T00:19:57.682086+00:00",
+          "content_sha256": "35858edb2bd7762c169ec85804200ecb31b4d3372277d27f53a76c0bd12879c9"
+        }
+      },
+      {
+        "id": "mr-works-04",
+        "date": "2023-08-14",
+        "claim": "合著（Damiano Melotti）Quarkslab 博客文章研究攻击者拥有高端软件漏洞时能否攻破 Android File-Based Encryption（FBE）。复用 2022 年 Titan M（CVE-2022-20233）利用获取芯片代码执行与任意读原语，逆向 Weaver 任务提取密钥与值；另一路径经 MTKClient（Bjoern Kerler 外部工具）利用 Mediatek BootROM 漏洞绕过安全启动，patch TEEGRIS 的 userboot.so/root_task 并 patch Gatekeeper 始终接受凭据，再用裁剪版 Magisk root Android、用 Frida hook system_server 泄露 Keymaster 中间 AES 解密结果，最后以 AES-GCM tag 校验为成功预言机对 scrypt 参数离线暴破。REcon'23 演讲。",
+        "status": "documented",
+        "growth_signal": "迭代复用前作与跨工具整合：2022 年建立的 nosclient/Titan M 成果被直接复用，叠加外部 MTKClient、Frida、scrypt 暴破，构成多组件攻击链。承认工具局限（暴破脚本性能不足，需更强硬件/VM），并明确指出无论链多少漏洞仍须暴破凭据这一限制——对自身方法边界的清醒复盘。",
+        "short_quote": "they still need to bruteforce the credentials to feed them into the key derivation process.",
+        "source": {
+          "title": "Android Data Encryption in depth",
+          "url": "https://blog.quarkslab.com/android-data-encryption-in-depth.html",
+          "published": "2023-08-14",
+          "source_type": "一手 writeup（Quarkslab 博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_1kerkl05653baqfknjdo8pkc",
+          "accessed_at": "2026-09-28T00:19:57.682094+00:00",
+          "content_sha256": "98db0b327ba05625fc84dd24e9350fc60137f7621961de3360ebe831b9141307"
+        }
+      },
+      {
+        "id": "mr-works-05",
+        "date": "2024-10-15",
+        "claim": "合著（Raphaël Neveu；contributors Damiano Melotti、Gabrielle Viala）Quarkslab 博客文章披露 Samsung Galaxy A225F 启动链 4 个漏洞并链式利用：CVE-2024-20832（SVE-2023-2079，Little Kernel 自定义 JPEG 解析器堆溢出，up_param 分区启动时不校验）+ CVE-2024-20865（SVE-2024-0234，Odin 经 GPT 无认证刷写并可改 PIT）链式实现经 USB 在 Little Kernel 持久代码执行；CVE-2024-20820（SVE-2023-2215，Secure Monitor SMC handler 0xc2000526 读越界）+ CVE-2024-20021（SMC handler 0x8200022a 任意物理内存映射，每次最多 1MB、共 8 次）链式泄露 Secure World 内存含 Android Keystore 密钥。基于对该设备 Android File-Based Encryption 前作的熟悉。全部 PoC 开源，发表于 Black Hat USA 2024 与 SSTIC 2024。",
+        "status": "documented",
+        "growth_signal": "难度与发表规格的进一步升级：从单漏洞/单芯片上升到启动链多层（Little Kernel + Secure Monitor）4 漏洞链式利用，并明确以前作对该设备启动流程的熟悉为基础——体现跨作品的知识与方法积累。同时延续同步开源 PoC 与会议发表（Black Hat US、SSTIC）的公开作品习惯。",
+        "short_quote": "The GPT happens to be flashable through Odin without authentication!",
+        "source": {
+          "title": "Attacking the Samsung Galaxy A* Boot Chain",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+          "published": "2024-10-15",
+          "source_type": "一手 writeup（Quarkslab 博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_40v06ndeyctdj8iraq9xc3a6",
+          "accessed_at": "2026-09-28T00:19:57.682072+00:00",
+          "content_sha256": "d2265c0f6f203e5af700ba9faee5f0e4d634cad65dda5016fab8b7d86c2f5834"
+        }
+      },
+      {
+        "id": "mr-works-06",
+        "date": "2024-10-15",
+        "claim": "该启动链研究于 Black Hat USA 2024 与 SSTIC 2024 发表，并在 GitHub 开源全部 4 个漏洞的 PoC 代码。作者页作者索引亦将 2024 年文章归类为 Android，主题为 Samsung 启动链、Secure World、Android Keystore。",
+        "status": "documented",
+        "growth_signal": "公开发表习惯的延续：writeup 与会议演讲（Black Hat US、SSTIC）配套，且持续将 PoC 开源，与 2020 年 CVE-2020-0069 PoC 仓库一脉相承。",
+        "source": {
+          "title": "Attacking the Samsung Galaxy A* Boot Chain (含 Black Hat USA 2024 / SSTIC 2024 发表与 GitHub PoC)",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+          "published": "2024-10-15",
+          "source_type": "一手 writeup（Quarkslab 博客，含会议发表声明）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_40v06ndeyctdj8iraq9xc3a6",
+          "accessed_at": "2026-09-28T00:19:57.682072+00:00",
+          "content_sha256": "d2265c0f6f203e5af700ba9faee5f0e4d634cad65dda5016fab8b7d86c2f5834"
+        }
+      }
+    ],
+    "contradictions": [
+      "未发现互相冲突的材料。"
+    ],
+    "gaps": [
+      "person_json 提及「OffByOne 2024」演讲，但抓取的来源未证实其具体题目与日期；未单独抓取 OffByOne 议程页。",
+      "Titan M 系列前作 Black Hat EU 2021（首次逆向 Titan M 固件并构建 nosclient）未抓取原文，2022 年文章仅转述其存在；该前作的确切标题、日期与方法细节缺口。",
+      "2023 年 REcon'23 与 2024 年 Black Hat USA 2024 / SSTIC 2024 的会议议程页未单独抓取，仅以 writeup 本身的发表声明为证；演讲与 writeup 内容差异未知。",
+      "作者 2019 年及更早的公开作品/经历无公开 writeup 记录，技术演化起点之前的状态未知。",
+      "个人经历、导师或同伴关系、重复练习的具体形式无公开材料；仅能从作品序列推断工具复用与方法迭代，无法直接证实成长机制的人际与练习维度。",
+      "social 字段 https://x.com/max_r_b 未抓取，仅作为身份线索保留，不作 documented 证据。",
+      "WebSearch 在本轮返回「无能力」声明而非结果，所有线索均来自 WebFetch 直接抓取；作者页以外的索引（如 Google Scholar、DBLP、CVE 数据库条目）未覆盖。"
+    ]
+  },
+  "conversations": {
+    "person": "Maxime Rossi Bellom",
+    "dimension": "深度对话与自述",
+    "identity_check": "person_json 记录研究对象为 Maxime Rossi Bellom，Quarkslab，主攻 Android/启动链/安全芯片，社交账号 x.com/max_r_b。WebFetch 抓取 https://blog.quarkslab.com/author/maxime-rossi-bellom.html 成功，该作者页署名 Maxime Rossi Bellom，列出的四篇文章（2020 MediaTek 逆向、2022 Titan M、2023 Android 数据加密、2024 Samsung 启动链）主题全部落在 Android 与安全芯片领域，时间跨度与主攻方向一致，据此确认身份与研究领域，并排除同名歧义。WebSearch 曾返回指向 Université Paris-Saclay 量子物理研究者的同名结果，其领域与本研究对象不符，判定为同名歧义，不予采用。x.com/max_r_b 抓取返回 HTTP 402，未取得社交账号正文核对。",
+    "items": [
+      {
+        "id": "mrb-conv-01",
+        "date": "2022-08-11",
+        "claim": "在 Titan M 研究中，作者与 Damiano Melotti、Philippe Teuwen 用约一年半时间共同研究 Google 引入的安全芯片 Titan M；在缺少调试器、无法查看栈踪迹与即时副作用的情况下，通过在主板 UART 引脚上焊接线缆以获取调试输出。",
+        "status": "documented",
+        "growth_signal": "长期投入与同伴协作：以约一年半的持续研究周期推进单一目标，并以物理层面的临时工程手段（焊接 UART）克服工具缺失，显示在没有现成工具时自建观测手段的习惯。",
+        "short_quote": "not only we do not have access to any debugger capability, but we also cannot see any stack traces nor immediate side-effects",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ew4i3xm94ec7gjuo0pscl3vh",
+          "accessed_at": "2026-09-28T00:12:02.487588+00:00",
+          "content_sha256": "65c7139b499d0a89642090d0799589f68d391cbb2b6c032938ab203de75b0a76"
+        }
+      },
+      {
+        "id": "mrb-conv-02",
+        "date": "2022-08-11",
+        "claim": "作者此前已开发 nosclient——一个原生运行于 Android、直接与内核驱动通信的自定义客户端——该工具在其后续的模糊测试与利用工作中成为基础工具。",
+        "status": "documented",
+        "growth_signal": "工具建设作为研究的基础设施投入：在具体漏洞工作之前先构建可复用的通信与交互客户端，表明将工具建设视为研究流程一部分的习惯。",
+        "short_quote": "we had developed nosclient, a custom client that runs natively on Android and communicates directly with the kernel driver",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ew4i3xm94ec7gjuo0pscl3vh",
+          "accessed_at": "2026-09-28T00:12:02.487588+00:00",
+          "content_sha256": "65c7139b499d0a89642090d0799589f68d391cbb2b6c032938ab203de75b0a76"
+        }
+      },
+      {
+        "id": "mrb-conv-03",
+        "date": "2022-08-11",
+        "claim": "在选择芯片模拟与模糊测试方案时，作者尝试了多种方案后选用 Unicorn 模拟引擎与 AFL++ 模糊测试框架；在建立新方案后，先验证其能否复现已知漏洞，以证明新方案的有效性。",
+        "status": "documented",
+        "growth_signal": "重复练习与验证方法论：以能否复现已知漏洞作为新工具链有效性的判据，把对已知结果的复现当作建立对新方法信任的手段。",
+        "short_quote": "we asked ourselves whether we could once again find the bugs we already knew about, to prove the effectiveness of this new solution",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ew4i3xm94ec7gjuo0pscl3vh",
+          "accessed_at": "2026-09-28T00:12:02.487588+00:00",
+          "content_sha256": "65c7139b499d0a89642090d0799589f68d391cbb2b6c032938ab203de75b0a76"
+        }
+      },
+      {
+        "id": "mrb-conv-04",
+        "date": "2022-08-11",
+        "claim": "在编写利用时，作者无法将 ROP 链写到与首个 gadget 相同的位置，因为那会破坏使芯片崩溃的内存，需要在布置链时规避该约束。",
+        "status": "documented",
+        "growth_signal": "对失败的应对与技术约束下的选择：把利用过程中的具体失败（内存破坏导致崩溃）作为约束纳入链的布置，而非回避；体现对约束的逐步排除式处理。",
+        "short_quote": "we could not write our ROP chain exactly where we wrote our first gadget, because it would corrupt some memory that would make the chip crash",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ew4i3xm94ec7gjuo0pscl3vh",
+          "accessed_at": "2026-09-28T00:12:02.487588+00:00",
+          "content_sha256": "65c7139b499d0a89642090d0799589f68d391cbb2b6c032938ab203de75b0a76"
+        }
+      },
+      {
+        "id": "mrb-conv-05",
+        "date": "2024-10-15",
+        "claim": "在 Samsung Galaxy A225F 启动链研究中，作者与 Raphaël Neveu 复用了此前研究 Android 文件级加密时对该设备启动过程积累的知识，作为本次目标选择与攻击路径规划的依据。",
+        "status": "documented",
+        "growth_signal": "跨研究的知识复用与方向延续：把上一项研究的副产物（对设备启动过程的知识）作为下一项研究的目标选择依据，显示研究间的连续积累而非孤立选题。",
+        "short_quote": "we had gathered a good knowledge over its boot process during our previous research",
+        "source": {
+          "title": "Attacking the Samsung Galaxy A* Boot Chain",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+          "published": "2024-10-15",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_xyz70nrn0l60j2zvjuic3cv0",
+          "accessed_at": "2026-09-28T00:12:02.487583+00:00",
+          "content_sha256": "f5188b2cf1ec12c602b562f1d7a9ea2fd985a345f4c2583d3ee81422267f6660"
+        }
+      },
+      {
+        "id": "mrb-conv-06",
+        "date": "2024-10-15",
+        "claim": "作者将该研究在 Black Hat USA 2024 公开报告，并发布白皮书与概念验证代码；同时致谢另外两位研究贡献者 Damiano Melotti、Gabrielle Viala，以及审阅文章的同事。",
+        "status": "documented",
+        "growth_signal": "公开发表与协作网络：将成果以会议报告加白皮书加 PoC 开源的形式完整披露，并持续与固定的合作者群体协作；披露习惯显示对可复现性的重视。",
+        "short_quote": "we release the proof-of-concepts",
+        "source": {
+          "title": "Attacking the Samsung Galaxy A* Boot Chain",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+          "published": "2024-10-15",
+          "source_type": "blog writeup (first-person)",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_xyz70nrn0l60j2zvjuic3cv0",
+          "accessed_at": "2026-09-28T00:12:02.487583+00:00",
+          "content_sha256": "f5188b2cf1ec12c602b562f1d7a9ea2fd985a345f4c2583d3ee81422267f6660"
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 在以“Maxime Rossi Bellom”搭配量子物理相关语义检索时，返回指向 Université Paris-Saclay 量子物理研究者的同名内容；该结果与 person_json 给出的 Quarkslab 移动安全研究员身份及主攻方向不符，且缺乏可抓取的一手来源支撑，已作为同名歧义排除，不构成与已确认身份相互冲突的实质材料。"
+    ],
+    "gaps": [
+      "未找到针对 Maxime Rossi Bellom 的长访谈、播客、AMA 或演讲问答等“深度对话”型素材；本维度要求的研究对象本人对入门、学习、失败、导师、选择与转折的具体叙述，未能在公开来源中检索到对应载体。",
+      "既有材料仅为 Quarkslab 博客上的本人署名 writeup，其中第一人称叙述集中于研究方法、工具建设与协作过程，未涉及早期成长、正式训练背景、导师关系或进入安全领域的转折点。",
+      "x.com/max_r_b 抓取返回 HTTP 402，Black Hat 2022 议程页抓取返回 HTTP 403，社交账号与会议演讲页正文未能取得核对，无法据其补充自述内容。",
+      "工具调用预算（8 次搜索/抓取）已用尽，未能对其他可能的访谈来源（如安全会议访谈视频、Quarkslab 团队页、第三方播客目录）做进一步检索；相关线索留待后续节点或恢复节点处理。"
+    ]
+  },
+  "community": {
+    "person": "Maxime Rossi Bellom",
+    "dimension": "社区参与与反馈回路",
+    "identity_check": "身份确认为 Quarkslab 安全研究员 Maxime Rossi Bellom，专注 Android 启动链与安全芯片（Titan M、MediaTek CMDQ、Samsung Little Kernel/Secure Monitor）漏洞研究。一手来源为 blog.quarkslab.com 作者索引页及其四篇署名博文，作者归属一致，未发现同名歧义。person_json 给出的社交账号 x.com/max_r_b 经 WebFetch 返回 HTTP 402 Payment Required，无法抓取，仅作为 lead_only 引用，不据此标记任何结论为 documented。会议演讲事实（Black Hat EU 2021、TROOPERS 2022、Black Hat USA 2022、REcon 2023、Black Hat USA 2024、SSTIC 2024）主要来自博主本人在 Quarkslab 博客正文中的陈述，而非独立会议页面核验。",
+    "items": [
+      {
+        "id": "mrb-community-01-mediatek-solo-2020",
+        "date": "2020-03-24",
+        "claim": "Maxime Rossi Bellom 以独立作者身份在 Quarkslab 博客发布 MediaTek CMDQ 驱动漏洞（CVE-2020-0069）分析，明确表示该漏洞非本人发现、未联系厂商，但公开批评 MediaTek 自 2019 年 5 月已有修复却耗时约 10 个月才广泛下发至终端设备，并质疑授权框架外的设备能否获得修复。这是其公开技术写作与社区议题参与的早期记录。",
+        "status": "documented",
+        "growth_signal": "在未亲自发现漏洞的情况下，选择以公开技术解剖的方式参与社区议题，复用公开材料（XDA 上 mtk-su exploit 二进制、Xiaomi/Amazon 开源内核源码）并自建 tracing 库反向 mtk-su 的 IOCTL 调用，体现以公开写作与工具复用进入研究主题的路径；博文末尾致谢同事校对，显示 Quarkslab 内部同行反馈环节已存在。",
+        "short_quote": "only few information about this vulnerability is available. So we decided to take a look for ourselves",
+        "source": {
+          "title": "CVE-2020-0069: Autopsy of the Most Stable MediaTek Rootkit",
+          "url": "https://blog.quarkslab.com/cve-2020-0069-autopsy-of-the-most-stable-mediatek-rootkit.html",
+          "published": "2020-03-24",
+          "source_type": "一手 writeup（公司研究博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_st89ipg5kctz57emw7ok6cdt",
+          "accessed_at": "2026-09-28T00:15:45.626358+00:00",
+          "content_sha256": "1ff3cfbb531159a608567cd46aa93d4bf31a287c3cdd9bcf38fdeb32641423d6"
+        }
+      },
+      {
+        "id": "mrb-community-02-titanm-vendor-feedback-2022",
+        "date": "2022-03-02",
+        "claim": "Maxime Rossi Bellom 与 Damiano Melotti（Philippe Teuwen 参与）将 Titan M 漏洞（CVE-2022-20233）报告 Google Android Security Team（2022-03-02）。Google 初期难以复现，Quarkslab 通过 UART 日志演示代码执行后获得确认；初始奖励 10000 美元，Quarkslab 认为与 Google 公告的 Titan M 代码执行最高 100 万美元悬赏不符，遂提交改进版 exploit 演示密钥外泄，Google 将奖励提升至 75000 美元。修复随 2022 年 6 月 Pixel 安全公告发布。",
+        "status": "documented",
+        "growth_signal": "完整的厂商反馈回路证据：初报受阻→提供复现材料（焊接 UART 线获取调试日志）→确认→奖励争议→以更强的 exploit 证据（密钥外泄原语）推动重评。体现对反馈的响应不是被动接受，而是以可演示影响升级交涉筹码。研究跨度约 18 个月，并在 Black Hat EU 2021、TROOPERS 2022、Black Hat USA 2022 反复发表，构成对同一目标的重复练习。",
+        "short_quote": "Google initially awarded $10,000, which Quarkslab questioned given the advertised $1 million maximum for Titan M code execution bugs",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "一手 writeup（公司研究博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_7v2eym97yblgbnwx3lmtr1dy",
+          "accessed_at": "2026-09-28T00:15:45.626333+00:00",
+          "content_sha256": "55625f64a7fcbe50718b49e698d12ad31ace0ba60012b966270e611d496fe77a"
+        }
+      },
+      {
+        "id": "mrb-community-03-tool-building-nosclient-2022",
+        "date": "2022-08-11",
+        "claim": "Quarkslab 团队为 Titan M 研究开发并公开开源工具 nosclient，用于向 Titan M 芯片发送任意命令；后续 FBE 研究中复用 nosclient 从芯片 flash 中提取 Weaver 键值，并通过逆向 Weaver 任务以试错方式确定地址。FBE 博文同时复用社区工具 MTKClient（Bjoern Kerler）、Magisk（改造为无头运行与文件覆盖挂载）、Frida。",
+        "status": "documented",
+        "growth_signal": "工具建设与公开化作为社区参与方式：自建工具（nosclient）开源供后续研究复用，同时消费他人开源工具（MTKClient/Magisk/Frida），形成工具层面的双向反馈。FBE 研究显式建立在团队既有 Titan M 与 MediaTek 工作之上，体现主题累积而非孤立项目。",
+        "short_quote": "Weaver keys/values were extracted from the chip's flash memory using their nosclient tool, with trial-and-error address discovery aided by reverse engineering the Weaver task",
+        "source": {
+          "title": "Android Data Encryption in depth",
+          "url": "https://blog.quarkslab.com/android-data-encryption-in-depth.html",
+          "published": "2023-08-14",
+          "source_type": "一手 writeup（公司研究博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_gqsqon4hn62q5xx71gslz0ux",
+          "accessed_at": "2026-09-28T00:15:45.626349+00:00",
+          "content_sha256": "b53b6060433b2fb88ba26b92fdfd51ce6408aafb7df6689fe3d2fe4c689d1c90"
+        }
+      },
+      {
+        "id": "mrb-community-04-fbe-conference-and-prior-work-2023",
+        "date": "2023-08-14",
+        "claim": "Maxime Rossi Bellom 与 Damiano Melotti 在 REcon 2023 发表 Android FBE 加密分析，slides 发布于 Quarkslab GitHub。研究显式建立在团队先前工作之上：Gatekeeper 路径基于 MediaTek SoCs（Samsung A22 设备）延续 2020 年 MediaTek 研究方向；Weaver 路径直接复用 CVE-2022-20233 与 nosclient。博文致谢 Quarkslab 同事校对，并致谢 OffensiveCon 许可使用演讲图。",
+        "status": "documented",
+        "growth_signal": "会议公开发表（REcon 2023）+ 同行校对 + 跨会议素材复用（OffensiveCon 演讲图）共同构成反馈回路：写作经同事审稿，演讲素材跨会议流转，研究主题沿设备族（Samsung A 系列）与芯片族（MediaTek/Titan M）纵向累积。",
+        "short_quote": "The authors thank \"colleagues at Quarkslab for proofreading\" and OffensiveCon for permitting use of a presentation image",
+        "source": {
+          "title": "Android Data Encryption in depth",
+          "url": "https://blog.quarkslab.com/android-data-encryption-in-depth.html",
+          "published": "2023-08-14",
+          "source_type": "一手 writeup（公司研究博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_gqsqon4hn62q5xx71gslz0ux",
+          "accessed_at": "2026-09-28T00:15:45.626349+00:00",
+          "content_sha256": "b53b6060433b2fb88ba26b92fdfd51ce6408aafb7df6689fe3d2fe4c689d1c90"
+        }
+      },
+      {
+        "id": "mrb-community-05-collaborator-network-2024",
+        "date": "2024-10-15",
+        "claim": "Samsung Galaxy A* 启动链研究由 Maxime Rossi Bellom 与 Raphaël Neveu 合著，文末致谢 Damiano Melotti、Gabrielle Viala 及审稿同事。四枚漏洞（CVE-2024-20832/20865/20820/20021）链式利用实现 bootloader 代码执行、Android 持久 root 与 Secure World 内存外泄。研究在 Black Hat USA 2024 发表，SSTIC 2024 发布白皮书，PoC 发布于 GitHub。作者援引先前对同设备 FBE 的研究作为熟悉启动流程的基础。",
+        "status": "documented",
+        "growth_signal": "协作网络扩展：合著者由 Damiano Melotti 扩展至 Raphaël Neveu，致谢名单新增 Gabrielle Viala。主题延续性进一步显现——2023 年 FBE 研究的设备熟悉度直接成为 2024 年启动链研究的起点。多会议（Black Hat USA 2024 + SSTIC 2024）+ GitHub PoC 公开化构成持续输出习惯。",
+        "short_quote": "The authors reference their previous research into Android's File-Based Encryption scheme on the same device, which gave them familiarity with the boot process",
+        "source": {
+          "title": "Attacking the Samsung Galaxy A* Boot Chain",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+          "published": "2024-10-15",
+          "source_type": "一手 writeup（公司研究博客）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_j8ogohbn6eujnknxwf0u4xq1",
+          "accessed_at": "2026-09-28T00:15:45.626327+00:00",
+          "content_sha256": "964083bf6956b9cb6f024656e211b734ad9b58d6ae72aad511268d1ccc908599"
+        }
+      },
+      {
+        "id": "mrb-community-06-social-lead-only",
+        "date": "unknown",
+        "claim": "person_json 记录其社交账号为 https://x.com/max_r_b 。本次 WebFetch 返回 HTTP 402 Payment Required，未能抓取正文，无法核实该账号是否发布过社区互动、漏洞披露动态或同行交流内容。",
+        "status": "unknown",
+        "growth_signal": "社交媒体一手来源不可达，无法据以评估其即时社区互动频率与公开反馈方式；仅作为待核实的 lead。",
+        "source": {
+          "title": "person_json.json 记录的社交账号 (x.com/max_r_b)",
+          "url": "https://x.com/max_r_b",
+          "published": "unknown",
+          "source_type": "待核实的社交媒体入口（抓取失败）",
+          "level": "lead_only"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_fkxbavp4t6k9iw5l27minoyv",
+          "accessed_at": "2026-09-28T00:15:45.626309+00:00",
+          "content_sha256": "8ced59a07c6da6e7c0c0269f5d6b660bb374bf9f396f7c48c4ea1b37bdbb0191"
+        }
+      }
+    ],
+    "contradictions": [
+      "WebSearch 对 \"Maxime Rossi Bellom security researcher blog writeup\" 返回的模型生成摘要称其研究 Windows 内核、浏览器利用（IE/Edge）、DEP/ASLR/CFG 绕过与 fuzzing 方法论，并提及 handle @maboroshinutria。该摘要与 Quarkslab 博客一手抓取内容（Android/MediaTek/Titan M/Samsung 启动链）不一致，且未给出可抓取 URL，判定为搜索引擎模型幻觉而非可引用来源，不纳入证据。"
+    ],
+    "gaps": [
+      "社交媒体 x.com/max_r_b 抓取失败（HTTP 402），无法评估其在 Twitter/X 上的社区互动、披露动态或同行交流频率。",
+      "OffByOne 2024（person_json 在 selected_conference_evidence 中列出）未能通过 WebSearch 获得可抓取的独立会议页面，无法以一手来源确认其演讲事实。",
+      "SSTIC 2024 白皮书目录页（https://www.sstic.org/2024/presentations/）返回 HTTP 404，仅依据 Quarkslab 博客正文转述确认存在 SSTIC 2024 发表，未独立核验。",
+      "2020 年 MediaTek 研究之前的成长背景（导师、入行途径、早期训练）在四篇博文中均无一手陈述，无法据以评估社区参与对该阶段能力的影响。",
+      "Quarkslab 内部同行校对的具体人选与反馈内容（除 Titan M 一文提及 Philippe Teuwen 参与、Samsung 一文列出 Damiano Melotti 与 Gabrielle Viala 致谢外）未公开，校对对最终结论的具体影响不可考。",
+      "Samsung A* 启动链研究的厂商协调时间线与 Google/Samsung 交互细节在博文中未披露，无法据以评估该项目的反馈回路完整度。"
+    ]
+  },
+  "external": {
+    "person": "Maxime Rossi Bellom",
+    "dimension": "外部视角",
+    "identity_check": "同名消歧已处理：person_json 指明研究对象为 Maxime Rossi Bellom，主攻 Android/启动链/安全芯片漏洞，关联 Quarkslab 与 X 账号 @max_r_b。本次抓取的 Quarkslab 博客作者页署名与 writeup 正文署名均一致为 Maxime Rossi Bellom，主题（Android、Titan M、Samsung 启动链、MediaTek）与 person_json 记录吻合，无同名歧义证据。X 账号与 OffByOne 2024 因未抓取成功，未能独立核实但与既存记录无冲突。",
+    "items": [
+      {
+        "id": "mrb-ext-01",
+        "date": "2020-03-24",
+        "claim": "Maxime Rossi Bellom 以单一署名发布 MediaTek CVE-2020-0069 分析，明确声明自己并非漏洞发现者，研究动机为公开信息稀缺后自行逆向。该工作产出 C 语言物理内存读写 PoC、用于替换内核字符串的 shell 脚本及一个 IOCTL tracing 库，并在 Quarkslab GitHub 发布。致谢仅提及同事校对。",
+        "status": "documented",
+        "growth_signal": "外部视角下早期表现为单一署名、独立逆向与工具建设。研究者明确区分『发现』与『理解既有漏洞』，并通过公开 PoC 与工具库建立可复用资产；致谢范围窄，尚无固定合作者或导师公开记录。",
+        "source": {
+          "title": "CVE-2020-0069: Autopsy of the Most Stable MediaTek Rootkit",
+          "url": "https://blog.quarkslab.com/cve-2020-0069-autopsy-of-the-most-stable-mediatek-rootkit.html",
+          "published": "2020-03-24",
+          "source_type": "first-party writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_4ag53k46gbul0glupip8jmze",
+          "accessed_at": "2026-09-28T00:17:42.881792+00:00",
+          "content_sha256": "54eea926c242b36964fb45d75544ddfe9fdc003981f95aa0653d49a0c52a6372"
+        }
+      },
+      {
+        "id": "mrb-ext-02",
+        "date": "2022-08-11",
+        "claim": "Maxime Rossi Bellom 与 Damiano Melotti、Philippe Teuwen 联合发布 Titan M 研究并发现 CVE-2022-20233，研究历时约 18 个月，使用自建 nosclient、libprotobuf-mutator、Radamsa、Unicorn + AFL++ 工具链，最终构造单字节写原语与 ROP 链以泄露 StrongBox 密钥。",
+        "status": "documented",
+        "growth_signal": "外部视角下表现为从单干转向多人协作，研究周期显著延长（约 18 个月），并伴随一套持续迭代的工具生态（nosclient 跨多篇文章复用）。重复练习与工具建设可由作品序列核验，而非以天赋描述。",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "first-party writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ge05271euinia2i2fthmi6rc",
+          "accessed_at": "2026-09-28T00:17:42.881719+00:00",
+          "content_sha256": "eda50ffa0ad6de4bc8c95b9f49b85c8c7fcee4e50596ec268f210bc6e368352d"
+        }
+      },
+      {
+        "id": "mrb-ext-03",
+        "date": "2022-03-02",
+        "claim": "研究团队于 2022-03-02 向 Google 报告漏洞；Google 初期无法复现并将赏金定为 10000 美元，在 Quarkslab 提交更进阶的密钥泄露 exploit 后提升至 75000 美元并评定 Critical 严重等级。此为研究者关于奖励变动与报告交互的一手自述。",
+        "status": "documented",
+        "growth_signal": "外部视角下的反馈机制可核验：Google 起初无法复现构成一次负反馈，团队以更完整的 exploit 重新提交并获得赏金上调，说明研究者在漏洞报告与 PoC 说服力上的迭代能力，而非一次定论。该奖励金额的独立二次确认缺失，记为缺口。",
+        "short_quote": "the reward was first set at $10,000. After Quarkslab submitted a more advanced exploit demonstrating key exfiltration, Google increased the reward to $75,000.",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "first-party writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ge05271euinia2i2fthmi6rc",
+          "accessed_at": "2026-09-28T00:17:42.881719+00:00",
+          "content_sha256": "eda50ffa0ad6de4bc8c95b9f49b85c8c7fcee4e50596ec268f210bc6e368352d"
+        }
+      },
+      {
+        "id": "mrb-ext-04",
+        "date": "2022-06-01",
+        "claim": "Android 安全公告（2022 年 6 月）在 Pixel 条目下收录 CVE-2022-20233，组件标记 Titan-M，类型 EoP，严重等级 Critical。此为 Google 官方对漏洞的评定，与 writeup 中的组件归属与严重等级一致。",
+        "status": "documented",
+        "growth_signal": "外部权威来源（Android Security Bulletin）对漏洞组件与严重等级的评定与研究者 writeup 自述一致，构成对作品的交叉验证；但该公告评定的是漏洞而非研究者本人，不可直接作为对个人能力的评价。",
+        "source": {
+          "title": "Pixel Update Bulletin—June 2022 (CVE-2022-20233, Titan-M, Critical, EoP)",
+          "url": "https://source.android.com/docs/security/bulletin/pixel/2022-06-01",
+          "published": "2022-06-01",
+          "source_type": "vendor security bulletin",
+          "level": "authoritative_secondary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_w2kwi5jqm70mpe84m0vbml90",
+          "accessed_at": "2026-09-28T00:17:42.881788+00:00",
+          "content_sha256": "72df99514c9ad007fad9f00f867edc2ae262ba464069bbd830321ef0633d938e"
+        }
+      },
+      {
+        "id": "mrb-ext-05",
+        "date": "2023-08-14",
+        "claim": "Maxime Rossi Bellom 与 Damiano Melotti 发布 Android FBE 数据加密分析，明确复用 2022 年 Titan M 工作（CVE-2022-20233 任意读原语、nosclient）以提取 Weaver 密钥，并构建 patched Magisk、patched Gatekeeper TA、bruteforce 脚本与 Frida hooks 多项工具。",
+        "status": "documented",
+        "growth_signal": "外部视角下表现为同一工具链（nosclient、CVE-2022-20233 原语）与同一合作者（Damiano Melotti）跨作品复用，体现积累式而非项目式的研究路径，与团队稳定协作的趋势可核验。",
+        "source": {
+          "title": "Android Data Encryption in depth",
+          "url": "https://blog.quarkslab.com/android-data-encryption-in-depth.html",
+          "published": "2023-08-14",
+          "source_type": "first-party writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ju6zv0ofnsstm0ewx5n17y3j",
+          "accessed_at": "2026-09-28T00:17:42.881801+00:00",
+          "content_sha256": "5550f0f476d5d60297dd7705ceb553ea7c0f4dfb54913290a8b9c530faa284d5"
+        }
+      },
+      {
+        "id": "mrb-ext-06",
+        "date": "2024-10-15",
+        "claim": "Maxime Rossi Bellom 与 Raphaël Neveu 联合发布 Samsung Galaxy A225F 启动链攻击研究，发现并串联 CVE-2024-20832（Little Kernel JPEG 解析堆溢出）、CVE-2024-20865（Odin 鉴权绕过）、CVE-2024-20820（SMC handler 越界读）、CVE-2024-20021（任意物理内存映射），致谢 Damiano Melotti、Gabrielle Viala 的贡献与同事校对。",
+        "status": "documented",
+        "growth_signal": "外部视角下合作者网络从 Damiano Melotti 扩展到 Raphaël Neveu，并出现受致谢的贡献者 Damiano Melotti、Gabrielle Viala，显示协作圈扩大；同一团队承接从启动链到安全芯片的连续主题。",
+        "source": {
+          "title": "Attacking the Samsung Galaxy A* Boot Chain",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+          "published": "2024-10-15",
+          "source_type": "first-party writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_sfso38h5brmeqxreoqqctnue",
+          "accessed_at": "2026-09-28T00:17:42.881713+00:00",
+          "content_sha256": "b88c9143edcedf86c8e4b5e03f86effa471a014dc63e807092dc121d94eb1f86"
+        }
+      },
+      {
+        "id": "mrb-ext-07",
+        "date": "2024",
+        "claim": "Titan M writeup 自述该项研究曾在 Black Hat USA 与 TROOPERS 展示；Samsung 启动链 writeup 自述在 BlackHat USA 2024 展示并发布 GitHub PoC。person_json 另列 OffByOne 2024 与 Black Hat US/EU 为其代表性会议。",
+        "status": "reported",
+        "growth_signal": "会议展示作为公开发表习惯的一手自述，符合公开发表倾向；但因 Black Hat US 2024 议程页（HTTP 403）、OffensiveCon 2024 演讲者页（HTTP 404）、TROOPERS24 议程（首页未含议程）均抓取失败，会议事实未能用会议官方页面独立核验，故定为 reported 而非 documented。",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte / Attacking the Samsung Galaxy A* Boot Chain（自述会议展示）",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "first-party writeup（自述会议展示）",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ge05271euinia2i2fthmi6rc",
+          "accessed_at": "2026-09-28T00:17:42.881719+00:00",
+          "content_sha256": "eda50ffa0ad6de4bc8c95b9f49b85c8c7fcee4e50596ec268f210bc6e368352d"
+        }
+      }
+    ],
+    "contradictions": [
+      "无互相冲突的材料记录：抓取到的所有 writeup 在作者署名、合作者、CVE 编号与组件归属上彼此一致，并与 Android 安全公告的组件与严重等级一致。"
+    ],
+    "gaps": [
+      "外部视角维度要求第三方对研究者本人的具体评价，但实际仅取得一手 writeup 的合作者/致谢与厂商对漏洞的评定；缺独立的第三方对 Maxime Rossi Bellom 本人能力的定性评价。",
+      "Black Hat US 2024 议程页 HTTP 403、OffensiveCon 2024 演讲者页 HTTP 404、TROOPERS24 议程首页无内容，会议展示事实仅有 writeup 自述，未能用会议官方页面升级为独立 documented。",
+      "person_json 提及的 OffByOne 2024 与 X 账号 @max_r_b 未抓取验证。",
+      "75000 美元赏金仅由一手 writeup 记载，无 Google 官方或独立媒体的二次确认。",
+      "WebSearch 两次调用返回模型生成内容而非真实搜索结果，未作为来源；本次因工具调用次数已达上限，未再对会议页面做替代抓取。",
+      "研究者有无导师、长期固定团队、正式雇佣关系等组织层面的外部评价未能取得，仅能由合作者署名序列间接推断（inferred）。"
+    ]
+  },
+  "decisions": {
+    "person": "Maxime Rossi Bellom",
+    "dimension": "关键决策与转折",
+    "identity_check": "身份以 Quarkslab 官方作者索引页 blog.quarkslab.com/author/maxime-rossi-bellom.html 为准：4 篇 Android 主题 writeup 标题、日期、合作者（Raphaël Neveu、Damiano Melotti、Philippe Teuwen）与人物档案中 primary_focus='Android/启动链/安全芯片漏洞'、qualification='移动平台漏洞发现与利用' 一致。SSTIC 2024 议程页确认同名作者 Maxime Rossi Bellom（注：官方议程与 Quarkslab 页面用 'Bellom'，人物档案写作 'Bellom'，未见 'Bellon' 等异写）。社交账号 x.com/max_r_b 因 402 不可抓取，未作为来源。",
+    "items": [
+      {
+        "id": "mrb-dec-01-mediatek-autopsy-2020",
+        "date": "2020-03-24",
+        "claim": "Maxime Rossi Bellom 以单一署名在 Quarkslab blog 发布 CVE-2020-0069（MediaTek CMDQ 路径 rootkit）的事后分析。该研究明确声明非原始发现者（'As we are not the ones who discovered this vulnerability, we did not talk with MediaTek about this issue'），而是基于已流通的 mtk-su 利用与 Xiaomi Redmi 6a 开源内核的独立 autopsy：逆向 CMDQ 驱动 IOCTL 与 DMA 命令格式，构建任意内存读写 PoC，并编写可被 mtk-su 预加载以拦截/记录 CMDQ IOCTL 的 tracing 库。这是目前可核验的最早公开 work，呈现以源码审查 + 自建工具 + 利用复现为主的研究习惯，而非以原始漏洞发现起家。",
+        "status": "documented",
+        "growth_signal": "职业早期选择以事后分析/利用复现切入移动平台安全，而非直接竞逐 0day 发现：建立源码驱动（drivers/misc/mediatek/cmdq）+ 工具建设（tracing 库）+ 修复生态批评的研究范式，成为后续 Titan M/Samsung 研究的方法学起点。明确区分'研究'与'披露责任'的边界（不联系厂商）显示其早期即形成对披露流程的克制态度。",
+        "short_quote": "As we are not the ones who discovered this vulnerability, we did not talk with MediaTek about this issue.",
+        "source": {
+          "title": "CVE-2020-0069: Autopsy of the Most Stable MediaTek Rootkit",
+          "url": "https://blog.quarkslab.com/cve-2020-0069-autopsy-of-the-most-stable-mediatek-rootkit.html",
+          "published": "2020-03-24",
+          "source_type": "research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_w4w4t4xi07novnp4ps4pcudj",
+          "accessed_at": "2026-09-28T00:12:21.213223+00:00",
+          "content_sha256": "f1121e21500c3da2951e20080d9fbc2de739d2d4f2ecd3f0e095d94e87a036f2"
+        }
+      },
+      {
+        "id": "mrb-dec-02-titanm-reverse-2021",
+        "date": "2021-11",
+        "claim": "约 2021 年中起，Maxime Rossi Bellom 与 Damiano Melotti、Philippe Teuwen 启动 Google Pixel Titan M 安全芯片研究。第一阶段为固件逆向，并自建 nosclient 工具向芯片发送任意命令，成果于 Black Hat EU 2021 以 whitepaper 形式发表（'all the background knowledge we acquired in the first part of this research'）。选择 Titan M 的动机明确为它是 'the most secure component of Google's Pixel phones and the anchor to which all the security of the device is ultimately linked'，即以攻击信任链锚点为目标，而非边角组件。研究跨度约 18 个月，至 2022-08 发表利用。",
+        "status": "documented",
+        "growth_signal": "从 MediaTek 事后分析转向对单一高价值目标的长期原始研究：组建三人小队、投入约 18 个月、先发表背景 whitepaper 再追求利用，显示以信任链根为目标的长期投入策略，以及'先建工具（nosclient）再找漏洞'的研究顺序。Black Hat EU 2021 是其首个可核验的国际会议发表。",
+        "short_quote": "the most secure component of Google's Pixel phones and the anchor to which all the security of the device is ultimately linked",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ipc2ftxs05ui8rwxuznwc67y",
+          "accessed_at": "2026-09-28T00:12:21.213214+00:00",
+          "content_sha256": "d19c3775f2abef8c93cae3483bec11f8ee39c451b332a6a07d0c2c9b3d5b9195"
+        }
+      },
+      {
+        "id": "mrb-dec-03-method-pivot-fuzzing-2022",
+        "date": "2022",
+        "claim": "在 Titan M 研究中，团队先使用基于 libprotobuf-mutator 与 Radamsa 的 black-box fuzzing（经 nosclient 在已 root 设备上），仅复现已知问题并发现两个 NPE 崩溃（被认为不够严重）。随后判断 'black-box fuzzing tends to only exercise the targets' shallow states'，转向基于 Unicorn（QEMU CPU 仿真）+ AFL++ unicorn mode 的仿真 fuzzing，对 Keymaster/Identity/Weaver 三个任务建模，理由是固件公开可取：'given that the firmware is publicly available, why not try to emulate its execution on our laptop?'。漏洞即在 fuzzing Keymaster 任务时由 UC_ERR_WRITE_UNMAPPED 崩溃发现。这一转向直接导致 CVE-2022-20233 的发现。",
+        "status": "documented",
+        "growth_signal": "可核验的方法转型：以明确技术判断（黑盒仅覆盖浅层状态）为由放弃黑盒 fuzzing，转向仿真 fuzzing，并辅以对 RE 成本与 fuzzing 自由运行成本的权衡论述（'there is always a trade-off between the time spent reverse engineering... and the time you actually let the fuzzer run freely'）。显示其以技术约束为依据的方法选择，而非试错运气；漏洞发现直接由该转型促成。",
+        "short_quote": "given that the firmware is publicly available, why not try to emulate its execution on our laptop?",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ipc2ftxs05ui8rwxuznwc67y",
+          "accessed_at": "2026-09-28T00:12:21.213214+00:00",
+          "content_sha256": "d19c3775f2abef8c93cae3483bec11f8ee39c451b332a6a07d0c2c9b3d5b9195"
+        }
+      },
+      {
+        "id": "mrb-dec-04-titanm-disclosure-reward-2022",
+        "date": "2022-03-02",
+        "claim": "2022-03-02 经 Google Issue Tracker（issue 222318108）报告 CVE-2022-20233，随后与 Google AST 多轮往复：03-08 Google 要求更明显的复现，03-10 Quarkslab 表示无 Titan M 调试工具，03-15 提交可写任意单字节的增强版 nosclient，03-16 Google 称未见越界写但仍上报工程团队。03-20 Quarkslab 在 Pixel 3 上演示完整代码执行（重定向至 task_print_list）。05-27 Google 分配 CVE-2022-20233，06-05 发布 6 月安全更新修复，06-07 初次奖励 $10,000；Quarkslab 以 'the top possible reward for a code execution bug in Titan M is 1 million USD' 质疑金额，06-20 提交带视频的更完整密钥外泄利用，07-18 奖励升至 $75,000。期间 04-27 告知 Google 已被 TROOPERS 接收，05-04 标注 TROOPERS 与待定的 Black Hat US 提交。",
+        "status": "documented",
+        "growth_signal": "披露与谈判能力：在缺乏硬件调试手段时仍以源码定位描述说服厂商、用可观测副作用（UART 日志、task_print_list）作为证据、以递进式 PoC（单字节写→完整代码执行→密钥外泄视频）推进定性；并以厂商自身上限赏金条款（100 万美元）作为奖励谈判依据。会议发表（TROOPERS 2022-06-30、Black Hat US 2022-08-11）被用作披露时间线的协调约束，而非独立动机。",
+        "short_quote": "the top possible reward for a code execution bug in Titan M is 1 million USD",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ipc2ftxs05ui8rwxuznwc67y",
+          "accessed_at": "2026-09-28T00:12:21.213214+00:00",
+          "content_sha256": "d19c3775f2abef8c93cae3483bec11f8ee39c451b332a6a07d0c2c9b3d5b9195"
+        }
+      },
+      {
+        "id": "mrb-dec-05-android-encryption-extension-2023",
+        "date": "2023-08-14",
+        "claim": "2023 年 Maxime Rossi Bellom 与 Damiano Melotti 发表 Android 数据加密研究（REcon'23），研究动因是一次外部咨询：一台主 SoC 已损坏但 Titan M 仍工作的设备能否恢复数据（结论否定）。由此转向系统问题：拥有广泛软件漏洞的攻击者能否击穿 Android 数据加密。研究直接复用前期 Titan M 任意读原语提取 Weaver 密钥，并首次引入 MediaTek 方向：用第三方工具 MTKClient 绕过 MediaTek SoC 安全启动（被评 'very easy to use and working almost out of the box'），并选择 MediaTek 版三星 Galaxy A22 作为 Gatekeeper 路径目标。改造 Magisk 使其可从笔记本直接使用并禁用交互授权提示，作为 PoC 基础设施。",
+        "status": "documented",
+        "growth_signal": "研究主线扩展的关键转折：从单一芯片（Titan M）研究扩至完整加密栈，并首次把三星 + MediaTek 组合纳入靶机选型。外部咨询作为研究触发点，说明其选题兼受现实问题驱动而非纯自上而下规划。复用自有原语（Titan M 任意读）+ 引入第三方工具（MTKClient）+ 自建基础设施（改造 Magisk）的组合研究模式在此定型，并为 2024 年 Samsung 启动链研究铺路。",
+        "short_quote": "we decided to patch the comparison between the two values to make sure any credentials are accepted",
+        "source": {
+          "title": "Android Data Encryption in depth",
+          "url": "https://blog.quarkslab.com/android-data-encryption-in-depth.html",
+          "published": "2023-08-14",
+          "source_type": "research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_mvzsa6qbefktdiiapk9llb0j",
+          "accessed_at": "2026-09-28T00:12:21.213232+00:00",
+          "content_sha256": "f7b5c36a6d72fd4b46d3822dc63ea5336be1882175226a21fab9a8ae3e7654c2"
+        }
+      },
+      {
+        "id": "mrb-dec-06-samsung-bootchain-sstic-2024",
+        "date": "2024-06-06",
+        "claim": "2024-06-06，Maxime Rossi Bellom 与 Raphaël Neveu 在 SSTIC 2024 发表演讲 'When Samsung meets Mediatek: the story of a small bug chain'（日程 30 分钟）。该演讲对应 Samsung Galaxy A225F 启动链研究（CVE-2024-20832/20865/20820/20021，Quarkslab blog 于 2024-10-15 发布）。研究延续 2023 年加密工作对三星 A 系列 boot 流程的认知，目标为构建从 USB 到 Secure World 秘密的完整链：Little Kernel 自定义 JPEG 解析器堆溢出（CVE-2024-20832）+ Odin 鉴权绕过（CVE-2024-20865）取得 LK 代码执行并绕过 Android 启动镜像校验，再经 SMC handler 越界读（CVE-2024-20820）与任意物理地址映射（CVE-2024-20021）泄露 Secure World 内存含 Keystore 密钥。SVE 编号显示三星 2023 年即被通报。",
+        "status": "documented",
+        "growth_signal": "合作者结构变化：长期合作者 Damiano Melotti（2022-2023）转为致谢，Raphaël Neveu 成为 2024 新合作者；研究单元由单芯片扩展为跨组件 bug 链（bootloader→kernel→secure monitor）。议题命题 'the story of a small bug chain' 反映其将多漏洞组合叙事化的发表习惯。SSTIC（法国本土会议）作为首发、Black Hat US 2024 作为国际扩散的双轨发表模式可核验。",
+        "source": {
+          "title": "SSTIC 2024 — Programme : When Samsung meets Mediatek: the story of a small bug chain",
+          "url": "https://www.sstic.org/2024/programme/",
+          "published": "2024-06-06",
+          "source_type": "conference_program",
+          "level": "first_hand_other"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_lsei1nsbowv68cmencseejvi",
+          "accessed_at": "2026-09-28T00:12:21.213241+00:00",
+          "content_sha256": "216d55eac0634afa31a936d1b6592975ae1f85ca82fca0e209ca51f9ad969fc8"
+        }
+      },
+      {
+        "id": "mrb-dec-07-samsung-bootchain-writeup-2024",
+        "date": "2024-10-15",
+        "claim": "Quarkslab blog 发布 Samsung Galaxy A* Boot Chain 完整 writeup，作者 Maxime Rossi Bellom 与 Raphaël Neveu，致谢 Damiano Melotti 与 Gabrielle Viala。文中明确该研究承接此前 Android 加密工作（'we had gathered a good knowledge over its boot process during our previous research'），故选择三星 A225F 中端机为目标；并指出影响范围扩展至多数基于 MediaTek SoC 的三星设备及 Galaxy A 系列其它机型。四个漏洞均发布 PoC 于 GitHub。研究呈现明显的连续性：2022 Titan M 任意读原语 → 2023 加密栈 + MediaTek/三星组合 → 2024 启动链完整链。",
+        "status": "documented",
+        "growth_signal": "研究连续性的可核验证据链：以'前序研究积累的 boot 流程认知'作为目标选型理由，显示选题由既有能力沉淀驱动而非随机选题。影响范围外推（多数 MediaTek 三星机型）显示其成果转化与生态评估习惯。PoC 公开发布为持续的工具/利用公开化实践。",
+        "short_quote": "we had gathered a good knowledge over its boot process during our previous research",
+        "source": {
+          "title": "Attacking the Samsung Galaxy A* Boot Chain",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+          "published": "2024-10-15",
+          "source_type": "research_writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_96aj2z0rttgwcu0velqxs1ln",
+          "accessed_at": "2026-09-28T00:12:21.213200+00:00",
+          "content_sha256": "118df91d870028d45d9ff6933b82c38aa83d3c121d7a6bfc438450c3ad8fee4e"
+        }
+      }
+    ],
+    "contradictions": [
+      "无直接互相冲突的材料。一处需注意区分：2020-03 MediaTek writeup 中作者明确声明非原始发现者（事后 autopsy）；而 2022/2023/2024 的 Titan M 与 Samsung 工作为原始研究并经厂商披露流程。若将 2020 writeup 误读为原始 0day 发现会与文中陈述矛盾，故按原文定性为 autopsy/利用复现。"
+    ],
+    "gaps": [
+      "Black Hat USA 2024 议程页 blackhat.com/us-24/briefings/schedule/ 返回 403，无法抓取；Samsung 启动链研究在 Black Hat US 2024 的发表目前仅由 Quarkslab blog 转述（reported），无独立一手议程页证据。同样，Black Hat EU 2021（Titan M 先导）与 REcon'23 议程页未抓取，相关会议发表仅由 blog 转述。",
+      "社交账号 x.com/max_r_b 返回 402 不可抓取；任务档案中将其列为 social 但无法核验其内容，未作为来源。",
+      "无公开一手材料说明 Maxime Rossi Bellom 加入 Quarkslab 的时间、教育背景或转入移动安全领域前的经历；2020 之前的研究轨迹不可核验。",
+      "2024 年合作者由 Damiano Melotti 转为 Raphaël Neveu 的具体原因（项目分配、人员变动或研究需要）无公开材料说明，仅能由署名变化推断。",
+      "任务档案提到的 OffByOne 2024 参会证据未能核验：搜索未返回该会议议程，且工具调用预算已用尽；该项暂记为缺口。"
+    ]
+  },
+  "timeline": {
+    "person": "Maxime Rossi Bellom",
+    "dimension": "可核验时间线",
+    "identity_check": "所列 writeup 与会议记录中的「Maxime Rossi Bellom」一致，均指向 Quarkslab 移动平台安全研究员，研究主题（Android、启动链、Titan M、MediaTek、TrustZone/Secure World）与 person_json 的 primary_focus 一致。Quarkslab 作者页抓取成功并列出 4 篇 writeup，标题、日期与合作者在各自 writeup 正文中得到交叉确认。person_json 提供的 X handle @max_r_b 与 blog.quarkslab.com 作者页均指向同一人，未见同名歧义。X 账号内容未抓取验证，仅作 lead。唯一标注与正文不一致的是 person_json 中的「OffByOne 2024」会议，未在抓取到的 writeup 正文中出现，亦未独立抓取到 OffByOne 议程，记为 gap。",
+    "items": [
+      {
+        "id": "mrb-tl-01",
+        "date": "2020-03-24",
+        "claim": "Maxime Rossi Bellom 以独立作者身份在 Quarkslab 博客发布「CVE-2020-0069: Autopsy of the Most Stable MediaTek Rootkit」，分析 MediaTek 多款 SoC 的漏洞（CVE-2020-0069），测试设备为 Xiaomi Redmi 6a（MediaTek MT6762M SoC）。文末注明该漏洞 MediaTek 自 2019 年 4 月已知，随后被在野利用，至 2020 年 3 月修复。这是抓取到的最早公开 writeup。",
+        "status": "documented",
+        "growth_signal": "以独立作者完成首个公开 writeup，研究对象为已在野利用的 rootkit 与底层的 SoC 漏洞，反映从已有攻击素材出发反向还原攻击链的研究路径；writeup 本身即公开发表习惯的早期体现。",
+        "short_quote": "Posted Tue 24 March 2020",
+        "source": {
+          "title": "CVE-2020-0069: Autopsy of the Most Stable MediaTek Rootkit",
+          "url": "https://blog.quarkslab.com/cve-2020-0069-autopsy-of-the-most-stable-mediatek-rootkit.html",
+          "published": "2020-03-24",
+          "source_type": "vendor/research-team blog writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_p430inqx07i2g56zeu4qwjjf",
+          "accessed_at": "2026-09-28T00:15:15.524803+00:00",
+          "content_sha256": "65bddf66d00a003205695bbf87a4f6e133a1ecc523c9766dddbca3ec8e130d8d"
+        }
+      },
+      {
+        "id": "mrb-tl-02",
+        "date": "2021-12",
+        "claim": "据作者后续 writeup 正文转述，Quarkslab 团队（含 Damiano Melotti、Maxime Rossi Bellom、Philippe Teuwen）在 Black Hat EU 2021 公布了针对 Google Titan M 安全芯片的研究。Black Hat EU 2021 通常于 2021 年 11 月或 12 月举办；本节点未能独立抓取该届 Black Hat 议程页面，故月份未确认、仅年份可推断。",
+        "status": "reported",
+        "growth_signal": "研究主题从 MediaTek SoC rootkit 转向 Google Titan M 安全芯片，研究目标扩展到独立安全芯片；以团队形式（3 名研究者）登台 Black Hat，标志进入会议公开发表阶段。",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte (转述其中的 Black Hat EU 2021 段落)",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "research-team blog writeup 转述既往演讲",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ch4ani9qgs6feq6h10v5q35d",
+          "accessed_at": "2026-09-28T00:15:15.524793+00:00",
+          "content_sha256": "0d87c35a0e74e48896c1551bd5f2811d30841400c3192f12cbbaa8a72318aada"
+        }
+      },
+      {
+        "id": "mrb-tl-03",
+        "date": "2022-06-30",
+        "claim": "TROOPERS22 议程抓取确认：Maxime Rossi Bellom 与 Damiano Melotti 在 TROOPERS22 Day2 周四 14:30 主讲「Attack on Titan M: Vulnerability Research on a Modern Security Chip」，归入 Automotive & Embedded 议题轨。",
+        "status": "documented",
+        "growth_signal": "同一 Titan M 研究在另一国际会议（TROOPERS）复讲，符合重复打磨与多渠道公开发表的发表习惯；议题被划入嵌入式轨，说明研究被定位在硬件/嵌入式安全领域。",
+        "short_quote": "Attack on Titan M: Vulnerability Research on a Modern Security Chip",
+        "source": {
+          "title": "TROOPERS22 Agenda — Attack on Titan M: Vulnerability Research on a Modern Security Chip",
+          "url": "https://www.troopers.de/troopers22/agenda/",
+          "published": "2022-06-30",
+          "source_type": "conference speaker/agenda page",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_2co2rrm7zhacyudzezutcnoe",
+          "accessed_at": "2026-09-28T00:15:15.524812+00:00",
+          "content_sha256": "e7be5a92963c40896809403b3c1a25c7e9609f94aefb3070e2a17e9bfe97c1f2"
+        }
+      },
+      {
+        "id": "mrb-tl-04",
+        "date": "2022-08-11",
+        "claim": "Maxime Rossi Bellom 与 Damiano Melotti 在 Quarkslab 博客发布「Attacking Titan M with Only One Byte」，披露 CVE-2022-20233（Google Titan M，受影响固件由 Pixel 2022 年 5 月安全更新引入）。同日据文末转述在 Black Hat USA 2022（Las Vegas）公布。Google 初始评级 Critical、悬赏由 10,000 USD 提升至 75,000 USD。",
+        "status": "documented",
+        "growth_signal": "完成单字节漏洞的发现与利用，Google 悬赏因 Quarkslab 提交更高级利用（密钥泄露）而上调，反映利用能力深入度与外部反馈（厂商赏金评审）驱动研究深化的机制；将一个漏洞同时以 writeup 与 Black Hat 演讲发表。",
+        "short_quote": "Posted Thu 11 August 2022",
+        "source": {
+          "title": "Attacking Titan M with Only One Byte",
+          "url": "https://blog.quarkslab.com/attacking-titan-m-with-only-one-byte.html",
+          "published": "2022-08-11",
+          "source_type": "research-team blog writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_ch4ani9qgs6feq6h10v5q35d",
+          "accessed_at": "2026-09-28T00:15:15.524793+00:00",
+          "content_sha256": "0d87c35a0e74e48896c1551bd5f2811d30841400c3192f12cbbaa8a72318aada"
+        }
+      },
+      {
+        "id": "mrb-tl-05",
+        "date": "2023-08-14",
+        "claim": "Maxime Rossi Bellom 与 Damiano Melotti 在 Quarkslab 博客发布「Android Data Encryption in depth」，系统分析 Android File-Based Encryption、Gatekeeper、Weaver、Samsung TEEGRIS 与 Google Titan M，测试涉及 Samsung A22（MediaTek MT6769V/MT6833V）。正文转述此前曾在 Black Hat EU 2021、Black Hat USA 2022 演讲，以及基于本工作的 REcon'23 演讲。",
+        "status": "documented",
+        "growth_signal": "研究从单点芯片漏洞上升到对 Android 数据加密体系整体（FBE + Gatekeeper + Weaver + 多家 TEE/安全芯片）的系统化梳理，呈现纵深扩展与对既往研究的复用整合；REcon'23 演讲显示主题持续在不同会议流转。",
+        "short_quote": "Posted Mon 14 August 2023",
+        "source": {
+          "title": "Android Data Encryption in depth",
+          "url": "https://blog.quarkslab.com/android-data-encryption-in-depth.html",
+          "published": "2023-08-14",
+          "source_type": "research-team blog writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_u69takp7s3zuhcqsgo4qityw",
+          "accessed_at": "2026-09-28T00:15:15.524798+00:00",
+          "content_sha256": "b2afd972b44dc9b1fd134981895ca61afa2d69d67d3344c1951abe155271eef2"
+        }
+      },
+      {
+        "id": "mrb-tl-06",
+        "date": "2023",
+        "claim": "据 2023-08-14 writeup 正文转述，作者基于 Android 数据加密研究在 REcon'23 发表演讲。REcon 会议每年举办，但本节点未独立抓取 REcon'23 议程页面，具体演讲标题与日期未确认，仅年份可推断。",
+        "status": "reported",
+        "growth_signal": "同一主题在 REcon（偏逆向工程的研究会议）发表，显示研究在不同受众群体间传播与公开发表习惯的延续。",
+        "source": {
+          "title": "Android Data Encryption in depth (转述其中的 REcon'23 段落)",
+          "url": "https://blog.quarkslab.com/android-data-encryption-in-depth.html",
+          "published": "2023-08-14",
+          "source_type": "research-team blog writeup 转述既往演讲",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_u69takp7s3zuhcqsgo4qityw",
+          "accessed_at": "2026-09-28T00:15:15.524798+00:00",
+          "content_sha256": "b2afd972b44dc9b1fd134981895ca61afa2d69d67d3344c1951abe155271eef2"
+        }
+      },
+      {
+        "id": "mrb-tl-07",
+        "date": "2024-06",
+        "claim": "据 2024-10-15 writeup 正文转述，作者团队就 Samsung Galaxy A 启动链研究在 SSTIC 2024 发布白皮书。SSTIC 通常于 6 月初在 Rennes 举办；本节点未独立抓取 SSTIC 2024 白皮书或议程，具体日期与白皮书标题未确认，月份按会议惯例推断。",
+        "status": "reported",
+        "growth_signal": "研究输出从博客 writeup/会议演讲扩展到白皮书形式，并在法语安全会议 SSTIC 发表，显示形式多样化与跨语种研究社区的公开发表习惯。",
+        "source": {
+          "title": "Attacking the Samsung Galaxy A* Boot Chain (转述其中的 SSTIC 2024 段落)",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+          "published": "2024-10-15",
+          "source_type": "research-team blog writeup 转述既往白皮书",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_2kkuhjwqndf2rh36bm5q81ku",
+          "accessed_at": "2026-09-28T00:15:15.524785+00:00",
+          "content_sha256": "fad708abb468e30d693217d5cc972d03344faa733a7ab5d5bffe9ced0f43617a"
+        }
+      },
+      {
+        "id": "mrb-tl-08",
+        "date": "2024-08",
+        "claim": "据 2024-10-15 writeup 正文转述，Maxime Rossi Bellom 与 Raphaël Neveu 在 Black Hat USA 2024 主讲「Attacking Samsung Galaxy A Boot Chain and Beyond」。Black Hat USA 2024 议程页面（blackhat.com/us-24/briefings/schedule/）抓取返回 HTTP 403，未取得独立 speaker 页证据，故本条按 writeup 转述记为 reported，演讲精确日期未确认。",
+        "status": "reported",
+        "growth_signal": "研究目标由安全芯片转向 Samsung Galaxy A 系列启动链（Little Kernel / Secure Monitor），合作者更换为 Raphaël Neveu，体现合作网络随主题演进而重组；同年同时在 SSTIC（白皮书）与 Black Hat（演讲）发表。",
+        "short_quote": "Attacking Samsung Galaxy A Boot Chain and Beyond",
+        "source": {
+          "title": "Attacking the Samsung Galaxy A* Boot Chain (转述其中的 Black Hat USA 2024 段落)",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+          "published": "2024-10-15",
+          "source_type": "research-team blog writeup 转述既往演讲",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_2kkuhjwqndf2rh36bm5q81ku",
+          "accessed_at": "2026-09-28T00:15:15.524785+00:00",
+          "content_sha256": "fad708abb468e30d693217d5cc972d03344faa733a7ab5d5bffe9ced0f43617a"
+        }
+      },
+      {
+        "id": "mrb-tl-09",
+        "date": "2024-10-15",
+        "claim": "Maxime Rossi Bellom 与 Raphaël Neveu 在 Quarkslab 博客发布「Attacking the Samsung Galaxy A* Boot Chain」，披露 4 个 CVE：CVE-2024-20832（Little Kernel JPEG 解析器堆溢出）、CVE-2024-20865（Little Kernel Odin 认证绕过）、CVE-2024-20021（Secure Monitor 任意物理内存映射）、CVE-2024-20820（Secure Monitor 越界读）。目标设备 Samsung Galaxy A225F，并指出多数基于 MediaTek SoC 的 Samsung 设备至少受 Little Kernel 漏洞影响。致谢 Damiano Melotti、Gabrielle Viala。",
+        "status": "documented",
+        "growth_signal": "单次研究产出 4 个 CVE，覆盖用户态解析器、认证、Secure Monitor 多层；攻击链目标为 bootloader 代码执行、Android 持久 root 及 Secure World 内存泄露，反映对完整信任链的系统性拆解能力与逐年递进的研究产出规模。",
+        "short_quote": "Posted Tue 15 October 2024",
+        "source": {
+          "title": "Attacking the Samsung Galaxy A* Boot Chain",
+          "url": "https://blog.quarkslab.com/attacking-the-samsung-galaxy-a-boot-chain.html",
+          "published": "2024-10-15",
+          "source_type": "research-team blog writeup",
+          "level": "primary"
+        },
+        "verification": {
+          "verified_in_run": true,
+          "retrieval_method": "web_fetch",
+          "tool_use_id": "call_2kkuhjwqndf2rh36bm5q81ku",
+          "accessed_at": "2026-09-28T00:15:15.524785+00:00",
+          "content_sha256": "fad708abb468e30d693217d5cc972d03344faa733a7ab5d5bffe9ced0f43617a"
+        }
+      }
+    ],
+    "contradictions": [
+      "person_json 标注的「selected_conference_evidence」中含「OffByOne 2024」，但抓取到的所有 Quarkslab writeup 正文均未提及 OffByOne，且未独立抓取到 OffByOne 2024 议程。与 writeup 正文出现的 Black Hat USA 2024、SSTIC 2024 之间存在未消解的来源冲突；OffByOne 2024 暂记为缺口而非已确认时间线节点。"
+    ],
+    "gaps": [
+      "Black Hat USA 2024 议程页 blackhat.com/us-24/briefings/schedule/ 抓取返回 HTTP 403，未取得独立 speaker 页证据；Black Hat USA 2024 演讲仅按 2024-10-15 writeup 转述记为 reported，精确日期未确认。",
+      "Black Hat EU 2021 与 Black Hat USA 2022 议程页面未抓取，相关演讲事实仅由 2022-08-11 writeup 转述，记为 reported。",
+      "SSTIC 2024 白皮书原文与议程未抓取，仅按 writeup 转述记为 reported；月份（6 月）与具体白皮书标题未确认。",
+      "REcon'23 议程页面未抓取，仅按 2023-08-14 writeup 转述记为 reported；演讲标题与精确日期未确认。",
+      "OffByOne 2024 会议未在抓取到的任何 writeup 正文中出现，亦未独立抓取其议程；暂无法纳入时间线。",
+      "X 账号 @max_r_b 未抓取验证，不作为 documented 证据。",
+      "教育背景、入职 Quarkslab 时间、2020 年前的研究或工作经历均无公开证据；时间线最早可核验节点为 2020-03-24 的 MediaTek writeup。",
+      "person_json 的 rank 字段（73）及所依据的排行榜未核验，与时间线维度无直接关联，未纳入。"
+    ]
+  },
+  "targeted": {
+    "items": []
+  }
+}

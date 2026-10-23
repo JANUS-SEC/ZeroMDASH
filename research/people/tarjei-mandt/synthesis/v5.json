@@ -1,0 +1,346 @@
+{
+  "person": "Tarjei Mandt",
+  "expertise": [
+    "Windows 内核漏洞（kernel pool 内部结构、win32k.sys 用户态回调重入）",
+    "iOS/macOS 内核漏洞（early_random PRNG、Secure Enclave Processor）",
+    "内核利用原语抽象与堆风水",
+    "内核子系统攻击面枚举与缓解建议"
+  ],
+  "stages": [
+    {
+      "period": "2007",
+      "stage": "密码学协议论文（待核）",
+      "capability_change": "LinkedIn 自述 publications 段列出 LNCS 4435/2007 论文条目「Certificateless Authenticated Two-Party Key Agreement Protocols」，署名 Tarjei Mandt，无可读合著者姓名。Springer Link 章节页、DOI resolver、DBLP、Semantic Scholar 一手正文前序轮次均不可达（404、Anubis 反爬、空内容），作者一手署名未核实；复核所引「Tarak K. Mandt」署名来自搜索摘要而非一手，不作为已证事实。该阶段不作为科班起点已证事实使用，仅作待核身份歧义风险条目保留。",
+      "evidence_ids": [
+        "tm-tl-2007-crypto",
+        "tm-r1-01"
+      ],
+      "confidence": "low"
+    },
+    {
+      "period": "2010-2011",
+      "stage": "Windows 内核子系统闭环研究方法建立",
+      "capability_change": "形成针对单一子系统内部机制的闭环研究方法：先完整逆向分配器内部结构（pool descriptors、ListHeads 自由链表、lookaside lists、大块分配及 AMD64/x64 相关变化），再枚举攻击原语（ListEntry Flink、lookaside next、PendingFrees next、PoolIndex、quota process pointer 覆盖），以 CVE-2010-1893 案例验证，最后给出池元数据硬化建议。2011 年将目标从通用内存管理器转向 win32k.sys 图形内核子系统，方法演化为「回调重入→引用失效」的因果模型，覆盖 UAF（CVE-2011-1237 窗口对象、CVE-2011-1241 键盘布局对象）与状态校验缺陷两类漏洞。闭环结构由 primary PDF 支撑；同阶段混入 Pwnie 归属与 Black Hat 日期为 inferred/自述支撑。",
+      "evidence_ids": [
+        "tm-works-01",
+        "tm-works-02",
+        "tm-tl-2011-01-bh-dc-kernelpool",
+        "tm-tl-2011-08-bh-us-callbacks",
+        "tm-tl-2011-pwnie-privesc",
+        "tm-r1-01"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2012",
+      "stage": "攻击面相邻主题与平台扩展",
+      "capability_change": "研究目标由 Windows 内核池/win32k 扩展至 Windows 堆内部实现与 iOS 内核安全导览。2012 年内于 REcon、Black Hat USA、Hack in the Box Malaysia 三场不同会议各发表一次演讲。iOS 方向首篇与 Mark Dowd 联合发表。研究主题由 Windows 单平台扩展到 Windows 与 iOS 双平台。",
+      "evidence_ids": [
+        "tm-tl-2012-06-recon-atom",
+        "tm-tl-2012-07-bh-us-win8heap",
+        "tm-tl-2012-10-hitb-ios6",
+        "tm-tl-2012-pwnie-nom",
+        "tm-r1-01"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2014-2016",
+      "stage": "iOS 方向单组件推进与协处理器扩展",
+      "capability_change": "iOS 方向由整体安全导览推进到针对单一子组件（early_random PRNG）的攻击，再扩展到相邻硬件协处理器（苹果 Secure Enclave Processor）。early_random 论文正文为 FlateDecode 压缩二进制未解码，是否沿用 Windows 闭环结构仅为推断，不作为 observed outcome 列入闭环机制。SEP 研究由三人联合发表。",
+      "evidence_ids": [
+        "tm-tl-2014-03-csw-earlyrandom",
+        "tm-tl-2016-08-bh-us-sep",
+        "tm-works-03"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2025-",
+      "stage": "现职 Catalyst Security（自链间接成立）",
+      "capability_change": "现职关联由 GitHub 个人页自链间接成立（github.com/kernelpool Company=Catalyst Security、Website=catalystsecurity.com）。Catalyst 首页未点名研究对象，公司招聘方向（iOS/Android/Browser/Zero-Click）仅作雇主组织定位背景，不直接表述为研究对象个人研究方向。GitHub 当前公开仓库（mlx/mlx-lm/ds4 等机器学习相关 fork）与早期 Windows/iOS 内核研究方向脱节，缺乏说明该活动变化是否反映研究主题或方向变化的一手材料。",
+      "evidence_ids": [
+        "tm-tl-current-catalyst",
+        "tm-deepconv-02",
+        "tm-r2-02",
+        "tm-r2-01"
+      ],
+      "confidence": "low"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "单一子系统内部机制的闭环研究方法",
+      "starting_conditions": "早期（2010-2011）已对内存破坏与堆风水前人工作（Shacham、Blazakis、Kortchinsky、Beck、Conover）进行复盘，并自建 cheatsheet（kernelpool_cheatsheet.pdf）的工具建设习惯，体现重复练习与工具沉淀。",
+      "repeated_practice": "对单一子系统先完整逆向内部结构，再枚举攻击原语，以 CVE 案例验证，最后给出缓解建议。2010 年针对 Windows kernel pool（pool descriptors、ListHeads、lookaside lists、大块分配），2011 年针对 win32k.sys（GUI 线程、窗口管理器、用户对象、句柄表）。",
+      "feedback": "缓解建议作为闭环终点（改进锁纪律、回调后空指针校验、池元数据硬化）；外部认可为 Pwnie 2011 Best Privilege Escalation Bug（MS11-034），归属依赖主题对应推断，Pwnie 官方页面未点名研究者。",
+      "intermediate_capability": "形成由内部结构文档化→原语抽象→案例验证→缓解反馈的目标推进能力；该闭环结构作为 Windows kernel pool（tm-works-01）与 win32k.sys（tm-works-02）两项长文之间的重复验证模板，不外推到结构不同的子系统。",
+      "observed_outcomes": [
+        "2010 kernel pool 长文枚举 5 种池元数据利用原语并以 CVE-2010-1893 案例验证",
+        "2011 win32k 回调长文枚举 UAF（CVE-2011-1237 窗口对象、CVE-2011-1241 键盘布局对象）与状态校验缺陷",
+        "Pwnie 2011 Best Privilege Escalation Bug（MS11-034，inferred）"
+      ],
+      "evidence_ids": [
+        "tm-works-01",
+        "tm-works-02",
+        "tm-tl-2011-01-bh-dc-kernelpool",
+        "tm-tl-2011-08-bh-us-callbacks",
+        "tm-tl-2011-pwnie-privesc",
+        "tm-r1-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "闭环结构由 primary PDF 支撑，但 Pwnie 归属与 Black Hat 日期为 inferred/自述支撑，Black Hat 官方历史页与 infocon.org 镜像前序轮次抓取返回 403，未由会议官方页交叉验证；前序轮次无可达一手会议源用于升级该外部认可证据层级。iOS 方向（2014 CanSecWest early_random）是否沿用该闭环仅为推断，正文未核验，iOS 方向闭环证据弱于 Windows。"
+    },
+    {
+      "name": "攻击面相邻主题的连续展开",
+      "starting_conditions": "2010-2011 已建立 Windows 内核子系统研究的内部机制基础，具备在同一技术栈内推进相邻主题的条件。",
+      "repeated_practice": "在同一技术栈内按攻击面类别连续展开相邻主题：2010 池分配器→2011 win32k 回调→2012 REcon「Smashing the Atom: Extraordinary String-based Attacks」→2012 Black Hat USA Windows 8 Heap Internals（合著 Chris Valasek）。",
+      "feedback": "会议演讲邀约与 Pwnie 2012 Most Innovative Research 提名（归属依赖主题对应推断，Pwnie 页面未点名研究者）。",
+      "intermediate_capability": "形成研究产出的时序分布能力；2012 年内于 REcon、Black Hat USA、Hack in the Box Malaysia 三场不同会议各发表一次演讲。",
+      "observed_outcomes": [
+        "2012 REcon「Smashing the Atom: Extraordinary String-based Attacks」",
+        "2012 Black Hat USA Windows 8 Heap Internals（合著 Chris Valasek）",
+        "2012 HITB Malaysia iOS 6 Kernel Security: A Hacker's Guide（合著 Mark Dowd）",
+        "Pwnie 2012 Most Innovative Research 提名（inferred）"
+      ],
+      "evidence_ids": [
+        "tm-tl-2012-06-recon-atom",
+        "tm-tl-2012-07-bh-us-win8heap",
+        "tm-tl-2012-10-hitb-ios6",
+        "tm-tl-2012-pwnie-nom",
+        "tm-r1-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "短时间内的产出与会议邀约可能部分由攻击面可得性与市场关注度驱动，而非纯个人能力驱动；Pwnie 提名归属依赖主题对应推断，页面未点名研究者。"
+    },
+    {
+      "name": "通过合著关系进入新组件或新平台",
+      "starting_conditions": "2012 年起 Windows 方向已有独立署名基础（2010 池、2011 win32k 均为独立署名或自述未列合著）。",
+      "repeated_practice": "合著关系存在（可观察事实，由 LinkedIn 自述支撑）：2012 Black Hat USA Windows 8 Heap Internals 合著 Chris Valasek；2012 HITB Malaysia iOS 6 Kernel Security 合著 Mark Dowd；2016 Black Hat USA Demystifying the Secure Enclave Processor 合著 Mathew Solnik、David Wang。合著者涵盖堆研究者（Chris Valasek）与系统安全研究方向研究者（Mark Dowd、Mathew Solnik、David Wang）。合著作为学习或反馈渠道、能力来源为推断，无合著者实际指导或反馈的一手证据。",
+      "feedback": "合著研究平台（Windows 堆、iOS 内核、苹果 SEP）与 Catalyst 招聘方向（iOS/Android/Browser/Zero-Click）交集仅 iOS 一项；Catalyst 首页未点名研究对象，现职关联仅由 GitHub 个人页自链间接成立，不构成机制性证据。",
+      "intermediate_capability": "通过合著进入 iOS 内核（2012 HITB）与苹果 SEP（2016 Black Hat）等新平台。",
+      "observed_outcomes": [
+        "2012 HITB Malaysia iOS 6 Kernel Security（合著 Mark Dowd）",
+        "2016 Black Hat USA Demystifying the Secure Enclave Processor（合著 Mathew Solnik、David Wang）"
+      ],
+      "evidence_ids": [
+        "tm-tl-2012-07-bh-us-win8heap",
+        "tm-tl-2012-10-hitb-ios6",
+        "tm-tl-2016-08-bh-us-sep",
+        "tm-r1-01",
+        "tm-r2-02",
+        "tm-deepconv-02"
+      ],
+      "validation_tests": [
+        "repeated"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "研究平台由 Windows 向 iOS 迁移（2012 HITB）可能反映 2012 年前后 iOS 内核安全研究的市场关注度与攻击面可得性变化，而非个人能力驱动的平台迁移；合著者知名度不构成能力来源的证据。"
+    }
+  ],
+  "tensions": [
+    "2007 LNCS 4435 论文一手正文作者署名未核实（Springer Link、DOI resolver 返回 404，DBLP Anubis 反爬，Semantic Scholar 空内容）；复核所引「Tarak K. Mandt」署名亦来自搜索摘要而非一手，不作为已证事实，仅作待核身份歧义风险标注。",
+    "证据基础以研究对象自述（LinkedIn publications 段，tm-r1-01、tm-r2-02）与自存档（GitHub kernelpool/research，tm-works-01/02/03、tm-r2-01）为主，无独立第三方来源确认成长叙述；Pwnie 页面（tm-tl-2011-pwnie-privesc、tm-tl-2012-pwnie-nom）为权威二手但未点名研究者，归属依赖主题对应推断。该结构存在幸存者与自我呈现偏差（失败、未发表工作、学习路径不可见），作为各机制 confidence 的上限约束。",
+    "Black Hat 官方历史页与 infocon.org 镜像前序轮次抓取返回 403，LinkedIn 自述的演讲标题与日期未由会议官方页交叉验证。",
+    "2016-08 至 2025 年间 LinkedIn Experience 段未展开 prior employment，雇佣与活动一手证据无法取得，stages 由 2014-2016 直接跳至 2025-。",
+    "Catalyst Security 首页未点名研究对象，现职关联仅由 GitHub 个人页自链间接成立，未由公司一手页面升格。",
+    "GitHub 当前公开仓库（mlx/mlx-lm/ds4 等机器学习相关 fork）与早期 Windows/iOS 内核研究方向脱节，缺乏说明该活动变化的一手材料。"
+  ],
+  "transferable_practices": [
+    "内部结构文档化→原语抽象→案例验证→缓解反馈的闭环研究方法（仅在 Windows kernel pool tm-works-01 与 win32k.sys tm-works-02 两项自存档长文中得到验证，可能迁移到结构相似的内核子系统攻击面研究，但普适性未被更多案例验证）。",
+    "同一技术栈内按攻击面类别连续展开相邻主题的研究产出时序分布（2010 池→2011 回调→2012 堆/字符串/iOS）。",
+    "paper 与 slides 成对自存档于个人仓库的归档习惯（tm-works-03、tm-r2-01），仓库仅 1 次提交，提交日期 2025-04-23，提交信息 Add past research material，为历史材料一次性批量上传，时间跨度未核验。"
+  ],
+  "non_transferable_conditions": [
+    "特定时期的条件与时期性机会：2010-2012 Windows 内核池/win32k 攻击面可得性与会议（Black Hat DC/USA、REcon、HITB）邀约机会，非个人可复制的客观条件。",
+    "2012 年前后 iOS 内核安全研究的市场关注度与攻击面可得性变化驱动平台迁移的外部条件。",
+    "primary PDF 自存档与一手会议演讲机会（个人既有成果与会议关系网络），非新进入者可复制。"
+  ],
+  "open_questions": [
+    "2007 LNCS 4435 论文一手作者署名（Tarak K. Mandt 与 Tarjei Mandt 歧义）未核实，是否作为科班起点未决。",
+    "2016-08-04 Black Hat USA SEP 演讲至 2025 年现职 Catalyst Security 之间存在约9年间隔，stages 由 2014-2016 直接跳至 2025-，无任何阶段或证据覆盖；LinkedIn Experience 段仅显示当前 Catalyst Security、未展开 prior employment，2016-2025 年间雇佣与活动一手证据无法取得，该缺口维持 unresolved。",
+    "BlueHat 出席事实无可用来源核实（person_json selected_conference_evidence 列出，但无一手页面）。",
+    "early_random/sep 等 iOS 方向论文正文（FlateDecode 压缩二进制）未解码，是否沿用 Windows 闭环结构仅为推断。",
+    "GitHub 当前机器学习相关公开仓库是否反映研究主题或方向的变化，缺乏一手说明。",
+    "Catalyst Security 与研究对象的雇主关联仅由 GitHub 个人页自链间接成立，公司一手确认未取得。",
+    "教育背景（学位、学校、毕业年份）缺失：LinkedIn 页面无教育段，未见任何一手来源。",
+    "导师、同伴、重复练习过程、失败与转向的具体叙述均缺失（深度对话维度无一手长访谈/播客/AMA/演讲问答材料）。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790702343622661000-tarjei-mandt-synthesis-v5.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "24020e18-555e-48a2-94d4-59a7905c0fae",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_riknccspdr70p4hkmmhknzjy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-29T17:19:03.656653+00:00"
+      },
+      {
+        "tool_use_id": "call_wznj89con9qf2nphlpxu1j7k",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-29T17:19:03.656684+00:00"
+      },
+      {
+        "tool_use_id": "call_b2rhhvl2tehz0yftktz9f2xk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "b9f0dce280fdc98199cfbc38200d164633d37650eede616a0be3b86d5e7fbca1",
+        "accessed_at": "2026-09-29T17:19:03.656691+00:00"
+      },
+      {
+        "tool_use_id": "call_t3rymn3h7a2j2nri6aiuyegr",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "f477e57f4f4ed8f600f623741cdd4305174c31c0acfd9fb5f02405d6193c1a01",
+        "accessed_at": "2026-09-29T17:19:03.656700+00:00"
+      },
+      {
+        "tool_use_id": "call_tdl2uh9vj0ivondi5xdlw204",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "372f51b1e15a15e46495b3fe2528aa4eddeea07f4f9217dd3ba7247b7d44d920",
+        "accessed_at": "2026-09-29T17:19:03.656780+00:00"
+      },
+      {
+        "tool_use_id": "call_d0jo0gnfoh8sil6km6mm1htt",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "12c1a671c2017bf795597131b6270f3213fafda1e7f0b3ea5f1618bfb89d9dea",
+        "accessed_at": "2026-09-29T17:19:03.656863+00:00"
+      },
+      {
+        "tool_use_id": "call_nn1r9mqr10y3vystwx66pb3q",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/inputs/revision_context.json",
+          "offset": 473,
+          "limit": 765
+        },
+        "success": false,
+        "content_sha256": "0fcc49c7ceb8a1fcc1324bf52309402275a2248344a8dc7d760a005491b347e0",
+        "accessed_at": "2026-09-29T17:19:03.656868+00:00"
+      },
+      {
+        "tool_use_id": "call_7h99koauleaszhhyaezddy19",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/inputs/revision_context.json",
+          "limit": 400,
+          "offset": 473
+        },
+        "success": true,
+        "content_sha256": "2e6b4ab1c89cf1049877706f5f818f5d94f5b504945e5adf28b8401fd003370a",
+        "accessed_at": "2026-09-29T17:19:03.656921+00:00"
+      },
+      {
+        "tool_use_id": "call_0oeao04nt79ggpqqp6xp75ni",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/inputs/revision_context.json",
+          "limit": 400,
+          "offset": 873
+        },
+        "success": true,
+        "content_sha256": "71e51650765da955f00b9ea171bc47110bc89963e35304b14192f8221e5bc7a6",
+        "accessed_at": "2026-09-29T17:19:03.656980+00:00"
+      },
+      {
+        "tool_use_id": "call_md7247qz1fk6wrjhnguofnp7",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/checkpoint.md",
+          "content": "# Checkpoint — Tarjei Mandt 综合（synthesis v5）\n\n## 任务状态\n- 已读取 CLAUDE.md、task.md、output.schema.json。\n- 已读取 inputs/person_json.json、inputs/evidence_json.json（六维 + targeted 三轮补证）、inputs/revision_context.json（4 轮定向补证与纠错的累积指令）。\n- 本节点为综合节点：重建领域能力成长过程，输出符合 output.schema.json 的完整 JSON。\n\n## 有效证据基础（verified_in_run=true，排除 verified=false）\n- works：tm-works-01（2010 kernel pool 长文，primary PDF）、tm-works-02（2011 win32k 回调长文，primary PDF）、tm-works-03（GitHub kernelpool/research 仓库归档，inferred）。\n- conversations：tm-deepconv-01-identity-handle（GitHub 身份核验）、tm-deepconv-02（Catalyst 招聘方向）、tm-deepconv-05（x.com 402）、tm-deepconv-06（Black Hat 403）。\n- community/external：tm-community-01/03/04、tarjei-ext-01/03/04/05（多为抓取失败/阴性，仅作背景）。\n- timeline：tm-tl-2007-crypto（LNCS 4435/2007，inferred，作者署名未一手核实）、tm-tl-2011-01-bh-dc-kernelpool、tm-tl-2011-08-bh-us-callbacks、tm-tl-2011-pwnie-privesc（inferred，Pwnie 页未点名）、tm-tl-2012-06-recon-atom、tm-tl-2012-pwnie-nom（inferred）、tm-tl-2012-07-bh-us-win8heap、tm-tl-2012-10-hitb-ios6、tm-tl-2014-03-csw-earlyrandom、tm-tl-2016-08-bh-us-sep、tm-tl-current-catalyst。\n- targeted：tm-r1-01（LinkedIn publications 9 条，documented）、tm-r2-01（GitHub commits 1 次提交 2025-04-23，documented）、tm-r2-02（LinkedIn Experience 仅 Catalyst，2016-2025 缺口，documented）。\n- 排除：tm-deepconv-04、tm-community-02、tarjei-ext-02、tm-dec-01、tm-dec-02、tm-tl-bluehat（verified=false，不作为成长证据使用）。\n\n## 累积修订指令（4 轮）汇总执行\n1. 2007 LNCS 论文作者署名未一手核实（Tarak vs Tarjei 歧义），不作为科班起点已证事实；stages[2007] confidence=low，并补 tension 标注身份歧义风险。\n2. Smashing the Atom 直接引用原标题\"Smashing the Atom: Extraordinary String-based Attacks\"，不二次概括。\n3. 合著机制 confidence=low；区分\"合著关系存在（可观察事实）\"与\"合著作为能力来源（推断）\"。\n4. 合著机制 feedback 删除\"部分重叠\"，改为交集仅 iOS 一项，Catalyst 首页未点名。\n5. stages[2025-] 现职来源标注为 GitHub 个人页自链；公司招聘方向仅作雇主背景，不直接表述为个人研究方向。\n6. transferable_practices 去\"任意\"绝对化；归档习惯去\"长期积累\"，改为单次批量归档（2025-04-23）。\n7. mechanisms[1] observed_outcomes 中 2014 CanSecWest early_random 删除\"同一闭环\"表述，改为仅据标题推断，正文未核验。\n8. 去除比喻/拟人：研究节奏→研究产出的时序分布；紧凑时间窗→短时间内的产出；成熟过程→推进序列；机会窗口→特定时期的条件；研究重心转移→研究主题或方向的变化；删除\"密集产出\"与\"产出呈现产出\"冗余。\n9. 标注系统性偏差（schema 无 biases 字段，并入 tensions）：证据基础以自述+自存档为主，无独立第三方确认，存在幸存者与自我呈现偏差，作为各机制 confidence 上限。\n10. mechanisms[2] alternative_explanation 补充：平台迁移可能反映 iOS 内核安全研究市场关注度与攻击面可得性变化。\n11. open_questions 补充 2016-2025 约9年间隔时间线缺口。\n12. mechanisms[1] validation_tests 删除\"generative\"，仅保留 repeated、distinctive。\n13. stages[2010-2011] confidence 由 high 降为 medium（混入 inferred 证据）。\n14. stages[2012] 去\"资深研究者\"，改\"Mark Dowd\"；mechanisms 合著 repeated_practice 去\"资深系统安全研究者\"，改为姓名+研究方向。\n15. 保留所有被标记\"缺失\"的引用（经核对均 verified=true，为复核块级误报）。\n\n## 未解决事项\n1. 2007 LNCS 论文一手作者署名（Tarak K. Mandt vs Tarjei Mandt）无法核实。\n2. 2016-08 至 2025 年间雇佣与公开活动一手证据无法取得（约9年缺口）。\n3. BlueHat 出席事实无可用来源核实。\n4. early_random/sep 等 iOS 方向论文正文（FlateDecode 压缩二进制）未解码，是否沿用 Windows 闭环结构仅为推断。\n5. Catalyst Security 与研究对象的雇主关联仅由 GitHub 个人页自链间接成立。\n\n## 输出\n- output.json 按 output.schema.json 字段名、必填、枚举、additionalProperties=false 校验写入。\n- 未自行填写 _run 与 verification。\n- 全篇使用专业书面语，已逐字段检查并改写比喻/拟人/宣传性表达。\n"
+        },
+        "success": true,
+        "content_sha256": "a13868b4362a4b8da632a21a8d35b8c9537e5782a29afce09d417ae2fc24836a",
+        "accessed_at": "2026-09-29T17:19:03.657316+00:00"
+      },
+      {
+        "tool_use_id": "call_1oo73p83hhvgypsuxrh04eb1",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/tarjei-mandt-synthesis-v5-20260930-011416-761/output.json",
+          "content": "{\n  \"person\": \"Tarjei Mandt\",\n  \"expertise\": [\n    \"Windows 内核漏洞（kernel pool 内部结构、win32k.sys 用户态回调重入）\",\n    \"iOS/macOS 内核漏洞（early_random PRNG、Secure Enclave Processor）\",\n    \"内核利用原语抽象与堆风水\",\n    \"内核子系统攻击面枚举与缓解建议\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2007\",\n      \"stage\": \"密码学协议论文（待核）\",\n      \"capability_change\": \"LinkedIn 自述 publications 段列出 LNCS 4435/2007 论文条目「Certificateless Authenticated Two-Party Key Agreement Protocols」，署名 Tarjei Mandt，无可读合著者姓名。Springer Link 章节页、DOI resolver、DBLP、Semantic Scholar 一手正文前序轮次均不可达（404、Anubis 反爬、空内容），作者一手署名未核实；复核所引「Tarak K. Mandt」署名来自搜索摘要而非一手，不作为已证事实。该阶段不作为科班起点已证事实使用，仅作待核身份歧义风险条目保留。\",\n      \"evidence_ids\": [\"tm-tl-2007-crypto\", \"tm-r1-01\"],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2010-2011\",\n      \"stage\": \"Windows 内核子系统闭环研究方法建立\",\n      \"capability_change\": \"形成针对单一子系统内部机制的闭环研究方法：先完整逆向分配器内部结构（pool descriptors、ListHeads 自由链表、lookaside lists、大块分配及 AMD64/x64 相关变化），再枚举攻击原语（ListEntry Flink、lookaside next、PendingFrees next、PoolIndex、quota process pointer 覆盖），以 CVE-2010-1893 案例验证，最后给出池元数据硬化建议。2011 年将目标从通用内存管理器转向 win32k.sys 图形内核子系统，方法演化为「回调重入→引用失效」的因果模型，覆盖 UAF（CVE-2011-1237 窗口对象、CVE-2011-1241 键盘布局对象）与状态校验缺陷两类漏洞。闭环结构由 primary PDF 支撑；同阶段混入 Pwnie 归属与 Black Hat 日期为 inferred/自述支撑。\",\n      \"evidence_ids\": [\"tm-works-01\", \"tm-works-02\", \"tm-tl-2011-01-bh-dc-kernelpool\", \"tm-tl-2011-08-bh-us-callbacks\", \"tm-tl-2011-pwnie-privesc\", \"tm-r1-01\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2012\",\n      \"stage\": \"攻击面相邻主题与平台扩展\",\n      \"capability_change\": \"研究目标由 Windows 内核池/win32k 扩展至 Windows 堆内部实现与 iOS 内核安全导览。2012 年内于 REcon、Black Hat USA、Hack in the Box Malaysia 三场不同会议各发表一次演讲。iOS 方向首篇与 Mark Dowd 联合发表。研究主题由 Windows 单平台扩展到 Windows 与 iOS 双平台。\",\n      \"evidence_ids\": [\"tm-tl-2012-06-recon-atom\", \"tm-tl-2012-07-bh-us-win8heap\", \"tm-tl-2012-10-hitb-ios6\", \"tm-tl-2012-pwnie-nom\", \"tm-r1-01\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2014-2016\",\n      \"stage\": \"iOS 方向单组件推进与协处理器扩展\",\n      \"capability_change\": \"iOS 方向由整体安全导览推进到针对单一子组件（early_random PRNG）的攻击，再扩展到相邻硬件协处理器（苹果 Secure Enclave Processor）。early_random 论文正文为 FlateDecode 压缩二进制未解码，是否沿用 Windows 闭环结构仅为推断，不作为 observed outcome 列入闭环机制。SEP 研究由三人联合发表。\",\n      \"evidence_ids\": [\"tm-tl-2014-03-csw-earlyrandom\", \"tm-tl-2016-08-bh-us-sep\", \"tm-works-03\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2025-\",\n      \"stage\": \"现职 Catalyst Security（自链间接成立）\",\n      \"capability_change\": \"现职关联由 GitHub 个人页自链间接成立（github.com/kernelpool Company=Catalyst Security、Website=catalystsecurity.com）。Catalyst 首页未点名研究对象，公司招聘方向（iOS/Android/Browser/Zero-Click）仅作雇主组织定位背景，不直接表述为研究对象个人研究方向。GitHub 当前公开仓库（mlx/mlx-lm/ds4 等机器学习相关 fork）与早期 Windows/iOS 内核研究方向脱节，缺乏说明该活动变化是否反映研究主题或方向变化的一手材料。\",\n      \"evidence_ids\": [\"tm-tl-current-catalyst\", \"tm-deepconv-02\", \"tm-r2-02\", \"tm-r2-01\"],\n      \"confidence\": \"low\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"单一子系统内部机制的闭环研究方法\",\n      \"starting_conditions\": \"早期（2010-2011）已对内存破坏与堆风水前人工作（Shacham、Blazakis、Kortchinsky、Beck、Conover）进行复盘，并自建 cheatsheet（kernelpool_cheatsheet.pdf）的工具建设习惯，体现重复练习与工具沉淀。\",\n      \"repeated_practice\": \"对单一子系统先完整逆向内部结构，再枚举攻击原语，以 CVE 案例验证，最后给出缓解建议。2010 年针对 Windows kernel pool（pool descriptors、ListHeads、lookaside lists、大块分配），2011 年针对 win32k.sys（GUI 线程、窗口管理器、用户对象、句柄表）。\",\n      \"feedback\": \"缓解建议作为闭环终点（改进锁纪律、回调后空指针校验、池元数据硬化）；外部认可为 Pwnie 2011 Best Privilege Escalation Bug（MS11-034），归属依赖主题对应推断，Pwnie 官方页面未点名研究者。\",\n      \"intermediate_capability\": \"形成由内部结构文档化→原语抽象→案例验证→缓解反馈的目标推进能力；该闭环结构作为 Windows kernel pool（tm-works-01）与 win32k.sys（tm-works-02）两项长文之间的重复验证模板，不外推到结构不同的子系统。\",\n      \"observed_outcomes\": [\n        \"2010 kernel pool 长文枚举 5 种池元数据利用原语并以 CVE-2010-1893 案例验证\",\n        \"2011 win32k 回调长文枚举 UAF（CVE-2011-1237 窗口对象、CVE-2011-1241 键盘布局对象）与状态校验缺陷\",\n        \"Pwnie 2011 Best Privilege Escalation Bug（MS11-034，inferred）\"\n      ],\n      \"evidence_ids\": [\"tm-works-01\", \"tm-works-02\", \"tm-tl-2011-01-bh-dc-kernelpool\", \"tm-tl-2011-08-bh-us-callbacks\", \"tm-tl-2011-pwnie-privesc\", \"tm-r1-01\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"闭环结构由 primary PDF 支撑，但 Pwnie 归属与 Black Hat 日期为 inferred/自述支撑，Black Hat 官方历史页与 infocon.org 镜像前序轮次抓取返回 403，未由会议官方页交叉验证；前序轮次无可达一手会议源用于升级该外部认可证据层级。iOS 方向（2014 CanSecWest early_random）是否沿用该闭环仅为推断，正文未核验，iOS 方向闭环证据弱于 Windows。\"\n    },\n    {\n      \"name\": \"攻击面相邻主题的连续展开\",\n      \"starting_conditions\": \"2010-2011 已建立 Windows 内核子系统研究的内部机制基础，具备在同一技术栈内推进相邻主题的条件。\",\n      \"repeated_practice\": \"在同一技术栈内按攻击面类别连续展开相邻主题：2010 池分配器→2011 win32k 回调→2012 REcon「Smashing the Atom: Extraordinary String-based Attacks」→2012 Black Hat USA Windows 8 Heap Internals（合著 Chris Valasek）。\",\n      \"feedback\": \"会议演讲邀约与 Pwnie 2012 Most Innovative Research 提名（归属依赖主题对应推断，Pwnie 页面未点名研究者）。\",\n      \"intermediate_capability\": \"形成研究产出的时序分布能力；2012 年内于 REcon、Black Hat USA、Hack in the Box Malaysia 三场不同会议各发表一次演讲。\",\n      \"observed_outcomes\": [\n        \"2012 REcon「Smashing the Atom: Extraordinary String-based Attacks」\",\n        \"2012 Black Hat USA Windows 8 Heap Internals（合著 Chris Valasek）\",\n        \"2012 HITB Malaysia iOS 6 Kernel Security: A Hacker's Guide（合著 Mark Dowd）\",\n        \"Pwnie 2012 Most Innovative Research 提名（inferred）\"\n      ],\n      \"evidence_ids\": [\"tm-tl-2012-06-recon-atom\", \"tm-tl-2012-07-bh-us-win8heap\", \"tm-tl-2012-10-hitb-ios6\", \"tm-tl-2012-pwnie-nom\", \"tm-r1-01\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"短时间内的产出与会议邀约可能部分由攻击面可得性与市场关注度驱动，而非纯个人能力驱动；Pwnie 提名归属依赖主题对应推断，页面未点名研究者。\"\n    },\n    {\n      \"name\": \"通过合著关系进入新组件或新平台\",\n      \"starting_conditions\": \"2012 年起 Windows 方向已有独立署名基础（2010 池、2011 win32k 均为独立署名或自述未列合著）。\",\n      \"repeated_practice\": \"合著关系存在（可观察事实，由 LinkedIn 自述支撑）：2012 Black Hat USA Windows 8 Heap Internals 合著 Chris Valasek；2012 HITB Malaysia iOS 6 Kernel Security 合著 Mark Dowd；2016 Black Hat USA Demystifying the Secure Enclave Processor 合著 Mathew Solnik、David Wang。合著者涵盖堆研究者（Chris Valasek）与系统安全研究方向研究者（Mark Dowd、Mathew Solnik、David Wang）。合著作为学习或反馈渠道、能力来源为推断，无合著者实际指导或反馈的一手证据。\",\n      \"feedback\": \"合著研究平台（Windows 堆、iOS 内核、苹果 SEP）与 Catalyst 招聘方向（iOS/Android/Browser/Zero-Click）交集仅 iOS 一项；Catalyst 首页未点名研究对象，现职关联仅由 GitHub 个人页自链间接成立，不构成机制性证据。\",\n      \"intermediate_capability\": \"通过合著进入 iOS 内核（2012 HITB）与苹果 SEP（2016 Black Hat）等新平台。\",\n      \"observed_outcomes\": [\n        \"2012 HITB Malaysia iOS 6 Kernel Security（合著 Mark Dowd）\",\n        \"2016 Black Hat USA Demystifying the Secure Enclave Processor（合著 Mathew Solnik、David Wang）\"\n      ],\n      \"evidence_ids\": [\"tm-tl-2012-07-bh-us-win8heap\", \"tm-tl-2012-10-hitb-ios6\", \"tm-tl-2016-08-bh-us-sep\", \"tm-r1-01\", \"tm-r2-02\", \"tm-deepconv-02\"],\n      \"validation_tests\": [\"repeated\"],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"研究平台由 Windows 向 iOS 迁移（2012 HITB）可能反映 2012 年前后 iOS 内核安全研究的市场关注度与攻击面可得性变化，而非个人能力驱动的平台迁移；合著者知名度不构成能力来源的证据。\"\n    }\n  ],\n  \"tensions\": [\n    \"2007 LNCS 4435 论文一手正文作者署名未核实（Springer Link、DOI resolver 返回 404，DBLP Anubis 反爬，Semantic Scholar 空内容）；复核所引「Tarak K. Mandt」署名亦来自搜索摘要而非一手，不作为已证事实，仅作待核身份歧义风险标注。\",\n    \"证据基础以研究对象自述（LinkedIn publications 段，tm-r1-01、tm-r2-02）与自存档（GitHub kernelpool/research，tm-works-01/02/03、tm-r2-01）为主，无独立第三方来源确认成长叙述；Pwnie 页面（tm-tl-2011-pwnie-privesc、tm-tl-2012-pwnie-nom）为权威二手但未点名研究者，归属依赖主题对应推断。该结构存在幸存者与自我呈现偏差（失败、未发表工作、学习路径不可见），作为各机制 confidence 的上限约束。\",\n    \"Black Hat 官方历史页与 infocon.org 镜像前序轮次抓取返回 403，LinkedIn 自述的演讲标题与日期未由会议官方页交叉验证。\",\n    \"2016-08 至 2025 年间 LinkedIn Experience 段未展开 prior employment，雇佣与活动一手证据无法取得，stages 由 2014-2016 直接跳至 2025-。\",\n    \"Catalyst Security 首页未点名研究对象，现职关联仅由 GitHub 个人页自链间接成立，未由公司一手页面升格。\",\n    \"GitHub 当前公开仓库（mlx/mlx-lm/ds4 等机器学习相关 fork）与早期 Windows/iOS 内核研究方向脱节，缺乏说明该活动变化的一手材料。\"\n  ],\n  \"transferable_practices\": [\n    \"内部结构文档化→原语抽象→案例验证→缓解反馈的闭环研究方法（仅在 Windows kernel pool tm-works-01 与 win32k.sys tm-works-02 两项自存档长文中得到验证，可能迁移到结构相似的内核子系统攻击面研究，但普适性未被更多案例验证）。\",\n    \"同一技术栈内按攻击面类别连续展开相邻主题的研究产出时序分布（2010 池→2011 回调→2012 堆/字符串/iOS）。\",\n    \"paper 与 slides 成对自存档于个人仓库的归档习惯（tm-works-03、tm-r2-01），仓库仅 1 次提交，提交日期 2025-04-23，提交信息 Add past research material，为历史材料一次性批量上传，时间跨度未核验。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"特定时期的条件与时期性机会：2010-2012 Windows 内核池/win32k 攻击面可得性与会议（Black Hat DC/USA、REcon、HITB）邀约机会，非个人可复制的客观条件。\",\n    \"2012 年前后 iOS 内核安全研究的市场关注度与攻击面可得性变化驱动平台迁移的外部条件。\",\n    \"primary PDF 自存档与一手会议演讲机会（个人既有成果与会议关系网络），非新进入者可复制。\"\n  ],\n  \"open_questions\": [\n    \"2007 LNCS 4435 论文一手作者署名（Tarak K. Mandt 与 Tarjei Mandt 歧义）未核实，是否作为科班起点未决。\",\n    \"2016-08-04 Black Hat USA SEP 演讲至 2025 年现职 Catalyst Security 之间存在约9年间隔，stages 由 2014-2016 直接跳至 2025-，无任何阶段或证据覆盖；LinkedIn Experience 段仅显示当前 Catalyst Security、未展开 prior employment，2016-2025 年间雇佣与活动一手证据无法取得，该缺口维持 unresolved。\",\n    \"BlueHat 出席事实无可用来源核实（person_json selected_conference_evidence 列出，但无一手页面）。\",\n    \"early_random/sep 等 iOS 方向论文正文（FlateDecode 压缩二进制）未解码，是否沿用 Windows 闭环结构仅为推断。\",\n    \"GitHub 当前机器学习相关公开仓库是否反映研究主题或方向的变化，缺乏一手说明。\",\n    \"Catalyst Security 与研究对象的雇主关联仅由 GitHub 个人页自链间接成立，公司一手确认未取得。\",\n    \"教育背景（学位、学校、毕业年份）缺失：LinkedIn 页面无教育段，未见任何一手来源。\",\n    \"导师、同伴、重复练习过程、失败与转向的具体叙述均缺失（深度对话维度无一手长访谈/播客/AMA/演讲问答材料）。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "0dfea5be17079b6c10c178a15732c2f6ae1be0af393370dd8369633e1bf2f21e",
+        "accessed_at": "2026-09-29T17:19:03.657596+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790702343657616000-tarjei-mandt-synthesis-v5.json",
+    "label": "Tarjei Mandt:synthesis:v5",
+    "elapsed_seconds": 286.89,
+    "prompt_sha256": "2ef82566f12e48e77df93f8174611b4336c4eb700c6c82a392bf54fd61d2df39",
+    "num_turns": 12,
+    "total_cost_usd": 1.3974380000000002,
+    "usage": {
+      "input_tokens": 169898,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 285696,
+      "output_tokens": 16204,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 169898,
+        "outputTokens": 16204,
+        "cacheReadInputTokens": 285696,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.3974380000000002,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

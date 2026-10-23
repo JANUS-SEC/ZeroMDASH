@@ -1,0 +1,365 @@
+{
+  "person": "Seth Jenkins",
+  "dimension": "可核验时间线",
+  "identity_check": "projectzero.google 博客索引（首页抓取成功）将 Seth Jenkins 列为作者，与 James Forshaw、Jann Horn、Ivan Fratric、Natalie Silvanovich 等并列；三篇正文抓取成功的博文（2025-11-03、2026-01-14、2026-05-13）作者署名均为 'Seth Jenkins'。其工作集中于 Android arm64 内核 KASLR 与 Pixel SoC 驱动漏洞（BigWave、VPU），与 person_json 记录的 Android 内核/在野漏洞方向一致。X 账号 @__seth_jenkins 与记录一致，但未独立抓取该账号页面。未发现同名歧义。无法从抓取到的页面确认其加入 Project Zero 的具体时间、教育背景或 2022 年前的经历。",
+  "items": [
+    {
+      "id": "sj-tl-01",
+      "date": "2022",
+      "claim": "Seth Jenkins 曾在 Project Zero 博客发表一篇关于 x86 KASLR 的文章，并提出'对于本地攻击者，KASLR 已不再是有效缓解措施'的观点。其 2025-11 的 arm64 KASLR 博文明确将其作为此前的同类工作加以引用。",
+      "status": "reported",
+      "growth_signal": "KASLR 弱点分析构成其持续主题：2022 年面向 x86，2025 年扩展到 arm64/Android。该引用由其本人一手博文确认，但 2022 年原文未在本轮抓取中直接获得。",
+      "source": {
+        "title": "Defeating KASLR by Doing Nothing at All (Project Zero, 2025-11-03，正文自引 2022 年 x86 KASLR 博文)",
+        "url": "https://projectzero.google/2025/11/defeating-kaslr-by-doing-nothing-at-all.html",
+        "published": "2025-11-03",
+        "source_type": "blog_post",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_hbtkpbbzgwcw0rfbx8tk5eb2",
+        "accessed_at": "2026-09-26T14:46:04.385985+00:00",
+        "content_sha256": "d6fa1a76e3aec36473e3083c26428bfa90b4df9d1a30d7aeb6f2330b649e69c7"
+      }
+    },
+    {
+      "id": "sj-tl-02",
+      "date": "2025-11-03",
+      "claim": "Seth Jenkins 在 Project Zero 发表 'Defeating KASLR by Doing Nothing at All'，指出 arm64 Linux 线性映射虚拟地址固定于 PAGE_OFFSET=0xffffff8000000000（物理 0x80000000）、Pixel 引导加载器固定将内核解压于 0x80010000，二者叠加使攻击者可硬编码内核基址而无需 KASLR 泄露。测试设备为 Pixel 9 与 Samsung S23。两条问题被 Linux 内核团队与 Google Pixel 判定为 'intended behavior'，非在野利用。",
+      "status": "documented",
+      "growth_signal": "平台扩展（x86→arm64/Android）与对 KASLR 缓解有效性的持续审视；以 Pixel 9 等实际设备验证物理地址固定性，体现硬件级取证习惯。",
+      "short_quote": "Project Zero and the Google Threat Intelligence Group have yet to see a hardware side-channel attack for bypassing KASLR on Android in the wild.",
+      "source": {
+        "title": "Defeating KASLR by Doing Nothing at All — Project Zero",
+        "url": "https://projectzero.google/2025/11/defeating-kaslr-by-doing-nothing-at-all.html",
+        "published": "2025-11-03",
+        "source_type": "blog_post",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_hbtkpbbzgwcw0rfbx8tk5eb2",
+        "accessed_at": "2026-09-26T14:46:04.385985+00:00",
+        "content_sha256": "d6fa1a76e3aec36473e3083c26428bfa90b4df9d1a30d7aeb6f2330b649e69c7"
+      }
+    },
+    {
+      "id": "sj-tl-03",
+      "date": "2026-01-14",
+      "claim": "Seth Jenkins 发表 'A 0-click exploit chain for the Pixel 9 Part 2: Cracking the Sandbox with a Big Wave'，披露 Pixel SoC AV1 解码加速驱动 /dev/bigwave 的 UAF：BIGO_IOCX_PROCESS ioctl 16 秒超时后出队 job 并返回用户态，随后关闭文件描述符使含内联 job 的 inst 结构在 bigo_worker_thread 仍引用时被释放；经堆喷射控制 job->regs，实现 2144 字节任意写且无需泄露 KASLR。驱动共三处缺陷，修复于 2026-01-05。该漏洞可从 mediacodec SELinux 沙箱触达，构成 Pixel 9 0-click 链的沙箱逃逸环节。",
+      "status": "documented",
+      "growth_signal": "从 KASLR 理论分析转向完整 0-click 链构建（沙箱逃逸至内核任意读写）；通过堆喷射绕过 KASLR 依赖，与其 2025 年 KASLR 弱化结论形成方法衔接。",
+      "source": {
+        "title": "A 0-click exploit chain for the Pixel 9 Part 2: Cracking the Sandbox with a Big Wave — Project Zero",
+        "url": "https://projectzero.google/2026/01/pixel-0-click-part-2.html",
+        "published": "2026-01-14",
+        "source_type": "blog_post",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_psrk25n1uq780kbkfn3pu6wo",
+        "accessed_at": "2026-09-26T14:46:04.385989+00:00",
+        "content_sha256": "5e84a10161c3669b4358942cc216a37a70260328da4fa0588b4b1387ac42fdbe"
+      }
+    },
+    {
+      "id": "sj-tl-04",
+      "date": "2026-05-13",
+      "claim": "Seth Jenkins 发表 'A 0-click exploit chain for the Pixel 10: When a Door Closes, a Window Opens'，披露 Tensor G5（Chips&Media Wave677DV）VPU 驱动 /dev/vpu 的 vpu_mmap 调用 remap_pfn_range 时未将 VMA 大小约束至寄存器区域，允许用户态映射并改写内核镜像，作者称仅需 5 行代码即可实现内核任意读写。该 bug 于 2025-11-24 报告、2026-02 Pixel 安全公告修复（71 天）。链复用 Pixel 9 的 Dolby 0-click 入口 CVE-2025-54957。作者与 Jann Horn 协同审计 VPU，自述约 2 小时即发现同类缺陷；并记录 BigWave 初评 Moderate、VPU 评 High 的评级差异，以及 VPU 为其首个在 90 天内被修补的 Android 驱动 bug。",
+      "status": "documented",
+      "growth_signal": "跨代重复练习：同团队产出的 BigWave 与 VPU 驱动属同类 mmap 边界 bug，短时间复现显示模式识别积累；与 Jann Horn 协作引入同伴反馈；对评级与修复时效的追踪反映其将厂商响应纳入研究复盘。",
+      "short_quote": "it was the first time that an Android driver bug I reported was patched within 90 days.",
+      "source": {
+        "title": "A 0-click exploit chain for the Pixel 10: When a Door Closes, a Window Opens — Project Zero",
+        "url": "https://projectzero.google/2026/05/pixel-10-exploit.html",
+        "published": "2026-05-13",
+        "source_type": "blog_post",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_ju2blk7a20wzdo8b2a3g1z1z",
+        "accessed_at": "2026-09-26T14:46:04.386001+00:00",
+        "content_sha256": "014211fbf92e57e57fcc1928b26934a845d178ffd19e8db03bbe60feca80cf9b"
+      }
+    }
+  ],
+  "contradictions": [
+    "severity 评定不一致：Pixel 9 BigWave 驱动漏洞初评 Moderate，而功能等价的 Pixel 10 VPU 漏洞评 High；作者在 2026-05 博文中将此差异作为可观察事实记录，未给出厂商评定标准的官方解释。",
+    "2025-11 KASLR 博文涉及的两条问题被 Linux 内核团队与 Google Pixel 判定为 'intended behavior'（非漏洞），而 2026 年两条 Pixel 链则作为可利用漏洞被修复——同为内核/驱动地址处理类问题，定性方向相反，反映其研究对象涵盖'设计性弱化'与'可修复缺陷'两类。"
+  ],
+  "gaps": [
+    "2025-11 博文自引的 2022 年 x86 KASLR Project Zero 帖子未在本轮直接抓取到：projectzero.google 首页索引仅含 2025-08 起的条目，googleprojectzero.blogspot.com/2022/02/ 抓取未见该文；其存在性仅经一手博文转引，URL 与确切发布日期缺。",
+    "person_json 记 selected_conference_evidence=Black Hat US，但三篇抓取到的 Project Zero 博文均未提及 Black Hat 演讲，未发现其本人 Black Hat US 议程或演讲材料；该维度无可核验证据。",
+    "Seth Jenkins 加入 Project Zero 的具体时间未知；2022 年帖子的引用把其 Project Zero 身份至少推至 2022 年，但确认日期缺。",
+    "教育背景、2022 年前的从业经历未知；本轮未发现简历、学位或早期雇主的一手材料。",
+    "X 账号 @__seth_jenkins 与记录一致但未独立抓取，无法据其补全时间线节点。",
+    "2026-01 Pixel 9 链的 Part 1（Dolby Unified Decoder 入口，mediacodec 沙箱内 RCE）由 Natalie Silvanovich 撰写，非 Seth Jenkins；故其在该 0-click 链中的贡献边界（沙箱逃逸环节）与整链作者关系需注意区分。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-timeline-20260926-224036-682",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790433964372509000-seth-jenkins-timeline.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "159d886c-f1b8-48ef-a165-6ac67163796d",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_17e68f9wucwggp992qbr5eu4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-timeline-20260926-224036-682/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-26T14:46:04.385844+00:00"
+      },
+      {
+        "tool_use_id": "call_i3qz1p19apcr4ktfcum1hqq4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-timeline-20260926-224036-682/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "a079e42f480fc1fa0f49af29094b388416ed03df7c4073c113fa2d90cf30d5de",
+        "accessed_at": "2026-09-26T14:46:04.385875+00:00"
+      },
+      {
+        "tool_use_id": "call_zadxpug6bwgbxxkzrt4ctdwc",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-timeline-20260926-224036-682/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "d0b8cdf3b40a9559378808dc1c7a6b485e6ec5ba9e3c6f8c9a4a9017a32b1faf",
+        "accessed_at": "2026-09-26T14:46:04.385885+00:00"
+      },
+      {
+        "tool_use_id": "call_hgw4onihan3we9a5gw7ud13i",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-timeline-20260926-224036-682/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "9e8418e1a75193491db4204749b8209491f25a472416514c61e682981c173405",
+        "accessed_at": "2026-09-26T14:46:04.385890+00:00"
+      },
+      {
+        "tool_use_id": "call_wo6zoaxkn7pda5s4xcc3lefu",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-timeline-20260926-224036-682/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6578e71ef3e1c67e1ebb0c03b8158c64cec4937cdc032dfafe5513194a2b1f4e",
+        "accessed_at": "2026-09-26T14:46:04.385894+00:00"
+      },
+      {
+        "tool_use_id": "call_kzmuv6zds0c73kd5sa6aehrk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-timeline-20260926-224036-682/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-26T14:46:04.385898+00:00"
+      },
+      {
+        "tool_use_id": "call_91khu3kqw74sqzk2y5a8y369",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Seth Jenkins Google Project Zero Android kernel vulnerabilities"
+        },
+        "success": true,
+        "content_sha256": "3cd3c9f35b31c8418915911ba565829f11f5338f4cffc4b40954e447cb1b651e",
+        "accessed_at": "2026-09-26T14:46:04.385915+00:00"
+      },
+      {
+        "tool_use_id": "call_ohblbv0fktb6f4qbuk3uqikp",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Seth Jenkins\" Project Zero writeup in-the-wild"
+        },
+        "success": true,
+        "content_sha256": "1e2ba68b4d2f7a61bf598b3b110c5bf3f16652759779d58ffba868719c2d412f",
+        "accessed_at": "2026-09-26T14:46:04.385921+00:00"
+      },
+      {
+        "tool_use_id": "call_iohzy1r5s3vf456gentf3ptt",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/",
+          "prompt": "List all blog posts by Seth Jenkins, with their titles, publication dates, and URLs. Also list any authors visible on the page."
+        },
+        "success": true,
+        "content_sha256": "d72ae19dd05b22ca755d6122a054759cc0393f7bfde5b4c87802b3cee7748356",
+        "accessed_at": "2026-09-26T14:46:04.385928+00:00"
+      },
+      {
+        "tool_use_id": "call_srrxwlfss43wxeqs1g10dz6c",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Seth Jenkins Project Zero blog Android"
+        },
+        "success": true,
+        "content_sha256": "1aa849e0879f41d065d91de605a47eccc406f972bcde56a2c74a2fa14b1cb8e7",
+        "accessed_at": "2026-09-26T14:46:04.385934+00:00"
+      },
+      {
+        "tool_use_id": "call_kr7r4y1uqxvq3bu9ob9s0514",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is the author of this post? What is the exact publication date? Summarize the vulnerability, the affected component, the in-the-wild exploitation status, and any biographical/author details. Quote the author byline exactly.",
+          "url": "https://projectzero.google/blog/2025/11/defeating-kaslr-by-doing-nothing-at-all"
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-26T14:46:04.385960+00:00"
+      },
+      {
+        "tool_use_id": "call_4b1u20lwnrc2hm67db7azuf4",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Seth Jenkins Project Zero researcher background Black Hat Android"
+        },
+        "success": true,
+        "content_sha256": "a5017fd7dd5e6f1dad550e684c7ae000e763f82049ef52c269167bc58cfde244",
+        "accessed_at": "2026-09-26T14:46:04.385965+00:00"
+      },
+      {
+        "tool_use_id": "call_suhe0fgwdjl91vigzidchvua",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "What is the full URL of each blog post link on this page? List the exact href values for posts authored by Seth Jenkins, and the exact author bylines. Also note the site's main URL/domain.",
+          "url": "https://projectzero.google/"
+        },
+        "success": true,
+        "content_sha256": "8f4f005d703c3beaabcce085361d22364a847e6888827dfbda76b64af96a4a9a",
+        "accessed_at": "2026-09-26T14:46:04.385977+00:00"
+      },
+      {
+        "tool_use_id": "call_hbtkpbbzgwcw0rfbx8tk5eb2",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Quote the exact author byline and publication date at the top of this post. Summarize: the vulnerability/component, whether it was exploited in the wild, the Android/Pixel versions affected, and any biographical note about the author. List any CVEs mentioned.",
+          "url": "https://projectzero.google/2025/11/defeating-kaslr-by-doing-nothing-at-all.html"
+        },
+        "success": true,
+        "content_sha256": "d6fa1a76e3aec36473e3083c26428bfa90b4df9d1a30d7aeb6f2330b649e69c7",
+        "accessed_at": "2026-09-26T14:46:04.385985+00:00"
+      },
+      {
+        "tool_use_id": "call_psrk25n1uq780kbkfn3pu6wo",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Quote the exact author byline and publication date. Summarize the vulnerability/component, whether exploited in the wild, Android/Pixel versions affected, related CVEs, and how this relates to a multi-part series. Note any biographical detail about the author.",
+          "url": "https://projectzero.google/2026/01/pixel-0-click-part-2.html"
+        },
+        "success": true,
+        "content_sha256": "5e84a10161c3669b4358942cc216a37a70260328da4fa0588b4b1387ac42fdbe",
+        "accessed_at": "2026-09-26T14:46:04.385989+00:00"
+      },
+      {
+        "tool_use_id": "call_ju2blk7a20wzdo8b2a3g1z1z",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Quote the exact author byline and publication date. Summarize: the vulnerability/component, whether exploited in the wild, Android/Pixel versions affected, related CVEs, and how it relates to prior work. Note any biographical detail about the author.",
+          "url": "https://projectzero.google/2026/05/pixel-10-exploit.html"
+        },
+        "success": true,
+        "content_sha256": "014211fbf92e57e57fcc1928b26934a845d178ffd19e8db03bbe60feca80cf9b",
+        "accessed_at": "2026-09-26T14:46:04.386001+00:00"
+      },
+      {
+        "tool_use_id": "call_b1fkcfiqv8a4gugsd0j13fhr",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Seth Jenkins\" x86 KASLR 2022 Project Zero blog"
+        },
+        "success": true,
+        "content_sha256": "83961626c267b01693bd42823b3c9addf466264149c32a3cf5b5473cb2d55afe",
+        "accessed_at": "2026-09-26T14:46:04.385995+00:00"
+      },
+      {
+        "tool_use_id": "call_fma74ev51r863rjm1zto7qdo",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Is there a Project Zero blog post about x86 KASLR written by Seth Jenkins around 2022? If found, quote the exact title, author byline, and publication date, and summarize the argument.",
+          "url": "https://googleprojectzero.blogspot.com/2022/02/"
+        },
+        "success": true,
+        "content_sha256": "02c820f298b3094b2488ea6730ab2aa96201e16f0b8a89230772760e3558179d",
+        "accessed_at": "2026-09-26T14:46:04.386017+00:00"
+      },
+      {
+        "tool_use_id": "call_oojzg5zbybkbkt5a7khydrlv",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-timeline-20260926-224036-682/checkpoint.md",
+          "content": "# Checkpoint — Seth Jenkins, 可核验时间线\n\n## 身份与一手来源\n- projectzero.google 博客索引（首页抓取成功）将 Seth Jenkins 列为作者，与 Forshaw/Horn/Fratric/Silvanovich 等并列。\n- 三篇博客正文抓取成功，作者署名均为 \"Seth Jenkins\"：\n  1. 2025-11-03 \"Defeating KASLR by Doing Nothing at All\"（arm64 线性映射/物理地址未随机化；Pixel 9、Samsung S23）\n  2. 2026-01-14 \"A 0-click exploit chain for the Pixel 9 Part 2: Cracking the Sandbox with a Big Wave\"（/dev/bigwave UAF；修复 2026-01-05）\n  3. 2026-05-13 \"A 0-click exploit chain for the Pixel 10: When a Door Closes, a Window Opens\"（VPU Wave677DV remap_pfn_range；2025-11-24 报告，2026-02 修复；复用 Dolby CVE-2025-54957；Jann Horn 协同审计 VPU）\n\n## 跨阶段线索（未直接核验）\n- 2025-11 帖子正文自引「此前在 2022 年发表的 x86 KASLR 博客」，并引述其原话「it is probably time to accept that KASLR is no longer an effective mitigation against local attackers」。该 2022 帖子在 projectzero.google 首页索引（仅含 2025-08 起）之外，且 googleprojectzero.blogspot.com/2022/02/ 抓取未见该文——缺口。\n- person_json 标记 selected_conference_evidence=Black Hat US，但三篇抓取页面均无 Black Hat 演讲佐证——缺口。\n\n## 成长机制观察（documented basis）\n- 主题延续：KASLR（2022 x86 → 2025 arm64/Pixel）→ Pixel SoC 驱动沙箱逃逸（2026）。\n- 重复模式识别：Pixel 9 BigWave 与 Pixel 10 VPU 为同团队驱动，remap_pfn_range/mmap 边界类 bug，作者自述 VPU 审计「约 2 小时」即发现同类缺陷。\n- 同伴反馈：与 Jann Horn 协同审计 VPU（2026-05 帖正文）。\n- 评级/修复反馈：作者记录 BigWave 初评 Moderate、VPU 评 High 的差异，以及「首次在 90 天内被修补」的修复时效。\n\n## 缺口（明确记录）\n- 2022 x86 KASLR 帖子未直接抓取到。\n- Black Hat US 演讲无证据。\n- 入职 Project Zero 时间、教育背景、2022 前经历：未知。\n- X 账号 @__seth_jenkins 未独立抓取。\n\n## 工具调用预算\n- 已用 7 次搜索/抓取（2 WebSearch + 5 WebFetch；1 WebSearch 无结果、1 WebFetch 404）。本轮为提交轮。\n"
+        },
+        "success": true,
+        "content_sha256": "85f65f1cf08794d1d746cea17b8d1fd70b38773781cdb4d766ab32ab0668798d",
+        "accessed_at": "2026-09-26T14:46:04.386143+00:00"
+      },
+      {
+        "tool_use_id": "call_226g95gtmru575m6y4ygkw5x",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/seth-jenkins-timeline-20260926-224036-682/output.json",
+          "content": "{\n  \"person\": \"Seth Jenkins\",\n  \"dimension\": \"可核验时间线\",\n  \"identity_check\": \"projectzero.google 博客索引（首页抓取成功）将 Seth Jenkins 列为作者，与 James Forshaw、Jann Horn、Ivan Fratric、Natalie Silvanovich 等并列；三篇正文抓取成功的博文（2025-11-03、2026-01-14、2026-05-13）作者署名均为 'Seth Jenkins'。其工作集中于 Android arm64 内核 KASLR 与 Pixel SoC 驱动漏洞（BigWave、VPU），与 person_json 记录的 Android 内核/在野漏洞方向一致。X 账号 @__seth_jenkins 与记录一致，但未独立抓取该账号页面。未发现同名歧义。无法从抓取到的页面确认其加入 Project Zero 的具体时间、教育背景或 2022 年前的经历。\",\n  \"items\": [\n    {\n      \"id\": \"sj-tl-01\",\n      \"date\": \"2022\",\n      \"claim\": \"Seth Jenkins 曾在 Project Zero 博客发表一篇关于 x86 KASLR 的文章，并提出'对于本地攻击者，KASLR 已不再是有效缓解措施'的观点。其 2025-11 的 arm64 KASLR 博文明确将其作为此前的同类工作加以引用。\",\n      \"status\": \"reported\",\n      \"growth_signal\": \"KASLR 弱点分析构成其持续主题：2022 年面向 x86，2025 年扩展到 arm64/Android。该引用由其本人一手博文确认，但 2022 年原文未在本轮抓取中直接获得。\",\n      \"source\": {\n        \"title\": \"Defeating KASLR by Doing Nothing at All (Project Zero, 2025-11-03，正文自引 2022 年 x86 KASLR 博文)\",\n        \"url\": \"https://projectzero.google/2025/11/defeating-kaslr-by-doing-nothing-at-all.html\",\n        \"published\": \"2025-11-03\",\n        \"source_type\": \"blog_post\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"sj-tl-02\",\n      \"date\": \"2025-11-03\",\n      \"claim\": \"Seth Jenkins 在 Project Zero 发表 'Defeating KASLR by Doing Nothing at All'，指出 arm64 Linux 线性映射虚拟地址固定于 PAGE_OFFSET=0xffffff8000000000（物理 0x80000000）、Pixel 引导加载器固定将内核解压于 0x80010000，二者叠加使攻击者可硬编码内核基址而无需 KASLR 泄露。测试设备为 Pixel 9 与 Samsung S23。两条问题被 Linux 内核团队与 Google Pixel 判定为 'intended behavior'，非在野利用。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"平台扩展（x86→arm64/Android）与对 KASLR 缓解有效性的持续审视；以 Pixel 9 等实际设备验证物理地址固定性，体现硬件级取证习惯。\",\n      \"short_quote\": \"Project Zero and the Google Threat Intelligence Group have yet to see a hardware side-channel attack for bypassing KASLR on Android in the wild.\",\n      \"source\": {\n        \"title\": \"Defeating KASLR by Doing Nothing at All — Project Zero\",\n        \"url\": \"https://projectzero.google/2025/11/defeating-kaslr-by-doing-nothing-at-all.html\",\n        \"published\": \"2025-11-03\",\n        \"source_type\": \"blog_post\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"sj-tl-03\",\n      \"date\": \"2026-01-14\",\n      \"claim\": \"Seth Jenkins 发表 'A 0-click exploit chain for the Pixel 9 Part 2: Cracking the Sandbox with a Big Wave'，披露 Pixel SoC AV1 解码加速驱动 /dev/bigwave 的 UAF：BIGO_IOCX_PROCESS ioctl 16 秒超时后出队 job 并返回用户态，随后关闭文件描述符使含内联 job 的 inst 结构在 bigo_worker_thread 仍引用时被释放；经堆喷射控制 job->regs，实现 2144 字节任意写且无需泄露 KASLR。驱动共三处缺陷，修复于 2026-01-05。该漏洞可从 mediacodec SELinux 沙箱触达，构成 Pixel 9 0-click 链的沙箱逃逸环节。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"从 KASLR 理论分析转向完整 0-click 链构建（沙箱逃逸至内核任意读写）；通过堆喷射绕过 KASLR 依赖，与其 2025 年 KASLR 弱化结论形成方法衔接。\",\n      \"source\": {\n        \"title\": \"A 0-click exploit chain for the Pixel 9 Part 2: Cracking the Sandbox with a Big Wave — Project Zero\",\n        \"url\": \"https://projectzero.google/2026/01/pixel-0-click-part-2.html\",\n        \"published\": \"2026-01-14\",\n        \"source_type\": \"blog_post\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"sj-tl-04\",\n      \"date\": \"2026-05-13\",\n      \"claim\": \"Seth Jenkins 发表 'A 0-click exploit chain for the Pixel 10: When a Door Closes, a Window Opens'，披露 Tensor G5（Chips&Media Wave677DV）VPU 驱动 /dev/vpu 的 vpu_mmap 调用 remap_pfn_range 时未将 VMA 大小约束至寄存器区域，允许用户态映射并改写内核镜像，作者称仅需 5 行代码即可实现内核任意读写。该 bug 于 2025-11-24 报告、2026-02 Pixel 安全公告修复（71 天）。链复用 Pixel 9 的 Dolby 0-click 入口 CVE-2025-54957。作者与 Jann Horn 协同审计 VPU，自述约 2 小时即发现同类缺陷；并记录 BigWave 初评 Moderate、VPU 评 High 的评级差异，以及 VPU 为其首个在 90 天内被修补的 Android 驱动 bug。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"跨代重复练习：同团队产出的 BigWave 与 VPU 驱动属同类 mmap 边界 bug，短时间复现显示模式识别积累；与 Jann Horn 协作引入同伴反馈；对评级与修复时效的追踪反映其将厂商响应纳入研究复盘。\",\n      \"short_quote\": \"it was the first time that an Android driver bug I reported was patched within 90 days.\",\n      \"source\": {\n        \"title\": \"A 0-click exploit chain for the Pixel 10: When a Door Closes, a Window Opens — Project Zero\",\n        \"url\": \"https://projectzero.google/2026/05/pixel-10-exploit.html\",\n        \"published\": \"2026-05-13\",\n        \"source_type\": \"blog_post\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"severity 评定不一致：Pixel 9 BigWave 驱动漏洞初评 Moderate，而功能等价的 Pixel 10 VPU 漏洞评 High；作者在 2026-05 博文中将此差异作为可观察事实记录，未给出厂商评定标准的官方解释。\",\n    \"2025-11 KASLR 博文涉及的两条问题被 Linux 内核团队与 Google Pixel 判定为 'intended behavior'（非漏洞），而 2026 年两条 Pixel 链则作为可利用漏洞被修复——同为内核/驱动地址处理类问题，定性方向相反，反映其研究对象涵盖'设计性弱化'与'可修复缺陷'两类。\"\n  ],\n  \"gaps\": [\n    \"2025-11 博文自引的 2022 年 x86 KASLR Project Zero 帖子未在本轮直接抓取到：projectzero.google 首页索引仅含 2025-08 起的条目，googleprojectzero.blogspot.com/2022/02/ 抓取未见该文；其存在性仅经一手博文转引，URL 与确切发布日期缺。\",\n    \"person_json 记 selected_conference_evidence=Black Hat US，但三篇抓取到的 Project Zero 博文均未提及 Black Hat 演讲，未发现其本人 Black Hat US 议程或演讲材料；该维度无可核验证据。\",\n    \"Seth Jenkins 加入 Project Zero 的具体时间未知；2022 年帖子的引用把其 Project Zero 身份至少推至 2022 年，但确认日期缺。\",\n    \"教育背景、2022 年前的从业经历未知；本轮未发现简历、学位或早期雇主的一手材料。\",\n    \"X 账号 @__seth_jenkins 与记录一致但未独立抓取，无法据其补全时间线节点。\",\n    \"2026-01 Pixel 9 链的 Part 1（Dolby Unified Decoder 入口，mediacodec 沙箱内 RCE）由 Natalie Silvanovich 撰写，非 Seth Jenkins；故其在该 0-click 链中的贡献边界（沙箱逃逸环节）与整链作者关系需注意区分。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "7b45f5dacee342359f4f12d3a97b82cb8f2069b67de030281380970638e6e283",
+        "accessed_at": "2026-09-26T14:46:04.386147+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790433964386161000-seth-jenkins-timeline.json",
+    "label": "Seth Jenkins:timeline",
+    "elapsed_seconds": 327.69,
+    "prompt_sha256": "4888e4b4052a271efc8f0c549765ce70fb2f5d9de748e36eebddad4a8a092072",
+    "num_turns": 21,
+    "total_cost_usd": 0.675227,
+    "usage": {
+      "input_tokens": 20839,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 146368,
+      "output_tokens": 7914,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 31568,
+        "outputTokens": 15555,
+        "cacheReadInputTokens": 257024,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.675227,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

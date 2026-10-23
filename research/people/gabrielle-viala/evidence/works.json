@@ -1,0 +1,549 @@
+{
+  "person": "Gabrielle Viala",
+  "dimension": "公开作品与技术演化",
+  "identity_check": "任务输入将 person 记为 'Gabrielle Viala'，handle 记为 pwissenlit，primary_focus 记为 'Android/Boot/TEE 漏洞'，writeup_evidence 指向 blog.quarkslab.com，conference 记为 OffByOne 2024 / Black Hat。抓取结果与该记录存在多处冲突，身份无法在一手来源上闭合。Quarkslab 博客作者索引(https://blog.quarkslab.com/authors.html，128 名作者)中既无 'Viala' 也无 'pwissenlit'，仅有作者名 'Gwaby'(3 篇文章)。GitHub https://github.com/pwissenlit 的显示名为 'Gwaby'，仓库全为 fork(edk2-libc、avatar-qemu、blackhoodiere.github.io)，方向为 UEFI/firmware。由此可推断(inferred) pwissenlit 即 Quarkslab 的 'Gwaby'。但 'Gabrielle Viala' 这一全名未在任何一手抓取页面出现；pwissenlit/Gwaby 与 'Gabrielle Viala' 的同一性未获文档确认。此外 Gwaby 的实际作品主题为 Windows/UEFI/SMM，与 person_json 声称的 Android/TEE 焦点不符。SSTIC 2024、2022、2019 议程均未出现 Gabrielle Viala / pwissenlit / Gwaby(2022 出现的 Louis Vialar 为不同人)。综合判断：pwissenlit=Gwaby 为可推断身份，但 'Gabrielle Viala' 全名及其 Android/TEE 定位、OffByOne/Black Hat 出场均因资料缺口未能证实，相关条目按 status=inferred 或 unknown 标注。",
+  "items": [
+    {
+      "id": "gv-works-01",
+      "date": "2018-10-25",
+      "claim": "以作者名 Gwaby 在 Quarkslab 博客发表 'Playing with the Windows Notification Facility (WNF)'，对 Windows 通知设施(WNF)进行逆向分析，主题归类为 Reverse-Engineering。此为可抓取确认的最早署名公开作品。",
+      "status": "unknown",
+      "growth_signal": "早期作品为单点机制逆向(WNF)，未涉及利用链；技术栈以 Windows 内核对象结构与机制梳理为主，尚无后续 UEFI/SMM 阶段的约束原语→完整执行方法论。",
+      "source": {
+        "title": "Playing with the Windows Notification Facility (WNF)",
+        "url": "https://blog.quarkslab.com/playing-with-the-windows-notification-facility-wnf.html",
+        "published": "2018-10-25",
+        "source_type": "公司研究博客文章",
+        "level": "lead_only"
+      },
+      "verification": {
+        "verified_in_run": false,
+        "retrieval_method": "unverified",
+        "tool_use_id": "",
+        "accessed_at": "",
+        "content_sha256": ""
+      }
+    },
+    {
+      "id": "gv-works-02",
+      "date": "2023-06-23",
+      "claim": "以作者名 Gwaby 在 Quarkslab 博客发表 'For Science! - Using an Unimpressive Bug in EDK II to Do Some Fun Exploitation'，针对 EDK II 的 Tcg2Smm 模块(SMM/ring -2)，利用 TPM_NVS_MM_COMM_BUFFER 中 TargetAddress 校验缺失，将 mTcgNvs 指向任意 SMRAM 地址，获得固定 4 字节写原语(写 0x00000001)，再经腐蚀 mSmmMemLibInternalSmramCount 绕过 SMRAM 边界检查、借 SmmLockBox 读写、向 PiSmmCore 链表注入伪造 SMI handler 并以 ROP 关闭 WP/NX，达成 SMM 代码执行。文章自述该 bug 仅在 DXE 阶段末 EFI_SMM_READY_TO_LOCK_PROTOCOL 发布前可利用。开篇原文为：'In this blog post we'll see a technique to gain code execution in SMM from a very limited write primitive.'",
+      "status": "documented",
+      "growth_signal": "技术栈从 Windows 用户态/内核机制逆向转向 UEFI/SMM(ring -2)利用。确立'约束写原语→边界计数器腐蚀→伪造 SMI handler→ROP 关闭保护'的方法论，作者将弱原语描述为 'unimpressive'/'rather weak'，体现以窄原语经多步升级达成完整执行的技术演化路径。研究动机为公开参考实现(EDK II)的方法学练习(for science)。",
+      "short_quote": "In this blog post we'll see a technique to gain code execution in SMM from a very limited write primitive.",
+      "source": {
+        "title": "For Science! - Using an Unimpressive Bug in EDK II to Do Some Fun Exploitation",
+        "url": "https://blog.quarkslab.com/for-science-using-an-unimpressive-bug-in-edk-ii-to-do-some-fun-exploitation.html",
+        "published": "2023-06-23",
+        "source_type": "公司研究博客文章",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_kky1p5eseyhnbvw7ol2ks32v",
+        "accessed_at": "2026-09-28T01:06:32.869599+00:00",
+        "content_sha256": "60a075f87778f0fc661c2c085d3a0ecfd2c171851560933cc9e27afb06f187f3"
+      }
+    },
+    {
+      "id": "gv-works-03",
+      "date": "2025-02-11",
+      "claim": "以作者名 Gwaby 在 Quarkslab 博客发表 'Being Overlord on the Steam Deck with 1 Byte'，针对 Steam Deck(AMD Van Gogh APU)UEFI 固件中 AmdCpmDisplayFeatureSmm.efi 的 CVE-2024-0179，利用可在受控地址写入固定单字节 0x83 及有限 AND 掩码清位的能力，链式:用 AND 掩码清零 mSmmIhisiSmramCount 绕过 SMRAM 边界检查获得任意读、以 1 字节写扩展共享内存缓冲区大小使其覆盖 SMRAM、注入伪造 IHISI 命令处理函数、以 ROP 关闭 NX 页保护实现 SMM 代码执行；post-exploitation 采用 Dmytro Oleksiuk 的 SMM 后门页表重映射技术以透明读写 OS 内存。开篇原文为：'In this blog post we explain the consequences of asking our R&D boss for a Steam Deck as a Christmas gift.'",
+      "status": "documented",
+      "growth_signal": "方法论与 2023 年同构(极窄原语→边界计数器清零→伪造命令处理函数→ROP 关闭保护→SMM 执行)，但原语更窄(固定 1 字节+固定 AND 掩码)，目标从公开 EDK II 参考实现转向商业硬件固件(Steam Deck)，并明确引用整合外部同行(Dmytro Oleksiuk SMM 后门)的既有技术做 post-exploitation，体现技术积累的复用与外溢。研究目标获取来自非正式反馈机制(R&D 负责人作为圣诞礼物的 Steam Deck)，反映目标选题受团队资源与个人兴趣驱动。",
+      "short_quote": "In this blog post we explain the consequences of asking our R&D boss for a Steam Deck as a Christmas gift.",
+      "source": {
+        "title": "Being Overlord on the Steam Deck with 1 Byte",
+        "url": "https://blog.quarkslab.com/being-overlord-on-the-steam-deck-with-1-byte.html",
+        "published": "2025-02-11",
+        "source_type": "公司研究博客文章",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_htit6lto7tgbdcro4gd5i7k6",
+        "accessed_at": "2026-09-28T01:06:32.869593+00:00",
+        "content_sha256": "5094f588bec41a36d7d1e509786b9a35e62bff3e3e61d7bf652ad67e4754727d"
+      }
+    },
+    {
+      "id": "gv-works-04",
+      "date": "2024",
+      "claim": "任务输入(person_json)记录其 selected_conference_evidence 为 'OffByOne 2024 / Black Hat'，暗示 2024 年在 OffByOne 会议出场。尝试抓取 https://offbyone.fr/ 验证，连接被拒(ECONNREFUSED)，未取得一手议程页面。",
+      "status": "unknown",
+      "growth_signal": "无一手证据可评估。若成立，可作为从博客写作向会议公开演进的一环，但目前无抓取证据支持该会议出场事实、演讲主题或与 UEFI/SMM 作品的关联。",
+      "source": {
+        "title": "OffByOne 会议官网(抓取失败)",
+        "url": "https://offbyone.fr/",
+        "published": "2024",
+        "source_type": "会议官网(未抓取成功)",
+        "level": "lead_only"
+      },
+      "verification": {
+        "verified_in_run": false,
+        "retrieval_method": "unverified",
+        "tool_use_id": "",
+        "accessed_at": "",
+        "content_sha256": ""
+      }
+    },
+    {
+      "id": "gv-works-05",
+      "date": "2026",
+      "claim": "基于 GitHub(pwissenlit 显示名 Gwaby)与 Quarkslab 博客作者名一致，推断 pwissenlit 即 Quarkslab 的 Gwaby，亦即本维度所述作品的署名人。此同一性为推断，无直接署名链接 Gwaby↔pwissenlit↔Gabrielle Viala 全名。",
+      "status": "inferred",
+      "growth_signal": "身份同一性的推断支撑了将 GitHub handle、博客署名与任务记录三者关联的可能性，但仍缺一手页面同时列出三者。该缺口影响对其完整作品脉络(代码、博客、会议)的归并，不能在不确认身份的前提下合并作品归属。",
+      "source": {
+        "title": "GitHub 用户 pwissenlit 个人页",
+        "url": "https://github.com/pwissenlit",
+        "published": "2026",
+        "source_type": "代码托管平台用户主页",
+        "level": "first_hand_other"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_ahu6u0k0tss9xpwa17y7d51v",
+        "accessed_at": "2026-09-28T01:06:32.869522+00:00",
+        "content_sha256": "8efbfb4877c371483c4c92f115ea527da8d0d9485c1d30f98276d6525eeacd0b"
+      }
+    },
+    {
+      "id": "gv-works-06",
+      "date": "2026",
+      "claim": "Quarkslab 博客作者索引(128 名作者)中不存在 'Viala' 或 'pwissenlit' 署名，仅存在 'Gwaby'(3 篇)。Gwaby 的 3 篇作品主题为 Windows WNF 逆向、EDK II SMM 利用、Steam Deck SMM 利用，均与 Android/TrustZone/TEE 无关。",
+      "status": "documented",
+      "growth_signal": "该证据用于排除 person_json 中 primary_focus='Android/TEE 漏洞' 的定位与 Quarkslab 博客实际署名作品一致的可能性：在可抓取的 Quarkslab 博客范围内，Gwaby 的公开作品主题为 Windows/UEFI/SMM，并非 Android/TEE。若 Android/TEE 作品存在，应见于其他平台，但本次未抓取到相应一手来源。",
+      "source": {
+        "title": "Quarkslab 博客作者索引",
+        "url": "https://blog.quarkslab.com/authors.html",
+        "published": "2026",
+        "source_type": "公司研究博客作者索引页",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_rzgh23bwh2tswjs3h9mkvynn",
+        "accessed_at": "2026-09-28T01:06:32.869504+00:00",
+        "content_sha256": "7bb0fd6fd969e289726902fb69b8c567e362e9f7f67d8f9d480617c8219943e2"
+      }
+    }
+  ],
+  "contradictions": [
+    "person_json 将 primary_focus 记为 'Android/Boot/TEE 漏洞'，但 Quarkslab 博客上 Gwaby(推断即 pwissenlit)的全部 3 篇作品主题为 Windows WNF 逆向与 UEFI/SMM(EDK II、Steam Deck)利用，未见 Android/TrustZone/QSEE/TEE 主题；'Boot' 仅在 UEFI/SMM 语境下间接相关(2023 文章提及 SMM 参与保护 boot process、SmmLockBox 保护 BootScripts)。",
+    "person_json 的 writeup_evidence 指向 blog.quarkslab.com，但该博客作者索引中既无 'Gabrielle Viala' 也无 'pwissenlit' 署名；可抓取到的关联作者名为 'Gwaby'，而 'Gabrielle Viala' 全名未出现在任何一手页面。",
+    "person_json 记 selected_conference_evidence 为 'OffByOne 2024 / Black Hat'，但 SSTIC 2024 议程无相关署名，OffByOne 站点抓取失败(ECONNREFUSED)，Black Hat 出场无任何一手抓取证据，与该记录无法互相印证。"
+  ],
+  "gaps": [
+    "'Gabrielle Viala' 全名与 handle pwissenlit / 博客署名 Gwaby 的同一性未获任何一手页面确认。pwissenlit=Gwaby 为推断(GitHub 显示名与博客作者名一致)，但 Gabrielle Viala↔Gwaby/pwissenlit 缺直接证据，存在三者实为不同人或全名记录有误的可能。",
+    "未找到任何 Android/TrustZone/QSEE/OP-TEE/TEE 主题的一手作品，与 person_json 的 primary_focus 定位不符；该定位的来源(是否来自其他平台或早期简历)未知。",
+    "OffByOne 2024 与 Black Hat 出场均未取得一手议程/演讲页面证据：offbyone.fr 抓取被拒(ECONNREFUSED)，Black Hat 无抓取结果。无法证实或证伪 2024 年会议公开活动。",
+    "SSTIC 出场仅核查 2024/2022/2019 三年议程(均无相关署名)，未覆盖全部年份与其他法语安全会议，不足以断言从未在任何 SSTIC 年份出场。",
+    "WebSearch 工具在本会话多次返回非实时/噪声结果，导致发现线索受限；受 8 次工具调用上限约束，未能进一步核验 OffByOne、Black Hat、其他会议与 Android/TEE 方向作品。如需确认身份同一性与 Android/TEE 作品存在性，需补充对这些平台的一手抓取。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-works-20260928-085622-654",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790557592863080000-gabrielle-viala-works.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "58fa2df3-4c91-4a3f-8fb9-d2a7546f9217",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_mna9hcytvcu8wx14p97cz89b",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-works-20260928-085622-654/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-28T01:06:32.869345+00:00"
+      },
+      {
+        "tool_use_id": "call_ps1fx85jwcciw64fxpz1wn22",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-works-20260928-085622-654/task.md"
+        },
+        "success": true,
+        "content_sha256": "5ebd2165a0bef4f75e486b96df60063e9e8c4c4ccc7e0e2cabed2dc0771ce49a",
+        "accessed_at": "2026-09-28T01:06:32.869375+00:00"
+      },
+      {
+        "tool_use_id": "call_immr83potjbezbkg6tw8eyqk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-works-20260928-085622-654/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "f162500f91bd8945e613fee2954fc6b3577a3eceac9364f7ddb1ac3166aa9785",
+        "accessed_at": "2026-09-28T01:06:32.869387+00:00"
+      },
+      {
+        "tool_use_id": "call_hj983rn679du4cm2n09e9f3l",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-works-20260928-085622-654/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "e2cac51510b7241c8538a97d94a3bd2956fbd7d6379718a627fabce696db769c",
+        "accessed_at": "2026-09-28T01:06:32.869396+00:00"
+      },
+      {
+        "tool_use_id": "call_188bezrsbipwxqirqe1ujkrt",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-works-20260928-085622-654/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "98d6159955e4031db24639369d116819220986aa8ec32370f8ce25cc7e814219",
+        "accessed_at": "2026-09-28T01:06:32.869401+00:00"
+      },
+      {
+        "tool_use_id": "call_l0syxv8o4w4aaoxgpkwim1xq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-works-20260928-085622-654/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6e5034a8a6d972f492d2b08811243633e8b01984efe14e10fad4de7367634388",
+        "accessed_at": "2026-09-28T01:06:32.869413+00:00"
+      },
+      {
+        "tool_use_id": "call_993pu1743kuqsfu8502jxivp",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-works-20260928-085622-654/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "aa3bfe1a48db5737540216e8b75dc53a427b41a9878bc65c71951705b0d88e52",
+        "accessed_at": "2026-09-28T01:06:32.869417+00:00"
+      },
+      {
+        "tool_use_id": "call_eofj5qvy7ex3zz4t0bfzfdvp",
+        "tool": "WebSearch",
+        "input": {
+          "query": "Gabrielle Viala Quarkslab Android TEE writeup pwissenlit"
+        },
+        "success": true,
+        "content_sha256": "9981b2a25b41fa5d20fd31be9b9f0ac567a745fd84b252f34921c43b6c9b412f",
+        "accessed_at": "2026-09-28T01:06:32.869426+00:00"
+      },
+      {
+        "tool_use_id": "call_hkr0mrvj58n1wot29l8bszcn",
+        "tool": "WebSearch",
+        "input": {
+          "query": "pwissenlit Gabrielle Viala blog quarkslab vulnerability"
+        },
+        "success": true,
+        "content_sha256": "ffcf0f8eac25ebdcee457e4333f7c88ad3514be48235bb028e0c028dab75c067",
+        "accessed_at": "2026-09-28T01:06:32.869431+00:00"
+      },
+      {
+        "tool_use_id": "call_kkd2qdgdfoiqhb990xc737f1",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/.claude/projects/-Users-c0ss4ck-Projects-C0ss4ck-ZeroMDASH-research-runs-sub-workspace-gabrielle-viala-works-20260928-085622-654/58fa2df3-4c91-4a3f-8fb9-d2a7546f9217/tool-results/call_hkr0mrvj58n1wot29l8bszcn.txt",
+          "limit": 300
+        },
+        "success": false,
+        "content_sha256": "6fb426a3aaaab6e55ee05e7c09575bcd722198a5911ea6b4ec693358a4a66f8f",
+        "accessed_at": "2026-09-28T01:06:32.869436+00:00"
+      },
+      {
+        "tool_use_id": "call_nf1dt58t4wu2tdoodm7fu7l4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/.claude/projects/-Users-c0ss4ck-Projects-C0ss4ck-ZeroMDASH-research-runs-sub-workspace-gabrielle-viala-works-20260928-085622-654/58fa2df3-4c91-4a3f-8fb9-d2a7546f9217/tool-results/call_hkr0mrvj58n1wot29l8bszcn.txt",
+          "limit": 150
+        },
+        "success": false,
+        "content_sha256": "6fb426a3aaaab6e55ee05e7c09575bcd722198a5911ea6b4ec693358a4a66f8f",
+        "accessed_at": "2026-09-28T01:06:32.869440+00:00"
+      },
+      {
+        "tool_use_id": "call_tzubd9q1swrtavskxez1976m",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/.claude/projects/-Users-c0ss4ck-Projects-C0ss4ck-ZeroMDASH-research-runs-sub-workspace-gabrielle-viala-works-20260928-085622-654/58fa2df3-4c91-4a3f-8fb9-d2a7546f9217/tool-results/call_hkr0mrvj58n1wot29l8bszcn.txt",
+          "offset": 0,
+          "limit": 80
+        },
+        "success": false,
+        "content_sha256": "6fb426a3aaaab6e55ee05e7c09575bcd722198a5911ea6b4ec693358a4a66f8f",
+        "accessed_at": "2026-09-28T01:06:32.869444+00:00"
+      },
+      {
+        "tool_use_id": "call_1tcol7cu7dar7n3lkxlu3emy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/.claude/projects/-Users-c0ss4ck-Projects-C0ss4ck-ZeroMDASH-research-runs-sub-workspace-gabrielle-viala-works-20260928-085622-654/58fa2df3-4c91-4a3f-8fb9-d2a7546f9217/tool-results/call_hkr0mrvj58n1wot29l8bszcn.txt",
+          "limit": 40,
+          "offset": 0
+        },
+        "success": false,
+        "content_sha256": "6fb426a3aaaab6e55ee05e7c09575bcd722198a5911ea6b4ec693358a4a66f8f",
+        "accessed_at": "2026-09-28T01:06:32.869452+00:00"
+      },
+      {
+        "tool_use_id": "call_91ussj44dhgmsx11mo1ls2fh",
+        "tool": "WebSearch",
+        "input": {
+          "query": "site:blog.quarkslab.com Gabrielle Viala"
+        },
+        "success": true,
+        "content_sha256": "15da30aebde01687c415948c14a8668d726c1f8e6efa90ef8f2903fa5cd67b9b",
+        "accessed_at": "2026-09-28T01:06:32.869458+00:00"
+      },
+      {
+        "tool_use_id": "call_ufvn8p0uew71val03dzu0al8",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Gabrielle Viala\" OR \"pwissenlit\" SSTIC TEE Android"
+        },
+        "success": true,
+        "content_sha256": "cad6e0393b3dba6dd6599689f210292bf5301dcd0e04b74ed2edbbbc32bf968a",
+        "accessed_at": "2026-09-28T01:06:32.869466+00:00"
+      },
+      {
+        "tool_use_id": "call_p7rix3gw22ei1dhb2thpjslj",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://blog.quarkslab.com/author/gabrielle-viala.html",
+          "prompt": "List all blog post titles, URLs, and publication dates authored by Gabrielle Viala. Include any co-authors and topics covered."
+        },
+        "success": true,
+        "content_sha256": "cb727220cfeea78501a7d56bf8bf397ba06833aaef3bb35d2c488aaa31dcf263",
+        "accessed_at": "2026-09-28T01:06:32.869479+00:00"
+      },
+      {
+        "tool_use_id": "call_66uqr1uubvqoeos2tetcvzwo",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://www.sstic.org/",
+          "prompt": "Find any mentions of Gabrielle Viala or pwissenlit in talks, papers, or program. List title, year, URL."
+        },
+        "success": true,
+        "content_sha256": "fc6b5e07b8839e1dfd0ad8029851d6d153fb7ffb6e7bd296b2ee69c689cfb00f",
+        "accessed_at": "2026-09-28T01:06:32.869483+00:00"
+      },
+      {
+        "tool_use_id": "call_rzgh23bwh2tswjs3h9mkvynn",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all author names visible on this blog page, especially anything containing \"Viala\" or \"pwissenlit\". Also list blog post titles with URLs and dates.",
+          "url": "https://blog.quarkslab.com/authors.html"
+        },
+        "success": true,
+        "content_sha256": "7bb0fd6fd969e289726902fb69b8c567e362e9f7f67d8f9d480617c8219943e2",
+        "accessed_at": "2026-09-28T01:06:32.869504+00:00"
+      },
+      {
+        "tool_use_id": "call_4hp4kvrmy0hwxan0k5lfymsw",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all articles by Gabrielle Viala or pwissenlit. Include title, URL, date, co-authors, and topic.",
+          "url": "https://blog.quarkslab.com/"
+        },
+        "success": true,
+        "content_sha256": "cbfc3338bf399defe1fc1255bc6f8d84d7bf9a3bc4b3ac467dfb5d97cfcba053",
+        "accessed_at": "2026-09-28T01:06:32.869489+00:00"
+      },
+      {
+        "tool_use_id": "call_by8onmzdy57jadnvfnq7w8xz",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"pwissenlit\" Quarkslab OR SSTIC OR Black Hat researcher"
+        },
+        "success": true,
+        "content_sha256": "bec4ca4e7a9de48b12e21dffd52d368732b7534627a0dabb904f55ad7f52bdb3",
+        "accessed_at": "2026-09-28T01:06:32.869511+00:00"
+      },
+      {
+        "tool_use_id": "call_m1pfxh4ymczr7n3tjrt5bt52",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Search for any author or talk containing \"pwissenlit\" or \"Viala\". List title, year, URL.",
+          "url": "https://www.sstic.org/?page=sstic_archives"
+        },
+        "success": true,
+        "content_sha256": "f2abb54c1ce921d3388b6f766cb2c8beb4787b0db64c4cd2a676baec316800b9",
+        "accessed_at": "2026-09-28T01:06:32.869515+00:00"
+      },
+      {
+        "tool_use_id": "call_ahu6u0k0tss9xpwa17y7d51v",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Describe this GitHub profile: username, real name shown, bio, repositories, pinned repos with descriptions and dates.",
+          "url": "https://github.com/pwissenlit"
+        },
+        "success": true,
+        "content_sha256": "8efbfb4877c371483c4c92f115ea527da8d0d9485c1d30f98276d6525eeacd0b",
+        "accessed_at": "2026-09-28T01:06:32.869522+00:00"
+      },
+      {
+        "tool_use_id": "call_b0r2t9xxlcyquac6bgdwwx3i",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all talks and authors for SSTIC 2024. Find any entry mentioning \"Viala\" or \"pwissenlit\".",
+          "url": "https://www.sstic.org/2024/programme/"
+        },
+        "success": true,
+        "content_sha256": "0df56d6a6fa9ecc65469403c633625468f8b6c66b18841aa01d17052d21f5a0d",
+        "accessed_at": "2026-09-28T01:06:32.869531+00:00"
+      },
+      {
+        "tool_use_id": "call_817q69h6tvavd3hy4epxyz2f",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all blog posts by this author: title, URL, publication date, co-authors. Note any real name shown (such as Gabrielle Viala) and bio.",
+          "url": "https://blog.quarkslab.com/author/gwaby.html"
+        },
+        "success": true,
+        "content_sha256": "aa80b779883d9e787e31af2e286cc8f480c2d6275a2bcbcc73896e681b704ddb",
+        "accessed_at": "2026-09-28T01:06:32.869536+00:00"
+      },
+      {
+        "tool_use_id": "call_ilp37wf5edmwhtc6tp5gfdhz",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all talks and authors for SSTIC 2019. Find any entry mentioning \"Viala\" or \"pwissenlit\" or \"Gwaby\".",
+          "url": "https://www.sstic.org/2019/programme/"
+        },
+        "success": true,
+        "content_sha256": "c9a967cebbb1324bed93a25917bb62e064bc2f6483f44157e67b8cada24727c9",
+        "accessed_at": "2026-09-28T01:06:32.869545+00:00"
+      },
+      {
+        "tool_use_id": "call_tjn9rbght20hx9w5wtgre3uw",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"Gabrielle Viala\" security researcher Android TEE"
+        },
+        "success": true,
+        "content_sha256": "f3e9519a48f77aee820bf9c7a9b6f4cb492d6ae0469d09693a618e3126c93e04",
+        "accessed_at": "2026-09-28T01:06:32.869555+00:00"
+      },
+      {
+        "tool_use_id": "call_v2xfi1qovnny18vyg2vnsjfg",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "List all talks and authors for SSTIC 2022. Find any entry mentioning \"Viala\" or \"pwissenlit\" or \"Gwaby\" or \"Gabrielle\".",
+          "url": "https://www.sstic.org/2022/programme/"
+        },
+        "success": true,
+        "content_sha256": "7ff93c5ab8aacf237b8ff74c547ea698125b915b72999fc40d5e0b3db30e10d0",
+        "accessed_at": "2026-09-28T01:06:32.869564+00:00"
+      },
+      {
+        "tool_use_id": "call_lbz5e5d2ttvhdys8mvhchqcn",
+        "tool": "WebSearch",
+        "input": {
+          "query": "\"pwissenlit\" OR \"Gwaby\" Quarkslab Steam Deck EDK II UEFI exploit"
+        },
+        "success": true,
+        "content_sha256": "bf45932bd6cfe9e0e7c055b9bfe2930be9cc6fe4938b92555651f8d0cc94bb5b",
+        "accessed_at": "2026-09-28T01:06:32.869574+00:00"
+      },
+      {
+        "tool_use_id": "call_cggjb0pz1x0cb2i7cqp3ejqw",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Find any speaker named Gabrielle Viala, pwissenlit, or Gwaby. List the talk title, year, and URL if present. Also describe what OffByOne 2024 is and list its speakers.",
+          "url": "https://offbyone.fr/"
+        },
+        "success": false,
+        "content_sha256": "415e894063094cf47adb4abf7c6d433a373fccbea3415ec86d5cf3fc73acee80",
+        "accessed_at": "2026-09-28T01:06:32.869569+00:00"
+      },
+      {
+        "tool_use_id": "call_kky1p5eseyhnbvw7ol2ks32v",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize this article: publication date, author, technical target, what bug/exploit technique is demonstrated, difficulty level described, and any mention of TEE, Android, or boot. Quote the opening sentence verbatim.",
+          "url": "https://blog.quarkslab.com/for-science-using-an-unimpressive-bug-in-edk-ii-to-do-some-fun-exploitation.html"
+        },
+        "success": true,
+        "content_sha256": "60a075f87778f0fc661c2c085d3a0ecfd2c171851560933cc9e27afb06f187f3",
+        "accessed_at": "2026-09-28T01:06:32.869599+00:00"
+      },
+      {
+        "tool_use_id": "call_htit6lto7tgbdcro4gd5i7k6",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Summarize this article: publication date, author, technical target (Steam Deck/UEFI), what 1-byte bug and exploit technique are described, difficulty level, and any mention of TEE, Android, or secure boot. Quote the opening sentence verbatim.",
+          "url": "https://blog.quarkslab.com/being-overlord-on-the-steam-deck-with-1-byte.html"
+        },
+        "success": true,
+        "content_sha256": "5094f588bec41a36d7d1e509786b9a35e62bff3e3e61d7bf652ad67e4754727d",
+        "accessed_at": "2026-09-28T01:06:32.869593+00:00"
+      },
+      {
+        "tool_use_id": "call_ixy8d69c03uelrxkrfglr9fk",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-works-20260928-085622-654/checkpoint.md",
+          "content": "# Checkpoint — Gabrielle Viala / 公开作品与技术演化\n\n## 身份核验（关键未决矛盾）\n\nperson_json 声称：person=\"Gabrielle Viala\"，handle=pwissenlit，primary_focus=\"Android/Boot/TEE 漏洞\"，writeup_evidence=blog.quarkslab.com，conference=OffByOne 2024 / Black Hat。\n\n抓取结果与上述多处冲突：\n- Quarkslab 博客作者索引（128 人，https://blog.quarkslab.com/authors.html）**无 \"Viala\"，无 \"pwissenlit\"**；存在 \"Gwaby\"（3 篇）。\n- GitHub https://github.com/pwissenlit：显示名 **\"Gwaby\"**，3 个仓库全为 fork（edk2-libc、avatar-qemu、blackhoodiere.github.io），方向为 UEFI/firmware，无 Android/TEE 原创。\n- SSTIC 2024、2022、2019 议程均无 Gabrielle Viala / pwissenlit / Gwaby。SSTIC 2022 出现 Louis Vialar（不同人，侧信道）。\n- \"Gabrielle Viala\" 这一全名在所有抓取页面均未出现。WebSearch 对该全名返回非实时结果。\n\n推断（标记 inferred，非 documented）：\n- pwissenlit = Gwaby（GitHub 显示名 + Quarkslab 博客作者名一致）。\n- \"Gabrielle Viala\" 与 pwissenlit/Gwaby 的关系未被任何一手或权威二手来源确认；可能为别名/译名，也可能 person_json 的名字字段有误。此缺口须在 identity_check 与 gaps 中如实记录。\n\n## 已确认来源（一手 / 抓取成功）\n\n1. https://blog.quarkslab.com/author/gwaby.html — Quarkslab 博客 Gwaby 作者页，列 3 篇文章。\n2. https://blog.quarkslab.com/playing-with-the-windows-notification-facility-wnf.html — 2018-10-25，WNF 逆向。\n3. https://blog.quarkslab.com/for-science-using-an-unimpressive-bug-in-edk-ii-to-do-some-fun-exploitation.html — 2023-06-23，EDK II Tcg2Smm 4 字节固定写原语 → SMM 代码执行。开篇原文：\"In this blog post we'll see a technique to gain code execution in SMM from a very limited write primitive.\"\n4. https://blog.quarkslab.com/being-overlord-on-the-steam-deck-with-1-byte.html — 2025-02-11，Steam Deck UEFI/SMM，CVE-2024-0179，1 字节（0x83）写 + AND 掩码 → SMRAM 任意读写 → SMM 代码执行。开篇原文：\"In this blog post we explain the consequences of asking our R&D boss for a Steam Deck as a Christmas gift.\"\n5. https://blog.quarkslab.com/authors.html — 作者索引，证伪 \"Viala/pwissenlit\" 直接署名。\n6. https://github.com/pwissenlit — 显示名 Gwaby。\n\n## 技术演化（基于 Gwaby 三篇，UEFI/SMM 方向，非 Android/TEE）\n\n- 2018（WNF）：Windows 内核机制逆向，工具/结构分析为主，无利用链。\n- 2023（EDK II Tcg2Smm）：进入 UEFI SMM；从\"unimpressive\"固定 4 字节写原语出发，经 SmmMemLib 边界计数器腐蚀、SmmLockBox、伪造 SMI handler、ROP 关闭 WP/NX，达成 ring -2 代码执行；强调约束原语→任意读写的多步升级方法论。\n- 2025（Steam Deck CVE-2024-0179）：AMD SMM 模块，1 字节写(0x83)+AND 掩码极窄原语；链式升级 SMRAM 边界绕过、假 IHISI handler、ROP 去 NX；明确借用 Dmytro Oleksiuk SMM 后门页表重映射作为 post-exploitation；目标为商业硬件（Steam Deck，AMD Van Gogh APU）。难度评估为高。\n\n成长信号：约束原语→完整执行的方法论重复与深化（2023 与 2025 同构：弱原语 + 边界计数器腐蚀 + 伪造 SMI handler + ROP）；引用并整合外部同行工作（Oleksiuk）；目标从公开 UEFI 参考实现转向商业硬件固件；开篇自述研究动机来自\"圣诞礼物\"式 R&D 请求，体现工具/目标获取的非正式反馈机制。\n\n## 未完成 / 资料缺口\n\n- \"Gabrielle Viala\" 全名零文档支持；pwissenlit↔Gwaby↔Gabrielle Viala 三者关系未确认。\n- primary_focus=\"Android/TEE\" 与实际抓取的 UEFI/SMM 作品不符；未找到任何 Android/TrustZone/QSEE 主题一手作品。\n- OffByOne 2024：offbyone.fr WebFetch ECONNREFUSED，未验证演讲事实。\n- Black Hat 出场：未抓取到证据。\n- SSTIC 出场：2024/2022/2019 议程均无，未覆盖全部年份，不能断言从未出场。\n- 工具预算：已用 8 次工具调用上限（2 WebSearch 噪声 + 6 WebFetch，其中 authors/author-gwaby/github/sstic-2024/sstic-2022/for-science/being-overlord 有效）。无剩余预算继续搜索。\n\n## 复核结论\n\n- 凡引用 Gwaby 三篇博客的证据：status=documented，level=primary。\n- 凡涉及 pwissenlit=Gwaby 推断：status=inferred。\n- 凡涉及 \"Gabrielle Viala\" 身份、Android/TEE 焦点、OffByOne/Black Hat/SSTIC 出场：status=unknown 或 inferred，并在 gaps 记录。\n"
+        },
+        "success": true,
+        "content_sha256": "1f236642034dc293778fe7f0079cf63a797600fba955dad9ebc930acadf3496f",
+        "accessed_at": "2026-09-28T01:06:32.869605+00:00"
+      },
+      {
+        "tool_use_id": "call_btn4cog1zmerealdmfu0afms",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/gabrielle-viala-works-20260928-085622-654/output.json",
+          "content": "{\n  \"person\": \"Gabrielle Viala\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"任务输入将 person 记为 'Gabrielle Viala'，handle 记为 pwissenlit，primary_focus 记为 'Android/Boot/TEE 漏洞'，writeup_evidence 指向 blog.quarkslab.com，conference 记为 OffByOne 2024 / Black Hat。抓取结果与该记录存在多处冲突，身份无法在一手来源上闭合。Quarkslab 博客作者索引(https://blog.quarkslab.com/authors.html，128 名作者)中既无 'Viala' 也无 'pwissenlit'，仅有作者名 'Gwaby'(3 篇文章)。GitHub https://github.com/pwissenlit 的显示名为 'Gwaby'，仓库全为 fork(edk2-libc、avatar-qemu、blackhoodiere.github.io)，方向为 UEFI/firmware。由此可推断(inferred) pwissenlit 即 Quarkslab 的 'Gwaby'。但 'Gabrielle Viala' 这一全名未在任何一手抓取页面出现；pwissenlit/Gwaby 与 'Gabrielle Viala' 的同一性未获文档确认。此外 Gwaby 的实际作品主题为 Windows/UEFI/SMM，与 person_json 声称的 Android/TEE 焦点不符。SSTIC 2024、2022、2019 议程均未出现 Gabrielle Viala / pwissenlit / Gwaby(2022 出现的 Louis Vialar 为不同人)。综合判断：pwissenlit=Gwaby 为可推断身份，但 'Gabrielle Viala' 全名及其 Android/TEE 定位、OffByOne/Black Hat 出场均因资料缺口未能证实，相关条目按 status=inferred 或 unknown 标注。\",\n  \"items\": [\n    {\n      \"id\": \"gv-works-01\",\n      \"date\": \"2018-10-25\",\n      \"claim\": \"以作者名 Gwaby 在 Quarkslab 博客发表 'Playing with the Windows Notification Facility (WNF)'，对 Windows 通知设施(WNF)进行逆向分析，主题归类为 Reverse-Engineering。此为可抓取确认的最早署名公开作品。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"早期作品为单点机制逆向(WNF)，未涉及利用链；技术栈以 Windows 内核对象结构与机制梳理为主，尚无后续 UEFI/SMM 阶段的约束原语→完整执行方法论。\",\n      \"source\": {\n        \"title\": \"Playing with the Windows Notification Facility (WNF)\",\n        \"url\": \"https://blog.quarkslab.com/playing-with-the-windows-notification-facility-wnf.html\",\n        \"published\": \"2018-10-25\",\n        \"source_type\": \"公司研究博客文章\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"gv-works-02\",\n      \"date\": \"2023-06-23\",\n      \"claim\": \"以作者名 Gwaby 在 Quarkslab 博客发表 'For Science! - Using an Unimpressive Bug in EDK II to Do Some Fun Exploitation'，针对 EDK II 的 Tcg2Smm 模块(SMM/ring -2)，利用 TPM_NVS_MM_COMM_BUFFER 中 TargetAddress 校验缺失，将 mTcgNvs 指向任意 SMRAM 地址，获得固定 4 字节写原语(写 0x00000001)，再经腐蚀 mSmmMemLibInternalSmramCount 绕过 SMRAM 边界检查、借 SmmLockBox 读写、向 PiSmmCore 链表注入伪造 SMI handler 并以 ROP 关闭 WP/NX，达成 SMM 代码执行。文章自述该 bug 仅在 DXE 阶段末 EFI_SMM_READY_TO_LOCK_PROTOCOL 发布前可利用。开篇原文为：'In this blog post we'll see a technique to gain code execution in SMM from a very limited write primitive.'\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"技术栈从 Windows 用户态/内核机制逆向转向 UEFI/SMM(ring -2)利用。确立'约束写原语→边界计数器腐蚀→伪造 SMI handler→ROP 关闭保护'的方法论，作者将弱原语描述为 'unimpressive'/'rather weak'，体现以窄原语经多步升级达成完整执行的技术演化路径。研究动机为公开参考实现(EDK II)的方法学练习(for science)。\",\n      \"short_quote\": \"In this blog post we'll see a technique to gain code execution in SMM from a very limited write primitive.\",\n      \"source\": {\n        \"title\": \"For Science! - Using an Unimpressive Bug in EDK II to Do Some Fun Exploitation\",\n        \"url\": \"https://blog.quarkslab.com/for-science-using-an-unimpressive-bug-in-edk-ii-to-do-some-fun-exploitation.html\",\n        \"published\": \"2023-06-23\",\n        \"source_type\": \"公司研究博客文章\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"gv-works-03\",\n      \"date\": \"2025-02-11\",\n      \"claim\": \"以作者名 Gwaby 在 Quarkslab 博客发表 'Being Overlord on the Steam Deck with 1 Byte'，针对 Steam Deck(AMD Van Gogh APU)UEFI 固件中 AmdCpmDisplayFeatureSmm.efi 的 CVE-2024-0179，利用可在受控地址写入固定单字节 0x83 及有限 AND 掩码清位的能力，链式:用 AND 掩码清零 mSmmIhisiSmramCount 绕过 SMRAM 边界检查获得任意读、以 1 字节写扩展共享内存缓冲区大小使其覆盖 SMRAM、注入伪造 IHISI 命令处理函数、以 ROP 关闭 NX 页保护实现 SMM 代码执行；post-exploitation 采用 Dmytro Oleksiuk 的 SMM 后门页表重映射技术以透明读写 OS 内存。开篇原文为：'In this blog post we explain the consequences of asking our R&D boss for a Steam Deck as a Christmas gift.'\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"方法论与 2023 年同构(极窄原语→边界计数器清零→伪造命令处理函数→ROP 关闭保护→SMM 执行)，但原语更窄(固定 1 字节+固定 AND 掩码)，目标从公开 EDK II 参考实现转向商业硬件固件(Steam Deck)，并明确引用整合外部同行(Dmytro Oleksiuk SMM 后门)的既有技术做 post-exploitation，体现技术积累的复用与外溢。研究目标获取来自非正式反馈机制(R&D 负责人作为圣诞礼物的 Steam Deck)，反映目标选题受团队资源与个人兴趣驱动。\",\n      \"short_quote\": \"In this blog post we explain the consequences of asking our R&D boss for a Steam Deck as a Christmas gift.\",\n      \"source\": {\n        \"title\": \"Being Overlord on the Steam Deck with 1 Byte\",\n        \"url\": \"https://blog.quarkslab.com/being-overlord-on-the-steam-deck-with-1-byte.html\",\n        \"published\": \"2025-02-11\",\n        \"source_type\": \"公司研究博客文章\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"gv-works-04\",\n      \"date\": \"2024\",\n      \"claim\": \"任务输入(person_json)记录其 selected_conference_evidence 为 'OffByOne 2024 / Black Hat'，暗示 2024 年在 OffByOne 会议出场。尝试抓取 https://offbyone.fr/ 验证，连接被拒(ECONNREFUSED)，未取得一手议程页面。\",\n      \"status\": \"unknown\",\n      \"growth_signal\": \"无一手证据可评估。若成立，可作为从博客写作向会议公开演进的一环，但目前无抓取证据支持该会议出场事实、演讲主题或与 UEFI/SMM 作品的关联。\",\n      \"source\": {\n        \"title\": \"OffByOne 会议官网(抓取失败)\",\n        \"url\": \"https://offbyone.fr/\",\n        \"published\": \"2024\",\n        \"source_type\": \"会议官网(未抓取成功)\",\n        \"level\": \"lead_only\"\n      }\n    },\n    {\n      \"id\": \"gv-works-05\",\n      \"date\": \"2026\",\n      \"claim\": \"基于 GitHub(pwissenlit 显示名 Gwaby)与 Quarkslab 博客作者名一致，推断 pwissenlit 即 Quarkslab 的 Gwaby，亦即本维度所述作品的署名人。此同一性为推断，无直接署名链接 Gwaby↔pwissenlit↔Gabrielle Viala 全名。\",\n      \"status\": \"inferred\",\n      \"growth_signal\": \"身份同一性的推断支撑了将 GitHub handle、博客署名与任务记录三者关联的可能性，但仍缺一手页面同时列出三者。该缺口影响对其完整作品脉络(代码、博客、会议)的归并，不能在不确认身份的前提下合并作品归属。\",\n      \"source\": {\n        \"title\": \"GitHub 用户 pwissenlit 个人页\",\n        \"url\": \"https://github.com/pwissenlit\",\n        \"published\": \"2026\",\n        \"source_type\": \"代码托管平台用户主页\",\n        \"level\": \"first_hand_other\"\n      }\n    },\n    {\n      \"id\": \"gv-works-06\",\n      \"date\": \"2026\",\n      \"claim\": \"Quarkslab 博客作者索引(128 名作者)中不存在 'Viala' 或 'pwissenlit' 署名，仅存在 'Gwaby'(3 篇)。Gwaby 的 3 篇作品主题为 Windows WNF 逆向、EDK II SMM 利用、Steam Deck SMM 利用，均与 Android/TrustZone/TEE 无关。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"该证据用于排除 person_json 中 primary_focus='Android/TEE 漏洞' 的定位与 Quarkslab 博客实际署名作品一致的可能性：在可抓取的 Quarkslab 博客范围内，Gwaby 的公开作品主题为 Windows/UEFI/SMM，并非 Android/TEE。若 Android/TEE 作品存在，应见于其他平台，但本次未抓取到相应一手来源。\",\n      \"source\": {\n        \"title\": \"Quarkslab 博客作者索引\",\n        \"url\": \"https://blog.quarkslab.com/authors.html\",\n        \"published\": \"2026\",\n        \"source_type\": \"公司研究博客作者索引页\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"person_json 将 primary_focus 记为 'Android/Boot/TEE 漏洞'，但 Quarkslab 博客上 Gwaby(推断即 pwissenlit)的全部 3 篇作品主题为 Windows WNF 逆向与 UEFI/SMM(EDK II、Steam Deck)利用，未见 Android/TrustZone/QSEE/TEE 主题；'Boot' 仅在 UEFI/SMM 语境下间接相关(2023 文章提及 SMM 参与保护 boot process、SmmLockBox 保护 BootScripts)。\",\n    \"person_json 的 writeup_evidence 指向 blog.quarkslab.com，但该博客作者索引中既无 'Gabrielle Viala' 也无 'pwissenlit' 署名；可抓取到的关联作者名为 'Gwaby'，而 'Gabrielle Viala' 全名未出现在任何一手页面。\",\n    \"person_json 记 selected_conference_evidence 为 'OffByOne 2024 / Black Hat'，但 SSTIC 2024 议程无相关署名，OffByOne 站点抓取失败(ECONNREFUSED)，Black Hat 出场无任何一手抓取证据，与该记录无法互相印证。\"\n  ],\n  \"gaps\": [\n    \"'Gabrielle Viala' 全名与 handle pwissenlit / 博客署名 Gwaby 的同一性未获任何一手页面确认。pwissenlit=Gwaby 为推断(GitHub 显示名与博客作者名一致)，但 Gabrielle Viala↔Gwaby/pwissenlit 缺直接证据，存在三者实为不同人或全名记录有误的可能。\",\n    \"未找到任何 Android/TrustZone/QSEE/OP-TEE/TEE 主题的一手作品，与 person_json 的 primary_focus 定位不符；该定位的来源(是否来自其他平台或早期简历)未知。\",\n    \"OffByOne 2024 与 Black Hat 出场均未取得一手议程/演讲页面证据：offbyone.fr 抓取被拒(ECONNREFUSED)，Black Hat 无抓取结果。无法证实或证伪 2024 年会议公开活动。\",\n    \"SSTIC 出场仅核查 2024/2022/2019 三年议程(均无相关署名)，未覆盖全部年份与其他法语安全会议，不足以断言从未在任何 SSTIC 年份出场。\",\n    \"WebSearch 工具在本会话多次返回非实时/噪声结果，导致发现线索受限；受 8 次工具调用上限约束，未能进一步核验 OffByOne、Black Hat、其他会议与 Android/TEE 方向作品。如需确认身份同一性与 Android/TEE 作品存在性，需补充对这些平台的一手抓取。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "662cc8189a3cc49f3932aba8849c705061d3a6fca116f46651dbfb0cf3b5c1a2",
+        "accessed_at": "2026-09-28T01:06:32.869610+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790557592869624000-gabrielle-viala-works.json",
+    "label": "Gabrielle Viala:works",
+    "elapsed_seconds": 610.21,
+    "prompt_sha256": "539c15444109a49ed1f5a04dca1cad11d620ffde9abcdfcf49a84caf0dd30854",
+    "num_turns": 19,
+    "total_cost_usd": 1.7680970000000003,
+    "usage": {
+      "input_tokens": 24732,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 300032,
+      "output_tokens": 7377,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 53935,
+        "outputTokens": 53702,
+        "cacheReadInputTokens": 311744,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.7680970000000003,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": true,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

@@ -1,0 +1,322 @@
+{
+  "person": "Stephen Röttger",
+  "expertise": [
+    "Fuzzing 入门与协议实现漏洞挖掘（ntpd，2015）",
+    "Chrome TurboFan JIT 手动代码审计与利用构建（2019）",
+    "Chrome Mojo IPC 原语分析（2020）",
+    "硬件侧信道（RIDL/MDS）与软件漏洞结合的浏览器沙箱逃逸（2020）",
+    "V8 控制流完整性缓解机制设计与运行时安全架构（2023）",
+    "CTF 出题与赛事基础设施搭建（2018，身份关联为姓氏拼写与研究方向吻合的间接推断）"
+  ],
+  "stages": [
+    {
+      "period": "2015 年 1 月（ntpd 文章发布日；正文自述学习 fuzzing 起始于此前数月，CVE-2014-9295 于 2014-12-20 在 NVD 发布；个人 fuzzing 学习确切起始时间未见一手来源）",
+      "stage": "Fuzzing 入门与首个目标选择",
+      "capability_change": "以 ntpd 作为首个 fuzzing 目标，依据为 NTP 协议先验背景且复杂度可控；产出 CVE-2014-9295 与首个 OS X 利用，完成由协议先验到漏洞发现与利用构建的初次贯通。",
+      "evidence_ids": [
+        "roettger-deepconv-01",
+        "roettger-deepconv-02",
+        "sr-r1-tl-01",
+        "sr-r1-conv-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2018 年 12 月（35C3 期间）",
+      "stage": "CTF 出题与赛事基础设施搭建（背景线索）",
+      "capability_change": "GitHub 账户 sroettger 公开维护 35c3ctf_chals、gce-ctf、play-my-challenge 等仓库，并 fork google/security-research-pocs、google/nsjail，体现 CTF 出题、部署工具建设与低层隔离工具跟进的实践。需显式标注：GitHub 账户 sroettger 与本名 Stephen Röttger 的同一性未取得平台交叉证明（GitHub profile 不显示真实姓名、雇主、地理位置或社交链接），该阶段身份关联仅为姓氏拼写与研究方向吻合的间接推断，仅作背景线索。",
+      "evidence_ids": [
+        "sr-works-01",
+        "sr-works-02",
+        "sr-works-03"
+      ],
+      "confidence": "low"
+    },
+    {
+      "period": "2019 年 5 月",
+      "stage": "Chrome TurboFan JIT 手动审计与利用构建",
+      "capability_change": "对 Chrome TurboFan JIT 编译器处理 Array.prototype.indexOf/includes 缺少运行时检查的漏洞进行系统性全调用点审计，将信息泄露升级为任意写原语；该文无 Mojo、IPC、port name 等字样，主题为 JIT 与利用原语构建。",
+      "evidence_ids": [
+        "stephen-ext-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2020 年 2 月",
+      "stage": "跨入硬件侧信道与完整沙箱逃逸",
+      "capability_change": "以 Project Zero 客座作者身份发表 RIDL/MDS 沙箱逃逸工作，将 2019 年 TurboFan 工作展示的 Chrome 代码审计与利用构建能力迁移到此前回避的硬件侧信道领域，并在本工作内引入 Chrome Mojo IPC 128-bit port name 泄露（前序他人工作 prior art，@NedWilliamson crbug.com/779314）以串联 RIDL/MDS 数据采样，分别针对 Linux（MFBDS 变体，Xeon Gold 6154）与 Windows（TAA 变体，Core i7-7600U）构建完整沙箱逃逸 exploit chain；并公开反思缓解措施曾令其误判漏洞已被解决。",
+      "evidence_ids": [
+        "stephen-ext-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2023 年 10 月",
+      "stage": "V8 控制流完整性缓解机制设计",
+      "capability_change": "以本人署名在 V8 官方博客发表《Control-flow Integrity in V8》，系统介绍 V8 前向/后向控制流完整性及 JIT 内存完整性的实现方法，标志其公开技术输出由漏洞发现与利用转向浏览器运行时安全架构与缓解机制设计；方向转向本身为基于署名与主题的推断，未见同期的漏洞发现 writeup 作为对照。",
+      "evidence_ids": [
+        "srottger-tl-02"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "目标选择与切入点判断由可核验判据驱动",
+      "starting_conditions": "2015 年 1 月自述决定开始学习 fuzzing，需选取首个目标；此前具备 NTP 协议先验背景。",
+      "repeated_practice": "ntpd 选型以先验背景加复杂度可控为判据；2019 年 TurboFan 工作中主动审计危险 API 模式的所有调用点而非被动等待；2020 年 RIDL 工作选定硬件侧信道作为跨领域迁移目标并选定可串联的 Mojo IPC port name 作为切入点。判据在 2015、2019、2020 三个时期均可核验。",
+      "feedback": "反馈来自本人公开自述的选型理由（「I have some background with NTP ... the protocol seemed simple enough to be a good learning experience」，roettger-deepconv-01）以及「I was convinced that one of the callers will get it wrong and audited all the call sites」（stephen-ext-01）。",
+      "intermediate_capability": "形成以先验背景加复杂度可控为标准的领域进入与目标选择能力，并能在新领域选定可串联既有能力的切入点。",
+      "observed_outcomes": [
+        "ntpd 首个 fuzzing 目标产出 CVE-2014-9295 与首个 OS X 利用",
+        "TurboFan 全调用点审计产出信息泄露到任意写的利用原语",
+        "RIDL/MDS 选定 Mojo IPC port name 切入点串联硬件数据采样，产出两套完整沙箱逃逸 exploit"
+      ],
+      "evidence_ids": [
+        "roettger-deepconv-01",
+        "stephen-ext-01",
+        "stephen-ext-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "选型判据为本人公开自述，无可核验的被排除目标或失败选型作为反例；判据的表述性使其区分度低于可量化的方法选择。该机制的可观察性亦受幸存者偏差限制（见下条）。"
+    },
+    {
+      "name": "公开发表中显式记录知识缺口、迭代过程与反思",
+      "starting_conditions": "2015 年 1 月 ntpd 文章中自述此前无 OS X 经验，并记录 GOT 一节长时间未解决（roettger-deepconv-02）。",
+      "repeated_practice": "2015 年公开承认无 OS X 经验与 GOT 技术难点；2019 年 TurboFan 文中记录遇到 GC 移动对象障碍后通过重分配解决的迭代过程；2020 年 RIDL 文中公开反思缓解措施曾令其误判漏洞已被解决并据此提出可操作建议。三个时期均将困难与反思写入公开 writeup。",
+      "feedback": "反馈为以记录困难推进迭代的自述习惯，原文如「took me way too long to figure out」（roettger-deepconv-02）与对缓解误判的反思（stephen-ext-02）。",
+      "intermediate_capability": "形成在公开发表中显式记录知识缺口与迭代过程、并据此推进后续工作的写作与复盘习惯，而非仅展示最终结果。",
+      "observed_outcomes": [
+        "ntpd 文中保留 OS X/GOT 自述与「exercise for the reader」式延伸邀请",
+        "TurboFan 文中记录 GC 障碍重分配的迭代过程",
+        "RIDL 文中记录缓解误判反思并提出更新微码、禁用超线程等可操作建议"
+      ],
+      "evidence_ids": [
+        "roettger-deepconv-02",
+        "roettger-deepconv-03",
+        "stephen-ext-01",
+        "stephen-ext-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "幸存者偏差：该机制只能从已公开发表的 writeup 样本（Project Zero 2015/2019/2020、v8.dev 2023）观察记录行为，未发表、失败或 2015 年之前的工作在可抓取范围不可见，机制跨时期稳定性据此受限，解释力可能被高估。"
+    },
+    {
+      "name": "跨领域迁移既有能力并复用既有工具链",
+      "starting_conditions": "2019 年已掌握 Chrome TurboFan JIT 手动审计与浏览器侧利用构建能力（stephen-ext-01，无 Mojo/IPC）；2020 年面对此前回避的硬件侧信道领域（stephen-ext-02）。",
+      "repeated_practice": "单次跨领域迁移实例（2019→2020），非多时期重复：将 2019 年 TurboFan 工作展示的 Chrome 代码审计与利用构建能力迁移到硬件侧信道领域，并在 2020 年工作中引入 Chrome Mojo IPC 128-bit port name 泄露（前序他人工作 prior art，@NedWilliamson crbug.com/779314）以串联 RIDL/MDS 数据采样，构建完整沙箱逃逸 exploit chain；复用既有工具链，未重新构建全部工具链。",
+      "feedback": "反馈来自以硬件 bug 替换软件泄露的迭代选择与可串联切入点的确认。",
+      "intermediate_capability": "在硬件侧信道新领域串联既有浏览器利用能力与既有 IPC 原语，完成端到端 exploit chain，而非从新领域基础知识重新积累。",
+      "observed_outcomes": [
+        "Linux MFBDS 变体（Xeon Gold 6154）沙箱逃逸 exploit",
+        "Windows TAA 变体（Core i7-7600U）沙箱逃逸 exploit"
+      ],
+      "evidence_ids": [
+        "stephen-ext-01",
+        "stephen-ext-02"
+      ],
+      "validation_tests": [
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "该迁移成果依赖 Project Zero 组织资源：硬件访问（Xeon Gold 6154、Core i7-7600U）、跨厂商披露渠道（Apple/Microsoft/Chrome）、Chrome/V8 源码与 issue tracker 可访问性、Project Zero 发表平台与披露政策。跨领域迁移中可迁移的个人能力以剥离上述组织资源为前提，个人能力归因强度据此受限，与 non_transferable_conditions 一致。Mojo IPC 分析为本工作内引入的前序他人工作，不得列为 2020 年前既有能力。"
+    },
+    {
+      "name": "方法论互补与同伴/前序工作交叉验证",
+      "starting_conditions": "2015 年 ntpd 为 Project Zero 首篇 guest post，由本人独立完成；后续工作涉及同伴与前序工作。",
+      "repeated_practice": "2019 年与 Samuel Groß（fuzzilli 作者）对同一 TurboFan 漏洞分别经手动审计与模糊测试独立发现并交叉验证；2020 年 RIDL 工作引用并承认 @NedWilliamson、Brandon Falk（MLPDS）等前序工作作为方法基础，而非自我归因。",
+      "feedback": "反馈来自交叉验证对漏洞与方法可靠性的确认。",
+      "intermediate_capability": "形成手动审计与模糊测试互补、引用并承认前序工作而非重复构建的工作方式。",
+      "observed_outcomes": [
+        "TurboFan 漏洞经手动审计与 fuzzilli 模糊测试双重独立发现",
+        "RIDL 沙箱逃逸建立在前序 port-name 泄露与 MLPDS 工作之上"
+      ],
+      "evidence_ids": [
+        "stephen-ext-01",
+        "stephen-ext-02"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "与 Samuel Groß 的雇佣关系未由一手来源核实（ntpd 为 guest post，Project Zero team.html 抓取返回 404）；交叉验证的可用性以同伴与 fuzzilli 工具生态、Chrome/V8 源码与 tracker 可访问性等组织资源为前提，非纯个人可迁移能力。"
+    }
+  ],
+  "tensions": [
+    "身份与 Project Zero 归属：2015 与 2020 两篇均为 guest post（客座作者），非 Project Zero 在职成员；team.html 抓取返回 404，在职状态与任期未由一手来源确认。",
+    "GitHub 账户 sroettger 与本名 Stephen Röttger 的同一性未取得平台交叉证明：GitHub profile 不显示真实姓名、雇主、地理位置或社交链接，CTF 阶段身份关联仅为姓氏拼写与研究方向吻合的间接推断。",
+    "Linux 内核方向无 Röttger 署名 writeup：抓取确认 KVM 嵌套虚拟化文章（2021-06）作者为 Felix Wilhelm 而非 Stephen Röttger，与 person_json 将 Linux 内核列为 primary_focus 之一存在张力，内核方向证据缺失。",
+    "Black Hat US/EU 演讲未取得一手来源核验：blackhat.com 议程页返回 403，演讲标题、年份与联合演讲人未经一手正文确认。",
+    "成长轨迹部分由组织资源塑造（硬件访问、跨厂商披露渠道、fuzzilli、Chrome/V8 源码与 tracker、Project Zero 发表平台），个人能力归因强度受限，存在将组织资源支撑的成果过度归为个人特质的幸存者偏差风险。",
+    "竞争性解释：可观察的早期能力成长可能由 Project Zero 平台、同伴生态与 guest post 发表渠道放大，而非纯个人特质；在剥离组织资源后，个人可迁移能力的实际强度低于公开成果所示。"
+  ],
+  "transferable_practices": [
+    "以先验背景加复杂度可控为判据选取首个学习目标，而非以笼统兴趣驱动——可迁移前提：剥离特定目标的协议先验与组织资源后，选型判据本身可迁移。",
+    "对识别为高风险的 API 模式系统性审计所有调用点，而非被动等待模糊测试命中——可迁移前提：剥离目标代码库与 tracker 可访问性后，审计方法论可迁移。",
+    "在公开 writeup 中显式记录知识缺口、迭代过程与反思，据此前行而非仅展示结果——可迁移前提：剥离 Project Zero 发表平台与披露政策后，记录与复盘习惯可迁移。",
+    "跨领域迁移时复用既有工具链与可串联原语，而非在新领域重新构建全部工具链——可迁移前提：剥离硬件访问、跨厂商披露渠道与同伴工具生态后，迁移思路可迁移，组织资源不可迁移。",
+    "引用并承认前序工作，以方法论互补（手动审计与模糊测试）交叉验证漏洞——可迁移前提：剥离同伴与 fuzzilli 后，引用与互补验证的工作方式可迁移。"
+  ],
+  "non_transferable_conditions": [
+    "硬件访问：Xeon Gold 6154 与 Core i7-7600U 等用于 RIDL/MDS 验证的硬件平台。",
+    "跨厂商披露渠道：与 Apple、Microsoft、Chrome 安全团队的协作披露通道。",
+    "fuzzilli 模糊测试工具：由 Samuel Groß 维护，2019 年 TurboFan 工作中的交叉验证依赖该工具与其作者。",
+    "Chrome/V8 源码与 issue tracker 可访问性：手动审计与漏洞报告依赖的目标代码库与跟踪器。",
+    "Project Zero 发表平台与披露政策：guest post 发表渠道与 90 天披露等政策框架。",
+    "guest post 身份而非在职成员：2015、2020 两篇均为客座作者，平台资源以客座形式获得，雇佣关系与团队资源未由一手来源核实。"
+  ],
+  "open_questions": [
+    "个人 fuzzing 学习的确切起始时间未见一手来源（仅有「a few months ago」自述与 CVE-2014-9295 的 NVD 发布日 2014-12-20 作为区间锚点）。",
+    "GitHub 账户 sroettger 与本名 Stephen Röttger 的同一性未取得平台一手交叉证明，CTF 阶段身份闭环未闭合。",
+    "Project Zero 在职状态、入职与离职时间、任期未由一手来源确认（team.html 404，仅两篇 guest post 可核）。",
+    "Linux 内核方向无 Röttger 署名 writeup，与 person_json 将其列为 primary_focus 之一存在缺口；KVM 相邻主题文章作者为 Felix Wilhelm。",
+    "Black Hat US/EU 的具体演讲标题、年份与联合演讲人未取得一手正文核验。",
+    "2024 年及以后的方法转型（如 Naptime/Big Sleep 等 LLM 辅助漏洞挖掘）作者归属未核，候选文章作者署名未在一手正文确认。",
+    "教育背景、早期履历与导师关系无一手来源；2015 年之前的成长阶段不可见。",
+    "v8.dev 2023 年控制流完整性文章之后至 2026 年的公开技术输出节律与方向变化未取得一手来源。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-synthesis-v3-20260928-191012-817",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790594292871510000-stephen-r-ttger-synthesis-v3.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "3b6aac2b-e335-4197-beee-b21d0bfa1791",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_7dbvfzw9000eedvm1lw2exxc",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-synthesis-v3-20260928-191012-817/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-28T11:18:12.938319+00:00"
+      },
+      {
+        "tool_use_id": "call_gtrj2n4wi8h0pwrfsjnouiow",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-synthesis-v3-20260928-191012-817/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T11:18:12.938375+00:00"
+      },
+      {
+        "tool_use_id": "call_s4mnjhvc7lj899mqitdktp2d",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-synthesis-v3-20260928-191012-817/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "51f489fd2088fe7f64580240530b5e0761f221702cb4bcc59becca632f9e2ec8",
+        "accessed_at": "2026-09-28T11:18:12.938384+00:00"
+      },
+      {
+        "tool_use_id": "call_h5kpnc5wg7ke9uzas4urdi2d",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-synthesis-v3-20260928-191012-817/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "2bfdadd4852f15cdf120bd97015249afe18a916622af548a5f4c82813f95d03b",
+        "accessed_at": "2026-09-28T11:18:12.938392+00:00"
+      },
+      {
+        "tool_use_id": "call_u5ce0aeu7vsrenht8g8y96iz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-synthesis-v3-20260928-191012-817/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "c2af5ee81cf36ce70b5b209021ceea3394340c5f97d683278a32f5998b99acbf",
+        "accessed_at": "2026-09-28T11:18:12.938443+00:00"
+      },
+      {
+        "tool_use_id": "call_wwwrlwwutiragqyagudabrbg",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-synthesis-v3-20260928-191012-817/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "ad6862a8a2607279a7366c05d89e5d8d4ec20d45a28fbc79ca1a6766ab88b624",
+        "accessed_at": "2026-09-28T11:18:12.938529+00:00"
+      },
+      {
+        "tool_use_id": "call_4km2nqgqc6jxrgmeccnt5ila",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-synthesis-v3-20260928-191012-817/checkpoint.md",
+          "content": "# Checkpoint — Stephen Röttger 综合 v3\n\n## 任务\n六维材料 + 两轮定向补证的综合。重建领域能力成长过程，每主机制给出 起点→反复行为→反馈→中间能力→可观察成果。按 output.schema.json 输出。\n\n## 有效证据（verified_in_run=true，invalid_evidence_ids 为空）\n| id | 维度 | 日期 | 要点 |\n|---|---|---|---|\n| sr-works-01/02/03 | works | 2018-12/unknown | GitHub sroettger: 35c3ctf_chals/gce-ctf/play-my-challenge；fork security-research-pocs、nsjail |\n| roettger-deepconv-01/02/03 | conversations | 2015-01-02 | ntpd fuzzing 入门自述；承认无 OS X 经验、GOT 技术难点；exercise for reader |\n| stephen-ext-01 | external | 2019-05-10 | Trashing the Flow of Data，TurboFan JIT 全调用点审计，info leak→任意写；与 Samuel Groß(fuzzilli) 交叉验证；GC 障碍重分配 |\n| stephen-ext-02 | external | 2020-02-15 | Escaping Chrome Sandbox with RIDL，guest post；RIDL/MDS + Mojo IPC port name(@NedWilliamson prior art)；Xeon Gold 6154 / Core i7-7600U；自述 out of comfort zone、缓解误判反思 |\n| srottger-tl-02 | timeline | 2023-10-09 | v8.dev Control-flow Integrity in V8 |\n| roettger-decisions-05 | decisions | 2021-06-29 | KVM 文章作者 Felix Wilhelm（负对照，排除内核方向误归） |\n| sr-r1-tl-01 | targeted r1 | 2014-12-20 | NVD CVE-2014-9295 published |\n| sr-r1-conv-01 | targeted r1 | 2015-01-02 | ntpd 为 Project Zero 首篇 guest post（非在职） |\n\n## 未用作支撑（verified_in_run=false）：sr-works-04、roettger-decisions-01/02/03/04、srottger-tl-01\n\n## 两轮 revision 落实\n- r1：阶段一 period 删除“约 2014 年末”，改 2015-01 + CVE/自述锚点（sr-r1-tl-01/sr-r1-conv-01）；CTF 阶段身份标注推断、confidence=low；删除“同事”改“Samuel Groß（fuzzilli 作者）”并注雇佣未核；去“舒适区/卡点/从零重建”比喻口语；删“不依赖外部授权”；transferable 加前提限定；mechanisms[2] 标单次实例。\n- r2：Mojo IPC 不作 2019 既有能力（stephen-ext-01 无 Mojo/IPC，stephen-ext-02 内引入且为 prior art）；expertise Mojo IPC 标 2020；增幸存者偏差标注；校准组织资源归因。\n\n## 阶段（5）\n1. 2015-01 ntpd 入门（high）\n2. 2018-12 CTF 出题（low，身份推断）\n3. 2019-05 TurboFan（high）\n4. 2020-02 RIDL（high）\n5. 2023-10 V8 CFI（medium，方向转向为推断）\n\n## 机制（4，均满足≥2 项）\n1. 目标选择与切入点判断由可核验判据驱动（repeated+generative+distinctive，medium）\n2. 公开发表中显式记录知识缺口/迭代/反思（repeated+generative+distinctive，high）\n3. 跨领域迁移既有能力并复用既有工具链（generative+distinctive，单次实例，medium）\n4. 方法论互补与同伴/前序工作交叉验证（repeated+distinctive，medium）\n\n## 张力/竞争性解释\n身份与 Project Zero 归属（均 guest post）、sroettger↔本名未平台交叉证明、Linux 内核方向无 Röttger 署名 writeup（KVM 文为 Wilhelm）、Black Hat 未一手核验、成长轨迹部分由组织资源塑造。\n\n## 状态\n已按 schema 写入 output.json；字段名/必填/枚举逐项核对（confidence、validation_tests）。未填 _run/verification。\n"
+        },
+        "success": true,
+        "content_sha256": "d0fceef74a9a68295b1dd000e92be75a14a46f5ab78ccf76a98b84473ba794c9",
+        "accessed_at": "2026-09-28T11:18:12.939340+00:00"
+      },
+      {
+        "tool_use_id": "call_2swczdudz938m0d6t7qowz47",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/stephen-r-ttger-synthesis-v3-20260928-191012-817/output.json",
+          "content": "{\n  \"person\": \"Stephen Röttger\",\n  \"expertise\": [\n    \"Fuzzing 入门与协议实现漏洞挖掘（ntpd，2015）\",\n    \"Chrome TurboFan JIT 手动代码审计与利用构建（2019）\",\n    \"Chrome Mojo IPC 原语分析（2020）\",\n    \"硬件侧信道（RIDL/MDS）与软件漏洞结合的浏览器沙箱逃逸（2020）\",\n    \"V8 控制流完整性缓解机制设计与运行时安全架构（2023）\",\n    \"CTF 出题与赛事基础设施搭建（2018，身份关联为姓氏拼写与研究方向吻合的间接推断）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2015 年 1 月（ntpd 文章发布日；正文自述学习 fuzzing 起始于此前数月，CVE-2014-9295 于 2014-12-20 在 NVD 发布；个人 fuzzing 学习确切起始时间未见一手来源）\",\n      \"stage\": \"Fuzzing 入门与首个目标选择\",\n      \"capability_change\": \"以 ntpd 作为首个 fuzzing 目标，依据为 NTP 协议先验背景且复杂度可控；产出 CVE-2014-9295 与首个 OS X 利用，完成由协议先验到漏洞发现与利用构建的初次贯通。\",\n      \"evidence_ids\": [\n        \"roettger-deepconv-01\",\n        \"roettger-deepconv-02\",\n        \"sr-r1-tl-01\",\n        \"sr-r1-conv-01\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2018 年 12 月（35C3 期间）\",\n      \"stage\": \"CTF 出题与赛事基础设施搭建（背景线索）\",\n      \"capability_change\": \"GitHub 账户 sroettger 公开维护 35c3ctf_chals、gce-ctf、play-my-challenge 等仓库，并 fork google/security-research-pocs、google/nsjail，体现 CTF 出题、部署工具建设与低层隔离工具跟进的实践。需显式标注：GitHub 账户 sroettger 与本名 Stephen Röttger 的同一性未取得平台交叉证明（GitHub profile 不显示真实姓名、雇主、地理位置或社交链接），该阶段身份关联仅为姓氏拼写与研究方向吻合的间接推断，仅作背景线索。\",\n      \"evidence_ids\": [\n        \"sr-works-01\",\n        \"sr-works-02\",\n        \"sr-works-03\"\n      ],\n      \"confidence\": \"low\"\n    },\n    {\n      \"period\": \"2019 年 5 月\",\n      \"stage\": \"Chrome TurboFan JIT 手动审计与利用构建\",\n      \"capability_change\": \"对 Chrome TurboFan JIT 编译器处理 Array.prototype.indexOf/includes 缺少运行时检查的漏洞进行系统性全调用点审计，将信息泄露升级为任意写原语；该文无 Mojo、IPC、port name 等字样，主题为 JIT 与利用原语构建。\",\n      \"evidence_ids\": [\n        \"stephen-ext-01\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020 年 2 月\",\n      \"stage\": \"跨入硬件侧信道与完整沙箱逃逸\",\n      \"capability_change\": \"以 Project Zero 客座作者身份发表 RIDL/MDS 沙箱逃逸工作，将 2019 年 TurboFan 工作展示的 Chrome 代码审计与利用构建能力迁移到此前回避的硬件侧信道领域，并在本工作内引入 Chrome Mojo IPC 128-bit port name 泄露（前序他人工作 prior art，@NedWilliamson crbug.com/779314）以串联 RIDL/MDS 数据采样，分别针对 Linux（MFBDS 变体，Xeon Gold 6154）与 Windows（TAA 变体，Core i7-7600U）构建完整沙箱逃逸 exploit chain；并公开反思缓解措施曾令其误判漏洞已被解决。\",\n      \"evidence_ids\": [\n        \"stephen-ext-02\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023 年 10 月\",\n      \"stage\": \"V8 控制流完整性缓解机制设计\",\n      \"capability_change\": \"以本人署名在 V8 官方博客发表《Control-flow Integrity in V8》，系统介绍 V8 前向/后向控制流完整性及 JIT 内存完整性的实现方法，标志其公开技术输出由漏洞发现与利用转向浏览器运行时安全架构与缓解机制设计；方向转向本身为基于署名与主题的推断，未见同期的漏洞发现 writeup 作为对照。\",\n      \"evidence_ids\": [\n        \"srottger-tl-02\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"目标选择与切入点判断由可核验判据驱动\",\n      \"starting_conditions\": \"2015 年 1 月自述决定开始学习 fuzzing，需选取首个目标；此前具备 NTP 协议先验背景。\",\n      \"repeated_practice\": \"ntpd 选型以先验背景加复杂度可控为判据；2019 年 TurboFan 工作中主动审计危险 API 模式的所有调用点而非被动等待；2020 年 RIDL 工作选定硬件侧信道作为跨领域迁移目标并选定可串联的 Mojo IPC port name 作为切入点。判据在 2015、2019、2020 三个时期均可核验。\",\n      \"feedback\": \"反馈来自本人公开自述的选型理由（「I have some background with NTP ... the protocol seemed simple enough to be a good learning experience」，roettger-deepconv-01）以及「I was convinced that one of the callers will get it wrong and audited all the call sites」（stephen-ext-01）。\",\n      \"intermediate_capability\": \"形成以先验背景加复杂度可控为标准的领域进入与目标选择能力，并能在新领域选定可串联既有能力的切入点。\",\n      \"observed_outcomes\": [\n        \"ntpd 首个 fuzzing 目标产出 CVE-2014-9295 与首个 OS X 利用\",\n        \"TurboFan 全调用点审计产出信息泄露到任意写的利用原语\",\n        \"RIDL/MDS 选定 Mojo IPC port name 切入点串联硬件数据采样，产出两套完整沙箱逃逸 exploit\"\n      ],\n      \"evidence_ids\": [\n        \"roettger-deepconv-01\",\n        \"stephen-ext-01\",\n        \"stephen-ext-02\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"选型判据为本人公开自述，无可核验的被排除目标或失败选型作为反例；判据的表述性使其区分度低于可量化的方法选择。该机制的可观察性亦受幸存者偏差限制（见下条）。\"\n    },\n    {\n      \"name\": \"公开发表中显式记录知识缺口、迭代过程与反思\",\n      \"starting_conditions\": \"2015 年 1 月 ntpd 文章中自述此前无 OS X 经验，并记录 GOT 一节长时间未解决（roettger-deepconv-02）。\",\n      \"repeated_practice\": \"2015 年公开承认无 OS X 经验与 GOT 技术难点；2019 年 TurboFan 文中记录遇到 GC 移动对象障碍后通过重分配解决的迭代过程；2020 年 RIDL 文中公开反思缓解措施曾令其误判漏洞已被解决并据此提出可操作建议。三个时期均将困难与反思写入公开 writeup。\",\n      \"feedback\": \"反馈为以记录困难推进迭代的自述习惯，原文如「took me way too long to figure out」（roettger-deepconv-02）与对缓解误判的反思（stephen-ext-02）。\",\n      \"intermediate_capability\": \"形成在公开发表中显式记录知识缺口与迭代过程、并据此推进后续工作的写作与复盘习惯，而非仅展示最终结果。\",\n      \"observed_outcomes\": [\n        \"ntpd 文中保留 OS X/GOT 自述与「exercise for the reader」式延伸邀请\",\n        \"TurboFan 文中记录 GC 障碍重分配的迭代过程\",\n        \"RIDL 文中记录缓解误判反思并提出更新微码、禁用超线程等可操作建议\"\n      ],\n      \"evidence_ids\": [\n        \"roettger-deepconv-02\",\n        \"roettger-deepconv-03\",\n        \"stephen-ext-01\",\n        \"stephen-ext-02\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"幸存者偏差：该机制只能从已公开发表的 writeup 样本（Project Zero 2015/2019/2020、v8.dev 2023）观察记录行为，未发表、失败或 2015 年之前的工作在可抓取范围不可见，机制跨时期稳定性据此受限，解释力可能被高估。\"\n    },\n    {\n      \"name\": \"跨领域迁移既有能力并复用既有工具链\",\n      \"starting_conditions\": \"2019 年已掌握 Chrome TurboFan JIT 手动审计与浏览器侧利用构建能力（stephen-ext-01，无 Mojo/IPC）；2020 年面对此前回避的硬件侧信道领域（stephen-ext-02）。\",\n      \"repeated_practice\": \"单次跨领域迁移实例（2019→2020），非多时期重复：将 2019 年 TurboFan 工作展示的 Chrome 代码审计与利用构建能力迁移到硬件侧信道领域，并在 2020 年工作中引入 Chrome Mojo IPC 128-bit port name 泄露（前序他人工作 prior art，@NedWilliamson crbug.com/779314）以串联 RIDL/MDS 数据采样，构建完整沙箱逃逸 exploit chain；复用既有工具链，未重新构建全部工具链。\",\n      \"feedback\": \"反馈来自以硬件 bug 替换软件泄露的迭代选择与可串联切入点的确认。\",\n      \"intermediate_capability\": \"在硬件侧信道新领域串联既有浏览器利用能力与既有 IPC 原语，完成端到端 exploit chain，而非从新领域基础知识重新积累。\",\n      \"observed_outcomes\": [\n        \"Linux MFBDS 变体（Xeon Gold 6154）沙箱逃逸 exploit\",\n        \"Windows TAA 变体（Core i7-7600U）沙箱逃逸 exploit\"\n      ],\n      \"evidence_ids\": [\n        \"stephen-ext-01\",\n        \"stephen-ext-02\"\n      ],\n      \"validation_tests\": [\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"该迁移成果依赖 Project Zero 组织资源：硬件访问（Xeon Gold 6154、Core i7-7600U）、跨厂商披露渠道（Apple/Microsoft/Chrome）、Chrome/V8 源码与 issue tracker 可访问性、Project Zero 发表平台与披露政策。跨领域迁移中可迁移的个人能力以剥离上述组织资源为前提，个人能力归因强度据此受限，与 non_transferable_conditions 一致。Mojo IPC 分析为本工作内引入的前序他人工作，不得列为 2020 年前既有能力。\"\n    },\n    {\n      \"name\": \"方法论互补与同伴/前序工作交叉验证\",\n      \"starting_conditions\": \"2015 年 ntpd 为 Project Zero 首篇 guest post，由本人独立完成；后续工作涉及同伴与前序工作。\",\n      \"repeated_practice\": \"2019 年与 Samuel Groß（fuzzilli 作者）对同一 TurboFan 漏洞分别经手动审计与模糊测试独立发现并交叉验证；2020 年 RIDL 工作引用并承认 @NedWilliamson、Brandon Falk（MLPDS）等前序工作作为方法基础，而非自我归因。\",\n      \"feedback\": \"反馈来自交叉验证对漏洞与方法可靠性的确认。\",\n      \"intermediate_capability\": \"形成手动审计与模糊测试互补、引用并承认前序工作而非重复构建的工作方式。\",\n      \"observed_outcomes\": [\n        \"TurboFan 漏洞经手动审计与 fuzzilli 模糊测试双重独立发现\",\n        \"RIDL 沙箱逃逸建立在前序 port-name 泄露与 MLPDS 工作之上\"\n      ],\n      \"evidence_ids\": [\n        \"stephen-ext-01\",\n        \"stephen-ext-02\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"与 Samuel Groß 的雇佣关系未由一手来源核实（ntpd 为 guest post，Project Zero team.html 抓取返回 404）；交叉验证的可用性以同伴与 fuzzilli 工具生态、Chrome/V8 源码与 tracker 可访问性等组织资源为前提，非纯个人可迁移能力。\"\n    }\n  ],\n  \"tensions\": [\n    \"身份与 Project Zero 归属：2015 与 2020 两篇均为 guest post（客座作者），非 Project Zero 在职成员；team.html 抓取返回 404，在职状态与任期未由一手来源确认。\",\n    \"GitHub 账户 sroettger 与本名 Stephen Röttger 的同一性未取得平台交叉证明：GitHub profile 不显示真实姓名、雇主、地理位置或社交链接，CTF 阶段身份关联仅为姓氏拼写与研究方向吻合的间接推断。\",\n    \"Linux 内核方向无 Röttger 署名 writeup：抓取确认 KVM 嵌套虚拟化文章（2021-06）作者为 Felix Wilhelm 而非 Stephen Röttger，与 person_json 将 Linux 内核列为 primary_focus 之一存在张力，内核方向证据缺失。\",\n    \"Black Hat US/EU 演讲未取得一手来源核验：blackhat.com 议程页返回 403，演讲标题、年份与联合演讲人未经一手正文确认。\",\n    \"成长轨迹部分由组织资源塑造（硬件访问、跨厂商披露渠道、fuzzilli、Chrome/V8 源码与 tracker、Project Zero 发表平台），个人能力归因强度受限，存在将组织资源支撑的成果过度归为个人特质的幸存者偏差风险。\",\n    \"竞争性解释：可观察的早期能力成长可能由 Project Zero 平台、同伴生态与 guest post 发表渠道放大，而非纯个人特质；在剥离组织资源后，个人可迁移能力的实际强度低于公开成果所示。\"\n  ],\n  \"transferable_practices\": [\n    \"以先验背景加复杂度可控为判据选取首个学习目标，而非以笼统兴趣驱动——可迁移前提：剥离特定目标的协议先验与组织资源后，选型判据本身可迁移。\",\n    \"对识别为高风险的 API 模式系统性审计所有调用点，而非被动等待模糊测试命中——可迁移前提：剥离目标代码库与 tracker 可访问性后，审计方法论可迁移。\",\n    \"在公开 writeup 中显式记录知识缺口、迭代过程与反思，据此前行而非仅展示结果——可迁移前提：剥离 Project Zero 发表平台与披露政策后，记录与复盘习惯可迁移。\",\n    \"跨领域迁移时复用既有工具链与可串联原语，而非在新领域重新构建全部工具链——可迁移前提：剥离硬件访问、跨厂商披露渠道与同伴工具生态后，迁移思路可迁移，组织资源不可迁移。\",\n    \"引用并承认前序工作，以方法论互补（手动审计与模糊测试）交叉验证漏洞——可迁移前提：剥离同伴与 fuzzilli 后，引用与互补验证的工作方式可迁移。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"硬件访问：Xeon Gold 6154 与 Core i7-7600U 等用于 RIDL/MDS 验证的硬件平台。\",\n    \"跨厂商披露渠道：与 Apple、Microsoft、Chrome 安全团队的协作披露通道。\",\n    \"fuzzilli 模糊测试工具：由 Samuel Groß 维护，2019 年 TurboFan 工作中的交叉验证依赖该工具与其作者。\",\n    \"Chrome/V8 源码与 issue tracker 可访问性：手动审计与漏洞报告依赖的目标代码库与跟踪器。\",\n    \"Project Zero 发表平台与披露政策：guest post 发表渠道与 90 天披露等政策框架。\",\n    \"guest post 身份而非在职成员：2015、2020 两篇均为客座作者，平台资源以客座形式获得，雇佣关系与团队资源未由一手来源核实。\"\n  ],\n  \"open_questions\": [\n    \"个人 fuzzing 学习的确切起始时间未见一手来源（仅有「a few months ago」自述与 CVE-2014-9295 的 NVD 发布日 2014-12-20 作为区间锚点）。\",\n    \"GitHub 账户 sroettger 与本名 Stephen Röttger 的同一性未取得平台一手交叉证明，CTF 阶段身份闭环未闭合。\",\n    \"Project Zero 在职状态、入职与离职时间、任期未由一手来源确认（team.html 404，仅两篇 guest post 可核）。\",\n    \"Linux 内核方向无 Röttger 署名 writeup，与 person_json 将其列为 primary_focus 之一存在缺口；KVM 相邻主题文章作者为 Felix Wilhelm。\",\n    \"Black Hat US/EU 的具体演讲标题、年份与联合演讲人未取得一手正文核验。\",\n    \"2024 年及以后的方法转型（如 Naptime/Big Sleep 等 LLM 辅助漏洞挖掘）作者归属未核，候选文章作者署名未在一手正文确认。\",\n    \"教育背景、早期履历与导师关系无一手来源；2015 年之前的成长阶段不可见。\",\n    \"v8.dev 2023 年控制流完整性文章之后至 2026 年的公开技术输出节律与方向变化未取得一手来源。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "45a4b1fb620c3185710a79fdab18272784dd124288cf83820a87d093fcfe5d9e",
+        "accessed_at": "2026-09-28T11:18:12.939442+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790594292939456000-stephen-r-ttger-synthesis-v3.json",
+    "label": "Stephen Röttger:synthesis:v3",
+    "elapsed_seconds": 480.06,
+    "prompt_sha256": "147fbd772c8bfc494cd0e1810efa6e02308c6e3860ba4b92b6375537f3698b0f",
+    "num_turns": 9,
+    "total_cost_usd": 1.030721,
+    "usage": {
+      "input_tokens": 51422,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 187072,
+      "output_tokens": 27203,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 51422,
+        "outputTokens": 27203,
+        "cacheReadInputTokens": 187072,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.030721,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

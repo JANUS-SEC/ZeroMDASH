@@ -1,0 +1,360 @@
+{
+  "person": "Vitaly Nikolenko",
+  "expertise": [
+    "Linux 内核本地提权与堆利用 (SLAB/SLUB off-by-one、UAF、计数器溢出)",
+    "x86_64 内核 ROP 链构造与 SMEP 约束下的提权方法",
+    "内核地址随机化 (KASLR) 绕过与 CPU 微架构 (TSX/RTM) 侧信道",
+    "Android (arm64) 内核安全与厂商加固机制 (SELinux/RKP)",
+    "内核缓解机制评估 (UAO、addr_limit、hardened usercopy、freelist randomization)",
+    "Linux 内核 fuzzing 与根因分析",
+    "Chrome (Renderer) on Android 与 AArch64 二进制利用",
+    "内核利用与培训材料的系统化输出 (DUASYNT 课程)"
+  ],
+  "stages": [
+    {
+      "period": "2014–2015",
+      "stage": "公开 writeup 与内核 LPE 起点",
+      "capability_change": "以对既有 Linux 内核 CVE 做分析并公开发布 writeup 为主要练习载体，覆盖 LPE、UAF、DoS 多种类型 (CVE-2014-4014/4699/4943/2851)，形成可公开的成果积累与可复现 PoC 仓库；同期 GitHub 上亦存在 WiFi/WPA 工具脚本，但内核方向已确立。",
+      "evidence_ids": [
+        "vn-tl-001",
+        "vn-comm-01",
+        "vn-ext-01",
+        "VN-WORKS-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2016",
+      "stage": "从单点 CVE 复现进入利用链构造与同行反馈",
+      "capability_change": "研究范围扩展到 SLAB/SLUB 堆 off-by-one (CVE-2016-6187) 并配套 GitHub PoC 仓库；同时以 kernel_rop 仓库和外部 writeup 演示 SMEP 约束下的内核态 ROP 提权。出现可核验的同行反馈回路：DM 质疑推动公开论证可利用性，Trippar 与 Pollet 贡献覆盖引用计数与堆对象定位的自动化，并引用 Jann Horn (Project Zero issue #808) 的工作。",
+      "evidence_ids": [
+        "vn-tl-002",
+        "vn-comm-02",
+        "vn-comm-05",
+        "VN-WORKS-02",
+        "vn-dec-005"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017–2019",
+      "stage": "缓解绕过专题化与跨子系统 PoC 库整理",
+      "capability_change": "在利用链之外开辟 kASLR 绕过专题 (kaslr_tsx_bypass 静态库，基于 Intel TSX/RTM) 与通用 ROP 框架；对 2013–2017 跨子系统 (perf、sysret/ptrace、xfs、ipx、sock_diag、netfilter、eBPF) 的旧 PoC 进行集中重新托管，方法从单点利用扩展为可复现的跨子系统 PoC 集合。注意：仓库仅记录更新日期 2019-07-23，非创作日期。",
+      "evidence_ids": [
+        "vn-tl-003",
+        "vn-ext-02",
+        "VN-WORKS-04"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2020–2022",
+      "stage": "平台迁移到 Android/aarch64 与缓解评估",
+      "capability_change": "研究对象从桌面/服务器扩展到 Android Binder UAF 与跨发行版 LPE (CVE-2019-2215、CVE-2019-15666)，进入厂商设备加固分析 (三星 S20 SELinux/RKP)；在 aarch64 上重建利用前置基础设施 (PGD 定位)；并对缓解机制本身做对照式评估 (UAO 对抗 addr_limit 改写)。2022 年与 Michael S 合著《Linux kernel heap feng shui in 2022》，致谢 Adrian Drzewiecki，标志稳定的协作发表模式。",
+      "evidence_ids": [
+        "vn-tl-004",
+        "vn-tl-005",
+        "vn-tl-006",
+        "vn-tl-007",
+        "vn-comm-03",
+        "vn-ext-05",
+        "vn-tl-008"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2024",
+      "stage": "研究能力课程化与机构化对外输出",
+      "capability_change": "以 DUASYNT 为载体公开六门分层课程 (Linux Kernel Exploit Development 入门与进阶、Android Kernel Security、Chrome Renderer on Android、Linux Kernel Fuzzing and RCA、Introduction to AArch64 Binary Exploitation)；2024 年排期含 6 月 x86_64 基础场 (售罄)、6 月进阶场与 9 月 Hexacon (Paris) Android kernel security。方法重心由利用开发并列出 fuzzing/RCA，研究输出由个人 writeup/PoC 转向体系化教学。",
+      "evidence_ids": [
+        "VN-WORKS-05",
+        "vn-comm-04",
+        "vn-dec-007",
+        "vn-ext-04",
+        "vn-ext-06",
+        "vn-tl-009",
+        "vn-ext-03",
+        "vn-dec-008",
+        "vn-tl-010"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "以 CVE writeup 为载体的资料驱动公开练习",
+      "starting_conditions": "2014 年前后以个人博客 (后归档于 duasynt.com/blog) 与 GitHub 仓库为公开输出渠道；可获取公开手册 (AMD/Intel 手册、bottomupcs、linuxjournal) 作为分析锚点，无可见导师或正式培训。",
+      "repeated_practice": "对既有内核 CVE 复现其触发条件与利用路径，并以 writeup 形式公开记录分析链条；从 2014 年系列 CVE 到 2016 年 heap off-by-one、再到 2020 年 Android 方向 writeup，跨多年持续输出。",
+      "feedback": "早期以一手技术手册为锚自驱动写作，未见同行反馈回路；后期反馈来自博客评论/DM 与博客文章的更新修订 (如 2022-05-10 文章于 2022-06-09 更新)。",
+      "intermediate_capability": "形成可核验的分析链条与可复现 PoC 仓库的写作习惯，使漏洞分析能被外部复核与复用。",
+      "observed_outcomes": [
+        "2014 年 CVE-2014 系列内核 LPE/UAF/DoS writeup (含 CVE-2014-4699 ptrace/sysret)",
+        "2016 年 CVE-2016-6187 heap off-by-one writeup 配套 GitHub PoC",
+        "2020 年 Android 方向多篇文章 (CVE-2019-2215、SELinux RKP、UAO、PGD 定位)"
+      ],
+      "evidence_ids": [
+        "vn-tl-001",
+        "vn-comm-01",
+        "vn-ext-01",
+        "vn-tl-002",
+        "vn-tl-004",
+        "vn-tl-005",
+        "vn-tl-006",
+        "vn-tl-007",
+        "vn-comm-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "持续 writeup 也可能由商业培训的市场曝光需求驱动 (writeup 为课程引流)，而非纯能力练习；但 2014 年早期博客出现时并无课程产品，该解释无法覆盖早期阶段。"
+    },
+    {
+      "name": "工具化与可复用产物建设",
+      "starting_conditions": "早期即有 GitHub 仓库托管脚本与 PoC 的习惯 (2015 年 WiFi 工具脚本调用外部破解服务，2014 年 LPE PoC 仓库)。",
+      "repeated_practice": "将利用方法封装为可复用产物而非一次性脚本：kernel_rop 提供自带漏洞的教学驱动、kaslr_tsx_bypass 封装为静态库、2019 年对旧 CVE PoC 跨子系统集中重新托管。",
+      "feedback": "仓库的 star/可见度与课程内容的引用构成间接反馈；教学驱动与课程材料互相复用。",
+      "intermediate_capability": "把单点漏洞利用沉淀为可教学、可复用的工具与方法库，支撑后续分层课程。",
+      "observed_outcomes": [
+        "kernel_rop 仓库 + cyseclabs writeup (SMEP 约束下内核态 ROP)",
+        "kaslr_tsx_bypass 静态库 (Intel TSX/RTM 旁路 KASLR)",
+        "2019-07-23 前后跨子系统 CVE PoC 库集中重新托管",
+        "DUASYNT 入门/进阶 Linux Kernel Exploit Development 课程"
+      ],
+      "evidence_ids": [
+        "VN-WORKS-01",
+        "VN-WORKS-02",
+        "VN-WORKS-04",
+        "vn-tl-003",
+        "vn-ext-02",
+        "vn-dec-005",
+        "vn-ext-06"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "工具化产出也可能是 GitHub 作为简历/展示用途的副产品，不必然服务于能力成长；但 kernel_rop 的教学驱动设计明显超出展示需要，该解释覆盖不全。"
+    },
+    {
+      "name": "在同行交互中迭代利用方法",
+      "starting_conditions": "已具备独立公开 writeup 的能力，并开始公开论证可利用性。",
+      "repeated_practice": "在 CVE-2016-6187 工作中记录并回应同行 DM 质疑 (路径是否可利用)，吸收 Trippar (覆盖引用计数触发 UAF 的方法)、Pollet (gdb/python 自动化定位堆对象) 的具体技术贡献，并引用 Jann Horn (Project Zero issue #808) 的 userfaultfd 工作；2022 年与 Michael S 合著并致谢 Adrian Drzewiecki 的对齐兼容检查逻辑。",
+      "feedback": "同行 DM 质疑、指定协作者的代码级贡献、对顶尖同行公开成果的引用与复用，构成可核验的同伴反馈回路。",
+      "intermediate_capability": "能将外部贡献整合进自身利用链条，把个人练习推进为协作产出的利用方法。",
+      "observed_outcomes": [
+        "CVE-2016-6187 writeup 含明确的同行致谢与争议回应并自述 Ruxcon 演讲",
+        "2022 年 heap feng shui 合著与代码级致谢",
+        "持续引用并复用 Project Zero 等顶尖同行成果"
+      ],
+      "evidence_ids": [
+        "vn-comm-02",
+        "vn-comm-05",
+        "vn-comm-03",
+        "vn-ext-05",
+        "vn-tl-008"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "同行交互目前仅在 CVE-2016-6187 一例中有详细技术致谢，2022 年合著的协作深度缺乏一手叙述，反馈回路可能被高估；该机制需更多样本才能升为 high。"
+    },
+    {
+      "name": "按缓解机制逐项拆解与平台迁移",
+      "starting_conditions": "已在 x86_64 内核利用上建立基础能力，可独立构造 ROP 与堆利用。",
+      "repeated_practice": "把研究目标按缓解机制 (SMEP、KASLR、addr_limit、freelist randomization、hardened usercopy、SELinux/RKP) 与平台 (x86_64 → aarch64/Android) 逐项拆解，对新平台先解决利用前置基础设施 (如 aarch64 PGD 定位) 再谈利用。",
+      "feedback": "平台迁移后内核自身变化 (SLUB 调整、cache aliasing、SLAB_ACCOUNT) 反向要求更新利用方法，2022 年 heap feng shui 文章即是对 2016 年堆利用方法的更新版。",
+      "intermediate_capability": "在新架构与缓解组合下重建利用工具链的能力，而非依赖单一一次性 PoC。",
+      "observed_outcomes": [
+        "SMEP 约束下 ROP → kASLR (TSX/RTM) 侧信道专题",
+        "2020 年 SELinux RKP / UAO vs addr_limit 的缓解评估",
+        "2020 年 aarch64 PGD 定位重建 Android 利用前置工具链",
+        "2022 年 heap feng shui 更新 (cache aliasing、SLAB_ACCOUNT、freelist randomization)"
+      ],
+      "evidence_ids": [
+        "VN-WORKS-02",
+        "vn-tl-003",
+        "vn-tl-005",
+        "vn-tl-006",
+        "vn-tl-007",
+        "vn-comm-03",
+        "vn-ext-06"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "逐项拆解也可能只是不同 CVE 暴露面的被动结果而非主动策略；但 2020 年多篇针对缓解机制本身 (而非具体 CVE) 的评估文章更支持主动拆解的解读。"
+    }
+  ],
+  "tensions": [
+    "person_json 记载 selected_conference_evidence 为 POC 2025 / Black Hat，但 POC 2025 议程页 (powerofcommunity.net/poc2025.html) 返回 404、Black Hat archive 页返回 403，两项会议参与均未取得一手页面确认；该种子字段无法与已抓取材料交叉验证，仅作为待核线索保留。",
+    "GitHub 仓库仅显示最近更新日期而非创建日期。2019-07-23 为旧 CVE PoC 的批量重新托管/更新日期，非创作日期；将更新日期叙述为创作年份会造成时间序误导，本报告全部以仓库元数据口径表述。",
+    "GitHub 仓库同时存在 2015 年 WiFi 工具 (wpa-autopwn、wifi-scripts) 与 2014 年内核 CVE writeup，二者时间先后无法由仓库元数据确定；无线→内核的领域转向叙事在更新日期上不成立，仅可断定 2014 年内核方向已确立且同期存在无线工具产出。",
+    "WebSearch 摘要将 CVE-2017-1000112 / CVE-2017-6074 归于 Nikolenko 公开披露，但 duasynt.com/blog 已抓取条目中未见这两项，且该摘要未抓取正文 (vn-tl-012 verified=false，已弃用)，存在搜索摘要与本人一手页面之间的不一致，未纳入结论。",
+    "WebSearch 摘要出现 Nikolenko 为 Trace Labs 创始人的说法，与 duasynt.com 实际页面内容 (未提及 Trace Labs) 不一致，且 Trace Labs 公开记录创始人另属他人；该冲突来源未抓取正文，不予采信。",
+    "kernel_rop README 链接的 cyseclabs.com/page?n=17012016 抓取时返回证书错误，日期 2016-01-17 仅由 URL 路径推断，应视为推断而非确证；cyseclabs 与 duasynt 的关系亦无一手说明。"
+  ],
+  "transferable_practices": [
+    "以既有 CVE 复现 + 公开 writeup 作为资料驱动的练习载体，用一手技术手册建立可核验分析链条，而非依赖不可复核的口述。",
+    "将利用方法封装为可复用产物 (教学驱动、静态库、跨子系统 PoC 库)，使单点漏洞沉淀为可教学的方法库。",
+    "对同行 DM 质疑与协作者代码级贡献做明确署名与回应，把个人练习推进为可被外部复核的协作产出。",
+    "按缓解机制 (而非仅按 CVE) 逐项拆解研究目标，并在迁移到新平台时先重建利用前置基础设施 (如 PGD 定位) 再谈利用。",
+    "对历史利用方法随内核变化做更新版评估 (如 heap feng shui 2022 相对 2016 堆利用)，保持方法与现行缓解的对应。"
+  ],
+  "non_transferable_conditions": [
+    "DUASYNT 机构化载体 (澳私有公司，ABN 13634103405，办公地 Zürich/Amsterdam/Sydney，面向情报与政府方案) 为其研究输出与分层课程提供了商业出口；缺乏同类机构化出口的研究者难以直接复制其课程化路径。",
+    "2014 年前后 Linux 内核 writeup 的公开博客生态、公开手册可得性与同行 DM 反馈渠道，构成其所处时期的特定外部条件，并非可任意平移到当前时间点。",
+    "与 Trippar、Pollet、Michael S 等指定协作者的技术网络，以及能引用 Project Zero 公开成果的时机，属个人特有条件，难以通过通用流程复现。",
+    "2016 年 Ruxcon 演讲与 2024 年 Hexacon (Paris) 培训排期等会议接纳，属外部市场对其既有权威性的认可，非可主动复制的方法步骤。"
+  ],
+  "open_questions": [
+    "POC 2025 / Black Hat 的具体参与 (演讲标题、日期、是否为培训) 缺一手议程页确认。",
+    "GitHub 仓库 (kernel_rop、kaslr_tsx_bypass、各 CVE PoC) 的创建日期与 commit 时间线未取得，技术子方向的精确起点年份未定。",
+    "WiFi 工具 (2015 更新) 与 2014 年内核 writeup 的实际先后无法确定，是否存在先无线后内核的转向未证。",
+    "cyseclabs.com (kernel_rop writeup 宿主) 与 duasynt 的关系未明；cyseclabs 是否为其前平台/前雇主无证据。",
+    "DUASYNT 之外的前雇主/平台无一手记录；搜索摘要出现的 Positive Technologies / Oracle / Datacom 等名称均未被抓取确认。",
+    "无第一人称长访谈或 AMA，入门动机、导师关系、失败经历与转型决策的自述缺失，关键决策的当时约束—可选项—选择—后果链条无法直接重建。",
+    "合著者 Michael S 的完整身份、机构归属与协作起始时间未知；DUASYNT 各门课程的首次开设年份未定。",
+    "CVE-2017-1000112 / CVE-2017-6074 是否为 Nikolenko 公开披露，未在本人一手页面交叉确认。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vitaly-nikolenko-synthesis-v1-20260930-021926-177",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790706235953982000-vitaly-nikolenko-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "1b7abfd4-9d41-4a72-95af-712015ba5ef2",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_w9a7p2ysc2igzm3k8lkchr2l",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vitaly-nikolenko-synthesis-v1-20260930-021926-177/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-29T18:23:55.982806+00:00"
+      },
+      {
+        "tool_use_id": "call_xesm3n8k6m92nbi60x6c79vm",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vitaly-nikolenko-synthesis-v1-20260930-021926-177/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-29T18:23:55.982834+00:00"
+      },
+      {
+        "tool_use_id": "call_pdxcclhmpybny9droetxx13x",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vitaly-nikolenko-synthesis-v1-20260930-021926-177/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "27391a5976038618eacf66756751c662311d5eb7c6f075c1a40b76b2eb70b59b",
+        "accessed_at": "2026-09-29T18:23:55.982840+00:00"
+      },
+      {
+        "tool_use_id": "call_63etk1tu12rgl2xpgtk4r7dh",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vitaly-nikolenko-synthesis-v1-20260930-021926-177/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "12ddabc0a1446ca5fd82814a52f8525374863ab7edbac275a331b31bd23d1d24",
+        "accessed_at": "2026-09-29T18:23:55.982847+00:00"
+      },
+      {
+        "tool_use_id": "call_8v3vqr2d5b18t06timyc03mz",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vitaly-nikolenko-synthesis-v1-20260930-021926-177/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "4ebf6bc9dce39a1f9a08572c59d4366ade2060204329941ddf98a9904a7e6640",
+        "accessed_at": "2026-09-29T18:23:55.982926+00:00"
+      },
+      {
+        "tool_use_id": "call_w6zccfio0gj2ejryqyo1bsmy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vitaly-nikolenko-synthesis-v1-20260930-021926-177/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-29T18:23:55.982929+00:00"
+      },
+      {
+        "tool_use_id": "call_ilgfhhqg9kplg9nqkm3moxn7",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vitaly-nikolenko-synthesis-v1-20260930-021926-177/checkpoint.md",
+          "content": "# Checkpoint — Vitaly Nikolenko 综合节点\n\n## 输入状态\n- person_json.json: 已读。rank 85, Linux/Android 内核漏洞方向, social x.com/vnik5287, writeup duasynt.com/trainings, selected_conference_evidence \"POC 2025 / Black Hat\"。\n- evidence_json.json: 已读全六维 (works/conversations/community/external/decisions/timeline), targeted.items 为空。\n- revision_context.json: 空数组 (首次综合, 无定向补证)。\n\n## 证据有效性判定 (verified_in_run=true 方可用)\n有效 (verified=true): VN-WORKS-01, VN-WORKS-02, VN-WORKS-04, VN-WORKS-05, VN-WORKS-06; vnik_convo_01, vnik_convo_02; vn-comm-01..05; vn-ext-01..06; vn-dec-001, vn-dec-005, vn-dec-007, vn-dec-008; vn-tl-001..011。\n无效 (verified=false, 不得使用): VN-WORKS-03, vn-dec-002-cve2014-4014, vn-dec-003-wifi-early, vn-dec-004-cve2016-6187, vn-dec-006-kaslr-bypass, vn-tl-012。\n\n注: kaslr_tsx_bypass 仓库的存在性经 vn-tl-003 / vn-ext-02 间接确认 (verified=true), 但其创作日期未定 (VN-WORKS-03 的 2017-10-15 为 invalid, 不得引用该日期)。\n\n## 已确认来源\n- 2014 内核 CVE 系列 writeup (CVE-2014-4014/4699/4943/2851): vn-tl-001, vn-comm-01, vn-ext-01\n- 2015 WiFi 工具 (wpa-autopwn, wifi-scripts, 更新日期): VN-WORKS-01\n- 2016-01-17 kernel_rop (SMEP 约束下 ROP, 教学驱动 + cyseclabs writeup 链接): VN-WORKS-02, vn-dec-005\n- 2016-10-16 CVE-2016-6187 heap off-by-one + 同行 DM 质疑 + Trippar/Pollet 协作 + 引用 Jann Horn P0 #808 + Ruxcon 自述: vn-comm-02, vn-tl-002, vn-comm-05\n- 2019-07-23 CVE PoC 批量重新托管 (perf/sysret/xfs/ipx/sock_diag/netfilter/eBPF): VN-WORKS-04\n- 2020-01 CVE-2019-2215 Binder UAF + CVE-2019-15666 LPE: vn-tl-004\n- 2020-08 SELinux RKP on S20: vn-tl-005\n- 2020-09 UAO vs addr_limit: vn-tl-006\n- 2020-12 PGD 定位 on Android/aarch64: vn-tl-007\n- 2022-05-10 heap feng shui 2022 合著 Michael S + 致谢 Adrian Drzewiecki: vn-comm-03, vn-ext-05, vn-tl-008\n- 2024 DUASYNT 六门课程矩阵 + 6 月班售罄 + 9 月 Hexacon Paris Android kernel security: VN-WORKS-05, vn-comm-04, vn-dec-007, vn-ext-04, vn-ext-06, vn-tl-009\n- DUASYNT 公司 (澳私有, ABN 13634103405, Zürich/Amsterdam/Sydney, 情报/政府方案): vn-ext-03, vn-dec-008, vn-tl-010\n\n## 未完成 / 缺口\n- person_json 的 \"POC 2025 / Black Hat\" 无一手页面 (POC 2025 404, Black Hat 403), 列为 tension/open_question, 不纳入机制。\n- GitHub 仓库仅有更新日期, 无创建/commit 日期; 2019-07-23 为迁移/更新日期非创作日期。\n- WiFi 工具 (2015 更新) 与 2014 内核 writeup 的时间先后不可定; \"无线先行\" 叙述存疑。\n- 无第一人称长访谈/AMA, 入门/导师/失败/转折的自述缺失。\n- cyseclabs (kernel_rop writeup 宿主) 与 duasynt 关系未明; 早年雇主/平台未知。\n- CVE-2017-1000112 / CVE-2017-6074 仅搜索摘要 (vn-tl-012 invalid), 不采用。\n- 合著者 Michael S 身份与合作起始时间未知; 课程创建年份未知。\n\n## 计划\n写入 output.json: person, expertise, 5 stages, 4 mechanisms, tensions, transferable_practices, non_transferable_conditions, open_questions。不填 _run/verification。所有 evidence_ids 取自 verified=true 集合。\n"
+        },
+        "success": true,
+        "content_sha256": "dd28bc992bac5f0c9cabfb0e2f071633a8cc5f9fd1d96b1d63a85ee6108b01a5",
+        "accessed_at": "2026-09-29T18:23:55.983337+00:00"
+      },
+      {
+        "tool_use_id": "call_z3n657yiekq9hucwosio8jrb",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vitaly-nikolenko-synthesis-v1-20260930-021926-177/output.json",
+          "content": "{\n  \"person\": \"Vitaly Nikolenko\",\n  \"expertise\": [\n    \"Linux 内核本地提权与堆利用 (SLAB/SLUB off-by-one、UAF、计数器溢出)\",\n    \"x86_64 内核 ROP 链构造与 SMEP 约束下的提权方法\",\n    \"内核地址随机化 (KASLR) 绕过与 CPU 微架构 (TSX/RTM) 侧信道\",\n    \"Android (arm64) 内核安全与厂商加固机制 (SELinux/RKP)\",\n    \"内核缓解机制评估 (UAO、addr_limit、hardened usercopy、freelist randomization)\",\n    \"Linux 内核 fuzzing 与根因分析\",\n    \"Chrome (Renderer) on Android 与 AArch64 二进制利用\",\n    \"内核利用与培训材料的系统化输出 (DUASYNT 课程)\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2014–2015\",\n      \"stage\": \"公开 writeup 与内核 LPE 起点\",\n      \"capability_change\": \"以对既有 Linux 内核 CVE 做分析并公开发布 writeup 为主要练习载体，覆盖 LPE、UAF、DoS 多种类型 (CVE-2014-4014/4699/4943/2851)，形成可公开的成果积累与可复现 PoC 仓库；同期 GitHub 上亦存在 WiFi/WPA 工具脚本，但内核方向已确立。\",\n      \"evidence_ids\": [\"vn-tl-001\", \"vn-comm-01\", \"vn-ext-01\", \"VN-WORKS-01\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2016\",\n      \"stage\": \"从单点 CVE 复现进入利用链构造与同行反馈\",\n      \"capability_change\": \"研究范围扩展到 SLAB/SLUB 堆 off-by-one (CVE-2016-6187) 并配套 GitHub PoC 仓库；同时以 kernel_rop 仓库和外部 writeup 演示 SMEP 约束下的内核态 ROP 提权。出现可核验的同行反馈回路：DM 质疑推动公开论证可利用性，Trippar 与 Pollet 贡献覆盖引用计数与堆对象定位的自动化，并引用 Jann Horn (Project Zero issue #808) 的工作。\",\n      \"evidence_ids\": [\"vn-tl-002\", \"vn-comm-02\", \"vn-comm-05\", \"VN-WORKS-02\", \"vn-dec-005\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017–2019\",\n      \"stage\": \"缓解绕过专题化与跨子系统 PoC 库整理\",\n      \"capability_change\": \"在利用链之外开辟 kASLR 绕过专题 (kaslr_tsx_bypass 静态库，基于 Intel TSX/RTM) 与通用 ROP 框架；对 2013–2017 跨子系统 (perf、sysret/ptrace、xfs、ipx、sock_diag、netfilter、eBPF) 的旧 PoC 进行集中重新托管，方法从单点利用扩展为可复现的跨子系统 PoC 集合。注意：仓库仅记录更新日期 2019-07-23，非创作日期。\",\n      \"evidence_ids\": [\"vn-tl-003\", \"vn-ext-02\", \"VN-WORKS-04\"],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2020–2022\",\n      \"stage\": \"平台迁移到 Android/aarch64 与缓解评估\",\n      \"capability_change\": \"研究对象从桌面/服务器扩展到 Android Binder UAF 与跨发行版 LPE (CVE-2019-2215、CVE-2019-15666)，进入厂商设备加固分析 (三星 S20 SELinux/RKP)；在 aarch64 上重建利用前置基础设施 (PGD 定位)；并对缓解机制本身做对照式评估 (UAO 对抗 addr_limit 改写)。2022 年与 Michael S 合著《Linux kernel heap feng shui in 2022》，致谢 Adrian Drzewiecki，标志稳定的协作发表模式。\",\n      \"evidence_ids\": [\"vn-tl-004\", \"vn-tl-005\", \"vn-tl-006\", \"vn-tl-007\", \"vn-comm-03\", \"vn-ext-05\", \"vn-tl-008\"],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2024\",\n      \"stage\": \"研究能力课程化与机构化对外输出\",\n      \"capability_change\": \"以 DUASYNT 为载体公开六门分层课程 (Linux Kernel Exploit Development 入门与进阶、Android Kernel Security、Chrome Renderer on Android、Linux Kernel Fuzzing and RCA、Introduction to AArch64 Binary Exploitation)；2024 年排期含 6 月 x86_64 基础场 (售罄)、6 月进阶场与 9 月 Hexacon (Paris) Android kernel security。方法重心由利用开发并列出 fuzzing/RCA，研究输出由个人 writeup/PoC 转向体系化教学。\",\n      \"evidence_ids\": [\"VN-WORKS-05\", \"vn-comm-04\", \"vn-dec-007\", \"vn-ext-04\", \"vn-ext-06\", \"vn-tl-009\", \"vn-ext-03\", \"vn-dec-008\", \"vn-tl-010\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"以 CVE writeup 为载体的资料驱动公开练习\",\n      \"starting_conditions\": \"2014 年前后以个人博客 (后归档于 duasynt.com/blog) 与 GitHub 仓库为公开输出渠道；可获取公开手册 (AMD/Intel 手册、bottomupcs、linuxjournal) 作为分析锚点，无可见导师或正式培训。\",\n      \"repeated_practice\": \"对既有内核 CVE 复现其触发条件与利用路径，并以 writeup 形式公开记录分析链条；从 2014 年系列 CVE 到 2016 年 heap off-by-one、再到 2020 年 Android 方向 writeup，跨多年持续输出。\",\n      \"feedback\": \"早期以一手技术手册为锚自驱动写作，未见同行反馈回路；后期反馈来自博客评论/DM 与博客文章的更新修订 (如 2022-05-10 文章于 2022-06-09 更新)。\",\n      \"intermediate_capability\": \"形成可核验的分析链条与可复现 PoC 仓库的写作习惯，使漏洞分析能被外部复核与复用。\",\n      \"observed_outcomes\": [\n        \"2014 年 CVE-2014 系列内核 LPE/UAF/DoS writeup (含 CVE-2014-4699 ptrace/sysret)\",\n        \"2016 年 CVE-2016-6187 heap off-by-one writeup 配套 GitHub PoC\",\n        \"2020 年 Android 方向多篇文章 (CVE-2019-2215、SELinux RKP、UAO、PGD 定位)\"\n      ],\n      \"evidence_ids\": [\"vn-tl-001\", \"vn-comm-01\", \"vn-ext-01\", \"vn-tl-002\", \"vn-tl-004\", \"vn-tl-005\", \"vn-tl-006\", \"vn-tl-007\", \"vn-comm-03\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"持续 writeup 也可能由商业培训的市场曝光需求驱动 (writeup 为课程引流)，而非纯能力练习；但 2014 年早期博客出现时并无课程产品，该解释无法覆盖早期阶段。\"\n    },\n    {\n      \"name\": \"工具化与可复用产物建设\",\n      \"starting_conditions\": \"早期即有 GitHub 仓库托管脚本与 PoC 的习惯 (2015 年 WiFi 工具脚本调用外部破解服务，2014 年 LPE PoC 仓库)。\",\n      \"repeated_practice\": \"将利用方法封装为可复用产物而非一次性脚本：kernel_rop 提供自带漏洞的教学驱动、kaslr_tsx_bypass 封装为静态库、2019 年对旧 CVE PoC 跨子系统集中重新托管。\",\n      \"feedback\": \"仓库的 star/可见度与课程内容的引用构成间接反馈；教学驱动与课程材料互相复用。\",\n      \"intermediate_capability\": \"把单点漏洞利用沉淀为可教学、可复用的工具与方法库，支撑后续分层课程。\",\n      \"observed_outcomes\": [\n        \"kernel_rop 仓库 + cyseclabs writeup (SMEP 约束下内核态 ROP)\",\n        \"kaslr_tsx_bypass 静态库 (Intel TSX/RTM 旁路 KASLR)\",\n        \"2019-07-23 前后跨子系统 CVE PoC 库集中重新托管\",\n        \"DUASYNT 入门/进阶 Linux Kernel Exploit Development 课程\"\n      ],\n      \"evidence_ids\": [\"VN-WORKS-01\", \"VN-WORKS-02\", \"VN-WORKS-04\", \"vn-tl-003\", \"vn-ext-02\", \"vn-dec-005\", \"vn-ext-06\"],\n      \"validation_tests\": [\"repeated\", \"generative\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"工具化产出也可能是 GitHub 作为简历/展示用途的副产品，不必然服务于能力成长；但 kernel_rop 的教学驱动设计明显超出展示需要，该解释覆盖不全。\"\n    },\n    {\n      \"name\": \"在同行交互中迭代利用方法\",\n      \"starting_conditions\": \"已具备独立公开 writeup 的能力，并开始公开论证可利用性。\",\n      \"repeated_practice\": \"在 CVE-2016-6187 工作中记录并回应同行 DM 质疑 (路径是否可利用)，吸收 Trippar (覆盖引用计数触发 UAF 的方法)、Pollet (gdb/python 自动化定位堆对象) 的具体技术贡献，并引用 Jann Horn (Project Zero issue #808) 的 userfaultfd 工作；2022 年与 Michael S 合著并致谢 Adrian Drzewiecki 的对齐兼容检查逻辑。\",\n      \"feedback\": \"同行 DM 质疑、指定协作者的代码级贡献、对顶尖同行公开成果的引用与复用，构成可核验的同伴反馈回路。\",\n      \"intermediate_capability\": \"能将外部贡献整合进自身利用链条，把个人练习推进为协作产出的利用方法。\",\n      \"observed_outcomes\": [\n        \"CVE-2016-6187 writeup 含明确的同行致谢与争议回应并自述 Ruxcon 演讲\",\n        \"2022 年 heap feng shui 合著与代码级致谢\",\n        \"持续引用并复用 Project Zero 等顶尖同行成果\"\n      ],\n      \"evidence_ids\": [\"vn-comm-02\", \"vn-comm-05\", \"vn-comm-03\", \"vn-ext-05\", \"vn-tl-008\"],\n      \"validation_tests\": [\"repeated\", \"distinctive\"],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"同行交互目前仅在 CVE-2016-6187 一例中有详细技术致谢，2022 年合著的协作深度缺乏一手叙述，反馈回路可能被高估；该机制需更多样本才能升为 high。\"\n    },\n    {\n      \"name\": \"按缓解机制逐项拆解与平台迁移\",\n      \"starting_conditions\": \"已在 x86_64 内核利用上建立基础能力，可独立构造 ROP 与堆利用。\",\n      \"repeated_practice\": \"把研究目标按缓解机制 (SMEP、KASLR、addr_limit、freelist randomization、hardened usercopy、SELinux/RKP) 与平台 (x86_64 → aarch64/Android) 逐项拆解，对新平台先解决利用前置基础设施 (如 aarch64 PGD 定位) 再谈利用。\",\n      \"feedback\": \"平台迁移后内核自身变化 (SLUB 调整、cache aliasing、SLAB_ACCOUNT) 反向要求更新利用方法，2022 年 heap feng shui 文章即是对 2016 年堆利用方法的更新版。\",\n      \"intermediate_capability\": \"在新架构与缓解组合下重建利用工具链的能力，而非依赖单一一次性 PoC。\",\n      \"observed_outcomes\": [\n        \"SMEP 约束下 ROP → kASLR (TSX/RTM) 侧信道专题\",\n        \"2020 年 SELinux RKP / UAO vs addr_limit 的缓解评估\",\n        \"2020 年 aarch64 PGD 定位重建 Android 利用前置工具链\",\n        \"2022 年 heap feng shui 更新 (cache aliasing、SLAB_ACCOUNT、freelist randomization)\"\n      ],\n      \"evidence_ids\": [\"VN-WORKS-02\", \"vn-tl-003\", \"vn-tl-005\", \"vn-tl-006\", \"vn-tl-007\", \"vn-comm-03\", \"vn-ext-06\"],\n      \"validation_tests\": [\"repeated\", \"generative\", \"distinctive\"],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"逐项拆解也可能只是不同 CVE 暴露面的被动结果而非主动策略；但 2020 年多篇针对缓解机制本身 (而非具体 CVE) 的评估文章更支持主动拆解的解读。\"\n    }\n  ],\n  \"tensions\": [\n    \"person_json 记载 selected_conference_evidence 为 POC 2025 / Black Hat，但 POC 2025 议程页 (powerofcommunity.net/poc2025.html) 返回 404、Black Hat archive 页返回 403，两项会议参与均未取得一手页面确认；该种子字段无法与已抓取材料交叉验证，仅作为待核线索保留。\",\n    \"GitHub 仓库仅显示最近更新日期而非创建日期。2019-07-23 为旧 CVE PoC 的批量重新托管/更新日期，非创作日期；将更新日期叙述为创作年份会造成时间序误导，本报告全部以仓库元数据口径表述。\",\n    \"GitHub 仓库同时存在 2015 年 WiFi 工具 (wpa-autopwn、wifi-scripts) 与 2014 年内核 CVE writeup，二者时间先后无法由仓库元数据确定；无线→内核的领域转向叙事在更新日期上不成立，仅可断定 2014 年内核方向已确立且同期存在无线工具产出。\",\n    \"WebSearch 摘要将 CVE-2017-1000112 / CVE-2017-6074 归于 Nikolenko 公开披露，但 duasynt.com/blog 已抓取条目中未见这两项，且该摘要未抓取正文 (vn-tl-012 verified=false，已弃用)，存在搜索摘要与本人一手页面之间的不一致，未纳入结论。\",\n    \"WebSearch 摘要出现 Nikolenko 为 Trace Labs 创始人的说法，与 duasynt.com 实际页面内容 (未提及 Trace Labs) 不一致，且 Trace Labs 公开记录创始人另属他人；该冲突来源未抓取正文，不予采信。\",\n    \"kernel_rop README 链接的 cyseclabs.com/page?n=17012016 抓取时返回证书错误，日期 2016-01-17 仅由 URL 路径推断，应视为推断而非确证；cyseclabs 与 duasynt 的关系亦无一手说明。\"\n  ],\n  \"transferable_practices\": [\n    \"以既有 CVE 复现 + 公开 writeup 作为资料驱动的练习载体，用一手技术手册建立可核验分析链条，而非依赖不可复核的口述。\",\n    \"将利用方法封装为可复用产物 (教学驱动、静态库、跨子系统 PoC 库)，使单点漏洞沉淀为可教学的方法库。\",\n    \"对同行 DM 质疑与协作者代码级贡献做明确署名与回应，把个人练习推进为可被外部复核的协作产出。\",\n    \"按缓解机制 (而非仅按 CVE) 逐项拆解研究目标，并在迁移到新平台时先重建利用前置基础设施 (如 PGD 定位) 再谈利用。\",\n    \"对历史利用方法随内核变化做更新版评估 (如 heap feng shui 2022 相对 2016 堆利用)，保持方法与现行缓解的对应。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"DUASYNT 机构化载体 (澳私有公司，ABN 13634103405，办公地 Zürich/Amsterdam/Sydney，面向情报与政府方案) 为其研究输出与分层课程提供了商业出口；缺乏同类机构化出口的研究者难以直接复制其课程化路径。\",\n    \"2014 年前后 Linux 内核 writeup 的公开博客生态、公开手册可得性与同行 DM 反馈渠道，构成其所处时期的特定外部条件，并非可任意平移到当前时间点。\",\n    \"与 Trippar、Pollet、Michael S 等指定协作者的技术网络，以及能引用 Project Zero 公开成果的时机，属个人特有条件，难以通过通用流程复现。\",\n    \"2016 年 Ruxcon 演讲与 2024 年 Hexacon (Paris) 培训排期等会议接纳，属外部市场对其既有权威性的认可，非可主动复制的方法步骤。\"\n  ],\n  \"open_questions\": [\n    \"POC 2025 / Black Hat 的具体参与 (演讲标题、日期、是否为培训) 缺一手议程页确认。\",\n    \"GitHub 仓库 (kernel_rop、kaslr_tsx_bypass、各 CVE PoC) 的创建日期与 commit 时间线未取得，技术子方向的精确起点年份未定。\",\n    \"WiFi 工具 (2015 更新) 与 2014 年内核 writeup 的实际先后无法确定，是否存在先无线后内核的转向未证。\",\n    \"cyseclabs.com (kernel_rop writeup 宿主) 与 duasynt 的关系未明；cyseclabs 是否为其前平台/前雇主无证据。\",\n    \"DUASYNT 之外的前雇主/平台无一手记录；搜索摘要出现的 Positive Technologies / Oracle / Datacom 等名称均未被抓取确认。\",\n    \"无第一人称长访谈或 AMA，入门动机、导师关系、失败经历与转型决策的自述缺失，关键决策的当时约束—可选项—选择—后果链条无法直接重建。\",\n    \"合著者 Michael S 的完整身份、机构归属与协作起始时间未知；DUASYNT 各门课程的首次开设年份未定。\",\n    \"CVE-2017-1000112 / CVE-2017-6074 是否为 Nikolenko 公开披露，未在本人一手页面交叉确认。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "11323eb92786edf4bcc7d8f885f116aec3e0cf411318aecfd4188d236edd134a",
+        "accessed_at": "2026-09-29T18:23:55.983341+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790706235983353000-vitaly-nikolenko-synthesis-v1.json",
+    "label": "Vitaly Nikolenko:synthesis:v1",
+    "elapsed_seconds": 269.8,
+    "prompt_sha256": "7d2ac7203cc1ec258db7569e45999889929ec0fb00e254a989caa8e45fc72602",
+    "num_turns": 9,
+    "total_cost_usd": 0.583565,
+    "usage": {
+      "input_tokens": 37768,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 96000,
+      "output_tokens": 13869,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 37768,
+        "outputTokens": 13869,
+        "cacheReadInputTokens": 96000,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.583565,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

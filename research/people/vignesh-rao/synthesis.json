@@ -1,0 +1,364 @@
+{
+  "person": "Vignesh Rao",
+  "expertise": [
+    "浏览器与系统漏洞",
+    "JIT 编译器利用（V8 TurboFan/Maglev、JSC FTL/B3）",
+    "patch-gapping（1day）方法论",
+    "addrof/fakeobj 与多阶段利用原语",
+    "沙箱绕过（V8 Ubercage）",
+    "ASLR brute-force（穷举）原语"
+  ],
+  "stages": [
+    {
+      "period": "2019（研究期）；2020-02-24（发表）",
+      "stage": "V8 TurboFan patch-gapping 利用链与 1day 方法论",
+      "capability_change": "confidence 语义声明：本阶段及后续阶段 confidence=high 指“技术内容可追溯性”，由四篇已核验 primary writeup 支撑，不含身份同一性确信；身份同一性见 tensions。与 István Kurucsai 合著，针对 Chromium V8 TurboFan InferReceiverMapsUnsafe 在 Proxy 拦截 JSCreate 原型访问时的副作用建模缺陷，构建完整利用链（DOUBLE-to-SMI 类型混淆 → addrof/fakeobj → TypedArray backing store 任意读写 → WASM RWX 写 shellcode）。文章系统阐述 patch-gapping 方法论：监控公开 chromium-review CL 与回归测试，按“simple but powerful-looking regression test, incorrect modeling of side-effects, easy to understand one-line change”筛选候选。自述发现补丁后约 3 日完成利用链（据 writeup 自述，无独立计时复核）；并依据 Chrome 改为双周/每周发布节奏判定 patch-gapping 路线不再可行，以“eulogy”表明收尾。",
+      "evidence_ids": [
+        "VR-WORKS-01",
+        "vr-conv-1",
+        "vr-community-001",
+        "vr-decisions-01"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2020（研究期，与 Martin Saar 协作）；2023-07-20（发表）",
+      "stage": "由 V8 转向 JSC：FTL/B3 范围分析整数溢出根因审计",
+      "capability_change": "沿用 stages[0] 声明：confidence=high 为技术内容可追溯性，不含身份同一性确信。研究目标由 Chrome/V8 迁移至 Apple WebKit/JSC 的 FTL JIT B3 强缩减阶段；由复用公开补丁（patch-gapping）转为直接审计 JIT 范围分析源码（B3ReduceStrength.cpp 的 rangeFor/shl），发现 IntRange::shl() 左移上界 0x7ffffffe 溢出变负且小于下界、computed range 与实际不符的整数溢出，DFG Integer Range Optimization 据此移除数组边界检查，得 JSC 堆上可控越界读写，经 ArrayWithDouble/ArrayWithContiguous 类型混淆得 addrof/fakeobj。研究期 2020（与 Martin Saar 协作）与发表期 2023-07 明确分离，时间线应按研究期而非发表期解读。",
+      "evidence_ids": [
+        "VR-WORKS-02",
+        "vr-conv-2",
+        "vr-community-002",
+        "vr-community-006",
+        "vr-decisions-02"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2023（研究）；2023-10-12/13 OBTS v6.0 演讲（Spain）；2023-12-11（发表）",
+      "stage": "JSC NaN-boxing 编码语义层审计与 ASLR brute-force 原语优化",
+      "capability_change": "沿用 stages[0] 声明：confidence=high 为技术内容可追溯性，不含身份同一性确信。与 Javier Jimenez 合著，在同一 JSC 引擎内转向 NaN-boxing 编码语义层审计：boxDouble() 假定入参为合法 double 或纯 NaN，未校验结果溢出；以 Float64Array + BigUint64Array 视图写入“impure NaN”减 JSValue::NumberTag 溢出得高位清零全控值，JSC 解释为原始对象指针即 fakeobj。引入基于 JIT 编译 CompareStrictEq（x86 cmp）的 ASLR brute-force（穷举）原语，并利用 macOS/iOS JSC 堆地址恒为 5 字节（40 位）且页对齐的结构前提，以 0x1000 步进将 32 位穷举由 M1 上逾一小时降至秒级（约 4096x 提速，依赖上述结构前提，非具此结构的地址空间不可直接迁移）。研究期与发表期分离：2023 研究、2023-10 OBTS v6.0 演讲、2023-12-11 发表。",
+      "evidence_ids": [
+        "VR-WORKS-03",
+        "vr-conv-3",
+        "vr-community-003",
+        "vr-community-005",
+        "vr-decisions-03",
+        "VR-NEW-R1-OBTS",
+        "VR-NEW-R1-CONF"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2023（自主发现）；2024-01-16（补丁）；2024-01-19（发表）",
+      "stage": "回到 V8/Maglev：二阶逻辑缺陷与 Ubercage 绕过",
+      "capability_change": "沿用 stages[0] 声明：confidence=high 为技术内容可追溯性，不含身份同一性确信。与 Javier Jimenez 合著，回到 V8 但切换至较 TurboFan 更新的 Maglev 编译管线，处理 current_raw_allocation_ 状态管理这类二阶逻辑缺陷（TryBuildFindNonConstructorOrConstruct() 调用 BuildAllocateFastObject() 后未清 current_raw_allocation_，GC 移动对象致折叠分配越界写，转 type confusion 得 addrof/read/write）；绕过 Ubercage 沙箱，借含“raw 64 bit pointer ... store the starting address of the jump table”的 WebAssembly 实例对象指向 RWX 内存，并以 WebAssembly 浮点常量“interpreted as assembly code by jumping in the middle of some compiled wasm code”跳转执行 shellcode。自述为数月前自主发现的 V8 漏洞，标志由 patch-gapping 的 1day 复现转向自主 0day 发现与利用。多阶段原语（fakeobj→addrof→相对/绝对读写→代码执行）由 JSC 迁移至 V8 复用（基于两篇 writeup 技术内容的推断）。利用技术随 V8 防御机制（pointer compression 到 Ubercage）的更迭而调整。研究期与发表期分离：2023 自主发现、2024-01-16 补丁、2024-01-19 发表。",
+      "evidence_ids": [
+        "VR-WORKS-04",
+        "vr-conv-4",
+        "vr-community-004",
+        "vr-decisions-04"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "patch-gapping 方法论：公开补丁作为研究输入",
+      "starting_conditions": "2019 年两次 patch-gapping Chrome 的既有经验；Exodus Intelligence 研究环境与合著者 István Kurucsai；Chrome 当时发布节奏下安全补丁先于用户版本公开、回归测试可显著缩短利用开发时间的窗口。",
+      "repeated_practice": "自述对 patch-gapping 这一主题至少进行三次系统研究（2019 年两次、本次一次），监控公开 chromium-review CL 与回归测试，按既定准则筛选候选（“simple but powerful-looking regression test, incorrect modeling of side-effects, easy to understand one-line change”）并完成端到端利用链。重复性判断仅基于已发表 writeup，未发表研究不可见。",
+      "feedback": "利用开发耗时自述（约 3 日，据 writeup 自述，无独立计时复核）；Chrome 发布节奏改为双周/每周这一外部约束使该路线收益下降。",
+      "intermediate_capability": "形成可复用的 1day 候选筛选准则与以公开补丁/CL 为输入的研究工作流，并据此评估研究路线的可行性与收益。",
+      "observed_outcomes": [
+        "完整 V8 TurboFan InferReceiverMapsUnsafe 利用链（DOUBLE-to-SMI → addrof/fakeobj → 任意读写 → WASM RWX shellcode）",
+        "以“eulogy”公开判定 patch-gapping Chrome 路线不再可行并收尾，驱动后续向直接源码审计与 0day 发现的转向"
+      ],
+      "evidence_ids": [
+        "VR-WORKS-01",
+        "vr-conv-1",
+        "vr-decisions-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "三次 patch-gapping 记录可能反映 Exodus 团队选题路线而非个人练习频度；“约 3 日”为 first-person 自述无独立复核，可能受记忆与叙述策略影响。"
+    },
+    {
+      "name": "JIT 编译器范围分析/编码语义根因审计",
+      "starting_conditions": "stages[0] 在 V8 TurboFan 上以副作用建模为切入的利用经验；Exodus 平台与合著者网络。",
+      "repeated_practice": "直接审计 JIT 编译器源码以发现 0day 类缺陷：stages[1] JSC FTL B3 IntRange::shl() 整数溢出（B3ReduceStrength.cpp rangeFor/shl）、stages[2] JSC NaN-boxing boxDouble() 溢出、stages[3] V8 Maglev current_raw_allocation_ 状态管理二阶逻辑缺陷。重复性判断仅基于已发表 writeup，未发表研究不可见。",
+      "feedback": "三次均产出可利用的根因级发现，分别经 ArrayWithDouble/ArrayWithContiguous 类型混淆、fakeobj、越界写转 type confusion 完成利用。",
+      "intermediate_capability": "在不同 JIT 编译管线（V8 TurboFan/Maglev、JSC FTL/B3）间定位范围分析、编码语义与状态管理缺陷的能力，从复用公开补丁转向自主根因审计。",
+      "observed_outcomes": [
+        "JSC FTL/B3 整数溢出（stages[1]）",
+        "JSC NaN-boxing boxDouble 溢出 fakeobj（stages[2]）",
+        "V8 Maglev CVE-2024-0517 current_raw_allocation_ 越界写（stages[3]）"
+      ],
+      "evidence_ids": [
+        "VR-WORKS-02",
+        "VR-WORKS-03",
+        "VR-WORKS-04",
+        "vr-conv-3",
+        "vr-decisions-02",
+        "vr-decisions-03",
+        "vr-decisions-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "三个根因级发现可能部分由 Exodus 研究选题路线与合著者贡献驱动，而非个人能力线性增长；2020-2023 公开输出空白期的实际研究量不可见。"
+    },
+    {
+      "name": "多阶段原语跨引擎复用与防御绕过适配",
+      "starting_conditions": "stages[0] V8 上 addrof/fakeobj + TypedArray backing store 任意读写 + WASM RWX 写 shellcode 的端到端原语链。",
+      "repeated_practice": "在不同引擎上构造并复用多阶段原语（fakeobj → addrof → 相对/绝对读写 → 代码执行）：stages[1] JSC 经类型混淆得 addrof/fakeobj、stages[2] JSC 经 NaN-boxing fakeobj + JIT-cmp ASLR brute-force（穷举）、stages[3] V8 经越界写转 type confusion 并借 WASM 实例 jump_table_start 指向 RWX + shellcode smuggling 绕过 Ubercage。重复性判断仅基于已发表 writeup，未发表研究不可见。",
+      "feedback": "各引擎防御机制（V8 pointer compression → Ubercage；JSC 堆地址结构）作为约束，倒逼原语与绕过方法的调整；利用技术随 V8 防御机制（pointer compression 到 Ubercage）的更迭而调整。",
+      "intermediate_capability": "一套可在 V8/JSC 间迁移、随防御更迭适配的多阶段原语与沙箱绕过方法。",
+      "observed_outcomes": [
+        "四篇 writeup 均达到代码执行或任意读写",
+        "stages[3] 显式绕过 Ubercage 并复用 WASM-RWX 原语",
+        "stages[2] 量化优化 ASLR brute-force 原语（约 4096x）"
+      ],
+      "evidence_ids": [
+        "VR-WORKS-01",
+        "VR-WORKS-02",
+        "VR-WORKS-03",
+        "VR-WORKS-04",
+        "vr-decisions-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "跨引擎原语复用可能受同期公开研究（如 Samuel Groß Phrack 文章、LiveOverflow WebKit 系列，见 vr-community-006）影响而非纯个人积累；“复用”为基于两篇 writeup 技术内容的推断。"
+    },
+    {
+      "name": "合著协作整理为公开技术记录",
+      "starting_conditions": "2020 年首次公开输出即以合著形式（István Kurucsai）出现，能力构建与同伴协作耦合；Exodus Intelligence 作为发表渠道。",
+      "repeated_practice": "与不同同伴分别推进并整理为公开 writeup/会议演讲：2020 Kurucsai（patch-gapping）、2020 Martin Saar（JSC 研究，2023 独著发表）、2023-2024 Javier Jimenez（连续三篇，含 OBTS v6.0 联合演讲）。重复性判断仅基于已发表 writeup，未发表研究不可见。",
+      "feedback": "合著者配对稳定（Jimenez 跨三篇），会议演讲（OBTS v6.0，2023-10-12/13，Spain）作为写作之外的公开传播渠道。",
+      "intermediate_capability": "将协作研究整理为公开技术记录与会议演讲的反馈回路，含研究期与发表期分离的延迟发表模式。",
+      "observed_outcomes": [
+        "四篇 Exodus 博客 writeup（2020/2023x2/2024）",
+        "OBTS v6.0 联合演讲（2023-10-12/13，Spain）",
+        "研究期与发表期分离的延迟发表（如 2020 研究于 2023 发表）"
+      ],
+      "evidence_ids": [
+        "VR-WORKS-01",
+        "VR-WORKS-02",
+        "VR-WORKS-03",
+        "VR-WORKS-04",
+        "vr-conv-2",
+        "vr-community-001",
+        "vr-community-002",
+        "vr-community-003",
+        "VR-NEW-R1-OBTS",
+        "VR-NEW-R1-CONF"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "合著与会议演讲频度可能反映 Exodus 团队发表策略与合著者可得性，而非个人协作能力的增长；OBTS v6.0 featured speakers 8 人不含二人，演讲事实仅由文章内嵌 YouTube 标题支撑，独立确认未取得。"
+    }
+  ],
+  "tensions": [
+    "身份同一性未独立确认：2020-02-24 byline 为“Vignesh S Rao”，2023-2024 为“Vignesh Rao”，二者均挂 Exodus Intelligence 且主题连续，推断同一人；但 Exodus 博客首页署名作者列表不含该姓名、/author/vignesh-rao/ 返回 404、OBTS v6.0 featured speakers 8 人不含 Vignesh Rao 或 Javier Jimenez、talks.html 模板未渲染完整名单无法独立取得、GitHub vigneshsrao（@sherl0ck__）handle 与 person_json @vigneshr4o 不一致且 bio 未提 Exodus/WebKit、Igalia 团队页 404、x.com/vigneshr4o HTTP 402——四篇带署名 writeup 与上述反证并存，身份同一性仅为推断。",
+    "归属判断受 Exodus 机构声誉加权：四篇 writeup 的 byline 出现在 Exodus Intelligence 博客具体文章页，但该博客首页署名作者索引不含该姓名、作者归档页 404；将能力归属于“Vignesh Rao”主要依赖 Exodus 作为机构研究博客的声誉与文章页 byline，而非独立生平来源，综合层不应据机构声誉加权归属判断。",
+    "2020-2023 公开输出空白期：2020-02-24 与 2023-07-20 之间约三年未见抓取到的署名 writeup，其间产出、目标或转向无来源证实，可能放大能力成长曲线的表观陡度。",
+    "研究期与发表期分离：VR-WORKS-02 研究于 2020（与 Martin Saar 协作）、2023-07 发表；VR-WORKS-03/04 研究与发表期亦明确分离；时间线应按研究期而非发表期解读，不应以发表日期为准推断能力节点。",
+    "幸存者偏差：所有“重复练习”判断仅基于已发表 writeup，未发表研究不可见，发表产出密度可能被直接等同于练习频度。",
+    "替代解释：四篇 writeup 跨四年的主题深入可能部分由 Exodus Intelligence 研究选题路线驱动，而非个人能力自然演化；2020-2023 公开输出空白期研究产出不可见。",
+    "brute-force（穷举）ASLR 4096x 提速的结构前提：以 0x1000 步进将 32 位穷举降至秒级（约 4096x）依赖 macOS/iOS JSC 堆地址恒为 5 字节（40 位）且页对齐，非具此结构的地址空间不可直接迁移。"
+  ],
+  "transferable_practices": [
+    "前提声明：以下可迁移实践所依托的能力归属受身份同一性推断前提限制（四篇 writeup 署名 Vignesh S Rao(2020)/Vignesh Rao(2023-2024) 为推断同一人，非独立确认；Exodus 博客首页署名作者列表不含该姓名、/author/vignesh-rao/ 404、OBTS v6.0 featured speakers 与 talks.html 完整名单均未独立锚定身份）。",
+    "将公开补丁/CL/回归测试作为研究输入，按“simple but powerful-looking regression test, incorrect modeling of side-effects, easy to understand one-line change”等准则筛选 1day 候选。",
+    "JIT 编译器源码根因审计路径（范围分析/编码语义/状态管理）可迁移至不同 JIT 引擎（该能力归属受上述身份推断前提限制）。",
+    "多阶段原语（fakeobj → addrof → 相对/绝对读写 → 代码执行）的构造与跨引擎复用。",
+    "以 JIT 编译指令（如 x86 cmp）实现 ASLR 穷举原语，并结合地址空间结构性质（如页对齐）做量化优化（提速依赖具体地址空间结构，需重新评估可迁移性）。",
+    "协作研究 → 公开 writeup/会议演讲的发表回路（含研究期与发表期分离的延迟发表）。"
+  ],
+  "non_transferable_conditions": [
+    "Exodus Intelligence 机构资源与研究环境：发表渠道、合著者网络（Kurucsai/Saar/Jimenez）、选题路线；四篇 writeup 均挂 Exodus，能力发展与此机构语境耦合，非纯个人条件。",
+    "macOS/iOS JSC 堆地址 5 字节（40 位）且页对齐的结构：支撑 brute-force（穷举）ASLR 4096x 提速，非具此结构的地址空间不可复用。",
+    "Chrome 发布节奏由更长周期改为双周/每周：使 patch-gapping 路线收益下降的外部条件，为时期特定，驱动 stages[0]→[1] 的转向。",
+    "特定合著者关系（István Kurucsai、Martin Saar、Javier Jimenez）：协作机制依赖这些具体同伴的可得性与配对，非可任意迁移的个人条件。"
+  ],
+  "open_questions": [
+    "身份同一性独立一手来源未取得：Exodus 作者归档 /author/vignesh-rao/ 返回 404、首页署名作者列表不含该姓名、OBTS v6.0 featured speakers 与 talks.html 完整名单均未独立锚定、GitHub vigneshsrao（@sherl0ck__）handle 与 person_json @vigneshr4o 不一致、Igalia 团队页 404、x.com/vigneshr4o HTTP 402——四篇带署名 writeup 与上述反证并存，身份同一性仅为推断。",
+    "CVE-2024-0517 厂商（Google Chrome）致谢未核验：Chrome Releases 博客、NVD、CVE.org、Chromium issues 在历轮抓取内分别返回 403/503/未渲染/重定向，无法确认 Vignesh Rao 或 Exodus Intelligence 是否为首报者或被厂商致谢。",
+    "person_json selected_conference_evidence 第二项“Black Hat”演讲事实未核验（Black Hat US-24 议程页 403）；OBTS v6.0 已核验为 2023-10-12/13 Spain 会议，“OffByOne”为“OBTS”（Objective by the Sea）的转写/讹写。",
+    "2020-2023 公开输出空白期的实际研究产出不可见：未公开、内部研究或其他渠道均未证实，能力成长曲线的该段无法据已发表材料补全。",
+    "入门经历、教育背景、进入安全行业路径、导师关系均无可核验来源；未找到长访谈/播客/AMA，仅有 writeup 内嵌的简短 first-person 句；与 Kurucsai/Saar/Jimenez 是否构成指导关系未知。",
+    "是否正式就职于 Exodus Intelligence、团队角色、内部技术评审流程均未核验（Exodus /team/、/about/ 403/404，博客无作者 bio；四篇 writeup 正文均未感谢审阅者）。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790571131626948000-vignesh-rao-synthesis-v3.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "0da358f3-6233-4496-99d8-68b90cedbf69",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_rkxd57yr751v32vyv8r0wovl",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T04:52:11.672599+00:00"
+      },
+      {
+        "tool_use_id": "call_t1vb9ucjf9mrrm26svchg2oe",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "8798c43f81e2cbe0a6de7b8e4ee65155474d9006731476d9e31361d8874fca46",
+        "accessed_at": "2026-09-28T04:52:11.672626+00:00"
+      },
+      {
+        "tool_use_id": "call_5bt60881ojnpxn871umvn8r5",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "5bfcb3fa2e2eb904d99e2184132643a3d51cf20e53d995ab342a49ff21036065",
+        "accessed_at": "2026-09-28T04:52:11.672637+00:00"
+      },
+      {
+        "tool_use_id": "call_bzrjajb8cqmrg9s14qcrre6z",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "1ca17cd929c680e6e5dd4ca3dab55dc8a5384e17fdaa073279e0f777381176d8",
+        "accessed_at": "2026-09-28T04:52:11.672684+00:00"
+      },
+      {
+        "tool_use_id": "call_dp4rmrwfhtdlkas2v56b2uk0",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341/inputs/revision_context.json",
+          "offset": 549,
+          "limit": 400
+        },
+        "success": true,
+        "content_sha256": "32b0c5004c4d4cee05466c0b67d4501a315b1129619e56be54b460eb7f46897e",
+        "accessed_at": "2026-09-28T04:52:11.672764+00:00"
+      },
+      {
+        "tool_use_id": "call_cyb4z6cz9tigi1s4zuzutyt1",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341/inputs/evidence_json.json",
+          "limit": 300
+        },
+        "success": true,
+        "content_sha256": "ecd19169e603aa5060434fe5ff47f91c1a09172e93346175a982b2f78c1e96ac",
+        "accessed_at": "2026-09-28T04:52:11.672802+00:00"
+      },
+      {
+        "tool_use_id": "call_hwilt1z9ft8hnojlq6nhq8qu",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341/inputs/evidence_json.json",
+          "offset": 300,
+          "limit": 400
+        },
+        "success": true,
+        "content_sha256": "16fa311a178c1c997aceeb55dc171db94ec9608622177a52499c02f74dd576f8",
+        "accessed_at": "2026-09-28T04:52:11.672845+00:00"
+      },
+      {
+        "tool_use_id": "call_r40oe1hdkrztztizcj63b1q4",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341/checkpoint.md",
+          "content": "# Checkpoint — Vignesh Rao 综合 v3\n\n## 任务\n综合 six-dimensions 取证 + R1/R2 定向补证，重建领域能力成长过程（非罗列成就）。\n节点：synthesis-v3。输入：person_json / evidence_json / revision_context（含 R1+R2 两轮）。\n\n## 已读取输入\n- task.md：综合分析师角色；主机制须满足\"跨材料重复/解释多个结果/有区分度\"中至少两项；documented/reported/inferred/unknown 分开；保留矛盾与竞争性解释；可迁移做法与个人特有条件分开；逐字段引用 evidence id；语言专业书面语禁黑话/比喻/拟人。\n- output.schema.json：required=[person, expertise, stages, mechanisms, tensions, transferable_practices, non_transferable_conditions, open_questions]；stages 5 字段；mechanisms 10 字段；additionalProperties=false；_run 可选（不自填）。\n- person_json.json：rank 81，Vignesh Rao，浏览器与系统漏洞，x.com/vigneshr4o，Exodus blog，\"OffByOne 2024 / Black Hat\"。\n- evidence_json.json：works(4)/conversations(4)/community(6)/external(1)/decisions(4)/timeline(3，其中 2 条 verified_in_run=false)/targeted(3)。\n- revision_context.json：R1(8 actions, new_evidence=VR-NEW-R1-OBTS+VR-NEW-R1-CONF, invalid=[]) + R2(7 actions, new_evidence=VR-R2-OBTS-TALKS, invalid=[])，含两轮 synthesis_instructions。\n\n## 证据基线（有效，verified_in_run=true）\n- VR-WORKS-01(2020-02-24,primary)：patch-gapping Chrome, TurboFan InferReceiverMapsUnsafe, 合著 Kurucsai。\n- VR-WORKS-02(2023-07-20,primary)：JSC FTL/B3 IntRange::shl 整数溢出, 独著, 研究 2020 与 Martin Saar。\n- VR-WORKS-03(2023-12-11,primary)：JSC NaN-boxing boxDouble 溢出 fakeobj, 合著 Jimenez, OBTS v6.0 2023-10。\n- VR-WORKS-04(2024-01-19,primary)：V8 Maglev CVE-2024-0517 current_raw_allocation_, 合著 Jimenez, Ubercage 绕过。\n- vr-conv-1..4, vr-community-001..006, vr-decisions-01..04：均 verified_in_run=true（部分 status=inferred）。\n- vigneshr4o-exodus-blog-authorship-absent (inferred)：Exodus 首页署名作者列表不含该姓名（身份负向）。\n- vr-tl-001 (documented, verified)：Exodus 首页/作者归档 404 负向。\n- VR-NEW-R1-OBTS (primary)：OBTS v6.0 YouTube 标题（\"OffByOne\"=OBTS 讹写）。\n- VR-NEW-R1-CONF (first_hand_other)：OBTS v6.0 议程 2023-10-12/13 Spain，featured 8 人不含二人。\n- VR-R2-OBTS-TALKS (inferred)：talks.html 模板未渲染，完整名单不可独立取得。\n\n## 不作支撑证据（verified_in_run=false）\n- vr-tl-002（Black Hat）、vr-tl-003（x.com handle）：仅在 open_questions 作\"input record, unverified\"资料缺口引用，不入 stages/mechanisms evidence_ids。\n\n## R1/R2 synthesis_instructions 落实\n- 删除\"WebKit Contributors Meeting 2023-09-13/14\"无来源断言；改用 OBTS v6.0 2023-10-12/13 Spain（VR-NEW-R1-OBTS/CONF）。\n- \"OffByOne 2024\"理解为\"OBTS v6.0 2023-10\"讹写；Black Hat 保留 lead_only/unknown。\n- confidence 统一为\"技术内容可追溯性 high，不含身份同一性确信\"；stages[0] 声明，stages[1]-[3] 引用。\n- stages[0]\"约 3 日\"补\"（据 writeup 自述，无独立计时复核）\"；stages[3] JSC→V8 复用补\"（基于两篇 writeup 技术内容的推断）\"。\n- stages[2] \"下探至\"→\"转向...审计\"；stages[3] \"走入 shellcode\"→\"跳转执行 shellcode\"；mechanism \"沉淀\"→\"整理\"。\n- stages[2] 0x1000 步进 4096x 提速标注依赖 macOS/iOS JSC 堆地址 5 字节(40位)页对齐结构前提。\n- \"暴力 X\"→\"brute-force（穷举）X\"首次标注；\"演进而升级\"→\"更迭而调整\"去拟人化。\n- mechanism[1]/[3]/[4] repeated_practice 补\"重复性判断仅基于已发表 writeup，未发表研究不可见\"（含 mechanism[2]=本机制2 patch-gapping）。\n- transferable_practices 开头统一声明身份推断前提限制；不据机构声誉加权归属。\n\n## 综合 JSON 结构（v3）\n- expertise：6 项（浏览器/系统漏洞、JIT 利用、patch-gapping、addrof/fakeobj、沙箱绕过、ASLR 穷举原语）。\n- stages：4 阶段（patch-gapping V8 / JSC FTL-B3 / JSC NaN-boxing / V8 Maglev-Ubercage），各含 evidence_ids+confidence=high（技术可追溯性语义）。\n- mechanisms：4 主机制（patch-gapping 方法论 / JIT 根因审计 / 多阶段原语跨引擎复用+防御绕过 / 合著协作整理为公开记录），各含 validation_tests+confidence（前3 high，机制4 medium）+alternative_explanation。\n- tensions：7 项（身份同一性、机构声誉加权、2020-23 空白期、研究/发表期分离、幸存者偏差、Exodus 选题路线替代解释、brute-force 结构前提）。\n- transferable_practices：5+1 前提声明。\n- non_transferable_conditions：4 项（Exodus 机构资源、JSC 堆地址结构、Chrome 发布节奏、特定合著者）。\n- open_questions：6 项（身份一手来源、CVE-2024-0517 厂商致谢、Black Hat、空白期、入门/导师、Exodus 在职/评审）。\n\n## 未解决（沿用 R1/R2 unresolved）\n- 身份同一性独立一手来源未取得（OBTS talks.html 模板未渲染、Exodus 首页/作者归档/featured/GitHub handle/Igalia/x.com 均未独立锚定）。\n- CVE-2024-0517 厂商致谢未核验（Chrome Releases/NVD/CVE.org/Chromium issues 403/503/未渲染/重定向）。\n- Black Hat 演讲事实未核验（US-24 议程页 403）。\n\n## 状态\n- 全部 R1/R2 synthesis_instructions 已落实；证据全部 verified_in_run=true；invalid_evidence_ids 空；vr-tl-002/003 不入 evidence_ids。\n- 待：写入 output.json。\n"
+        },
+        "success": true,
+        "content_sha256": "da2b935bd360546e113b840a666cc4ce4394291404d38849cf7611f4cfaf7618",
+        "accessed_at": "2026-09-28T04:52:11.673281+00:00"
+      },
+      {
+        "tool_use_id": "call_rhqd6c38padfdbtmzu0l435l",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341/output.json",
+          "content": "{\n  \"person\": \"Vignesh Rao\",\n  \"expertise\": [\n    \"浏览器与系统漏洞\",\n    \"JIT 编译器利用（V8 TurboFan/Maglev、JSC FTL/B3）\",\n    \"patch-gapping（1day）方法论\",\n    \"addrof/fakeobj 与多阶段利用原语\",\n    \"沙箱绕过（V8 Ubercage）\",\n    \"ASLR brute-force（穷举）原语\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2019（研究期）；2020-02-24（发表）\",\n      \"stage\": \"V8 TurboFan patch-gapping 利用链与 1day 方法论\",\n      \"capability_change\": \"confidence 语义声明：本阶段及后续阶段 confidence=high 指“技术内容可追溯性”，由四篇已核验 primary writeup 支撑，不含身份同一性确信；身份同一性见 tensions。与 István Kurucsai 合著，针对 Chromium V8 TurboFan InferReceiverMapsUnsafe 在 Proxy 拦截 JSCreate 原型访问时的副作用建模缺陷，构建完整利用链（DOUBLE-to-SMI 类型混淆 → addrof/fakeobj → TypedArray backing store 任意读写 → WASM RWX 写 shellcode）。文章系统阐述 patch-gapping 方法论：监控公开 chromium-review CL 与回归测试，按“simple but powerful-looking regression test, incorrect modeling of side-effects, easy to understand one-line change”筛选候选。自述发现补丁后约 3 日完成利用链（据 writeup 自述，无独立计时复核）；并依据 Chrome 改为双周/每周发布节奏判定 patch-gapping 路线不再可行，以“eulogy”表明收尾。\",\n      \"evidence_ids\": [\n        \"VR-WORKS-01\",\n        \"vr-conv-1\",\n        \"vr-community-001\",\n        \"vr-decisions-01\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020（研究期，与 Martin Saar 协作）；2023-07-20（发表）\",\n      \"stage\": \"由 V8 转向 JSC：FTL/B3 范围分析整数溢出根因审计\",\n      \"capability_change\": \"沿用 stages[0] 声明：confidence=high 为技术内容可追溯性，不含身份同一性确信。研究目标由 Chrome/V8 迁移至 Apple WebKit/JSC 的 FTL JIT B3 强缩减阶段；由复用公开补丁（patch-gapping）转为直接审计 JIT 范围分析源码（B3ReduceStrength.cpp 的 rangeFor/shl），发现 IntRange::shl() 左移上界 0x7ffffffe 溢出变负且小于下界、computed range 与实际不符的整数溢出，DFG Integer Range Optimization 据此移除数组边界检查，得 JSC 堆上可控越界读写，经 ArrayWithDouble/ArrayWithContiguous 类型混淆得 addrof/fakeobj。研究期 2020（与 Martin Saar 协作）与发表期 2023-07 明确分离，时间线应按研究期而非发表期解读。\",\n      \"evidence_ids\": [\n        \"VR-WORKS-02\",\n        \"vr-conv-2\",\n        \"vr-community-002\",\n        \"vr-community-006\",\n        \"vr-decisions-02\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023（研究）；2023-10-12/13 OBTS v6.0 演讲（Spain）；2023-12-11（发表）\",\n      \"stage\": \"JSC NaN-boxing 编码语义层审计与 ASLR brute-force 原语优化\",\n      \"capability_change\": \"沿用 stages[0] 声明：confidence=high 为技术内容可追溯性，不含身份同一性确信。与 Javier Jimenez 合著，在同一 JSC 引擎内转向 NaN-boxing 编码语义层审计：boxDouble() 假定入参为合法 double 或纯 NaN，未校验结果溢出；以 Float64Array + BigUint64Array 视图写入“impure NaN”减 JSValue::NumberTag 溢出得高位清零全控值，JSC 解释为原始对象指针即 fakeobj。引入基于 JIT 编译 CompareStrictEq（x86 cmp）的 ASLR brute-force（穷举）原语，并利用 macOS/iOS JSC 堆地址恒为 5 字节（40 位）且页对齐的结构前提，以 0x1000 步进将 32 位穷举由 M1 上逾一小时降至秒级（约 4096x 提速，依赖上述结构前提，非具此结构的地址空间不可直接迁移）。研究期与发表期分离：2023 研究、2023-10 OBTS v6.0 演讲、2023-12-11 发表。\",\n      \"evidence_ids\": [\n        \"VR-WORKS-03\",\n        \"vr-conv-3\",\n        \"vr-community-003\",\n        \"vr-community-005\",\n        \"vr-decisions-03\",\n        \"VR-NEW-R1-OBTS\",\n        \"VR-NEW-R1-CONF\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023（自主发现）；2024-01-16（补丁）；2024-01-19（发表）\",\n      \"stage\": \"回到 V8/Maglev：二阶逻辑缺陷与 Ubercage 绕过\",\n      \"capability_change\": \"沿用 stages[0] 声明：confidence=high 为技术内容可追溯性，不含身份同一性确信。与 Javier Jimenez 合著，回到 V8 但切换至较 TurboFan 更新的 Maglev 编译管线，处理 current_raw_allocation_ 状态管理这类二阶逻辑缺陷（TryBuildFindNonConstructorOrConstruct() 调用 BuildAllocateFastObject() 后未清 current_raw_allocation_，GC 移动对象致折叠分配越界写，转 type confusion 得 addrof/read/write）；绕过 Ubercage 沙箱，借含“raw 64 bit pointer ... store the starting address of the jump table”的 WebAssembly 实例对象指向 RWX 内存，并以 WebAssembly 浮点常量“interpreted as assembly code by jumping in the middle of some compiled wasm code”跳转执行 shellcode。自述为数月前自主发现的 V8 漏洞，标志由 patch-gapping 的 1day 复现转向自主 0day 发现与利用。多阶段原语（fakeobj→addrof→相对/绝对读写→代码执行）由 JSC 迁移至 V8 复用（基于两篇 writeup 技术内容的推断）。利用技术随 V8 防御机制（pointer compression 到 Ubercage）的更迭而调整。研究期与发表期分离：2023 自主发现、2024-01-16 补丁、2024-01-19 发表。\",\n      \"evidence_ids\": [\n        \"VR-WORKS-04\",\n        \"vr-conv-4\",\n        \"vr-community-004\",\n        \"vr-decisions-04\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"patch-gapping 方法论：公开补丁作为研究输入\",\n      \"starting_conditions\": \"2019 年两次 patch-gapping Chrome 的既有经验；Exodus Intelligence 研究环境与合著者 István Kurucsai；Chrome 当时发布节奏下安全补丁先于用户版本公开、回归测试可显著缩短利用开发时间的窗口。\",\n      \"repeated_practice\": \"自述对 patch-gapping 这一主题至少进行三次系统研究（2019 年两次、本次一次），监控公开 chromium-review CL 与回归测试，按既定准则筛选候选（“simple but powerful-looking regression test, incorrect modeling of side-effects, easy to understand one-line change”）并完成端到端利用链。重复性判断仅基于已发表 writeup，未发表研究不可见。\",\n      \"feedback\": \"利用开发耗时自述（约 3 日，据 writeup 自述，无独立计时复核）；Chrome 发布节奏改为双周/每周这一外部约束使该路线收益下降。\",\n      \"intermediate_capability\": \"形成可复用的 1day 候选筛选准则与以公开补丁/CL 为输入的研究工作流，并据此评估研究路线的可行性与收益。\",\n      \"observed_outcomes\": [\n        \"完整 V8 TurboFan InferReceiverMapsUnsafe 利用链（DOUBLE-to-SMI → addrof/fakeobj → 任意读写 → WASM RWX shellcode）\",\n        \"以“eulogy”公开判定 patch-gapping Chrome 路线不再可行并收尾，驱动后续向直接源码审计与 0day 发现的转向\"\n      ],\n      \"evidence_ids\": [\n        \"VR-WORKS-01\",\n        \"vr-conv-1\",\n        \"vr-decisions-01\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"三次 patch-gapping 记录可能反映 Exodus 团队选题路线而非个人练习频度；“约 3 日”为 first-person 自述无独立复核，可能受记忆与叙述策略影响。\"\n    },\n    {\n      \"name\": \"JIT 编译器范围分析/编码语义根因审计\",\n      \"starting_conditions\": \"stages[0] 在 V8 TurboFan 上以副作用建模为切入的利用经验；Exodus 平台与合著者网络。\",\n      \"repeated_practice\": \"直接审计 JIT 编译器源码以发现 0day 类缺陷：stages[1] JSC FTL B3 IntRange::shl() 整数溢出（B3ReduceStrength.cpp rangeFor/shl）、stages[2] JSC NaN-boxing boxDouble() 溢出、stages[3] V8 Maglev current_raw_allocation_ 状态管理二阶逻辑缺陷。重复性判断仅基于已发表 writeup，未发表研究不可见。\",\n      \"feedback\": \"三次均产出可利用的根因级发现，分别经 ArrayWithDouble/ArrayWithContiguous 类型混淆、fakeobj、越界写转 type confusion 完成利用。\",\n      \"intermediate_capability\": \"在不同 JIT 编译管线（V8 TurboFan/Maglev、JSC FTL/B3）间定位范围分析、编码语义与状态管理缺陷的能力，从复用公开补丁转向自主根因审计。\",\n      \"observed_outcomes\": [\n        \"JSC FTL/B3 整数溢出（stages[1]）\",\n        \"JSC NaN-boxing boxDouble 溢出 fakeobj（stages[2]）\",\n        \"V8 Maglev CVE-2024-0517 current_raw_allocation_ 越界写（stages[3]）\"\n      ],\n      \"evidence_ids\": [\n        \"VR-WORKS-02\",\n        \"VR-WORKS-03\",\n        \"VR-WORKS-04\",\n        \"vr-conv-3\",\n        \"vr-decisions-02\",\n        \"vr-decisions-03\",\n        \"vr-decisions-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"三个根因级发现可能部分由 Exodus 研究选题路线与合著者贡献驱动，而非个人能力线性增长；2020-2023 公开输出空白期的实际研究量不可见。\"\n    },\n    {\n      \"name\": \"多阶段原语跨引擎复用与防御绕过适配\",\n      \"starting_conditions\": \"stages[0] V8 上 addrof/fakeobj + TypedArray backing store 任意读写 + WASM RWX 写 shellcode 的端到端原语链。\",\n      \"repeated_practice\": \"在不同引擎上构造并复用多阶段原语（fakeobj → addrof → 相对/绝对读写 → 代码执行）：stages[1] JSC 经类型混淆得 addrof/fakeobj、stages[2] JSC 经 NaN-boxing fakeobj + JIT-cmp ASLR brute-force（穷举）、stages[3] V8 经越界写转 type confusion 并借 WASM 实例 jump_table_start 指向 RWX + shellcode smuggling 绕过 Ubercage。重复性判断仅基于已发表 writeup，未发表研究不可见。\",\n      \"feedback\": \"各引擎防御机制（V8 pointer compression → Ubercage；JSC 堆地址结构）作为约束，倒逼原语与绕过方法的调整；利用技术随 V8 防御机制（pointer compression 到 Ubercage）的更迭而调整。\",\n      \"intermediate_capability\": \"一套可在 V8/JSC 间迁移、随防御更迭适配的多阶段原语与沙箱绕过方法。\",\n      \"observed_outcomes\": [\n        \"四篇 writeup 均达到代码执行或任意读写\",\n        \"stages[3] 显式绕过 Ubercage 并复用 WASM-RWX 原语\",\n        \"stages[2] 量化优化 ASLR brute-force 原语（约 4096x）\"\n      ],\n      \"evidence_ids\": [\n        \"VR-WORKS-01\",\n        \"VR-WORKS-02\",\n        \"VR-WORKS-03\",\n        \"VR-WORKS-04\",\n        \"vr-decisions-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"跨引擎原语复用可能受同期公开研究（如 Samuel Groß Phrack 文章、LiveOverflow WebKit 系列，见 vr-community-006）影响而非纯个人积累；“复用”为基于两篇 writeup 技术内容的推断。\"\n    },\n    {\n      \"name\": \"合著协作整理为公开技术记录\",\n      \"starting_conditions\": \"2020 年首次公开输出即以合著形式（István Kurucsai）出现，能力构建与同伴协作耦合；Exodus Intelligence 作为发表渠道。\",\n      \"repeated_practice\": \"与不同同伴分别推进并整理为公开 writeup/会议演讲：2020 Kurucsai（patch-gapping）、2020 Martin Saar（JSC 研究，2023 独著发表）、2023-2024 Javier Jimenez（连续三篇，含 OBTS v6.0 联合演讲）。重复性判断仅基于已发表 writeup，未发表研究不可见。\",\n      \"feedback\": \"合著者配对稳定（Jimenez 跨三篇），会议演讲（OBTS v6.0，2023-10-12/13，Spain）作为写作之外的公开传播渠道。\",\n      \"intermediate_capability\": \"将协作研究整理为公开技术记录与会议演讲的反馈回路，含研究期与发表期分离的延迟发表模式。\",\n      \"observed_outcomes\": [\n        \"四篇 Exodus 博客 writeup（2020/2023x2/2024）\",\n        \"OBTS v6.0 联合演讲（2023-10-12/13，Spain）\",\n        \"研究期与发表期分离的延迟发表（如 2020 研究于 2023 发表）\"\n      ],\n      \"evidence_ids\": [\n        \"VR-WORKS-01\",\n        \"VR-WORKS-02\",\n        \"VR-WORKS-03\",\n        \"VR-WORKS-04\",\n        \"vr-conv-2\",\n        \"vr-community-001\",\n        \"vr-community-002\",\n        \"vr-community-003\",\n        \"VR-NEW-R1-OBTS\",\n        \"VR-NEW-R1-CONF\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"合著与会议演讲频度可能反映 Exodus 团队发表策略与合著者可得性，而非个人协作能力的增长；OBTS v6.0 featured speakers 8 人不含二人，演讲事实仅由文章内嵌 YouTube 标题支撑，独立确认未取得。\"\n    }\n  ],\n  \"tensions\": [\n    \"身份同一性未独立确认：2020-02-24 byline 为“Vignesh S Rao”，2023-2024 为“Vignesh Rao”，二者均挂 Exodus Intelligence 且主题连续，推断同一人；但 Exodus 博客首页署名作者列表不含该姓名、/author/vignesh-rao/ 返回 404、OBTS v6.0 featured speakers 8 人不含 Vignesh Rao 或 Javier Jimenez、talks.html 模板未渲染完整名单无法独立取得、GitHub vigneshsrao（@sherl0ck__）handle 与 person_json @vigneshr4o 不一致且 bio 未提 Exodus/WebKit、Igalia 团队页 404、x.com/vigneshr4o HTTP 402——四篇带署名 writeup 与上述反证并存，身份同一性仅为推断。\",\n    \"归属判断受 Exodus 机构声誉加权：四篇 writeup 的 byline 出现在 Exodus Intelligence 博客具体文章页，但该博客首页署名作者索引不含该姓名、作者归档页 404；将能力归属于“Vignesh Rao”主要依赖 Exodus 作为机构研究博客的声誉与文章页 byline，而非独立生平来源，综合层不应据机构声誉加权归属判断。\",\n    \"2020-2023 公开输出空白期：2020-02-24 与 2023-07-20 之间约三年未见抓取到的署名 writeup，其间产出、目标或转向无来源证实，可能放大能力成长曲线的表观陡度。\",\n    \"研究期与发表期分离：VR-WORKS-02 研究于 2020（与 Martin Saar 协作）、2023-07 发表；VR-WORKS-03/04 研究与发表期亦明确分离；时间线应按研究期而非发表期解读，不应以发表日期为准推断能力节点。\",\n    \"幸存者偏差：所有“重复练习”判断仅基于已发表 writeup，未发表研究不可见，发表产出密度可能被直接等同于练习频度。\",\n    \"替代解释：四篇 writeup 跨四年的主题深入可能部分由 Exodus Intelligence 研究选题路线驱动，而非个人能力自然演化；2020-2023 公开输出空白期研究产出不可见。\",\n    \"brute-force（穷举）ASLR 4096x 提速的结构前提：以 0x1000 步进将 32 位穷举降至秒级（约 4096x）依赖 macOS/iOS JSC 堆地址恒为 5 字节（40 位）且页对齐，非具此结构的地址空间不可直接迁移。\"\n  ],\n  \"transferable_practices\": [\n    \"前提声明：以下可迁移实践所依托的能力归属受身份同一性推断前提限制（四篇 writeup 署名 Vignesh S Rao(2020)/Vignesh Rao(2023-2024) 为推断同一人，非独立确认；Exodus 博客首页署名作者列表不含该姓名、/author/vignesh-rao/ 404、OBTS v6.0 featured speakers 与 talks.html 完整名单均未独立锚定身份）。\",\n    \"将公开补丁/CL/回归测试作为研究输入，按“simple but powerful-looking regression test, incorrect modeling of side-effects, easy to understand one-line change”等准则筛选 1day 候选。\",\n    \"JIT 编译器源码根因审计路径（范围分析/编码语义/状态管理）可迁移至不同 JIT 引擎（该能力归属受上述身份推断前提限制）。\",\n    \"多阶段原语（fakeobj → addrof → 相对/绝对读写 → 代码执行）的构造与跨引擎复用。\",\n    \"以 JIT 编译指令（如 x86 cmp）实现 ASLR 穷举原语，并结合地址空间结构性质（如页对齐）做量化优化（提速依赖具体地址空间结构，需重新评估可迁移性）。\",\n    \"协作研究 → 公开 writeup/会议演讲的发表回路（含研究期与发表期分离的延迟发表）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"Exodus Intelligence 机构资源与研究环境：发表渠道、合著者网络（Kurucsai/Saar/Jimenez）、选题路线；四篇 writeup 均挂 Exodus，能力发展与此机构语境耦合，非纯个人条件。\",\n    \"macOS/iOS JSC 堆地址 5 字节（40 位）且页对齐的结构：支撑 brute-force（穷举）ASLR 4096x 提速，非具此结构的地址空间不可复用。\",\n    \"Chrome 发布节奏由更长周期改为双周/每周：使 patch-gapping 路线收益下降的外部条件，为时期特定，驱动 stages[0]→[1] 的转向。\",\n    \"特定合著者关系（István Kurucsai、Martin Saar、Javier Jimenez）：协作机制依赖这些具体同伴的可得性与配对，非可任意迁移的个人条件。\"\n  ],\n  \"open_questions\": [\n    \"身份同一性独立一手来源未取得：Exodus 作者归档 /author/vignesh-rao/ 返回 404、首页署名作者列表不含该姓名、OBTS v6.0 featured speakers 与 talks.html 完整名单均未独立锚定、GitHub vigneshsrao（@sherl0ck__）handle 与 person_json @vigneshr4o 不一致、Igalia 团队页 404、x.com/vigneshr4o HTTP 402——四篇带署名 writeup 与上述反证并存，身份同一性仅为推断。\",\n    \"CVE-2024-0517 厂商（Google Chrome）致谢未核验：Chrome Releases 博客、NVD、CVE.org、Chromium issues 在历轮抓取内分别返回 403/503/未渲染/重定向，无法确认 Vignesh Rao 或 Exodus Intelligence 是否为首报者或被厂商致谢。\",\n    \"person_json selected_conference_evidence 第二项“Black Hat”演讲事实未核验（Black Hat US-24 议程页 403）；OBTS v6.0 已核验为 2023-10-12/13 Spain 会议，“OffByOne”为“OBTS”（Objective by the Sea）的转写/讹写。\",\n    \"2020-2023 公开输出空白期的实际研究产出不可见：未公开、内部研究或其他渠道均未证实，能力成长曲线的该段无法据已发表材料补全。\",\n    \"入门经历、教育背景、进入安全行业路径、导师关系均无可核验来源；未找到长访谈/播客/AMA，仅有 writeup 内嵌的简短 first-person 句；与 Kurucsai/Saar/Jimenez 是否构成指导关系未知。\",\n    \"是否正式就职于 Exodus Intelligence、团队角色、内部技术评审流程均未核验（Exodus /team/、/about/ 403/404，博客无作者 bio；四篇 writeup 正文均未感谢审阅者）。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "e8caa3b03ad1403fcc523f08e6265a38bc8cca069ba1da9e70426ae7a66bba47",
+        "accessed_at": "2026-09-28T04:52:11.673285+00:00"
+      },
+      {
+        "tool_use_id": "call_d61noberk6dnmc7hzikqfmlj",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/vignesh-rao-synthesis-v3-20260928-124632-341/output.json",
+          "offset": 1,
+          "limit": 5
+        },
+        "success": true,
+        "content_sha256": "b333a03acf66e2cede03b32334a3af4dffeacd802325d1a7a260a5a2055509b0",
+        "accessed_at": "2026-09-28T04:52:11.673374+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790571131673408000-vignesh-rao-synthesis-v3.json",
+    "label": "Vignesh Rao:synthesis:v3",
+    "elapsed_seconds": 339.33,
+    "prompt_sha256": "ff322bc50b5e4a9384680036e45cb5080fde7007ec13028b7dd82761a2903db0",
+    "num_turns": 11,
+    "total_cost_usd": 0.993792,
+    "usage": {
+      "input_tokens": 68728,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 240704,
+      "output_tokens": 21192,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 68728,
+        "outputTokens": 21192,
+        "cacheReadInputTokens": 240704,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.993792,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

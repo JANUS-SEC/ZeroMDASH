@@ -1,0 +1,335 @@
+{
+  "person": "Sergei Volokitin",
+  "expertise": [
+    "嵌入式安全、可信执行环境（TEE）与可信应用（Trusted Application）漏洞挖掘",
+    "移动 SoC TEE（MediaTek KeyInstall/Widevine/ISP、Samsung TEEGRIS/TIMA/Widevine Trustlet）内存破坏类缺陷分析",
+    "硬件钱包（Ledger Nano S）软件层攻击与系统调用接口审计",
+    "微控制器级嵌入式 Bootloader 与固件解析器（Silicon Labs Gecko/GSDK GBL）整数溢出与未初始化内存缺陷分析",
+    "消费级联网设备（Google Nest Wifi Pro）可信应用越界读写",
+    "跨厂商、跨信任边界（TEE、客户端库、智能卡方案）的输入校验缺失类漏洞横向迁移研究",
+    "面向厂商的协调漏洞披露与个人研究归档公开"
+  ],
+  "stages": [
+    {
+      "period": "2018",
+      "stage": "硬件钱包软件层攻击与方法论雏形",
+      "capability_change": "以厂商 SDK 自建测试应用、对系统调用做系统性指针/参数探测的方法初步成形，形成从单点缺陷（syscall 空指针解引用、校验顺序 oracle）到安装/权限模型（APPLICATION_FLAG_DEBUG 与 flash 隔离）再到跨生命周期漏洞组合（debug flag、刷机残留、自定义 CA 残留）的递进分析链条，并完成向厂商报告与会议自述披露。",
+      "evidence_ids": [
+        "sv-works-01",
+        "sv-deepconv-03",
+        "sv-deepconv-04",
+        "sv-decisions-01",
+        "sv-decisions-02",
+        "sv-decisions-03",
+        "sv-community-01",
+        "sv-ext-001",
+        "sv-ext-002"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2020-10 至 2020-11",
+      "stage": "移动 SoC TEE 可信应用方向确立",
+      "capability_change": "可考研究产出转向 Android TEE 可信应用，在 MediaTek KeyInstall/Widevine/ISP 与 Samsung TEEGRIS Widevine Trustlet 上重复发现越界读写与任意代码执行类缺陷，确立随后多年反复出现的 TEE/TrustZone 研究方向与同类缺陷模式。",
+      "evidence_ids": [
+        "sv-works-02",
+        "sv-tl-001",
+        "sv-tl-002",
+        "sv-decisions-04"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2022",
+      "stage": "信任边界横向扩展",
+      "capability_change": "在保留内存安全类缺陷主题的前提下，目标从 Android TEE 横向迁移至 Samsung TIMA Trustlet、第三方开源库（trilogy）、政府智能卡方案（de.fac2）与既有 MediaTek Widevine 续作，缺陷类型从单一越界读写扩展到未初始化内存与保护机制绕过，显示方法向相邻信任边界迁移。",
+      "evidence_ids": [
+        "sv-works-03",
+        "sv-tl-003",
+        "sv-tl-004",
+        "sv-decisions-05"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2023-07 至 2023-10",
+      "stage": "个人署名确立与底层嵌入式下探",
+      "capability_change": "首次取得厂商逐名致谢，Android 安全公告以个人名致谢 CVE-2023-20754，与 hexplot.com/cves 的同一 CVE 组织归属重叠，建立 Sergei Volokitin 与 Hexplot 的跨来源身份链；同期目标下探至微控制器级嵌入式 Bootloader 与 GBL 固件解析器，缺陷类型仍以整数溢出与未初始化缓冲区为主。",
+      "evidence_ids": [
+        "sv-tl-005",
+        "sv-tl-006",
+        "sv-works-04",
+        "sv-decisions-06"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2023-11 至 2024-04",
+      "stage": "研究整合站点与组织归属显式化",
+      "capability_change": "启用个人研究站点作为长期归档渠道，首篇完整 writeup 为 2018 年 Ledger 研究的延迟公开版；Android 致谢由个人名演化为显式 'Sergei Volokitin of Hexplot' 组织归属，研究目标扩展至联网设备可信应用（Google Nest Wifi Pro），方法论跨设备类迁移得到外部可见的持续验证。",
+      "evidence_ids": [
+        "sv-deepconv-01",
+        "sv-decisions-08",
+        "sv-tl-008",
+        "sv-works-05",
+        "sv-decisions-07",
+        "sv-ext-004"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "依托厂商 SDK 的可信应用输入校验审计方法",
+      "starting_conditions": "2018 年以较新、攻击面较大且托管高价值资产的设备（Ledger Nano S）为首选目标，主动将研究范围收窄至设备安全层面，明确排除加密货币应用层逻辑；具备使用厂商提供 SDK 编写测试应用的能力。",
+      "repeated_practice": "利用厂商 SDK 自建测试应用，向系统调用反复传入非法指针并递增遍历内存地址，比对异常行为差异以探测指针校验行为；以 grep 审阅开源应用代码定位将密钥写入 flash 的应用，构建针对 FIDO 应用的概念验证演示擦除后 flash 残留密钥的恢复。此后 2020-2024 年在多家厂商的 Trusted Application 上反复出现缺失边界检查、整数溢出与未初始化缓冲区类缺陷，呈现对同一类攻击面的刻意重复练习。",
+      "feedback": "厂商修复作为正向反馈确认漏洞可利用性，会议公开作为能力外部检验渠道；2023-07 起获得 Android 安全公告逐名致谢、2024-03 起以 'of Hexplot' 组织归属致谢，构成厂商层面对研究产出的逐名外部确认。",
+      "intermediate_capability": "形成可复用的漏洞挖掘工作流：SDK 探测 → 边界/算术/初始化缺陷定位 → 跨生命周期漏洞组合 → 概念验证与影响演示 → 协调披露与归档。",
+      "observed_outcomes": [
+        "2018 年向 Ledger 报告 7 个漏洞并由厂商在后续固件版本修复",
+        "2020-10 MediaTek KeyInstall/Widevine/ISP 多个越界读写 CVE",
+        "2020-11 Samsung TEEGRIS Widevine Trustlet 任意代码执行（Critical 9.8）",
+        "2022 年 Samsung TIMA、trilogy、de.fac2、MediaTek Widevine 等多类缺陷",
+        "2023-10 Silicon Labs Gecko Bootloader 整数溢出与 GBL 解析器未初始化缓冲区",
+        "2024-04 Google Nest Wifi Pro 可信应用越界读"
+      ],
+      "evidence_ids": [
+        "sv-works-01",
+        "sv-works-02",
+        "sv-works-03",
+        "sv-works-04",
+        "sv-works-05",
+        "sv-deepconv-03",
+        "sv-decisions-01",
+        "sv-decisions-02",
+        "sv-tl-001",
+        "sv-tl-002",
+        "sv-tl-005",
+        "sv-tl-008"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "缺陷类型的高度一致性也可能反映 2018-2024 年间 TEE/Trustlet 生态普遍存在输入校验缺失，加上目标选择偏好新设备，而非研究者独有方法；SDK 系统性探测的具体手法仅 2018 年 Ledger 一手自述有据，后续 TEE 批次的方法细节缺乏第一人称叙述，重复性部分属推断与资料缺口。"
+    },
+    {
+      "name": "沿嵌入式信任栈与跨厂商的目标迁移",
+      "starting_conditions": "2020 年研究产出集中于移动 SoC TEE 内的单一可信应用，以缺失边界检查类越界读写为主；具备针对特定 Trustlet 框架重复分析的基础能力。",
+      "repeated_practice": "在同一厂商不同子系统（MediaTek Widevine、RPMB、KeyInstall）间迁移已建立方法，并将目标类从移动 SoC TEE 扩展至第三方客户端库（trilogy）、政府智能卡方案（de.fac2）、微控制器 Bootloader 与固件解析器（Silicon Labs Gecko/GSDK）、联网设备可信应用（Google Nest Wifi Pro），在跨厂商、跨信任边界、跨设备类上保持内存安全主题。",
+      "feedback": "持续获得多家厂商 CVE 分配与 Android 安全公告致谢，组织级 CVE 页面逐年累积，2024-03 起组织归属显式化；厂商认可为方法跨平台可迁移性提供外部佐证。",
+      "intermediate_capability": "形成可迁移的信任边界审计对象类别：识别新设备/新框架中的同类输入校验与状态管理缺陷，而非针对单一厂商发散。",
+      "observed_outcomes": [
+        "2022 年目标从 Android TEE 扩展至客户端库、智能卡方案与既有 TEE 续作",
+        "2023-10 目标下探至微控制器级 Bootloader 与 GBL 解析器",
+        "2024-04 目标扩展至 WiFi 路由器固件中的可信应用",
+        "2023-07 至 2024-09 持续获得 Android 安全公告逐名致谢"
+      ],
+      "evidence_ids": [
+        "sv-works-03",
+        "sv-works-04",
+        "sv-works-05",
+        "sv-tl-003",
+        "sv-tl-004",
+        "sv-tl-006",
+        "sv-tl-008",
+        "sv-decisions-05",
+        "sv-decisions-06",
+        "sv-decisions-07"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "目标迁移可能部分由厂商合作机会与新设备披露窗口驱动，而非完全由研究者主动策略选择；公开材料未区分机会性扩展与策略性扩展，跨厂商迁移的内在驱动力无法独立确证。"
+    },
+    {
+      "name": "厂商反馈强化的协调披露与延迟归档循环",
+      "starting_conditions": "2018 年完成 Ledger Nano S 研究，先向厂商报告、由厂商修复，再于会议公开技术摘要，但完整 writeup 长期未公开；自述长期计划开设个人博客但未找到时机。",
+      "repeated_practice": "对每项研究先向厂商报告并等待修复，再经会议或公告公开，最后将研究整合至个人站点归档；2023-11 启用 hexplot.com 作为长期归档渠道，首篇即整理 2018 年研究，此后 CVE 列表逐年累积形成可追溯产出记录。",
+      "feedback": "厂商修复确认漏洞可利用性，会议与公告公开提供同行/行业可见性，个人站点提供研究归档沉淀；2023-07 起 Android 逐名致谢强化外部确认。",
+      "intermediate_capability": "形成从漏洞发现到可复用知识沉淀的完整链条：报告-修复-公开-归档，而非一次性产出。",
+      "observed_outcomes": [
+        "2018 Ledger 7 个漏洞由厂商在后续固件版本修复",
+        "2023-11 发布 Ledger Nano S 完整 writeup 作为博客开篇",
+        "hexplot.com/cves 列出 2020-2024 年 18 条 CVE 形成持续产出记录",
+        "2023-07 至 2024-09 持续获得 Android 安全公告致谢"
+      ],
+      "evidence_ids": [
+        "sv-works-01",
+        "sv-community-01",
+        "sv-community-02",
+        "sv-deepconv-01",
+        "sv-decisions-03",
+        "sv-decisions-08",
+        "sv-tl-005",
+        "sv-tl-008"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "2018 年研究延迟至 2023 年才公开完整 writeup，可能反映时间约束或自述的写作拖延，而非刻意选择的披露时机策略；协调披露本身是行业常规做法，其作为个人成长机制的独特性有限。"
+    }
+  ],
+  "tensions": [
+    "研究取向明确限定为设备安全、排除加密货币应用层，但研究对象集中于托管高价值资产的硬件钱包与联网设备，研究价值评估与资产价值存在耦合，纯粹技术取向与高价值目标选择之间存在张力。",
+    "公开材料显示研究姿态偏向独立单干（未命名合作者/导师、以独立咨询站点形式提供服务），但 2020-2022 年组织级 CVE 的个人作者身份（单人或含协作者）未由一手来源确认，独立性与协作程度不可核验。",
+    "2018 年 Ledger 研究与 2020 年首批 CVE 之间存在约两年的公开产出记录空窗，无法判断该阶段为方向转变、未公开研究还是实际空窗。",
+    "CVE 列表逐名归属存在不一致：CVE-2024-22004 在 Android 致谢（2024-03）与 hexplot.com/cves（2024-04）日期记录不同；CVE-2024-22013 在 Android 致谢 2024-06 与 2024-09 两段重复列名但未出现在 hexplot.com/cves，归属记录一致性待核验。",
+    "person_json 标注 OffByOne 2025 / Black Hat 作为会议证据，但 OffByOne 2025 站点不可达、Black Hat USA 2018 议程页返回 403，均无独立一手佐证；Black Hat 2018 发表事实目前仅由作者 2023 年 writeup 自述支撑。"
+  ],
+  "transferable_practices": [
+    "以厂商 SDK 自建测试应用、对系统调用做系统性参数/指针探测以定位输入校验缺口，形成可复用的可信应用审计工作流。",
+    "以攻击面规模与资产价值作为选题约束条件，将研究范围主动收窄到设备/接口安全层面而非应用层业务逻辑。",
+    "沿嵌入式信任栈（TEE → 客户端库 → 智能卡 → Bootloader → 联网设备 TA）横向迁移已建立的内存安全审计方法，而非针对单一厂商发散。",
+    "将单点缺陷组合为跨生命周期攻击链（debug flag、刷机残留、自定义 CA 残留）以演示端到端影响，从漏洞发现延伸到可演示的概念验证。",
+    "建立个人研究站点作为长期归档渠道，将过往未公开研究系统化整理上线，形成可追溯的产出记录。",
+    "采用报告-修复-公开-归档的协调披露循环，以厂商修复作为漏洞可利用性的正向反馈。"
+  ],
+  "non_transferable_conditions": [
+    "2018-2024 年 TEE/Trustlet 生态普遍存在输入校验缺失这一外部缺陷分布，使同一审计方法在该时期能持续产出，属特定时期外部条件而非可普遍复制。",
+    "研究产出集中于较新设备与新披露框架，可能受益于新设备攻击面尚未被充分审计的窗口期，存在幸存者偏差。",
+    "2020-2022 年组织级 CVE 的个人作者身份为推断（Hexplot 是否为单人主体、是否含协作者未由一手来源确认），其产出节奏与独立性不可作为可迁移的个人条件。",
+    "hexplot.com 站点、Android 安全公告致谢通道与厂商 SDK 可用性构成研究者特有的披露与工具资源，非一般研究者均可获得。",
+    "Black Hat USA 2018 发表与 OffByOne 2025 出席等会议证据无独立一手佐证，相关公开可见性不可作为可迁移条件核验。"
+  ],
+  "open_questions": [
+    "2018 年 Ledger 研究与 2020 年首批 CVE 之间约两年的公开产出空窗内容未知，无法判断是否存在方向转变或未公开研究。",
+    "2018 年以前的研究路径、正式学习经历、入门硬件/嵌入式安全领域的具体途径均无一手来源，pre-2018 决策路径不可重建。",
+    "hexplot.com About 页未披露作者履历、雇主、所在地或 Hexplot 创立日期；研究者所属机构与团队归属未知。",
+    "2020-2022 年组织级 CVE 的个人作者身份（单人或含协作者）未由一手来源逐一确认，相关条目归属停留在推断。",
+    "Black Hat USA 2018 议程页与 OffByOne 2025 演讲页均不可达，会议发表事实与主题无独立一手佐证。",
+    "CVE-2024-22013 的受影响产品/厂商与漏洞描述未取得，其在 Android 致谢两段重复列名与 hexplot.com/cves 缺失的原因未知。",
+    "x.com/svolokitin 抓取失败（HTTP 402），社交痕迹与同行互动不可核验，同伴网络反馈回路只能记录其缺席。",
+    "2020-2024 年 TEE 批次的具体审计方法细节（是否沿用 2018 年的 SDK 探测手法）缺乏第一人称叙述，方法延续性属推断与资料缺口。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergei-volokitin-synthesis-v1-20260928-101437-671",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790562106191490000-sergei-volokitin-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "ad357faa-ca13-4403-8ba8-51452e74ec86",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_tpzs5f08981uv72bi209h6sg",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergei-volokitin-synthesis-v1-20260928-101437-671/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-28T02:21:46.240504+00:00"
+      },
+      {
+        "tool_use_id": "call_3g6uq6q7gpjqbr1kayo8yo76",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergei-volokitin-synthesis-v1-20260928-101437-671/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "e4a968a51f24885ee9dce4f2049fb770421192e85925e688e2d81e331ced51fb",
+        "accessed_at": "2026-09-28T02:21:46.240536+00:00"
+      },
+      {
+        "tool_use_id": "call_q1ratnrc20hwg5l809zpqghp",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergei-volokitin-synthesis-v1-20260928-101437-671/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "5849c88e8d56aafe9f174e802dc7a091140dd8a528a4db04d5d7628d50bc391f",
+        "accessed_at": "2026-09-28T02:21:46.240544+00:00"
+      },
+      {
+        "tool_use_id": "call_j556zey0v4l03yx2dgrgm55c",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergei-volokitin-synthesis-v1-20260928-101437-671/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "aa6faef079e71acd60ea05bd1194403c1c44dd52f4a3e298efb86491c4268262",
+        "accessed_at": "2026-09-28T02:21:46.240619+00:00"
+      },
+      {
+        "tool_use_id": "call_2b29a11on056y7o3rkopplv6",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergei-volokitin-synthesis-v1-20260928-101437-671/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-28T02:21:46.240623+00:00"
+      },
+      {
+        "tool_use_id": "call_cnst9xd3w9nlz6g4u5imsul3",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergei-volokitin-synthesis-v1-20260928-101437-671/checkpoint.md",
+          "content": "# 综合节点 checkpoint — Sergei Volokitin\n\n节点类型：首次综合（revision_context.json = []，无定向补证）。\n\n## 证据有效性核对\n\n- 全部六维 evidence item 中，仅 `sv-tl-007` 标注 `verified_in_run=false`（blog post，未核验）。按规则不引用。\n- `sv-tl-007` 所指事实（hexplot.com 2023-11-01 发布 Ledger writeup）由 `sv-works-01`、`sv-deepconv-01/02/03/04`、`sv-community-01/03/04`、`sv-ext-001/002/004`、`sv-decisions-01/02/03/08` 等多条 `verified=true` 项覆盖，引用这些项即可，不损失事实。\n- 其余 items 均为 `verified_in_run=true`，可用。\n- person_json 中 OffByOne 2025、Black Hat USA 2018 议程均无独立抓取佐证（offbyone.ca ECONNREFUSED、blackhat.com 403），不进入 evidence_ids，仅作 tension / open_question。\n\n## 身份链\n\n- Sergei ↔ Hexplot 跨来源身份关联由 `sv-tl-005`（2023-07 Android 致谢以个人名致谢 CVE-2023-20754）与 hexplot.com/cves 同一 CVE 组织归属重叠建立。\n- 2024-03 起出现显式 \"Sergei Volokitin of Hexplot\"（`sv-tl-008`、`sv-tl-009`）。\n- 2020-2022 组织级 CVE 的个人作者身份为推断（inferred）。\n\n## 阶段划分（5 段，均仅引 verified=true）\n\n1. 2018 — Ledger Nano S 软件层攻击、Black Hat 自述披露。ids: sv-works-01, sv-deepconv-03/04, sv-decisions-01/02/03, sv-community-01, sv-ext-001/002. conf: medium（Black Hat 自述未独立佐证）。\n2. 2020-10/11 — Android TEE 可信应用方向确立。ids: sv-works-02, sv-tl-001/002, sv-decisions-04. conf: medium（归属推断）。\n3. 2022 — 信任边界横向扩展。ids: sv-works-03, sv-tl-003/004, sv-decisions-05. conf: medium。\n4. 2023-07/10 — 个人署名确立 + MCU bootloader 下探。ids: sv-tl-005/006, sv-works-04, sv-decisions-06. conf: medium。\n5. 2023-11 至 2024-04 — 研究整合站点 + 组织归属显式化 + 联网设备 TA。ids: sv-deepconv-01, sv-decisions-08, sv-tl-008, sv-works-05, sv-decisions-07, sv-ext-004. conf: medium。\n\n## 主机制（3 个，均满足 ≥2/3 判据）\n\n1. 依托厂商 SDK 的可信应用输入校验审计方法。repeated+generative+distinctive。conf: medium。竞争解释：缺陷类型一致性可能反映 2018-2024 TEE 生态普遍输入校验缺失 + 目标选择，而非独特技术；SDK 探测方法仅 2018 一手记录，后续重复属推断/缺口。\n2. 沿嵌入式信任栈与跨厂商的目标迁移。repeated+generative+distinctive。conf: medium。竞争解释：可能部分由厂商合作机会与新设备披露窗口驱动，无法区分机会性 vs 策略性。\n3. 厂商反馈强化的协调披露与延迟归档循环。repeated+generative。conf: medium。竞争解释：延迟 writeup 可能反映时间约束/自述拖延而非刻意披露时机策略；协调披露为行业常规。\n\n## 待办\n\n- 对照 output.schema.json 逐字段校验后写入 output.json。\n- _run 不填写（编排器负责）。\n"
+        },
+        "success": true,
+        "content_sha256": "6e4e97b05d2767b8a3d1c5f30d4a9a7156e31295ab13a184fd767907c5c27e15",
+        "accessed_at": "2026-09-28T02:21:46.241270+00:00"
+      },
+      {
+        "tool_use_id": "call_adszvbvqpym9me5z2kk8ciwv",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergei-volokitin-synthesis-v1-20260928-101437-671/output.json",
+          "content": "{\n  \"person\": \"Sergei Volokitin\",\n  \"expertise\": [\n    \"嵌入式安全、可信执行环境（TEE）与可信应用（Trusted Application）漏洞挖掘\",\n    \"移动 SoC TEE（MediaTek KeyInstall/Widevine/ISP、Samsung TEEGRIS/TIMA/Widevine Trustlet）内存破坏类缺陷分析\",\n    \"硬件钱包（Ledger Nano S）软件层攻击与系统调用接口审计\",\n    \"微控制器级嵌入式 Bootloader 与固件解析器（Silicon Labs Gecko/GSDK GBL）整数溢出与未初始化内存缺陷分析\",\n    \"消费级联网设备（Google Nest Wifi Pro）可信应用越界读写\",\n    \"跨厂商、跨信任边界（TEE、客户端库、智能卡方案）的输入校验缺失类漏洞横向迁移研究\",\n    \"面向厂商的协调漏洞披露与个人研究归档公开\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2018\",\n      \"stage\": \"硬件钱包软件层攻击与方法论雏形\",\n      \"capability_change\": \"以厂商 SDK 自建测试应用、对系统调用做系统性指针/参数探测的方法初步成形，形成从单点缺陷（syscall 空指针解引用、校验顺序 oracle）到安装/权限模型（APPLICATION_FLAG_DEBUG 与 flash 隔离）再到跨生命周期漏洞组合（debug flag、刷机残留、自定义 CA 残留）的递进分析链条，并完成向厂商报告与会议自述披露。\",\n      \"evidence_ids\": [\n        \"sv-works-01\",\n        \"sv-deepconv-03\",\n        \"sv-deepconv-04\",\n        \"sv-decisions-01\",\n        \"sv-decisions-02\",\n        \"sv-decisions-03\",\n        \"sv-community-01\",\n        \"sv-ext-001\",\n        \"sv-ext-002\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2020-10 至 2020-11\",\n      \"stage\": \"移动 SoC TEE 可信应用方向确立\",\n      \"capability_change\": \"可考研究产出转向 Android TEE 可信应用，在 MediaTek KeyInstall/Widevine/ISP 与 Samsung TEEGRIS Widevine Trustlet 上重复发现越界读写与任意代码执行类缺陷，确立随后多年反复出现的 TEE/TrustZone 研究方向与同类缺陷模式。\",\n      \"evidence_ids\": [\n        \"sv-works-02\",\n        \"sv-tl-001\",\n        \"sv-tl-002\",\n        \"sv-decisions-04\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2022\",\n      \"stage\": \"信任边界横向扩展\",\n      \"capability_change\": \"在保留内存安全类缺陷主题的前提下，目标从 Android TEE 横向迁移至 Samsung TIMA Trustlet、第三方开源库（trilogy）、政府智能卡方案（de.fac2）与既有 MediaTek Widevine 续作，缺陷类型从单一越界读写扩展到未初始化内存与保护机制绕过，显示方法向相邻信任边界迁移。\",\n      \"evidence_ids\": [\n        \"sv-works-03\",\n        \"sv-tl-003\",\n        \"sv-tl-004\",\n        \"sv-decisions-05\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2023-07 至 2023-10\",\n      \"stage\": \"个人署名确立与底层嵌入式下探\",\n      \"capability_change\": \"首次取得厂商逐名致谢，Android 安全公告以个人名致谢 CVE-2023-20754，与 hexplot.com/cves 的同一 CVE 组织归属重叠，建立 Sergei Volokitin 与 Hexplot 的跨来源身份链；同期目标下探至微控制器级嵌入式 Bootloader 与 GBL 固件解析器，缺陷类型仍以整数溢出与未初始化缓冲区为主。\",\n      \"evidence_ids\": [\n        \"sv-tl-005\",\n        \"sv-tl-006\",\n        \"sv-works-04\",\n        \"sv-decisions-06\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2023-11 至 2024-04\",\n      \"stage\": \"研究整合站点与组织归属显式化\",\n      \"capability_change\": \"启用个人研究站点作为长期归档渠道，首篇完整 writeup 为 2018 年 Ledger 研究的延迟公开版；Android 致谢由个人名演化为显式 'Sergei Volokitin of Hexplot' 组织归属，研究目标扩展至联网设备可信应用（Google Nest Wifi Pro），方法论跨设备类迁移得到外部可见的持续验证。\",\n      \"evidence_ids\": [\n        \"sv-deepconv-01\",\n        \"sv-decisions-08\",\n        \"sv-tl-008\",\n        \"sv-works-05\",\n        \"sv-decisions-07\",\n        \"sv-ext-004\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"依托厂商 SDK 的可信应用输入校验审计方法\",\n      \"starting_conditions\": \"2018 年以较新、攻击面较大且托管高价值资产的设备（Ledger Nano S）为首选目标，主动将研究范围收窄至设备安全层面，明确排除加密货币应用层逻辑；具备使用厂商提供 SDK 编写测试应用的能力。\",\n      \"repeated_practice\": \"利用厂商 SDK 自建测试应用，向系统调用反复传入非法指针并递增遍历内存地址，比对异常行为差异以探测指针校验行为；以 grep 审阅开源应用代码定位将密钥写入 flash 的应用，构建针对 FIDO 应用的概念验证演示擦除后 flash 残留密钥的恢复。此后 2020-2024 年在多家厂商的 Trusted Application 上反复出现缺失边界检查、整数溢出与未初始化缓冲区类缺陷，呈现对同一类攻击面的刻意重复练习。\",\n      \"feedback\": \"厂商修复作为正向反馈确认漏洞可利用性，会议公开作为能力外部检验渠道；2023-07 起获得 Android 安全公告逐名致谢、2024-03 起以 'of Hexplot' 组织归属致谢，构成厂商层面对研究产出的逐名外部确认。\",\n      \"intermediate_capability\": \"形成可复用的漏洞挖掘工作流：SDK 探测 → 边界/算术/初始化缺陷定位 → 跨生命周期漏洞组合 → 概念验证与影响演示 → 协调披露与归档。\",\n      \"observed_outcomes\": [\n        \"2018 年向 Ledger 报告 7 个漏洞并由厂商在后续固件版本修复\",\n        \"2020-10 MediaTek KeyInstall/Widevine/ISP 多个越界读写 CVE\",\n        \"2020-11 Samsung TEEGRIS Widevine Trustlet 任意代码执行（Critical 9.8）\",\n        \"2022 年 Samsung TIMA、trilogy、de.fac2、MediaTek Widevine 等多类缺陷\",\n        \"2023-10 Silicon Labs Gecko Bootloader 整数溢出与 GBL 解析器未初始化缓冲区\",\n        \"2024-04 Google Nest Wifi Pro 可信应用越界读\"\n      ],\n      \"evidence_ids\": [\n        \"sv-works-01\",\n        \"sv-works-02\",\n        \"sv-works-03\",\n        \"sv-works-04\",\n        \"sv-works-05\",\n        \"sv-deepconv-03\",\n        \"sv-decisions-01\",\n        \"sv-decisions-02\",\n        \"sv-tl-001\",\n        \"sv-tl-002\",\n        \"sv-tl-005\",\n        \"sv-tl-008\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"缺陷类型的高度一致性也可能反映 2018-2024 年间 TEE/Trustlet 生态普遍存在输入校验缺失，加上目标选择偏好新设备，而非研究者独有方法；SDK 系统性探测的具体手法仅 2018 年 Ledger 一手自述有据，后续 TEE 批次的方法细节缺乏第一人称叙述，重复性部分属推断与资料缺口。\"\n    },\n    {\n      \"name\": \"沿嵌入式信任栈与跨厂商的目标迁移\",\n      \"starting_conditions\": \"2020 年研究产出集中于移动 SoC TEE 内的单一可信应用，以缺失边界检查类越界读写为主；具备针对特定 Trustlet 框架重复分析的基础能力。\",\n      \"repeated_practice\": \"在同一厂商不同子系统（MediaTek Widevine、RPMB、KeyInstall）间迁移已建立方法，并将目标类从移动 SoC TEE 扩展至第三方客户端库（trilogy）、政府智能卡方案（de.fac2）、微控制器 Bootloader 与固件解析器（Silicon Labs Gecko/GSDK）、联网设备可信应用（Google Nest Wifi Pro），在跨厂商、跨信任边界、跨设备类上保持内存安全主题。\",\n      \"feedback\": \"持续获得多家厂商 CVE 分配与 Android 安全公告致谢，组织级 CVE 页面逐年累积，2024-03 起组织归属显式化；厂商认可为方法跨平台可迁移性提供外部佐证。\",\n      \"intermediate_capability\": \"形成可迁移的信任边界审计对象类别：识别新设备/新框架中的同类输入校验与状态管理缺陷，而非针对单一厂商发散。\",\n      \"observed_outcomes\": [\n        \"2022 年目标从 Android TEE 扩展至客户端库、智能卡方案与既有 TEE 续作\",\n        \"2023-10 目标下探至微控制器级 Bootloader 与 GBL 解析器\",\n        \"2024-04 目标扩展至 WiFi 路由器固件中的可信应用\",\n        \"2023-07 至 2024-09 持续获得 Android 安全公告逐名致谢\"\n      ],\n      \"evidence_ids\": [\n        \"sv-works-03\",\n        \"sv-works-04\",\n        \"sv-works-05\",\n        \"sv-tl-003\",\n        \"sv-tl-004\",\n        \"sv-tl-006\",\n        \"sv-tl-008\",\n        \"sv-decisions-05\",\n        \"sv-decisions-06\",\n        \"sv-decisions-07\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"目标迁移可能部分由厂商合作机会与新设备披露窗口驱动，而非完全由研究者主动策略选择；公开材料未区分机会性扩展与策略性扩展，跨厂商迁移的内在驱动力无法独立确证。\"\n    },\n    {\n      \"name\": \"厂商反馈强化的协调披露与延迟归档循环\",\n      \"starting_conditions\": \"2018 年完成 Ledger Nano S 研究，先向厂商报告、由厂商修复，再于会议公开技术摘要，但完整 writeup 长期未公开；自述长期计划开设个人博客但未找到时机。\",\n      \"repeated_practice\": \"对每项研究先向厂商报告并等待修复，再经会议或公告公开，最后将研究整合至个人站点归档；2023-11 启用 hexplot.com 作为长期归档渠道，首篇即整理 2018 年研究，此后 CVE 列表逐年累积形成可追溯产出记录。\",\n      \"feedback\": \"厂商修复确认漏洞可利用性，会议与公告公开提供同行/行业可见性，个人站点提供研究归档沉淀；2023-07 起 Android 逐名致谢强化外部确认。\",\n      \"intermediate_capability\": \"形成从漏洞发现到可复用知识沉淀的完整链条：报告-修复-公开-归档，而非一次性产出。\",\n      \"observed_outcomes\": [\n        \"2018 Ledger 7 个漏洞由厂商在后续固件版本修复\",\n        \"2023-11 发布 Ledger Nano S 完整 writeup 作为博客开篇\",\n        \"hexplot.com/cves 列出 2020-2024 年 18 条 CVE 形成持续产出记录\",\n        \"2023-07 至 2024-09 持续获得 Android 安全公告致谢\"\n      ],\n      \"evidence_ids\": [\n        \"sv-works-01\",\n        \"sv-community-01\",\n        \"sv-community-02\",\n        \"sv-deepconv-01\",\n        \"sv-decisions-03\",\n        \"sv-decisions-08\",\n        \"sv-tl-005\",\n        \"sv-tl-008\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"2018 年研究延迟至 2023 年才公开完整 writeup，可能反映时间约束或自述的写作拖延，而非刻意选择的披露时机策略；协调披露本身是行业常规做法，其作为个人成长机制的独特性有限。\"\n    }\n  ],\n  \"tensions\": [\n    \"研究取向明确限定为设备安全、排除加密货币应用层，但研究对象集中于托管高价值资产的硬件钱包与联网设备，研究价值评估与资产价值存在耦合，纯粹技术取向与高价值目标选择之间存在张力。\",\n    \"公开材料显示研究姿态偏向独立单干（未命名合作者/导师、以独立咨询站点形式提供服务），但 2020-2022 年组织级 CVE 的个人作者身份（单人或含协作者）未由一手来源确认，独立性与协作程度不可核验。\",\n    \"2018 年 Ledger 研究与 2020 年首批 CVE 之间存在约两年的公开产出记录空窗，无法判断该阶段为方向转变、未公开研究还是实际空窗。\",\n    \"CVE 列表逐名归属存在不一致：CVE-2024-22004 在 Android 致谢（2024-03）与 hexplot.com/cves（2024-04）日期记录不同；CVE-2024-22013 在 Android 致谢 2024-06 与 2024-09 两段重复列名但未出现在 hexplot.com/cves，归属记录一致性待核验。\",\n    \"person_json 标注 OffByOne 2025 / Black Hat 作为会议证据，但 OffByOne 2025 站点不可达、Black Hat USA 2018 议程页返回 403，均无独立一手佐证；Black Hat 2018 发表事实目前仅由作者 2023 年 writeup 自述支撑。\"\n  ],\n  \"transferable_practices\": [\n    \"以厂商 SDK 自建测试应用、对系统调用做系统性参数/指针探测以定位输入校验缺口，形成可复用的可信应用审计工作流。\",\n    \"以攻击面规模与资产价值作为选题约束条件，将研究范围主动收窄到设备/接口安全层面而非应用层业务逻辑。\",\n    \"沿嵌入式信任栈（TEE → 客户端库 → 智能卡 → Bootloader → 联网设备 TA）横向迁移已建立的内存安全审计方法，而非针对单一厂商发散。\",\n    \"将单点缺陷组合为跨生命周期攻击链（debug flag、刷机残留、自定义 CA 残留）以演示端到端影响，从漏洞发现延伸到可演示的概念验证。\",\n    \"建立个人研究站点作为长期归档渠道，将过往未公开研究系统化整理上线，形成可追溯的产出记录。\",\n    \"采用报告-修复-公开-归档的协调披露循环，以厂商修复作为漏洞可利用性的正向反馈。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"2018-2024 年 TEE/Trustlet 生态普遍存在输入校验缺失这一外部缺陷分布，使同一审计方法在该时期能持续产出，属特定时期外部条件而非可普遍复制。\",\n    \"研究产出集中于较新设备与新披露框架，可能受益于新设备攻击面尚未被充分审计的窗口期，存在幸存者偏差。\",\n    \"2020-2022 年组织级 CVE 的个人作者身份为推断（Hexplot 是否为单人主体、是否含协作者未由一手来源确认），其产出节奏与独立性不可作为可迁移的个人条件。\",\n    \"hexplot.com 站点、Android 安全公告致谢通道与厂商 SDK 可用性构成研究者特有的披露与工具资源，非一般研究者均可获得。\",\n    \"Black Hat USA 2018 发表与 OffByOne 2025 出席等会议证据无独立一手佐证，相关公开可见性不可作为可迁移条件核验。\"\n  ],\n  \"open_questions\": [\n    \"2018 年 Ledger 研究与 2020 年首批 CVE 之间约两年的公开产出空窗内容未知，无法判断是否存在方向转变或未公开研究。\",\n    \"2018 年以前的研究路径、正式学习经历、入门硬件/嵌入式安全领域的具体途径均无一手来源，pre-2018 决策路径不可重建。\",\n    \"hexplot.com About 页未披露作者履历、雇主、所在地或 Hexplot 创立日期；研究者所属机构与团队归属未知。\",\n    \"2020-2022 年组织级 CVE 的个人作者身份（单人或含协作者）未由一手来源逐一确认，相关条目归属停留在推断。\",\n    \"Black Hat USA 2018 议程页与 OffByOne 2025 演讲页均不可达，会议发表事实与主题无独立一手佐证。\",\n    \"CVE-2024-22013 的受影响产品/厂商与漏洞描述未取得，其在 Android 致谢两段重复列名与 hexplot.com/cves 缺失的原因未知。\",\n    \"x.com/svolokitin 抓取失败（HTTP 402），社交痕迹与同行互动不可核验，同伴网络反馈回路只能记录其缺席。\",\n    \"2020-2024 年 TEE 批次的具体审计方法细节（是否沿用 2018 年的 SDK 探测手法）缺乏第一人称叙述，方法延续性属推断与资料缺口。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "3feb18c8113b06798186bde450afec945442bed407b7fb2487501f820454acdf",
+        "accessed_at": "2026-09-28T02:21:46.241274+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790562106241313000-sergei-volokitin-synthesis-v1.json",
+    "label": "Sergei Volokitin:synthesis:v1",
+    "elapsed_seconds": 428.57,
+    "prompt_sha256": "ecb7cce978be8c8e39dd05ecff3c7657a1bf7dcb28162a1658ad1bb707ae2e58",
+    "num_turns": 8,
+    "total_cost_usd": 0.7702460000000001,
+    "usage": {
+      "input_tokens": 36937,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 91072,
+      "output_tokens": 21601,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 36937,
+        "outputTokens": 21601,
+        "cacheReadInputTokens": 91072,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.7702460000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

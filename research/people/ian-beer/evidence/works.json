@@ -1,0 +1,465 @@
+{
+  "person": "Ian Beer",
+  "dimension": "公开作品与技术演化",
+  "identity_check": "目标人物 Ian Beer 为 Google Project Zero 研究员，专注 iOS/macOS (XNU/IOKit) 内核利用，Twitter @i41nbeer，与 person_json 一致。身份经 6 次 WebFetch 直接抓取 projectzero.google 文章确认——每篇正文署名均为 'Ian Beer, Project Zero'（2014-11、2016-10、2017-04、2018-10、2019-08、2020-12、2022-06 共 7 篇），URL 路径与发布日期自洽，无同名歧义。另抓取 projectzero.google 首页（2026-09）确认当前作者列表已不含 Ian Beer，与本地种子时间线中'2023 年后无公开输出'的记录互证。研究领域的 'Ian Beer' 即此人，无其他人共用此名从事 iOS 安全研究的迹象。",
+  "items": [
+    {
+      "id": "ian-beer-pubworks-01-pwn4fun-2014",
+      "date": "2014-11-24",
+      "claim": "2014 年 Spring Pwn4Fun（CanSecWest）Safari 利用 writeup：完整三段链——Safari 渲染器整数截断→经 IOKit GPU 驱动 (AppleIntelHD4000Graphics, IGAccelGLContext::unmap_user_memory selector 0x201) 沙箱逃逸→内核控制流劫持。KASLR 经 IOKit 注册表 IOPlatformArgs 泄漏绕过（注册表读无 MAC hook，沙箱无法限制）。纯 ROP（fake vtable + ROP stack 置于用户态）绕 SMEP，KUNCExecute 以 root 启动 Calculator.app。WebFetch 确认。",
+      "status": "documented",
+      "growth_signal": "起点即达'端到端全链'水平（渲染器→沙箱逃逸→内核→root），奠定了其后续以完整利用链（而非单个 bug）为产出单位的习惯。方法论上自建 DYLD-interposing 模糊测试器随机翻转 IOConnectCallMethod 参数位以快速定位 GPU 驱动 bug，体现'自建工具优先于套用框架'的早期倾向。引用 Dionysus Blazakis（沙箱内部）、Meder Kydyraliev（Mach 服务挖掘）、winocm（DeviceTree/kASLR）等前人工作，显示其建立在社区研究脉络之上。",
+      "short_quote": "Kernel space is just trusting that userspace will only ever pass a valid kernel object pointer.",
+      "source": {
+        "title": "pwn4fun Spring 2014 - Safari - Part II",
+        "url": "https://projectzero.google/2014/11/pwn4fun-spring-2014-safari-part-ii.html",
+        "published": "2014-11-24",
+        "source_type": "Project Zero blog post (first-hand writeup)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_z411tff1yksdmqrh9vt3ak4w",
+        "accessed_at": "2026-09-26T13:53:56.165578+00:00",
+        "content_sha256": "9c58ae4fd64ccbc6c7d40c2f4c282746577797df406c037ea599a5b65e746e09"
+      }
+    },
+    {
+      "id": "ian-beer-pubworks-02-taskt-2016",
+      "date": "2016-10-25",
+      "claim": "提出架构性论点：XNU 的 execve 原地修改 task 结构而非新建，使任何持有 task_t 指针的内核代码在 suid 执行后静默获得高权限；'every single task_t pointer in the kernel is a potential security bug'。区分结构性内存安全与时序性内存安全（'no use-after-free involved'）。文章记录 4 轮 bypass→mitigation→bypass 迭代（原始 IOKit owningTask UAF → 10.11.6 task_reference 补丁 → 子进程 execve suid 绕过 → 10.12 exec-token 检查 → task_set_exception_ports 状态修改型绕过 → 10.12.1 根因重构 execve 分配新 task/thread）。WebFetch 确认。",
+      "status": "documented",
+      "growth_signal": "研究目标从'找单个 bug'升级到'指出设计类缺陷'——把 task_t 定位为架构性而非实现性问题。形成对抗性方法论：把每个补丁当作新攻击面，逐轮绕过厂商缓解，迫使 Apple 做根本性 execve 重构而非补丁。'considered harmful' 的命名框架把漏洞报告提升为设计批评，确立其后续把单点 bug 升华为子系统级理论贡献的写作范式。",
+      "short_quote": "there's no central point where access to a resource can be cut off",
+      "source": {
+        "title": "task_t considered harmful",
+        "url": "https://projectzero.google/2016/10/taskt-considered-harmful.html",
+        "published": "2016-10-25",
+        "source_type": "Project Zero blog post (first-hand writeup)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_wjg9wtjcr7fixfmyjq7h5b6i",
+        "accessed_at": "2026-09-26T13:53:56.165564+00:00",
+        "content_sha256": "d6df4a8bd46b62a109cb8523fa0ffc2e68b87f8b5d54337bd8cec21b3dc5b527"
+      }
+    },
+    {
+      "id": "ian-beer-pubworks-03-exception-oriented-2017",
+      "date": "2017-04-18",
+      "claim": "CVE-2017-2370：mach_voucher_extract_attr_recipe_trap 堆溢出。根因为从 host_create_mach_voucher_trap 复制粘贴代码时，size 参数由整数变为指向整数的指针，开发者忘记对 copyin 第三参数做额外解引用；clang 'did you mean' 修复建议编译通过但语义全错。引入 'exception-oriented exploitation' 技术：故意触发 brk 异常，使内核将攻击者控制的寄存器状态写入预分配 ipc_kmsg 的越界位置，把一次性溢出转化为可重复的受控读/写原语。WebFetch 确认。",
+      "status": "documented",
+      "growth_signal": "新技术诞生：把异常处理路径武器化为数据注入通道，命名并系统化一种新利用范式。工具建设方面，复用上一条 mach_portal exploit 的内核读写权作为新研究的开发平台，自述 'I'm going to build my own kernel debugger (with printfs and hexdumps)'——坦诚 iOS 内核研究的引导问题（调试新 exploit 需先有旧 exploit 运行）。形成稳定的测试批评语式 'this bug would have been caught in development if the code had any tests'，把漏洞归因为组织级代码审查/测试流程缺失而非个人。",
+      "short_quote": "an exploitation technique which involves repeatedly and deliberately crashing",
+      "source": {
+        "title": "Exception-oriented exploitation on iOS",
+        "url": "https://projectzero.google/2017/04/exception-oriented-exploitation-on-ios.html",
+        "published": "2017-04-18",
+        "source_type": "Project Zero blog post (first-hand writeup)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_18e4rnkwn2lun35nip4killg",
+        "accessed_at": "2026-09-26T13:53:56.165569+00:00",
+        "content_sha256": "693b9dc43ad75fbb3ecd097893ffa416d8eb73d28ed3f37edb8c87f782cc7ac9"
+      }
+    },
+    {
+      "id": "ian-beer-pubworks-04-deja-xnu-2018",
+      "date": "2018-10-18",
+      "claim": "变体分析方法论示范：重访 2014 年内核 IODataQueue bug (CVE-2014-4418)，发现用户态 IODataQueue 变体信任共享内存中的 queueSize 值，且同样把 mach 消息头存于共享内存，在内核变体修复后'又存在了四年'。明确提出方法论陈述：'Variant analysis is really important, but attackers are the only parties incentivized to do a good job of it.'。WebFetch 确认。",
+      "status": "documented",
+      "growth_signal": "研究目标从'找 bug'转向'示范方法论缺口'：在公开演讲变体分析前先亲自执行一遍以暴露防御方系统性盲区。识别出结构性不对称——攻击者有动力做变体分析、防御方没有，导致同类 bug 跨子system 持续多年。把'重访旧 bug 并用期间所学重新利用'明确化为可重复的研究方法，标志着进入'方法论教师'阶段：单点 bug 不如系统化发现能力重要。",
+      "short_quote": "persist for four more years after almost the exact same bug was fixed in the kernel code",
+      "source": {
+        "title": "Deja-XNU",
+        "url": "https://projectzero.google/2018/10/deja-xnu.html",
+        "published": "2018-10-18",
+        "source_type": "Project Zero blog post (first-hand writeup)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_6r9j82vllious3fiwyugg0fq",
+        "accessed_at": "2026-09-26T13:53:56.165542+00:00",
+        "content_sha256": "8ec6033955038a185c42bcab1b156cf11e9a2a70ef3c4d6e2066784326ec0371"
+      }
+    },
+    {
+      "id": "ian-beer-pubworks-05-itw-chains-2019",
+      "date": "2019-08-29",
+      "claim": "与 Google TAG 协作分析野外 iOS 利用链：5 条完整独立利用链、跨 iOS 10-12、14 个漏洞（7 个浏览器、5 个内核、2 个沙箱逃逸），持续至少两年。2019-02-01 以 7 天披露期限报告 Apple，2 月 7 日 iOS 12.1.4 带外发布。发现时至少一条提权链仍为 0-day（CVE-2019-7287、CVE-2019-7286）。WebFetch 确认。",
+      "status": "documented",
+      "growth_signal": "研究类型扩展：从原创漏洞研究增加事件响应式野外利用分析，连接 P0 进攻性研究与 TAG 防御情报。框架重构——把讨论从'million dollar dissident'转向'marginal cost for monitoring the n+1'th potential future dissident'，引入人口/族裔维度的监控政治化框架（'To be targeted might mean simply being born in a certain geographic region'）。Apple 公开反驳其'大规模利用'定性时，Beer 不回应公开论战、让技术记录自证，确立'让技术说话'的冲突处理模式。代码质量批评语式延续：'code which seems to have never worked, code that likely skipped QA'。",
+      "short_quote": "the marginal cost for monitoring the n+1'th potential future dissident",
+      "source": {
+        "title": "A very deep dive into iOS Exploit chains found in the wild",
+        "url": "https://projectzero.google/2019/08/a-very-deep-dive-into-ios-exploit.html",
+        "published": "2019-08-29",
+        "source_type": "Project Zero blog post (first-hand writeup)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_ddpfmeh1sy5jz91aizxpq1a1",
+        "accessed_at": "2026-09-26T13:53:56.165573+00:00",
+        "content_sha256": "95404cd9a1827c09294b0524e8758d10de8d1886427ade8aafc81d92343e91e3"
+      }
+    },
+    {
+      "id": "ian-beer-pubworks-06-awdl-2020",
+      "date": "2020-12-01",
+      "claim": "CVE-2020-3843：IO80211AWDLPeer::parseAwdlSyncTreeTLV 线性堆溢出（60 字节 inline sync_tree_macs，kalloc.6144 zone），TLV 类型 0x14 未被 tlvCheckBounds 强制。约 6 个月单人研究构建零点击无线电邻近利用，绕 ARM v8.3 PAC，单 bug 达成完整内核读/写与任意代码执行。自建完整 AWDL 客户端（libpcap + Raspberry Pi 4B + rtl8187 监听模式，双线程注入/ACK 嗅探）。实际结尾为 'I don't think all hope is lost; there's just an awful lot more left to do.'（非本地种子所称的 'Make zeroday hard.'）。WebFetch 确认。",
+      "status": "documented",
+      "growth_signal": "集大成且最透明的复盘：文章明确记录 5 个失败方向——(1) OWL 开源 AWDL 客户端无法构建→从零自建；(2) iOS 12 kernelcache 误导（iOS 13 新增 steering_msg_blob 字段）致数周空耗；(3) 链表 flink 部分覆盖因 6 字节边界对齐不可行；(4) 无 PAC 签名 vtable 时全覆盖致内核 panic；(5) 单帧双 SyncTree 溢出无法修复指针。转向模式清晰：'Can it really be this easy?' → 'In hindsight, there's an obvious reason why this doesn't work'。方法论固化：学术工具失败时倾向从零自建框架（'前期投入省后期时间'）。目标难度维度达到单人对抗国家级能力的论证目的。",
+      "short_quote": "In hindsight, there's an obvious reason why this doesn't work",
+      "source": {
+        "title": "An iOS zero-click radio proximity exploit odyssey",
+        "url": "https://projectzero.google/2020/12/an-ios-zero-click-radio-proximity.html",
+        "published": "2020-12-01",
+        "source_type": "Project Zero blog post (first-hand writeup)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_by7pgao5quqfdp5gapc5yeob",
+        "accessed_at": "2026-09-26T13:53:56.165550+00:00",
+        "content_sha256": "618350119accc79677c56bf9adb71862afff00421b50269919dc26dbd3d19036"
+      }
+    },
+    {
+      "id": "ian-beer-pubworks-07-carrier-app-2022",
+      "date": "2022-06-23",
+      "claim": "CVE-2021-30983（iOS 15.2 修复）：Display Co-Processor (DCP) 协处理器 UniformityCompensator::set 堆溢出，controlled_size 超过预期上限 64，经 AppleCLCD2 IOKit selector 78 / block handler type 19 触发，破坏相邻 C++ 对象 vtable，在 DCP 上执行代码后经 DCP→AP RPC 请求任意内存映射。提出'协处理器安全悖论'：DCP 无 ASLR/PAC、用 plain arm64、堆确定、运行更简 RTKit RTOS，把攻击面从'缓解重'AP 移到'缓解轻'DCP 是安全倒退。WebFetch 确认。",
+      "status": "documented",
+      "growth_signal": "批评层级再升级：从 bug 级、子系统级上升到硬件安全架构策略级——质疑 Apple 把驱动逻辑迁往协处理器的隔离策略在缓解层面是净退步，同时承认'分割与隔离总体是好事'的张力。工程现实感强化：逆向约 7000 函数 stripped 固件时 'My kingdom for a .dSYM!'、'Guess we'll have to do this the hard way!'，体现面对缺失调试符号时的务实姿态而非抱怨。演化至此，研究目标难度从软件利用扩展到跨处理器边界的固件逆向 + 协处理器利用。",
+      "short_quote": "'mitigation heavy' environment to a 'mitigation light' one is a regression",
+      "source": {
+        "title": "The curious tale of a fake Carrier.app",
+        "url": "https://projectzero.google/2022/06/curious-case-carrier-app.html",
+        "published": "2022-06-23",
+        "source_type": "Project Zero blog post (first-hand writeup)",
+        "level": "primary"
+      },
+      "verification": {
+        "verified_in_run": true,
+        "retrieval_method": "web_fetch",
+        "tool_use_id": "call_jv2uq91yqaqzii5ji0txyxzv",
+        "accessed_at": "2026-09-26T13:53:56.165591+00:00",
+        "content_sha256": "87469552f9a301ff6a24c78413bd83a3b8f5e523fd1641a0c3317768ee062424"
+      }
+    }
+  ],
+  "contradictions": [
+    "本地种子（03-expression-dna.md、05-decisions.md）称 Ian Beer 多篇文章以 'Make zeroday hard.' 结尾作为签名，并特别归因于 2020-12 AWDL 文章。但本次 WebFetch 实际抓取 AWDL 文章结尾为 'I don't think all hope is lost; there's just an awful lot more left to do.'。种子的签名归因可能错误或适用于其他文章，未在本轮 7 篇抓取中独立证实 'Make zeroday hard.' 出现于任何具体文章正文。",
+    "本地种子将 async_wake（2017-12）、mach_portal（2016-12）、multi_path/empty_list（2018）列为 HIGH-CONFIDENCE-1H 的'公开释放 exploit 代码'，但本次未对 P0 bug tracker 或 GitHub 仓库做 WebFetch 验证具体发布日期与技术细节，仅能作为 lead_only，不可标记为 documented。"
+  ],
+  "gaps": [
+    "未对 P0 issue tracker（bugs.chromium.org/p/project-zero）或 GitHub 仓库做 WebFetch，无法以 documented 等级枚举 Beer 报告的约 100+ Apple CVE 及 exploit 代码发布的精确日期与技术细节。种子提供的 CVE-2016-7644/2017-13861/2018-4241/2018-4243 等仅 lead_only。",
+    "会议演讲事实未亲自抓取会议页面验证：Black Hat USA 2016 'Attacking the XNU Kernel in El Capitan'、HITB Amsterdam 2017、Black Hat USA 2019 均为种子 [2H] 引用，本轮未抓取 Black Hat/HITB 议程页（种子记录这些页面 403/blocked）。",
+    "2023-2026 公开输出空白：projectzero.google 首页（2026-09 抓取）作者列表不含 Ian Beer，与种子时间线一致，但无法确认 Beer 是否仍在职 Google/Project Zero、是否转入内部研究、或已离职。无公开离职公告。",
+    "pre-2014 职业经历与教育背景未知。种子仅推断'加入 P0 前已有 iOS/macOS 安全研究经验'，无任何一手来源。",
+    "'Splitting atoms in XNU' 标题在 iOS 安全社区被广泛引用，但种子记录所有尝试的 URL 模式均 404，本轮未单独抓取验证，无法判断其为演讲、博客文章还是社区误传。",
+    "2015-09 'Revisiting Apple IPC: (1) Distributed Objects'、2018 multi_path/empty_list exploit 技术（pipe buffer 技术）、2021-12 与 2022-03 FORCEDENTRY 系列（与 Samuel Gross 合著）本轮未做 WebFetch，技术演化曲线在 2015 与 2021-2022 早期存在抓取缺口。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-works-20260926-214703-044",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790430836146891000-ian-beer-works.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "e4bdf463-cad6-494f-97f1-35edcf77c452",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_bax1ey54zglg59ccvvih3ksp",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-works-20260926-214703-044/task.md"
+        },
+        "success": true,
+        "content_sha256": "452909103f08f6a1afef54dac0b9bc2c295af33bbfdc982b9ec8a88369f92493",
+        "accessed_at": "2026-09-26T13:53:56.165262+00:00"
+      },
+      {
+        "tool_use_id": "call_hfx93m4vc7x8orjckpwrdwc5",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-works-20260926-214703-044/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "b4442a78fad2030047af1d3e1f6b682a23a1fe6f61805624606dd2bf995ad011",
+        "accessed_at": "2026-09-26T13:53:56.165293+00:00"
+      },
+      {
+        "tool_use_id": "call_uhfb0btajhxij9pxfo2v5gkm",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-works-20260926-214703-044/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "bc73bec40b9604a19ed68bca5d6921a6dc6f30a6031e50a23664d263e83e41b0",
+        "accessed_at": "2026-09-26T13:53:56.165302+00:00"
+      },
+      {
+        "tool_use_id": "call_7syoabjhnoeb5ftv0toc8pme",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-works-20260926-214703-044/inputs/dimension_name.md"
+        },
+        "success": true,
+        "content_sha256": "98d6159955e4031db24639369d116819220986aa8ec32370f8ce25cc7e814219",
+        "accessed_at": "2026-09-26T13:53:56.165308+00:00"
+      },
+      {
+        "tool_use_id": "call_x8rdnss6s2jevb1nuelk3t77",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-works-20260926-214703-044/inputs/dimension_questions.md"
+        },
+        "success": true,
+        "content_sha256": "6e5034a8a6d972f492d2b08811243633e8b01984efe14e10fad4de7367634388",
+        "accessed_at": "2026-09-26T13:53:56.165312+00:00"
+      },
+      {
+        "tool_use_id": "call_3gcyd6z271w4bhoocujgozuv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-works-20260926-214703-044/inputs/local_seed_note.md"
+        },
+        "success": true,
+        "content_sha256": "a33ea2daf9a033c232a415e13556a43384f637cb69d170c89bbb06431cae2915",
+        "accessed_at": "2026-09-26T13:53:56.165317+00:00"
+      },
+      {
+        "tool_use_id": "call_eh628vbupybgatp20jmdb8vv",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/ian-beer-perspective/references/research/01-writings.md"
+        },
+        "success": true,
+        "content_sha256": "e253482620d12b5e06df15e4376069bc7894cfa8b456e128c7ecbfe140651400",
+        "accessed_at": "2026-09-26T13:53:56.165337+00:00"
+      },
+      {
+        "tool_use_id": "call_ng4lkbhzf83ihhfwl1yha3m8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/ian-beer-perspective/references/research/06-timeline.md"
+        },
+        "success": true,
+        "content_sha256": "755e2c3575dfcfecbf6165807211d7023b3491659af31bc7c8ccecebc16dcf32",
+        "accessed_at": "2026-09-26T13:53:56.165353+00:00"
+      },
+      {
+        "tool_use_id": "call_8c4g4tw2ec39vzurci83319h",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/ian-beer-perspective/references/research/03-expression-dna.md"
+        },
+        "success": true,
+        "content_sha256": "7a38e97d81e1c944bcdfb9cc3f2c2c6c7d0e1e33797879ea35fbc59e2d29bdbc",
+        "accessed_at": "2026-09-26T13:53:56.165377+00:00"
+      },
+      {
+        "tool_use_id": "call_pisztk8ucquop9r1yzcucqxk",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/ian-beer-perspective/references/research/05-decisions.md"
+        },
+        "success": true,
+        "content_sha256": "5858c79e7a171c88fd47842d9413896091cc2826c089473ae43e3c37df7eb7d0",
+        "accessed_at": "2026-09-26T13:53:56.165396+00:00"
+      },
+      {
+        "tool_use_id": "call_mltjli9lngdu1rmuovplaqqe",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/ian-beer-perspective/references/research/02-conversations.md"
+        },
+        "success": true,
+        "content_sha256": "1842cd0dff6ee499bba11c0a1b0994cf49d7a9358adc4980adbb58fc1f653c9f",
+        "accessed_at": "2026-09-26T13:53:56.165413+00:00"
+      },
+      {
+        "tool_use_id": "call_vcmwdodm63n7nbw3df1xjp59",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/zeromdash/presets/skills/ian-beer-perspective/references/research/04-external-views.md"
+        },
+        "success": true,
+        "content_sha256": "9f87ea4df1ce7ebe1921a726919d726b76f30872a4060b3e76ecce1fc9020091",
+        "accessed_at": "2026-09-26T13:53:56.165429+00:00"
+      },
+      {
+        "tool_use_id": "call_kjn6x6j3snbrgpjy91mckucj",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-works-20260926-214703-044/checkpoint.md",
+          "content": "# Checkpoint — Ian Beer / 公开作品与技术演化\n\n## 身份\n- 目标人物：Ian Beer，Google Project Zero 研究员，专注 iOS/macOS (XNU/IOKit) 内核利用。Twitter @i41nbeer。\n- 同名歧义：需通过 P0 文章署名确认身份。\n\n## 维度问题\n按时间研究 writeup、漏洞公告、论文、代码和工具。识别目标难度、研究方法、技术栈与复盘方式如何变化。\n\n## 工具预算\n- 上限 8 次搜索/抓取。必须预留最后回合提交 output.json。\n- 计划：7 次 WebFetch 覆盖 2014→2022 关键演化节点。\n\n## 待抓取（覆盖技术演化）\n1. 2014-11 pwn4fun Spring 2014 Safari Part II — 起点：Safari→kernel 全链\n2. 2016-10 task_t considered harmful — 理论框架形成\n3. 2017-04 Exception-oriented exploitation — 新技术+自建调试器\n4. 2018-10 Deja-XNU — 变体分析方法论\n5. 2019-08 A very deep dive into iOS Exploit chains — 野外分析+政治维度\n6. 2020-12 AWDL zero-click radio proximity — 集大成+复盘\n7. 2022-06 The curious tale of a fake Carrier.app — 架构批评\n\n## 演化假设（来自种子，待 WebFetch 核对）\n- Phase1 (2014-2015) 单个 IOKit/GPU bug + 沙箱逃逸\n- Phase2 (2016-2017) 系统理论：task_t、Mach IPC、exception-oriented；自建内核调试器\n- Phase3 (2018) 方法论教师：Deja-XNU 变体分析；多 exploit 同版本\n- Phase4 (2019) 野外分析 + 政治化框架\n- Phase5 (2020) 集大成：6 个月零点击无线电；公开复盘死路\n- Phase6 (2021-2022) 协作 (NSO w/ Gross) + 架构批评 (DCP)\n\n## 进度\n- [x] 读取 task.md, output.schema.json, person_json, dimension inputs, 6 个本地种子\n- [ ] WebFetch 7 篇关键文章\n- [ ] 写 output.json\n"
+        },
+        "success": true,
+        "content_sha256": "72ac281ed96c6902f96f6b8e7da45d6a66997c584d3afc349ba8f7a1bb1139da",
+        "accessed_at": "2026-09-26T13:53:56.165537+00:00"
+      },
+      {
+        "tool_use_id": "call_by7pgao5quqfdp5gapc5yeob",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/2020/12/an-ios-zero-click-radio-proximity.html",
+          "prompt": "Who is the author? What is the publication date? Summarize: the vulnerability (CVE if any), the target difficulty, the research methodology used, the technical stack/tools built, any explicit retrospective/post-mortem about failed approaches and dead ends, and the closing statement. Quote short exact phrases (under 15 words each) for: the discovery moment, a failed approach, and the closing line."
+        },
+        "success": true,
+        "content_sha256": "618350119accc79677c56bf9adb71862afff00421b50269919dc26dbd3d19036",
+        "accessed_at": "2026-09-26T13:53:56.165550+00:00"
+      },
+      {
+        "tool_use_id": "call_6r9j82vllious3fiwyugg0fq",
+        "tool": "WebFetch",
+        "input": {
+          "url": "https://projectzero.google/2018/10/deja-xnu.html",
+          "prompt": "Who is the author? Publication date? Summarize: the variant analysis methodology, why the author revisits old bugs, whether the userspace variant persisted for years, and any explicit statements about who is incentivized to do variant analysis. Quote short exact phrases (under 15 words each) for: the variant analysis incentive statement, and how long the userspace bug persisted."
+        },
+        "success": true,
+        "content_sha256": "8ec6033955038a185c42bcab1b156cf11e9a2a70ef3c4d6e2066784326ec0371",
+        "accessed_at": "2026-09-26T13:53:56.165542+00:00"
+      },
+      {
+        "tool_use_id": "call_wjg9wtjcr7fixfmyjq7h5b6i",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is the author? Publication date? Summarize the central thesis: why every task_t pointer is a potential security bug, the distinction the author makes (e.g. temporal vs structural memory safety), and whether the post documents iterations of bypass/mitigation/bypass. Quote a short exact phrase (under 15 words) for the central thesis and one for the architectural critique.",
+          "url": "https://projectzero.google/2016/10/taskt-considered-harmful.html"
+        },
+        "success": true,
+        "content_sha256": "d6df4a8bd46b62a109cb8523fa0ffc2e68b87f8b5d54337bd8cec21b3dc5b527",
+        "accessed_at": "2026-09-26T13:53:56.165564+00:00"
+      },
+      {
+        "tool_use_id": "call_18e4rnkwn2lun35nip4killg",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is the author? Publication date? Summarize: the CVE and root cause, the new exploitation technique introduced (the \"exception-oriented\" idea), whether the author built their own kernel debugger, and any explicit criticism of code review/testing at Apple. Quote short exact phrases (under 15 words each) for: the technique name/coinage, the self-built debugger, and the testing critique.",
+          "url": "https://projectzero.google/2017/04/exception-oriented-exploitation-on-ios.html"
+        },
+        "success": true,
+        "content_sha256": "693b9dc43ad75fbb3ecd097893ffa416d8eb73d28ed3f37edb8c87f782cc7ac9",
+        "accessed_at": "2026-09-26T13:53:56.165569+00:00"
+      },
+      {
+        "tool_use_id": "call_z411tff1yksdmqrh9vt3ak4w",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is the author? Publication date? Summarize the 2014 pwn4fun Safari exploit: what was exploited (Safari renderer, sandbox escape, kernel), the KASLR bypass method, whether the author used pure ROP (no shellcode) to bypass SMEP, and which prior researchers are referenced. Quote a short exact phrase (under 15 words) about sandboxing's openness or trust.",
+          "url": "https://projectzero.google/2014/11/pwn4fun-spring-2014-safari-part-ii.html"
+        },
+        "success": true,
+        "content_sha256": "9c58ae4fd64ccbc6c7d40c2f4c282746577797df406c037ea599a5b65e746e09",
+        "accessed_at": "2026-09-26T13:53:56.165578+00:00"
+      },
+      {
+        "tool_use_id": "call_ddpfmeh1sy5jz91aizxpq1a1",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is the author? Publication date? Summarize: the in-the-wild iOS exploit chains (how many chains, how many vulnerabilities, what iOS versions), the role of Google TAG, the 7-day disclosure deadline applied, and the author's explicit reframing from \"million dollar dissident\" to \"marginal cost of monitoring\". Quote short exact phrases (under 15 words each) for: the QA/code-quality critique, and the marginal cost reframing.",
+          "url": "https://projectzero.google/2019/08/a-very-deep-dive-into-ios-exploit.html"
+        },
+        "success": true,
+        "content_sha256": "95404cd9a1827c09294b0524e8758d10de8d1886427ade8aafc81d92343e91e3",
+        "accessed_at": "2026-09-26T13:53:56.165573+00:00"
+      },
+      {
+        "tool_use_id": "call_jv2uq91yqaqzii5ji0txyxzv",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Who is the author? Publication date? Summarize: the CVE and target (Display Co-Processor / DCP), the central \"co-processor security paradox\" thesis, and how moving attack surface from \"mitigation heavy\" AP to \"mitigation light\" DCP is a regression. Quote a short exact phrase (under 15 words) for the security regression, and note any emotional/humorous phrases the author uses about missing debug symbols.",
+          "url": "https://projectzero.google/2022/06/curious-case-carrier-app.html"
+        },
+        "success": true,
+        "content_sha256": "87469552f9a301ff6a24c78413bd83a3b8f5e523fd1641a0c3317768ee062424",
+        "accessed_at": "2026-09-26T13:53:56.165591+00:00"
+      },
+      {
+        "tool_use_id": "call_l2dl7oc22yn6izg0qam64hba",
+        "tool": "WebFetch",
+        "input": {
+          "prompt": "Confirm: is Ian Beer listed/named as an author or contributor at Project Zero? List any article titles or author attributions you can see for Ian Beer. Quote the exact byline text if present.",
+          "url": "https://projectzero.google/"
+        },
+        "success": true,
+        "content_sha256": "646cfc46a118d4d3bc1d2f3ef0803216663310f19f8d58f20c449f605bb3f3e5",
+        "accessed_at": "2026-09-26T13:53:56.165587+00:00"
+      },
+      {
+        "tool_use_id": "call_a4fyxi75k7f9wzu8jms74oei",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-works-20260926-214703-044/output.json",
+          "content": "{\n  \"person\": \"Ian Beer\",\n  \"dimension\": \"公开作品与技术演化\",\n  \"identity_check\": \"目标人物 Ian Beer 为 Google Project Zero 研究员，专注 iOS/macOS (XNU/IOKit) 内核利用，Twitter @i41nbeer，与 person_json 一致。身份经 6 次 WebFetch 直接抓取 projectzero.google 文章确认——每篇正文署名均为 'Ian Beer, Project Zero'（2014-11、2016-10、2017-04、2018-10、2019-08、2020-12、2022-06 共 7 篇），URL 路径与发布日期自洽，无同名歧义。另抓取 projectzero.google 首页（2026-09）确认当前作者列表已不含 Ian Beer，与本地种子时间线中'2023 年后无公开输出'的记录互证。研究领域的 'Ian Beer' 即此人，无其他人共用此名从事 iOS 安全研究的迹象。\",\n  \"items\": [\n    {\n      \"id\": \"ian-beer-pubworks-01-pwn4fun-2014\",\n      \"date\": \"2014-11-24\",\n      \"claim\": \"2014 年 Spring Pwn4Fun（CanSecWest）Safari 利用 writeup：完整三段链——Safari 渲染器整数截断→经 IOKit GPU 驱动 (AppleIntelHD4000Graphics, IGAccelGLContext::unmap_user_memory selector 0x201) 沙箱逃逸→内核控制流劫持。KASLR 经 IOKit 注册表 IOPlatformArgs 泄漏绕过（注册表读无 MAC hook，沙箱无法限制）。纯 ROP（fake vtable + ROP stack 置于用户态）绕 SMEP，KUNCExecute 以 root 启动 Calculator.app。WebFetch 确认。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"起点即达'端到端全链'水平（渲染器→沙箱逃逸→内核→root），奠定了其后续以完整利用链（而非单个 bug）为产出单位的习惯。方法论上自建 DYLD-interposing 模糊测试器随机翻转 IOConnectCallMethod 参数位以快速定位 GPU 驱动 bug，体现'自建工具优先于套用框架'的早期倾向。引用 Dionysus Blazakis（沙箱内部）、Meder Kydyraliev（Mach 服务挖掘）、winocm（DeviceTree/kASLR）等前人工作，显示其建立在社区研究脉络之上。\",\n      \"short_quote\": \"Kernel space is just trusting that userspace will only ever pass a valid kernel object pointer.\",\n      \"source\": {\n        \"title\": \"pwn4fun Spring 2014 - Safari - Part II\",\n        \"url\": \"https://projectzero.google/2014/11/pwn4fun-spring-2014-safari-part-ii.html\",\n        \"published\": \"2014-11-24\",\n        \"source_type\": \"Project Zero blog post (first-hand writeup)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ian-beer-pubworks-02-taskt-2016\",\n      \"date\": \"2016-10-25\",\n      \"claim\": \"提出架构性论点：XNU 的 execve 原地修改 task 结构而非新建，使任何持有 task_t 指针的内核代码在 suid 执行后静默获得高权限；'every single task_t pointer in the kernel is a potential security bug'。区分结构性内存安全与时序性内存安全（'no use-after-free involved'）。文章记录 4 轮 bypass→mitigation→bypass 迭代（原始 IOKit owningTask UAF → 10.11.6 task_reference 补丁 → 子进程 execve suid 绕过 → 10.12 exec-token 检查 → task_set_exception_ports 状态修改型绕过 → 10.12.1 根因重构 execve 分配新 task/thread）。WebFetch 确认。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"研究目标从'找单个 bug'升级到'指出设计类缺陷'——把 task_t 定位为架构性而非实现性问题。形成对抗性方法论：把每个补丁当作新攻击面，逐轮绕过厂商缓解，迫使 Apple 做根本性 execve 重构而非补丁。'considered harmful' 的命名框架把漏洞报告提升为设计批评，确立其后续把单点 bug 升华为子系统级理论贡献的写作范式。\",\n      \"short_quote\": \"there's no central point where access to a resource can be cut off\",\n      \"source\": {\n        \"title\": \"task_t considered harmful\",\n        \"url\": \"https://projectzero.google/2016/10/taskt-considered-harmful.html\",\n        \"published\": \"2016-10-25\",\n        \"source_type\": \"Project Zero blog post (first-hand writeup)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ian-beer-pubworks-03-exception-oriented-2017\",\n      \"date\": \"2017-04-18\",\n      \"claim\": \"CVE-2017-2370：mach_voucher_extract_attr_recipe_trap 堆溢出。根因为从 host_create_mach_voucher_trap 复制粘贴代码时，size 参数由整数变为指向整数的指针，开发者忘记对 copyin 第三参数做额外解引用；clang 'did you mean' 修复建议编译通过但语义全错。引入 'exception-oriented exploitation' 技术：故意触发 brk 异常，使内核将攻击者控制的寄存器状态写入预分配 ipc_kmsg 的越界位置，把一次性溢出转化为可重复的受控读/写原语。WebFetch 确认。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"新技术诞生：把异常处理路径武器化为数据注入通道，命名并系统化一种新利用范式。工具建设方面，复用上一条 mach_portal exploit 的内核读写权作为新研究的开发平台，自述 'I'm going to build my own kernel debugger (with printfs and hexdumps)'——坦诚 iOS 内核研究的引导问题（调试新 exploit 需先有旧 exploit 运行）。形成稳定的测试批评语式 'this bug would have been caught in development if the code had any tests'，把漏洞归因为组织级代码审查/测试流程缺失而非个人。\",\n      \"short_quote\": \"an exploitation technique which involves repeatedly and deliberately crashing\",\n      \"source\": {\n        \"title\": \"Exception-oriented exploitation on iOS\",\n        \"url\": \"https://projectzero.google/2017/04/exception-oriented-exploitation-on-ios.html\",\n        \"published\": \"2017-04-18\",\n        \"source_type\": \"Project Zero blog post (first-hand writeup)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ian-beer-pubworks-04-deja-xnu-2018\",\n      \"date\": \"2018-10-18\",\n      \"claim\": \"变体分析方法论示范：重访 2014 年内核 IODataQueue bug (CVE-2014-4418)，发现用户态 IODataQueue 变体信任共享内存中的 queueSize 值，且同样把 mach 消息头存于共享内存，在内核变体修复后'又存在了四年'。明确提出方法论陈述：'Variant analysis is really important, but attackers are the only parties incentivized to do a good job of it.'。WebFetch 确认。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"研究目标从'找 bug'转向'示范方法论缺口'：在公开演讲变体分析前先亲自执行一遍以暴露防御方系统性盲区。识别出结构性不对称——攻击者有动力做变体分析、防御方没有，导致同类 bug 跨子system 持续多年。把'重访旧 bug 并用期间所学重新利用'明确化为可重复的研究方法，标志着进入'方法论教师'阶段：单点 bug 不如系统化发现能力重要。\",\n      \"short_quote\": \"persist for four more years after almost the exact same bug was fixed in the kernel code\",\n      \"source\": {\n        \"title\": \"Deja-XNU\",\n        \"url\": \"https://projectzero.google/2018/10/deja-xnu.html\",\n        \"published\": \"2018-10-18\",\n        \"source_type\": \"Project Zero blog post (first-hand writeup)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ian-beer-pubworks-05-itw-chains-2019\",\n      \"date\": \"2019-08-29\",\n      \"claim\": \"与 Google TAG 协作分析野外 iOS 利用链：5 条完整独立利用链、跨 iOS 10-12、14 个漏洞（7 个浏览器、5 个内核、2 个沙箱逃逸），持续至少两年。2019-02-01 以 7 天披露期限报告 Apple，2 月 7 日 iOS 12.1.4 带外发布。发现时至少一条提权链仍为 0-day（CVE-2019-7287、CVE-2019-7286）。WebFetch 确认。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"研究类型扩展：从原创漏洞研究增加事件响应式野外利用分析，连接 P0 进攻性研究与 TAG 防御情报。框架重构——把讨论从'million dollar dissident'转向'marginal cost for monitoring the n+1'th potential future dissident'，引入人口/族裔维度的监控政治化框架（'To be targeted might mean simply being born in a certain geographic region'）。Apple 公开反驳其'大规模利用'定性时，Beer 不回应公开论战、让技术记录自证，确立'让技术说话'的冲突处理模式。代码质量批评语式延续：'code which seems to have never worked, code that likely skipped QA'。\",\n      \"short_quote\": \"the marginal cost for monitoring the n+1'th potential future dissident\",\n      \"source\": {\n        \"title\": \"A very deep dive into iOS Exploit chains found in the wild\",\n        \"url\": \"https://projectzero.google/2019/08/a-very-deep-dive-into-ios-exploit.html\",\n        \"published\": \"2019-08-29\",\n        \"source_type\": \"Project Zero blog post (first-hand writeup)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ian-beer-pubworks-06-awdl-2020\",\n      \"date\": \"2020-12-01\",\n      \"claim\": \"CVE-2020-3843：IO80211AWDLPeer::parseAwdlSyncTreeTLV 线性堆溢出（60 字节 inline sync_tree_macs，kalloc.6144 zone），TLV 类型 0x14 未被 tlvCheckBounds 强制。约 6 个月单人研究构建零点击无线电邻近利用，绕 ARM v8.3 PAC，单 bug 达成完整内核读/写与任意代码执行。自建完整 AWDL 客户端（libpcap + Raspberry Pi 4B + rtl8187 监听模式，双线程注入/ACK 嗅探）。实际结尾为 'I don't think all hope is lost; there's just an awful lot more left to do.'（非本地种子所称的 'Make zeroday hard.'）。WebFetch 确认。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"集大成且最透明的复盘：文章明确记录 5 个失败方向——(1) OWL 开源 AWDL 客户端无法构建→从零自建；(2) iOS 12 kernelcache 误导（iOS 13 新增 steering_msg_blob 字段）致数周空耗；(3) 链表 flink 部分覆盖因 6 字节边界对齐不可行；(4) 无 PAC 签名 vtable 时全覆盖致内核 panic；(5) 单帧双 SyncTree 溢出无法修复指针。转向模式清晰：'Can it really be this easy?' → 'In hindsight, there's an obvious reason why this doesn't work'。方法论固化：学术工具失败时倾向从零自建框架（'前期投入省后期时间'）。目标难度维度达到单人对抗国家级能力的论证目的。\",\n      \"short_quote\": \"In hindsight, there's an obvious reason why this doesn't work\",\n      \"source\": {\n        \"title\": \"An iOS zero-click radio proximity exploit odyssey\",\n        \"url\": \"https://projectzero.google/2020/12/an-ios-zero-click-radio-proximity.html\",\n        \"published\": \"2020-12-01\",\n        \"source_type\": \"Project Zero blog post (first-hand writeup)\",\n        \"level\": \"primary\"\n      }\n    },\n    {\n      \"id\": \"ian-beer-pubworks-07-carrier-app-2022\",\n      \"date\": \"2022-06-23\",\n      \"claim\": \"CVE-2021-30983（iOS 15.2 修复）：Display Co-Processor (DCP) 协处理器 UniformityCompensator::set 堆溢出，controlled_size 超过预期上限 64，经 AppleCLCD2 IOKit selector 78 / block handler type 19 触发，破坏相邻 C++ 对象 vtable，在 DCP 上执行代码后经 DCP→AP RPC 请求任意内存映射。提出'协处理器安全悖论'：DCP 无 ASLR/PAC、用 plain arm64、堆确定、运行更简 RTKit RTOS，把攻击面从'缓解重'AP 移到'缓解轻'DCP 是安全倒退。WebFetch 确认。\",\n      \"status\": \"documented\",\n      \"growth_signal\": \"批评层级再升级：从 bug 级、子系统级上升到硬件安全架构策略级——质疑 Apple 把驱动逻辑迁往协处理器的隔离策略在缓解层面是净退步，同时承认'分割与隔离总体是好事'的张力。工程现实感强化：逆向约 7000 函数 stripped 固件时 'My kingdom for a .dSYM!'、'Guess we'll have to do this the hard way!'，体现面对缺失调试符号时的务实姿态而非抱怨。演化至此，研究目标难度从软件利用扩展到跨处理器边界的固件逆向 + 协处理器利用。\",\n      \"short_quote\": \"'mitigation heavy' environment to a 'mitigation light' one is a regression\",\n      \"source\": {\n        \"title\": \"The curious tale of a fake Carrier.app\",\n        \"url\": \"https://projectzero.google/2022/06/curious-case-carrier-app.html\",\n        \"published\": \"2022-06-23\",\n        \"source_type\": \"Project Zero blog post (first-hand writeup)\",\n        \"level\": \"primary\"\n      }\n    }\n  ],\n  \"contradictions\": [\n    \"本地种子（03-expression-dna.md、05-decisions.md）称 Ian Beer 多篇文章以 'Make zeroday hard.' 结尾作为签名，并特别归因于 2020-12 AWDL 文章。但本次 WebFetch 实际抓取 AWDL 文章结尾为 'I don't think all hope is lost; there's just an awful lot more left to do.'。种子的签名归因可能错误或适用于其他文章，未在本轮 7 篇抓取中独立证实 'Make zeroday hard.' 出现于任何具体文章正文。\",\n    \"本地种子将 async_wake（2017-12）、mach_portal（2016-12）、multi_path/empty_list（2018）列为 HIGH-CONFIDENCE-1H 的'公开释放 exploit 代码'，但本次未对 P0 bug tracker 或 GitHub 仓库做 WebFetch 验证具体发布日期与技术细节，仅能作为 lead_only，不可标记为 documented。\"\n  ],\n  \"gaps\": [\n    \"未对 P0 issue tracker（bugs.chromium.org/p/project-zero）或 GitHub 仓库做 WebFetch，无法以 documented 等级枚举 Beer 报告的约 100+ Apple CVE 及 exploit 代码发布的精确日期与技术细节。种子提供的 CVE-2016-7644/2017-13861/2018-4241/2018-4243 等仅 lead_only。\",\n    \"会议演讲事实未亲自抓取会议页面验证：Black Hat USA 2016 'Attacking the XNU Kernel in El Capitan'、HITB Amsterdam 2017、Black Hat USA 2019 均为种子 [2H] 引用，本轮未抓取 Black Hat/HITB 议程页（种子记录这些页面 403/blocked）。\",\n    \"2023-2026 公开输出空白：projectzero.google 首页（2026-09 抓取）作者列表不含 Ian Beer，与种子时间线一致，但无法确认 Beer 是否仍在职 Google/Project Zero、是否转入内部研究、或已离职。无公开离职公告。\",\n    \"pre-2014 职业经历与教育背景未知。种子仅推断'加入 P0 前已有 iOS/macOS 安全研究经验'，无任何一手来源。\",\n    \"'Splitting atoms in XNU' 标题在 iOS 安全社区被广泛引用，但种子记录所有尝试的 URL 模式均 404，本轮未单独抓取验证，无法判断其为演讲、博客文章还是社区误传。\",\n    \"2015-09 'Revisiting Apple IPC: (1) Distributed Objects'、2018 multi_path/empty_list exploit 技术（pipe buffer 技术）、2021-12 与 2022-03 FORCEDENTRY 系列（与 Samuel Gross 合著）本轮未做 WebFetch，技术演化曲线在 2015 与 2021-2022 早期存在抓取缺口。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "a2fa3cb2d3b540d034b35ea9854669ab5e4140d8b387bb46432b122b2943d7d3",
+        "accessed_at": "2026-09-26T13:53:56.165668+00:00"
+      },
+      {
+        "tool_use_id": "call_1kpzaqbp75v6iwpgaowktiqc",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/ian-beer-works-20260926-214703-044/checkpoint.md",
+          "content": "# Checkpoint — Ian Beer / 公开作品与技术演化\n\n## 身份\n- 目标人物：Ian Beer，Google Project Zero 研究员，专注 iOS/macOS (XNU/IOKit) 内核利用。Twitter @i41nbeer。\n- 身份已确认：6 次 WebFetch 抓取的 projectzero.google 文章正文署名均为 \"Ian Beer, Project Zero\"（2014-11、2016-10、2017-04、2018-10、2019-08、2020-12、2022-06 共 7 篇）。首页（2026-09）作者列表已不含 Beer，与\"2023 后无公开输出\"互证。\n\n## 维度问题\n按时间研究 writeup、漏洞公告、论文、代码和工具。识别目标难度、研究方法、技术栈与复盘方式如何变化。\n\n## 工具预算（上限 8，已用 7）\n- [x] 1. AWDL 2020-12 — 集大成 + 5 个失败方向复盘 ✓\n- [x] 2. Deja-XNU 2018-10 — 变体分析方法论 ✓\n- [x] 3. task_t 2016-10 — 理论框架 + 4 轮 bypass/mitigation ✓\n- [x] 4. Exception-oriented 2017-04 — 新技术 + 自建调试器 + 测试批评 ✓\n- [x] 5. pwn4fun 2014-11 — 起点：端到端全链 ✓\n- [x] 6. ITW chains 2019-08 — 野外分析 + 政治化框架 ✓\n- [x] 7. Carrier.app 2022-06 — 架构批评（协处理器悖论）✓\n- [x] 8. P0 首页（身份/当前状态验证）✓\n\n## 技术演化曲线（documented，7 节点）\n1. **2014-11 pwn4fun**：起点即端到端全链（Safari→IOKit GPU 沙箱逃逸→内核 root）；自建 DYLD-interposing fuzzer；纯 ROP 绕 SMEP。\n2. **2016-10 task_t**：从 bug 升级到架构性设计批评；4 轮 bypass→mitigation→bypass 迭代；'considered harmful' 命名框架。\n3. **2017-04 Exception-oriented**：新技术（异常路径武器化为数据注入）；复用旧 exploit 作调试平台；测试批评语式成型。\n4. **2018-10 Deja-XNU**：方法论教师阶段；变体分析缺口（用户态变体存在 4 年）；'attackers are the only parties incentivized'。\n5. **2019-08 ITW chains**：事件响应 + 政治化框架（marginal cost of monitoring）；7 天披露；Apple 公开反驳时让技术说话。\n6. **2020-12 AWDL**：6 个月单人零点击无线电；最透明复盘（5 个失败方向）；学术工具失败从零自建。\n7. **2022-06 Carrier.app**：硬件安全架构批评（协处理器安全悖论，mitigation heavy→light 是倒退）；逆向 7000 函数 stripped 固件。\n\n## 重要发现/冲突\n- **种子签名归因错误**：种子称 AWDL 文章以 'Make zeroday hard.' 结尾，WebFetch 实际结尾为 'I don't think all hope is lost; there's just an awful lot more left to do.'。已记入 contradictions。\n- **lead_only 边界**：async_wake/mach_portal/multi_path/empty_list exploit 代码发布、CVE-2016-7644 等、FORCEDENTRY 系列（2021-12/2022-03 合著）、2015 IPC 文章均未做 WebFetch，只能 lead_only，已记入 gaps。\n\n## 完成\n- [x] output.json 已写入，7 条 items 全部 documented + primary 来源。\n- [x] contradictions 2 条，gaps 6 条。\n"
+        },
+        "success": true,
+        "content_sha256": "f5de592fdc942a9d5431bea72a3cad6d4500d074b54f7b57a366b46157194077",
+        "accessed_at": "2026-09-26T13:53:56.165673+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790430836165688000-ian-beer-works.json",
+    "label": "Ian Beer:works",
+    "elapsed_seconds": 413.12,
+    "prompt_sha256": "7247d00945fe9c097f6acb1bd107dc8f60d9b055907beb2cbcf69b471d72fc3f",
+    "num_turns": 24,
+    "total_cost_usd": 1.1591809999999998,
+    "usage": {
+      "input_tokens": 61558,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 500608,
+      "output_tokens": 12147,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 70130,
+        "outputTokens": 20843,
+        "cacheReadInputTokens": 574912,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.1591809999999998,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

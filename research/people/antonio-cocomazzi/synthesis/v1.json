@@ -1,0 +1,383 @@
+{
+  "person": "Antonio Cocomazzi",
+  "expertise": [
+    "Windows 本地权限提升（Potato 技术家族：RogueWinRM、RoguePotato、RemotePotato0、JuicyPotatoNG、LocalPotato）",
+    "Windows 认证子系统滥用（SSPI、NTLM 本地反射、Kerberos DCOM 本地中继、OXID 解析、命名管道路径校验）",
+    "LSASS 内存转储方法与 EDR 检测规避（Seclogon 句柄泄露、竞态时序、Instrumentation Callback）",
+    "勒索软件与威胁团伙行为画像及逆向工程（Locky/Zepto、Zloader、Black Basta/FIN7、Vice Society）",
+    "漏洞披露流程与厂商协同（MSRC 报告、CVE 取得、Patch Tuesday 跟进、补丁有效性评估）",
+    "攻击性工具开源工程（ConPtyShell、SharPyShell、RunasCs、SspiUacBypass）"
+  ],
+  "stages": [
+    {
+      "period": "2016–2017",
+      "stage": "勒索软件样本逆向与威胁情报基线",
+      "capability_change": "公开写作以单一恶意样本为目标，方法停留在静态与动态样本分析层面，覆盖样本分发链与混淆逆向；尚未涉及权限提升或 EDR 规避，构成后续难度跃迁的对照基线。",
+      "evidence_ids": [
+        "ac-works-02",
+        "ac-works-03",
+        "ac-timeline-01",
+        "ac-timeline-02",
+        "ac-timeline-04"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2019–2020",
+      "stage": "由恶意软件分析转向 Windows 本地权限提升，确立 Potato 研究线与博客发布通道",
+      "capability_change": "研究目标从恶意样本迁移到操作系统信任边界；面对 JuicyPotato 在 Windows 10 1809/Server 2019 被限制 OXID 解析的厂商补丁，主动逆向系统服务（BITS/WinRM）以寻找绕过，产出 RogueWinRM 并自述为该绕过研究的非预期结果；随后以自建 Oxid Resolver 加命名管道端点替代 TCP/IP 序列，结合 PrintSpoofer 的路径校验缺陷产出 RoguePotato。同期建立独立博客作为体系化发布通道。",
+      "evidence_ids": [
+        "ac-decisions-01",
+        "ac-decisions-02",
+        "ac-works-05",
+        "ac-works-01",
+        "ac-timeline-05",
+        "ac-timeline-06",
+        "ac-timeline-07"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2020–2021",
+      "stage": "提权横向扩展到注入与 EDR 对抗面，进入一线会议并首次进入 MSRC 披露流程",
+      "capability_change": "将 mapping injection 与 Instrumentation Callback 结合以降低注入可检测性，研究目标由提权扩展到 EDR 规避；将 Potato 研究推上 Black Hat Asia/HITB AMS 等一线会议，演讲场所层级在一年内由地区性会议（RomHack 2020）升至一线议程；首次与 MSRC 进入正式披露流程（RemotePotato0，案件 62293），厂商以 Won't Fix、服务器须自防 NTLM 中继为由拒绝修复，该反馈限定了后续选题的可得 CVE 边界。",
+      "evidence_ids": [
+        "ac-timeline-08",
+        "ac-decisions-03",
+        "ac-decisions-04",
+        "ac-timeline-10",
+        "ac-works-06"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2021–2022",
+      "stage": "LSASS 转储系列化深挖与选题由攻击者收益转向防御可见性",
+      "capability_change": "对 Seclogon 单一组件做跨多篇序列化深挖（part 2 句柄泄露→part 3 竞态时序），首次给出方法论动机陈述——攻击方法公开才能催生检测方法；研究主题第二次迁移落到 EDR 方向，产出 Black Basta 关联 FIN7 的定制 EDR 规避工具分析与 Vice Society 外包开发分析，输出形态由博客帖扩展到可独立分发的白皮书；同期与 decoder_it 基于 Forshaw 的本地 Kerberos DCOM 中继研究产出 JuicyPotatoNG，再次被判定为非安全边界违反。",
+      "evidence_ids": [
+        "ac-decisions-05",
+        "ac-timeline-11",
+        "ac-timeline-13",
+        "ac-timeline-15",
+        "ac-timeline-16",
+        "ac-decisions-06",
+        "ac-community-07"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2023",
+      "stage": "协议级漏洞取得 CVE 闭环，失败选题回访重启，并对研究线作十年回顾收束",
+      "capability_change": "由 expected behavior/Won't Fix 类选题转向可获 CVE 的协议级漏洞：LocalPotato 经 Elad Shamir 提示研究 NTLM Challenge Reserved 字段，完成 MSRC 报告→CVE-2023-21746→Patch Tuesday 修复闭环，并主动评估补丁可能仅为权宜之计、其他 NTLM 服务仍可能存在可利用路径；同期回访两年前失败的 SSPI UAC 项目，受 Forshaw《Sharing a Logon Session a Little Too Much》启发转向新利用路径并公开 PoC；于 POC2023 以 10 Years of Windows Privilege Escalation with Potatoes 对研究线作阶段性总结。",
+      "evidence_ids": [
+        "ac-works-10",
+        "ac-decisions-07",
+        "ac-decisions-08",
+        "ac-decisions-09",
+        "ac-conversations-003",
+        "ac-timeline-17",
+        "ac-timeline-18"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "厂商补丁封堵后主动逆向系统服务以重建绕过原语",
+      "starting_conditions": "JuicyPotato 在 Windows 10 1809/Server 2019 被 Microsoft 限制 OXID 解析器仅允许端口 135，既有利用路径被封堵；本人处于已掌握提权原语但路径被切断的状态。",
+      "repeated_practice": "在 2019–2023 间反复针对被补丁封堵的利用路径寻找绕过：RogueWinRM 以 BITS 向 5985 端口 WinRM 认证重建原语（自述为 JuicyPotato 绕过研究的非预期结果）；RoguePotato 以自建 Oxid Resolver 与命名管道端点替代 TCP/IP 序列并复用 PrintSpoofer 路径校验缺陷；RemotePotato0 将本地令牌窃取转为跨协议远程中继；JuicyPotatoNG 将 OXID 解析改为本机 COM 服务器、以 LogonUser NewCredentials 注入 INTERACTIVE SID、以 SSPI hook 取代 RpcImpersonateClient；LocalPotato 在 NTLM 本地认证中交换 context handle 实现反射。",
+      "feedback": "Microsoft 对 RoguePotato、RemotePotato0（Won't Fix）、JuicyPotatoNG 均判定为 expected behavior 或非安全边界违反，未发 CVE；该反馈使其在 expected behavior/Won't Fix 类选题与可获 CVE 的协议级漏洞之间区分选题边界，直至 LocalPotato 完成 MSRC→CVE→Patch 闭环。",
+      "intermediate_capability": "形成以 SeImpersonate/服务账户→SYSTEM 这一信任边界为锚点、随系统版本演进而反复重建利用原语的方法习惯，并能据厂商反馈判断某选题是否可能取得 CVE。",
+      "observed_outcomes": [
+        "RogueWinRM、RoguePotato、RemotePotato0、JuicyPotatoNG、LocalPotato 构成连续五个提权原语，跨 2019–2023 跨越 Windows 多个版本",
+        "LocalPotato 取得 CVE-2023-21746 并经 Patch Tuesday 修复，msv1_0!SsprHandleChallengeMessage 增加 Feature_MSRC74246_Servicing_NTLM_ServiceBinding_ContextSwapping 校验",
+        "POC2023 以 10 Years of Windows Privilege Escalation with Potatoes 作阶段性收束"
+      ],
+      "evidence_ids": [
+        "ac-decisions-01",
+        "ac-decisions-02",
+        "ac-decisions-03",
+        "ac-decisions-06",
+        "ac-decisions-07",
+        "ac-works-05",
+        "ac-works-10",
+        "ac-timeline-05",
+        "ac-timeline-06",
+        "ac-timeline-14",
+        "ac-timeline-17"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "Potato 家族连续产出也可由厂商补丁日被动跟进而非主动逆向驱动解释——补丁发布迫使研究者寻找新路径。但 RogueWinRM 一文自述为 a research we did on Juicypotato exploit in order to find a possible bypass on restrictions（主动寻找绕过而非被动跟进），弱化被动跟进解释；补丁日仍是时间触发点，两种解释均部分成立。"
+    },
+    {
+      "name": "以固定合作者网络拼装并重组既有公开原语",
+      "starting_conditions": "本人长期阅读并跟踪 Forshaw（@tiraniddo）、itm4n（PrintSpoofer）、Elad Shamir、jonasLyk、x86matthew 等同行的近期公开成果；与 decoder_it 形成稳定合著关系。",
+      "repeated_practice": "在四篇合著（RoguePotato、RemotePotato0、JuicyPotatoNG、LocalPotato）中反复以特定同行的近期公开成果为起点重组原语：RoguePotato 显式致谢 tiraniddo 的共享登录会话研究、itm4n 的 PrintSpoofer 与 jonasLyk 的命名管道路径校验绕过；RemotePotato0 与 JuicyPotatoNG 建立在 Forshaw 的 DCOM 激活与本地 Kerberos 中继研究之上；LocalPotato 由 Elad Shamir 提示 NTLM Challenge Reserved 字段方向并在卡壳时获 Forshaw 关键提示；单著的 SSPI UAC 仍引用 Forshaw 与 x86matthew 成果并由 decoder_it 校对。",
+      "feedback": "同伴提示提供选题入口与瓶颈突破点（Elad Shamir 的 NTLM Reserved 字段方向、Forshaw 在 LocalPotato 瓶颈处的提示）；decoder_it 持续校对与合著分工；披露后厂商反馈进一步限定选题边界。",
+      "intermediate_capability": "形成把分散的他人原语拼装为新利用链的能力，以及以同行网络作为选题与重入研究支点的习惯。",
+      "observed_outcomes": [
+        "与 decoder_it 四次合著构成 Potato 家族主干",
+        "LocalPotato 由同伴提示驱动完成 CVE 闭环",
+        "SSPI UAC 在单著项目中仍由长期合作者校对并复用同行公开成果"
+      ],
+      "evidence_ids": [
+        "ac-community-02",
+        "ac-community-03",
+        "ac-community-04",
+        "ac-community-05",
+        "ac-community-06",
+        "ac-works-05",
+        "ac-works-10",
+        "ac-decisions-07"
+      ],
+      "validation_tests": [
+        "repeated",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "合著网络可由社区普遍协作解释而非个人可复现的方法；但与 decoder_it 的四次合著与 Forshaw/Elad Shamir 的反复致谢在本人作品中高度集中，且 JuicyPotatoNG 一文显式自述 I asked my friend (and coauthor in the *potato saga) @splinter_code for help，体现固定协作关系而非随机社区协作。"
+    },
+    {
+      "name": "失败与搁置选题的存档与日后回访重启",
+      "starting_conditions": "约 2021 年以特定 SSPI 配置绕过 UAC 失败（自述 failed miserably that time），搁置该思路。",
+      "repeated_practice": "将失败项目存档；两年后在浏览旧仓库时重新发现该废弃项目，受 Forshaw《Sharing a Logon Session a Little Too Much》启发找到不同利用路径（Datagram 风格 NTLM + LSASS 登录会话令牌混淆 + 经 SMB 的 SCM RPC），最终完成并发表；JuicyPotatoNG 一文亦体现对被补丁封闭旧选题的二次重启。",
+      "feedback": "同行一手 writeup 作为重入研究的支点；自述 i decided to look again into this abandoned idea。",
+      "intermediate_capability": "形成对失败选题不丢弃而是存档、在外部新思路出现时回访重启的习惯。",
+      "observed_outcomes": [
+        "2023-09-14 发表 Bypassing UAC with SSPI Datagram Contexts 并公开 PoC",
+        "JuicyPotatoNG 作为被补丁封闭旧选题的二次重启产出"
+      ],
+      "evidence_ids": [
+        "ac-conversations-003",
+        "ac-decisions-08",
+        "ac-decisions-06"
+      ],
+      "validation_tests": [
+        "distinctive"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "SSPI UAC 的回访也可由两年间 Forshaw 发表相关博文这一外部偶然机会驱动解释，而非个人存档习惯本身；自述 i decided to look again into this abandoned idea 兼受 Forshaw 启发，两因素均部分成立，故仅作中等置信且仅一条可核验主链。"
+    },
+    {
+      "name": "对单一组件做系列化、跨多篇的纵深挖掘",
+      "starting_conditions": "2021-12 在逆向 Seclogon 服务时发现 SlrCreateProcessWithLogon 信任客户端传入的调用方 PID，可通过修改 TEB 中的 ClientId 伪造 PPID。",
+      "repeated_practice": "对 Seclogon 同一组件跨多篇推进：part 2（2021-12-07）以句柄泄露实现隐蔽 LSASS 转储，文末预告可靠窃取 LSASS 句柄留待下篇；part 3（2022-06-28）以 CreateProcessAsUser/CreateProcessInternalW/NtCreateUserProcess 拦截点在句柄关闭前复制 LSASS 句柄，引入竞态时序。",
+      "feedback": "自我接续的预告与兑现（part 2 文末 but this is something for another blog post → part 3 落地）；同一组件内逐层加深而非发散追逐新 CVE。",
+      "intermediate_capability": "形成在单一目标上重复深入、以序列化 writeup 推进方法深度的练习模式。",
+      "observed_outcomes": [
+        "Seclogon part 2→part 3 跨约 7 个月形成隐蔽 LSASS 转储方法链",
+        "part 2 首次给出攻击方法公开以催生检测方法的方法论动机陈述"
+      ],
+      "evidence_ids": [
+        "ac-decisions-05",
+        "ac-community-07",
+        "ac-timeline-11",
+        "ac-timeline-13"
+      ],
+      "validation_tests": [
+        "repeated"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "系列化也可由 Seclogon 单一组件本身可挖深度足够、研究者顺势推进解释；但 part 2 文末显式预告 part 3 议题，体现主动的序列规划而非被动延展。"
+    },
+    {
+      "name": "以持续公开写作与工具开源构成研究—反馈—产出回路",
+      "starting_conditions": "2016 年起即经博客 RSS 公开撰写勒索软件分析；2020-07-15 建立独立博客，开篇以 knowledge sharing is the key for the hacking community's growth 表述回馈社区动机。",
+      "repeated_practice": "自 2016 至 2023 持续七年以上公开 writeup；同步在 GitHub（antonioCoco）开源 POC 与工具（RemotePotato0、SspiUacBypass、JuicyPotatoNG、ConPtyShell、SharPyShell、RunasCs），并在 RomHack、Black Hat Asia、HITB、BlueHat IL、Insomni'Hack、POC2023 等会议重复发表。",
+      "feedback": "MSRC 披露闭环与厂商补丁反馈（RemotePotato0 Won't Fix、LocalPotato CVE 与 Patch）；GitHub 社区采纳（RemotePotato0 约 1.5k stars 等置顶仓库公开数据）；会议议程认可（演讲场所层级由地区会议升至一线议程）。",
+      "intermediate_capability": "以独立博客与 GitHub 为固定发布通道，把研究、披露与工程产出闭环，使单点研究可被社区复用并形成再选题的外部信号。",
+      "observed_outcomes": [
+        "2016–2023 跨主题（勒索软件→提权→EDR 规避→UAC）持续公开输出",
+        "6 个置顶公开仓库构成可核验的工程产出与社区采纳指标",
+        "MSRC 协同披露与 CVE 取得形成厂商反馈回路"
+      ],
+      "evidence_ids": [
+        "ac-conversations-001",
+        "ac-conversations-002",
+        "ac-conversations-004",
+        "ac-community-01",
+        "ac-community-08",
+        "ac-works-01",
+        "ext-03",
+        "ac-decisions-04"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "持续公开写作也可由个人品牌维护动机解释而非研究回路本身；但开篇自述定位为社区回馈、且 MSRC 闭环与会议议程认可构成可核验的外部反馈，弱化单纯品牌动机解释。"
+    }
+  ],
+  "tensions": [
+    "RoguePotato、RemotePotato0（Won't Fix）、JuicyPotatoNG 均被 Microsoft 判定为 expected behavior 或非安全边界违反而未获 CVE，与 LocalPotato 取得 CVE-2023-21746 形成张力：CVE 可得性可能由选题所处认证子系统的边界判断差异主导（LocalPotato 在 ISC_REQ_UNVERIFIED_TARGET_NAME 时置空 SPN 才被认可为漏洞），未必单纯由研究能力提升决定。",
+    "SSPI UAC 约两年前自述 failed miserably 后搁置，两年后受 Forshaw《Sharing a Logon Session a Little Too Much》启发回访重启——该回访由个人存档习惯与外部偶然机会（同行新发文）共同驱动，二者难以分离。",
+    "WebSearch 返回片段将研究员误作 Gabriel Cocomazzi、将演讲误记为 Black Hat USA 2021、并附共同演讲人 Roberto Sestino，与一手来源（博客 Talks 页列出 Black Hat Asia 2021 且无共同演讲人；GitHub 与博客一致署名 Antonio Cocomazzi / @splinter_code）冲突，该搜索工具输出不予采纳，仅记录为待核冲突。",
+    "博客 RSS 最早条目为 2016-06-26，而 Welcome to my blog 发布于 2020-07-15；2016–2017 条目与开篇帖的先后关系（后期回填/导入 vs 开篇日期后期调整）未核验。",
+    "Black Hat 议程页（blackhat.com）抓取返回 HTTP 403，person_json 标注的 Black Hat US/EU 演讲事实未由官方议程页一手核验；ac-timeline-19 关于 Black Hat Europe 2022 EDR & Blinding 的线索亦为 lead_only。",
+    "博客自 2023-09-14 后无新条目，2024–2026 公开活动与研究方向属 unknown；二手搜索摘要提及的 Atomic Stealing、Bringing Back the Lost、EDR-Prison 等技术名称无匹配的一手 URL（ext-04 inferred），与归档页返回空结果存在张力。"
+  ],
+  "transferable_practices": [
+    "厂商补丁封堵既有利用路径后，主动逆向相关系统服务以寻找绕过原语，而非放弃该研究方向。",
+    "在 writeup 中明确列出依赖的前序研究并致谢各自贡献，把分散的他人原语拼装为新利用链。",
+    "对失败或搁置选题存档，并在获得新思路或同行新成果时回访重启。",
+    "对单一组件做序列化、跨多篇的纵深挖掘，以自我接续的预告与兑现推进方法深度。",
+    "据厂商既有反馈（expected behavior / Won't Fix）区分选题的 CVE 可得性边界，据此调整披露策略与选题取向。",
+    "同步公开 writeup 与 POC 开源，使研究、披露与工程产出形成可被社区复用的回路。",
+    "完成披露后主动评估补丁是否仅为权宜之计、是否残留可利用攻击面（如 LocalPotato 评估 msv1_0 补丁可能仅为 workaround）。"
+  ],
+  "non_transferable_conditions": [
+    "与 decoder_it 的长期合著关系（四次合著）及与 Forshaw、Elad Shamir 的直接提示关系——同伴网络是个人长期积累的结果，非可短期复制的方法。",
+    "2016–2017 已积累的勒索软件逆向与威胁情报基础，以及意大利语 RomHack 2020 作为进入 Black Hat Asia/HITB 的地区性跳板——研究时长预算与地区会议机会为结构性条件。",
+    "博客 RSS 自 2016 年起即存在、独立博客 2020 年正式建站并持续七年输出——时间投入与社区可见度非短期可复制。",
+    "Microsoft 对服务账户模拟类利用一贯判 expected behavior、而对 NTLM 本地反射在特定条件下认可为漏洞的边界判断差异——该外部判定主导了 LocalPotato 取得 CVE 而早期 Potato 未取得的差异，并非研究者单方面可控。"
+  ],
+  "open_questions": [
+    "2016 年最早博客帖子之前的学习路径、教育背景与入行机制无可核验公开来源。",
+    "雇主、任职机构与团队归属未在 GitHub 主页或博客主页公开披露；导师或固定研究同伴关系仅能从致谢推断，未单独访谈或抓取佐证。",
+    "GitHub 仓库（RoguePotato、JuicyPotatoNG、LocalPotato、RunasCs 等）的 commit 历史与开源时间未逐项核查；ConPtyShell、SharPyShell、RunasCs 等较早工具的发布时间与动机未见对应 writeup 直接说明。",
+    "Black Hat US/EU 的具体演讲年份、议题标题与合讲人未由官方议程页一手核验（议程页返回 HTTP 403）；Black Hat Europe 2022 EDR & Blinding（与 Luca Nagy 合讲）线索未一手核验。",
+    "2023-09-14 之后的公开作品与技术演化（2024–2026）无一手核验来源，是否存在转向或停更属 unknown。",
+    "ext-04 与 ac-timeline-19 所引二手技术名称（Atomic Stealing、Bringing Back the Lost、EDR-Prison 等）与 Black Hat 演讲线索无匹配的一手 URL，仅作 lead_only，不计入 documented 结论。",
+    "X（x.com/splinter_code）抓取返回 HTTP 402、Mastodon（infosec.exchange/@splinter_code）未抓取，社交平台上的公开声明、同业评价与 AMA 线索缺失。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v1-20260927-185226-577",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790506552873707000-antonio-cocomazzi-synthesis-v1.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "d9577f9b-8a84-4c76-991d-8b72d1fc3d68",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_c39pji8ragesp305anrcfqxb",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v1-20260927-185226-577/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-27T10:55:52.888091+00:00"
+      },
+      {
+        "tool_use_id": "call_52qlfzxwd6z1uu615p4v245t",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v1-20260927-185226-577/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "f84d0add0b59ce038493dccd20207d20ab059b61916a5c908245d3064c0b0c60",
+        "accessed_at": "2026-09-27T10:55:52.888110+00:00"
+      },
+      {
+        "tool_use_id": "call_jqo9m4zdnzy37x7nto3wukx8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v1-20260927-185226-577/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "5225c228aee614a7ea03955de28d62f49ef5cf9c2f5ed5216e6e7545f4347755",
+        "accessed_at": "2026-09-27T10:55:52.888117+00:00"
+      },
+      {
+        "tool_use_id": "call_hm1weqdi9jhe56kxj89od2pc",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v1-20260927-185226-577/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "e1f2fc07e60e9396e898242705e8f9d2f44c45d7c2981f29d40a4d3e81cdea04",
+        "accessed_at": "2026-09-27T10:55:52.888246+00:00"
+      },
+      {
+        "tool_use_id": "call_kr0c8oxrrw799zzu6x6j2ko8",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v1-20260927-185226-577/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "32f4253f90d5945780b4a10e09c3d2686845559ef9b0198811aa329be4d26547",
+        "accessed_at": "2026-09-27T10:55:52.888252+00:00"
+      },
+      {
+        "tool_use_id": "call_zx0t1nxpk4712axyzrd35zvq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v1-20260927-185226-577/inputs/evidence_json.json",
+          "offset": 963,
+          "limit": 400
+        },
+        "success": true,
+        "content_sha256": "d731aaffa483b8ff67e49e1598a37032549ac40690184ac38356f0ae79c60d85",
+        "accessed_at": "2026-09-27T10:55:52.888305+00:00"
+      },
+      {
+        "tool_use_id": "call_ommckkta5gf23ysn7mizrceu",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v1-20260927-185226-577/checkpoint.md",
+          "content": "# Antonio Cocomazzi 综合 — checkpoint\n\n## 输入状态\n- person_json.json: rank 42, Antonio Cocomazzi, primary_focus=Windows 与 EDR 漏洞, handle @splinter_code, 博客 splintercod3.blogspot.com, GitHub antonioCoco.\n- evidence_json.json: 6 维 (works/conversations/community/external/decisions/timeline) + targeted 空。\n  - verified_in_run=true 的有效证据为主，部分 works 维度的 item (beans/instrumentation/potato-conf/seclogon/ransomware-actor/UAC) verified_in_run=false (lead_only/unverified)，按 task.md 第5条这些可作 reported/线索但机制需 verified 来源支撑。\n- revision_context.json: [] (首次综合)。\n\n## 有效证据清单 (verified_in_run=true)\n跨维度可用的 documented 一手证据 (verified):\n- works: ac-works-01 (blog founding 2020-07-15), 02 (ransomware-reverse-era 2016), 03 (IEEE X-Rays 2017), 05 (RoguePotato 2020-05-11), 10 (LocalPotato CVE-2023-21746 2023-02-10).\n  - works 04/06/07/08/09/11 verified_in_run=false (仅 lead).\n- conversations: ac-conversations-001 (blog motive), 002 (whoami), 003 (SSPI UAC fail-revisit), 004 (Talks index), 005 (topic migration inferred).\n- community: ac-community-01..09 (除 09 reported) 全部 verified documented.\n  - ac-community-02 RoguePotato coauthored decoder_it (verified).\n  - ac-community-03 RemotePotato0 MSRC Won't Fix (verified).\n  - ac-community-04 JuicyPotatoNG coauthored decoder_it (verified).\n  - ac-community-05 LocalPotato coauthored decoder_it + Elad Shamir/Forshaw tips (verified).\n  - ac-community-06 SSPI UAC single-author, decoder_it proofread (verified).\n  - ac-community-07 Seclogon part3 single-author series (verified).\n  - ac-community-08 RSS 2016 ransomware→2023 migration (verified).\n  - ac-community-09 conference reported (verified 但 status=reported).\n- external: ext-01 (blog motive), ext-02 (GitHub bio Italy), ext-03 (6 pinned repos), ext-04 (search summary inferred, lead_only).\n- decisions: ac-decisions-01..10 全部 verified documented (01 RogueWinRM 2019-12-06, 02 RoguePotato 2020-05-11, 03 RemotePotato0 2021-04-26 MSRC Won't Fix, 04 conferences 2021, 05 Seclogon part2 EDR detection motive 2021-12-07, 06 JuicyPotatoNG 2022-09-21, 07 LocalPotato CVE 2023-02-10, 08 SSPI UAC revisit 2023-09-14, 09 POC2023 10-years review, 10 ransomware→privesc inferred).\n- timeline: ac-timeline-01..18 全部 verified documented; ac-timeline-19 Black Hat EU 2022 EDR&Blinding inferred lead_only (HTTP 403 未抓).\n\n## 阶段划分 (capability_change)\n1. 2016-2017 勒索样本逆向基线 (ac-works-02, ac-timeline-01/02/04, ac-works-03): 静态/动态样本分析，单恶意样本目标，攻击面有限。\n2. 2019-2020 转向 Windows 提权 + Potato 家族起步 (ac-decisions-01 RogueWinRM/beans 2019-12-06, ac-works-05 RoguePotato 2020-05-11, ac-works-01/decisions-04): 从样本迁移到 OS 信任边界，跟随厂商补丁封堵主动逆向系统服务重建利用原语 (RogueWinRM = \"unintended result\" of JuicyPotato bypass research)；建立博客为发布通道。\n3. 2020-2021 注入/规避扩展 + 会议渠道 (ac-works-06 instrumentation callback 2020-07-16 lead, ac-decisions-03 RemotePotato0 MSRC Won't Fix 2021-04-26, ac-decisions-04 Black Hat Asia/HITB 2021, ac-timeline-10 Zloader 2021-09): 提权横向扩展到注入与 EDR 对抗面；进入一线会议；首次 MSRC 披露流程 (Won't Fix 反馈)。\n4. 2021-2022 LSASS 转储 + EDR 检测动机转型 (ac-works-08 Seclogon part2/3, ac-decisions-05 EDR detection motive \"attacking methods known→detection methods\", ac-timeline-15 Black Basta/FIN7 EDR evasion 2022-11, ac-timeline-16 Vice Society, ac-decisions-06 JuicyPotatoNG 2022-09): 选题由攻击者收益转向防御可见性；系列化深挖单一组件 (Seclogon)；威胁团伙画像+白皮书。\n5. 2023 协议级漏洞 + CVE 闭环 + 失败回访 (ac-works-10/ac-decisions-07 LocalPotato CVE-2023-21746 MSRC→Patch Tuesday, ac-decisions-08 SSPI UAC revisit 2023-09-14, ac-decisions-09 POC2023 10-year review): 从 expected behavior/Won't Fix 转向可获 CVE 的协议级漏洞；失败-搁置-回访循环；十年回顾收束。\n\n## 主机制 (满足≥2 项: 跨材料/时期重复、解释多结果、有区分度)\nM1. 厂商补丁封堵 → 主动重建绕过的迭代 (起点: RogueWinRM unintended result, repeated: RoguePotato 命名管道替代 TCP/IP, RemotePotato0 跨机中继, JuicyPotatoNG OXID→本机COM, LocalPotato NTLM context swap; feedback: MSRC expected behavior/Won't Fix; outcome: Potato 家族连续 4-5 个原语 + CVE-2023-21746). 跨 works/decisions/community/timeline 四维度，2019-2023 跨时期。\nM2. 固定合作者网络的拼装式重组 (起点: 阅读并复用 Forshaw(tiraniddo)/itm4n/Elad Shamir/jonasLyk/x86matthew 近期公开成果; repeated: 与 decoder_it 合著 RoguePotato/RemotePotato0/JuicyPotatoNG/LocalPotato 四次; feedback: 同伴提示 (Elad Shamir NTLM Reserved, Forshaw 瓶颈提示) + decoder_it proofread; outcome: 把分散原语组合为新利用 + 提供选题入口). community 02/03/04/05/06 + works 05/10 + decisions 02/03/06/07。\nM3. 失败-搁置-回访-转向的选题存档习惯 (起点: SSPI UAC failed miserably 2 years prior; repeated: 浏览旧仓库重发现废弃项目 + 受 Forshaw《Sharing a Logon Session a Little Too Much》启发转向; feedback: 同伴 writeup 作为重入支点; outcome: SSPI UAC 2023-09 发表). conversations-003 + decisions-08；单一主链但有失败循环可核验，区分度高 (多数研究员不回访失败项目)。\nM4. 系列化、跨多篇的单一组件纵深挖掘 (起点: Seclogon part2 2021-12; repeated: part3 2022-06-28 同组件竞态时序; feedback: 自我接续 part2 内 \"steal lsass handle in reliable way... another blog post\"; outcome: 隐蔽 LSASS dump 方法链). community-07 + works-08 + timeline-11/13；跨时期 (7 个月) 重复。\nM5. 持续公开写作作为研究-反馈-产出回路 (起点: 2016 RSS ransomware → 2020 正式博客 founding \"knowledge sharing is key\"; repeated: 7 年持续公开 writeup + POC 开源 + 会议演讲; feedback: MSRC 披露闭环 + GitHub star/社区采纳 (ext-03 RemotePotato0 ~1.5k stars); outcome: Potato 系列与 LSASS/EDR 研究的固定发布通道 + 工具开源). conversations-001/004 + community-01/08 + external-03。\n\n## 竞争性解释 (task.md 第3条)\n- Potato 家族连续产出可由\"对 SeImpersonate/服务账户→SYSTEM 这一单一边界的持续兴趣\"解释，也可由\"厂商补丁逐次封堵迫使被动跟进\"竞争性解释；后者受 RogueWinRM \"unintended result of a research we did... to find a possible bypass on restrictions\" 弱化——自述为主动寻找绕过而非被动跟进，但厂商补丁日仍是时间触发点。\n- LocalPotato 取得 CVE 而 RoguePotato/RemotePotato0/JuicyPotatoNG 未获 CVE，可能由\"选题成熟度/研究质量提升\"解释，也可能由\"微软对 NTLM 本地反射 vs 服务账户模拟的边界判断差异\"这一外部因素解释 (LocalPotato 在 ISC_REQ_UNVERIFIED_TARGET_NAME 时置空 SPN 才被认可为漏洞)；披露策略 (报告 MSRC vs 直接公开 POC) 的变化本身不能证明能力变化。\n- SSPI UAC 的失败-回访循环可由\"个人对搁置选题的存档习惯\"解释，也可能由\"两年间 Forshaw 发表相关博文提供了重入支点\"这一外部偶然机会解释；后者受 conversations-003 自述 \"i decided to look again into this abandoned idea\" + 受 Forshaw 启发支持。\n\n## 可迁移 vs 个人特有 (task.md 第4条，避免幸存者偏差)\n可迁移:\n- 厂商补丁封堵后主动逆向系统服务寻找绕过原语 (非特定于 Potato)。\n- 把失败/搁置项目存档并在获得新思路或新同伴成果时回访重启。\n- 系列化深挖单一组件 (part2→part3) 而非发散追逐新 CVE。\n- 明确列出前序研究依赖并致谢，把分散原语拼装为新利用 (RoguePotato 显式列 4 项)。\n- 同步公开 writeup + POC 开源，形成研究→反馈→产出回路。\n- 据厂商既有反馈 (expected behavior/Won't Fix) 调整披露策略与选题边界。\n\n个人特有 (不可简单迁移):\n- 与 decoder_it 长期合著网络 (4 次合著) 及与 Forshaw/Elad Shamir 的直接提示关系——同伴网络是个人积累结果，非可复制方法。\n- 2016-2017 已积累的勒索软件逆向与威胁情报基础 (意大利语 RomHack 起点) 提供了转入 Windows 内部的研究时长预算。\n- 博客作为发布通道的早期建立 (2016 RSS 已存在) 与 7 年持续输出——时间投入与社区可见度非短期可复制。\n- 意大利地区性会议 (RomHack 2020) 作为进入 Black Hat Asia/HITB 的跳板——地区会议机会是结构性条件。\n\n## tensions (保留矛盾/失败/偶然)\n- RoguePotato/RemotePotato0/JuicyPotatoNG 均被微软判 expected behavior/Won't Fix (未获 CVE)，与 LocalPotato 获 CVE-2023-21746 形成\"选题边界判断主导 CVE 可得性\"的张力——能力提升 vs 外部边界判断。\n- SSPI UAC 约 2 年前 \"failed miserably\" 后搁置——失败与偶然机会 (Forshaw 博文) 的作用。\n- WebSearch 噪声 (Gabriel Cocomazzi / Black Hat USA 2021 / Roberto Sestino) 与一手冲突——工具不可靠，不予采纳。\n- 博客 RSS 最早条目 2016-06 与 \"Welcome to my blog\" 2020-07-15 的先后关系未核验 (回填/导入 vs 后期调整)。\n- Black Hat 议程页 HTTP 403，Black Hat US/EU 演讲事实未一手核验 (person_json 标注但外部维度未取得)。\n- 2023-09 后博客无更新，2024-2026 活动属 unknown。\n\n## open_questions\n- 2016 前 (早于最早博客) 的学习路径、教育背景、入行机制无公开证据。\n- 雇主/团队归属、导师关系未在一手来源披露。\n- GitHub 仓库 (RoguePotato/JuicyPotatoNG/LocalPotato/RunasCs 等) 的 commit 历史与开源时间未逐项核查。\n- 2024-2026 公开作品与研究方向无一手核验。\n- Black Hat US/EU 具体演讲年份、议题、合讲人未一手核验 (议程页 403)。\n- EDR-Prison/Atomic Stealing/Bringing Back the Lost 等二手线索无一手 URL (ext-04 inferred)。\n- X (x.com/splinter_code) 返回 HTTP 402，社交动态与同业评价缺。\n\n## 下一步\n将上述阶段/机制/tensions/transferable/non-transferable/open-questions 映射到 output.schema.json 字段，写入 output.json。\n"
+        },
+        "success": true,
+        "content_sha256": "7ae3fb3c39f1f92dad3bba85fb9ef6d825429c8b9486012f274d458eb3ff5b0f",
+        "accessed_at": "2026-09-27T10:55:52.888311+00:00"
+      },
+      {
+        "tool_use_id": "call_1rih17yky9xfvd3gi5az94b6",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/antonio-cocomazzi-synthesis-v1-20260927-185226-577/output.json",
+          "content": "{\n  \"person\": \"Antonio Cocomazzi\",\n  \"expertise\": [\n    \"Windows 本地权限提升（Potato 技术家族：RogueWinRM、RoguePotato、RemotePotato0、JuicyPotatoNG、LocalPotato）\",\n    \"Windows 认证子系统滥用（SSPI、NTLM 本地反射、Kerberos DCOM 本地中继、OXID 解析、命名管道路径校验）\",\n    \"LSASS 内存转储方法与 EDR 检测规避（Seclogon 句柄泄露、竞态时序、Instrumentation Callback）\",\n    \"勒索软件与威胁团伙行为画像及逆向工程（Locky/Zepto、Zloader、Black Basta/FIN7、Vice Society）\",\n    \"漏洞披露流程与厂商协同（MSRC 报告、CVE 取得、Patch Tuesday 跟进、补丁有效性评估）\",\n    \"攻击性工具开源工程（ConPtyShell、SharPyShell、RunasCs、SspiUacBypass）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2016–2017\",\n      \"stage\": \"勒索软件样本逆向与威胁情报基线\",\n      \"capability_change\": \"公开写作以单一恶意样本为目标，方法停留在静态与动态样本分析层面，覆盖样本分发链与混淆逆向；尚未涉及权限提升或 EDR 规避，构成后续难度跃迁的对照基线。\",\n      \"evidence_ids\": [\n        \"ac-works-02\",\n        \"ac-works-03\",\n        \"ac-timeline-01\",\n        \"ac-timeline-02\",\n        \"ac-timeline-04\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2019–2020\",\n      \"stage\": \"由恶意软件分析转向 Windows 本地权限提升，确立 Potato 研究线与博客发布通道\",\n      \"capability_change\": \"研究目标从恶意样本迁移到操作系统信任边界；面对 JuicyPotato 在 Windows 10 1809/Server 2019 被限制 OXID 解析的厂商补丁，主动逆向系统服务（BITS/WinRM）以寻找绕过，产出 RogueWinRM 并自述为该绕过研究的非预期结果；随后以自建 Oxid Resolver 加命名管道端点替代 TCP/IP 序列，结合 PrintSpoofer 的路径校验缺陷产出 RoguePotato。同期建立独立博客作为体系化发布通道。\",\n      \"evidence_ids\": [\n        \"ac-decisions-01\",\n        \"ac-decisions-02\",\n        \"ac-works-05\",\n        \"ac-works-01\",\n        \"ac-timeline-05\",\n        \"ac-timeline-06\",\n        \"ac-timeline-07\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2020–2021\",\n      \"stage\": \"提权横向扩展到注入与 EDR 对抗面，进入一线会议并首次进入 MSRC 披露流程\",\n      \"capability_change\": \"将 mapping injection 与 Instrumentation Callback 结合以降低注入可检测性，研究目标由提权扩展到 EDR 规避；将 Potato 研究推上 Black Hat Asia/HITB AMS 等一线会议，演讲场所层级在一年内由地区性会议（RomHack 2020）升至一线议程；首次与 MSRC 进入正式披露流程（RemotePotato0，案件 62293），厂商以 Won't Fix、服务器须自防 NTLM 中继为由拒绝修复，该反馈限定了后续选题的可得 CVE 边界。\",\n      \"evidence_ids\": [\n        \"ac-timeline-08\",\n        \"ac-decisions-03\",\n        \"ac-decisions-04\",\n        \"ac-timeline-10\",\n        \"ac-works-06\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2021–2022\",\n      \"stage\": \"LSASS 转储系列化深挖与选题由攻击者收益转向防御可见性\",\n      \"capability_change\": \"对 Seclogon 单一组件做跨多篇序列化深挖（part 2 句柄泄露→part 3 竞态时序），首次给出方法论动机陈述——攻击方法公开才能催生检测方法；研究主题第二次迁移落到 EDR 方向，产出 Black Basta 关联 FIN7 的定制 EDR 规避工具分析与 Vice Society 外包开发分析，输出形态由博客帖扩展到可独立分发的白皮书；同期与 decoder_it 基于 Forshaw 的本地 Kerberos DCOM 中继研究产出 JuicyPotatoNG，再次被判定为非安全边界违反。\",\n      \"evidence_ids\": [\n        \"ac-decisions-05\",\n        \"ac-timeline-11\",\n        \"ac-timeline-13\",\n        \"ac-timeline-15\",\n        \"ac-timeline-16\",\n        \"ac-decisions-06\",\n        \"ac-community-07\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2023\",\n      \"stage\": \"协议级漏洞取得 CVE 闭环，失败选题回访重启，并对研究线作十年回顾收束\",\n      \"capability_change\": \"由 expected behavior/Won't Fix 类选题转向可获 CVE 的协议级漏洞：LocalPotato 经 Elad Shamir 提示研究 NTLM Challenge Reserved 字段，完成 MSRC 报告→CVE-2023-21746→Patch Tuesday 修复闭环，并主动评估补丁可能仅为权宜之计、其他 NTLM 服务仍可能存在可利用路径；同期回访两年前失败的 SSPI UAC 项目，受 Forshaw《Sharing a Logon Session a Little Too Much》启发转向新利用路径并公开 PoC；于 POC2023 以 10 Years of Windows Privilege Escalation with Potatoes 对研究线作阶段性总结。\",\n      \"evidence_ids\": [\n        \"ac-works-10\",\n        \"ac-decisions-07\",\n        \"ac-decisions-08\",\n        \"ac-decisions-09\",\n        \"ac-conversations-003\",\n        \"ac-timeline-17\",\n        \"ac-timeline-18\"\n      ],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"厂商补丁封堵后主动逆向系统服务以重建绕过原语\",\n      \"starting_conditions\": \"JuicyPotato 在 Windows 10 1809/Server 2019 被 Microsoft 限制 OXID 解析器仅允许端口 135，既有利用路径被封堵；本人处于已掌握提权原语但路径被切断的状态。\",\n      \"repeated_practice\": \"在 2019–2023 间反复针对被补丁封堵的利用路径寻找绕过：RogueWinRM 以 BITS 向 5985 端口 WinRM 认证重建原语（自述为 JuicyPotato 绕过研究的非预期结果）；RoguePotato 以自建 Oxid Resolver 与命名管道端点替代 TCP/IP 序列并复用 PrintSpoofer 路径校验缺陷；RemotePotato0 将本地令牌窃取转为跨协议远程中继；JuicyPotatoNG 将 OXID 解析改为本机 COM 服务器、以 LogonUser NewCredentials 注入 INTERACTIVE SID、以 SSPI hook 取代 RpcImpersonateClient；LocalPotato 在 NTLM 本地认证中交换 context handle 实现反射。\",\n      \"feedback\": \"Microsoft 对 RoguePotato、RemotePotato0（Won't Fix）、JuicyPotatoNG 均判定为 expected behavior 或非安全边界违反，未发 CVE；该反馈使其在 expected behavior/Won't Fix 类选题与可获 CVE 的协议级漏洞之间区分选题边界，直至 LocalPotato 完成 MSRC→CVE→Patch 闭环。\",\n      \"intermediate_capability\": \"形成以 SeImpersonate/服务账户→SYSTEM 这一信任边界为锚点、随系统版本演进而反复重建利用原语的方法习惯，并能据厂商反馈判断某选题是否可能取得 CVE。\",\n      \"observed_outcomes\": [\n        \"RogueWinRM、RoguePotato、RemotePotato0、JuicyPotatoNG、LocalPotato 构成连续五个提权原语，跨 2019–2023 跨越 Windows 多个版本\",\n        \"LocalPotato 取得 CVE-2023-21746 并经 Patch Tuesday 修复，msv1_0!SsprHandleChallengeMessage 增加 Feature_MSRC74246_Servicing_NTLM_ServiceBinding_ContextSwapping 校验\",\n        \"POC2023 以 10 Years of Windows Privilege Escalation with Potatoes 作阶段性收束\"\n      ],\n      \"evidence_ids\": [\n        \"ac-decisions-01\",\n        \"ac-decisions-02\",\n        \"ac-decisions-03\",\n        \"ac-decisions-06\",\n        \"ac-decisions-07\",\n        \"ac-works-05\",\n        \"ac-works-10\",\n        \"ac-timeline-05\",\n        \"ac-timeline-06\",\n        \"ac-timeline-14\",\n        \"ac-timeline-17\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"Potato 家族连续产出也可由厂商补丁日被动跟进而非主动逆向驱动解释——补丁发布迫使研究者寻找新路径。但 RogueWinRM 一文自述为 a research we did on Juicypotato exploit in order to find a possible bypass on restrictions（主动寻找绕过而非被动跟进），弱化被动跟进解释；补丁日仍是时间触发点，两种解释均部分成立。\"\n    },\n    {\n      \"name\": \"以固定合作者网络拼装并重组既有公开原语\",\n      \"starting_conditions\": \"本人长期阅读并跟踪 Forshaw（@tiraniddo）、itm4n（PrintSpoofer）、Elad Shamir、jonasLyk、x86matthew 等同行的近期公开成果；与 decoder_it 形成稳定合著关系。\",\n      \"repeated_practice\": \"在四篇合著（RoguePotato、RemotePotato0、JuicyPotatoNG、LocalPotato）中反复以特定同行的近期公开成果为起点重组原语：RoguePotato 显式致谢 tiraniddo 的共享登录会话研究、itm4n 的 PrintSpoofer 与 jonasLyk 的命名管道路径校验绕过；RemotePotato0 与 JuicyPotatoNG 建立在 Forshaw 的 DCOM 激活与本地 Kerberos 中继研究之上；LocalPotato 由 Elad Shamir 提示 NTLM Challenge Reserved 字段方向并在卡壳时获 Forshaw 关键提示；单著的 SSPI UAC 仍引用 Forshaw 与 x86matthew 成果并由 decoder_it 校对。\",\n      \"feedback\": \"同伴提示提供选题入口与瓶颈突破点（Elad Shamir 的 NTLM Reserved 字段方向、Forshaw 在 LocalPotato 瓶颈处的提示）；decoder_it 持续校对与合著分工；披露后厂商反馈进一步限定选题边界。\",\n      \"intermediate_capability\": \"形成把分散的他人原语拼装为新利用链的能力，以及以同行网络作为选题与重入研究支点的习惯。\",\n      \"observed_outcomes\": [\n        \"与 decoder_it 四次合著构成 Potato 家族主干\",\n        \"LocalPotato 由同伴提示驱动完成 CVE 闭环\",\n        \"SSPI UAC 在单著项目中仍由长期合作者校对并复用同行公开成果\"\n      ],\n      \"evidence_ids\": [\n        \"ac-community-02\",\n        \"ac-community-03\",\n        \"ac-community-04\",\n        \"ac-community-05\",\n        \"ac-community-06\",\n        \"ac-works-05\",\n        \"ac-works-10\",\n        \"ac-decisions-07\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"合著网络可由社区普遍协作解释而非个人可复现的方法；但与 decoder_it 的四次合著与 Forshaw/Elad Shamir 的反复致谢在本人作品中高度集中，且 JuicyPotatoNG 一文显式自述 I asked my friend (and coauthor in the *potato saga) @splinter_code for help，体现固定协作关系而非随机社区协作。\"\n    },\n    {\n      \"name\": \"失败与搁置选题的存档与日后回访重启\",\n      \"starting_conditions\": \"约 2021 年以特定 SSPI 配置绕过 UAC 失败（自述 failed miserably that time），搁置该思路。\",\n      \"repeated_practice\": \"将失败项目存档；两年后在浏览旧仓库时重新发现该废弃项目，受 Forshaw《Sharing a Logon Session a Little Too Much》启发找到不同利用路径（Datagram 风格 NTLM + LSASS 登录会话令牌混淆 + 经 SMB 的 SCM RPC），最终完成并发表；JuicyPotatoNG 一文亦体现对被补丁封闭旧选题的二次重启。\",\n      \"feedback\": \"同行一手 writeup 作为重入研究的支点；自述 i decided to look again into this abandoned idea。\",\n      \"intermediate_capability\": \"形成对失败选题不丢弃而是存档、在外部新思路出现时回访重启的习惯。\",\n      \"observed_outcomes\": [\n        \"2023-09-14 发表 Bypassing UAC with SSPI Datagram Contexts 并公开 PoC\",\n        \"JuicyPotatoNG 作为被补丁封闭旧选题的二次重启产出\"\n      ],\n      \"evidence_ids\": [\n        \"ac-conversations-003\",\n        \"ac-decisions-08\",\n        \"ac-decisions-06\"\n      ],\n      \"validation_tests\": [\n        \"distinctive\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"SSPI UAC 的回访也可由两年间 Forshaw 发表相关博文这一外部偶然机会驱动解释，而非个人存档习惯本身；自述 i decided to look again into this abandoned idea 兼受 Forshaw 启发，两因素均部分成立，故仅作中等置信且仅一条可核验主链。\"\n    },\n    {\n      \"name\": \"对单一组件做系列化、跨多篇的纵深挖掘\",\n      \"starting_conditions\": \"2021-12 在逆向 Seclogon 服务时发现 SlrCreateProcessWithLogon 信任客户端传入的调用方 PID，可通过修改 TEB 中的 ClientId 伪造 PPID。\",\n      \"repeated_practice\": \"对 Seclogon 同一组件跨多篇推进：part 2（2021-12-07）以句柄泄露实现隐蔽 LSASS 转储，文末预告可靠窃取 LSASS 句柄留待下篇；part 3（2022-06-28）以 CreateProcessAsUser/CreateProcessInternalW/NtCreateUserProcess 拦截点在句柄关闭前复制 LSASS 句柄，引入竞态时序。\",\n      \"feedback\": \"自我接续的预告与兑现（part 2 文末 but this is something for another blog post → part 3 落地）；同一组件内逐层加深而非发散追逐新 CVE。\",\n      \"intermediate_capability\": \"形成在单一目标上重复深入、以序列化 writeup 推进方法深度的练习模式。\",\n      \"observed_outcomes\": [\n        \"Seclogon part 2→part 3 跨约 7 个月形成隐蔽 LSASS 转储方法链\",\n        \"part 2 首次给出攻击方法公开以催生检测方法的方法论动机陈述\"\n      ],\n      \"evidence_ids\": [\n        \"ac-decisions-05\",\n        \"ac-community-07\",\n        \"ac-timeline-11\",\n        \"ac-timeline-13\"\n      ],\n      \"validation_tests\": [\n        \"repeated\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"系列化也可由 Seclogon 单一组件本身可挖深度足够、研究者顺势推进解释；但 part 2 文末显式预告 part 3 议题，体现主动的序列规划而非被动延展。\"\n    },\n    {\n      \"name\": \"以持续公开写作与工具开源构成研究—反馈—产出回路\",\n      \"starting_conditions\": \"2016 年起即经博客 RSS 公开撰写勒索软件分析；2020-07-15 建立独立博客，开篇以 knowledge sharing is the key for the hacking community's growth 表述回馈社区动机。\",\n      \"repeated_practice\": \"自 2016 至 2023 持续七年以上公开 writeup；同步在 GitHub（antonioCoco）开源 POC 与工具（RemotePotato0、SspiUacBypass、JuicyPotatoNG、ConPtyShell、SharPyShell、RunasCs），并在 RomHack、Black Hat Asia、HITB、BlueHat IL、Insomni'Hack、POC2023 等会议重复发表。\",\n      \"feedback\": \"MSRC 披露闭环与厂商补丁反馈（RemotePotato0 Won't Fix、LocalPotato CVE 与 Patch）；GitHub 社区采纳（RemotePotato0 约 1.5k stars 等置顶仓库公开数据）；会议议程认可（演讲场所层级由地区会议升至一线议程）。\",\n      \"intermediate_capability\": \"以独立博客与 GitHub 为固定发布通道，把研究、披露与工程产出闭环，使单点研究可被社区复用并形成再选题的外部信号。\",\n      \"observed_outcomes\": [\n        \"2016–2023 跨主题（勒索软件→提权→EDR 规避→UAC）持续公开输出\",\n        \"6 个置顶公开仓库构成可核验的工程产出与社区采纳指标\",\n        \"MSRC 协同披露与 CVE 取得形成厂商反馈回路\"\n      ],\n      \"evidence_ids\": [\n        \"ac-conversations-001\",\n        \"ac-conversations-002\",\n        \"ac-conversations-004\",\n        \"ac-community-01\",\n        \"ac-community-08\",\n        \"ac-works-01\",\n        \"ext-03\",\n        \"ac-decisions-04\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"持续公开写作也可由个人品牌维护动机解释而非研究回路本身；但开篇自述定位为社区回馈、且 MSRC 闭环与会议议程认可构成可核验的外部反馈，弱化单纯品牌动机解释。\"\n    }\n  ],\n  \"tensions\": [\n    \"RoguePotato、RemotePotato0（Won't Fix）、JuicyPotatoNG 均被 Microsoft 判定为 expected behavior 或非安全边界违反而未获 CVE，与 LocalPotato 取得 CVE-2023-21746 形成张力：CVE 可得性可能由选题所处认证子系统的边界判断差异主导（LocalPotato 在 ISC_REQ_UNVERIFIED_TARGET_NAME 时置空 SPN 才被认可为漏洞），未必单纯由研究能力提升决定。\",\n    \"SSPI UAC 约两年前自述 failed miserably 后搁置，两年后受 Forshaw《Sharing a Logon Session a Little Too Much》启发回访重启——该回访由个人存档习惯与外部偶然机会（同行新发文）共同驱动，二者难以分离。\",\n    \"WebSearch 返回片段将研究员误作 Gabriel Cocomazzi、将演讲误记为 Black Hat USA 2021、并附共同演讲人 Roberto Sestino，与一手来源（博客 Talks 页列出 Black Hat Asia 2021 且无共同演讲人；GitHub 与博客一致署名 Antonio Cocomazzi / @splinter_code）冲突，该搜索工具输出不予采纳，仅记录为待核冲突。\",\n    \"博客 RSS 最早条目为 2016-06-26，而 Welcome to my blog 发布于 2020-07-15；2016–2017 条目与开篇帖的先后关系（后期回填/导入 vs 开篇日期后期调整）未核验。\",\n    \"Black Hat 议程页（blackhat.com）抓取返回 HTTP 403，person_json 标注的 Black Hat US/EU 演讲事实未由官方议程页一手核验；ac-timeline-19 关于 Black Hat Europe 2022 EDR & Blinding 的线索亦为 lead_only。\",\n    \"博客自 2023-09-14 后无新条目，2024–2026 公开活动与研究方向属 unknown；二手搜索摘要提及的 Atomic Stealing、Bringing Back the Lost、EDR-Prison 等技术名称无匹配的一手 URL（ext-04 inferred），与归档页返回空结果存在张力。\"\n  ],\n  \"transferable_practices\": [\n    \"厂商补丁封堵既有利用路径后，主动逆向相关系统服务以寻找绕过原语，而非放弃该研究方向。\",\n    \"在 writeup 中明确列出依赖的前序研究并致谢各自贡献，把分散的他人原语拼装为新利用链。\",\n    \"对失败或搁置选题存档，并在获得新思路或同行新成果时回访重启。\",\n    \"对单一组件做序列化、跨多篇的纵深挖掘，以自我接续的预告与兑现推进方法深度。\",\n    \"据厂商既有反馈（expected behavior / Won't Fix）区分选题的 CVE 可得性边界，据此调整披露策略与选题取向。\",\n    \"同步公开 writeup 与 POC 开源，使研究、披露与工程产出形成可被社区复用的回路。\",\n    \"完成披露后主动评估补丁是否仅为权宜之计、是否残留可利用攻击面（如 LocalPotato 评估 msv1_0 补丁可能仅为 workaround）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"与 decoder_it 的长期合著关系（四次合著）及与 Forshaw、Elad Shamir 的直接提示关系——同伴网络是个人长期积累的结果，非可短期复制的方法。\",\n    \"2016–2017 已积累的勒索软件逆向与威胁情报基础，以及意大利语 RomHack 2020 作为进入 Black Hat Asia/HITB 的地区性跳板——研究时长预算与地区会议机会为结构性条件。\",\n    \"博客 RSS 自 2016 年起即存在、独立博客 2020 年正式建站并持续七年输出——时间投入与社区可见度非短期可复制。\",\n    \"Microsoft 对服务账户模拟类利用一贯判 expected behavior、而对 NTLM 本地反射在特定条件下认可为漏洞的边界判断差异——该外部判定主导了 LocalPotato 取得 CVE 而早期 Potato 未取得的差异，并非研究者单方面可控。\"\n  ],\n  \"open_questions\": [\n    \"2016 年最早博客帖子之前的学习路径、教育背景与入行机制无可核验公开来源。\",\n    \"雇主、任职机构与团队归属未在 GitHub 主页或博客主页公开披露；导师或固定研究同伴关系仅能从致谢推断，未单独访谈或抓取佐证。\",\n    \"GitHub 仓库（RoguePotato、JuicyPotatoNG、LocalPotato、RunasCs 等）的 commit 历史与开源时间未逐项核查；ConPtyShell、SharPyShell、RunasCs 等较早工具的发布时间与动机未见对应 writeup 直接说明。\",\n    \"Black Hat US/EU 的具体演讲年份、议题标题与合讲人未由官方议程页一手核验（议程页返回 HTTP 403）；Black Hat Europe 2022 EDR & Blinding（与 Luca Nagy 合讲）线索未一手核验。\",\n    \"2023-09-14 之后的公开作品与技术演化（2024–2026）无一手核验来源，是否存在转向或停更属 unknown。\",\n    \"ext-04 与 ac-timeline-19 所引二手技术名称（Atomic Stealing、Bringing Back the Lost、EDR-Prison 等）与 Black Hat 演讲线索无匹配的一手 URL，仅作 lead_only，不计入 documented 结论。\",\n    \"X（x.com/splinter_code）抓取返回 HTTP 402、Mastodon（infosec.exchange/@splinter_code）未抓取，社交平台上的公开声明、同业评价与 AMA 线索缺失。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "919a44c512a16c0af09eeec05a7d8f478afcc698aa66c9691407ba8675d57d77",
+        "accessed_at": "2026-09-27T10:55:52.888442+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790506552888458000-antonio-cocomazzi-synthesis-v1.json",
+    "label": "Antonio Cocomazzi:synthesis:v1",
+    "elapsed_seconds": 206.31,
+    "prompt_sha256": "da8df58d8a4be7e054da2d9140134ace942a0e4079fdbd243fb54d9eefe4fde2",
+    "num_turns": 9,
+    "total_cost_usd": 0.60667,
+    "usage": {
+      "input_tokens": 48418,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 146560,
+      "output_tokens": 11652,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 48418,
+        "outputTokens": 11652,
+        "cacheReadInputTokens": 146560,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.60667,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}

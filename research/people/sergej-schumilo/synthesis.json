@@ -1,0 +1,490 @@
+{
+  "person": "Sergej Schumilo",
+  "expertise": [
+    "基于硬件辅助（Intel PT / VT-x）与 hypervisor 快照的内核与 hypervisor fuzzing",
+    "覆盖率引导 fuzzing 的输入处理方法扩展（输入-状态对应、结构化输入合成、状态空间探索）",
+    "快照 fuzzing 框架的工程化与跨目标迁移（USB 设备→OS 内核→hypervisor→网络协议栈）",
+    "覆盖解码库（libxdc）与公开 fuzzing 工具链的建设、发布与维护",
+    "漏洞发现工具的有效性验证（跨 OS 内核文件系统缺陷、hypervisor 缺陷与 CVE 产出）"
+  ],
+  "stages": [
+    {
+      "period": "2014-2016",
+      "stage": "学位阶段：从 USB 设备 fuzzing 到硬件辅助 OS 内核 fuzzing 的技术基底建立",
+      "capability_change": "2014 年 B.Sc. 论文构建基于 QEMU/KVM 的 USB fuzzing 基础设施（工具 vUSBf，ss-works-bsc-2014、ss-timeline-001、ss-dec-001 均 documented）；2016 年 M.Sc. 论文将目标由 USB 设备升级到 OS 内核，引入 Intel PT 覆盖反馈与 VT-x 隔离/快照，构成 kAFL 的直接前身（ss-works-msc-2016、ss-timeline-003、ss-dec-002 均 documented）。该阶段确立『虚拟化 + 硬件辅助覆盖 + 快照恢复』技术基底，后续 kAFL/Nyx 的快照与虚拟化思路可追溯至此。需补注：2014-2016 学位阶段的导师与同伴具体反馈方式无公开一手材料（conversations/decisions 维度 gaps 一致），故技术基底的『确立』不宜读为已证个人决策，选题连续性也可能源于导师与机构研究主线导向。",
+      "evidence_ids": [
+        "ss-works-bsc-2014",
+        "ss-works-msc-2016",
+        "ss-timeline-001",
+        "ss-timeline-003",
+        "ss-dec-001",
+        "ss-dec-002",
+        "ss-convo-002"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2017",
+      "stage": "kAFL 顶会化：硬件辅助覆盖引导内核 fuzzing 范式的首次确立",
+      "capability_change": "作为第一作者在 USENIX Security 2017 发表 kAFL，使用 Intel PT 取覆盖、VT-x 快照隔离内核崩溃，跨 Linux/macOS/Windows 工作，给出每秒最高 17,000 次执行的性能数据，并在 ext4、HFS、APFS、NTFS 驱动中发现缺陷（ss-works-kafl-2017、ss-timeline-004、ss-dec-003 均 documented）。这是首次进入顶级安全会议，并与 Aschermann、Gawlik、Schinzel、Holz 形成稳定合作团队，方法抽象为 OS 无关、硬件辅助范式，确立后续 5 年研究主线。该阶段的能力变化可由 USENIX Security 17 论文页一手核验。",
+      "evidence_ids": [
+        "ss-works-kafl-2017",
+        "ss-timeline-004",
+        "ss-dec-003",
+        "ss-works-bsc-2014",
+        "ss-works-msc-2016"
+      ],
+      "confidence": "high"
+    },
+    {
+      "period": "2019-2020",
+      "stage": "方法扩展阶段：覆盖率引导局限的逐项方法扩展",
+      "capability_change": "REDQUEEN（输入-状态对应，NDSS 2019）、GRIMOIRE（结构合成，USENIX Security 2019）、HYPER-CUBE（高维 hypervisor fuzzing，NDSS 2020）、IJON（人工锚点深度状态空间探索，IEEE S&P 2020）四项工作的会议发表事实与作者列表经 timeline 维度及 R1-EV-01/02/03/04 一手核验为 documented（ss-timeline-006/007/009/010）；但其方法定位（输入-状态对应、结构合成、高维 hypervisor、人工锚点）在 works 维度仅依据 schumilo.de 一手记录，status 为 reported（ss-works-redqueen-2019、ss-works-hypercube-2020、ss-works-ijon-2020）。同期研究对象由 OS 内核扩展到 hypervisor（HYPER-CUBE，Schumilo 第一作者，R1-EV-03），方法层叠加高维输入构造与状态空间探索，为 Nyx 的覆盖引导 hypervisor fuzzing 做前置探索（ss-dec-004/006 documented）。",
+      "evidence_ids": [
+        "ss-timeline-006",
+        "ss-timeline-007",
+        "ss-timeline-009",
+        "ss-timeline-010",
+        "R1-EV-01",
+        "R1-EV-02",
+        "R1-EV-03",
+        "R1-EV-04",
+        "ss-works-redqueen-2019",
+        "ss-works-hypercube-2020",
+        "ss-works-ijon-2020",
+        "ss-dec-004",
+        "ss-dec-006"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "period": "2021-2022",
+      "stage": "系统化与产业反馈阶段：Nyx/Nyx-Net 统一框架与外部认可",
+      "capability_change": "Nyx（USENIX Security 2021，ss-works-nyx-2021、ss-timeline-011、ss-dec-007 均 documented）整合 kAFL/HYPER-CUBE 路线为统一框架，基于快速快照与 affine types 变异引擎对 hypervisor 做 greybox 覆盖引导 fuzzing；Nyx 论文以覆盖率引导反驳『盲 fuzzing 为 hypervisor fuzzing 最优』论点（ss-dec-007 documented，short_quote: blind fuzzing is the most efficient approach to identify security issues in hypervisors），该证据应限定为反驳论点证据，而非基于 HYPER-CUBE 经验反馈的改进证据。评估中报告发现 44 个新缺陷、为其中 22 个申请 CVE（ext-05 reported，单一 USENIX 会议页来源；与 ext-01 Intel 新闻稿 authoritative_secondary documented 不同来源强度，不得并列标 documented）。Nyx-Net（EuroSys 2022）将快照机制演化为增量快照以适配网络协议栈 fuzzing：其会议发表事实由 ss-timeline-012（documented）一手支撑，方法定位在 works 维仅依据 schumilo.de 一手记录，status 为 reported（ss-works-nyxnet-2022）。同期 Nyx 获 Intel Hardware Security Award 二等奖（ext-01 documented），Intel 称其安全卓越中心已在内部使用并演进该技术；ss-dec-008（Intel 奖项 documented）维持 documented。ss-dec-009（Nyx-Net 产品化）中 Mozilla『currently integrating』Nyx into Firefox CI 与 Intel『actively maintaining a fork』为 nyx-fuzz.com 项目方进行时自述（R2-EV-03），Mozilla 官方 Firefox fuzzing 文档（R2-EV-02）未提及 Nyx，Intel 官方 fork 仓库（github.com/IntelLabs/nyx、github.com/intel/nyx）均 404 未一手确认，故 ss-dec-009 的产业采用主张应标 reported/inferred 并附限定，与 mechanisms[3].observed_outcomes 及 tensions 的限定一致（ss-dec-009 证据本身 status=documented 不变）。",
+      "evidence_ids": [
+        "ss-works-nyx-2021",
+        "ss-timeline-011",
+        "ss-timeline-012",
+        "ss-timeline-013",
+        "ss-dec-007",
+        "ss-dec-008",
+        "ss-dec-009",
+        "ss-works-nyxnet-2022",
+        "ext-01",
+        "ext-03",
+        "ext-05",
+        "R2-EV-02",
+        "R2-EV-03"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "mechanisms": [
+    {
+      "name": "硬件辅助与快照的虚拟化 fuzzing 技术基底建立及跨目标复用",
+      "starting_conditions": "2014-2016 学位阶段以 QEMU/KVM 构建 USB fuzzing 基础设施（vUSBf），并引入 Intel PT 覆盖反馈与 VT-x 隔离/快照构建硬件辅助 OS 内核 fuzzer（ss-works-bsc-2014、ss-works-msc-2016 documented）。选题与后续主线一致，构成可复用技术基底。需补注：2014-2016 学位阶段的导师与同伴具体反馈方式无公开一手材料（conversations/decisions 维度 gaps），技术基底的建立不宜读为已证个人决策。",
+      "repeated_practice": "以同一虚拟化 + 硬件辅助 + 快照基底反复迁移目标域：USB 设备（vUSBf）→ OS 内核（kAFL，2017）→ hypervisor（HYPER-CUBE 2020、Nyx 2021）→ 网络协议栈（Nyx-Net 2022，增量快照）。每次迁移保留并扩展覆盖解码、快照执行等基础设施（libxdc、Intel PT 覆盖、快照执行在工具间复用）。",
+      "feedback": "外部反馈来自多类渠道：USENIX Security 2017/2021、NDSS 2019/2020、IEEE S&P 2020、EuroSys 2022 同行评议接收（ss-timeline-004/006/007/009/010/011/012 documented）；Intel Hardware Security Award 2022 二等奖及 Intel 安全卓越中心内部采用（ext-01 documented）；学位阶段 Univention Open Source Absolventpreis 2015 与 Bernard-Rincklake-Preis 2018（ss-timeline-002 reported、ss-timeline-005 reported，独立页面未抓取，仅 schumilo.de 一手）。需补注：2014-2016 学位阶段的导师与同伴具体反馈方式无公开一手材料。",
+      "intermediate_capability": "形成『以快照隔离实现近零开销崩溃恢复 + 以硬件特性获取 OS 无关覆盖』的可复用工程能力，并能针对新目标域调整快照粒度（全量快照→增量快照）与变异策略。",
+      "observed_outcomes": [
+        "kAFL 跨 Linux/macOS/Windows 内核文件系统驱动发现缺陷，每秒最高 17,000 次执行（ss-works-kafl-2017、ss-timeline-004、ss-dec-003 documented）",
+        "HYPER-CUBE 相对现有 hypervisor fuzzer 发现逾两倍缺陷与最高两倍覆盖率，5 分钟内复现 VENOM 并发现 54 个新缺陷、获 37 个 CVE（R1-EV-03 documented，NDSS 2020 一手）",
+        "Nyx 评估中报告 44 个新缺陷、22 个 CVE 申请（ext-05 reported，单一 USENIX 会议页来源，与 ext-01 Intel 新闻稿 authoritative_secondary documented 不同来源强度）",
+        "Nyx-Net 将快照 fuzzing 扩展到网络协议栈：会议发表事实由 ss-timeline-012（documented，Nyx-Net EuroSys 2022）一手支撑；方法定位 ss-works-nyxnet-2022 reported（works 维，方法定位仅 schumilo.de 一手）",
+        "Google Scholar 累计引用 2030、h-index 9、i10-index 9（ext-04 documented，数值经 R1-EV-05 重新一手核验一致）——聚合引用计量仅作外部采纳广度旁证，不构成能力来源的独立证据",
+        "八个公开 fuzzing 工具（vUSBf、kAFL、redqueen、grimoire、ijon、hypercube、nyx、nyx-net）；vUSBf 来自 ss-comm-publictools-2014-2022，grimoire 来自 ss-works-toolchain-inferred 与 R2-EV-01（RUB-SysSec/grimoire 仓库一手核验），其余 6 个两来源均列"
+      ],
+      "evidence_ids": [
+        "ss-works-bsc-2014",
+        "ss-works-msc-2016",
+        "ss-works-kafl-2017",
+        "ss-works-nyx-2021",
+        "ss-works-nyxnet-2022",
+        "ss-works-toolchain-inferred",
+        "ss-timeline-004",
+        "ss-timeline-009",
+        "ss-timeline-011",
+        "ss-timeline-012",
+        "ss-dec-003",
+        "ss-dec-007",
+        "ext-01",
+        "ext-04",
+        "ext-05",
+        "R1-EV-03",
+        "R1-EV-05",
+        "R2-EV-01",
+        "ss-comm-publictools-2014-2022"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative",
+        "distinctive"
+      ],
+      "confidence": "high",
+      "alternative_explanation": "选题连续性与技术基底复用也可能源于导师与机构（RUB-SysSec）研究主线导向，以及团队分工下不同合著者主导不同子方向，而非本人独立主导的系统性决策；2014-2016 学位阶段导师与同伴具体反馈方式无公开一手材料，技术基底『确立』的个人决策属性不可单独证实。"
+    },
+    {
+      "name": "覆盖率引导局限的方法扩展（输入-状态对应、结构合成、状态空间探索）",
+      "starting_conditions": "kAFL（2017）确立硬件辅助覆盖引导内核 fuzzing 范式后，覆盖率引导在输入校验（magic bytes、checksum）与高度结构化输入处存在结构性短板（ss-dec-004 documented）。",
+      "repeated_practice": "以针对结构性短板的逐项方法扩展推进研究，而非一次性重写：覆盖率引导→输入-状态对应（REDQUEEN，NDSS 2019）→结构合成（GRIMOIRE，USENIX Security 2019）→状态空间探索（IJON，IEEE S&P 2020）。其中 ss-works-redqueen-2019/ijon-2020 在 works 维度 status=reported，方法定位仅依据 schumilo.de 一手；会议发表事实由 ss-timeline-006/010 documented 及 R1-EV-01/04 一手核验支撑。同期 HYPER-CUBE（NDSS 2020，Schumilo 一作，R1-EV-03 documented）将目标由 OS 内核扩展到 hypervisor，方法层叠加高维输入构造。",
+      "feedback": "反馈主要来自 NDSS 2019、USENIX Security 2019、IEEE S&P 2020 同行评议接收（ss-timeline-006/007/010 documented，R1-EV-01/02/04 一手核验作者列表）。GRIMOIRE 评估中识别 19 个真实程序内存损坏缺陷并获 11 个新 CVE（R1-EV-02 documented，USENIX Security 2019 一手）。",
+      "intermediate_capability": "形成对覆盖率引导局限的识别能力，及针对不同局限类型选择对应方法原语（输入-状态对应、grammar-like 组合、人工锚点）的扩展能力，而非依赖单一覆盖引导。",
+      "observed_outcomes": [
+        "REDQUEEN 提出基于输入-状态对应的变异机制以绕过 magic bytes 与嵌套 checksum 等比较约束（R1-EV-01 documented，NDSS 2019 一手）",
+        "GRIMOIRE 通过 grammar-like 组合处理高度结构化输入，评估中识别 19 个真实程序内存损坏缺陷并获 11 个新 CVE（R1-EV-02、R2-EV-01 documented）",
+        "IJON 通过人工锚点（ijon_max/ijon_min/ijon_strdist 原语）定义状态空间度量，引导 fuzzer 探索纯覆盖引导无法到达的深度状态空间（R1-EV-04 documented，RUB-SysSec/ijon GitHub 仓库 README，因 IEEE Xplore/CSDL 官方页抓取失败采用的替代一手来源）",
+        "HYPER-CUBE 相对现有 hypervisor fuzzer 发现逾两倍缺陷与最高两倍覆盖率，5 分钟内复现 VENOM 并发现 54 个新缺陷、获 37 个 CVE（R1-EV-03 documented）"
+      ],
+      "evidence_ids": [
+        "ss-works-redqueen-2019",
+        "ss-works-ijon-2020",
+        "ss-works-hypercube-2020",
+        "ss-timeline-006",
+        "ss-timeline-007",
+        "ss-timeline-009",
+        "ss-timeline-010",
+        "ss-dec-004",
+        "R1-EV-01",
+        "R1-EV-02",
+        "R1-EV-03",
+        "R1-EV-04",
+        "R2-EV-01"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "方法扩展的叙事可能部分源于团队分工（不同合著者主导不同原语创新，如 REDQUEEN 第一作者为 Aschermann、GRIMOIRE 第一作者为 Blazytko），而非本人主导的系统性扩展；works 维度方法定位仅 schumilo.de 一手（reported），本人对这些方法原语的具体贡献度不可单独证实。存在幸存者偏差：该机制仅可观测已被顶会接收并发表的方法扩展成功案例，未被接收或未公开的补全尝试不可见，因果强度受发表筛选影响。"
+    },
+    {
+      "name": "学术-产业双轨反馈与工具公开配套产出",
+      "starting_conditions": "kAFL（2017）被 USENIX Security 接收后，研究产出同时具备学术评议与产业实践两条潜在反馈通道；同期已有公开工具发布习惯（vUSBf 2014，ss-comm-publictools-2014-2022 documented）。",
+      "repeated_practice": "每项研究产出配套开源工具与公开演讲（论文、开源代码与公开演讲三者配套产出），使原型同时暴露于同行评议与实践者两条反馈通道。学术侧在 USENIX Security/NDSS/IEEE S&P/EuroSys 反复发表；产业侧在 Black Hat Europe 2019（『What the Fuzz』，ss-dec-005 reported、ss-timeline-008 reported，blackhat.com 议程页 403 未独立核验）、FuzzCon Europe 2020、USENIX Security 2021 等会场宣讲（ss-comm-talks-2019-2021 documented）。配套工具持续发布并后期统一收口到 nyx-fuzz 组织（nyx、libxdc）与站点 nyx-fuzz.com（ss-works-toolchain-inferred inferred，仅作旁证）。",
+      "feedback": "学术侧反馈为顶会同行评议接收；产业侧反馈为 Black Hat/FuzzCon 等实践者会场接受与 Intel 厂商奖项。Intel 官方新闻稿称 Nyx『greatly improved the ability to test critical system software』，并称其安全卓越中心已在内部使用并演进该技术（ext-01 documented，authoritative_secondary）。",
+      "intermediate_capability": "形成将研究原型同时转向学术评议与实践者采纳的双轨输出能力，以及将工具整合为可被第三方维护与集成的基础设施（libxdc 作为共享覆盖库）的工程化能力。",
+      "observed_outcomes": [
+        "学术侧：kAFL/REDQUEEN/GRIMOIRE/HYPER-CUBE/IJON/Nyx/Nyx-Net 七篇代表作跨 2017-2022 顶会发表（ss-timeline-004/006/007/009/010/011/012 documented）",
+        "产业侧：据 nyx-fuzz.com 项目方自述（ss-dec-009，单一一手），Mozilla『currently integrating』Nyx into Firefox CI（进行时，非完成式），Intel『actively maintaining a fork of an older version』；Mozilla 官方 Firefox fuzzing 文档（R2-EV-02 documented）未提及 Nyx（列出 libFuzzer/AFLFuzz/LangFuzz/Avalanche/domino/Grizzly/Android Monkey），security.mozilla.org 连接被拒未取得；Intel 官方 fork 仓库（github.com/IntelLabs/nyx、github.com/intel/nyx）均 404 未一手确认。该产业采用主张不得与 ext-01（Intel 官方新闻稿 authoritative_secondary）等量标 documented，应标 reported/inferred 并明示未获 Mozilla/Intel 官方页面交叉核实（R2-EV-03 核实原意为进行时表述）",
+        "Intel Hardware Security Award 2022 二等奖（50,000 USD）与第 9 届德国 IT Security Award 决赛（ss-dec-008 documented；ss-timeline-013 documented；ss-timeline-014 reported，独立页面未抓取）",
+        "八个公开 fuzzing 工具的持续发布（vUSBf、kAFL、redqueen、grimoire、ijon、hypercube、nyx、nyx-net）；vUSBf 来自 ss-comm-publictools-2014-2022，grimoire 来自 ss-works-toolchain-inferred 与 R2-EV-01，其余 6 个两来源均列"
+      ],
+      "evidence_ids": [
+        "ss-comm-publictools-2014-2022",
+        "ss-comm-talks-2019-2021",
+        "ss-comm-awards-2015-2022",
+        "ss-works-toolchain-inferred",
+        "ss-timeline-008",
+        "ss-timeline-013",
+        "ss-timeline-014",
+        "ss-dec-005",
+        "ss-dec-008",
+        "ss-dec-009",
+        "ext-01",
+        "R2-EV-01",
+        "R2-EV-02",
+        "R2-EV-03"
+      ],
+      "validation_tests": [
+        "repeated",
+        "generative"
+      ],
+      "confidence": "medium",
+      "alternative_explanation": "双轨反馈部分依赖 nyx-fuzz.com 项目方单一一手自述（Mozilla/Intel 产业采用），Mozilla 官方文档未提及 Nyx、Intel fork 仓库未确认，产业采纳的完成度与范围被高估的风险存在；Black Hat Europe 2019 议程页 403 未独立核验，仅以 schumilo.de 一手为据。『论文-代码-演讲配套产出』作为可迁移特征的证据 status=inferred（源自 ss-works-toolchain-inferred），不宜读作已证实践特征。存在声誉偏差：Intel 官方新闻稿与 Google Scholar 引用计量作为外部认可被反复引用，权重高于非官方渠道，可能放大对工具实际影响的判断。"
+    },
+    {
+      "name": "长期合著网络的稳定协作与机构归属",
+      "starting_conditions": "自 kAFL（2017）起即与 Aschermann、Gawlik、Schinzel、Holz 合著，形成以 RUB-SysSec 组（Holz 主持）为核心的合著网络（ss-comm-peernetwork-2017-2022 documented；ss-convo-003 inferred）。",
+      "repeated_practice": "2017-2022 七篇代表作中 Thorsten Holz 出现在全部七篇，Cornelius Aschermann 出现在七篇，Ali Abbasi 出现在四至五篇，Simon Wörner 与 Andrea Jemmett 出现在后期工作（ss-comm-peernetwork-2017-2022 documented）。各篇合著署名经一手核验：kAFL（ss-timeline-004）、REDQUEEN（R1-EV-01）、GRIMOIRE（R1-EV-02）、HYPER-CUBE（R1-EV-03，Schumilo 一作）、IJON（R1-EV-04，RUB-SysSec/ijon GitHub README）、Nyx（ss-timeline-011）、Nyx-Net（ss-timeline-012）。Google Scholar 高频共同作者 Aschermann/Abbasi/Blazytko 与 schumilo.de 列示吻合（ext-04/ext-06）。",
+      "feedback": "合著网络提供合著审阅与技术迁移通道，使工作从 OS 内核 fuzzing 扩展到 hypervisor fuzzing；但导师/合作指导者关系（与 Thorsten Holz）仅由长期共同作者结构推断，无一手评价或公开致谢文字佐证其指导机制与反馈方式（external 维度 gaps）。",
+      "intermediate_capability": "形成依托稳定合著网络与机构（RUB-SysSec）持续产出顶会论文的协作能力。",
+      "observed_outcomes": [
+        "各篇合著署名一手核验（ss-timeline-004/006/007/009/010/011/012 + R1-EV-01/02/03/04 documented）",
+        "Google Scholar 高频共同作者 Aschermann/Abbasi/Blazytko 与 schumilo.de 列示吻合（ext-04/ext-06）"
+      ],
+      "evidence_ids": [
+        "ss-comm-peernetwork-2017-2022",
+        "ss-convo-003",
+        "ss-timeline-004",
+        "ss-timeline-006",
+        "ss-timeline-007",
+        "ss-timeline-009",
+        "ss-timeline-010",
+        "ss-timeline-011",
+        "ss-timeline-012",
+        "R1-EV-01",
+        "R1-EV-02",
+        "R1-EV-03",
+        "R1-EV-04",
+        "ext-04",
+        "ext-06"
+      ],
+      "validation_tests": [
+        "repeated"
+      ],
+      "confidence": "low",
+      "alternative_explanation": "机制4 仅满足『跨材料/跨时期重复』一项验证标准，generative（独立产出新结果）与 distinctive（相对对照的区分度）标准缺乏独立证据支撑，故 confidence=low。合著网络的持续出现既作为机制起点条件又作为观测结果，存在循环论证风险（circular reasoning）；与 tensions 中『合著网络与个人贡献难分离』及幸存者偏差识别相符。机构归属（RUB-SysSec 组、Holz/Aschermann 长期合著网络）与顶会接收筛选对机制4 独立解释力构成限制：合著网络的存在可由机构资源配置与导师声誉解释，个人贡献不可单独分离。不得为凑齐 generative/distinctive 而搜索或拔高证据。"
+    }
+  ],
+  "tensions": [
+    "学术代表作集中于 USENIX Security/NDSS/IEEE S&P/EuroSys 等顶级学术会议，而 person_json 的 selected_conference_evidence 标为 Black Hat EU（产业会议）；两者并不矛盾但侧重不同，解读外部评价时应区分学术同行评议与产业演讲两类渠道。",
+    "Mozilla『currently integrating』Nyx into Firefox CI 与 Intel『actively maintaining a fork』为 nyx-fuzz.com 项目方进行时自述（ss-dec-009，单一一手），Mozilla 官方 Firefox fuzzing 文档（R2-EV-02）未提及 Nyx，Intel 官方 fork 仓库（github.com/IntelLabs/nyx、github.com/intel/nyx）均 404 未一手确认；产业采纳主张未获 Mozilla/Intel 官方页面交叉核实，完成度与范围存在被高估风险。",
+    "ss-dec-009 证据本身 status=documented，但其 Mozilla/Intel 产业采用主张经 R2-EV-02 部分反证、R2-EV-03 限定（进行时表述）、Intel fork 仓库未确认，故在 stages/mechanisms 标注中需标 reported/inferred 并附限定，证据 status 与主张来源强度并非同一层级。",
+    "ext-05（Nyx 44 bugs/22 CVEs，单一 USENIX 会议页）status=reported，与 ext-01（Intel 新闻稿 authoritative_secondary documented）来源强度不同，不得并列标 documented；同一阶段内不同外部来源的强度需区分。",
+    "ss-works-nyxnet-2022（works 维，方法定位仅 schumilo.de 一手，reported）与 ss-timeline-012（timeline 维，Nyx-Net EuroSys 2022 会议发表事实，documented）需区分两维度，不得将方法定位与会议发表事实等量标 documented。",
+    "Intel 2022-08-10 新闻稿将 Schumilo 标注为 Ruhr-Universität Bochum、Holz 标注为 CISPA；schumilo.de 自述为 RUB 系统安全组 PhD 学生与前安全研究员。Holz 在 2020 年前后由 RUB 迁至 CISPA，但 Schumilo 本人是否随组迁移未见一手材料确认，存在 affiliation 描述不一致的潜在冲突。",
+    "合著网络的持续出现既作为机制4 起点条件又作为观测结果，存在循环论证风险（circular reasoning）；个人贡献与合著网络/机构资源难分离。",
+    "幸存者偏差：四个机制均基于 2017-2022 已被 USENIX Security/NDSS/IEEE S&P/EuroSys 接收并发表的论文构建，未被接收的投稿、未公开工具与失败方向在材料中不可见，机制2『方法扩展』仅可观测扩展成功案例，无法观测扩展尝试未达发表或被拒的对照，因果强度受发表筛选影响。",
+    "声誉偏差：Intel 官方新闻稿与 Google Scholar 引用计量作为外部认可被反复引用，权重高于非官方渠道，可能放大对工具实际影响的判断；聚合引用计量仅作外部采纳广度旁证，不构成能力来源的独立证据。"
+  ],
+  "transferable_practices": [
+    "以学位论文选题对齐后续研究主线：B.Sc./M.Sc. 学位论文选题与后续顶会论文主线对齐，使学位产出可复用为研究原型（ss-works-bsc-2014、ss-works-msc-2016、ss-works-kafl-2017 documented）。",
+    "以同一技术基底（虚拟化 + 硬件辅助覆盖 + 快照恢复）反复迁移目标域，针对新目标调整快照粒度与变异策略而非从零重建（ss-works-kafl-2017、ss-works-nyx-2021、ss-works-nyxnet-2022、ss-timeline-004/011/012 documented）。",
+    "每项研究产出配套开源工具与公开演讲（论文、开源代码与公开演讲三者配套产出），使原型同时暴露于同行评议与实践者两条反馈通道（ss-comm-publictools-2014-2022、ss-comm-talks-2019-2021 documented；配套产出作为可迁移特征的证据 status=inferred，源自 ss-works-toolchain-inferred，不宜读作已证实践特征）。",
+    "以针对结构性短板的逐项方法扩展（覆盖率引导→输入-状态对应→结构合成→状态空间探索）推进研究，而非一次性重写（ss-dec-004、ss-timeline-006/007/010 documented）。",
+    "以可核验产出（发现缺陷数、CVE 申请数、执行吞吐）作为工具有效性的外部校验依据，而非以宣传性表述替代（ss-works-kafl-2017、R1-EV-03、ext-05、ss-dec-007 documented/reported 按各自来源强度）。",
+    "将共享基础设施（如 libxdc 覆盖解码库）在多个工具间复用，使工具建设工程化而非一次性产出（ss-works-toolchain-inferred inferred，仅作旁证）。"
+  ],
+  "non_transferable_conditions": [
+    "长期稳定合著网络（Holz/Aschermann/Abbasi 等，2017-2022 全程合著）与机构归属（RUB-SysSec 组）属个人特有条件，非可迁移做法；个人贡献与合著网络/机构资源难分离。",
+    "Intel Hardware Security Award 2022 与 Intel 安全卓越中心内部采用属特定厂商与特定时间窗口的外部认可，伴随资金支持，可能影响后续工具产品化决策权重，非可复制的研究路径。",
+    "学位阶段（FH Münster B.Sc./M.Sc.）的选题连续性部分依托所在院校课程与导师配置，2014-2016 学位阶段的导师与同伴具体反馈方式无公开一手材料，不宜作为可迁移做法。",
+    "顶会发表筛选本身构成幸存者偏差来源：四个机制均基于已被顶会接收的论文构建，未被接收的投稿与失败方向不可见，外部认可的可复制性受发表筛选限制。"
+  ],
+  "open_questions": [
+    "Atropos（USENIX Security 2024，Web 应用 Server-Side 漏洞 fuzzing）：Google Scholar（R1-EV-05）列示且归属 Sergej Schumilo，但 schumilo.de 主页未列示，USENIX Security 2024 多个 URL 路径（/presentation/schumilo、/presentation/petzsch、/presentation/petzsch-heuser）均 404，搜索摘要作者归属不确定（可能非 Sergej Schumilo）。作者归属与一手页面均未确认，保留为资料缺口。",
+    "IJON 的 IEEE S&P 2020 官方页面（IEEE Xplore/CSDL）一手未取得：IEEE Xplore(document/9152759) 返回空白，DBLP(dblp.org/rec/conf/sp/AschermannSAH20.html) 返回 Anubis 拦截页；R1-EV-04（RUB-SysSec/ijon GitHub 仓库 README）维持为当前可用一手替代来源，但非 IEEE 官方一手。",
+    "x.com/ms_s3c 因 HTTP 402 未抓取，当前职业身份与社交发布记录无法独立核验；schumilo.de 用『former security researcher』表述职业状态（2022 自述，ss-dec-010 inferred），具体离开 RUB syssec 的日期、去向机构与触发条件未确认。",
+    "Black Hat Europe 2019『What the Fuzz』官方议程页（blackhat.com）返回 403，未能独立核验讲题、共讲人与具体披露内容；当前仅依据 schumilo.de 本人主页记录（ss-dec-005/ss-timeline-008 reported）。",
+    "Bernard-Rincklake-Preis（2018）与 Univention Absolventpreis（2015）均依赖 schumilo.de 一手记录，FH Münster 与 linux-magazin 的独立页面未能抓取，奖项无法以独立来源双重佐证（ss-timeline-002/005 reported）。",
+    "2014-2016 学位阶段的导师与同伴具体反馈方式、本人关于入门安全研究、失败与技术转向动机的自述材料均缺失（conversations/decisions 维度 gaps），成长机制中反馈来源与重复练习环节的证据不足。",
+    "Mozilla 官方是否在 Bugzilla、Mozilla 工程博客或 TaskCluster 配置中提及 Nyx 集成进度未取得（security.mozilla.org ECONNREFUSED，Firefox fuzzing 官方文档未提及 Nyx）；Intel 维护的 fork 的具体 GitHub 仓库位置未一手确认（IntelLabs/nyx 与 intel/nyx 均 404）。",
+    "近两年（2024-2026）的新作品、CVE 与公开 writeup 未在 schumilo.de 主页列示，且本次未额外检索独立来源；当前时间线止于 2022。"
+  ],
+  "_run": {
+    "pipeline_version": 2,
+    "output_recovery_version": 4,
+    "sub_workspace": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993",
+    "raw_response_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/responses/1790712561056404000-sergej-schumilo-synthesis-v5.json",
+    "resume_response_paths": [],
+    "recovery_response_path": null,
+    "output_source": "artifact",
+    "session_id": "7d51bb49-7341-4d9f-9dd4-6c2dc8764c8f",
+    "tool_receipts": [
+      {
+        "tool_use_id": "call_ieqddv6f3bzoic2essvqy8e3",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/task.md"
+        },
+        "success": true,
+        "content_sha256": "9d9425d2eafd8f7f1d35673dd235c29a87fef998e553e3f3677b6975fbd388f5",
+        "accessed_at": "2026-09-29T20:09:21.066125+00:00"
+      },
+      {
+        "tool_use_id": "call_zr50m99c0madg8l0vcl9c3td",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/output.schema.json"
+        },
+        "success": true,
+        "content_sha256": "f43e7e070b04369c742bbc21352ee8ce6a6a4aecc6668aac38abbf3d522bfdd2",
+        "accessed_at": "2026-09-29T20:09:21.066158+00:00"
+      },
+      {
+        "tool_use_id": "call_uma5ndsojeflka5attbf50b6",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/CLAUDE.md"
+        },
+        "success": true,
+        "content_sha256": "b424b191ccf4a2fb89367c39bf48e7239371dbb14cc1fdd34503bf7b6f8c3544",
+        "accessed_at": "2026-09-29T20:09:21.066164+00:00"
+      },
+      {
+        "tool_use_id": "call_nfp5lc5mtnx3mc0lj0o91a1s",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/inputs/person_json.json"
+        },
+        "success": true,
+        "content_sha256": "36960a1d08797a7601cfc87b0dac52bea57dc38443e01542c3c7533b25b41831",
+        "accessed_at": "2026-09-29T20:09:21.066172+00:00"
+      },
+      {
+        "tool_use_id": "call_c5140jdyyeiebzqs7v6m36v4",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/inputs/evidence_json.json"
+        },
+        "success": true,
+        "content_sha256": "44556d94af71c3a3185cfb7e1fdd16d8c8f16f3503f1f12cbeb48eb469b33e05",
+        "accessed_at": "2026-09-29T20:09:21.066249+00:00"
+      },
+      {
+        "tool_use_id": "call_36dghgk179ae02afuk7vmcqb",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/inputs/revision_context.json"
+        },
+        "success": true,
+        "content_sha256": "8d974225f7390990e800e1dcca3e36af41b7a1347ef54d67bbe1f6d7af42e569",
+        "accessed_at": "2026-09-29T20:09:21.066317+00:00"
+      },
+      {
+        "tool_use_id": "call_07mhk5i1i2ymwvj9x3if6qmd",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/inputs/evidence_json.json",
+          "offset": 984,
+          "limit": 984
+        },
+        "success": true,
+        "content_sha256": "3ec71dec9018440d31795cba88c1f10c2f030e703071b69897fa7be9db7b795b",
+        "accessed_at": "2026-09-29T20:09:21.066363+00:00"
+      },
+      {
+        "tool_use_id": "call_s0zxao99j2a6yaydoezmj5wy",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/inputs/revision_context.json",
+          "offset": 469,
+          "limit": 920
+        },
+        "success": false,
+        "content_sha256": "02f8f40bc54bdb6063ca2b985040a1ce7b2bcb70f9f18568974b5c9b99caac29",
+        "accessed_at": "2026-09-29T20:09:21.066371+00:00"
+      },
+      {
+        "tool_use_id": "call_w4zy5o9pg7lrpu2am1t792mu",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/inputs/revision_context.json",
+          "limit": 460,
+          "offset": 469
+        },
+        "success": true,
+        "content_sha256": "6e20cbdf44f2007a3b8eea46af672892e6467959c60e056a038e9d490dac03ca",
+        "accessed_at": "2026-09-29T20:09:21.066480+00:00"
+      },
+      {
+        "tool_use_id": "call_mkgxcxgc2h8yjwr5hh0zryic",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/inputs/revision_context.json",
+          "limit": 400,
+          "offset": 928
+        },
+        "success": true,
+        "content_sha256": "25f4707f09b57004828560f8606714fb34588cec760be938bf4240dde0445b8f",
+        "accessed_at": "2026-09-29T20:09:21.066564+00:00"
+      },
+      {
+        "tool_use_id": "call_od8dcgtj7walwwfwo94lumeq",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/inputs/revision_context.json",
+          "limit": 90,
+          "offset": 1325
+        },
+        "success": true,
+        "content_sha256": "173264ef8e7c626f065c10ab38b2f34876d40dc9e7bbbe30604002dbe79c2b49",
+        "accessed_at": "2026-09-29T20:09:21.066614+00:00"
+      },
+      {
+        "tool_use_id": "call_e69qjvhrw45hqz4jvpg4otst",
+        "tool": "WebFetch",
+        "input": {
+          "url": "file:///Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/checkpoint.md",
+          "prompt": "read"
+        },
+        "success": false,
+        "content_sha256": "82e45382e7d625da9fd553fe7ffad1cc3723573f619e00b822f856bfa7919749",
+        "accessed_at": "2026-09-29T20:09:21.066619+00:00"
+      },
+      {
+        "tool_use_id": "call_6yiwim66nbru4a2p3egzxlrw",
+        "tool": "WebFetch",
+        "input": {
+          "url": "file:///Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/output.json",
+          "prompt": "read"
+        },
+        "success": false,
+        "content_sha256": "82e45382e7d625da9fd553fe7ffad1cc3723573f619e00b822f856bfa7919749",
+        "accessed_at": "2026-09-29T20:09:21.066622+00:00"
+      },
+      {
+        "tool_use_id": "call_4pdfpd47zq48z1672v8eqsqm",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/checkpoint.md",
+          "content": "# Checkpoint — Sergej Schumilo 综合 v5\n\n## 任务确认\n- task.md：综合分析师。基于六维证据 + 4 轮定向补证/纠错，重建领域能力成长过程。\n- 输出契约 output.schema.json：required = person(const)/expertise[]/stages[]/mechanisms[]/tensions[]/transferable_practices[]/non_transferable_conditions[]/open_questions[]；additionalProperties=false。\n- 不自填 _run/verification；只写 output.json 与 checkpoint.md。\n\n## 输入已读\n- person_json.json：rank 86，Sergej Schumilo，x.com/ms_s3c，schumilo.de，内核/虚拟化/Web 自动化漏洞发现，Black Hat EU，fuzzing 研究。\n- evidence_json.json：六维 works/conversations/community/external/decisions/timeline + targeted(R1-EV-01~05, R2-EV-01~03)。全量已读（1-1370 行）。所有 verification.verified_in_run=true。\n- revision_context.json：4 轮定向补证与纠错的 actions/new_evidence/invalid_evidence_ids/synthesis_instructions/unresolved，全量已读（1-1389 行）。\n\n## 证据强度层级（最终采用）\n- documented（一手/权威二手核验）：\n  - 学位/早期：ss-works-bsc-2014, ss-works-msc-2016, ss-timeline-001, ss-timeline-003, ss-convo-002\n  - kAFL：ss-works-kafl-2017, ss-timeline-004, ss-dec-003, R1 来源 USENIX 17\n  - Nyx：ss-works-nyx-2021, ss-timeline-011, ss-dec-007, ext-03（USENIX 21 论文集页）, R1 来源 USENIX 21\n  - Nyx-Net 会议发表事实：ss-timeline-012（documented）\n  - REDQUEEN 会议发表：ss-timeline-006 + R1-EV-01（NDSS 2019 一手）\n  - GRIMOIRE 会议发表：ss-timeline-007 + R1-EV-02（USENIX 19 一手）+ R2-EV-01（grimoire 仓库）\n  - HYPER-CUBE 会议发表：ss-timeline-009 + R1-EV-03（NDSS 2020 一手，Schumilo 一作）\n  - IJON 会议发表/方法：ss-timeline-010 + R1-EV-04（RUB-SysSec/ijon GitHub README，IEEE 官方页未取得，level=first_hand_other）\n  - 决策/时间线其余 documented：ss-dec-001/002/003/004/006/007/008, ss-timeline-004/011/013\n  - 外部：ext-01（Intel 新闻稿）, ext-02, ext-03, ext-04（Google Scholar，数值经 R1-EV-05 复核一致）, ext-06, ss-comm-peernetwork-2017-2022, ss-comm-publictools-2014-2022, ss-comm-awards-2015-2022, ss-comm-talks-2019-2021, ss-comm-nyxrepo-issues-2026\n  - 工具链推断：ss-works-toolchain-inferred（status=inferred，非 documented，仅作旁证）\n- reported（方法定位仅 schumilo.de 一手 / 单一会议页）：ss-works-redqueen-2019, ss-works-ijon-2020, ss-works-hypercube-2020, ss-works-nyxnet-2022, ss-works-blackhat-2019, ss-works-awards-2022, ss-timeline-002/008/014, ss-dec-005, ext-05（Nyx 44 bugs/22 CVEs，单一 USENIX 页）\n- inferred：ss-convo-003, ss-dec-010, ext-06（部分）\n- lead_only/unknown 不采用为机制/阶段支撑：ext-07, ext-08\n\n## 4 轮 synthesis_instructions 汇总（必须落实）\n- R1：stages[2] 区分 works 维 reported 与 timeline 维 documented；mechanisms[1].repeated_practice 句末补 works 维 status 限定；transferable_practices 删除「三件套」口语；mechanisms[0].observed_outcomes 引用数补「不构成能力来源」限定。\n- R2：mechanisms[3].observed_outcomes 第1条计数改「八个公开 fuzzing 工具」，说明 vUSBf 来自 ss-comm-publictools、grimoire 来自 ss-works-toolchain-inferred + R2-EV-01；第4条 Mozilla/Intel 产业采用补来源强度限定（nyx-fuzz.com 进行时自述，R2-EV-02 Mozilla 官方未提及 Nyx，R2-EV-03 核实原意，Intel fork 仓库 404 未确认），不得与 ext-01 等量标 documented；重构机制4 observed_outcomes 消除循环；补幸存者偏差与声誉偏差；mechanisms[3] confidence 降 low。\n- R3：stages[3] ss-works-nyxnet-2022 标 reported（补 ss-timeline-012 documented）；ext-05 标 reported；ss-dec-009 在 stages 标 reported/inferred 并附限定；mechanisms[0].observed_outcomes[3] 区分 timeline 维 documented 与 works 维 reported；mechanisms[3].validation_tests 维持 [repeated]，alternative_explanation 明示限制。\n- R4：删除「复盘」「补丁式」「孵化器」「自我循环」等黑话/比喻改中性；stages[3] 删除 HYPER-CUBE 经验反馈链路，ss-dec-007 限定为反驳论点证据；mechanisms[1].alternative_explanation 改中性团队分工；mechanisms[3].observed_outcomes 第1条 IJON 补注来源层级（R1-EV-04 GitHub README vs 会议官方页）；mechanisms[0]/stages[0] 补注 2014-2016 导师同伴反馈无一手材料。\n\n## 阶段划分（4 阶段）\n1. 2014-2016 学位阶段（USB→OS kernel 硬件辅助）：ss-works-bsc-2014/msc-2016, ss-timeline-001/003, ss-dec-001/002\n2. 2017 kAFL 顶会化：ss-works-kafl-2017, ss-timeline-004, ss-dec-003\n3. 2019-2020 方法扩展（REDQUEEN/GRIMOIRE/HYPER-CUBE/IJON）：ss-timeline-006/007/009/010 + R1-EV-01~04, ss-dec-004/006, ss-works-redqueen/ijon/hypercube（reported）\n4. 2021-2022 Nyx/Nyx-Net 系统化与产业反馈：ss-works-nyx-2021, ss-timeline-011/012/013, ss-dec-007/008/009, ext-01/03/05, ss-works-nyxnet-2022（reported）\n\n## 机制划分（4 机制）\n1. 硬件辅助+快照的虚拟化 fuzzing 技术基底建立与跨目标复用（documented-heavy，confidence high）\n2. 覆盖率引导局限的方法扩展（输入-状态对应/结构合成/状态空间探索）（confidence medium，团队分工 alternative）\n3. 学术-产业双轨反馈与工具公开配套产出（confidence medium）\n4. 长期合著网络的稳定协作与机构归属（confidence low，validation=[repeated]，循环论证 + 幸存者偏差未排除）\n\n## 待写\n- output.json（按 schema，落实全部 synthesis_instructions）。\n"
+        },
+        "success": true,
+        "content_sha256": "8dfaec4b3b8d5e4c7d05a61cdd8d452982763536e4106157ee5550b393ffc2a6",
+        "accessed_at": "2026-09-29T20:09:21.066632+00:00"
+      },
+      {
+        "tool_use_id": "call_sf0a0yge06p4hbp9agi78rl5",
+        "tool": "Write",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/output.json",
+          "content": "{\n  \"person\": \"Sergej Schumilo\",\n  \"expertise\": [\n    \"基于硬件辅助（Intel PT / VT-x）与 hypervisor 快照的内核与 hypervisor fuzzing\",\n    \"覆盖率引导 fuzzing 的输入处理方法扩展（输入-状态对应、结构化输入合成、状态空间探索）\",\n    \"快照 fuzzing 框架的工程化与跨目标迁移（USB 设备→OS 内核→hypervisor→网络协议栈）\",\n    \"覆盖解码库（libxdc）与公开 fuzzing 工具链的建设、发布与维护\",\n    \"漏洞发现工具的有效性验证（跨 OS 内核文件系统缺陷、hypervisor 缺陷与 CVE 产出）\"\n  ],\n  \"stages\": [\n    {\n      \"period\": \"2014-2016\",\n      \"stage\": \"学位阶段：从 USB 设备 fuzzing 到硬件辅助 OS 内核 fuzzing 的技术基底建立\",\n      \"capability_change\": \"2014 年 B.Sc. 论文构建基于 QEMU/KVM 的 USB fuzzing 基础设施（工具 vUSBf，ss-works-bsc-2014、ss-timeline-001、ss-dec-001 均 documented）；2016 年 M.Sc. 论文将目标由 USB 设备升级到 OS 内核，引入 Intel PT 覆盖反馈与 VT-x 隔离/快照，构成 kAFL 的直接前身（ss-works-msc-2016、ss-timeline-003、ss-dec-002 均 documented）。该阶段确立『虚拟化 + 硬件辅助覆盖 + 快照恢复』技术基底，后续 kAFL/Nyx 的快照与虚拟化思路可追溯至此。需补注：2014-2016 学位阶段的导师与同伴具体反馈方式无公开一手材料（conversations/decisions 维度 gaps 一致），故技术基底的『确立』不宜读为已证个人决策，选题连续性也可能源于导师与机构研究主线导向。\",\n      \"evidence_ids\": [\n        \"ss-works-bsc-2014\",\n        \"ss-works-msc-2016\",\n        \"ss-timeline-001\",\n        \"ss-timeline-003\",\n        \"ss-dec-001\",\n        \"ss-dec-002\",\n        \"ss-convo-002\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2017\",\n      \"stage\": \"kAFL 顶会化：硬件辅助覆盖引导内核 fuzzing 范式的首次确立\",\n      \"capability_change\": \"作为第一作者在 USENIX Security 2017 发表 kAFL，使用 Intel PT 取覆盖、VT-x 快照隔离内核崩溃，跨 Linux/macOS/Windows 工作，给出每秒最高 17,000 次执行的性能数据，并在 ext4、HFS、APFS、NTFS 驱动中发现缺陷（ss-works-kafl-2017、ss-timeline-004、ss-dec-003 均 documented）。这是首次进入顶级安全会议，并与 Aschermann、Gawlik、Schinzel、Holz 形成稳定合作团队，方法抽象为 OS 无关、硬件辅助范式，确立后续 5 年研究主线。该阶段的能力变化可由 USENIX Security 17 论文页一手核验。\",\n      \"evidence_ids\": [\n        \"ss-works-kafl-2017\",\n        \"ss-timeline-004\",\n        \"ss-dec-003\",\n        \"ss-works-bsc-2014\",\n        \"ss-works-msc-2016\"\n      ],\n      \"confidence\": \"high\"\n    },\n    {\n      \"period\": \"2019-2020\",\n      \"stage\": \"方法扩展阶段：覆盖率引导局限的逐项方法扩展\",\n      \"capability_change\": \"REDQUEEN（输入-状态对应，NDSS 2019）、GRIMOIRE（结构合成，USENIX Security 2019）、HYPER-CUBE（高维 hypervisor fuzzing，NDSS 2020）、IJON（人工锚点深度状态空间探索，IEEE S&P 2020）四项工作的会议发表事实与作者列表经 timeline 维度及 R1-EV-01/02/03/04 一手核验为 documented（ss-timeline-006/007/009/010）；但其方法定位（输入-状态对应、结构合成、高维 hypervisor、人工锚点）在 works 维度仅依据 schumilo.de 一手记录，status 为 reported（ss-works-redqueen-2019、ss-works-hypercube-2020、ss-works-ijon-2020）。同期研究对象由 OS 内核扩展到 hypervisor（HYPER-CUBE，Schumilo 第一作者，R1-EV-03），方法层叠加高维输入构造与状态空间探索，为 Nyx 的覆盖引导 hypervisor fuzzing 做前置探索（ss-dec-004/006 documented）。\",\n      \"evidence_ids\": [\n        \"ss-timeline-006\",\n        \"ss-timeline-007\",\n        \"ss-timeline-009\",\n        \"ss-timeline-010\",\n        \"R1-EV-01\",\n        \"R1-EV-02\",\n        \"R1-EV-03\",\n        \"R1-EV-04\",\n        \"ss-works-redqueen-2019\",\n        \"ss-works-hypercube-2020\",\n        \"ss-works-ijon-2020\",\n        \"ss-dec-004\",\n        \"ss-dec-006\"\n      ],\n      \"confidence\": \"medium\"\n    },\n    {\n      \"period\": \"2021-2022\",\n      \"stage\": \"系统化与产业反馈阶段：Nyx/Nyx-Net 统一框架与外部认可\",\n      \"capability_change\": \"Nyx（USENIX Security 2021，ss-works-nyx-2021、ss-timeline-011、ss-dec-007 均 documented）整合 kAFL/HYPER-CUBE 路线为统一框架，基于快速快照与 affine types 变异引擎对 hypervisor 做 greybox 覆盖引导 fuzzing；Nyx 论文以覆盖率引导反驳『盲 fuzzing 为 hypervisor fuzzing 最优』论点（ss-dec-007 documented，short_quote: blind fuzzing is the most efficient approach to identify security issues in hypervisors），该证据应限定为反驳论点证据，而非基于 HYPER-CUBE 经验反馈的改进证据。评估中报告发现 44 个新缺陷、为其中 22 个申请 CVE（ext-05 reported，单一 USENIX 会议页来源；与 ext-01 Intel 新闻稿 authoritative_secondary documented 不同来源强度，不得并列标 documented）。Nyx-Net（EuroSys 2022）将快照机制演化为增量快照以适配网络协议栈 fuzzing：其会议发表事实由 ss-timeline-012（documented）一手支撑，方法定位在 works 维仅依据 schumilo.de 一手记录，status 为 reported（ss-works-nyxnet-2022）。同期 Nyx 获 Intel Hardware Security Award 二等奖（ext-01 documented），Intel 称其安全卓越中心已在内部使用并演进该技术；ss-dec-008（Intel 奖项 documented）维持 documented。ss-dec-009（Nyx-Net 产品化）中 Mozilla『currently integrating』Nyx into Firefox CI 与 Intel『actively maintaining a fork』为 nyx-fuzz.com 项目方进行时自述（R2-EV-03），Mozilla 官方 Firefox fuzzing 文档（R2-EV-02）未提及 Nyx，Intel 官方 fork 仓库（github.com/IntelLabs/nyx、github.com/intel/nyx）均 404 未一手确认，故 ss-dec-009 的产业采用主张应标 reported/inferred 并附限定，与 mechanisms[3].observed_outcomes 及 tensions 的限定一致（ss-dec-009 证据本身 status=documented 不变）。\",\n      \"evidence_ids\": [\n        \"ss-works-nyx-2021\",\n        \"ss-timeline-011\",\n        \"ss-timeline-012\",\n        \"ss-timeline-013\",\n        \"ss-dec-007\",\n        \"ss-dec-008\",\n        \"ss-dec-009\",\n        \"ss-works-nyxnet-2022\",\n        \"ext-01\",\n        \"ext-03\",\n        \"ext-05\",\n        \"R2-EV-02\",\n        \"R2-EV-03\"\n      ],\n      \"confidence\": \"medium\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"name\": \"硬件辅助与快照的虚拟化 fuzzing 技术基底建立及跨目标复用\",\n      \"starting_conditions\": \"2014-2016 学位阶段以 QEMU/KVM 构建 USB fuzzing 基础设施（vUSBf），并引入 Intel PT 覆盖反馈与 VT-x 隔离/快照构建硬件辅助 OS 内核 fuzzer（ss-works-bsc-2014、ss-works-msc-2016 documented）。选题与后续主线一致，构成可复用技术基底。需补注：2014-2016 学位阶段的导师与同伴具体反馈方式无公开一手材料（conversations/decisions 维度 gaps），技术基底的建立不宜读为已证个人决策。\",\n      \"repeated_practice\": \"以同一虚拟化 + 硬件辅助 + 快照基底反复迁移目标域：USB 设备（vUSBf）→ OS 内核（kAFL，2017）→ hypervisor（HYPER-CUBE 2020、Nyx 2021）→ 网络协议栈（Nyx-Net 2022，增量快照）。每次迁移保留并扩展覆盖解码、快照执行等基础设施（libxdc、Intel PT 覆盖、快照执行在工具间复用）。\",\n      \"feedback\": \"外部反馈来自多类渠道：USENIX Security 2017/2021、NDSS 2019/2020、IEEE S&P 2020、EuroSys 2022 同行评议接收（ss-timeline-004/006/007/009/010/011/012 documented）；Intel Hardware Security Award 2022 二等奖及 Intel 安全卓越中心内部采用（ext-01 documented）；学位阶段 Univention Open Source Absolventpreis 2015 与 Bernard-Rincklake-Preis 2018（ss-timeline-002 reported、ss-timeline-005 reported，独立页面未抓取，仅 schumilo.de 一手）。需补注：2014-2016 学位阶段的导师与同伴具体反馈方式无公开一手材料。\",\n      \"intermediate_capability\": \"形成『以快照隔离实现近零开销崩溃恢复 + 以硬件特性获取 OS 无关覆盖』的可复用工程能力，并能针对新目标域调整快照粒度（全量快照→增量快照）与变异策略。\",\n      \"observed_outcomes\": [\n        \"kAFL 跨 Linux/macOS/Windows 内核文件系统驱动发现缺陷，每秒最高 17,000 次执行（ss-works-kafl-2017、ss-timeline-004、ss-dec-003 documented）\",\n        \"HYPER-CUBE 相对现有 hypervisor fuzzer 发现逾两倍缺陷与最高两倍覆盖率，5 分钟内复现 VENOM 并发现 54 个新缺陷、获 37 个 CVE（R1-EV-03 documented，NDSS 2020 一手）\",\n        \"Nyx 评估中报告 44 个新缺陷、22 个 CVE 申请（ext-05 reported，单一 USENIX 会议页来源，与 ext-01 Intel 新闻稿 authoritative_secondary documented 不同来源强度）\",\n        \"Nyx-Net 将快照 fuzzing 扩展到网络协议栈：会议发表事实由 ss-timeline-012（documented，Nyx-Net EuroSys 2022）一手支撑；方法定位 ss-works-nyxnet-2022 reported（works 维，方法定位仅 schumilo.de 一手）\",\n        \"Google Scholar 累计引用 2030、h-index 9、i10-index 9（ext-04 documented，数值经 R1-EV-05 重新一手核验一致）——聚合引用计量仅作外部采纳广度旁证，不构成能力来源的独立证据\",\n        \"八个公开 fuzzing 工具（vUSBf、kAFL、redqueen、grimoire、ijon、hypercube、nyx、nyx-net）；vUSBf 来自 ss-comm-publictools-2014-2022，grimoire 来自 ss-works-toolchain-inferred 与 R2-EV-01（RUB-SysSec/grimoire 仓库一手核验），其余 6 个两来源均列\"\n      ],\n      \"evidence_ids\": [\n        \"ss-works-bsc-2014\",\n        \"ss-works-msc-2016\",\n        \"ss-works-kafl-2017\",\n        \"ss-works-nyx-2021\",\n        \"ss-works-nyxnet-2022\",\n        \"ss-works-toolchain-inferred\",\n        \"ss-timeline-004\",\n        \"ss-timeline-009\",\n        \"ss-timeline-011\",\n        \"ss-timeline-012\",\n        \"ss-dec-003\",\n        \"ss-dec-007\",\n        \"ext-01\",\n        \"ext-04\",\n        \"ext-05\",\n        \"R1-EV-03\",\n        \"R1-EV-05\",\n        \"R2-EV-01\",\n        \"ss-comm-publictools-2014-2022\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\",\n        \"distinctive\"\n      ],\n      \"confidence\": \"high\",\n      \"alternative_explanation\": \"选题连续性与技术基底复用也可能源于导师与机构（RUB-SysSec）研究主线导向，以及团队分工下不同合著者主导不同子方向，而非本人独立主导的系统性决策；2014-2016 学位阶段导师与同伴具体反馈方式无公开一手材料，技术基底『确立』的个人决策属性不可单独证实。\"\n    },\n    {\n      \"name\": \"覆盖率引导局限的方法扩展（输入-状态对应、结构合成、状态空间探索）\",\n      \"starting_conditions\": \"kAFL（2017）确立硬件辅助覆盖引导内核 fuzzing 范式后，覆盖率引导在输入校验（magic bytes、checksum）与高度结构化输入处存在结构性短板（ss-dec-004 documented）。\",\n      \"repeated_practice\": \"以针对结构性短板的逐项方法扩展推进研究，而非一次性重写：覆盖率引导→输入-状态对应（REDQUEEN，NDSS 2019）→结构合成（GRIMOIRE，USENIX Security 2019）→状态空间探索（IJON，IEEE S&P 2020）。其中 ss-works-redqueen-2019/ijon-2020 在 works 维度 status=reported，方法定位仅依据 schumilo.de 一手；会议发表事实由 ss-timeline-006/010 documented 及 R1-EV-01/04 一手核验支撑。同期 HYPER-CUBE（NDSS 2020，Schumilo 一作，R1-EV-03 documented）将目标由 OS 内核扩展到 hypervisor，方法层叠加高维输入构造。\",\n      \"feedback\": \"反馈主要来自 NDSS 2019、USENIX Security 2019、IEEE S&P 2020 同行评议接收（ss-timeline-006/007/010 documented，R1-EV-01/02/04 一手核验作者列表）。GRIMOIRE 评估中识别 19 个真实程序内存损坏缺陷并获 11 个新 CVE（R1-EV-02 documented，USENIX Security 2019 一手）。\",\n      \"intermediate_capability\": \"形成对覆盖率引导局限的识别能力，及针对不同局限类型选择对应方法原语（输入-状态对应、grammar-like 组合、人工锚点）的扩展能力，而非依赖单一覆盖引导。\",\n      \"observed_outcomes\": [\n        \"REDQUEEN 提出基于输入-状态对应的变异机制以绕过 magic bytes 与嵌套 checksum 等比较约束（R1-EV-01 documented，NDSS 2019 一手）\",\n        \"GRIMOIRE 通过 grammar-like 组合处理高度结构化输入，评估中识别 19 个真实程序内存损坏缺陷并获 11 个新 CVE（R1-EV-02、R2-EV-01 documented）\",\n        \"IJON 通过人工锚点（ijon_max/ijon_min/ijon_strdist 原语）定义状态空间度量，引导 fuzzer 探索纯覆盖引导无法到达的深度状态空间（R1-EV-04 documented，RUB-SysSec/ijon GitHub 仓库 README，因 IEEE Xplore/CSDL 官方页抓取失败采用的替代一手来源）\",\n        \"HYPER-CUBE 相对现有 hypervisor fuzzer 发现逾两倍缺陷与最高两倍覆盖率，5 分钟内复现 VENOM 并发现 54 个新缺陷、获 37 个 CVE（R1-EV-03 documented）\"\n      ],\n      \"evidence_ids\": [\n        \"ss-works-redqueen-2019\",\n        \"ss-works-ijon-2020\",\n        \"ss-works-hypercube-2020\",\n        \"ss-timeline-006\",\n        \"ss-timeline-007\",\n        \"ss-timeline-009\",\n        \"ss-timeline-010\",\n        \"ss-dec-004\",\n        \"R1-EV-01\",\n        \"R1-EV-02\",\n        \"R1-EV-03\",\n        \"R1-EV-04\",\n        \"R2-EV-01\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"方法扩展的叙事可能部分源于团队分工（不同合著者主导不同原语创新，如 REDQUEEN 第一作者为 Aschermann、GRIMOIRE 第一作者为 Blazytko），而非本人主导的系统性扩展；works 维度方法定位仅 schumilo.de 一手（reported），本人对这些方法原语的具体贡献度不可单独证实。存在幸存者偏差：该机制仅可观测已被顶会接收并发表的方法扩展成功案例，未被接收或未公开的补全尝试不可见，因果强度受发表筛选影响。\"\n    },\n    {\n      \"name\": \"学术-产业双轨反馈与工具公开配套产出\",\n      \"starting_conditions\": \"kAFL（2017）被 USENIX Security 接收后，研究产出同时具备学术评议与产业实践两条潜在反馈通道；同期已有公开工具发布习惯（vUSBf 2014，ss-comm-publictools-2014-2022 documented）。\",\n      \"repeated_practice\": \"每项研究产出配套开源工具与公开演讲（论文、开源代码与公开演讲三者配套产出），使原型同时暴露于同行评议与实践者两条反馈通道。学术侧在 USENIX Security/NDSS/IEEE S&P/EuroSys 反复发表；产业侧在 Black Hat Europe 2019（『What the Fuzz』，ss-dec-005 reported、ss-timeline-008 reported，blackhat.com 议程页 403 未独立核验）、FuzzCon Europe 2020、USENIX Security 2021 等会场宣讲（ss-comm-talks-2019-2021 documented）。配套工具持续发布并后期统一收口到 nyx-fuzz 组织（nyx、libxdc）与站点 nyx-fuzz.com（ss-works-toolchain-inferred inferred，仅作旁证）。\",\n      \"feedback\": \"学术侧反馈为顶会同行评议接收；产业侧反馈为 Black Hat/FuzzCon 等实践者会场接受与 Intel 厂商奖项。Intel 官方新闻稿称 Nyx『greatly improved the ability to test critical system software』，并称其安全卓越中心已在内部使用并演进该技术（ext-01 documented，authoritative_secondary）。\",\n      \"intermediate_capability\": \"形成将研究原型同时转向学术评议与实践者采纳的双轨输出能力，以及将工具整合为可被第三方维护与集成的基础设施（libxdc 作为共享覆盖库）的工程化能力。\",\n      \"observed_outcomes\": [\n        \"学术侧：kAFL/REDQUEEN/GRIMOIRE/HYPER-CUBE/IJON/Nyx/Nyx-Net 七篇代表作跨 2017-2022 顶会发表（ss-timeline-004/006/007/009/010/011/012 documented）\",\n        \"产业侧：据 nyx-fuzz.com 项目方自述（ss-dec-009，单一一手），Mozilla『currently integrating』Nyx into Firefox CI（进行时，非完成式），Intel『actively maintaining a fork of an older version』；Mozilla 官方 Firefox fuzzing 文档（R2-EV-02 documented）未提及 Nyx（列出 libFuzzer/AFLFuzz/LangFuzz/Avalanche/domino/Grizzly/Android Monkey），security.mozilla.org 连接被拒未取得；Intel 官方 fork 仓库（github.com/IntelLabs/nyx、github.com/intel/nyx）均 404 未一手确认。该产业采用主张不得与 ext-01（Intel 官方新闻稿 authoritative_secondary）等量标 documented，应标 reported/inferred 并明示未获 Mozilla/Intel 官方页面交叉核实（R2-EV-03 核实原意为进行时表述）\",\n        \"Intel Hardware Security Award 2022 二等奖（50,000 USD）与第 9 届德国 IT Security Award 决赛（ss-dec-008 documented；ss-timeline-013 documented；ss-timeline-014 reported，独立页面未抓取）\",\n        \"八个公开 fuzzing 工具的持续发布（vUSBf、kAFL、redqueen、grimoire、ijon、hypercube、nyx、nyx-net）；vUSBf 来自 ss-comm-publictools-2014-2022，grimoire 来自 ss-works-toolchain-inferred 与 R2-EV-01，其余 6 个两来源均列\"\n      ],\n      \"evidence_ids\": [\n        \"ss-comm-publictools-2014-2022\",\n        \"ss-comm-talks-2019-2021\",\n        \"ss-comm-awards-2015-2022\",\n        \"ss-works-toolchain-inferred\",\n        \"ss-timeline-008\",\n        \"ss-timeline-013\",\n        \"ss-timeline-014\",\n        \"ss-dec-005\",\n        \"ss-dec-008\",\n        \"ss-dec-009\",\n        \"ext-01\",\n        \"R2-EV-01\",\n        \"R2-EV-02\",\n        \"R2-EV-03\"\n      ],\n      \"validation_tests\": [\n        \"repeated\",\n        \"generative\"\n      ],\n      \"confidence\": \"medium\",\n      \"alternative_explanation\": \"双轨反馈部分依赖 nyx-fuzz.com 项目方单一一手自述（Mozilla/Intel 产业采用），Mozilla 官方文档未提及 Nyx、Intel fork 仓库未确认，产业采纳的完成度与范围被高估的风险存在；Black Hat Europe 2019 议程页 403 未独立核验，仅以 schumilo.de 一手为据。『论文-代码-演讲配套产出』作为可迁移特征的证据 status=inferred（源自 ss-works-toolchain-inferred），不宜读作已证实践特征。存在声誉偏差：Intel 官方新闻稿与 Google Scholar 引用计量作为外部认可被反复引用，权重高于非官方渠道，可能放大对工具实际影响的判断。\"\n    },\n    {\n      \"name\": \"长期合著网络的稳定协作与机构归属\",\n      \"starting_conditions\": \"自 kAFL（2017）起即与 Aschermann、Gawlik、Schinzel、Holz 合著，形成以 RUB-SysSec 组（Holz 主持）为核心的合著网络（ss-comm-peernetwork-2017-2022 documented；ss-convo-003 inferred）。\",\n      \"repeated_practice\": \"2017-2022 七篇代表作中 Thorsten Holz 出现在全部七篇，Cornelius Aschermann 出现在七篇，Ali Abbasi 出现在四至五篇，Simon Wörner 与 Andrea Jemmett 出现在后期工作（ss-comm-peernetwork-2017-2022 documented）。各篇合著署名经一手核验：kAFL（ss-timeline-004）、REDQUEEN（R1-EV-01）、GRIMOIRE（R1-EV-02）、HYPER-CUBE（R1-EV-03，Schumilo 一作）、IJON（R1-EV-04，RUB-SysSec/ijon GitHub README）、Nyx（ss-timeline-011）、Nyx-Net（ss-timeline-012）。Google Scholar 高频共同作者 Aschermann/Abbasi/Blazytko 与 schumilo.de 列示吻合（ext-04/ext-06）。\",\n      \"feedback\": \"合著网络提供合著审阅与技术迁移通道，使工作从 OS 内核 fuzzing 扩展到 hypervisor fuzzing；但导师/合作指导者关系（与 Thorsten Holz）仅由长期共同作者结构推断，无一手评价或公开致谢文字佐证其指导机制与反馈方式（external 维度 gaps）。\",\n      \"intermediate_capability\": \"形成依托稳定合著网络与机构（RUB-SysSec）持续产出顶会论文的协作能力。\",\n      \"observed_outcomes\": [\n        \"各篇合著署名一手核验（ss-timeline-004/006/007/009/010/011/012 + R1-EV-01/02/03/04 documented）\",\n        \"Google Scholar 高频共同作者 Aschermann/Abbasi/Blazytko 与 schumilo.de 列示吻合（ext-04/ext-06）\"\n      ],\n      \"evidence_ids\": [\n        \"ss-comm-peernetwork-2017-2022\",\n        \"ss-convo-003\",\n        \"ss-timeline-004\",\n        \"ss-timeline-006\",\n        \"ss-timeline-007\",\n        \"ss-timeline-009\",\n        \"ss-timeline-010\",\n        \"ss-timeline-011\",\n        \"ss-timeline-012\",\n        \"R1-EV-01\",\n        \"R1-EV-02\",\n        \"R1-EV-03\",\n        \"R1-EV-04\",\n        \"ext-04\",\n        \"ext-06\"\n      ],\n      \"validation_tests\": [\n        \"repeated\"\n      ],\n      \"confidence\": \"low\",\n      \"alternative_explanation\": \"机制4 仅满足『跨材料/跨时期重复』一项验证标准，generative（独立产出新结果）与 distinctive（相对对照的区分度）标准缺乏独立证据支撑，故 confidence=low。合著网络的持续出现既作为机制起点条件又作为观测结果，存在循环论证风险（circular reasoning）；与 tensions 中『合著网络与个人贡献难分离』及幸存者偏差识别相符。机构归属（RUB-SysSec 组、Holz/Aschermann 长期合著网络）与顶会接收筛选对机制4 独立解释力构成限制：合著网络的存在可由机构资源配置与导师声誉解释，个人贡献不可单独分离。不得为凑齐 generative/distinctive 而搜索或拔高证据。\"\n    }\n  ],\n  \"tensions\": [\n    \"学术代表作集中于 USENIX Security/NDSS/IEEE S&P/EuroSys 等顶级学术会议，而 person_json 的 selected_conference_evidence 标为 Black Hat EU（产业会议）；两者并不矛盾但侧重不同，解读外部评价时应区分学术同行评议与产业演讲两类渠道。\",\n    \"Mozilla『currently integrating』Nyx into Firefox CI 与 Intel『actively maintaining a fork』为 nyx-fuzz.com 项目方进行时自述（ss-dec-009，单一一手），Mozilla 官方 Firefox fuzzing 文档（R2-EV-02）未提及 Nyx，Intel 官方 fork 仓库（github.com/IntelLabs/nyx、github.com/intel/nyx）均 404 未一手确认；产业采纳主张未获 Mozilla/Intel 官方页面交叉核实，完成度与范围存在被高估风险。\",\n    \"ss-dec-009 证据本身 status=documented，但其 Mozilla/Intel 产业采用主张经 R2-EV-02 部分反证、R2-EV-03 限定（进行时表述）、Intel fork 仓库未确认，故在 stages/mechanisms 标注中需标 reported/inferred 并附限定，证据 status 与主张来源强度并非同一层级。\",\n    \"ext-05（Nyx 44 bugs/22 CVEs，单一 USENIX 会议页）status=reported，与 ext-01（Intel 新闻稿 authoritative_secondary documented）来源强度不同，不得并列标 documented；同一阶段内不同外部来源的强度需区分。\",\n    \"ss-works-nyxnet-2022（works 维，方法定位仅 schumilo.de 一手，reported）与 ss-timeline-012（timeline 维，Nyx-Net EuroSys 2022 会议发表事实，documented）需区分两维度，不得将方法定位与会议发表事实等量标 documented。\",\n    \"Intel 2022-08-10 新闻稿将 Schumilo 标注为 Ruhr-Universität Bochum、Holz 标注为 CISPA；schumilo.de 自述为 RUB 系统安全组 PhD 学生与前安全研究员。Holz 在 2020 年前后由 RUB 迁至 CISPA，但 Schumilo 本人是否随组迁移未见一手材料确认，存在 affiliation 描述不一致的潜在冲突。\",\n    \"合著网络的持续出现既作为机制4 起点条件又作为观测结果，存在循环论证风险（circular reasoning）；个人贡献与合著网络/机构资源难分离。\",\n    \"幸存者偏差：四个机制均基于 2017-2022 已被 USENIX Security/NDSS/IEEE S&P/EuroSys 接收并发表的论文构建，未被接收的投稿、未公开工具与失败方向在材料中不可见，机制2『方法扩展』仅可观测扩展成功案例，无法观测扩展尝试未达发表或被拒的对照，因果强度受发表筛选影响。\",\n    \"声誉偏差：Intel 官方新闻稿与 Google Scholar 引用计量作为外部认可被反复引用，权重高于非官方渠道，可能放大对工具实际影响的判断；聚合引用计量仅作外部采纳广度旁证，不构成能力来源的独立证据。\"\n  ],\n  \"transferable_practices\": [\n    \"以学位论文选题对齐后续研究主线：B.Sc./M.Sc. 学位论文选题与后续顶会论文主线对齐，使学位产出可复用为研究原型（ss-works-bsc-2014、ss-works-msc-2016、ss-works-kafl-2017 documented）。\",\n    \"以同一技术基底（虚拟化 + 硬件辅助覆盖 + 快照恢复）反复迁移目标域，针对新目标调整快照粒度与变异策略而非从零重建（ss-works-kafl-2017、ss-works-nyx-2021、ss-works-nyxnet-2022、ss-timeline-004/011/012 documented）。\",\n    \"每项研究产出配套开源工具与公开演讲（论文、开源代码与公开演讲三者配套产出），使原型同时暴露于同行评议与实践者两条反馈通道（ss-comm-publictools-2014-2022、ss-comm-talks-2019-2021 documented；配套产出作为可迁移特征的证据 status=inferred，源自 ss-works-toolchain-inferred，不宜读作已证实践特征）。\",\n    \"以针对结构性短板的逐项方法扩展（覆盖率引导→输入-状态对应→结构合成→状态空间探索）推进研究，而非一次性重写（ss-dec-004、ss-timeline-006/007/010 documented）。\",\n    \"以可核验产出（发现缺陷数、CVE 申请数、执行吞吐）作为工具有效性的外部校验依据，而非以宣传性表述替代（ss-works-kafl-2017、R1-EV-03、ext-05、ss-dec-007 documented/reported 按各自来源强度）。\",\n    \"将共享基础设施（如 libxdc 覆盖解码库）在多个工具间复用，使工具建设工程化而非一次性产出（ss-works-toolchain-inferred inferred，仅作旁证）。\"\n  ],\n  \"non_transferable_conditions\": [\n    \"长期稳定合著网络（Holz/Aschermann/Abbasi 等，2017-2022 全程合著）与机构归属（RUB-SysSec 组）属个人特有条件，非可迁移做法；个人贡献与合著网络/机构资源难分离。\",\n    \"Intel Hardware Security Award 2022 与 Intel 安全卓越中心内部采用属特定厂商与特定时间窗口的外部认可，伴随资金支持，可能影响后续工具产品化决策权重，非可复制的研究路径。\",\n    \"学位阶段（FH Münster B.Sc./M.Sc.）的选题连续性部分依托所在院校课程与导师配置，2014-2016 学位阶段的导师与同伴具体反馈方式无公开一手材料，不宜作为可迁移做法。\",\n    \"顶会发表筛选本身构成幸存者偏差来源：四个机制均基于已被顶会接收的论文构建，未被接收的投稿与失败方向不可见，外部认可的可复制性受发表筛选限制。\"\n  ],\n  \"open_questions\": [\n    \"Atropos（USENIX Security 2024，Web 应用 Server-Side 漏洞 fuzzing）：Google Scholar（R1-EV-05）列示且归属 Sergej Schumilo，但 schumilo.de 主页未列示，USENIX Security 2024 多个 URL 路径（/presentation/schumilo、/presentation/petzsch、/presentation/petzsch-heuser）均 404，搜索摘要作者归属不确定（可能非 Sergej Schumilo）。作者归属与一手页面均未确认，保留为资料缺口。\",\n    \"IJON 的 IEEE S&P 2020 官方页面（IEEE Xplore/CSDL）一手未取得：IEEE Xplore(document/9152759) 返回空白，DBLP(dblp.org/rec/conf/sp/AschermannSAH20.html) 返回 Anubis 拦截页；R1-EV-04（RUB-SysSec/ijon GitHub 仓库 README）维持为当前可用一手替代来源，但非 IEEE 官方一手。\",\n    \"x.com/ms_s3c 因 HTTP 402 未抓取，当前职业身份与社交发布记录无法独立核验；schumilo.de 用『former security researcher』表述职业状态（2022 自述，ss-dec-010 inferred），具体离开 RUB syssec 的日期、去向机构与触发条件未确认。\",\n    \"Black Hat Europe 2019『What the Fuzz』官方议程页（blackhat.com）返回 403，未能独立核验讲题、共讲人与具体披露内容；当前仅依据 schumilo.de 本人主页记录（ss-dec-005/ss-timeline-008 reported）。\",\n    \"Bernard-Rincklake-Preis（2018）与 Univention Absolventpreis（2015）均依赖 schumilo.de 一手记录，FH Münster 与 linux-magazin 的独立页面未能抓取，奖项无法以独立来源双重佐证（ss-timeline-002/005 reported）。\",\n    \"2014-2016 学位阶段的导师与同伴具体反馈方式、本人关于入门安全研究、失败与技术转向动机的自述材料均缺失（conversations/decisions 维度 gaps），成长机制中反馈来源与重复练习环节的证据不足。\",\n    \"Mozilla 官方是否在 Bugzilla、Mozilla 工程博客或 TaskCluster 配置中提及 Nyx 集成进度未取得（security.mozilla.org ECONNREFUSED，Firefox fuzzing 官方文档未提及 Nyx）；Intel 维护的 fork 的具体 GitHub 仓库位置未一手确认（IntelLabs/nyx 与 intel/nyx 均 404）。\",\n    \"近两年（2024-2026）的新作品、CVE 与公开 writeup 未在 schumilo.de 主页列示，且本次未额外检索独立来源；当前时间线止于 2022。\"\n  ]\n}\n"
+        },
+        "success": true,
+        "content_sha256": "eece8cc027e425d072bf9377ed90d826424feda0051cc1f62a6b593c93037c63",
+        "accessed_at": "2026-09-29T20:09:21.066640+00:00"
+      },
+      {
+        "tool_use_id": "call_0i1x0ypvi2ffkvplnpys0fwb",
+        "tool": "Read",
+        "input": {
+          "file_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/sub_workspace/sergej-schumilo-synthesis-v5-20260930-040523-993/output.json",
+          "limit": 5
+        },
+        "success": true,
+        "content_sha256": "07f9955e27c31ce56fb058834e6e5b03a7032cb176116e60c5178e59c30585bc",
+        "accessed_at": "2026-09-29T20:09:21.066649+00:00"
+      }
+    ],
+    "tool_audit_path": "/Users/c0ss4ck/Projects/C0ss4ck/ZeroMDASH/research/runs/tools/1790712561066670000-sergej-schumilo-synthesis-v5.json",
+    "label": "Sergej Schumilo:synthesis:v5",
+    "elapsed_seconds": 237.11,
+    "prompt_sha256": "4ae53562d371c42ec1661854f258a7f0ec877ee12eeb02e8b81a722e9162ddae",
+    "num_turns": 17,
+    "total_cost_usd": 1.709516,
+    "usage": {
+      "input_tokens": 210058,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 685952,
+      "output_tokens": 12650,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "model_usage": {
+      "GLM-5.2": {
+        "inputTokens": 210058,
+        "outputTokens": 12650,
+        "cacheReadInputTokens": 685952,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 1.709516,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000
+      }
+    },
+    "recovered_after_max_turns": false,
+    "formatted_or_recovered": false,
+    "recovery_usage": null
+  }
+}
