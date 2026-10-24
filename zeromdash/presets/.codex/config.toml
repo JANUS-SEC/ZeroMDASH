@@ -1,0 +1,29 @@
+# Codex CLI per-project config for ZeroMDASH sub_workspace.
+# Sandbox: allow workspace writes everywhere under the ZeroMDASH workspace
+# (NOT just this sub_workspace), but block target repo source trees.
+
+approval_policy = "on-failure"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+writable_roots = [
+    "{workspace_base}",
+    "{main}",
+    "{similar}",
+    "{log}",
+]
+network_access = true
+# 把 /tmp 与 $TMPDIR 排除出可写区, 强制 scratch 落到 {sub_workspace}, 避免
+# agent 在 workspace 树外面留下中间产物 (默认两者是包含在可写区里的)。
+exclude_slash_tmp = true
+exclude_tmpdir_env_var = true
+
+[shell_environment_policy]
+inherit = "core"
+include_only = ["PATH", "HOME", "LANG", "LC_*", "SHELL", "TERM", "USER"]
+
+[shell_environment_policy.set]
+ZEROMDASH_NODE = "{node}"
+ZEROMDASH_SUBTASK = "{subtask_id}"
+ZEROMDASH_TARGET = "{target}"
+ZEROMDASH_WORKSPACE = "{workspace_base}"
