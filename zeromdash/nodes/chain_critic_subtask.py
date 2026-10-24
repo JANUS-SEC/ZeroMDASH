@@ -9,9 +9,9 @@ from zeromdash import presets, prompts, skills as skills_mod
 from zeromdash.agents import AgentResult, normalize_agent_name
 from zeromdash.state import ReviewTurn, ZeroMDASHState
 
+from .core.chain_context import chain_prompt_context
 from .core.config import _agent_configs_with_node_variant, agent_config_variants_for_node
 from .core.context import _node_focus, _ws
-from .core.domain_registry import domain_registry_json
 from .core.invocation import (
     _agent_errors,
     _emit_node_fallback,
@@ -121,6 +121,7 @@ def chain_critic_subtask(state: ZeroMDASHState, *, backends=None) -> dict:
     investigation = normalize_chain_fact_fields(
         chain_investigation_json(state.get("chain_investigation", ""))
     )
+    input_context = chain_prompt_context(state)
     variants = agent_config_variants_for_node(
         "chain_critic_subtask",
         backends,
@@ -161,8 +162,7 @@ def chain_critic_subtask(state: ZeroMDASHState, *, backends=None) -> dict:
 
         prompt_text = prompts.CHAIN_CRITIC_SUBTASK.format(
             chain_candidate_json=json.dumps(chain, ensure_ascii=False, indent=2),
-            chain_pool_json=json.dumps(state.get("chain_pool") or [], ensure_ascii=False, indent=2),
-            domain_registry_json=domain_registry_json(state),
+            **input_context,
             chain_investigation_json=json.dumps(investigation, ensure_ascii=False, indent=2),
             history_json=json.dumps(history, ensure_ascii=False, indent=2),
             repo_path=state["repo_path"],
