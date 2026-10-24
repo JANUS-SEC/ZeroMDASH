@@ -1438,15 +1438,15 @@ pip install -e .
 
 ### 4.2 准备 agent-config
 
-仓库里的 `zeromdash.oss.demo.yaml` 是单仓库 **demo / template**，用于展示一个完整 agent-config 应该覆盖哪些 node、每个字段怎么写，以及哪些 focus 应该由具体任务填充。`zeromdash.oss.multi-repo-demo.yaml` 展示主仓库加插件/功能仓库组成一个目标时的 `target_repos` 写法。它们都不是某个目标的最佳配置，不应该不加修改地用于真实任务。
+仓库里的 `demo/zeromdash.oss.demo.yaml` 是单仓库 **demo / template**，用于展示一个完整 agent-config 应该覆盖哪些 node、每个字段怎么写，以及哪些 focus 应该由具体任务填充。`demo/zeromdash.oss.multi-repo-demo.yaml` 展示主仓库加插件/功能仓库组成一个目标时的 `target_repos` 写法。它们都不是某个目标的最佳配置，不应该不加修改地用于真实任务。
 
 建议使用方式：
 
 ```bash
-cp zeromdash.oss.demo.yaml zeromdash.oss.<target>.yaml
+cp demo/zeromdash.oss.demo.yaml zeromdash.oss.<target>.yaml
 
 # 多仓库目标
-cp zeromdash.oss.multi-repo-demo.yaml zeromdash.oss.<target>.yaml
+cp demo/zeromdash.oss.multi-repo-demo.yaml zeromdash.oss.<target>.yaml
 ```
 
 然后按目标领域修改：
@@ -1470,7 +1470,7 @@ cp zeromdash.oss.multi-repo-demo.yaml zeromdash.oss.<target>.yaml
 zeromdash.oss.local.yaml
 ```
 
-`.gitignore` 默认忽略 `zeromdash.oss.*.yaml`，但保留两个 demo YAML。多仓库目标当前只支持 full scan；在 per-repository diff schema 落地前不能使用 `--scan-mode diff`。
+`.gitignore` 默认忽略 `zeromdash.oss.*.yaml`，但保留 `demo/` 下的两个 demo YAML。多仓库目标当前只支持 full scan；在 per-repository diff schema 落地前不能使用 `--scan-mode diff`。
 
 ---
 

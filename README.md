@@ -22,8 +22,8 @@ zeromdash \
 # Gather cross-target chains from completed workspaces
 zeromdash \
   --scan-mode gather \
-  --gather-workspace-to-chain gather-multi-target-config.example.yaml \
-  --agent-config gather-agent-config.example.yaml
+  --gather-workspace-to-chain demo/gather-multi-target-config.example.yaml \
+  --agent-config demo/gather-agent-config.example.yaml
 ```
 
 ### Full/diff workspace layout
@@ -216,8 +216,8 @@ zeromdash --start-from-summary .zeromdash/workspace_for_curl
 # Build cross-target chains from completed source workspaces
 zeromdash \
   --scan-mode gather \
-  --gather-workspace-to-chain gather-multi-target-config.example.yaml \
-  --agent-config gather-agent-config.example.yaml
+  --gather-workspace-to-chain demo/gather-multi-target-config.example.yaml \
+  --agent-config demo/gather-agent-config.example.yaml
 ```
 
 When `--target` is a local directory, ZeroMDASH copies the complete source tree
@@ -229,13 +229,13 @@ not modified, and local `.git` / `.zeromdash` metadata is not copied.
 `--agent-config` is the preferred way to set workflow limits, task focus, and
 per-node runtime settings:
 
-Use `zeromdash.oss.demo.yaml` for a single repository. Use
-`zeromdash.oss.multi-repo-demo.yaml` when one target product is composed of a
-core repository plus plugin or feature repositories. Multi-repo targets
+Use `demo/zeromdash.oss.demo.yaml` for a single repository. Use
+`demo/zeromdash.oss.multi-repo-demo.yaml` when one target product is composed of
+a core repository plus plugin or feature repositories. Multi-repo targets
 currently support full scan mode only. Gather mode instead consumes two or more
 already-completed workspaces; its manifest and coordinator examples live at
-`gather-multi-target-config.example.yaml` and
-`gather-agent-config.example.yaml` in the repository root.
+`demo/gather-multi-target-config.example.yaml` and
+`demo/gather-agent-config.example.yaml`.
 
 ```yaml
 common_focus: >
