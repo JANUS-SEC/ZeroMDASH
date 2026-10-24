@@ -427,6 +427,77 @@ class ChainPlanningTest(unittest.TestCase):
 
         return run
 
+    def test_plan_chains_keeps_large_inputs_on_disk(self):
+        with TemporaryDirectory() as tmp:
+            ws = Workspace.create(tmp, target="libfoo", task_id="chain-large-pool")
+            primitives = [
+                {
+                    **_primitive_a(),
+                    "primitive_id": f"prim_{index}",
+                    "confirmation": {
+                        "critic_verdict": "confirm",
+                        "reasoning": "full-primitive-evidence " * 400,
+                    },
+                }
+                for index in range(174)
+            ]
+            registry = {
+                **nodes.legacy_domain_registry("libfoo"),
+                "notes": ["full-registry-evidence " * 4000],
+            }
+            state = {
+                **_workspace_state(ws),
+                "chain_pool": primitives,
+                "domain_registry": registry,
+                "top_K": {"chain": 28},
+            }
+            with patch(
+                "zeromdash.nodes._invoke_with_output_retry",
+                side_effect=self._fake_chain_planner({"chains": []}),
+            ) as invoke:
+                update = nodes.plan_chains(state)
+
+            self.assertEqual(update["chain_plan"], [])
+            prompt = invoke.call_args.args[2]
+            self.assertLess(len(prompt), 12_000)
+            self.assertNotIn("full-primitive-evidence", prompt)
+            self.assertNotIn("full-registry-evidence", prompt)
+            pool_path = ws.state_path("chain_pool.json")
+            registry_path = ws.state_path("chain_domain_registry.json")
+            prefilter_path = ws.log_path("review_log") / "chain_prefilter.json"
+            for path in (pool_path, registry_path, prefilter_path):
+                self.assertIn(str(path), prompt)
+            self.assertGreater(pool_path.stat().st_size, 1_048_576)
+            self.assertEqual(json.loads(pool_path.read_text())["primitives"], primitives)
+            self.assertEqual(json.loads(registry_path.read_text()), registry)
+            self.assertIn("full pool in bounded batches", prompt)
+
+    def test_chain_input_files_refresh_from_resumed_state(self):
+        with TemporaryDirectory() as tmp:
+            ws = Workspace.create(tmp, target="libfoo", task_id="chain-resume-inputs")
+            state = {
+                **_workspace_state(ws),
+                "chain_pool": [_primitive_a(), _primitive_b()],
+            }
+            context = nodes.chain_prompt_context(state)
+            pool_path = ws.state_path("chain_pool.json")
+            first_mtime = pool_path.stat().st_mtime_ns
+            self.assertEqual(nodes.chain_prompt_context(state), context)
+            self.assertEqual(pool_path.stat().st_mtime_ns, first_mtime)
+
+            state["chain_pool"] = [_primitive_b()]
+            state["domain_registry"] = {
+                **nodes.legacy_domain_registry("libfoo"),
+                "notes": ["Updated registry from resumed state"],
+            }
+            context = nodes.chain_prompt_context(state)
+            self.assertEqual(context["primitive_count"], 1)
+            self.assertEqual(json.loads(pool_path.read_text())["primitives"], [_primitive_b()])
+            self.assertEqual(
+                json.loads(ws.state_path("chain_domain_registry.json").read_text()),
+                state["domain_registry"],
+            )
+
     def test_plan_chains_uses_capability_closure_and_skips_unrelated_terminal(self):
         with TemporaryDirectory() as tmp:
             ws = Workspace.create(tmp, target="libfoo", task_id="chain-plan")
@@ -964,6 +1035,51 @@ class ChainFinalizeTest(unittest.TestCase):
             self.assertEqual(finding["ordered_primitive_ids"], ["prim_a", "prim_b"])
             self.assertTrue((ws.log_path("chain_res") / f"{candidate['chain_id']}.json").is_file())
 
+    def test_chain_investigator_and_critic_keep_pool_on_disk(self):
+        with TemporaryDirectory() as tmp:
+            ws = Workspace.create(tmp, target="libfoo", task_id="chain-subtask-files")
+            candidate, bindings = self._simple_candidate()
+            investigation = self._simple_investigation(bindings)
+            unrelated = {
+                **_primitive_a(),
+                "primitive_id": "prim_unrelated",
+                "confirmation": {"reasoning": "unrelated-pool-evidence " * 50_000},
+            }
+            state = {
+                **_workspace_state(ws),
+                "chain_candidate": candidate,
+                "chain_pool": [_primitive_a(), _primitive_b(), unrelated],
+                "iteration": 0,
+                "min_critic_skills": 0,
+            }
+            result = AgentResult(json.dumps(investigation), "", 0, "codex")
+
+            def invoke(*args, **kwargs):
+                ok, detail = kwargs["validate"](result)
+                return result, [] if ok else [detail]
+
+            with patch.object(nodes, "_invoke_with_output_retry", side_effect=invoke) as run:
+                update = nodes.chain_investigate_subtask(state)
+            self.assertTrue(update["chain_investigation_valid"])
+            investigator_prompt = run.call_args.args[2]
+            state.update(update)
+            review = AgentResult(json.dumps(self._simple_review(bindings)), "", 0, "codex")
+            with patch.object(nodes, "_make_agent", return_value=object()), patch.object(
+                nodes, "_run_agent_with_config", return_value=review
+            ) as run:
+                nodes.chain_critic_subtask(state)
+            critic_prompt = run.call_args.args[3]
+
+            for prompt in (investigator_prompt, critic_prompt):
+                self.assertLess(len(prompt), 16_000)
+                self.assertNotIn("unrelated-pool-evidence", prompt)
+                self.assertIn(str(ws.state_path("chain_pool.json")), prompt)
+                self.assertIn(str(ws.state_path("chain_domain_registry.json")), prompt)
+            self.assertEqual(
+                json.loads(ws.state_path("chain_pool.json").read_text())["primitives"][-1],
+                unrelated,
+            )
+
     def test_finalize_chain_agent_can_promote_confirmed_contract_mismatch(self):
         with TemporaryDirectory() as tmp:
             ws = Workspace.create(tmp, target="libfoo", task_id="chain-agent-finalize")
@@ -1016,9 +1132,13 @@ class ChainFinalizeTest(unittest.TestCase):
                 nodes,
                 "_run_agent_with_config",
                 return_value=result,
-            ):
+            ) as run:
                 update = nodes.finalize_chain_subtask(state)
 
+            prompt = run.call_args.args[3]
+            self.assertIn(str(ws.state_path("chain_pool.json")), prompt)
+            self.assertIn(str(ws.state_path("chain_domain_registry.json")), prompt)
+            self.assertNotIn("root_cause_anchor", prompt)
             self.assertEqual(len(update["chain_findings"]), 1)
             finding = update["chain_findings"][0]
             self.assertEqual(finding["title"], "agent-finalized chain")

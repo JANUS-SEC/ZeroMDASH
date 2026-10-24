@@ -23,8 +23,8 @@ from .core.chain_compatibility import (
     stable_chain_id,
     stable_edge_id,
 )
+from .core.chain_context import chain_prompt_context
 from .core.context import _node_focus, _ws
-from .core.domain_registry import domain_registry_json
 from .core.invocation import _invoke_with_output_retry
 from .core.io import _planner_fallback_json, _try_json
 from .core.primitive_qualification import capability_signature, normalize_capabilities
@@ -574,18 +574,10 @@ def plan_chains(state: ZeroMDASHState, *, backends=None) -> dict:
         repo_path=state.get("repo_path", ""),
         focus=focus or "(none)",
         top_k=top_k,
-        chain_pool_json=json.dumps(primitives, ensure_ascii=False, indent=2),
-        domain_registry_json=domain_registry_json(state),
-        prefilter_json=json.dumps(
-            {
-                "schema_version": CHAIN_SCHEMA_VERSION,
-                "chain_count": len(prefilter_candidates),
-                "chains": prefilter_candidates,
-                "pruning_log": str(pruning_path),
-            },
-            ensure_ascii=False,
-            indent=2,
-        ),
+        **chain_prompt_context(state),
+        prefilter_path=str(prefilter_path),
+        prefilter_count=len(prefilter_candidates),
+        pruning_path=str(pruning_path),
     )
     _, errors = _invoke_with_output_retry(
         ws,

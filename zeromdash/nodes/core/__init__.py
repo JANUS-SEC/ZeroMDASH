@@ -2,6 +2,7 @@
 
 from . import (
     chain_compatibility,
+    chain_context,
     chain_qualification,
     config,
     constants,
@@ -41,6 +42,7 @@ CORE_MODULES = (
     qualification,
     primitive_qualification,
     chain_compatibility,
+    chain_context,
     chain_qualification,
     report_dedup,
     result_artifacts,

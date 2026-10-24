@@ -1000,6 +1000,18 @@ CRITIC_ONE = CRITIC_SUBTASK
 # Deprecated prompt alias for integrations importing the old symbol.
 INVESTIGATE_SUBAGENT = INVESTIGATE_SUBTASK
 
+CHAIN_CONTEXT_FILES = """\
+Confirmed primitive pool file: {chain_pool_path}
+This JSON object contains `primitives[]` with {primitive_count} complete records,
+including capabilities, constraints, evidence, and confirmation.
+Domain Model and Invariant Registry file: {domain_registry_path}
+
+Read these input files before deciding. Use bounded reads or local JSON queries
+to inspect relevant records; do not dump the entire pool into a tool response.
+Retrieve complete primitive evidence by primitive_id when checking a binding.
+The file references do not narrow the analysis scope or omit any primitives.
+"""
+
 PLAN_CHAINS = """\
 You are the ZeroMDASH chain-planning agent.
 Target: {target}
@@ -1007,14 +1019,14 @@ Repo: {repo_path}
 Analysis focus: {focus}
 Top-K policy: return at most {top_k} final chain candidates.
 
-Confirmed primitive pool:
-{chain_pool_json}
+""" + CHAIN_CONTEXT_FILES + """
+Deterministic prefilter candidates file: {prefilter_path}
+Read its `chains[]` and `config.attacker_entry_capabilities`; the prefilter
+contains {prefilter_count} candidates. Pruning log: {pruning_path}
 
-Domain Model and Invariant Registry:
-{domain_registry_json}
-
-Deterministic prefilter candidates:
-{prefilter_json}
+Inspect capabilities, entry conditions, constraints, and handoff objects across
+the full pool in bounded batches before selecting candidates. Fetch detailed
+evidence for potential compositions as needed.
 
 The deterministic prefilter enforces exact normalized field matching. It is
 advisory evidence for reducing the search space, not a security decision. It
@@ -1099,12 +1111,7 @@ Iteration: {iteration} / {max_iterations}
 Planned chain candidate:
 {chain_candidate_json}
 
-Confirmed primitive pool:
-{chain_pool_json}
-
-Domain Model and Invariant Registry:
-{domain_registry_json}
-
+""" + CHAIN_CONTEXT_FILES + """
 Upstream context:
 - Attack-surface report: {attack_surface}
 - Spec / standards: {spec_doc}
@@ -1205,12 +1212,7 @@ You are a strict critic reviewer for ONE attack-chain investigation.
 Planned chain candidate:
 {chain_candidate_json}
 
-Confirmed primitive pool:
-{chain_pool_json}
-
-Domain Model and Invariant Registry:
-{domain_registry_json}
-
+""" + CHAIN_CONTEXT_FILES + """
 This iteration's chain investigation:
 {chain_investigation_json}
 
@@ -1357,9 +1359,7 @@ still be materialized as a chain finding.
 Planned chain candidate:
 {chain_candidate_json}
 
-Confirmed primitive pool:
-{chain_pool_json}
-
+""" + CHAIN_CONTEXT_FILES + """
 This iteration's chain investigation:
 {chain_investigation_json}
 
@@ -1368,9 +1368,6 @@ This iteration's chain critic review:
 
 Deterministic finalizer failure reasons:
 {failure_reasons_json}
-
-Domain Model and Invariant Registry:
-{domain_registry_json}
 
 Repo: {repo_path}
 Upstream context:

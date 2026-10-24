@@ -12,6 +12,7 @@ from zeromdash.agents import normalize_agent_name
 from zeromdash.cvss4 import CVSS4ValidationError, has_direct_impact, score_base_vector
 from zeromdash.state import ZeroMDASHState
 
+from .core.chain_context import chain_prompt_context
 from .core.chain_qualification import (
     chain_investigation_json,
     close_chain_candidate,
@@ -22,7 +23,7 @@ from .core.config import (
     agent_config_variants_for_node,
 )
 from .core.context import _node_focus, _ws
-from .core.domain_registry import domain_registry_from_state, domain_registry_json
+from .core.domain_registry import domain_registry_from_state
 from .core.invocation import (
     _agent_errors,
     _make_agent,
@@ -130,11 +131,10 @@ def _run_finalizer_agent(
     prompt = prompts.CHAIN_FINALIZER_SUBTASK.format(
         focus=_node_focus(state, "chain_finalizer_subtask_focus"),
         chain_candidate_json=json.dumps(candidate, ensure_ascii=False, indent=2),
-        chain_pool_json=json.dumps(state.get("chain_pool") or [], ensure_ascii=False, indent=2),
+        **chain_prompt_context(state),
         chain_investigation_json=json.dumps(investigation, ensure_ascii=False, indent=2),
         chain_review_json=json.dumps(review, ensure_ascii=False, indent=2),
         failure_reasons_json=json.dumps(failures, ensure_ascii=False, indent=2),
-        domain_registry_json=domain_registry_json(state),
         repo_path=state["repo_path"],
         attack_surface=state.get("attack_surface", ""),
         spec_doc=state.get("spec_doc", ""),

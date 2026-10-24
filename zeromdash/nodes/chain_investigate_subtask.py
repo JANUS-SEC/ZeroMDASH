@@ -10,8 +10,8 @@ from zeromdash import prompts
 from zeromdash.agents import AgentResult
 from zeromdash.state import ChainCandidate, ReviewTurn, ZeroMDASHState
 
+from .core.chain_context import chain_prompt_context
 from .core.context import _node_focus, _ws
-from .core.domain_registry import domain_registry_json
 from .core.invocation import _invoke_with_output_retry, _selected_log_dir
 from .core.chain_qualification import validate_chain_investigation_output
 
@@ -36,8 +36,7 @@ def chain_investigate_subtask(state: ZeroMDASHState, *, backends=None) -> dict:
         iteration=iteration,
         max_iterations=state.get("max_chain_iterations", 2),
         chain_candidate_json=json.dumps(chain, ensure_ascii=False, indent=2),
-        chain_pool_json=json.dumps(state.get("chain_pool") or [], ensure_ascii=False, indent=2),
-        domain_registry_json=domain_registry_json(state),
+        **chain_prompt_context(state),
         attack_surface=state.get("attack_surface", ""),
         spec_doc=state.get("spec_doc", ""),
         writeup_dir=str(ws.main_path("writeup")),
