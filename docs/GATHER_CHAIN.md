@@ -120,6 +120,11 @@ zeromdash \
   --workspace-root ./.zeromdash
 ```
 
+可直接运行的示例在 `demo/gather-multi-target-config.example.yaml`（manifest）和
+`demo/gather-agent-config.example.yaml`（gather 节点配置）；示例中的相对路径都相
+对于 manifest 所在目录解析，因此从仓库根目录执行时用
+`--gather-workspace-to-chain demo/gather-multi-target-config.example.yaml` 即可。
+
 `--agent-config` 在 gather 模式下配置本次 gather graph 的 runtime、model、focus、
 并发和 chain budget。manifest 中每个 target 的 `agent_config` 则描述源扫描所使用的
 配置和 threat context；两者职责不同，不能隐式选择“第一个 target 的 runtime”作为

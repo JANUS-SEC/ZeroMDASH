@@ -41,7 +41,10 @@ zeromdash --target https://github.com/curl/curl
 
 ```
 --target TEXT              目标软件（路径、git URL 或包名）
---scan-mode full|diff      全仓扫描或 diff 高亮扫描（默认：full）
+--scan-mode full|diff|gather
+                           全仓扫描、diff 高亮扫描或跨 workspace gather（默认：full）
+--gather-workspace-to-chain YAML
+                           gather 模式必需的多目标 workspace manifest
 --diff-file PATCH          已应用到目标仓库的 unified git diff
 --diff-git BEFORE..AFTER   在拉取的远程 git 仓库中基于两个 ref 生成 diff
 --workspace-root PATH      输出目录（默认：./.zeromdash）
@@ -115,17 +118,173 @@ zeromdash \
 
 # 从 log/review_res/*.json 重新生成中英文报告
 zeromdash --start-from-summary .zeromdash/workspace_for_curl
+
+# 把已完成的源 workspace 串成跨目标攻击链
+zeromdash \
+  --scan-mode gather \
+  --gather-workspace-to-chain demo/gather-multi-target-config.example.yaml \
+  --agent-config demo/gather-agent-config.example.yaml
 ```
 
 当 `--target` 是本地目录时，ZeroMDASH 会在分析前把完整源码树确定性地复制到
 `main/repo/`。原目录不会被修改，本地 `.git` / `.zeromdash` 元数据不会被复制。
 
+## Gather 模式
+
+`gather` 是独立的第二级 graph，把多个已经跑完的单目标 workspace 串成跨目标攻击
+链。它不 fetch、也不重新扫描目标源码，而是：
+
+- 把每个源 workspace 的 attack surface、primitive、subtask 与本地 chain 产物复制
+  到 `inputs/<target-id>/` 下，形成不可变证据快照；
+- 给所有 source id 按 target 加命名空间，避免跨 workspace 的 ID 碰撞；
+- 合成 scenario 级的 cross-target registry，再由 Agent 原生 planner 规划，只对
+  跨越至少两个 target 的候选跑 investigate/critic battle；
+- 源 workspace 里已确认的 finding 只作为证据引用，不会在 gather 报告里被重复
+  报成新漏洞。
+
+gather graph：
+
+```text
+gather_analyze_attack_surface
+  -> gather_plan_chains
+  -> dispatch_gather_chains
+  -> N x gather_chain_subtask（investigate -> critic -> finalize）
+  -> gather_prepare_report_groups
+  -> summary
+  -> polish_report
+```
+
+完整架构与证据契约见 [docs/GATHER_CHAIN.md](docs/GATHER_CHAIN.md)。
+
+### 前置条件
+
+manifest 里每个 target 必须指向一次已完成的扫描：
+
+- `workspace.json` 存在；
+- `main/attack_surface/` 下至少有一个非空文件；
+- `log/primitive_res/`、`log/subtask_res/`、`log/review_res/`、`log/chain_res/`
+  中至少有一个非空 `*.json`（chain evidence）；
+- `agent_config` 指向的文件存在且 YAML 可解析。
+
+`targets` 至少两项，`name` 不能重复，slugify 之后也不能碰撞。
+
+### manifest
+
+```yaml
+schema_version: "1.0"
+name: example-service-stack        # 可选；默认取文件名，用于 workspace 名和报告标题
+scenario: >                        # 必填；描述这些 target 如何共同工作，而非通用审计方法论
+  External tenants submit deployment requests to api-gateway ...
+
+# 可选；CLI 未传 --agent-config 时的 fallback，配置 gather 节点本身
+gather_agent_config: ./gather-agent-config.example.yaml
+
+targets:
+  - name: public-api               # 必填；slug 后唯一
+    agent_config: ./zeromdash.oss.demo.yaml   # 必填；源扫描使用的配置
+    workspace: ./.zeromdash/workspace_for_public-api  # 必填；已完成的源 workspace
+    role: tenant authentication and job normalization  # 可选；该 target 在场景中的职责
+```
+
+可直接运行的示例是 `demo/gather-multi-target-config.example.yaml`，对应的 gather
+节点配置是 `demo/gather-agent-config.example.yaml`。manifest 内的所有相对路径都
+相对于 manifest 所在目录解析，与当前 shell 目录无关，因此从仓库根目录执行时给
+manifest 加 `demo/` 前缀即可，示例内部的引用不需要改。
+
+`gather_agent_config` / `--agent-config` 配置本次 gather graph 的 runtime、model、
+focus、并发和 chain budget：
+
+```yaml
+top_K:
+  chain: 16
+
+gather:
+  max_pair_passes: 12              # 定向 target 对深挖的最大次数
+  max_chain_length: 6              # 单条链允许的最大 evidence unit 数
+  max_candidates_before_top_k: 200 # top_K.chain 之前的原始候选上限
+  max_battle_rounds: 3             # 每条链的 investigate/critic 最大轮数
+  require_cross_target: true       # gather 模式下不能设为 false
+```
+
+manifest 中每个 target 的 `agent_config` 只提供 `common_focus`、仓库描述和与证据
+解释相关的 focus；其 runtime、model、provider、env、fallback 不会被继承，其中的
+secret 也不会写入快照、prompt 或 `final_state.json`。gather 模式的 agent-config
+不允许定义 `target_repos`。
+
+### 参数校验
+
+| 条件 | 行为 |
+| --- | --- |
+| `--scan-mode gather` 但缺少 `--gather-workspace-to-chain` | 启动前失败 |
+| 非 gather 模式却提供 `--gather-workspace-to-chain` | 启动前失败 |
+| gather 与 `--target`、`--diff-file`、`--diff-git` 同用 | 启动前失败 |
+| gather 与 `--preset-attack-surface`、`--till-node` 同用 | 启动前失败 |
+| gather 与 `--start-from-*` 恢复模式同用 | 启动前失败 |
+| gather 与 `--disable-spec` / `--disable-target-history` / `--disable-new-feature` / `--disable-chain` 同用 | 启动前失败；这些 track 已在源 workspace 完成 |
+| manifest `schema_version` 不是 `1.0`、`scenario` 为空、`targets` 少于两项 | 启动前失败 |
+| target `name` 重复或 slugify 后碰撞 | 启动前失败 |
+| workspace 不存在、缺 `workspace.json`、无 attack surface 或无 chain evidence | 启动前失败并列出 target |
+| `agent_config` / `gather_agent_config` 不存在或 YAML 无法解析 | 启动前失败 |
+
+`--fail-on-gate` 在 gather 模式下同样生效，读取 gather workspace 的
+`gate_result.json`。
+
+### gather workspace 布局
+
+gather 模式写入独立的 `.zeromdash/workspace_for_gather-<scenario-name>/`，不使用
+`main/repo/` 作为输入源：
+
+```text
+workspace_for_gather-<scenario-name>/
+├── workspace.json
+├── gather_manifest.yaml
+├── inputs/
+│   ├── manifest.normalized.json
+│   ├── gather_inputs.lock.json
+│   └── <target-id>/
+│       ├── workspace.json       # 清洗后的源 workspace 元数据
+│       ├── source_context.json  # 清洗后的 focus / 仓库上下文，不含 env secret
+│       ├── attack_surface/      # 源 main/attack_surface 快照
+│       ├── source/
+│       │   ├── main/            # 源 main/repo 快照
+│       │   └── <repo-id>/       # 源 main/repos/<repo-id> 快照
+│       ├── primitive_res/       # active primitive envelope
+│       ├── subtask_res/         # active terminal subtask envelope
+│       └── chain_res/           # active 的本地已确认链
+├── main/attack_surface/
+│   ├── gather_attack_surface.md
+│   └── cross_target_registry.json
+├── log/
+│   ├── state/
+│   │   ├── gather_evidence_pool.json
+│   │   └── gather_chain_plan.json
+│   ├── review_log/              # gather 节点与 battle 的尝试日志
+│   ├── gather_chain_res/        # 已确认的跨目标链 finding
+│   ├── gather_chain_candidates/ # 被否决或结论不足的跨目标链
+│   ├── gather_report_groups.json
+│   └── agent_commands.jsonl
+├── sub_workspace/               # gather 节点与逐链 agent 工作目录
+├── summary.en.md
+├── summary.zh_CN.md
+├── summary.md
+├── gate_result.json
+└── final_state.json
+```
+
+基础 `Workspace` 类还会在 gather workspace 中创建 `main/repo/`、`similar/`、
+`log/subtask_res/`、`log/chain_res/` 等兼容目录，通常为空；canonical 的 gather
+输入在 `inputs/` 下，跨目标结果在 `gather_*` 路径下。
+
+当前 V1 没有 gather 专用的恢复模式，未提供 `--start-from-gather-chain`；需要重跑
+时请重建 manifest 或从源 workspace 重新生成。规划中的恢复能力见
+[docs/GATHER_CHAIN.md](docs/GATHER_CHAIN.md)。
+
 ## Agent 配置
 
 `--agent-config` 是设置工作流上限、任务聚焦点和各节点运行时配置的首选方式：
 
-单仓库目标使用 `zeromdash.oss.demo.yaml`。当一个目标产品由核心仓库加插件或
-功能仓库组成时，使用 `zeromdash.oss.multi-repo-demo.yaml`。多仓库目标当前
+单仓库目标使用 `demo/zeromdash.oss.demo.yaml`。当一个目标产品由核心仓库加插件或
+功能仓库组成时，使用 `demo/zeromdash.oss.multi-repo-demo.yaml`。多仓库目标当前
 仅支持 full 扫描模式。
 
 ```yaml
