@@ -267,6 +267,7 @@ class ZeroMDASHState(TypedDict, total=False):
     gate_result: dict[str, Any]
     gate_result_path: str
     poc_results: list[dict[str, Any]]
+    poc_selection_stats: dict[str, Any]  # finding-selection diagnostics from the poc_gen node
     stopped_at: str
     errors: Annotated[list[str], operator.add]
 

@@ -125,10 +125,116 @@ class FindingLoaderTest(unittest.TestCase):
                 "report_groups": [group],
                 "report_groups_path": str(ws.log / "report_groups.json"),
             }
-            selected = load_finding_records(state, "vuln-001")
+            stats: dict = {}
+            selected = load_finding_records(state, "vuln-001", stats=stats)
             self.assertEqual(selected[0]["finding_id"], "VULN-001")
+            self.assertEqual(selected[0]["qualification"], "gate")
+            self.assertEqual(stats["admitted_gate"], 1)
             with self.assertRaisesRegex(ValueError, "available finding IDs"):
-                load_finding_records(state, "VULN-999")
+                load_finding_records(state, "vuln-999")
+
+    def _legacy_review_res(self, tmp, name, review):
+        ws = Workspace.create(tmp, target="libfoo")
+        review_res = ws.log_path("review_res")
+        review_res.mkdir(parents=True, exist_ok=True)
+        (review_res / f"{name}.json").write_text(
+            json.dumps(
+                {
+                    "finding": {
+                        "title": f"legacy {name}",
+                        "subtask_id": name,
+                        "evidence": {"code_locations": ["src/main.c:10"]},
+                        "review": review,
+                    }
+                }
+            )
+        )
+        return ws
+
+    def test_legacy_confirm_finding_admitted_via_fallback(self):
+        # Pre-qualification-gate workspaces carry no gate fields; a critic
+        # confirm verdict must still be selectable for PoC generation.
+        with TemporaryDirectory() as tmp:
+            ws = self._legacy_review_res(tmp, "vuln-001", {"verdict": "confirm"})
+            state = {"task_id": ws.task_id, "workspace_root": str(ws.root)}
+            stats: dict = {}
+            records = load_finding_records(state, stats=stats)
+            self.assertEqual(len(records), 1)
+            self.assertEqual(records[0]["finding_id"], "vuln-001")
+            self.assertEqual(records[0]["qualification"], "legacy_confirm")
+            self.assertEqual(stats["considered"], 1)
+            self.assertEqual(stats["admitted_legacy_confirm"], 1)
+            selected = load_finding_records(state, "vuln-001")
+            self.assertEqual(selected[0]["finding_id"], "vuln-001")
+
+    def test_legacy_revise_finding_skipped_with_stats(self):
+        with TemporaryDirectory() as tmp:
+            ws = self._legacy_review_res(tmp, "vuln-001", {"verdict": "revise"})
+            state = {"task_id": ws.task_id, "workspace_root": str(ws.root)}
+            stats: dict = {}
+            records = load_finding_records(state, stats=stats)
+            self.assertEqual(records, [])
+            self.assertEqual(stats["considered"], 1)
+            self.assertEqual(stats["skipped_legacy_not_confirmed"], 1)
+
+    def test_new_schema_confirm_still_requires_gate(self):
+        # Once a finding carries the gate schema, a bare confirm verdict
+        # must NOT bypass the strict qualification gate.
+        review = {
+            "verdict": "confirm",
+            "qualification_gate_passed": False,
+            "qualification_gate_version": "cvss4-v1",
+        }
+        with TemporaryDirectory() as tmp:
+            ws = self._legacy_review_res(tmp, "vuln-001", review)
+            state = {"task_id": ws.task_id, "workspace_root": str(ws.root)}
+            stats: dict = {}
+            records = load_finding_records(state, stats=stats)
+            self.assertEqual(records, [])
+            self.assertEqual(stats["skipped_gate_failed"], 1)
+            self.assertEqual(stats.get("admitted_legacy_confirm", 0), 0)
+
+    def test_group_records_admit_legacy_primary_finding(self):
+        finding = {
+            "title": "legacy group finding",
+            "subtask_id": "vuln-001",
+            "review": {"verdict": "confirm"},
+        }
+        group = {
+            "group_id": "VULN-001",
+            "summary_format": "full",
+            "primary_finding": finding,
+            "source_subtasks": ["vuln-001"],
+            "source_chains": [],
+        }
+        with TemporaryDirectory() as tmp:
+            ws = Workspace.create(tmp, target="libfoo")
+            state = {
+                "task_id": ws.task_id,
+                "workspace_root": str(ws.root),
+                "report_groups": [group],
+                "report_groups_path": str(ws.log / "report_groups.json"),
+            }
+            stats: dict = {}
+            records = load_finding_records(state, stats=stats)
+            self.assertEqual(len(records), 1)
+            self.assertEqual(records[0]["qualification"], "legacy_confirm")
+            self.assertEqual(stats["admitted_legacy_confirm"], 1)
+
+
+class PocGenNodeTest(unittest.TestCase):
+    def test_node_reports_selection_stats(self):
+        from zeromdash.poc_gen.node import poc_gen
+
+        with TemporaryDirectory() as tmp:
+            ws = Workspace.create(tmp, target="libfoo")
+            state = {"task_id": ws.task_id, "workspace_root": str(ws.root), "poc_finding_id": ""}
+            with patch("zeromdash.poc_gen.node.PocGenService") as service_cls:
+                service_cls.return_value.run.return_value = []
+                result = poc_gen(state)
+        self.assertIn("poc_selection_stats", result)
+        self.assertIn("poc_results", result)
+        service_cls.return_value.run.assert_called_once_with("", stats={})
 
 
 class PocGenServiceTest(unittest.TestCase):

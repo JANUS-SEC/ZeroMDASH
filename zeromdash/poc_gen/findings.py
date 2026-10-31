@@ -5,7 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from zeromdash.nodes.core.qualification import _finding_qualification_passed
+from zeromdash.nodes.core.qualification import (
+    _finding_qualification_passed,
+    _summary_status,
+)
 from zeromdash.nodes.core.result_artifacts import active_subtask_result_payloads
 from zeromdash.workspace import Workspace
 
@@ -14,6 +17,64 @@ from .io import canonical_json, read_json_object, sha256_text
 
 def _identifier(value: Any) -> str:
     return str(value or "").strip()
+
+
+def _finding_review(finding: dict[str, Any]) -> dict[str, Any]:
+    review = finding.get("review")
+    return review if isinstance(review, dict) else {}
+
+
+def _has_qualification_schema(finding: dict[str, Any]) -> bool:
+    """Return True when the finding carries any qualification-gate marker.
+
+    Workspaces produced before the qualification gate existed store neither
+    ``qualification_gate_passed`` nor ``qualification_gate_version`` on the
+    finding or its review; such findings are "legacy" and can never satisfy
+    the strict gate.
+    """
+    review = _finding_review(finding)
+    return (
+        isinstance(finding.get("qualification_gate_passed"), bool)
+        or isinstance(review.get("qualification_gate_passed"), bool)
+        or bool(_identifier(review.get("qualification_gate_version")))
+    )
+
+
+def _admission_source(finding: dict[str, Any]) -> str:
+    """Classify how a finding may enter PoC generation.
+
+    Returns ``"gate"`` when the strict qualification gate passed,
+    ``"legacy_confirm"`` for pre-gate findings whose critic verdict is
+    ``confirm``, and ``""`` when the finding must be skipped.
+    """
+    if _finding_qualification_passed(finding):
+        return "gate"
+    if not _has_qualification_schema(finding) and _summary_status(finding) == "confirm":
+        return "legacy_confirm"
+    return ""
+
+
+def _record_stat(stats: dict[str, Any] | None, key: str) -> None:
+    if stats is not None:
+        stats[key] = int(stats.get(key, 0)) + 1
+
+
+def _admit_finding(finding: dict[str, Any], stats: dict[str, Any] | None) -> str:
+    """Shared admission filter with selection diagnostics.
+
+    Returns the admission source (see :func:`_admission_source`) and records
+    per-reason counters into ``stats`` when provided.
+    """
+    _record_stat(stats, "considered")
+    admission = _admission_source(finding)
+    if not admission:
+        _record_stat(
+            stats,
+            "skipped_gate_failed" if _has_qualification_schema(finding) else "skipped_legacy_not_confirmed",
+        )
+        return ""
+    _record_stat(stats, "admitted_gate" if admission == "gate" else "admitted_legacy_confirm")
+    return admission
 
 
 def _request_record(
@@ -26,6 +87,7 @@ def _request_record(
     source_result_path: str,
     aliases: list[str],
     group: dict[str, Any] | None = None,
+    qualification: str = "",
 ) -> dict[str, Any]:
     source_hash = sha256_text(canonical_json(source_payload))
     identity = {
@@ -45,16 +107,20 @@ def _request_record(
         "source_result_path": source_result_path,
         "source_artifact_sha256": source_hash,
         "aliases": sorted({item for item in aliases if item}),
+        "qualification": qualification,
     }
 
 
-def _group_records(state: dict[str, Any]) -> list[dict[str, Any]]:
+def _group_records(state: dict[str, Any], stats: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     for group in state.get("report_groups") or []:
         if not isinstance(group, dict) or group.get("summary_format") == "patch_gap":
             continue
         finding = group.get("primary_finding")
-        if not isinstance(finding, dict) or not _finding_qualification_passed(finding):
+        if not isinstance(finding, dict):
+            continue
+        admission = _admit_finding(finding, stats)
+        if not admission:
             continue
         finding_id = _identifier(group.get("group_id"))
         if not finding_id:
@@ -77,12 +143,13 @@ def _group_records(state: dict[str, Any]) -> list[dict[str, Any]]:
                 source_result_path=str(state.get("report_groups_path") or ""),
                 aliases=aliases,
                 group=group,
+                qualification=admission,
             )
         )
     return records
 
 
-def _standalone_records(state: dict[str, Any], ws: Workspace) -> list[dict[str, Any]]:
+def _standalone_records(state: dict[str, Any], ws: Workspace, stats: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     for path, payload in active_subtask_result_payloads(ws):
         finding = payload.get("finding")
@@ -91,7 +158,8 @@ def _standalone_records(state: dict[str, Any], ws: Workspace) -> list[dict[str, 
         outcome = _identifier(payload.get("outcome_type") or finding.get("outcome_type")).replace("-", "_")
         if outcome and outcome != "standalone_finding":
             continue
-        if not _finding_qualification_passed(finding):
+        admission = _admit_finding(finding, stats)
+        if not admission:
             continue
         finding_id = _identifier(finding.get("subtask_id") or finding.get("id") or path.stem)
         if finding_id:
@@ -104,12 +172,13 @@ def _standalone_records(state: dict[str, Any], ws: Workspace) -> list[dict[str, 
                     source_payload=payload,
                     source_result_path=str(path),
                     aliases=[finding_id, path.stem],
+                    qualification=admission,
                 )
             )
     return records
 
 
-def _chain_records(state: dict[str, Any], ws: Workspace) -> list[dict[str, Any]]:
+def _chain_records(state: dict[str, Any], ws: Workspace, stats: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     active = state.get("chain_findings")
     active_ids = None if not isinstance(active, list) else {
         _identifier(item.get("chain_id")) for item in active if isinstance(item, dict)
@@ -125,7 +194,8 @@ def _chain_records(state: dict[str, Any], ws: Workspace) -> list[dict[str, Any]]
         finding = payload.get("finding")
         if not isinstance(finding, dict) or finding.get("closure_verdict") != "closed":
             continue
-        if not _finding_qualification_passed(finding):
+        admission = _admit_finding(finding, stats)
+        if not admission:
             continue
         finding_id = _identifier(finding.get("chain_id") or finding.get("subtask_id") or path.stem)
         if not finding_id or (active_ids is not None and finding_id not in active_ids):
@@ -139,16 +209,21 @@ def _chain_records(state: dict[str, Any], ws: Workspace) -> list[dict[str, Any]]
                 source_payload=payload,
                 source_result_path=str(path),
                 aliases=[finding_id, _identifier(finding.get("subtask_id")), path.stem],
+                qualification=admission,
             )
         )
     return records
 
 
-def load_finding_records(state: dict[str, Any], selected_id: str = "") -> list[dict[str, Any]]:
+def load_finding_records(
+    state: dict[str, Any],
+    selected_id: str = "",
+    stats: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     ws = Workspace.open(state["workspace_root"], state["task_id"])
-    records = _group_records(state)
+    records = _group_records(state, stats=stats)
     if not records:
-        records = [*_standalone_records(state, ws), *_chain_records(state, ws)]
+        records = [*_standalone_records(state, ws, stats=stats), *_chain_records(state, ws, stats=stats)]
     selected = _identifier(selected_id)
     if selected:
         lowered = selected.lower()
