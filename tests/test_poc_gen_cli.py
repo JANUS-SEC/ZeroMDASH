@@ -88,6 +88,26 @@ class PocCliTest(unittest.TestCase):
         self.assertTrue(all(node not in disabled for node in POC_AGENT_NODES))
         self.assertIn("original summary", (self.workspace / "final_state.json").read_text())
 
+    def test_only_gen_pocs_prints_legacy_note_and_selection_stats(self):
+        final = {
+            **self.final,
+            "poc_results": [],
+            "poc_selection_stats": {
+                "considered": 53,
+                "admitted_legacy_confirm": 36,
+                "skipped_legacy_not_confirmed": 15,
+                "skipped_gate_failed": 2,
+            },
+        }
+        with patch("zeromdash.cli._resolve_startup_backends", return_value=({"plan_poc": "codex"}, {})), patch(
+            "zeromdash.cli.run_pocs_from_workspace", return_value=final
+        ):
+            result = self.runner.invoke(main, ["--only-gen-pocs", str(self.workspace)])
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn("No qualified findings found", result.output)
+        self.assertIn("legacy finding(s) admitted", result.output)
+        self.assertIn("considered=53", result.output)
+
     def test_only_gen_poc_splits_on_last_colon(self):
         workspace = self.root / "workspace:with-colon"
         workspace.mkdir()

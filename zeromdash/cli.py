@@ -1367,8 +1367,20 @@ def main(
     if only_gen_mode:
         click.echo("\n=== PoC generation results ===\n")
         results = final.get("poc_results") or []
+        stats = final.get("poc_selection_stats") or {}
+        if stats.get("admitted_legacy_confirm"):
+            click.echo(
+                f"note: {stats['admitted_legacy_confirm']} legacy finding(s) admitted via the "
+                "confirm-verdict fallback (pre-qualification-gate workspace schema); "
+                "the CVSS4 qualification gate was not applied to them."
+            )
         if not results:
             click.echo("No qualified findings found; no PoCs were generated.")
+            if stats:
+                click.echo(
+                    "finding selection: "
+                    + ", ".join(f"{key}={value}" for key, value in sorted(stats.items()))
+                )
         for item in results:
             click.echo(
                 f"{item.get('finding_id', '')}: {item.get('status', '')}"

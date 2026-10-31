@@ -419,7 +419,7 @@ class PocGenService:
         atomic_write_json(result_path, result)
         return result
 
-    def run(self, selected_id: str = "") -> list[dict[str, Any]]:
-        records = load_finding_records(self.state, selected_id)
+    def run(self, selected_id: str = "", stats: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+        records = load_finding_records(self.state, selected_id, stats=stats)
         records = records[: self.config["max_findings"]]
         return [self.run_record(record) for record in records]
