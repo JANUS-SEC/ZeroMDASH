@@ -24,7 +24,7 @@ from .io import (
     sha256_text,
     tree_sha256,
 )
-from .oracle import evaluate_verification, match_oracle, oracle_hash, validate_oracle_spec
+from .oracle import evaluate_verification, match_oracle, oracle_hash, oracle_spec_schema, validate_oracle_spec
 
 Validator = Callable[[dict[str, Any]], tuple[dict[str, Any] | None, str]]
 
@@ -87,12 +87,15 @@ class PocGenService:
         return validate
 
     def _plan(self, record: dict[str, Any], workdir: Path) -> tuple[dict[str, Any] | None, list[str]]:
+        schema_path = workdir / "oracle_schema.json"
+        atomic_write_json(schema_path, oracle_spec_schema())
         prompt = prompts.POC_PLAN.format(
             request_path=workdir / "request.json",
             repo_path=self.repo_path,
             verification_runs=self.config["verification_runs"],
             verification_min_matches=self.config["verification_min_matches"],
             max_strategies=self.config["max_strategies_per_round"],
+            oracle_schema_path=schema_path,
         )
         def validate(payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str]:
             spec, failure = validate_oracle_spec(payload.get("oracle_spec"))

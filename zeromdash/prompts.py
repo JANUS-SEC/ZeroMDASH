@@ -1891,6 +1891,12 @@ runs={verification_runs}, min_matches={verification_min_matches}.
 Return JSON only with oracle_spec, environment_requirements (object), and strategies (array).
 Each strategy requires objective, kind, entry_point and novelty_key. Generate at most
 {max_strategies} genuinely different strategies. Do not inline the request back into the output.
+
+The OracleSpec is validated strictly. Read the full contract (per-kind expected fields,
+reachability.required_markers, controls, stability, profile) from {oracle_schema_path}.
+oracle_spec.kind must be exactly one of: sanitizer, signal, exit_code, output, state_invariant,
+plugin. Crashes, panics and aborts must use signal (or sanitizer when a sanitizer report is
+the oracle); never invent kinds such as crash, differential or behavioral.
 """
 
 POC_PREPARE_ENVIRONMENT = """\

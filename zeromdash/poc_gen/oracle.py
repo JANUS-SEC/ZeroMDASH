@@ -9,6 +9,42 @@ from .io import canonical_json, sha256_text
 _KINDS = {"sanitizer", "signal", "exit_code", "output", "state_invariant", "plugin"}
 
 
+def oracle_spec_schema() -> dict[str, Any]:
+    """Machine-readable OracleSpec contract materialized for the planning agent."""
+    return {
+        "kind": {
+            "required": True,
+            "allowed": sorted(_KINDS),
+            "notes": (
+                "crashes/panics/aborts use signal (or sanitizer when a sanitizer report is "
+                "the oracle); do not invent kinds such as crash, differential or behavioral"
+            ),
+        },
+        "expected": {
+            "required": True,
+            "rule": "non-empty object whose fields depend on kind",
+            "by_kind": {
+                "sanitizer": {"sanitizer": "<name>", "error": "<error substring>", "top_symbols": ["<frame symbol>"]},
+                "signal": {"signal": "<signal value matching the run observation>"},
+                "exit_code": {"exit_code": 0},
+                "output": {"contains": ["<required substring>"], "not_contains": ["<forbidden substring>"]},
+                "state_invariant": {"violation": "<state key that must be true>", "required_fields": ["<dotted.state.path>"]},
+                "plugin": {
+                    "plugin": "<name>",
+                    "plugin_version": "<optional>",
+                    "operation": "<optional>",
+                    "min_absolute_milliseconds": "<optional number>",
+                    "min_ratio_to_baseline": "<optional number>",
+                },
+            },
+        },
+        "reachability": {"required_markers": ["<observation marker>"]},
+        "controls": [{"kind": "<control kind>", "required": True}],
+        "stability": {"runs": "<int>", "min_matches": "<int>", "rule": "1 <= min_matches <= runs"},
+        "profile": "<non-empty build/run profile name, e.g. plain or asan>",
+    }
+
+
 def oracle_hash(spec: dict[str, Any]) -> str:
     return sha256_text(canonical_json(spec))
 
