@@ -138,7 +138,10 @@ workspace. They are normally empty; canonical gather inputs live under
 --disable-target-history   Skip target history and patch-miss planning
 --disable-new-feature      Skip new-feature coverage-gap analysis
 --disable-chain            Skip cross-primitive chain planning and chain battles
---till-node analyze|plan   Stop after analyze_attack_surface or all planner JSON files
+--till-node analyze|plan|summary
+                           Stop before later stages; summary never runs PoC generation
+--only-gen-pocs DIR        Generate PoCs for all qualified findings in a workspace
+--only-gen-poc DIR:ID      Generate one report-group, subtask, or chain finding PoC
 --start-from-subtask DIR   Restore an existing workspace and start at subtask dispatch
 --select-subtask-to-run IDS
                            Rerun selected planner subtask IDs without summary
@@ -185,6 +188,13 @@ zeromdash --target curl --till-node analyze
 
 # Stop after planner JSON is materialized
 zeromdash --target curl --till-node plan
+
+# Stop after summary, without PoC generation
+zeromdash --target curl --till-node summary
+
+# Generate all PoCs, or one selected PoC, from an existing workspace
+zeromdash --only-gen-pocs .zeromdash/workspace_for_curl
+zeromdash --only-gen-poc .zeromdash/workspace_for_curl:VULN-001
 
 # Restore a workspace that already has planner JSON files
 zeromdash --start-from-subtask .zeromdash/workspace_for_curl
@@ -259,6 +269,15 @@ top_K:
 #   max_candidates_before_top_k: 200   # candidate cap before top_K.chain
 #   max_battle_rounds: 2               # max chain investigate/critic iterations
 
+# Optional post-summary PoC generation (disabled by default):
+# poc:
+#   enabled: true
+#   backend: agent_sandbox
+#   max_findings: 8
+#   max_debug_rounds_per_strategy: 4
+#   verification_runs: 3
+#   verification_min_matches: 2
+
 node:
   search_spec:
     runtime: claude_code
@@ -275,6 +294,22 @@ node:
         provider: ark
 
   critic_subtask:
+    runtime: codex
+
+  # Each PoC phase has an independent headless Agent configuration:
+  plan_poc:
+    runtime: codex
+  prepare_environment_and_debugger:
+    runtime: codex
+  generate_poc:
+    runtime: codex
+  build_and_execute_poc:
+    runtime: codex
+  debug_poc:
+    runtime: codex
+  verify_poc:
+    runtime: codex
+  release_poc:
     runtime: codex
 ```
 
@@ -632,29 +667,32 @@ export LANGFUSE_SECRET_KEY=sk-...
 
 All LangGraph node invocations are traced to Langfuse.
 
-## Repro Workflow
+## PoC Generation
 
-`zeromdash-repro` is a separate helper for validating findings already produced
-under `log/subtask_res/`:
+Set `poc.enabled=true` and configure the individual PoC phase nodes to continue
+into PoC generation after the normal summary/polish stages. The `poc_gen` graph
+node only orchestrates the workflow; the seven phase nodes have independent
+headless Agent runtime/config/fallback settings. The default is disabled. Use
+`--till-node summary` to stop before polish and PoC generation even when enabled.
+
+Completed workspaces can be used directly without `--target`:
 
 ```bash
-zeromdash-repro \
-  --subtask-res .zeromdash/workspace_for_curl/log/subtask_res \
-  --repo-path .zeromdash/workspace_for_curl/main/repo \
-  --target curl
+# All qualified report groups
+zeromdash --only-gen-pocs .zeromdash/workspace_for_curl --agent-config ./agents.yaml
+
+# One report-group ID; subtask_id and chain_id aliases are also accepted
+zeromdash --only-gen-poc .zeromdash/workspace_for_curl:VULN-001 --agent-config ./agents.yaml
 ```
 
-It runs a linear flow:
+Both workspace forms accept absolute or relative paths. Results are written to
+`log/poc_res/`, attempt evidence under `poc/`, and release packages with
+`README.md`, `repro_report.md`, `manifest.json`, PoC files, and evidence under
+`deliverables/poc/`.
 
-```text
-load_subtask_results -> plan_repro -> build_harmless_poc -> validate_repro -> summary
-```
-
-The former `--review-res` option and `review_res=` Python keyword remain
-available as deprecated compatibility aliases.
-
-Unlike the main workflow, `zeromdash-repro` still uses a backend fallback chain
-during startup health checks.
+The current `agent_sandbox` backend executes through the selected Agent runtime's
+sandbox. It is not a separate container/VM isolation boundary for hostile code;
+see [`docs/POC_GEN.md`](docs/POC_GEN.md) for the evidence gates and limitations.
 
 ## Requirements
 

@@ -57,7 +57,10 @@ zeromdash --target https://github.com/curl/curl
 --disable-spec             跳过 spec 链路（search_spec + plan_by_spec，无 spec 子任务）
 --disable-target-history   跳过目标历史漏洞与补丁遗漏规划
 --disable-new-feature      跳过新特性覆盖缺口分析
---till-node analyze|plan   在 analyze_attack_surface 或全部 planner JSON 落盘后停止
+--till-node analyze|plan|summary
+                           在指定阶段停止；summary 不运行 polish 或 PoC Gen
+--only-gen-pocs DIR        为 workspace 中全部合格 finding 生成 PoC
+--only-gen-poc DIR:ID      为指定 report-group、subtask 或 chain finding 生成 PoC
 --start-from-subtask DIR   恢复已有 workspace，从子任务派发阶段开始
 --select-subtask-to-run IDS
                            只重跑选中的 planner 子任务 ID，不生成 summary
@@ -101,6 +104,13 @@ zeromdash --target curl --till-node analyze
 
 # 在 planner JSON 落盘后停止
 zeromdash --target curl --till-node plan
+
+# 在 summary 后停止，不运行 PoC Gen
+zeromdash --target curl --till-node summary
+
+# 从已有 workspace 生成全部或指定 finding 的 PoC
+zeromdash --only-gen-pocs .zeromdash/workspace_for_curl
+zeromdash --only-gen-poc .zeromdash/workspace_for_curl:VULN-001
 
 # 恢复一个已有 planner JSON 的 workspace
 zeromdash --start-from-subtask .zeromdash/workspace_for_curl
@@ -299,6 +309,15 @@ top_K:
   patch: 3
   feature: 4
 
+# 可选：扫描报告完成后继续生成 PoC（默认关闭）
+# poc:
+#   enabled: true
+#   backend: agent_sandbox
+#   max_findings: 8
+#   max_debug_rounds_per_strategy: 4
+#   verification_runs: 3
+#   verification_min_matches: 2
+
 node:
   search_spec:
     runtime: claude_code
@@ -315,6 +334,22 @@ node:
         provider: ark
 
   critic_subtask:
+    runtime: codex
+
+  # 每个 PoC 阶段都可独立配置 headless Agent：
+  plan_poc:
+    runtime: codex
+  prepare_environment_and_debugger:
+    runtime: codex
+  generate_poc:
+    runtime: codex
+  build_and_execute_poc:
+    runtime: codex
+  debug_poc:
+    runtime: codex
+  verify_poc:
+    runtime: codex
+  release_poc:
     runtime: codex
 ```
 
@@ -550,25 +585,30 @@ export LANGFUSE_SECRET_KEY=sk-...
 
 所有 LangGraph 节点调用都会追踪到 Langfuse。
 
-## 复现工作流
+## PoC 生成
 
-`zeromdash-repro` 是一个独立辅助工具，用于验证已在 `log/review_res/` 下产出
-的 finding：
+在 agent-config 中设置 `poc.enabled=true` 并配置各个 PoC 阶段节点，即可在正常
+summary/polish 阶段后继续生成 PoC。`poc_gen` 图节点只负责编排，七个阶段节点均支持
+独立的 headless Agent runtime/config/fallback 配置；默认关闭。即使启用，也可通过
+`--till-node summary` 在 summary 后停止，不运行 polish 和 PoC Gen。
+
+已有 workspace 无需 `--target`，可直接运行：
 
 ```bash
-zeromdash-repro \
-  --review-res .zeromdash/workspace_for_curl/log/review_res \
-  --repo-path .zeromdash/workspace_for_curl/main/repo \
-  --target curl
+# 为全部合格报告组生成
+zeromdash --only-gen-pocs .zeromdash/workspace_for_curl --agent-config ./agents.yaml
+
+# 按报告组 ID 生成；也接受 subtask_id 和 chain_id 别名
+zeromdash --only-gen-poc .zeromdash/workspace_for_curl:VULN-001 --agent-config ./agents.yaml
 ```
 
-它运行线性流程：
+两种 workspace 参数均支持绝对路径和相对路径。结果写入 `log/poc_res/`，
+attempt 证据写入 `poc/`，发布包写入 `deliverables/poc/`，包含 `README.md`、
+`repro_report.md`、`manifest.json`、PoC 文件和证据。
 
-```text
-load_review_results -> plan_repro -> build_harmless_poc -> validate_repro -> summary
-```
-
-与主工作流不同，`zeromdash-repro` 在启动健康检查时仍使用后端 fallback 链。
+当前 `agent_sandbox` 后端通过所选 Agent runtime 的沙箱执行，不等同于独立的
+容器/VM 不可信代码隔离边界。证据门槛和限制见
+[`docs/POC_GEN.md`](docs/POC_GEN.md)。
 
 ## 环境要求
 

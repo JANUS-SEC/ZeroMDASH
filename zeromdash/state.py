@@ -202,6 +202,8 @@ class ZeroMDASHState(TypedDict, total=False):
     preset_attack_surface_path: str  # optional seed file appended by analyze_attack_surface
     top_K: dict[str, int]  # optional positive per-bucket subtask fan-out caps: spec/vuln/patch/feature
     chain_config: dict[str, Any]
+    poc_config: dict[str, Any]  # optional post-summary PoC generation settings
+    poc_finding_id: str  # optional report-group/subtask/chain selector for only-gen-poc
     disabled_nodes: list[str]  # node names to skip (e.g. ["search_spec", "plan_by_spec"] for --disable-spec)
     completed_subtask_ids: list[str]  # restore-only: subtask ids materialized under log/subtask_res (or legacy review_res)
     selected_subtask_ids: list[str]
@@ -264,6 +266,7 @@ class ZeroMDASHState(TypedDict, total=False):
     summary_zh_CN: str
     gate_result: dict[str, Any]
     gate_result_path: str
+    poc_results: list[dict[str, Any]]
     stopped_at: str
     errors: Annotated[list[str], operator.add]
 

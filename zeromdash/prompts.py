@@ -1880,3 +1880,85 @@ Use these exact section names when findings exist:
 - Chinese: `## 业务场景与目标拓扑`, `## 跨目标数据流清单`, `## 漏洞详情`, and
   within every finding `#### 跨目标绑定`, `#### 数据流向图`, `#### 攻击时序图`.
 """
+
+
+POC_PLAN = """\
+# Phase: plan_poc
+Analyze the confirmed finding and source tree. Produce an OracleSpec before any PoC exists.
+Read the finding request from {request_path}; do not modify it. Repository: {repo_path}
+Use the exact stability defaults unless the finding justifies a stricter policy:
+runs={verification_runs}, min_matches={verification_min_matches}.
+Return JSON only with oracle_spec, environment_requirements (object), and strategies (array).
+Each strategy requires objective, kind, entry_point and novelty_key. Generate at most
+{max_strategies} genuinely different strategies. Do not inline the request back into the output.
+"""
+
+POC_PREPARE_ENVIRONMENT = """\
+# Phase: prepare_environment_and_debugger
+Inspect the repository and prepare a build/debug approach for this finding.
+Read the plan from {plan_path} and the finding request from {request_path}.
+Repository: {repo_path}
+PoC work directory: {workdir}
+Use only non-destructive setup/build inspection inside the runtime sandbox. Never patch source
+or binaries. Build artifacts must stay outside the canonical repository. Debugger use is
+observation-only. Return JSON only with status (ready|failed), environment_manifest (object),
+summary and error. The manifest must identify backend=agent_sandbox, toolchain/build profiles,
+and resource limitations.
+"""
+
+POC_GENERATE = """\
+# Phase: generate_poc
+Implement exactly one minimal, harmless reproducer strategy. Do not patch target source or binaries.
+Read the finding request from {request_path}, frozen OracleSpec from {oracle_path}, strategy from
+{strategy_path}, parent attempt from {parent_path}, and debug hypothesis from {debug_path}.
+The parent/debug files contain an empty object on the first round.
+Attempt directory: {attempt_dir}
+Return JSON only with summary, files and run. files is an array of path/content objects; paths are
+relative and content is text. run contains a command string or argv array and optional build_command.
+Include every input needed by the reproducer. No persistence, stealth, weaponized payloads, or
+target-side hooks. Do not inline the input JSON documents back into the output.
+"""
+
+POC_EXECUTE = """\
+# Phase: build_and_execute_poc
+Build and execute the candidate inside the runtime sandbox now. Read the generation declaration
+from {generation_path} and frozen OracleSpec from {oracle_path}. Candidate directory: {attempt_dir}
+Do not patch target source or binaries. Use only declared, non-destructive build/run commands.
+Capture real observations; never invent a crash, marker, backtrace or sanitizer report.
+Return JSON only with runner_status (completed|expected_terminal|build_failed|setup_failed|runner_failed|timeout|oom),
+build (object), runs (array), and notes. Each run requires runner_status, command, exit_code,
+signal, stdout, stderr, markers, backtrace and duration_ms. Include sanitizer name/error when
+observed, semantic state when relevant, and plugin/metrics when relevant.
+"""
+
+POC_DEBUG = """\
+# Phase: debug_poc
+Diagnose why the candidate did not satisfy the frozen Oracle. Read the finding request from
+{request_path}, OracleSpec from {oracle_path}, candidate from {generation_path}, and observation
+from {observation_path}. Do not weaken the Oracle or modify the target.
+Return JSON only with hypothesis, changes and progress_markers (array). Be specific about the next
+candidate change. Do not inline these input documents back into the output.
+"""
+
+POC_VERIFY = """\
+# Phase: verify_poc
+Act as an independent verification Agent in a fresh invocation. Read the generation declaration
+from {generation_path} and frozen OracleSpec from {oracle_path}. Candidate directory: {attempt_dir}
+Re-run the candidate in a clean attempt context. Execute at least {verification_runs} runs and
+every applicable control. Never trust the generator's claim. Do not modify the candidate, target,
+Oracle or previous observations. Return JSON only with environment_status, runs, controls and notes.
+Use the execution observation schema. Each control requires kind, status (passed|failed|skipped),
+skip_reason and an observation when applicable.
+"""
+
+POC_RELEASE = """\
+# Phase: release_poc
+Write a precise reproduction report from the finalized evidence at {release_input_path}.
+Release directory: {release_dir}
+Do not change the verdict or claim missing evidence. Return JSON only with readme and report
+(Markdown strings). The report must include finding and status, source/environment identity,
+build steps, exact reproduction commands, OracleSpec, expected/actual observations,
+controls/stability, limitations and evidence references. For failed/partial results, explain
+what was attempted and why the result is not validated. Do not inline the evidence JSON in the
+Markdown report.
+"""

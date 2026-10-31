@@ -37,6 +37,14 @@ DEFAULT_BACKENDS = {
 
     "summary":                   "claude_code",
     "polish_report":             "claude_code",
+
+    "plan_poc":                  "codex",
+    "prepare_environment_and_debugger": "codex",
+    "generate_poc":              "codex",
+    "build_and_execute_poc":     "codex",
+    "debug_poc":                 "codex",
+    "verify_poc":                "codex",
+    "release_poc":               "codex",
 }
 
 NATIVE_SUBAGENT_REQUIRED_NODES = frozenset(

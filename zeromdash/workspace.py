@@ -66,6 +66,7 @@ LOG_SUBDIRS: tuple[str, ...] = (
     "primitive_res",
     "chain_res",
     "chain_candidates",
+    "poc_res",
 )
 
 

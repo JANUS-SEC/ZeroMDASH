@@ -26,9 +26,11 @@ from zeromdash.graph import (
     run_from_subtask_workspace,
     run_polish_report_from_workspace,
     run_summary_from_workspace,
+    run_pocs_from_workspace,
 )
 from zeromdash.gather import load_gather_manifest
 from zeromdash.gather_graph import run_gather
+from zeromdash.poc_gen.config import POC_AGENT_NODES, POC_CONFIG_KEYS, normalize_poc_config
 from zeromdash.nodes.core.recovery import (
     RecoveryRequest,
     RuntimeRecovery,
@@ -42,6 +44,7 @@ _AGENT_CONFIG_COMMON_FOCUS_KEY = "__common_focus__"
 _AGENT_CONFIG_TOP_K_KEY = "__top_K__"
 _AGENT_CONFIG_CHAIN_KEY = "__chain__"
 _AGENT_CONFIG_GATHER_KEY = "__gather__"
+_AGENT_CONFIG_POC_KEY = "__poc__"
 _AGENT_CONFIG_MAX_CONCURRENCY_KEY = "__max_concurrency__"
 _AGENT_CONFIG_TARGET_REPOS_KEY = "__target_repos__"
 DEFAULT_MAX_CONCURRENCY = 8
@@ -244,6 +247,33 @@ def _parse_chain_config(value: object) -> dict[str, object]:
     return parsed
 
 
+def _parse_poc_config(value: object) -> dict[str, object]:
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise click.ClickException("invalid poc section in --agent-config: expected mapping")
+    unknown = sorted(str(key) for key in value if key not in POC_CONFIG_KEYS)
+    if unknown:
+        raise click.ClickException(f"unknown poc key(s) in --agent-config: {', '.join(unknown)}")
+    parsed: dict[str, object] = {}
+    for key, raw in value.items():
+        if key == "enabled":
+            if not isinstance(raw, bool):
+                raise click.ClickException("invalid poc.enabled in --agent-config: expected bool")
+            parsed[key] = raw
+        elif key == "backend":
+            parsed[key] = str(raw or "").strip()
+        else:
+            if not isinstance(raw, int) or isinstance(raw, bool) or raw <= 0:
+                raise click.ClickException(f"invalid poc.{key} in --agent-config: expected positive int")
+            parsed[key] = raw
+    try:
+        normalize_poc_config(parsed)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+    return parsed
+
+
 def _parse_gather_config(value: object) -> dict[str, object]:
     if value is None:
         return {}
@@ -336,7 +366,7 @@ def _parse_agent_config_file(path: str | None) -> nodes.AgentConfigs:
         )
 
     parsed: nodes.AgentConfigs = {}
-    allowed_top_level = {"common_focus", "max_concurrency", "node", "target_repos", "top_K", "chain", "gather"}
+    allowed_top_level = {"common_focus", "max_concurrency", "node", "target_repos", "top_K", "chain", "gather", "poc"}
     unknown_keys = sorted(str(key) for key in data if key not in allowed_top_level)
     if unknown_keys:
         raise click.ClickException(f"unknown top-level key(s) in --agent-config: {', '.join(unknown_keys)}")
@@ -356,6 +386,9 @@ def _parse_agent_config_file(path: str | None) -> nodes.AgentConfigs:
     gather_config = _parse_gather_config(data.get("gather"))
     if gather_config:
         parsed[_AGENT_CONFIG_GATHER_KEY] = {"gather": gather_config}
+    poc_config = _parse_poc_config(data.get("poc"))
+    if poc_config:
+        parsed[_AGENT_CONFIG_POC_KEY] = {"poc": poc_config}
     parsed[_AGENT_CONFIG_MAX_CONCURRENCY_KEY] = {
         "max_concurrency": _parse_max_concurrency(data.get("max_concurrency"))
     }
@@ -442,6 +475,12 @@ def _pop_chain_config_from_agent_config(agent_configs: nodes.AgentConfigs) -> di
     cfg = agent_configs.pop(_AGENT_CONFIG_CHAIN_KEY, {})
     chain = (cfg or {}).get("chain") or {}
     return dict(chain)
+
+
+def _pop_poc_config_from_agent_config(agent_configs: nodes.AgentConfigs) -> dict[str, object]:
+    """Remove and return top-level PoC generation settings."""
+    cfg = agent_configs.pop(_AGENT_CONFIG_POC_KEY, {})
+    return dict((cfg or {}).get("poc") or {})
 
 
 def _pop_gather_config_from_agent_config(agent_configs: nodes.AgentConfigs) -> dict[str, object]:
@@ -832,10 +871,11 @@ def _resolve_startup_backends(
 )
 @click.option(
     "--till-node",
-    type=click.Choice(["analyze", "plan"]),
+    type=click.Choice(["analyze", "plan", "summary"]),
     default=None,
     help="Stop after a pipeline stage: analyze stops after analyze_attack_surface; "
-         "plan stops after all enabled planners materialize plan JSON.",
+         "plan stops after all enabled planners materialize plan JSON; "
+         "summary stops after summary generation and never runs PoC generation.",
 )
 @click.option(
     "--start-from-subtask",
@@ -874,6 +914,21 @@ def _resolve_startup_backends(
     metavar="WORKSPACE",
     help="Restore from an existing ZeroMDASH workspace and run only the "
          "lightweight report polish/formatting pass over existing summary files.",
+)
+@click.option(
+    "--only-gen-pocs",
+    "only_gen_pocs",
+    type=click.Path(file_okay=False, path_type=str),
+    default=None,
+    metavar="WORKSPACE",
+    help="Generate PoCs for all qualified findings in an existing workspace.",
+)
+@click.option(
+    "--only-gen-poc",
+    "only_gen_poc",
+    default=None,
+    metavar="WORKSPACE:FINDING_ID",
+    help="Generate a PoC for one report-group, subtask, or chain finding ID.",
 )
 @click.option(
     "--select-subtask-to-run",
@@ -950,22 +1005,38 @@ def main(
     start_from_chain: str | None,
     start_from_summary: str | None,
     start_from_polish_report: str | None,
+    only_gen_pocs: str | None,
+    only_gen_poc: str | None,
     select_subtask_to_run: str | None,
     select_subtask_to_run_log_dir: str | None,
     select_chain_to_run: str | None,
     select_chain_to_run_log_dir: str | None,
     fail_on_gate: bool,
 ) -> None:
+    if only_gen_pocs and only_gen_poc:
+        raise click.ClickException("--only-gen-pocs and --only-gen-poc are mutually exclusive")
+    only_gen_workspace = only_gen_pocs or ""
+    only_gen_finding_id = ""
+    if only_gen_poc:
+        if ":" not in only_gen_poc:
+            raise click.ClickException("--only-gen-poc requires WORKSPACE:FINDING_ID")
+        only_gen_workspace, only_gen_finding_id = only_gen_poc.rsplit(":", 1)
+        only_gen_workspace = only_gen_workspace.strip()
+        only_gen_finding_id = only_gen_finding_id.strip()
+        if not only_gen_workspace or not only_gen_finding_id:
+            raise click.ClickException("--only-gen-poc requires non-empty WORKSPACE and FINDING_ID")
+    only_gen_mode = bool(only_gen_workspace)
     restore_modes = [
         bool(start_from_subtask),
         bool(start_from_chain),
         bool(start_from_summary),
         bool(start_from_polish_report),
+        only_gen_mode,
     ]
     if sum(restore_modes) > 1:
         raise click.ClickException(
-            "--start-from-subtask, --start-from-chain, --start-from-summary, and "
-            "--start-from-polish-report are mutually exclusive"
+            "--start-from-subtask, --start-from-chain, --start-from-summary, "
+            "--start-from-polish-report, and the --only-gen-poc(s) modes are mutually exclusive"
         )
     selected_subtask_ids = [
         item.strip()
@@ -1046,11 +1117,16 @@ def main(
     top_K = _pop_top_k_from_agent_config(agent_configs)
     chain_config = _pop_chain_config_from_agent_config(agent_configs)
     gather_config = _pop_gather_config_from_agent_config(agent_configs)
+    poc_config = _pop_poc_config_from_agent_config(agent_configs)
+    if scan_mode == "gather" and poc_config.get("enabled"):
+        raise click.ClickException("poc.enabled is not supported in --scan-mode gather")
     if scan_mode == "gather" and gather_config.get("require_cross_target") is False:
         raise click.ClickException("gather.require_cross_target cannot be false in --scan-mode gather")
     max_concurrency = _pop_max_concurrency_from_agent_config(agent_configs)
     target_repos = _pop_target_repos_from_agent_config(agent_configs)
     common_focus = common_focus or config_common_focus
+    if only_gen_mode and target:
+        raise click.ClickException("--target cannot be combined with --only-gen-poc(s)")
     if scan_mode != "gather" and not target and target_repos and not any(restore_modes):
         target = "multi-repo-target"
     if scan_mode != "gather" and not target and not any(restore_modes):
@@ -1112,6 +1188,25 @@ def main(
         startup_disabled_nodes.update(_TILL_ANALYZE_DISABLED_NODES)
     elif till_node == "plan":
         startup_disabled_nodes.update(_TILL_PLAN_DISABLED_NODES)
+
+    if only_gen_mode:
+        startup_disabled_nodes.update(set(nodes.DEFAULT_BACKENDS) - set(POC_AGENT_NODES))
+    else:
+        poc_allowed = bool(poc_config.get("enabled")) and not any(
+            (
+                till_node,
+                start_from_polish_report,
+                select_subtask_to_run is not None,
+                select_chain_to_run is not None,
+                scan_mode == "gather",
+            )
+        )
+        if poc_allowed:
+            startup_disabled_nodes.difference_update(POC_AGENT_NODES)
+        else:
+            startup_disabled_nodes.update(POC_AGENT_NODES)
+        if till_node == "summary":
+            startup_disabled_nodes.add("polish_report")
     try:
         selected_backends, _health = _resolve_startup_backends(
             overrides, agent_configs, startup_disabled_nodes
@@ -1138,6 +1233,19 @@ def main(
                 )
             except ValueError as exc:
                 raise click.ClickException(str(exc)) from exc
+        elif only_gen_mode:
+            try:
+                final = run_pocs_from_workspace(
+                    workspace_path=only_gen_workspace,
+                    finding_id=only_gen_finding_id,
+                    backends=selected_backends,
+                    common_focus=common_focus,
+                    agent_configs=agent_configs,
+                    max_concurrency=max_concurrency,
+                    poc_config=poc_config,
+                )
+            except ValueError as exc:
+                raise click.ClickException(str(exc)) from exc
         elif start_from_subtask:
             try:
                 final = run_from_subtask_workspace(
@@ -1158,6 +1266,7 @@ def main(
                     ),
                     selected_subtask_log_dir=select_subtask_to_run_log_dir,
                     run_summary=select_subtask_to_run is None,
+                    poc_config=poc_config,
                 )
             except ValueError as exc:
                 raise click.ClickException(str(exc)) from exc
@@ -1179,6 +1288,7 @@ def main(
                     ),
                     selected_chain_log_dir=select_chain_to_run_log_dir,
                     run_summary=select_chain_to_run is None,
+                    poc_config=poc_config,
                 )
             except ValueError as exc:
                 raise click.ClickException(str(exc)) from exc
@@ -1190,6 +1300,7 @@ def main(
                     common_focus=common_focus,
                     agent_configs=agent_configs,
                     max_concurrency=max_concurrency,
+                    poc_config=poc_config,
                 )
             except ValueError as exc:
                 raise click.ClickException(str(exc)) from exc
@@ -1231,6 +1342,7 @@ def main(
                 max_concurrency=max_concurrency,
                 disabled_nodes=disabled_nodes,
                 till_node=till_node,
+                poc_config=poc_config,
             )
         return final
 
@@ -1252,7 +1364,18 @@ def main(
 
     final_state_path = _write_final_state(final)
     click.echo(f"final state written to {final_state_path}", err=True)
-    if select_subtask_to_run is not None:
+    if only_gen_mode:
+        click.echo("\n=== PoC generation results ===\n")
+        results = final.get("poc_results") or []
+        if not results:
+            click.echo("No qualified findings found; no PoCs were generated.")
+        for item in results:
+            click.echo(
+                f"{item.get('finding_id', '')}: {item.get('status', '')}"
+                f" attempts={item.get('attempt_count', 0)}"
+                f" release={item.get('release_path', '')}"
+            )
+    elif select_subtask_to_run is not None:
         click.echo("\n=== selected subtask statuses ===\n")
         for item in final.get("selected_subtask_statuses") or []:
             click.echo(
