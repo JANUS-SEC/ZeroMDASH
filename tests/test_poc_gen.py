@@ -100,6 +100,33 @@ class OracleTest(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 safe_relative_path(value)
 
+    def test_plan_prompt_declares_full_oracle_contract(self):
+        # The plan prompt must teach the model the exact OracleSpec schema;
+        # otherwise it invents kinds like "crash"/"differential" and every
+        # attempt fails strict validation. The full contract is materialized
+        # as a JSON file; the prompt only references its path and the kind enum.
+        from zeromdash import prompts
+        from zeromdash.poc_gen.oracle import _KINDS, oracle_spec_schema
+
+        text = prompts.POC_PLAN.format(
+            request_path="request.json",
+            repo_path="/repo",
+            verification_runs=3,
+            verification_min_matches=2,
+            max_strategies=3,
+            oracle_schema_path="oracle_schema.json",
+        )
+        for kind in sorted(_KINDS):
+            self.assertIn(kind, text)
+        self.assertIn("oracle_schema.json", text)
+        self.assertIn("crash", text)  # explicitly forbidden as an invented kind
+        self.assertNotIn('{"', text)  # no inline JSON documents in prompts
+        schema = oracle_spec_schema()
+        self.assertEqual(set(schema["kind"]["allowed"]), _KINDS)
+        self.assertEqual(set(schema["expected"]["by_kind"]), _KINDS)
+        for field in ("reachability", "controls", "stability", "profile"):
+            self.assertIn(field, schema)
+
 
 class FindingLoaderTest(unittest.TestCase):
     def test_report_group_and_local_alias_selection(self):

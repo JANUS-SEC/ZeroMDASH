@@ -11,6 +11,8 @@ from __future__ import annotations
 import copy
 import inspect
 import json
+import os
+import sys
 import threading
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import contextmanager
@@ -270,6 +272,19 @@ def recover_runtime(*, node: str | None = None, failure=invocation_failure):
                         _recovery_round.reset(round_token)
                     detail = failure(result)
                     if not detail:
+                        return result
+                    if os.environ.get("ZEROMDASH_NONINTERACTIVE", "").strip() == "1":
+                        # Unattended/batch runs must never block on (or die from)
+                        # the interactive recovery prompt. Keep the recorded
+                        # failure so callers can finish this finding/subtask and
+                        # continue with the remaining work.
+                        with runtime_console():
+                            sys.stderr.write(
+                                f"Runtime recovery skipped (ZEROMDASH_NONINTERACTIVE=1): "
+                                f"node={name} subtask={task or '-'}; returning the recorded "
+                                f"failure so the workflow can continue: {detail}\n"
+                            )
+                            sys.stderr.flush()
                         return result
                     current = agent_config_variants_for_node(name, selected_backends, selected_configs)[-1]
                     # Focus belongs to the node, even when the failed fallback
