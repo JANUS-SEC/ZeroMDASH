@@ -16,6 +16,7 @@ from typing import Any
 from .core import CORE_MODULES
 from . import polish_report as _polish_report_module
 from . import summary as _summary_module
+from zeromdash.poc_gen import node as _poc_gen_module
 
 
 _IMPLEMENTATION_MODULES: list[ModuleType] = []
@@ -34,6 +35,7 @@ for _core_module in CORE_MODULES:
     _export_module(_core_module)
 _export_module(_polish_report_module)
 _export_module(_summary_module)
+_export_module(_poc_gen_module)
 
 _NODE_MODULE_NAMES = (
     "fetch_target_repo",
