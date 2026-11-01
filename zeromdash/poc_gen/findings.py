@@ -54,6 +54,14 @@ def _admission_source(finding: dict[str, Any]) -> str:
     return ""
 
 
+_SEVERITY_FLOOR = {"medium", "high", "critical"}
+
+
+def _finding_severity(finding: dict[str, Any]) -> str:
+    review = _finding_review(finding)
+    return _identifier(finding.get("severity") or review.get("severity")).lower()
+
+
 def _record_stat(stats: dict[str, Any] | None, key: str) -> None:
     if stats is not None:
         stats[key] = int(stats.get(key, 0)) + 1
@@ -62,8 +70,9 @@ def _record_stat(stats: dict[str, Any] | None, key: str) -> None:
 def _admit_finding(finding: dict[str, Any], stats: dict[str, Any] | None) -> str:
     """Shared admission filter with selection diagnostics.
 
-    Returns the admission source (see :func:`_admission_source`) and records
-    per-reason counters into ``stats`` when provided.
+    Admission requires a qualification source (strict gate, or legacy
+    confirm verdict) AND severity >= medium. Low/unrated findings never
+    enter PoC generation. Per-reason counters go into ``stats``.
     """
     _record_stat(stats, "considered")
     admission = _admission_source(finding)
@@ -72,6 +81,9 @@ def _admit_finding(finding: dict[str, Any], stats: dict[str, Any] | None) -> str
             stats,
             "skipped_gate_failed" if _has_qualification_schema(finding) else "skipped_legacy_not_confirmed",
         )
+        return ""
+    if _finding_severity(finding) not in _SEVERITY_FLOOR:
+        _record_stat(stats, "skipped_low_severity")
         return ""
     _record_stat(stats, "admitted_gate" if admission == "gate" else "admitted_legacy_confirm")
     return admission
