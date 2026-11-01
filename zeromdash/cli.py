@@ -1371,8 +1371,8 @@ def main(
         if stats.get("admitted_legacy_confirm"):
             click.echo(
                 f"note: {stats['admitted_legacy_confirm']} legacy finding(s) admitted via the "
-                "confirm-verdict fallback (pre-qualification-gate workspace schema); "
-                "the CVSS4 qualification gate was not applied to them."
+                "confirm-verdict + severity>=medium fallback (pre-qualification-gate workspace "
+                "schema); the CVSS4 qualification gate was not applied to them."
             )
         if not results:
             click.echo("No qualified findings found; no PoCs were generated.")

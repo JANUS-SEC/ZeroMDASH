@@ -135,6 +135,7 @@ class FindingLoaderTest(unittest.TestCase):
             "subtask_id": "vuln-001",
             "disposition": "confirmed_vulnerability",
             "qualification_gate_passed": True,
+            "severity": "high",
             "cvss4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
         }
         group = {
@@ -160,7 +161,7 @@ class FindingLoaderTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "available finding IDs"):
                 load_finding_records(state, "vuln-999")
 
-    def _legacy_review_res(self, tmp, name, review):
+    def _legacy_review_res(self, tmp, name, review, severity="high"):
         ws = Workspace.create(tmp, target="libfoo")
         review_res = ws.log_path("review_res")
         review_res.mkdir(parents=True, exist_ok=True)
@@ -170,6 +171,7 @@ class FindingLoaderTest(unittest.TestCase):
                     "finding": {
                         "title": f"legacy {name}",
                         "subtask_id": name,
+                        "severity": severity,
                         "evidence": {"code_locations": ["src/main.c:10"]},
                         "review": review,
                     }
@@ -225,6 +227,7 @@ class FindingLoaderTest(unittest.TestCase):
         finding = {
             "title": "legacy group finding",
             "subtask_id": "vuln-001",
+            "severity": "high",
             "review": {"verdict": "confirm"},
         }
         group = {
@@ -247,6 +250,97 @@ class FindingLoaderTest(unittest.TestCase):
             self.assertEqual(len(records), 1)
             self.assertEqual(records[0]["qualification"], "legacy_confirm")
             self.assertEqual(stats["admitted_legacy_confirm"], 1)
+
+    def test_legacy_low_severity_confirm_skipped(self):
+        with TemporaryDirectory() as tmp:
+            ws = self._legacy_review_res(tmp, "vuln-001", {"verdict": "confirm"}, severity="low")
+            state = {"task_id": ws.task_id, "workspace_root": str(ws.root)}
+            stats: dict = {}
+            records = load_finding_records(state, stats=stats)
+            self.assertEqual(records, [])
+            self.assertEqual(stats["skipped_low_severity"], 1)
+            self.assertEqual(stats.get("admitted_legacy_confirm", 0), 0)
+
+    def test_legacy_medium_severity_confirm_admitted(self):
+        with TemporaryDirectory() as tmp:
+            ws = self._legacy_review_res(tmp, "vuln-001", {"verdict": "confirm"}, severity="medium")
+            state = {"task_id": ws.task_id, "workspace_root": str(ws.root)}
+            stats: dict = {}
+            records = load_finding_records(state, stats=stats)
+            self.assertEqual(len(records), 1)
+            self.assertEqual(records[0]["qualification"], "legacy_confirm")
+            self.assertEqual(stats["admitted_legacy_confirm"], 1)
+
+    def test_legacy_missing_severity_confirm_skipped(self):
+        with TemporaryDirectory() as tmp:
+            ws = self._legacy_review_res(tmp, "vuln-001", {"verdict": "confirm"}, severity="")
+            state = {"task_id": ws.task_id, "workspace_root": str(ws.root)}
+            stats: dict = {}
+            records = load_finding_records(state, stats=stats)
+            self.assertEqual(records, [])
+            self.assertEqual(stats["skipped_low_severity"], 1)
+
+    def test_gate_passed_low_severity_skipped(self):
+        finding = {
+            "title": "qualified but low",
+            "subtask_id": "vuln-001",
+            "disposition": "confirmed_vulnerability",
+            "qualification_gate_passed": True,
+            "severity": "low",
+            "cvss4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+        }
+        group = {
+            "group_id": "VULN-001",
+            "summary_format": "full",
+            "primary_finding": finding,
+            "source_subtasks": ["vuln-001"],
+            "source_chains": [],
+        }
+        with TemporaryDirectory() as tmp:
+            ws = Workspace.create(tmp, target="libfoo")
+            state = {
+                "task_id": ws.task_id,
+                "workspace_root": str(ws.root),
+                "report_groups": [group],
+                "report_groups_path": str(ws.log / "report_groups.json"),
+            }
+            stats: dict = {}
+            records = load_finding_records(state, stats=stats)
+            self.assertEqual(records, [])
+            self.assertEqual(stats["skipped_low_severity"], 1)
+            self.assertEqual(stats.get("admitted_gate", 0), 0)
+
+
+class PocFindingsCapTest(unittest.TestCase):
+    def _service(self, tmp, poc_config):
+        ws = Workspace.create(tmp, target="libfoo")
+        (ws.main_path("repo") / "main.c").write_text("int main(void) { return 0; }\n")
+        state = {
+            "target": "libfoo",
+            "task_id": ws.task_id,
+            "workspace_root": str(ws.root),
+            "repo_path": str(ws.main_path("repo")),
+            "agent_configs": {},
+            "poc_config": {"enabled": True, **poc_config},
+        }
+        return PocGenService(state)
+
+    def _records(self, count):
+        return [{**_record(), "finding_id": f"VULN-{i:03d}"} for i in range(count)]
+
+    def test_default_config_uncapped_and_explicit_cap(self):
+        from zeromdash.poc_gen.config import normalize_poc_config
+
+        self.assertEqual(normalize_poc_config(None)["max_findings"], -1)
+        with TemporaryDirectory() as tmp:
+            for config, expected in (({}, 3), ({"max_findings": -1}, 3), ({"max_findings": 1}, 1)):
+                with self.subTest(config=config):
+                    service = self._service(tmp, config)
+                    with patch("zeromdash.poc_gen.service.load_finding_records", return_value=self._records(3)), patch.object(
+                        PocGenService, "run_record", side_effect=lambda record: {"finding_id": record["finding_id"], "status": "ok"}
+                    ):
+                        results = service.run()
+                    self.assertEqual(len(results), expected)
 
 
 class PocGenNodeTest(unittest.TestCase):

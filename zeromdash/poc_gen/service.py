@@ -424,5 +424,7 @@ class PocGenService:
 
     def run(self, selected_id: str = "", stats: dict[str, Any] | None = None) -> list[dict[str, Any]]:
         records = load_finding_records(self.state, selected_id, stats=stats)
-        records = records[: self.config["max_findings"]]
+        max_findings = int(self.config.get("max_findings", -1))
+        if max_findings >= 0:
+            records = records[:max_findings]
         return [self.run_record(record) for record in records]

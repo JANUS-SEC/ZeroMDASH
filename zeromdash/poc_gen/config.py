@@ -7,7 +7,8 @@ from typing import Any
 DEFAULT_POC_CONFIG: dict[str, Any] = {
     "enabled": False,
     "backend": "agent_sandbox",
-    "max_findings": 8,
+    # -1 = no cap: every qualified finding (severity >= medium) gets PoC generation.
+    "max_findings": -1,
     "max_strategies_per_round": 3,
     "max_debug_rounds_per_strategy": 4,
     "max_no_progress_rounds": 2,
