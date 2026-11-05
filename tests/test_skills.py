@@ -258,6 +258,23 @@ class IntegrationWithBundledPresetsTest(unittest.TestCase):
                 self.assertNotIn("\n", info.summary)
                 self.assertLessEqual(len(info.summary), 280)
 
+    def test_database_repro_environment_skill_discovered(self):
+        from zeromdash import presets as presets_mod
+        d = presets_mod.default_presets_dir() / "skills"
+        out = {info.name: info for info in skills.discover_skills([d])}
+        info = out.get("database-repro-environment")
+        self.assertIsNotNone(info)
+        self.assertIn("Database", info.summary)
+        self.assertIn("prepare_environment_and_debugger", info.summary)
+        self.assertLessEqual(len(info.summary), 280)
+
+    def test_prepare_role_cards_reference_database_skill(self):
+        from zeromdash import presets as presets_mod
+        roles = presets_mod.default_presets_dir() / "roles"
+        for rel in ("prepare_environment_and_debugger.md", "zh_CN/prepare_environment_and_debugger.md"):
+            text = (roles / rel).read_text()
+            self.assertIn("skills/database-repro-environment/SKILL.md", text)
+
 
 if __name__ == "__main__":
     unittest.main()
