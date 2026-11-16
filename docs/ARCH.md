@@ -99,6 +99,7 @@ CLI 入口，负责：
 - 解析 `zeromdash` 命令行参数。
 - 加载 `.env`。
 - 解析 `--agent-config` YAML 文件，包括顶层 `max_concurrency`（默认 8）、
+  `subtask_concurrency` / `chain_subtask_concurrency` / `poc_task_concurrency`、
   `top_K`（含 `chain` bucket）、`chain` 聚合控制段（`enabled` /
   `max_length` / `max_successors_per_capability` / `beam_width` /
   `max_candidates_before_top_k` / `max_battle_rounds` /
@@ -134,7 +135,7 @@ LangGraph 拓扑定义，负责：
 - 创建 workspace。
 - 注入 Langfuse metadata。
 - 调用 `graph.invoke(...)`，并把 `max_concurrency` 传入 LangGraph config
-  以限制 `Send(...)` fan-out 的同时执行数量。
+  以限制普通图节点并发；三类任务 Pipeline 分别使用其独立槽位配置。
 
 主图大致结构：
 
@@ -661,7 +662,26 @@ objective 和证据引用写入代表任务的 `hints.merged_subtasks`，然后�
 Send("subtask", child_state)
 ```
 
-`max_concurrency` 只限制已派发任务的同时执行数量。`top_K` 是用户显式配置的
+这些 `Send` 作为任务描述交给共用 Pipeline，不再逐个占用父图 executor。
+父图的 `subtask`、`chain_subtask`（含 gather chain）节点运行有界任务队列，
+PoC service 也使用同一个 `TaskPipeline`。三个独立的正整数配置项为：
+
+```yaml
+max_concurrency: 8
+subtask_concurrency: 8
+chain_subtask_concurrency: 4
+poc_task_concurrency: 2
+```
+
+未配置的 task 槽位继承 `max_concurrency`；显式值不受父图该值的二次截断。
+每个 worker 持有完整任务，包括 investigate/critic 的返修循环或 PoC 的全部
+阶段。只提交槽位数以内的 future，任一完成后立即补位。worker 复制调用上下文，
+保留 tracing 和 run-scoped runtime recovery；结果按派发顺序合并，子图 scratch
+state 继续隔离。未处理异常停止补位并向上抛出，运行中的任务结束后退出；子图
+已经记录并正常返回的 errors 则随结果合并。队列事件写入 `log/pipeline/`，
+selected 重跑使用独立目录。初始任务、chain 和报告之间的阶段屏障保持不变。
+
+`max_concurrency` 控制普通 LangGraph 节点并发。`top_K` 是用户显式配置的
 成本上限；未配置时不截断，配置后可能牺牲覆盖率。diff mode 不隐式设置
 `top_K`。full mode 保持原有全仓 planning / dispatch 语义。
 
@@ -671,7 +691,7 @@ diff anchor -> sink 因果链的 adjacent / pre-existing 候选只保留在
 `*.candidates.json`，不单独派发。
 
 diff 模式下 Send 顺序按 spec / vuln / patch / feature 做 round-robin，避免某个
-大 bucket 把 `max_concurrency` 槽位和执行队列长期占满。full 模式保持原有顺序。
+大 bucket 把 subtask 槽位和执行队列长期占满。full 模式保持原有顺序。
 
 如果没有任何 subtask，全新扫描仍直接进入 `summary`，保证 workflow 总是有最终输出；但恢复场景里只要 state 已有 finding 或 primitive，即使本批没有新 subtask，也会继续进入 `materialize_chain_pool` 做 chain 聚合。
 
@@ -1079,18 +1099,22 @@ runtime: deepagent
 codex / codex_cli
 traex / trae-cli
 claude_code
+kimi / kimi_code / kimi_cli
+dsh
 ```
 
 限制同时覆盖 primary 和全部显式 fallback；只要其中一个 runtime 不具备该
 能力，配置解析或执行前解析 runtime chain 时就 fail closed。Codex 调用会显式
 加入 `--enable multi_agent`，TraeX 调用会加入
 `--config features.multi_agent_v2.enabled=true`，Claude Code 则只在这六个节点
-生成的 local settings 中允许 `Agent` tool。Kimi、OpenCode、DeepAgent 当前 adapter 没有经过
-验证的原生子 agent 契约；DSH 的 bundled headless-minimal overlay 明确禁用了
-subagent tools，所以它们只能用于其他节点。
+生成的 local settings 中允许 `Agent` tool。Kimi Code >= 2.5 内置 agent-profile
+subagents，prompt 模式可直接派发，无需额外 CLI 旗标；DSH 通过 bundled
+headless-minimal overlay 暴露受控的 tool-subagent 路径。OpenCode、DeepAgent
+当前 adapter 没有经过验证的原生子 agent 契约，只能用于其他节点。
 
 术语上，`subtask` 是 ZeroMDASH 自己通过 LangGraph `Send("subtask", ...)`
-派发的调查/复核工作单元；`subagent` 只指 Codex、TraeX 或 Claude Code harness
+派发的调查/复核工作单元；`subagent` 只指 Codex、TraeX、Claude Code、Kimi
+Code 或 DSH harness
 内部真正创建的原生子代理。
 
 规范 runtime 名称：

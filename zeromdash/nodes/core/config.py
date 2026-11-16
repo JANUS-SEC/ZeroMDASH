@@ -6,7 +6,12 @@ import copy
 import os
 from typing import Any, TypedDict
 
-from zeromdash.agents import AgentEnv, normalize_agent_name, supports_native_subagents
+from zeromdash.agents import (
+    NATIVE_SUBAGENT_BACKENDS,
+    AgentEnv,
+    normalize_agent_name,
+    supports_native_subagents,
+)
 
 from .constants import *
 
@@ -101,7 +106,7 @@ def validate_native_subagent_runtime_variants(
         raise ValueError(
             f"node {node!r} requires a harness with native subagent support; "
             f"unsupported runtime(s): {', '.join(unsupported)}; "
-            "supported runtimes: claude_code, codex, dsh, traex"
+            f"supported runtimes: {', '.join(sorted(NATIVE_SUBAGENT_BACKENDS))}"
         )
 
 def _agent_configs_with_node_variant(
@@ -200,6 +205,25 @@ def agent_env_for_node(
         token = os.environ.get("AWS_BEARER_TOKEN_BEDROCK")
         if token is not None:
             env["AWS_BEARER_TOKEN_BEDROCK"] = token
+        env.update(explicit_env)
+        _clear_backend_model_env_if_configured(env, backend, config)
+        return env
+
+    if provider in ("glm", "bigmodel"):
+        # Same leftover-env cleanup as bedrock: parent-shell ANTHROPIC_* vars
+        # win over the settings file, so clear them unless set via node env.
+        env: AgentEnv = {
+            "CLAUDE_CODE_USE_BEDROCK": None,
+            "AWS_BEARER_TOKEN_BEDROCK": None,
+            "ANTHROPIC_AUTH_TOKEN": None,
+            "ANTHROPIC_BASE_URL": None,
+            "ANTHROPIC_MODEL": None,
+            "ANTHROPIC_SMALL_FAST_MODEL": None,
+            "ANTHROPIC_DEFAULT_HAIKU_MODEL": None,
+            "ANTHROPIC_DEFAULT_SONNET_MODEL": None,
+            "ANTHROPIC_DEFAULT_OPUS_MODEL": None,
+            "CLAUDE_CODE_SUBAGENT_MODEL": None,
+        }
         env.update(explicit_env)
         _clear_backend_model_env_if_configured(env, backend, config)
         return env

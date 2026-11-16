@@ -460,9 +460,18 @@ class AgentRegistryTest(unittest.TestCase):
         self.assertIsInstance(get_agent("deepagent"), DeepAgent)
 
     def test_native_subagent_capability_is_fail_closed(self):
-        for runtime in ("codex", "codex_cli", "traex", "trae-cli", "claude_code", "dsh"):
+        for runtime in (
+            "codex",
+            "codex_cli",
+            "traex",
+            "trae-cli",
+            "claude_code",
+            "dsh",
+            "kimi",
+            "kimi_code",
+        ):
             self.assertTrue(supports_native_subagents(runtime), runtime)
-        for runtime in ("kimi", "opencode", "deepagent", "unknown"):
+        for runtime in ("opencode", "deepagent", "unknown"):
             self.assertFalse(supports_native_subagents(runtime), runtime)
 
 

@@ -16,13 +16,12 @@ Top-level edges (left half):
 `plan_by_vuln_patch`; the attack-surface barrier and planner barrier drop
 those nodes the same way `--disable-spec` drops spec nodes.
 
-Per-bucket fan-out (right half):
+Planner barrier and bounded task pipelines (right half):
 
-    analyze_attack_surface
-        -> plan_by_spec         --(conditional Send)--> [N x investigate_subtask]
-        -> plan_by_vuln_similar --(conditional Send)--> [M x investigate_subtask]
-        -> plan_by_vuln_patch   --(conditional Send)--> [K x investigate_subtask]
-        -> plan_by_new_feature  --(conditional Send)--> [F x investigate_subtask]
+    analyze_attack_surface -> [enabled planners] -> dispatch_subtasks
+        -> subtask pipeline (bounded whole-task slots)
+        -> materialize_chain_pool -> plan_chains -> dispatch_chains
+        -> chain_subtask pipeline (independent bounded whole-task slots)
 
 Each subtask graph runs an Agent-Native hypothesis-set loop:
 
@@ -61,6 +60,7 @@ from zeromdash.state import (
     SubtaskState,
 )
 from zeromdash.workspace import Workspace
+from zeromdash.pipeline import task_pipeline_node
 from zeromdash.nodes.core.result_artifacts import (
     active_subtask_result_payloads,
     append_finalized_result_state,
@@ -130,11 +130,21 @@ def build_graph(
         # Compile the investigate/critic/finalize loop as a nested graph so
         # per-subtask scratch keys (iteration, investigation, review, ...) stay
         # isolated and only final Finding buckets merge back into the parent graph.
-        g.add_node("subtask", build_subtask_graph(backends))
+        g.add_node(
+            "subtask",
+            task_pipeline_node(build_subtask_graph(backends), nodes.dispatch_all,
+                               kind="subtask", next_node="materialize_chain_pool"),
+            destinations=("materialize_chain_pool", "summary"),
+        )
         g.add_node("materialize_chain_pool", _bind(nodes.materialize_chain_pool))
         g.add_node("plan_chains", _bind(nodes.plan_chains))
         g.add_node("dispatch_chains", _bind(nodes.dispatch_chains))
-        g.add_node("chain_subtask", build_chain_subtask_graph(backends))
+        g.add_node(
+            "chain_subtask",
+            task_pipeline_node(build_chain_subtask_graph(backends), nodes.dispatch_all_chains,
+                               kind="chain_subtask", next_node="prepare_report_groups"),
+            destinations=("prepare_report_groups",),
+        )
         g.add_node("prepare_report_groups", _bind(nodes.prepare_report_groups))
 
         # ---------------- summary / polish ------------------
@@ -197,15 +207,13 @@ def build_graph(
     # view of all buckets. If all planners return zero subtasks, dispatch_all
     # routes directly to summary so the workflow still produces an output.
     g.add_edge(planner_nodes, "dispatch_subtasks")
-    g.add_conditional_edges("dispatch_subtasks", nodes.dispatch_all)
+    g.add_edge("dispatch_subtasks", "subtask")
 
     # The nested subtask graph returns aggregated findings and primitives.
     # A second barrier materializes the primitive pool before chain planning.
-    g.add_edge("subtask", "materialize_chain_pool")
     g.add_edge("materialize_chain_pool", "plan_chains")
     g.add_edge("plan_chains", "dispatch_chains")
-    g.add_conditional_edges("dispatch_chains", nodes.dispatch_all_chains)
-    g.add_edge("chain_subtask", "prepare_report_groups")
+    g.add_edge("dispatch_chains", "chain_subtask")
     g.add_edge("prepare_report_groups", "summary")
 
     if till_node == "summary":
@@ -270,22 +278,30 @@ def build_subtask_restore_graph(backends: dict[str, str] | None = None, poc_enab
         return partial(fn, backends=backends)
 
     g.add_node("dispatch_subtasks", _bind(nodes.dispatch_subtasks))
-    g.add_node("subtask", build_subtask_graph(backends))
+    g.add_node(
+        "subtask",
+        task_pipeline_node(build_subtask_graph(backends), nodes.dispatch_all,
+                           kind="subtask", next_node="materialize_chain_pool"),
+        destinations=("materialize_chain_pool", "summary"),
+    )
     g.add_node("materialize_chain_pool", _bind(nodes.materialize_chain_pool))
     g.add_node("plan_chains", _bind(nodes.plan_chains))
     g.add_node("dispatch_chains", _bind(nodes.dispatch_chains))
-    g.add_node("chain_subtask", build_chain_subtask_graph(backends))
+    g.add_node(
+        "chain_subtask",
+        task_pipeline_node(build_chain_subtask_graph(backends), nodes.dispatch_all_chains,
+                           kind="chain_subtask", next_node="prepare_report_groups"),
+        destinations=("prepare_report_groups",),
+    )
     g.add_node("prepare_report_groups", _bind(nodes.prepare_report_groups))
     g.add_node("summary", _bind(nodes.summary))
     g.add_node("polish_report", nodes.polish_report)
 
     g.add_edge(START, "dispatch_subtasks")
-    g.add_conditional_edges("dispatch_subtasks", nodes.dispatch_all)
-    g.add_edge("subtask", "materialize_chain_pool")
+    g.add_edge("dispatch_subtasks", "subtask")
     g.add_edge("materialize_chain_pool", "plan_chains")
     g.add_edge("plan_chains", "dispatch_chains")
-    g.add_conditional_edges("dispatch_chains", nodes.dispatch_all_chains)
-    g.add_edge("chain_subtask", "prepare_report_groups")
+    g.add_edge("dispatch_chains", "chain_subtask")
     g.add_edge("prepare_report_groups", "summary")
     g.add_edge("summary", "polish_report")
     if poc_enabled:
@@ -349,7 +365,12 @@ def build_chain_restore_graph(backends: dict[str, str] | None = None, poc_enable
     g.add_node("materialize_chain_pool", _bind(nodes.materialize_chain_pool))
     g.add_node("plan_chains", _bind(nodes.plan_chains))
     g.add_node("dispatch_chains", _bind(nodes.dispatch_chains))
-    g.add_node("chain_subtask", build_chain_subtask_graph(backends))
+    g.add_node(
+        "chain_subtask",
+        task_pipeline_node(build_chain_subtask_graph(backends), nodes.dispatch_all_chains,
+                           kind="chain_subtask", next_node="prepare_report_groups"),
+        destinations=("prepare_report_groups",),
+    )
     g.add_node("prepare_report_groups", _bind(nodes.prepare_report_groups))
     g.add_node("summary", _bind(nodes.summary))
     g.add_node("polish_report", nodes.polish_report)
@@ -357,8 +378,7 @@ def build_chain_restore_graph(backends: dict[str, str] | None = None, poc_enable
     g.add_edge(START, "materialize_chain_pool")
     g.add_edge("materialize_chain_pool", "plan_chains")
     g.add_edge("plan_chains", "dispatch_chains")
-    g.add_conditional_edges("dispatch_chains", nodes.dispatch_all_chains)
-    g.add_edge("chain_subtask", "prepare_report_groups")
+    g.add_edge("dispatch_chains", "chain_subtask")
     g.add_edge("prepare_report_groups", "summary")
     g.add_edge("summary", "polish_report")
     if poc_enabled:
@@ -380,14 +400,18 @@ def build_selected_chain_restore_graph(backends: dict[str, str] | None = None):
     g.add_node("materialize_chain_pool", _bind(nodes.materialize_chain_pool))
     g.add_node("plan_chains", _bind(nodes.plan_chains))
     g.add_node("dispatch_chains", _bind(nodes.dispatch_chains))
-    g.add_node("chain_subtask", build_chain_subtask_graph(backends))
+    g.add_node(
+        "chain_subtask",
+        task_pipeline_node(build_chain_subtask_graph(backends), nodes.dispatch_selected_chains,
+                           kind="chain_subtask", next_node="collect_selected_chain_statuses"),
+        destinations=("collect_selected_chain_statuses",),
+    )
     g.add_node("collect_selected_chain_statuses", nodes.collect_selected_chain_statuses)
 
     g.add_edge(START, "materialize_chain_pool")
     g.add_edge("materialize_chain_pool", "plan_chains")
     g.add_edge("plan_chains", "dispatch_chains")
-    g.add_conditional_edges("dispatch_chains", nodes.dispatch_selected_chains)
-    g.add_edge("chain_subtask", "collect_selected_chain_statuses")
+    g.add_edge("dispatch_chains", "chain_subtask")
     g.add_edge("collect_selected_chain_statuses", END)
     return g.compile()
 
@@ -402,15 +426,19 @@ def build_selected_subtask_restore_graph(
         return partial(fn, backends=backends)
 
     g.add_node("dispatch_subtasks", _bind(nodes.dispatch_subtasks))
-    g.add_node("subtask", build_subtask_graph(backends))
+    g.add_node(
+        "subtask",
+        task_pipeline_node(build_subtask_graph(backends), nodes.dispatch_selected,
+                           kind="subtask", next_node="collect_selected_subtask_statuses"),
+        destinations=("collect_selected_subtask_statuses",),
+    )
     g.add_node(
         "collect_selected_subtask_statuses",
         nodes.collect_selected_subtask_statuses,
     )
 
     g.add_edge(START, "dispatch_subtasks")
-    g.add_conditional_edges("dispatch_subtasks", nodes.dispatch_selected)
-    g.add_edge("subtask", "collect_selected_subtask_statuses")
+    g.add_edge("dispatch_subtasks", "subtask")
     g.add_edge("collect_selected_subtask_statuses", END)
     return g.compile()
 
@@ -1059,6 +1087,7 @@ def run(
     till_node: str | None = None,
     extra_state: dict[str, Any] | None = None,
     poc_config: dict[str, Any] | None = None,
+    task_concurrency: dict[str, int] | None = None,
 ) -> ZeroMDASHState:
     if target_repos and (scan_mode != "full" or diff_file or diff_git):
         raise ValueError(
@@ -1132,6 +1161,7 @@ def run(
         },
     )
 
+    state["task_concurrency"] = dict(task_concurrency or {})
     config = dict(config or {})
     config["max_concurrency"] = max_concurrency
     final = graph.invoke(state, config=config or None)
@@ -1160,6 +1190,7 @@ def run_from_subtask_workspace(
     run_summary: bool = True,
     extra_state: dict[str, Any] | None = None,
     poc_config: dict[str, Any] | None = None,
+    task_concurrency: dict[str, int] | None = None,
 ) -> ZeroMDASHState:
     """Resume an existing workspace from planner outputs into subtasks."""
     if not run_summary and selected_subtask_ids is None:
@@ -1210,6 +1241,7 @@ def run_from_subtask_workspace(
             "selected_subtask_log_dir": state.get("selected_subtask_log_dir", ""),
         },
     )
+    state["task_concurrency"] = dict(task_concurrency or {})
     config = dict(config or {})
     config["max_concurrency"] = max_concurrency
     return graph.invoke(state, config=config or None)
@@ -1232,6 +1264,7 @@ def run_from_chain_workspace(
     run_summary: bool = True,
     extra_state: dict[str, Any] | None = None,
     poc_config: dict[str, Any] | None = None,
+    task_concurrency: dict[str, int] | None = None,
 ) -> ZeroMDASHState:
     """Resume an existing workspace from confirmed primitives into chain analysis."""
     if not run_summary and selected_chain_ids is None:
@@ -1288,6 +1321,7 @@ def run_from_chain_workspace(
             "selected_chain_log_dir": state.get("selected_chain_log_dir", ""),
         },
     )
+    state["task_concurrency"] = dict(task_concurrency or {})
     config = dict(config or {})
     config["max_concurrency"] = max_concurrency
     return graph.invoke(state, config=config or None)
@@ -1315,6 +1349,7 @@ def run_from_subagent_workspace(
     selected_subagent_log_dir: str | Path | None = None,
     run_summary: bool = True,
     extra_state: dict[str, Any] | None = None,
+    task_concurrency: dict[str, int] | None = None,
 ) -> ZeroMDASHState:
     """Deprecated wrapper preserving the former keyword argument names."""
     return run_from_subtask_workspace(
@@ -1329,6 +1364,7 @@ def run_from_subagent_workspace(
         chain_config=chain_config,
         disabled_nodes=disabled_nodes,
         max_concurrency=max_concurrency,
+        task_concurrency=task_concurrency,
         selected_subtask_ids=selected_subagent_ids,
         selected_subtask_log_dir=selected_subagent_log_dir,
         run_summary=run_summary,
@@ -1345,6 +1381,7 @@ def run_summary_from_workspace(
     max_concurrency: int = 8,
     extra_state: dict[str, Any] | None = None,
     poc_config: dict[str, Any] | None = None,
+    task_concurrency: dict[str, int] | None = None,
 ) -> ZeroMDASHState:
     """Restore an existing workspace and run summary followed by report polish."""
     state = _summary_state_from_workspace(
@@ -1379,6 +1416,7 @@ def run_summary_from_workspace(
             "restore_mode": "start_from_summary",
         },
     )
+    state["task_concurrency"] = dict(task_concurrency or {})
     config = dict(config or {})
     config["max_concurrency"] = max_concurrency
     return app.invoke(state, config=config or None)
@@ -1394,6 +1432,7 @@ def run_pocs_from_workspace(
     agent_config_task_types: nodes.AgentConfigTaskTypes | None = None,
     max_concurrency: int = 8,
     poc_config: dict[str, Any] | None = None,
+    task_concurrency: dict[str, int] | None = None,
 ) -> ZeroMDASHState:
     """Run only PoC generation from a completed single-target workspace."""
     from zeromdash.poc_gen.config import normalize_poc_config
@@ -1421,6 +1460,7 @@ def run_pocs_from_workspace(
             "workspace_path": str(Path(workspace_path).expanduser().resolve()),
         },
     )
+    state["task_concurrency"] = dict(task_concurrency or {})
     config = dict(config or {})
     config["max_concurrency"] = max_concurrency
     return app.invoke(state, config=config or None)
@@ -1433,6 +1473,7 @@ def run_polish_report_from_workspace(
     agent_config_task_types: nodes.AgentConfigTaskTypes | None = None,
     max_concurrency: int = 8,
     extra_state: dict[str, Any] | None = None,
+    task_concurrency: dict[str, int] | None = None,
 ) -> ZeroMDASHState:
     """Restore an existing workspace and run only the lightweight polish node."""
     state = _polish_report_state_from_workspace(
@@ -1459,6 +1500,7 @@ def run_polish_report_from_workspace(
             "restore_mode": "start_from_polish_report",
         },
     )
+    state["task_concurrency"] = dict(task_concurrency or {})
     config = dict(config or {})
     config["max_concurrency"] = max_concurrency
     return app.invoke(state, config=config or None)

@@ -355,7 +355,7 @@ class PocGenNodeTest(unittest.TestCase):
                 result = poc_gen(state)
         self.assertIn("poc_selection_stats", result)
         self.assertIn("poc_results", result)
-        service_cls.return_value.run.assert_called_once_with("", stats={})
+        service_cls.return_value.run.assert_called_once_with("", stats={}, config=None)
 
 
 class PocGenServiceTest(unittest.TestCase):

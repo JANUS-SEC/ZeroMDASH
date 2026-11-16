@@ -481,8 +481,13 @@ def render_into(
             f'"Write({similar}/**/repo/**)",\n      "Edit({similar}/**/repo/**)"',
         )
         enriched_ctx.setdefault(
+            # Sandbox denyWrite paths are literal-only (no glob support), and
+            # the sanctioned delivery dirs similar/<sw>/{writeup,patch} live
+            # inside {similar}. Denying the whole tree blocks every gather
+            # node's required output; similar repo clones stay protected by
+            # permissions.deny and the read-only source-tree policy instead.
             "claude_repo_sandbox_deny_write",
-            f'"{main}/repo",\n        "{main}/repos",\n        "{similar}"',
+            f'"{main}/repo",\n        "{main}/repos"',
         )
         enriched_ctx.setdefault(
             "source_tree_policy",

@@ -11,8 +11,8 @@ Per-bucket fan-out
 The `fanout_by_*` step does NOT directly emit findings. Instead it runs a
 **planner** that produces a *dynamic* list of `Subtask` items (the count
 depends on the actual target / writeups / spec content). The graph then
-    fans out one nested **subtask graph** per `Subtask` via
-    `langgraph.constants.Send`.
+    queues one nested **subtask graph** per `Subtask` in a bounded pipeline.
+    A slot is held until its investigate/critic/finalize loop terminates.
 
 Each subtask graph runs an Agent-Native `investigate -> critic` loop. New
 planner outputs are bounded work packages with coverage obligations and a
@@ -193,6 +193,7 @@ class ZeroMDASHState(TypedDict, total=False):
     report_group_adjudicator_focus: str
     summary_focus: str
     role_lang: str               # role card language, e.g. "en" or "zh_CN"
+    task_concurrency: dict[str, int]
     task_id: str
     workspace_root: str
     max_iterations: int          # 单个 subtask 的最大 critic 反馈轮数
@@ -316,7 +317,7 @@ class SubtaskState(SubtaskInputState, total=False):
 class SubtaskOutputState(TypedDict, total=False):
     # Plain lists here: the nested graph emits one completed subtask's
     # aggregate output. The parent ZeroMDASHState owns the operator.add
-    # reducers that merge outputs from multiple concurrent subgraphs.
+    # reducers that merge the pipeline aggregate into the parent once.
     spec_findings: list[Finding]
     vuln_candidates: list[Finding]
     patch_findings: list[Finding]

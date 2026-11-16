@@ -30,6 +30,7 @@ from zeromdash.graph import (
 )
 from zeromdash.gather import load_gather_manifest
 from zeromdash.gather_graph import run_gather
+from zeromdash.pipeline import TASK_CONCURRENCY_KEYS
 from zeromdash.poc_gen.config import POC_AGENT_NODES, POC_CONFIG_KEYS, normalize_poc_config
 from zeromdash.nodes.core.recovery import (
     RecoveryRequest,
@@ -46,6 +47,7 @@ _AGENT_CONFIG_CHAIN_KEY = "__chain__"
 _AGENT_CONFIG_GATHER_KEY = "__gather__"
 _AGENT_CONFIG_POC_KEY = "__poc__"
 _AGENT_CONFIG_MAX_CONCURRENCY_KEY = "__max_concurrency__"
+_AGENT_CONFIG_TASK_CONCURRENCY_KEY = "__task_concurrency__"
 _AGENT_CONFIG_TARGET_REPOS_KEY = "__target_repos__"
 DEFAULT_MAX_CONCURRENCY = 8
 _TOP_K_BUCKETS = {"spec", "vuln", "patch", "feature", "chain"}
@@ -212,6 +214,18 @@ def _parse_max_concurrency(value: object) -> int:
     return value
 
 
+def _parse_task_concurrency(data: dict) -> dict[str, int]:
+    parsed = {}
+    for key in TASK_CONCURRENCY_KEYS:
+        if key not in data:
+            continue
+        value = data[key]
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+            raise click.ClickException(f"invalid {key} in --agent-config: expected positive int")
+        parsed[key] = value
+    return parsed
+
+
 def _parse_chain_config(value: object) -> dict[str, object]:
     if value is None:
         return {}
@@ -366,7 +380,7 @@ def _parse_agent_config_file(path: str | None) -> nodes.AgentConfigs:
         )
 
     parsed: nodes.AgentConfigs = {}
-    allowed_top_level = {"common_focus", "max_concurrency", "node", "target_repos", "top_K", "chain", "gather", "poc"}
+    allowed_top_level = {"common_focus", "max_concurrency", "node", "target_repos", "top_K", "chain", "gather", "poc", *TASK_CONCURRENCY_KEYS}
     unknown_keys = sorted(str(key) for key in data if key not in allowed_top_level)
     if unknown_keys:
         raise click.ClickException(f"unknown top-level key(s) in --agent-config: {', '.join(unknown_keys)}")
@@ -392,6 +406,9 @@ def _parse_agent_config_file(path: str | None) -> nodes.AgentConfigs:
     parsed[_AGENT_CONFIG_MAX_CONCURRENCY_KEY] = {
         "max_concurrency": _parse_max_concurrency(data.get("max_concurrency"))
     }
+    task_concurrency = _parse_task_concurrency(data)
+    if task_concurrency:
+        parsed[_AGENT_CONFIG_TASK_CONCURRENCY_KEY] = task_concurrency
     target_repos = _parse_target_repos(data.get("target_repos"), config_dir=cfg_path.parent)
     if target_repos:
         parsed[_AGENT_CONFIG_TARGET_REPOS_KEY] = {"target_repos": target_repos}
@@ -495,6 +512,10 @@ def _pop_max_concurrency_from_agent_config(agent_configs: nodes.AgentConfigs) ->
     cfg = agent_configs.pop(_AGENT_CONFIG_MAX_CONCURRENCY_KEY, {})
     raw = (cfg or {}).get("max_concurrency")
     return raw if isinstance(raw, int) and not isinstance(raw, bool) else DEFAULT_MAX_CONCURRENCY
+
+
+def _pop_task_concurrency_from_agent_config(agent_configs: nodes.AgentConfigs) -> dict[str, int]:
+    return dict(agent_configs.pop(_AGENT_CONFIG_TASK_CONCURRENCY_KEY, {}))
 
 
 def _pop_target_repos_from_agent_config(agent_configs: nodes.AgentConfigs) -> list[dict[str, str]]:
@@ -1123,6 +1144,7 @@ def main(
     if scan_mode == "gather" and gather_config.get("require_cross_target") is False:
         raise click.ClickException("gather.require_cross_target cannot be false in --scan-mode gather")
     max_concurrency = _pop_max_concurrency_from_agent_config(agent_configs)
+    task_concurrency = _pop_task_concurrency_from_agent_config(agent_configs)
     target_repos = _pop_target_repos_from_agent_config(agent_configs)
     common_focus = common_focus or config_common_focus
     if only_gen_mode and target:
@@ -1230,6 +1252,7 @@ def main(
                     top_K=top_K,
                     gather_config=gather_config,
                     max_concurrency=max_concurrency,
+                    task_concurrency=task_concurrency,
                 )
             except ValueError as exc:
                 raise click.ClickException(str(exc)) from exc
@@ -1242,6 +1265,7 @@ def main(
                     common_focus=common_focus,
                     agent_configs=agent_configs,
                     max_concurrency=max_concurrency,
+                    task_concurrency=task_concurrency,
                     poc_config=poc_config,
                 )
             except ValueError as exc:
@@ -1259,6 +1283,7 @@ def main(
                     chain_config=chain_config,
                     disabled_nodes=disabled_nodes,
                     max_concurrency=max_concurrency,
+                    task_concurrency=task_concurrency,
                     selected_subtask_ids=(
                         selected_subtask_ids
                         if select_subtask_to_run is not None
@@ -1283,6 +1308,7 @@ def main(
                     chain_config=chain_config,
                     disabled_nodes=disabled_nodes,
                     max_concurrency=max_concurrency,
+                    task_concurrency=task_concurrency,
                     selected_chain_ids=(
                         selected_chain_ids if select_chain_to_run is not None else None
                     ),
@@ -1300,6 +1326,7 @@ def main(
                     common_focus=common_focus,
                     agent_configs=agent_configs,
                     max_concurrency=max_concurrency,
+                    task_concurrency=task_concurrency,
                     poc_config=poc_config,
                 )
             except ValueError as exc:
@@ -1311,6 +1338,7 @@ def main(
                     common_focus=common_focus,
                     agent_configs=agent_configs,
                     max_concurrency=max_concurrency,
+                    task_concurrency=task_concurrency,
                 )
             except ValueError as exc:
                 raise click.ClickException(str(exc)) from exc
@@ -1340,6 +1368,7 @@ def main(
                 top_K=top_K,
                 chain_config=chain_config,
                 max_concurrency=max_concurrency,
+                task_concurrency=task_concurrency,
                 disabled_nodes=disabled_nodes,
                 till_node=till_node,
                 poc_config=poc_config,

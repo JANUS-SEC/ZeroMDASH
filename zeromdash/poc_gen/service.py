@@ -6,11 +6,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from langchain_core.runnables import RunnableConfig
+
 from zeromdash import prompts
 from zeromdash.agents import AgentResult
 from zeromdash.nodes.core.context import _node_focus
 from zeromdash.nodes.core.invocation import _invoke_with_output_retry
 from zeromdash.workspace import Workspace, slugify
+from zeromdash.pipeline import TaskPipeline, pipeline_log_dir, task_slots
 
 from .config import POC_PHASE_NODES, normalize_poc_config
 from .findings import load_finding_records
@@ -422,9 +425,13 @@ class PocGenService:
         atomic_write_json(result_path, result)
         return result
 
-    def run(self, selected_id: str = "", stats: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    def run(self, selected_id: str = "", stats: dict[str, Any] | None = None, *, config: RunnableConfig | None = None) -> list[dict[str, Any]]:
         records = load_finding_records(self.state, selected_id, stats=stats)
         max_findings = int(self.config.get("max_findings", -1))
         if max_findings >= 0:
             records = records[:max_findings]
-        return [self.run_record(record) for record in records]
+        pipeline = TaskPipeline(
+            task_slots(self.state, "poc_task", config),
+            kind="poc_task", log_dir=pipeline_log_dir(self.state),
+        )
+        return pipeline.run(records, self.run_record, identify=lambda record: record["finding_id"])

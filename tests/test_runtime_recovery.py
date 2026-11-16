@@ -303,7 +303,7 @@ class RuntimeRecoveryTest(unittest.TestCase):
 
     def test_cli_rechecks_invalid_and_unhealthy_manual_configs(self):
         request = RecoveryRequest("investigate_subtask", "spec-001", {"runtime": "codex"}, "empty", self.ws.log)
-        answers = ["kimi", "", "", "", "codex", "bad", "", "", "claude_code", "ark-proxy", "ark", "working"]
+        answers = ["opencode", "", "", "", "codex", "bad", "", "", "claude_code", "ark-proxy", "ark", "working"]
         with patch("zeromdash.cli.click.prompt", side_effect=answers), patch(
             "zeromdash.cli.check_agent_health", side_effect=[
                 AgentHealth(name="codex", ok=False, message="expired login"),

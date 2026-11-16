@@ -898,14 +898,14 @@ class CliStartupHealthCheckTest(unittest.TestCase):
             cfg.write_text(
                 "node:\n"
                 "  summary:\n"
-                "    runtime: kimi\n"
+                "    runtime: opencode\n"
             )
 
             with self.assertRaises(click.ClickException) as cm:
                 _parse_agent_config_file(str(cfg))
 
         self.assertIn("node 'summary' requires a harness with native subagent support", str(cm.exception))
-        self.assertIn("unsupported runtime(s): kimi", str(cm.exception))
+        self.assertIn("unsupported runtime(s): opencode", str(cm.exception))
 
     def test_parse_agent_config_rejects_unsupported_fallback_for_native_subagent_node(self):
         with TemporaryDirectory() as tmp:

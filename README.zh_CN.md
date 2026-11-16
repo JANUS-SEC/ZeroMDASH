@@ -302,7 +302,10 @@ common_focus: >
   威胁模型、攻击者位置、信任边界、目标组件、影响类别，
   以及项目级约束。
 
-max_concurrency: 8  # 默认值；限制同时执行的 LangGraph Send/节点数量
+max_concurrency: 8  # 普通图节点并发数；也是未配置 task 槽位时的默认值
+subtask_concurrency: 8       # 完整 investigate/critic/finalize 任务槽位
+chain_subtask_concurrency: 4 # 完整 chain 任务槽位，也用于 gather chain
+poc_task_concurrency: 2      # 从规划到发布的完整 PoC 任务槽位
 top_K:
   spec: 5
   vuln: 8
@@ -354,8 +357,20 @@ node:
 ```
 
 `top_K` 是派发子任务的显式成本上限。不配置则不截断；配置后会降低覆盖率，
-diff 模式不会隐式启用它。`max_concurrency` 只限制已派发 LangGraph 任务的
-并发数。
+diff 模式不会隐式启用它。
+
+`subtask_concurrency`、`chain_subtask_concurrency`、`poc_task_concurrency`
+分别配置三类任务的并发槽位，必须为正整数。未配置时继承 `max_concurrency`
+（默认 8）；显式配置可以高于它。一个任务在 investigate、critic、返修循环及
+finalize 期间始终持有同一个槽位；PoC 则覆盖规划、准备、生成、执行、调试、
+验证和发布。任务结束后立即补入下一个，不等待其他运行中的任务，因此不同
+阶段可以同时运行。这些参数统计完整任务，不统计运行时内部的原生子 Agent。
+
+full/diff、gather chain、恢复入口、selected 重跑和 PoC-only 入口共用这套
+Pipeline。排序、`top_K`、选择过滤和已完成任务过滤仍决定待运行队列。初始
+subtask 队列全部结束后才规划 chain，PoC 仍在报告阶段之后执行。生命周期事件
+（`queued`、`started`、`finished`、`failed`、`cancelled`）写入
+`log/pipeline/*.jsonl`；selected 重跑写入其独立输出目录的 `pipeline/`。
 
 `investigate_subtask`、`critic_subtask` 和 `summary` 必须使用经过验证、
 具备原生子 Agent 能力的 harness。可接受的运行时为 `codex`（含 `codex_cli`
@@ -404,16 +419,25 @@ DeepSeek Harness 通过 `dsh --profile headless` 支持。ZeroMDASH 不把完整
 工作区根启动 DSH，使 `workspace-write` 覆盖 `main/`、`log/` 与
 `sub_workspace/`，同时把逻辑当前目录保持在调用子工作区。
 
-默认 DSH 模式是受限的 minimal-plus-search 叶子 Agent：保留持久的 `bash` 和
-`str_replace_editor`，增加有界的 `glob`/`grep` 仓库检索，并禁用交互审批、
-shell/编辑器之外的可写文件系统工具、Web 访问、嵌套 DSH 子
-Agent/workflow/Ralph、自动会话标题 LLM 请求和全局会话持久化。节点的
+建议使用与内置 overlay 兼容的较新 DSH 版本。overlay 使用的子 Agent 独立
+Agent Preset 接口首次发布于
+[0.2.1-alpha.3](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-alpha.3)，
+同时用 preset 替代旧的子 Agent `persona`/`toolFilter` 字段。
+需要时可通过 `npm install -g @deepseek-ai/dsh@latest` 升级。启动健康检查
+直接执行配置好的 headless 调用，验证 overlay 能否加载、Agent 能否成功响应，
+以实际运行结果判断兼容性，不按版本号强制拦截。
+
+默认 DSH 模式是受限的 minimal-plus-search Agent：保留持久的 `bash` 和
+直接文件 `read`/`write`/`edit`，增加有界的 `glob`/`grep` 仓库检索，并禁用
+交互审批、Web 访问、DSH 子 Agent 控制/fork 工具、workflow/Ralph 和自动
+会话标题 LLM 请求，会话记录保存在每次调用的目录中。节点的
 `config` 值会被当作一个额外的、受信任的 DSH `--patch` 文件，在内置 minimal
 patch 之后应用。
 
-由于内置 headless DSH overlay 禁用了其子 Agent 工具，DSH 同样不能分配给
-`investigate_subtask`、`critic_subtask` 或 `summary`，但可与其他节点配合
-使用，支持 `provider`、`model` 和可选的受信任 `config` patch。
+内置 overlay 启用有界的原生委派（`maxDepth: 1`），并为创建的子 Agent 指定
+`zeromdash-readonly-verifier` Agent Preset。因此 DSH 可用于要求原生子 Agent
+的调查、critic、链规划和 summary 等节点，支持 `provider`、`model` 和可选的
+受信任 `config` patch。
 
 每次 DSH 调用会物化：
 

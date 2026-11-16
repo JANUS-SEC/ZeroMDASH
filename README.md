@@ -252,7 +252,10 @@ common_focus: >
   Threat model, attacker position, trust boundary, target component, impact
   class, and any project-wide constraints.
 
-max_concurrency: 8  # default; caps simultaneous LangGraph Send/node executions
+max_concurrency: 8  # general graph concurrency; fallback for omitted task slot settings
+subtask_concurrency: 8       # whole investigate/critic/finalize tasks
+chain_subtask_concurrency: 4 # whole chain tasks; also applies to gather chains
+poc_task_concurrency: 2      # whole PoC tasks, from planning through release
 top_K:
   spec: 5
   vuln: 8
@@ -315,8 +318,23 @@ node:
 
 `top_K` is an explicit cost cap on dispatched subtasks. Omitting it leaves
 the bucket uncapped; setting it can reduce coverage and is not implicitly
-enabled by diff mode. `max_concurrency` only limits how many dispatched
-LangGraph tasks run at the same time.
+enabled by diff mode.
+
+`subtask_concurrency`, `chain_subtask_concurrency`, and `poc_task_concurrency`
+are independent positive-integer task slot counts. Omitted values inherit
+`max_concurrency` (default 8); explicit values can exceed it. A task retains
+its slot through investigation, critic feedback and revisions, or the full
+PoC plan/build/execute/debug/verify/release sequence. When it finishes, the
+next queued task starts without waiting for the other active tasks. Different
+stages can therefore run simultaneously. These settings count whole tasks,
+not the native subagents an agent runtime may launch.
+
+The shared pipeline is used by full/diff scans, gather chains, restored runs,
+selected reruns, and PoC-only runs. Ranking, `top_K`, selection and completed
+task filtering still determine the queue. Chain planning waits for the initial
+subtask pipeline to drain; PoC generation follows reporting. Lifecycle events
+(`queued`, `started`, `finished`, `failed`, `cancelled`) are recorded under
+`log/pipeline/*.jsonl`, or the selected rerun directory's `pipeline/`.
 
 `investigate_subtask`, `critic_subtask`, `plan_chains`,
 `chain_investigate_subtask`, `chain_critic_subtask`, all semantic `gather_*`
@@ -373,18 +391,27 @@ the invocation-local `.dsh/` directory, starts DSH from the task workspace root
 so `workspace-write` covers `main/`, `log/`, and `sub_workspace/`, and keeps the
 logical current directory at the invocation sub-workspace.
 
-The default DSH mode is a constrained minimal-plus-search leaf agent. It keeps
-persistent `bash` and `str_replace_editor`, adds bounded `glob`/`grep`
-repository discovery, and disables interactive approval, writable filesystem
-tools beyond shell/editor, web access, nested DSH subagents/workflows/Ralph,
-the automatic session-title LLM request, and global session persistence. A
+Use a recent DSH release compatible with the bundled overlay. Its independent
+subagent Agent Preset interface first shipped in
+[0.2.1-alpha.3](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-alpha.3),
+which replaced the legacy subagent `persona`/`toolFilter` fields with presets.
+Upgrade with `npm install -g @deepseek-ai/dsh@latest` if needed. Startup health
+checks run the configured headless invocation to verify that the overlay loads
+and the agent responds successfully; compatibility is determined by that result
+without a version-number gate.
+
+The default DSH mode is a constrained minimal-plus-search agent. It keeps
+persistent `bash` and direct file `read`/`write`/`edit`, adds bounded `glob`/`grep`
+repository discovery, and disables interactive approval, web access, DSH
+subagent control/fork tools, workflows/Ralph, and the automatic session-title
+LLM request. Session transcripts are stored per invocation. A
 node `config` value is treated as an additional trusted DSH `--patch` file
 applied after the bundled minimal patch.
 
-Because the bundled headless DSH overlay disables its subagent tools, DSH also
-cannot be assigned to `investigate_subtask`, `critic_subtask`,
-`plan_chains`, `chain_investigate_subtask`, `chain_critic_subtask`, or `summary`. It can
-still be used by the other nodes, with `provider`, `model`, and an optional
+The overlay enables bounded native delegation (`maxDepth: 1`) and selects the
+`zeromdash-readonly-verifier` Agent Preset for spawned subagents. DSH can be
+assigned to nodes requiring native subagents, including investigation, critic,
+chain planning, and summary nodes, with `provider`, `model`, and an optional
 trusted `config` patch.
 
 Each DSH invocation materializes:

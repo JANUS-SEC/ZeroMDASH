@@ -53,12 +53,12 @@ import yaml
 AgentEnv = dict[str, str | None]
 
 # Native harness-level delegation, not ZeroMDASH's own LangGraph fan-out.
-# Native harness-level delegation, not ZeroMDASH's own LangGraph fan-out.
 # DSH exposes the bounded tool-subagent path through ZeroMDASH's bundled
-# headless-minimal overlay. Kimi, OpenCode, and DeepAgent do not currently have
-# a verified native-subagent contract in these adapters, so they remain
+# headless-minimal overlay. Kimi Code >= 2.5 ships native agent-profile
+# subagents usable from prompt mode. OpenCode and DeepAgent do not currently
+# have a verified native-subagent contract in these adapters, so they remain
 # fail-closed.
-NATIVE_SUBAGENT_BACKENDS = frozenset({"traex", "codex", "claude_code", "dsh"})
+NATIVE_SUBAGENT_BACKENDS = frozenset({"traex", "codex", "claude_code", "dsh", "kimi"})
 
 
 @dataclass

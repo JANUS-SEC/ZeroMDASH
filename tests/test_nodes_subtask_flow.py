@@ -642,14 +642,14 @@ class GraphConfigTest(unittest.TestCase):
             {"investigate_subtask": {"runtime": "dsh"}},
         )
         self.assertEqual([variant["runtime"] for variant in variants], ["dsh"])
-        with self.assertRaisesRegex(ValueError, r"unsupported runtime\(s\): kimi"):
+        with self.assertRaisesRegex(ValueError, r"unsupported runtime\(s\): opencode"):
             nodes.agent_config_variants_for_node(
                 "critic_subtask",
                 None,
                 {
                     "critic_subtask": {
                         "runtime": "codex",
-                        "fallbacks": [{"runtime": "kimi"}],
+                        "fallbacks": [{"runtime": "opencode"}],
                     }
                 },
             )
@@ -1713,6 +1713,33 @@ class FetchTargetRepoTest(unittest.TestCase):
             ),
             {"CLAUDE_CODE_USE_BEDROCK": None, "AWS_BEARER_TOKEN_BEDROCK": None},
         )
+
+    def test_agent_env_for_node_controls_claude_glm_bigmodel_environment(self):
+        for provider in ("glm", "bigmodel"):
+            with self.subTest(provider=provider):
+                env = nodes.agent_env_for_node(
+                    "search_spec",
+                    "claude_code",
+                    {
+                        "search_spec": {
+                            "runtime": "claude_code",
+                            "provider": provider,
+                            "model": "glm-5.3[1m]",
+                            "env": {
+                                "CUSTOM_ENV": "1",
+                                "ANTHROPIC_BASE_URL": "https://glm.example/api",
+                            },
+                        }
+                    },
+                )
+                self.assertIsNone(env["CLAUDE_CODE_USE_BEDROCK"])
+                self.assertIsNone(env["AWS_BEARER_TOKEN_BEDROCK"])
+                self.assertIsNone(env["ANTHROPIC_AUTH_TOKEN"])
+                self.assertIsNone(env["ANTHROPIC_MODEL"])
+                self.assertIsNone(env["CLAUDE_CODE_SUBAGENT_MODEL"])
+                self.assertIsNone(env["ZEROMDASH_CLAUDE_MODEL"])
+                self.assertEqual(env["CUSTOM_ENV"], "1")
+                self.assertEqual(env["ANTHROPIC_BASE_URL"], "https://glm.example/api")
 
     def test_agent_env_for_node_clears_global_model_when_node_model_is_configured(self):
         self.assertEqual(
@@ -3853,6 +3880,20 @@ class FocusRoutingTest(unittest.TestCase):
 
 
 class DispatchTest(unittest.TestCase):
+    def test_safe_similar_software_name_rejects_placeholder_prose(self):
+        # Regression: a stdout-dump report quoting ~/.claude.json syntax
+        # contained a literal ["<workspace>"], which _try_json's
+        # bracket-slice heuristic extracted as the candidate array.
+        from zeromdash.nodes.core.search import _parse_candidate_names
+
+        text = (
+            "status: partial — set projects[\"<workspace>\"].hasTrustDialogAccepted: "
+            "true in ~/.claude.json to trust the workspace"
+        )
+        ok, names, _payload = _parse_candidate_names(text)
+        self.assertTrue(ok)
+        self.assertEqual(names, [])
+
     def test_search_similar_software_parses_materialized_candidates_file(self):
         tmp = TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
