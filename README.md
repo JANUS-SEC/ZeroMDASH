@@ -647,6 +647,13 @@ without a passed vulnerability-qualification gate and valid CVSS v4.0 Base
 vector are kept as non-vulnerability observations rather than promoted to
 `VULN-XXX`.
 
+Before invoking summary, ZeroMDASH writes its input datasets and a
+`manifest.json` under `log/summary_inputs/`. The prompt carries only record
+counts and JSON paths for report groups, findings, confirmed primitives,
+observations, and the resolved result-file index. Agents read these files in
+batches as they assemble the reports. Gather summary uses the same layout for
+its report groups, unclosed candidates, and workflow errors.
+
 Malformed or incomplete investigation output is retried without consuming an
 investigate/critic iteration. Before each attempt, ZeroMDASH removes stale
 `finding.json`, `investigation.json`, and `output.json` files from that

@@ -690,7 +690,9 @@ def _resolve_startup_backends(
                 extra_args = nodes.agent_extra_args_for_node(node, backend, variant_configs)
                 env = nodes.agent_env_for_node(node, backend, variant_configs)
                 key = _health_key(backend, extra_args, env)
-                if key not in health_cache:
+                # Reuse successful probes across nodes. A failed probe must be
+                # retried even when the user keeps the same configuration.
+                if key not in health_cache or not health_cache[key].ok:
                     health_cache[key] = _bedrock_env_health_error(backend, env) or check_agent_health(
                         get_agent(backend), timeout=timeout, extra_args=extra_args or None, env=env or None
                     )

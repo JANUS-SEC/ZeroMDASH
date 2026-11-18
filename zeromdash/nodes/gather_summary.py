@@ -13,6 +13,7 @@ from .core.context import _node_focus, _ws
 from .core.invocation import _invoke_with_output_retry
 from .core.io import _file_has_text, _read_text_lossy, _reset_file_output
 from .core.reporting import _each_vulnerability_has_both_diagrams
+from .core.summary_inputs import write_summary_inputs
 
 
 def gather_summary(state: GatherState, *, backends=None) -> dict:
@@ -22,16 +23,21 @@ def gather_summary(state: GatherState, *, backends=None) -> dict:
     compat_out = ws.base / "summary.md"
     groups = [item for item in state.get("gather_report_groups") or [] if isinstance(item, dict)]
     focus = _node_focus(state, "summary_focus")
+    summary_inputs_path, summary_inputs_catalog = write_summary_inputs(
+        ws.log_path("summary_inputs"),
+        {
+            "report_groups": groups,
+            "unclosed_candidates": list(state.get("gather_chain_candidates") or []),
+            "errors": list(state.get("errors") or []),
+        },
+    )
     prompt = prompts.GATHER_SUMMARY.format(
         scenario_name=state.get("scenario_name", "gather"),
         scenario=state.get("scenario", ""),
         registry_path=state.get("cross_target_registry_path", ""),
         input_lock_path=state.get("input_lock_path", ""),
-        report_groups_json=json.dumps(groups, ensure_ascii=False, indent=2),
-        unclosed_candidates_json=json.dumps(
-            state.get("gather_chain_candidates") or [], ensure_ascii=False, indent=2
-        ),
-        errors_json=json.dumps(state.get("errors") or [], ensure_ascii=False, indent=2),
+        summary_inputs_path=summary_inputs_path,
+        summary_inputs_catalog=summary_inputs_catalog,
         out_en=out_en,
         out_zh=out_zh,
         focus=focus,

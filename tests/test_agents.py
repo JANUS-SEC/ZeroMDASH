@@ -174,6 +174,17 @@ class AgentHealthCheckTest(unittest.TestCase):
         self.assertEqual(health.stdout, "partial")
         self.assertEqual(health.stderr, "slow")
 
+    def test_timeout_decodes_partial_output_from_subprocess(self):
+        agent = _FakeAgent(raises=subprocess.TimeoutExpired(
+            cmd=["fake"], timeout=3, output=b"partial", stderr="模型响应慢".encode(),
+        ))
+
+        health = check_agent_health(agent, timeout=3)
+
+        self.assertFalse(health.ok)
+        self.assertEqual(health.stdout, "partial")
+        self.assertEqual(health.stderr, "模型响应慢")
+
     def test_check_required_agents_checks_codex_and_claude(self):
         with patch("zeromdash.agents.CodexAgent", return_value="codex-agent"), patch(
             "zeromdash.agents.ClaudeCodeAgent", return_value="claude-agent"

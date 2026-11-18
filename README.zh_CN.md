@@ -571,11 +571,16 @@ workspace 下解析，且目录必须不存在。隔离目录包含 `attempts/`�
 
 `--start-from-summary <workspace>` 复用已有 workspace，只运行 `summary`
 节点。workspace 必须包含 `workspace.json`、非空 `main/repo/`、非空
-`main/attack_surface/attack_surface.md` 和 `log/review_res/*.json`。它会重新
-加载 `review_res` 中序列化的 finding 并按 `kind` 分组；这是报告重生成路径，
+`main/attack_surface/attack_surface.md` 和 `log/subtask_res/*.json`（兼容旧的
+`log/review_res/`）。它会重新加载结果文件中序列化的 finding 并按 `kind` 分组；这是报告重生成路径，
 不是新一轮 critic。summary 的准入仍是确定性的：没有通过漏洞资格门且缺少合法
 CVSS v4.0 Base 向量的历史 finding，会保留为非漏洞观察项，而不会提升为
 `VULN-XXX`。
+
+调用 summary 前，ZeroMDASH 会将输入数据集和 `manifest.json` 写入
+`log/summary_inputs/`。prompt 中仅传递报告分组、findings、已确认原语、
+观察项和结果文件索引的记录数量及 JSON 路径，agent 编写报告时分批读取。
+gather summary 也采用相同布局，保存报告分组、未闭合候选和运行错误。
 
 格式错误或不全的调查输出会重试，且不消耗 investigate/critic 轮次。每次尝试
 前，ZeroMDASH 会从该次调用的子工作区删除陈旧的 `finding.json`、

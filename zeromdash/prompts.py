@@ -1487,15 +1487,29 @@ reports for {target}.
 Summary focus (optional): {focus}
 Target repository: {repo_path}
 Canonical per-subtask result directory: {subtask_res_dir}
-Resolved per-subtask result files (canonical files override same-named legacy files):
-{subtask_result_files}
 Full chain finding records: {chain_res_dir}
 Confirmed primitive artifact directory: {primitive_res_dir}
 Canonical report groups: {report_groups_path}
 Target vulnerability writeups: {target_writeup_dir}
 Target vulnerability patches: {target_patch_dir}
 Similar-software evidence: {similar_dir}
-Inputs are compact report groups and finding lists that passed deterministic
+Summary input manifest (read first): {summary_inputs_path}
+Input datasets (JSON arrays; counts are records, not distinct vulnerabilities):
+{summary_inputs_catalog}
+
+The manifest and dataset files are the complete input snapshot for this run.
+Read them with a JSON parser, selecting small batches or records by id and only
+the fields needed for the current report section. Do not dump whole datasets
+or concatenate all result files into a single tool response. Track coverage:
+process every eligible finding and every confirmed primitive, without sampling
+or truncating the inputs. A zero count means that dataset is empty.
+
+`subtask_result_files` is the resolved JSON index of published result paths:
+canonical files override same-named legacy files, and unpublished or stale
+hypothesis artifacts are excluded. Use this index to locate full results; do
+not discover additional report inputs by recursively scanning result directories.
+
+The finding datasets contain compact items that passed deterministic
 qualification gates. Prefer `report_groups` when it is non-empty; the legacy
 bucket lists are compatibility inputs for older workspaces. Each compact item
 contains only:
@@ -1503,14 +1517,6 @@ id, bucket, title, status, severity, confidence, evidence, code_locations,
 call_path, call_flow, requires_call_path_summary, skills, scope_relation,
 scope_verdict, gate_decision, changed_locations, change_to_sink_path,
 summary_format, cve_ids, patch_status, disposition, cvss4_vector, cvss4_score.
-- report_groups: {report_groups}
-- chain_findings: {chain_findings}
-- spec_findings: {spec_findings}
-- vuln_candidates: {vuln_candidates}
-- patch_findings: {patch_findings}
-- feature_findings: {feature_findings}
-- confirmed_primitives: {confirmed_primitives}
-- non-vulnerability observations: {observations}
 
 Confirmed primitives are proven capability transitions that did not pass the
 vulnerability qualification gate. They are important evidence, but they are not
@@ -1533,7 +1539,7 @@ passed qualification gate.
 Read all confirm items first. After confirm items are covered, inspect revise
 items and mention only those that carry strong evidence. Do not rely on missing
 fields in the compact lists. For each listed id, read its matching JSON from
-`Resolved per-subtask result files` or `Full chain finding records` to recover
+the `subtask_result_files` JSON index or `Full chain finding records` to recover
 the full detail, evidence, review reasoning, writeup refs, patch refs, threat
 model, primitive sequence, and trigger preconditions. Do not re-introduce
 rejected findings that are absent from the compact lists.
@@ -1851,14 +1857,16 @@ Business scenario:
 
 Cross-target registry: {registry_path}
 Input lock: {input_lock_path}
-Canonical report groups:
-{report_groups_json}
+Summary input manifest (read first): {summary_inputs_path}
+Input datasets (JSON arrays; counts are records):
+{summary_inputs_catalog}
 
-Unclosed candidates and qualification failures:
-{unclosed_candidates_json}
-
-Workflow errors:
-{errors_json}
+Read canonical report groups, unclosed candidates and qualification failures,
+and workflow errors from these dataset files. Use a JSON parser to select small
+batches or records by id and only the fields needed for the current section.
+Do not dump whole datasets or concatenate all source records into one tool
+response. Cover every canonical group and account for all unclosed candidates
+and errors without sampling or truncation. A zero count means an empty dataset.
 
 Write English to {out_en} and Simplified Chinese to {out_zh}. Report only the
 canonical gather groups; source-workspace findings are evidence steps and must

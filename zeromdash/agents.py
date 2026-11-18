@@ -1228,13 +1228,20 @@ def check_agent_health(
                 env=env,
             )
     except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout or ""
+        stderr = exc.stderr or ""
+        # TimeoutExpired can carry bytes even when subprocess uses text=True.
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode("utf-8", errors="replace")
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
         return AgentHealth(
             name=name,
             ok=False,
             binary=binary,
             message=f"{name} headless health check timed out after {timeout}s",
-            stdout=exc.stdout or "",
-            stderr=exc.stderr or "",
+            stdout=stdout,
+            stderr=stderr,
             extra_args=health_extra_args,
             env_overlay=health_env,
         )
