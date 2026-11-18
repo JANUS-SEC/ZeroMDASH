@@ -7,9 +7,34 @@ DeepSeek Harness (`dsh`), and DeepAgent.
 
 ## Quickstart
 
-```bash
-pip install -e ".[all]"
+### Install with uv
 
+If uv is not installed yet, follow the
+[official uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+
+```bash
+# Install the latest master branch with all optional dependencies.
+uv tool install --force --refresh \
+  "zeromdash[all] @ git+https://github.com/JANUS-SEC/ZeroMDASH.git@master"
+
+# Make uv-installed tools available in new shells.
+uv tool update-shell
+
+# Verify the installation.
+zeromdash --help
+```
+
+For a minimal installation without optional dependencies, use:
+
+```bash
+uv tool install --force --refresh \
+  "git+https://github.com/JANUS-SEC/ZeroMDASH.git@master"
+```
+
+Re-running the same `uv tool install --force --refresh` command updates the
+tool checkout to the latest commit on the selected branch.
+
+```bash
 # Full scan
 zeromdash --target https://github.com/curl/curl
 
@@ -694,12 +719,13 @@ vulnerabilities. The detailed architecture and evidence contracts are in
 ## Observability (optional)
 
 ```bash
-pip install -e ".[observability]"
 export LANGFUSE_PUBLIC_KEY=pk-...
 export LANGFUSE_SECRET_KEY=sk-...
 ```
 
-All LangGraph node invocations are traced to Langfuse.
+The `all` extra in the uv quickstart already includes the Langfuse
+integration. All LangGraph node invocations are traced to Langfuse when its
+credentials are configured.
 
 ## PoC Generation
 

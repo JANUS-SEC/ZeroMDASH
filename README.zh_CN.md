@@ -9,8 +9,34 @@ Kimi Code、OpenCode、DeepSeek Harness（`dsh`）、DeepAgent 等外部编码 A
 
 ## 快速开始
 
+### 使用 uv 安装
+
+如果尚未安装 uv，请先参考
+[uv 官方安装指南](https://docs.astral.sh/uv/getting-started/installation/)。
+
 ```bash
-pip install -e ".[all]"
+# 安装 master 分支最新提交及全部可选依赖
+uv tool install --force --refresh \
+  "zeromdash[all] @ git+https://github.com/JANUS-SEC/ZeroMDASH.git@master"
+
+# 让新 shell 能找到 uv 安装的命令
+uv tool update-shell
+
+# 验证安装
+zeromdash --help
+```
+
+仅需基础功能时，可使用：
+
+```bash
+uv tool install --force --refresh \
+  "git+https://github.com/JANUS-SEC/ZeroMDASH.git@master"
+```
+
+重新执行同一条 `uv tool install --force --refresh` 命令，即可将工具更新到
+所选分支的最新提交。
+
+```bash
 zeromdash --target https://github.com/curl/curl
 ```
 
@@ -607,12 +633,12 @@ diff 模式运行中，`main/scope/` 包含 `scope.json`、`changes.diff`、
 ## 可观测性（可选）
 
 ```bash
-pip install -e ".[observability]"
 export LANGFUSE_PUBLIC_KEY=pk-...
 export LANGFUSE_SECRET_KEY=sk-...
 ```
 
-所有 LangGraph 节点调用都会追踪到 Langfuse。
+uv 快速开始中的 `all` 可选依赖已包含 Langfuse 集成。配置凭据后，所有
+LangGraph 节点调用都会追踪到 Langfuse。
 
 ## PoC 生成
 
