@@ -21,17 +21,16 @@ adapter，对目标项目进行源码获取、规范/历史漏洞/相似软件�
 ```text
 ZeroMDASH/
   zeromdash/              # 主分析 workflow
-  zeromdash_repro/        # 复现/验证 workflow
+    poc_gen/              # PoC 规划、生成、执行、调试、验证与发布 workflow
   tests/                  # 单元测试
   pyproject.toml          # Python package metadata 和 CLI entrypoints
 ```
 
-`pyproject.toml` 中注册了两个命令：
+`pyproject.toml` 中注册了统一入口：
 
 ```toml
 [project.scripts]
 zeromdash = "zeromdash.cli:main"
-zeromdash-repro = "zeromdash_repro.cli:main"
 ```
 
 ---
