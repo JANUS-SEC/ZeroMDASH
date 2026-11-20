@@ -1943,6 +1943,24 @@ Return JSON only with runner_status (completed|expected_terminal|build_failed|se
 build (object), runs (array), and notes. Each run requires runner_status, command, exit_code,
 signal, stdout, stderr, markers, backtrace and duration_ms. Include sanitizer name/error when
 observed, semantic state when relevant, and plugin/metrics when relevant.
+Before returning, re-read the frozen OracleSpec and self-check that every observation field has
+the intended shape. Put exact required marker strings in markers; put explanations, metadata,
+and uncertainty in notes. Ensure the returned runs are directly consumable by the Oracle matcher.
+"""
+
+POC_REVIEW_ORACLE_MISMATCH = """\
+# Phase: review_oracle_mismatch
+Act as a semantic Oracle mismatch reviewer, not as an executor. Read the review input from
+{review_input_path}. It contains a frozen OracleSpec, one raw observation, the deterministic
+hard_match_reason, and context.
+
+Do not modify the OracleSpec or observation. Decide whether the hard failure is only a
+representation-level contract mismatch while the captured observation still semantically proves
+every required part of the OracleSpec, including reachability and the expected oracle. You may
+accept semantic representation mismatches, but you may not invent evidence, waive missing
+evidence, weaken the OracleSpec, or rely on claims outside the raw observation.
+
+Return JSON only with matched (boolean) and reason (string).
 """
 
 POC_DEBUG = """\
@@ -1963,6 +1981,10 @@ every applicable control. Never trust the generator's claim. Do not modify the c
 Oracle or previous observations. Return JSON only with environment_status, runs, controls and notes.
 Use the execution observation schema. Each control requires kind, status (passed|failed|skipped),
 skip_reason and an observation when applicable.
+Before returning, re-read the frozen OracleSpec and self-check that every run/control observation
+has the intended shape. Put exact required marker strings in markers; put explanations, metadata,
+and uncertainty in notes or skip_reason. Ensure runs and control observations are directly
+consumable by the Oracle matcher.
 """
 
 POC_RELEASE = """\

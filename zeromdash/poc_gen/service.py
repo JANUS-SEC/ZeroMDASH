@@ -27,7 +27,7 @@ from .io import (
     sha256_text,
     tree_sha256,
 )
-from .oracle import evaluate_verification, match_oracle, oracle_hash, oracle_spec_schema, validate_oracle_spec
+from .oracle import OracleMatcher, evaluate_verification, match_oracle, oracle_hash, oracle_spec_schema, validate_oracle_spec
 
 Validator = Callable[[dict[str, Any]], tuple[dict[str, Any] | None, str]]
 
@@ -205,6 +205,73 @@ class PocGenService:
             return payload, ""
         return self._call("verify_poc", prompt, f"{record['finding_id']}-{attempt_dir.name}-verify", validate)
 
+    def _review_oracle_mismatch(
+        self,
+        record: dict[str, Any],
+        spec: dict[str, Any],
+        observation: dict[str, Any],
+        hard_match_reason: str,
+        review_dir: Path,
+        context: str,
+    ) -> tuple[bool, str, list[str]]:
+        review_input = {
+            "context": context,
+            "oracle_spec": spec,
+            "observation": observation,
+            "hard_match_reason": hard_match_reason,
+        }
+        review_hash = sha256_text(canonical_json(review_input))[:8]
+        review_input_path = review_dir / f"oracle_mismatch_{review_hash}.json"
+        atomic_write_json(review_input_path, review_input)
+        prompt = prompts.POC_REVIEW_ORACLE_MISMATCH.format(review_input_path=review_input_path)
+
+        def validate(payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str]:
+            if not isinstance(payload.get("matched"), bool):
+                return None, "oracle mismatch review requires matched boolean"
+            reason = str(payload.get("reason") or "").strip()
+            if not reason:
+                return None, "oracle mismatch review requires reason"
+            return {"matched": payload["matched"], "reason": reason}, ""
+
+        review, errors = self._call(
+            "review_oracle_mismatch",
+            prompt,
+            f"{record['finding_id']}-{slugify(context)}-{review_hash}-oracle-review",
+            validate,
+        )
+        if review is None:
+            return False, f"{hard_match_reason}; semantic oracle review unavailable", errors
+        decision = "accepted" if review["matched"] else "rejected"
+        return bool(review["matched"]), f"semantic oracle review {decision}: {review['reason']}", errors
+
+    def _match_oracle(
+        self,
+        record: dict[str, Any],
+        spec: dict[str, Any],
+        observation: dict[str, Any],
+        review_dir: Path,
+        context: str,
+    ) -> tuple[bool, str, list[str]]:
+        matched, reason = match_oracle(spec, observation)
+        if matched:
+            return True, reason, []
+        return self._review_oracle_mismatch(record, spec, observation, reason, review_dir, context)
+
+    def _matcher_for(
+        self,
+        record: dict[str, Any],
+        review_dir: Path,
+        context: str,
+    ) -> tuple[OracleMatcher, list[str]]:
+        review_errors: list[str] = []
+
+        def matcher(spec: dict[str, Any], observation: dict[str, Any]) -> tuple[bool, str]:
+            matched, reason, errors = self._match_oracle(record, spec, observation, review_dir, context)
+            review_errors.extend(errors)
+            return matched, reason
+
+        return matcher, review_errors
+
     def _release(self, record: dict[str, Any], result: dict[str, Any], release_dir: Path, workdir: Path) -> tuple[dict[str, Any] | None, list[str]]:
         release_input_path = workdir / "release_input.json"
         atomic_write_json(release_input_path, _compact_observation(result, 6000))
@@ -330,7 +397,9 @@ class PocGenService:
                         errors.append(f"source tree drift detected in {attempt_id}")
                         environment_failed = True
                         break
-                    matches = [match_oracle(spec, run) for run in observation["runs"]]
+                    matcher, match_errors = self._matcher_for(record, attempt_dir / "oracle_reviews", "execute")
+                    matches = [matcher(spec, run) for run in observation["runs"]]
+                    errors.extend(match_errors)
                     matched = any(item[0] for item in matches)
                     any_oracle = any_oracle or matched
                     valid_execution = valid_execution or observation.get("runner_status") in {"completed", "expected_terminal"}
@@ -351,7 +420,13 @@ class PocGenService:
                         errors.extend(verify_errors)
                         if verification is not None:
                             atomic_write_json(attempt_dir / "verification.json", verification)
-                            verdict, verification_details = evaluate_verification(spec, verification)
+                            verifier, verification_match_errors = self._matcher_for(
+                                record,
+                                attempt_dir / "oracle_reviews",
+                                "verify",
+                            )
+                            verdict, verification_details = evaluate_verification(spec, verification, matcher=verifier)
+                            errors.extend(verification_match_errors)
                             attempt["verification"] = verification
                             attempt["verification_details"] = verification_details
                             any_oracle = any_oracle or verification_details.get("oracle_match_count", 0) > 0

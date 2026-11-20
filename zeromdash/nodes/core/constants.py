@@ -42,6 +42,7 @@ DEFAULT_BACKENDS = {
     "prepare_environment_and_debugger": "codex",
     "generate_poc":              "codex",
     "build_and_execute_poc":     "codex",
+    "review_oracle_mismatch":    "codex",
     "debug_poc":                 "codex",
     "verify_poc":                "codex",
     "release_poc":               "codex",

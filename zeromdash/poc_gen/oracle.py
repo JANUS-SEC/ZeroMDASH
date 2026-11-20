@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 from .io import canonical_json, sha256_text
 
 _KINDS = {"sanitizer", "signal", "exit_code", "output", "state_invariant", "plugin"}
+OracleMatcher = Callable[[dict[str, Any], dict[str, Any]], tuple[bool, str]]
 
 
 def oracle_spec_schema() -> dict[str, Any]:
@@ -181,10 +182,14 @@ def match_oracle(spec: dict[str, Any], observation: dict[str, Any]) -> tuple[boo
     return True, "matched"
 
 
-def evaluate_verification(spec: dict[str, Any], payload: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+def evaluate_verification(
+    spec: dict[str, Any],
+    payload: dict[str, Any],
+    matcher: OracleMatcher = match_oracle,
+) -> tuple[str, dict[str, Any]]:
     runs = payload.get("runs") or []
     controls = payload.get("controls") or []
-    matches = [match_oracle(spec, run) for run in runs if isinstance(run, dict)]
+    matches = [matcher(spec, run) for run in runs if isinstance(run, dict)]
     match_count = sum(1 for matched, _ in matches if matched)
     stability = spec["stability"]
     failures: list[str] = []
@@ -207,7 +212,7 @@ def evaluate_verification(spec: dict[str, Any], payload: dict[str, Any]) -> tupl
         elif status != "passed":
             failures.append(f"control did not pass: {kind}")
         observation = result.get("observation")
-        if isinstance(observation, dict) and match_oracle(spec, observation)[0]:
+        if isinstance(observation, dict) and matcher(spec, observation)[0]:
             failures.append(f"control triggered the target oracle: {kind}")
     details = {
         "run_count": len(runs),

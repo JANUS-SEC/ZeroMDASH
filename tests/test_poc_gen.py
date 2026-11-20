@@ -42,6 +42,10 @@ def _run(exit_code=42):
     }
 
 
+def _run_with_marker_object(exit_code=42):
+    return {**_run(exit_code), "markers": [{"marker": "entry", "observed": True}]}
+
+
 def _record():
     finding = {
         "title": "controlled exit",
@@ -92,6 +96,20 @@ class OracleTest(unittest.TestCase):
         self.assertEqual(verdict, "validated", details)
         payload["controls"][0]["observation"] = _run()
         verdict, details = evaluate_verification(spec, payload)
+        self.assertEqual(verdict, "reproduced_unstable")
+        self.assertIn("control triggered the target oracle: benign_input", details["failures"])
+
+    def test_verification_uses_supplied_matcher_for_controls(self):
+        spec, _ = validate_oracle_spec(_spec())
+        payload = {
+            "runs": [_run_with_marker_object(), _run_with_marker_object()],
+            "controls": [{"kind": "benign_input", "status": "passed", "skip_reason": "", "observation": _run_with_marker_object()}],
+        }
+
+        def semantic_matcher(_spec, observation):
+            return observation.get("exit_code") == 42, "semantic match"
+
+        verdict, details = evaluate_verification(spec, payload, matcher=semantic_matcher)
         self.assertEqual(verdict, "reproduced_unstable")
         self.assertIn("control triggered the target oracle: benign_input", details["failures"])
 
@@ -410,8 +428,17 @@ class PocGenServiceTest(unittest.TestCase):
             "generate_poc": {"summary": "candidate", "files": [{"path": "poc.py", "content": "raise SystemExit(42)\n"}], "run": {"command": "python3 poc.py"}},
             "execute_poc": {"runner_status": "completed", "build": {}, "runs": [_run()], "notes": "observed"},
             "verify_poc": {"environment_status": "ready", "runs": [_run(), _run()], "controls": [{"kind": "benign_input", "status": "passed", "skip_reason": "", "observation": _run(0)}], "notes": "verified"},
+            "review_oracle_mismatch": {"matched": False, "reason": "control observation does not satisfy the oracle"},
             "release_poc": {"readme": "# VULN-001\nStatus: validated", "report": "# Reproduction report\nFinding: VULN-001\nStatus: validated\n"},
         }
+
+    def test_hard_oracle_match_skips_semantic_review(self):
+        service = PocGenService(self.state)
+        with patch.object(service, "_review_oracle_mismatch", side_effect=AssertionError("unexpected review")):
+            matched, reason, errors = service._match_oracle(_record(), _spec(), _run(), self.ws.base / "unused", "execute")
+        self.assertTrue(matched)
+        self.assertEqual(reason, "matched")
+        self.assertEqual(errors, [])
 
     def test_end_to_end_validated_and_release_report(self):
         calls = []
@@ -441,6 +468,7 @@ class PocGenServiceTest(unittest.TestCase):
                 "generate_poc",
                 "build_and_execute_poc",
                 "verify_poc",
+                "review_oracle_mismatch",
                 "release_poc",
             ],
         )
@@ -459,6 +487,41 @@ class PocGenServiceTest(unittest.TestCase):
         self.assertEqual(calls.count("generate_poc"), 2)
         self.assertEqual(calls.count("debug_poc"), 1)
         self.assertNotIn("verify_poc", calls)
+
+    def test_semantic_oracle_review_accepts_marker_object_shape(self):
+        responses = self._responses()
+        responses["execute_poc"] = {"runner_status": "completed", "build": {}, "runs": [_run_with_marker_object()], "notes": "observed"}
+        responses["verify_poc"] = {
+            "environment_status": "ready",
+            "runs": [_run_with_marker_object(), _run_with_marker_object()],
+            "controls": [{"kind": "benign_input", "status": "passed", "skip_reason": "", "observation": _run_with_marker_object(0)}],
+            "notes": "verified",
+        }
+
+        def review(prompt):
+            match = re.search(r"(/[^\s;]+\.json)", prompt)
+            self.assertIsNotNone(match)
+            review_input = json.loads(Path(match.group(1)).read_text())
+            observation = review_input["observation"]
+            has_entry_marker = any(
+                isinstance(marker, dict) and marker.get("marker") == "entry" and marker.get("observed") is True
+                for marker in observation.get("markers", [])
+            )
+            return {
+                "matched": observation.get("exit_code") == 42 and has_entry_marker,
+                "reason": "structured marker carries the required reachability marker",
+            }
+
+        responses["review_oracle_mismatch"] = review
+        calls = []
+        with patch("zeromdash.poc_gen.service.load_finding_records", return_value=[_record()]), patch(
+            "zeromdash.poc_gen.service._invoke_with_output_retry",
+            side_effect=self._fake_invoke(responses, calls),
+        ):
+            result = PocGenService(self.state).run()[0]
+        self.assertEqual(result["status"], "validated", result.get("errors"))
+        self.assertIn("review_oracle_mismatch", calls)
+        self.assertIn("verify_poc", calls)
 
     def test_source_drift_fails_closed(self):
         responses = self._responses()
