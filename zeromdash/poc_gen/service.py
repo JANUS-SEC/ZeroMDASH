@@ -54,6 +54,14 @@ class PocGenService:
     def _call(self, phase: str, prompt: str, subtask_id: str, validate: Validator) -> tuple[dict[str, Any] | None, list[str]]:
         parsed: dict[str, Any] | None = None
         failure = ""
+        node = POC_PHASE_NODES[phase]
+        focus = _node_focus(self.state, f"{node}_focus")
+        if focus:
+            prompt = (
+                f"{prompt.rstrip()}\n\n"
+                "# Mandatory execution constraints\n"
+                f"{focus}\n"
+            )
 
         def _validate(res: AgentResult) -> tuple[bool, str]:
             nonlocal parsed, failure
@@ -65,7 +73,6 @@ class PocGenService:
             parsed, failure = validate(candidate)
             return parsed is not None, failure
 
-        node = POC_PHASE_NODES[phase]
         _res, errors = _invoke_with_output_retry(
             self.ws,
             node,
@@ -76,7 +83,7 @@ class PocGenService:
             validate=_validate,
             subtask_id=subtask_id,
             attempt_log_subtask_id=subtask_id,
-            focus=_node_focus(self.state, f"{node}_focus"),
+            focus=focus,
             artifact_filenames=("output.json",),
             extra_context={"poc_phase": phase},
         )
