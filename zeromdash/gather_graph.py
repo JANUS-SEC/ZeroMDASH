@@ -9,6 +9,7 @@ from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 
+from zeromdash.pipeline import task_pipeline_node
 from zeromdash.agents import langfuse_config
 from zeromdash.gather import prepare_gather_state
 from zeromdash.gather_state import (
@@ -80,7 +81,12 @@ def build_gather_graph(backends: dict[str, str] | None = None):
     graph.add_node("gather_analyze_attack_surface", bind(gather_analyze_attack_surface))
     graph.add_node("gather_plan_chains", bind(gather_plan_chains))
     graph.add_node("dispatch_gather_chains", bind(dispatch_gather_chains))
-    graph.add_node("gather_chain_subtask", build_gather_chain_subtask_graph(backends))
+    graph.add_node(
+        "gather_chain_subtask",
+        task_pipeline_node(build_gather_chain_subtask_graph(backends), dispatch_all_gather_chains,
+                           kind="chain_subtask", next_node="gather_prepare_report_groups"),
+        destinations=("gather_prepare_report_groups",),
+    )
     graph.add_node("gather_prepare_report_groups", bind(gather_prepare_report_groups))
     graph.add_node("summary", bind(gather_summary))
     graph.add_node("polish_report", polish_report)
@@ -88,8 +94,7 @@ def build_gather_graph(backends: dict[str, str] | None = None):
     graph.add_edge(START, "gather_analyze_attack_surface")
     graph.add_edge("gather_analyze_attack_surface", "gather_plan_chains")
     graph.add_edge("gather_plan_chains", "dispatch_gather_chains")
-    graph.add_conditional_edges("dispatch_gather_chains", dispatch_all_gather_chains)
-    graph.add_edge("gather_chain_subtask", "gather_prepare_report_groups")
+    graph.add_edge("dispatch_gather_chains", "gather_chain_subtask")
     graph.add_edge("gather_prepare_report_groups", "summary")
     graph.add_edge("summary", "polish_report")
     graph.add_edge("polish_report", END)
@@ -109,6 +114,7 @@ def run_gather(
     top_K: dict[str, int] | None = None,
     gather_config: dict[str, Any] | None = None,
     max_concurrency: int = 8,
+    task_concurrency: dict[str, int] | None = None,
 ) -> GatherState:
     state = prepare_gather_state(
         manifest,
@@ -135,6 +141,7 @@ def run_gather(
             "max_concurrency": str(max_concurrency),
         },
     )
+    state["task_concurrency"] = dict(task_concurrency or {})
     config = dict(config or {})
     config["max_concurrency"] = max_concurrency
     final = build_gather_graph(backends).invoke(state, config=config or None)

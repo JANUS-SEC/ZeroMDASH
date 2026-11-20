@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import subprocess
 import threading
 import unittest
@@ -91,6 +92,20 @@ class RuntimeRecoveryTest(unittest.TestCase):
         self.assertTrue((logs / "spec-001.iter-1.recovery-1.investigate_subtask.attempt-1.log").is_file())
         journal = [json.loads(line) for line in (self.ws.log / "runtime_recovery.jsonl").read_text().splitlines()]
         self.assertEqual(journal[0]["config"]["model"], "working")
+
+    def test_noninteractive_env_skips_prompt_and_returns_failure(self):
+        # Unattended runs (ZEROMDASH_NONINTERACTIVE=1) must not pause for
+        # interactive recovery: the failed result is returned so callers
+        # can record the failure and continue with the remaining work.
+        state = self.state()
+        recovery = RuntimeRecovery(self.request)
+        with patch.dict(os.environ, {"ZEROMDASH_NONINTERACTIVE": "1"}), runtime_recovery_scope(recovery), patch.object(
+            nodes, "_run_agent_with_config", side_effect=self.run_agent
+        ):
+            update = nodes.investigate_subtask(state, backends={"investigate_subtask": "codex"})
+        self.assertFalse(update["investigation_valid"])
+        self.assertEqual(self.requests, [])  # interactive recovery was never requested
+        self.assertEqual([m for _, _, m in self.calls], ["primary"] * 3 + ["fallback"] * 3)
 
     def test_langgraph_concurrent_subtasks_share_one_prompt_and_all_reach_critic(self):
         count = 6
@@ -288,7 +303,7 @@ class RuntimeRecoveryTest(unittest.TestCase):
 
     def test_cli_rechecks_invalid_and_unhealthy_manual_configs(self):
         request = RecoveryRequest("investigate_subtask", "spec-001", {"runtime": "codex"}, "empty", self.ws.log)
-        answers = ["kimi", "", "", "", "codex", "bad", "", "", "claude_code", "ark-proxy", "ark", "working"]
+        answers = ["opencode", "", "", "", "codex", "bad", "", "", "claude_code", "ark-proxy", "ark", "working"]
         with patch("zeromdash.cli.click.prompt", side_effect=answers), patch(
             "zeromdash.cli.check_agent_health", side_effect=[
                 AgentHealth(name="codex", ok=False, message="expired login"),

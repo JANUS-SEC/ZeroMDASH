@@ -12,6 +12,7 @@ from unittest.mock import patch
 import click
 from click.testing import CliRunner
 
+from zeromdash import nodes
 from zeromdash.agents import AgentHealth
 from zeromdash.cli import (
     _parse_agent_config_file,
@@ -898,14 +899,14 @@ class CliStartupHealthCheckTest(unittest.TestCase):
             cfg.write_text(
                 "node:\n"
                 "  summary:\n"
-                "    runtime: kimi\n"
+                "    runtime: opencode\n"
             )
 
             with self.assertRaises(click.ClickException) as cm:
                 _parse_agent_config_file(str(cfg))
 
         self.assertIn("node 'summary' requires a harness with native subagent support", str(cm.exception))
-        self.assertIn("unsupported runtime(s): kimi", str(cm.exception))
+        self.assertIn("unsupported runtime(s): opencode", str(cm.exception))
 
     def test_parse_agent_config_rejects_unsupported_fallback_for_native_subagent_node(self):
         with TemporaryDirectory() as tmp:
@@ -1116,6 +1117,30 @@ class CliStartupHealthCheckTest(unittest.TestCase):
             ),
             cache,
         )
+
+    def test_startup_backend_resolution_rechecks_unchanged_config_after_timeout(self):
+        agent_configs = {
+            "polish_report": {
+                "runtime": "codex",
+                "config": "",
+                "provider": "",
+                "model": "kimi-k3.1-pro",
+            }
+        }
+        failed = AgentHealth(name="codex", ok=False, message="health check timed out")
+        passed = AgentHealth(name="codex", ok=True, message="ok")
+        with patch("zeromdash.cli.check_agent_health", side_effect=[failed, passed]) as check, patch(
+            "zeromdash.cli.click.prompt", side_effect=["codex", "", "", "kimi-k3.1-pro"]
+        ) as prompt:
+            selected, cache = _resolve_startup_backends(
+                {}, agent_configs, disabled_nodes=set(nodes.DEFAULT_BACKENDS) - {"polish_report"},
+            )
+
+        self.assertEqual(selected, {"polish_report": "codex"})
+        self.assertEqual(check.call_count, 2)
+        self.assertEqual(check.call_args_list[0].kwargs, check.call_args_list[1].kwargs)
+        self.assertEqual(prompt.call_count, 4)
+        self.assertEqual(list(cache.values()), [passed])
 
     def test_startup_backend_resolution_checks_fallback_configs(self):
         calls = []

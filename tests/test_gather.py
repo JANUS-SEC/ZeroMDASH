@@ -608,6 +608,63 @@ class GatherNodeTest(unittest.TestCase):
             self.assertEqual(result["gate_result"]["decision"], "pass")
             self.assertTrue((ws.base / "summary.md").is_file())
 
+    def test_summary_externalizes_large_groups_candidates_and_errors(self):
+        summary_mod = importlib.import_module("zeromdash.nodes.gather_summary")
+        with TemporaryDirectory() as tmp:
+            ws = Workspace.create(tmp, target="gather-stack")
+            groups = [{
+                "group_id": "VULN-001",
+                "primary_finding": {"detail": "BULK_GROUP_" + "g" * 1_100_000},
+            }]
+            candidates = [{"chain_id": "pending-001", "reasoning": "BULK_CANDIDATE_" + "c" * 200_000}]
+            errors = ["BULK_ERROR_" + "e" * 200_000]
+            state = {
+                "target": "gather:stack",
+                "scenario_name": "stack",
+                "scenario": "api calls worker",
+                "task_id": ws.task_id,
+                "workspace_root": str(ws.root),
+                "gather_report_groups": groups,
+                "gather_chain_candidates": candidates,
+                "errors": errors,
+                "source_read_roots": [str(ws.main)],
+            }
+
+            def fake_summary_invoke(_ws, _node, prompt, _backends, _state, **kwargs):
+                self.assertLess(len(prompt), 10_000)
+                self.assertEqual(kwargs["additional_read_roots"], [str(ws.main)])
+                manifest_path = ws.log_path("summary_inputs") / "manifest.json"
+                self.assertIn(str(manifest_path), prompt)
+                manifest = json.loads(manifest_path.read_text())
+                expected = {"report_groups": groups, "unclosed_candidates": candidates, "errors": errors}
+                for name, records in expected.items():
+                    entry = manifest["datasets"][name]
+                    self.assertEqual(entry["count"], len(records))
+                    self.assertEqual(json.loads(Path(entry["path"]).read_text()), records)
+                    self.assertIn(f"- {name}: {len(records)} records; JSON: {entry['path']}", prompt)
+                for marker in ("BULK_GROUP_", "BULK_CANDIDATE_", "BULK_ERROR_"):
+                    self.assertNotIn(marker, prompt)
+                kwargs["reset"]()
+                section_names = (
+                    ("summary.en.md", "Scenario and Target Topology", "Cross-target Flow Registry", "Vulnerability Details", "Cross-target Bindings", "Data Flow", "Attack Sequence"),
+                    ("summary.zh_CN.md", "业务场景与目标拓扑", "跨目标数据流清单", "漏洞详情", "跨目标绑定", "数据流向图", "攻击时序图"),
+                )
+                for filename, topology, registry, details, bindings, flow, sequence in section_names:
+                    (ws.base / filename).write_text(
+                        f"## {topology}\n## {registry}\n## {details}\n### VULN-001: chain\n"
+                        f"#### {bindings}\n#### {flow}\n```mermaid\nflowchart LR\nA --> B\n```\n"
+                        f"#### {sequence}\n```mermaid\nsequenceDiagram\nA->>B: input\n```\n"
+                    )
+                result = AgentResult("done", "", 0, "claude_code")
+                kwargs["materialize"](result)
+                self.assertTrue(kwargs["validate"](result)[0])
+                return result, []
+
+            with patch.object(summary_mod, "_invoke_with_output_retry", side_effect=fake_summary_invoke):
+                result = summary_mod.gather_summary(state, backends={})
+            self.assertEqual(result["errors"], [])
+            self.assertEqual(result["gate_result"]["unclosed_candidates"], candidates)
+
 
 class GatherCliTest(unittest.TestCase):
     def test_help_lists_gather_mode(self):

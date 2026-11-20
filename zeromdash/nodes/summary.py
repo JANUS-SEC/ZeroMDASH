@@ -24,6 +24,7 @@ from .core.qualification import (
 from .core.report_dedup import compact_report_group
 from .core.result_artifacts import active_subtask_result_files
 from .core.reporting import _each_vulnerability_has_both_diagrams
+from .core.summary_inputs import write_summary_inputs
 
 
 def _primitive_compact_for_summary(primitive: dict) -> dict:
@@ -97,28 +98,30 @@ def summary(state: ZeroMDASHState, *, backends=None) -> dict:
             for cve_id in _summary_list(finding.get("cve_ids"))
         }
     )
+    summary_inputs_path, summary_inputs_catalog = write_summary_inputs(
+        ws.log_path("summary_inputs"),
+        {
+            "report_groups": report_groups,
+            "chain_findings": chain_findings,
+            **compact,
+            "confirmed_primitives": confirmed_primitives,
+            "observations": observations,
+            "subtask_result_files": [str(path) for path in active_subtask_result_files(ws)],
+        },
+    )
     prompt = prompts.SUMMARY.format(
         target=state["target"],
         focus=focus,
         repo_path=state.get("repo_path", str(ws.main_path("repo"))),
         subtask_res_dir=ws.log_path("subtask_res"),
-        subtask_result_files="\n".join(
-            str(path) for path in active_subtask_result_files(ws)
-        ),
+        summary_inputs_path=summary_inputs_path,
+        summary_inputs_catalog=summary_inputs_catalog,
         chain_res_dir=ws.log_path("chain_res"),
         primitive_res_dir=ws.log_path("primitive_res"),
         report_groups_path=state.get("report_groups_path", str(ws.log / "report_groups.json")),
-        report_groups=json.dumps(report_groups, ensure_ascii=False, indent=2),
-        chain_findings=json.dumps(chain_findings, ensure_ascii=False, indent=2),
         target_writeup_dir=ws.main_path("writeup"),
         target_patch_dir=ws.main_path("patch"),
         similar_dir=ws.similar,
-        spec_findings=json.dumps(compact["spec_findings"], ensure_ascii=False, indent=2),
-        vuln_candidates=json.dumps(compact["vuln_candidates"], ensure_ascii=False, indent=2),
-        patch_findings=json.dumps(compact["patch_findings"], ensure_ascii=False, indent=2),
-        feature_findings=json.dumps(compact["feature_findings"], ensure_ascii=False, indent=2),
-        confirmed_primitives=json.dumps(confirmed_primitives, ensure_ascii=False, indent=2),
-        observations=json.dumps(observations, ensure_ascii=False, indent=2),
         out_en=out_en,
         out_zh=out_zh,
     )

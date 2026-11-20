@@ -50,10 +50,59 @@
       needed, ground claims in evidence, and return the requested final
       artifact or output without unrelated commentary.
 
+# Newer DSH requires subagent persona/tool restrictions to live in an Agent
+# Preset. Keep the headless root on an empty default preset so existing global
+# headless tools remain in effect, and select the read-only verifier preset only
+# for spawned subagents.
+- insert:
+    - id: agent-preset-registry
+      name: '@deepseek-ai/dsh-agent-preset-registry'
+      config:
+        default: zeromdash-headless-root
+    - id: preset-zeromdash-headless-root
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: zeromdash-headless-root
+        name: ZeroMDASH headless root
+        description: Empty default preset; the headless patch supplies root tools.
+        plugins: []
+    - id: preset-zeromdash-readonly-verifier
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: zeromdash-readonly-verifier
+        name: ZeroMDASH read-only verifier
+        description: Read-only verifier for bounded ZeroMDASH evidence checks.
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: >-
+                You are an independent read-only security verifier. Perform only
+                the bounded verification task delegated by the parent. Inspect
+                the supplied clean source checkout and return concise evidence,
+                counterevidence, sibling-path checks requested by the task, and
+                unresolved gaps. Do not modify files, access prior reports,
+                start descendants, or use the network.
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+            config:
+              read: true
+              readImage: false
+              write: false
+              edit: false
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: true
+              globMaxResults: 200
+              grepMaxMatches: 500
+              grepMaxLineBytes: 2000
+              timeoutMs: 60000
+
 # Default minimal-plus-search mode: keep persistent bash for batched inspection,
 # expose direct read/write/edit for deterministic artifacts, and add bounded
 # glob/grep discovery. Keep web, subagent control/fork, workflow, and planning
-# tools disabled; allow one bounded read-only subagent for independent checks.
+# tools disabled; allow one bounded read-only subagent through the verifier preset.
 - id: tool-bash
   disabled: true
 - id: tool-jobs
@@ -86,17 +135,7 @@
     maxDepth: 1
     agentOptions:
       maxTokens: 262144
-    toolFilter:
-      allow:
-        - read
-        - glob
-        - grep
-    persona: >-
-      You are an independent read-only security verifier. Perform only the
-      bounded verification task delegated by the parent. Inspect the supplied
-      clean source checkout and return concise evidence, counterevidence,
-      sibling-path checks requested by the task, and unresolved gaps. Do not
-      modify files, access prior reports, start descendants, or use the network.
+    agentPreset: zeromdash-readonly-verifier
 - id: tool-subagent-fork
   disabled: true
 - id: tool-workflow

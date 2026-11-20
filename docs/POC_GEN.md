@@ -655,15 +655,17 @@ snapshot() / reset() / cleanup()
 
 ### 11.1 模块位置
 
-`pyproject.toml`、README 和 `docs/ARCH.md` 已声明 `zeromdash-repro` 与 `zeromdash_repro/`，但当前工作树没有该实现。因此建议直接在该命名空间实现本设计，不再新增一个平行的 `zeromdash_poc` 包。
-
-已声明的线性流程：
+当前实现位于 `zeromdash/poc_gen/`，通过主 graph 的可选 `poc_gen` 节点接入：
 
 ```text
-load_review_results -> plan_repro -> build_harmless_poc -> validate_repro -> summary
+summary -> polish_report -> poc_gen（可选）-> END
 ```
 
-应升级为本文件定义的 nested graph；实现落地时同步修正 README/ARCH，避免继续把旧线性描述当作现状。
+模块包含 finding loader、OracleSpec/匹配、Agent 调用、attempt 管理、复验、报告和 publisher。显式 only-gen 模式从既有 workspace 恢复状态并只运行该节点，不重跑扫描。
+
+`poc_gen` 是确定性编排节点，不是 Agent runtime 配置项。`plan_poc`、`prepare_environment_and_debugger`、`generate_poc`、`build_and_execute_poc`、`debug_poc`、`verify_poc`、`release_poc` 都注册在 `DEFAULT_BACKENDS` 中，分别支持 runtime/config/provider/model/env/focus/fallback、启动健康检查和独立 headless 调用。
+
+七个阶段的 prompt 模板集中在 `zeromdash/prompts.py` 的 `POC_*` 常量中。finding、OracleSpec、strategy、generation、observation 和 release evidence 均先物化为 workspace 内的 JSON 文件，prompt 只传文件路径和少量预算参数，避免把大型结构化上下文重复内联到 Agent 调用中。
 
 ### 11.2 可复用能力
 
@@ -675,11 +677,11 @@ load_review_results -> plan_repro -> build_harmless_poc -> validate_repro -> sum
 - selected-run 隔离、终态 envelope、完整 history 和 runtime recovery；
 - Langfuse 节点 tracing 与 `agent_commands.jsonl` 审计。
 
-不要跨包长期依赖 `_invoke_with_output_retry` 等私有函数；实现时把公共机制抽成明确接口。
+当前 PoC 调用集中在 `poc_gen.service` 中复用 `_invoke_with_output_retry`，避免各阶段分别实现重试和恢复；后续应把该 adapter 提升为稳定的公共接口。
 
 ### 11.3 不反向污染漏洞结论
 
-PoC 结果通过新的 `poc_validation` 引用挂到 finding/report group，不原地改写既有 finding JSON：
+PoC 结果通过 `poc_results` 和 `log/poc_res/` 关联到 finding/report group，不原地改写既有 finding JSON：
 
 - `validated` 可增加动态证据并缩小 `validation_gaps`；
 - `not_reproduced` 只记录本次覆盖与限制，不自动降低漏洞资格；
@@ -694,21 +696,13 @@ PoC 结果通过新的 `poc_validation` 引用挂到 finding/report group，不�
 ```yaml
 poc:
   enabled: false
-  backend: container
+  backend: agent_sandbox
   max_findings: 8
   max_strategies_per_round: 3
-  max_replan_rounds: 1
   max_debug_rounds_per_strategy: 4
-  max_environment_repairs: 2
   max_no_progress_rounds: 2
-  max_parallel_attempts: 1
-  max_wall_time_seconds: 3600
-  generation_timeout_seconds: 600
-  build_timeout_seconds: 900
-  run_timeout_seconds: 30
-  verification_runs: 5
-  verification_min_matches: 3
-  release_partial: true
+  verification_runs: 3
+  verification_min_matches: 2
 
 node:
   plan_poc:
@@ -727,7 +721,27 @@ node:
     runtime: codex
 ```
 
-`enabled=false` 适合默认关闭高成本动态执行；用户显式启用后，安全后端不可用仍必须 fail closed。
+`enabled=false` 默认关闭高成本动态执行。普通扫描只有显式设为 true 才在报告后运行 PoC；`--till-node summary` 总是优先停止。两个 only-gen 模式会强制启用，不要求修改原配置。
+
+当前 `agent_sandbox` 后端由所选 Agent runtime 的沙箱执行构建和运行，编排器校验结构化 observation、源码树 hash、Oracle 和复验结果。它不等于独立的容器/VM 不可信代码隔离后端；容器、VM、进程树资源控制和跨后端恢复仍是后续工作，不能把当前结果误解为已经完成这些隔离保证。
+
+### 11.5 CLI 入口
+
+```bash
+# 扫描结束后继续生成：agent-config 中设置 poc.enabled=true
+zeromdash --target ./my-project --agent-config ./agents.yaml
+
+# 只跑到 summary，即使 poc.enabled=true 也不生成 PoC
+zeromdash --target ./my-project --agent-config ./agents.yaml --till-node summary
+
+# 从 workspace 为全部合格 finding 生成
+zeromdash --only-gen-pocs .zeromdash/workspace_for_my-project --agent-config ./agents.yaml
+
+# 只生成一个 finding；支持 report group ID、subtask ID 或 chain ID
+zeromdash --only-gen-poc .zeromdash/workspace_for_my-project:VULN-001 --agent-config ./agents.yaml
+```
+
+两个 workspace 参数都支持绝对路径和相对路径。单 finding 参数按最后一个冒号拆分 workspace 与 ID。
 
 ## 12. 可观测性与审计
 

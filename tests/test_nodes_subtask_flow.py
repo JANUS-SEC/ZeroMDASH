@@ -642,14 +642,14 @@ class GraphConfigTest(unittest.TestCase):
             {"investigate_subtask": {"runtime": "dsh"}},
         )
         self.assertEqual([variant["runtime"] for variant in variants], ["dsh"])
-        with self.assertRaisesRegex(ValueError, r"unsupported runtime\(s\): kimi"):
+        with self.assertRaisesRegex(ValueError, r"unsupported runtime\(s\): opencode"):
             nodes.agent_config_variants_for_node(
                 "critic_subtask",
                 None,
                 {
                     "critic_subtask": {
                         "runtime": "codex",
-                        "fallbacks": [{"runtime": "kimi"}],
+                        "fallbacks": [{"runtime": "opencode"}],
                     }
                 },
             )
@@ -1713,6 +1713,33 @@ class FetchTargetRepoTest(unittest.TestCase):
             ),
             {"CLAUDE_CODE_USE_BEDROCK": None, "AWS_BEARER_TOKEN_BEDROCK": None},
         )
+
+    def test_agent_env_for_node_controls_claude_glm_bigmodel_environment(self):
+        for provider in ("glm", "bigmodel"):
+            with self.subTest(provider=provider):
+                env = nodes.agent_env_for_node(
+                    "search_spec",
+                    "claude_code",
+                    {
+                        "search_spec": {
+                            "runtime": "claude_code",
+                            "provider": provider,
+                            "model": "glm-5.3[1m]",
+                            "env": {
+                                "CUSTOM_ENV": "1",
+                                "ANTHROPIC_BASE_URL": "https://glm.example/api",
+                            },
+                        }
+                    },
+                )
+                self.assertIsNone(env["CLAUDE_CODE_USE_BEDROCK"])
+                self.assertIsNone(env["AWS_BEARER_TOKEN_BEDROCK"])
+                self.assertIsNone(env["ANTHROPIC_AUTH_TOKEN"])
+                self.assertIsNone(env["ANTHROPIC_MODEL"])
+                self.assertIsNone(env["CLAUDE_CODE_SUBAGENT_MODEL"])
+                self.assertIsNone(env["ZEROMDASH_CLAUDE_MODEL"])
+                self.assertEqual(env["CUSTOM_ENV"], "1")
+                self.assertEqual(env["ANTHROPIC_BASE_URL"], "https://glm.example/api")
 
     def test_agent_env_for_node_clears_global_model_when_node_model_is_configured(self):
         self.assertEqual(
@@ -3053,7 +3080,7 @@ class NodeOutputRetryTest(unittest.TestCase):
         self.assertEqual(update["summary_zh_CN"], "# 执行摘要")
         self.assertEqual((ws.base / "summary.md").read_text(), "# Executive Summary")
 
-    def test_summary_prompt_uses_compact_confirm_then_revise_findings(self):
+    def test_summary_input_files_preserve_compact_confirm_then_revise_findings(self):
         tmp = TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         ws = Workspace.create(tmp.name, target="libfoo", task_id="summary-compact")
@@ -3139,21 +3166,27 @@ class NodeOutputRetryTest(unittest.TestCase):
 
         self.assertEqual(update["errors"], [])
         prompt = captured["prompt"]
-        self.assertIn('"id": "spec-001"', prompt)
-        self.assertIn('"status": "confirm"', prompt)
-        self.assertIn('"code_locations": [', prompt)
-        self.assertIn('"call_path": [', prompt)
-        self.assertIn('"call_flow": [', prompt)
-        self.assertIn('"requires_call_path_summary": true', prompt)
-        self.assertIn('"summary_format": "full"', prompt)
-        self.assertIn('"skills": [', prompt)
-        self.assertIn('"a -> sink"', prompt)
-        self.assertIn('"raw": "keep"', prompt)
-        self.assertIn('"notes": "keep"', prompt)
+        inputs_dir = ws.log_path("summary_inputs")
+        findings = json.loads((inputs_dir / "spec_findings.json").read_text())
+        self.assertEqual([item["id"] for item in findings], ["spec-001", "spec-002"])
+        self.assertEqual([item["status"] for item in findings], ["confirm", "revise"])
+        self.assertEqual(findings[0]["code_locations"], ["a.py:1"])
+        self.assertEqual(findings[0]["call_path"], ["a -> sink"])
+        self.assertEqual(findings[0]["call_flow"], ["a -> sink"])
+        self.assertTrue(findings[0]["requires_call_path_summary"])
+        self.assertEqual(findings[0]["summary_format"], "full")
+        self.assertEqual(findings[0]["skills"], ["memory"])
+        self.assertEqual(findings[0]["evidence"]["raw"], "keep")
+        self.assertEqual(findings[1]["evidence"]["notes"], "keep")
+        self.assertNotIn("detail", findings[0])
+        self.assertNotIn("detail", findings[1])
+        self.assertIn(f"- spec_findings: 2 records; JSON: {inputs_dir / 'spec_findings.json'}", prompt)
+        self.assertIn(str(inputs_dir / "manifest.json"), prompt)
+        self.assertNotIn("confirm title", prompt)
+        self.assertNotIn("revise title", prompt)
         self.assertNotIn("long confirm detail", prompt)
         self.assertNotIn("long revise detail", prompt)
         self.assertNotIn("reject title", prompt)
-        self.assertLess(prompt.index('"id": "spec-001"'), prompt.index('"id": "spec-002"'))
         self.assertIn("ONE canonical vulnerability grouping", prompt)
         self.assertIn("VULN-001", prompt)
         self.assertIn("flowchart LR", prompt)
@@ -3267,7 +3300,10 @@ Missing next capabilities: deterministic page reuse.
         self.assertEqual(update["errors"], [])
         self.assertIn("Confirmed primitive artifact directory", captured["prompt"])
         self.assertIn("- confirmed_primitives:", captured["prompt"])
-        self.assertIn('"primitive_id": "prim_deadbeef"', captured["prompt"])
+        primitive_path = ws.log_path("summary_inputs") / "confirmed_primitives.json"
+        self.assertIn(f"- confirmed_primitives: 1 records; JSON: {primitive_path}", captured["prompt"])
+        self.assertNotIn("prim_deadbeef", captured["prompt"])
+        self.assertEqual(json.loads(primitive_path.read_text())[0]["primitive_id"], "prim_deadbeef")
         self.assertIn("## Confirmed Primitives", captured["prompt"])
         self.assertIn("## 已确认原语", captured["prompt"])
         self.assertEqual(update["summary_en"], en)
@@ -3276,6 +3312,150 @@ Missing next capabilities: deterministic page reuse.
             update["gate_result"]["confirmed_primitives"][0]["primitive_id"],
             "prim_deadbeef",
         )
+
+    def test_summary_externalizes_large_inputs_and_retries_with_bounded_prompts(self):
+        tmp = TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        ws = Workspace.create(tmp.name, target="libfoo", task_id="summary-large-inputs")
+        evidence_text = "BULK_FINDING_EVIDENCE_" + "x" * 250_000
+
+        def finding(kind, subtask_id):
+            return {
+                "kind": kind,
+                "subtask_id": subtask_id,
+                "title": "large finding",
+                "disposition": "confirmed_vulnerability",
+                "qualification_gate_passed": True,
+                "cvss4_vector": _CVSS4_HIGH_VECTOR,
+                "review": _qualified_review(),
+                "evidence": {"notes": evidence_text, "code_locations": ["src/core.c:10"]},
+            }
+
+        state = {
+            **_workspace_state(ws),
+            "spec_findings": [finding("spec", "spec-001")],
+            "vuln_candidates": [finding("vuln", "vuln-001")],
+            "patch_findings": [finding("patch_bypass", "patch-001")],
+            "feature_findings": [finding("feature", "feat-001")],
+            "chain_findings": [finding("chain", "chain-001")],
+            "report_groups": [{"group_id": "VULN-001", "source_subtasks": ["spec-001"]}],
+            "confirmed_primitives": [
+                {
+                    "primitive_id": f"prim_{index:08d}",
+                    "entry_conditions": {"notes": "BULK_PRIMITIVE_" + "y" * 3_000},
+                }
+                for index in range(200)
+            ],
+            "observations": [
+                {
+                    "subtask_id": f"obs-{index:04d}",
+                    "title": "BULK_OBSERVATION_" + "z" * 3_000,
+                    "disposition": "hardening_recommendation",
+                    "review": {"verdict": "confirm"},
+                }
+                for index in range(200)
+            ],
+        }
+        result_paths = [
+            ws.log_path("subtask_res") / f"resolved-{index:05d}-{'r' * 150}.json"
+            for index in range(5_000)
+        ]
+        expected_counts = {
+            "report_groups": 1, "chain_findings": 1, "spec_findings": 1,
+            "vuln_candidates": 1, "patch_findings": 1, "feature_findings": 1,
+            "confirmed_primitives": 200, "observations": 200, "subtask_result_files": 5_000,
+        }
+        captured_prompts = []
+
+        def fake_invoke(_ws, _node, prompt, _backends, **kwargs):
+            captured_prompts.append(prompt)
+            self.assertLess(len(prompt), 20_000)
+            manifest_path = ws.log_path("summary_inputs") / "manifest.json"
+            self.assertIn(str(manifest_path), prompt)
+            manifest = json.loads(manifest_path.read_text())
+            self.assertEqual(set(manifest["datasets"]), set(expected_counts))
+            total_chars = 0
+            for name, count in expected_counts.items():
+                entry = manifest["datasets"][name]
+                text = Path(entry["path"]).read_text()
+                self.assertEqual(entry["count"], count)
+                self.assertEqual(len(json.loads(text)), count)
+                self.assertIn(f"- {name}: {count} records; JSON: {entry['path']}", prompt)
+                total_chars += len(text)
+            self.assertGreater(total_chars, 1_048_576)
+            if kwargs["extra_context"]["attempt"] == 1:
+                return AgentResult("", "temporary failure", 1, "codex")
+            primitive_ids = "\n".join(item["primitive_id"] for item in state["confirmed_primitives"])
+            (ws.base / "summary.en.md").write_text(_SUMMARY_EN + "\n## Confirmed Primitives\n" + primitive_ids)
+            (ws.base / "summary.zh_CN.md").write_text(_SUMMARY_ZH + "\n## 已确认原语\n" + primitive_ids)
+            return AgentResult("done", "", 0, "codex")
+
+        with patch.object(nodes, "active_subtask_result_files", return_value=result_paths), patch.object(
+            nodes, "_invoke", side_effect=fake_invoke
+        ):
+            update = nodes.summary(state, backends={"summary": "codex"})
+
+        self.assertEqual(update["errors"], [])
+        self.assertEqual(len(captured_prompts), 2)
+        inputs_dir = ws.log_path("summary_inputs")
+        for name in ("spec_findings", "vuln_candidates", "patch_findings", "feature_findings", "chain_findings"):
+            records = json.loads((inputs_dir / f"{name}.json").read_text())
+            self.assertEqual(records[0]["evidence"]["notes"], evidence_text)
+        self.assertEqual(
+            json.loads((inputs_dir / "subtask_result_files.json").read_text()),
+            [str(path) for path in result_paths],
+        )
+        self.assertEqual(
+            json.loads((inputs_dir / "confirmed_primitives.json").read_text())[-1]["entry_conditions"],
+            state["confirmed_primitives"][-1]["entry_conditions"],
+        )
+        self.assertEqual(
+            json.loads((inputs_dir / "observations.json").read_text())[-1]["title"],
+            state["observations"][-1]["title"],
+        )
+        for prompt in captured_prompts:
+            for marker in ("BULK_FINDING_EVIDENCE_", "BULK_PRIMITIVE_", "BULK_OBSERVATION_", str(result_paths[-1])):
+                self.assertNotIn(marker, prompt)
+        self.assertIn("# Orchestrator retry feedback", captured_prompts[1])
+
+    def test_summary_result_index_preserves_canonical_and_published_artifacts(self):
+        tmp = TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        ws = Workspace.create(tmp.name, target="libfoo", task_id="summary-result-index")
+        canonical = ws.log_path("subtask_res")
+        legacy = ws.log_path("review_res")
+        legacy.mkdir()
+        legacy_only = legacy / "legacy-only.json"
+        legacy_only.write_text("{}")
+        (legacy / "published.json").write_text("{}")
+        published = canonical / "published.json"
+        published.write_text(json.dumps({"finding": {"parent_subtask_id": "spec-001"}}))
+        stale = canonical / "stale.json"
+        stale.write_text(json.dumps({"finding": {"parent_subtask_id": "spec-001"}}))
+        package = canonical / "spec-001.json"
+        package.write_text(json.dumps({
+            "result_type": "hypothesis_package", "package_id": "spec-001",
+            "artifacts": [{"path": str(published)}],
+        }))
+
+        def fake_invoke(_ws, _node, prompt, _backends, **_kwargs):
+            inputs_dir = ws.log_path("summary_inputs")
+            manifest = json.loads((inputs_dir / "manifest.json").read_text())
+            entry = manifest["datasets"]["subtask_result_files"]
+            self.assertEqual(entry["count"], 3)
+            self.assertEqual(set(json.loads(Path(entry["path"]).read_text())), {
+                str(legacy_only), str(published), str(package),
+            })
+            self.assertEqual(json.loads((inputs_dir / "report_groups.json").read_text()), [])
+            self.assertIn("- report_groups: 0 records; JSON:", prompt)
+            self.assertNotIn(str(legacy_only), prompt)
+            (ws.base / "summary.en.md").write_text("# Executive Summary")
+            (ws.base / "summary.zh_CN.md").write_text("# 执行摘要")
+            return AgentResult("done", "", 0, "codex")
+
+        with patch.object(nodes, "_invoke", side_effect=fake_invoke):
+            update = nodes.summary(_workspace_state(ws), backends={"summary": "codex"})
+        self.assertEqual(update["errors"], [])
 
     def test_prepare_report_groups_uses_agent_adjudication_to_merge_semantic_duplicates(self):
         tmp = TemporaryDirectory()
@@ -3608,10 +3788,13 @@ Source subtasks: `patch-001`; confidence 0.9.
             update = nodes.summary(state, backends={"summary": "claude_code"})
 
         self.assertEqual(update["errors"], [])
-        self.assertIn('"summary_format": "patch_gap"', captured["prompt"])
-        self.assertIn('"patch_status": "not_applied"', captured["prompt"])
-        self.assertIn('"cve_ids"', captured["prompt"])
-        self.assertIn('"CVE-2024-1234"', captured["prompt"])
+        patch_path = ws.log_path("summary_inputs") / "patch_findings.json"
+        patch_findings = json.loads(patch_path.read_text())
+        self.assertEqual(patch_findings[0]["summary_format"], "patch_gap")
+        self.assertEqual(patch_findings[0]["patch_status"], "not_applied")
+        self.assertEqual(patch_findings[0]["cve_ids"], ["CVE-2024-1234"])
+        self.assertIn(str(patch_path), captured["prompt"])
+        self.assertNotIn("CVE-2024-1234", captured["prompt"])
         self.assertIn("Known CVE Patch Gaps", captured["prompt"])
         self.assertEqual(update["summary_en"], en)
         self.assertEqual(update["summary_zh_CN"], zh)
@@ -3853,6 +4036,20 @@ class FocusRoutingTest(unittest.TestCase):
 
 
 class DispatchTest(unittest.TestCase):
+    def test_safe_similar_software_name_rejects_placeholder_prose(self):
+        # Regression: a stdout-dump report quoting ~/.claude.json syntax
+        # contained a literal ["<workspace>"], which _try_json's
+        # bracket-slice heuristic extracted as the candidate array.
+        from zeromdash.nodes.core.search import _parse_candidate_names
+
+        text = (
+            "status: partial — set projects[\"<workspace>\"].hasTrustDialogAccepted: "
+            "true in ~/.claude.json to trust the workspace"
+        )
+        ok, names, _payload = _parse_candidate_names(text)
+        self.assertTrue(ok)
+        self.assertEqual(names, [])
+
     def test_search_similar_software_parses_materialized_candidates_file(self):
         tmp = TemporaryDirectory()
         self.addCleanup(tmp.cleanup)

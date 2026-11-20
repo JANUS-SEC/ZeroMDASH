@@ -47,6 +47,8 @@ def _safe_similar_software_name(value: Any) -> str:
         or lowered.endswith(".json")
         or name.startswith(("/", "\\", "~/", "./", "../"))
         or re.match(r"^[A-Za-z]:[\\/]", name)
+        or "<" in name
+        or ">" in name
     ):
         return ""
     name = re.sub(r"[\\/]+", " - ", name)

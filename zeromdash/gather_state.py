@@ -87,6 +87,7 @@ class GatherState(TypedDict, total=False):
     scenario: str
     manifest_path: str
     manifest_hash: str
+    task_concurrency: dict[str, int]
     task_id: str
     workspace_root: str
     role_lang: str

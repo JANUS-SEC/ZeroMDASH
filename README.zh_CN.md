@@ -9,8 +9,34 @@ Kimi Code、OpenCode、DeepSeek Harness（`dsh`）、DeepAgent 等外部编码 A
 
 ## 快速开始
 
+### 使用 uv 安装
+
+如果尚未安装 uv，请先参考
+[uv 官方安装指南](https://docs.astral.sh/uv/getting-started/installation/)。
+
 ```bash
-pip install -e ".[all]"
+# 安装 master 分支最新提交及全部可选依赖
+uv tool install --force --refresh \
+  "zeromdash[all] @ git+https://github.com/JANUS-SEC/ZeroMDASH.git@master"
+
+# 让新 shell 能找到 uv 安装的命令
+uv tool update-shell
+
+# 验证安装
+zeromdash --help
+```
+
+仅需基础功能时，可使用：
+
+```bash
+uv tool install --force --refresh \
+  "git+https://github.com/JANUS-SEC/ZeroMDASH.git@master"
+```
+
+重新执行同一条 `uv tool install --force --refresh` 命令，即可将工具更新到
+所选分支的最新提交。
+
+```bash
 zeromdash --target https://github.com/curl/curl
 ```
 
@@ -57,7 +83,10 @@ zeromdash --target https://github.com/curl/curl
 --disable-spec             跳过 spec 链路（search_spec + plan_by_spec，无 spec 子任务）
 --disable-target-history   跳过目标历史漏洞与补丁遗漏规划
 --disable-new-feature      跳过新特性覆盖缺口分析
---till-node analyze|plan   在 analyze_attack_surface 或全部 planner JSON 落盘后停止
+--till-node analyze|plan|summary
+                           在指定阶段停止；summary 不运行 polish 或 PoC Gen
+--only-gen-pocs DIR        为 workspace 中全部合格 finding 生成 PoC
+--only-gen-poc DIR:ID      为指定 report-group、subtask 或 chain finding 生成 PoC
 --start-from-subtask DIR   恢复已有 workspace，从子任务派发阶段开始
 --select-subtask-to-run IDS
                            只重跑选中的 planner 子任务 ID，不生成 summary
@@ -101,6 +130,13 @@ zeromdash --target curl --till-node analyze
 
 # 在 planner JSON 落盘后停止
 zeromdash --target curl --till-node plan
+
+# 在 summary 后停止，不运行 PoC Gen
+zeromdash --target curl --till-node summary
+
+# 从已有 workspace 生成全部或指定 finding 的 PoC
+zeromdash --only-gen-pocs .zeromdash/workspace_for_curl
+zeromdash --only-gen-poc .zeromdash/workspace_for_curl:VULN-001
 
 # 恢复一个已有 planner JSON 的 workspace
 zeromdash --start-from-subtask .zeromdash/workspace_for_curl
@@ -292,12 +328,24 @@ common_focus: >
   威胁模型、攻击者位置、信任边界、目标组件、影响类别，
   以及项目级约束。
 
-max_concurrency: 8  # 默认值；限制同时执行的 LangGraph Send/节点数量
+max_concurrency: 8  # 普通图节点并发数；也是未配置 task 槽位时的默认值
+subtask_concurrency: 8       # 完整 investigate/critic/finalize 任务槽位
+chain_subtask_concurrency: 4 # 完整 chain 任务槽位，也用于 gather chain
+poc_task_concurrency: 2      # 从规划到发布的完整 PoC 任务槽位
 top_K:
   spec: 5
   vuln: 8
   patch: 3
   feature: 4
+
+# 可选：扫描报告完成后继续生成 PoC（默认关闭）
+# poc:
+#   enabled: true
+#   backend: agent_sandbox
+#   max_findings: 8
+#   max_debug_rounds_per_strategy: 4
+#   verification_runs: 3
+#   verification_min_matches: 2
 
 node:
   search_spec:
@@ -316,11 +364,39 @@ node:
 
   critic_subtask:
     runtime: codex
+
+  # 每个 PoC 阶段都可独立配置 headless Agent：
+  plan_poc:
+    runtime: codex
+  prepare_environment_and_debugger:
+    runtime: codex
+  generate_poc:
+    runtime: codex
+  build_and_execute_poc:
+    runtime: codex
+  debug_poc:
+    runtime: codex
+  verify_poc:
+    runtime: codex
+  release_poc:
+    runtime: codex
 ```
 
 `top_K` 是派发子任务的显式成本上限。不配置则不截断；配置后会降低覆盖率，
-diff 模式不会隐式启用它。`max_concurrency` 只限制已派发 LangGraph 任务的
-并发数。
+diff 模式不会隐式启用它。
+
+`subtask_concurrency`、`chain_subtask_concurrency`、`poc_task_concurrency`
+分别配置三类任务的并发槽位，必须为正整数。未配置时继承 `max_concurrency`
+（默认 8）；显式配置可以高于它。一个任务在 investigate、critic、返修循环及
+finalize 期间始终持有同一个槽位；PoC 则覆盖规划、准备、生成、执行、调试、
+验证和发布。任务结束后立即补入下一个，不等待其他运行中的任务，因此不同
+阶段可以同时运行。这些参数统计完整任务，不统计运行时内部的原生子 Agent。
+
+full/diff、gather chain、恢复入口、selected 重跑和 PoC-only 入口共用这套
+Pipeline。排序、`top_K`、选择过滤和已完成任务过滤仍决定待运行队列。初始
+subtask 队列全部结束后才规划 chain，PoC 仍在报告阶段之后执行。生命周期事件
+（`queued`、`started`、`finished`、`failed`、`cancelled`）写入
+`log/pipeline/*.jsonl`；selected 重跑写入其独立输出目录的 `pipeline/`。
 
 `investigate_subtask`、`critic_subtask` 和 `summary` 必须使用经过验证、
 具备原生子 Agent 能力的 harness。可接受的运行时为 `codex`（含 `codex_cli`
@@ -369,16 +445,25 @@ DeepSeek Harness 通过 `dsh --profile headless` 支持。ZeroMDASH 不把完整
 工作区根启动 DSH，使 `workspace-write` 覆盖 `main/`、`log/` 与
 `sub_workspace/`，同时把逻辑当前目录保持在调用子工作区。
 
-默认 DSH 模式是受限的 minimal-plus-search 叶子 Agent：保留持久的 `bash` 和
-`str_replace_editor`，增加有界的 `glob`/`grep` 仓库检索，并禁用交互审批、
-shell/编辑器之外的可写文件系统工具、Web 访问、嵌套 DSH 子
-Agent/workflow/Ralph、自动会话标题 LLM 请求和全局会话持久化。节点的
+建议使用与内置 overlay 兼容的较新 DSH 版本。overlay 使用的子 Agent 独立
+Agent Preset 接口首次发布于
+[0.2.1-alpha.3](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-alpha.3)，
+同时用 preset 替代旧的子 Agent `persona`/`toolFilter` 字段。
+需要时可通过 `npm install -g @deepseek-ai/dsh@latest` 升级。启动健康检查
+直接执行配置好的 headless 调用，验证 overlay 能否加载、Agent 能否成功响应，
+以实际运行结果判断兼容性，不按版本号强制拦截。
+
+默认 DSH 模式是受限的 minimal-plus-search Agent：保留持久的 `bash` 和
+直接文件 `read`/`write`/`edit`，增加有界的 `glob`/`grep` 仓库检索，并禁用
+交互审批、Web 访问、DSH 子 Agent 控制/fork 工具、workflow/Ralph 和自动
+会话标题 LLM 请求，会话记录保存在每次调用的目录中。节点的
 `config` 值会被当作一个额外的、受信任的 DSH `--patch` 文件，在内置 minimal
 patch 之后应用。
 
-由于内置 headless DSH overlay 禁用了其子 Agent 工具，DSH 同样不能分配给
-`investigate_subtask`、`critic_subtask` 或 `summary`，但可与其他节点配合
-使用，支持 `provider`、`model` 和可选的受信任 `config` patch。
+内置 overlay 启用有界的原生委派（`maxDepth: 1`），并为创建的子 Agent 指定
+`zeromdash-readonly-verifier` Agent Preset。因此 DSH 可用于要求原生子 Agent
+的调查、critic、链规划和 summary 等节点，支持 `provider`、`model` 和可选的
+受信任 `config` patch。
 
 每次 DSH 调用会物化：
 
@@ -512,11 +597,16 @@ workspace 下解析，且目录必须不存在。隔离目录包含 `attempts/`�
 
 `--start-from-summary <workspace>` 复用已有 workspace，只运行 `summary`
 节点。workspace 必须包含 `workspace.json`、非空 `main/repo/`、非空
-`main/attack_surface/attack_surface.md` 和 `log/review_res/*.json`。它会重新
-加载 `review_res` 中序列化的 finding 并按 `kind` 分组；这是报告重生成路径，
+`main/attack_surface/attack_surface.md` 和 `log/subtask_res/*.json`（兼容旧的
+`log/review_res/`）。它会重新加载结果文件中序列化的 finding 并按 `kind` 分组；这是报告重生成路径，
 不是新一轮 critic。summary 的准入仍是确定性的：没有通过漏洞资格门且缺少合法
 CVSS v4.0 Base 向量的历史 finding，会保留为非漏洞观察项，而不会提升为
 `VULN-XXX`。
+
+调用 summary 前，ZeroMDASH 会将输入数据集和 `manifest.json` 写入
+`log/summary_inputs/`。prompt 中仅传递报告分组、findings、已确认原语、
+观察项和结果文件索引的记录数量及 JSON 路径，agent 编写报告时分批读取。
+gather summary 也采用相同布局，保存报告分组、未闭合候选和运行错误。
 
 格式错误或不全的调查输出会重试，且不消耗 investigate/critic 轮次。每次尝试
 前，ZeroMDASH 会从该次调用的子工作区删除陈旧的 `finding.json`、
@@ -543,32 +633,37 @@ diff 模式运行中，`main/scope/` 包含 `scope.json`、`changes.diff`、
 ## 可观测性（可选）
 
 ```bash
-pip install -e ".[observability]"
 export LANGFUSE_PUBLIC_KEY=pk-...
 export LANGFUSE_SECRET_KEY=sk-...
 ```
 
-所有 LangGraph 节点调用都会追踪到 Langfuse。
+uv 快速开始中的 `all` 可选依赖已包含 Langfuse 集成。配置凭据后，所有
+LangGraph 节点调用都会追踪到 Langfuse。
 
-## 复现工作流
+## PoC 生成
 
-`zeromdash-repro` 是一个独立辅助工具，用于验证已在 `log/review_res/` 下产出
-的 finding：
+在 agent-config 中设置 `poc.enabled=true` 并配置各个 PoC 阶段节点，即可在正常
+summary/polish 阶段后继续生成 PoC。`poc_gen` 图节点只负责编排，七个阶段节点均支持
+独立的 headless Agent runtime/config/fallback 配置；默认关闭。即使启用，也可通过
+`--till-node summary` 在 summary 后停止，不运行 polish 和 PoC Gen。
+
+已有 workspace 无需 `--target`，可直接运行：
 
 ```bash
-zeromdash-repro \
-  --review-res .zeromdash/workspace_for_curl/log/review_res \
-  --repo-path .zeromdash/workspace_for_curl/main/repo \
-  --target curl
+# 为全部合格报告组生成
+zeromdash --only-gen-pocs .zeromdash/workspace_for_curl --agent-config ./agents.yaml
+
+# 按报告组 ID 生成；也接受 subtask_id 和 chain_id 别名
+zeromdash --only-gen-poc .zeromdash/workspace_for_curl:VULN-001 --agent-config ./agents.yaml
 ```
 
-它运行线性流程：
+两种 workspace 参数均支持绝对路径和相对路径。结果写入 `log/poc_res/`，
+attempt 证据写入 `poc/`，发布包写入 `deliverables/poc/`，包含 `README.md`、
+`repro_report.md`、`manifest.json`、PoC 文件和证据。
 
-```text
-load_review_results -> plan_repro -> build_harmless_poc -> validate_repro -> summary
-```
-
-与主工作流不同，`zeromdash-repro` 在启动健康检查时仍使用后端 fallback 链。
+当前 `agent_sandbox` 后端通过所选 Agent runtime 的沙箱执行，不等同于独立的
+容器/VM 不可信代码隔离边界。证据门槛和限制见
+[`docs/POC_GEN.md`](docs/POC_GEN.md)。
 
 ## 环境要求
 

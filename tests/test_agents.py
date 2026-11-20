@@ -174,6 +174,17 @@ class AgentHealthCheckTest(unittest.TestCase):
         self.assertEqual(health.stdout, "partial")
         self.assertEqual(health.stderr, "slow")
 
+    def test_timeout_decodes_partial_output_from_subprocess(self):
+        agent = _FakeAgent(raises=subprocess.TimeoutExpired(
+            cmd=["fake"], timeout=3, output=b"partial", stderr="模型响应慢".encode(),
+        ))
+
+        health = check_agent_health(agent, timeout=3)
+
+        self.assertFalse(health.ok)
+        self.assertEqual(health.stdout, "partial")
+        self.assertEqual(health.stderr, "模型响应慢")
+
     def test_check_required_agents_checks_codex_and_claude(self):
         with patch("zeromdash.agents.CodexAgent", return_value="codex-agent"), patch(
             "zeromdash.agents.ClaudeCodeAgent", return_value="claude-agent"
@@ -460,9 +471,18 @@ class AgentRegistryTest(unittest.TestCase):
         self.assertIsInstance(get_agent("deepagent"), DeepAgent)
 
     def test_native_subagent_capability_is_fail_closed(self):
-        for runtime in ("codex", "codex_cli", "traex", "trae-cli", "claude_code", "dsh"):
+        for runtime in (
+            "codex",
+            "codex_cli",
+            "traex",
+            "trae-cli",
+            "claude_code",
+            "dsh",
+            "kimi",
+            "kimi_code",
+        ):
             self.assertTrue(supports_native_subagents(runtime), runtime)
-        for runtime in ("kimi", "opencode", "deepagent", "unknown"):
+        for runtime in ("opencode", "deepagent", "unknown"):
             self.assertFalse(supports_native_subagents(runtime), runtime)
 
 

@@ -7,9 +7,34 @@ DeepSeek Harness (`dsh`), and DeepAgent.
 
 ## Quickstart
 
-```bash
-pip install -e ".[all]"
+### Install with uv
 
+If uv is not installed yet, follow the
+[official uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+
+```bash
+# Install the latest master branch with all optional dependencies.
+uv tool install --force --refresh \
+  "zeromdash[all] @ git+https://github.com/JANUS-SEC/ZeroMDASH.git@master"
+
+# Make uv-installed tools available in new shells.
+uv tool update-shell
+
+# Verify the installation.
+zeromdash --help
+```
+
+For a minimal installation without optional dependencies, use:
+
+```bash
+uv tool install --force --refresh \
+  "git+https://github.com/JANUS-SEC/ZeroMDASH.git@master"
+```
+
+Re-running the same `uv tool install --force --refresh` command updates the
+tool checkout to the latest commit on the selected branch.
+
+```bash
 # Full scan
 zeromdash --target https://github.com/curl/curl
 
@@ -138,7 +163,10 @@ workspace. They are normally empty; canonical gather inputs live under
 --disable-target-history   Skip target history and patch-miss planning
 --disable-new-feature      Skip new-feature coverage-gap analysis
 --disable-chain            Skip cross-primitive chain planning and chain battles
---till-node analyze|plan   Stop after analyze_attack_surface or all planner JSON files
+--till-node analyze|plan|summary
+                           Stop before later stages; summary never runs PoC generation
+--only-gen-pocs DIR        Generate PoCs for all qualified findings in a workspace
+--only-gen-poc DIR:ID      Generate one report-group, subtask, or chain finding PoC
 --start-from-subtask DIR   Restore an existing workspace and start at subtask dispatch
 --select-subtask-to-run IDS
                            Rerun selected planner subtask IDs without summary
@@ -185,6 +213,13 @@ zeromdash --target curl --till-node analyze
 
 # Stop after planner JSON is materialized
 zeromdash --target curl --till-node plan
+
+# Stop after summary, without PoC generation
+zeromdash --target curl --till-node summary
+
+# Generate all PoCs, or one selected PoC, from an existing workspace
+zeromdash --only-gen-pocs .zeromdash/workspace_for_curl
+zeromdash --only-gen-poc .zeromdash/workspace_for_curl:VULN-001
 
 # Restore a workspace that already has planner JSON files
 zeromdash --start-from-subtask .zeromdash/workspace_for_curl
@@ -242,7 +277,10 @@ common_focus: >
   Threat model, attacker position, trust boundary, target component, impact
   class, and any project-wide constraints.
 
-max_concurrency: 8  # default; caps simultaneous LangGraph Send/node executions
+max_concurrency: 8  # general graph concurrency; fallback for omitted task slot settings
+subtask_concurrency: 8       # whole investigate/critic/finalize tasks
+chain_subtask_concurrency: 4 # whole chain tasks; also applies to gather chains
+poc_task_concurrency: 2      # whole PoC tasks, from planning through release
 top_K:
   spec: 5
   vuln: 8
@@ -258,6 +296,15 @@ top_K:
 #   beam_width: 64                     # search frontier cap
 #   max_candidates_before_top_k: 200   # candidate cap before top_K.chain
 #   max_battle_rounds: 2               # max chain investigate/critic iterations
+
+# Optional post-summary PoC generation (disabled by default):
+# poc:
+#   enabled: true
+#   backend: agent_sandbox
+#   max_findings: 8
+#   max_debug_rounds_per_strategy: 4
+#   verification_runs: 3
+#   verification_min_matches: 2
 
 node:
   search_spec:
@@ -276,12 +323,43 @@ node:
 
   critic_subtask:
     runtime: codex
+
+  # Each PoC phase has an independent headless Agent configuration:
+  plan_poc:
+    runtime: codex
+  prepare_environment_and_debugger:
+    runtime: codex
+  generate_poc:
+    runtime: codex
+  build_and_execute_poc:
+    runtime: codex
+  debug_poc:
+    runtime: codex
+  verify_poc:
+    runtime: codex
+  release_poc:
+    runtime: codex
 ```
 
 `top_K` is an explicit cost cap on dispatched subtasks. Omitting it leaves
 the bucket uncapped; setting it can reduce coverage and is not implicitly
-enabled by diff mode. `max_concurrency` only limits how many dispatched
-LangGraph tasks run at the same time.
+enabled by diff mode.
+
+`subtask_concurrency`, `chain_subtask_concurrency`, and `poc_task_concurrency`
+are independent positive-integer task slot counts. Omitted values inherit
+`max_concurrency` (default 8); explicit values can exceed it. A task retains
+its slot through investigation, critic feedback and revisions, or the full
+PoC plan/build/execute/debug/verify/release sequence. When it finishes, the
+next queued task starts without waiting for the other active tasks. Different
+stages can therefore run simultaneously. These settings count whole tasks,
+not the native subagents an agent runtime may launch.
+
+The shared pipeline is used by full/diff scans, gather chains, restored runs,
+selected reruns, and PoC-only runs. Ranking, `top_K`, selection and completed
+task filtering still determine the queue. Chain planning waits for the initial
+subtask pipeline to drain; PoC generation follows reporting. Lifecycle events
+(`queued`, `started`, `finished`, `failed`, `cancelled`) are recorded under
+`log/pipeline/*.jsonl`, or the selected rerun directory's `pipeline/`.
 
 `investigate_subtask`, `critic_subtask`, `plan_chains`,
 `chain_investigate_subtask`, `chain_critic_subtask`, all semantic `gather_*`
@@ -338,18 +416,27 @@ the invocation-local `.dsh/` directory, starts DSH from the task workspace root
 so `workspace-write` covers `main/`, `log/`, and `sub_workspace/`, and keeps the
 logical current directory at the invocation sub-workspace.
 
-The default DSH mode is a constrained minimal-plus-search leaf agent. It keeps
-persistent `bash` and `str_replace_editor`, adds bounded `glob`/`grep`
-repository discovery, and disables interactive approval, writable filesystem
-tools beyond shell/editor, web access, nested DSH subagents/workflows/Ralph,
-the automatic session-title LLM request, and global session persistence. A
+Use a recent DSH release compatible with the bundled overlay. Its independent
+subagent Agent Preset interface first shipped in
+[0.2.1-alpha.3](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-alpha.3),
+which replaced the legacy subagent `persona`/`toolFilter` fields with presets.
+Upgrade with `npm install -g @deepseek-ai/dsh@latest` if needed. Startup health
+checks run the configured headless invocation to verify that the overlay loads
+and the agent responds successfully; compatibility is determined by that result
+without a version-number gate.
+
+The default DSH mode is a constrained minimal-plus-search agent. It keeps
+persistent `bash` and direct file `read`/`write`/`edit`, adds bounded `glob`/`grep`
+repository discovery, and disables interactive approval, web access, DSH
+subagent control/fork tools, workflows/Ralph, and the automatic session-title
+LLM request. Session transcripts are stored per invocation. A
 node `config` value is treated as an additional trusted DSH `--patch` file
 applied after the bundled minimal patch.
 
-Because the bundled headless DSH overlay disables its subagent tools, DSH also
-cannot be assigned to `investigate_subtask`, `critic_subtask`,
-`plan_chains`, `chain_investigate_subtask`, `chain_critic_subtask`, or `summary`. It can
-still be used by the other nodes, with `provider`, `model`, and an optional
+The overlay enables bounded native delegation (`maxDepth: 1`) and selects the
+`zeromdash-readonly-verifier` Agent Preset for spawned subagents. DSH can be
+assigned to nodes requiring native subagents, including investigation, critic,
+chain planning, and summary nodes, with `provider`, `model`, and an optional
 trusted `config` patch.
 
 Each DSH invocation materializes:
@@ -585,6 +672,13 @@ without a passed vulnerability-qualification gate and valid CVSS v4.0 Base
 vector are kept as non-vulnerability observations rather than promoted to
 `VULN-XXX`.
 
+Before invoking summary, ZeroMDASH writes its input datasets and a
+`manifest.json` under `log/summary_inputs/`. The prompt carries only record
+counts and JSON paths for report groups, findings, confirmed primitives,
+observations, and the resolved result-file index. Agents read these files in
+batches as they assemble the reports. Gather summary uses the same layout for
+its report groups, unclosed candidates, and workflow errors.
+
 Malformed or incomplete investigation output is retried without consuming an
 investigate/critic iteration. Before each attempt, ZeroMDASH removes stale
 `finding.json`, `investigation.json`, and `output.json` files from that
@@ -625,36 +719,40 @@ vulnerabilities. The detailed architecture and evidence contracts are in
 ## Observability (optional)
 
 ```bash
-pip install -e ".[observability]"
 export LANGFUSE_PUBLIC_KEY=pk-...
 export LANGFUSE_SECRET_KEY=sk-...
 ```
 
-All LangGraph node invocations are traced to Langfuse.
+The `all` extra in the uv quickstart already includes the Langfuse
+integration. All LangGraph node invocations are traced to Langfuse when its
+credentials are configured.
 
-## Repro Workflow
+## PoC Generation
 
-`zeromdash-repro` is a separate helper for validating findings already produced
-under `log/subtask_res/`:
+Set `poc.enabled=true` and configure the individual PoC phase nodes to continue
+into PoC generation after the normal summary/polish stages. The `poc_gen` graph
+node only orchestrates the workflow; the seven phase nodes have independent
+headless Agent runtime/config/fallback settings. The default is disabled. Use
+`--till-node summary` to stop before polish and PoC generation even when enabled.
+
+Completed workspaces can be used directly without `--target`:
 
 ```bash
-zeromdash-repro \
-  --subtask-res .zeromdash/workspace_for_curl/log/subtask_res \
-  --repo-path .zeromdash/workspace_for_curl/main/repo \
-  --target curl
+# All qualified report groups
+zeromdash --only-gen-pocs .zeromdash/workspace_for_curl --agent-config ./agents.yaml
+
+# One report-group ID; subtask_id and chain_id aliases are also accepted
+zeromdash --only-gen-poc .zeromdash/workspace_for_curl:VULN-001 --agent-config ./agents.yaml
 ```
 
-It runs a linear flow:
+Both workspace forms accept absolute or relative paths. Results are written to
+`log/poc_res/`, attempt evidence under `poc/`, and release packages with
+`README.md`, `repro_report.md`, `manifest.json`, PoC files, and evidence under
+`deliverables/poc/`.
 
-```text
-load_subtask_results -> plan_repro -> build_harmless_poc -> validate_repro -> summary
-```
-
-The former `--review-res` option and `review_res=` Python keyword remain
-available as deprecated compatibility aliases.
-
-Unlike the main workflow, `zeromdash-repro` still uses a backend fallback chain
-during startup health checks.
+The current `agent_sandbox` backend executes through the selected Agent runtime's
+sandbox. It is not a separate container/VM isolation boundary for hostile code;
+see [`docs/POC_GEN.md`](docs/POC_GEN.md) for the evidence gates and limitations.
 
 ## Requirements
 

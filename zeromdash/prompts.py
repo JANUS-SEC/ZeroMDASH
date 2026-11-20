@@ -1487,15 +1487,29 @@ reports for {target}.
 Summary focus (optional): {focus}
 Target repository: {repo_path}
 Canonical per-subtask result directory: {subtask_res_dir}
-Resolved per-subtask result files (canonical files override same-named legacy files):
-{subtask_result_files}
 Full chain finding records: {chain_res_dir}
 Confirmed primitive artifact directory: {primitive_res_dir}
 Canonical report groups: {report_groups_path}
 Target vulnerability writeups: {target_writeup_dir}
 Target vulnerability patches: {target_patch_dir}
 Similar-software evidence: {similar_dir}
-Inputs are compact report groups and finding lists that passed deterministic
+Summary input manifest (read first): {summary_inputs_path}
+Input datasets (JSON arrays; counts are records, not distinct vulnerabilities):
+{summary_inputs_catalog}
+
+The manifest and dataset files are the complete input snapshot for this run.
+Read them with a JSON parser, selecting small batches or records by id and only
+the fields needed for the current report section. Do not dump whole datasets
+or concatenate all result files into a single tool response. Track coverage:
+process every eligible finding and every confirmed primitive, without sampling
+or truncating the inputs. A zero count means that dataset is empty.
+
+`subtask_result_files` is the resolved JSON index of published result paths:
+canonical files override same-named legacy files, and unpublished or stale
+hypothesis artifacts are excluded. Use this index to locate full results; do
+not discover additional report inputs by recursively scanning result directories.
+
+The finding datasets contain compact items that passed deterministic
 qualification gates. Prefer `report_groups` when it is non-empty; the legacy
 bucket lists are compatibility inputs for older workspaces. Each compact item
 contains only:
@@ -1503,14 +1517,6 @@ id, bucket, title, status, severity, confidence, evidence, code_locations,
 call_path, call_flow, requires_call_path_summary, skills, scope_relation,
 scope_verdict, gate_decision, changed_locations, change_to_sink_path,
 summary_format, cve_ids, patch_status, disposition, cvss4_vector, cvss4_score.
-- report_groups: {report_groups}
-- chain_findings: {chain_findings}
-- spec_findings: {spec_findings}
-- vuln_candidates: {vuln_candidates}
-- patch_findings: {patch_findings}
-- feature_findings: {feature_findings}
-- confirmed_primitives: {confirmed_primitives}
-- non-vulnerability observations: {observations}
 
 Confirmed primitives are proven capability transitions that did not pass the
 vulnerability qualification gate. They are important evidence, but they are not
@@ -1533,7 +1539,7 @@ passed qualification gate.
 Read all confirm items first. After confirm items are covered, inspect revise
 items and mention only those that carry strong evidence. Do not rely on missing
 fields in the compact lists. For each listed id, read its matching JSON from
-`Resolved per-subtask result files` or `Full chain finding records` to recover
+the `subtask_result_files` JSON index or `Full chain finding records` to recover
 the full detail, evidence, review reasoning, writeup refs, patch refs, threat
 model, primitive sequence, and trigger preconditions. Do not re-introduce
 rejected findings that are absent from the compact lists.
@@ -1851,14 +1857,16 @@ Business scenario:
 
 Cross-target registry: {registry_path}
 Input lock: {input_lock_path}
-Canonical report groups:
-{report_groups_json}
+Summary input manifest (read first): {summary_inputs_path}
+Input datasets (JSON arrays; counts are records):
+{summary_inputs_catalog}
 
-Unclosed candidates and qualification failures:
-{unclosed_candidates_json}
-
-Workflow errors:
-{errors_json}
+Read canonical report groups, unclosed candidates and qualification failures,
+and workflow errors from these dataset files. Use a JSON parser to select small
+batches or records by id and only the fields needed for the current section.
+Do not dump whole datasets or concatenate all source records into one tool
+response. Cover every canonical group and account for all unclosed candidates
+and errors without sampling or truncation. A zero count means an empty dataset.
 
 Write English to {out_en} and Simplified Chinese to {out_zh}. Report only the
 canonical gather groups; source-workspace findings are evidence steps and must
@@ -1879,4 +1887,114 @@ Use these exact section names when findings exist:
   `#### Cross-target Bindings`, `#### Data Flow`, `#### Attack Sequence`.
 - Chinese: `## 业务场景与目标拓扑`, `## 跨目标数据流清单`, `## 漏洞详情`, and
   within every finding `#### 跨目标绑定`, `#### 数据流向图`, `#### 攻击时序图`.
+"""
+
+
+POC_PLAN = """\
+# Phase: plan_poc
+Analyze the confirmed finding and source tree. Produce an OracleSpec before any PoC exists.
+Read the finding request from {request_path}; do not modify it. Repository: {repo_path}
+Use the exact stability defaults unless the finding justifies a stricter policy:
+runs={verification_runs}, min_matches={verification_min_matches}.
+Return JSON only with oracle_spec, environment_requirements (object), and strategies (array).
+Each strategy requires objective, kind, entry_point and novelty_key. Generate at most
+{max_strategies} genuinely different strategies. Do not inline the request back into the output.
+
+The OracleSpec is validated strictly. Read the full contract (per-kind expected fields,
+reachability.required_markers, controls, stability, profile) from {oracle_schema_path}.
+oracle_spec.kind must be exactly one of: sanitizer, signal, exit_code, output, state_invariant,
+plugin. Crashes, panics and aborts must use signal (or sanitizer when a sanitizer report is
+the oracle); never invent kinds such as crash, differential or behavioral.
+"""
+
+POC_PREPARE_ENVIRONMENT = """\
+# Phase: prepare_environment_and_debugger
+Inspect the repository and prepare a build/debug approach for this finding.
+Read the plan from {plan_path} and the finding request from {request_path}.
+Repository: {repo_path}
+PoC work directory: {workdir}
+Use only non-destructive setup/build inspection inside the runtime sandbox. Never patch source
+or binaries. Build artifacts must stay outside the canonical repository. Debugger use is
+observation-only. Return JSON only with status (ready|failed), environment_manifest (object),
+summary and error. The manifest must identify backend=agent_sandbox, toolchain/build profiles,
+and resource limitations.
+"""
+
+POC_GENERATE = """\
+# Phase: generate_poc
+Implement exactly one minimal, harmless reproducer strategy. Do not patch target source or binaries.
+Read the finding request from {request_path}, frozen OracleSpec from {oracle_path}, strategy from
+{strategy_path}, parent attempt from {parent_path}, and debug hypothesis from {debug_path}.
+The parent/debug files contain an empty object on the first round.
+Attempt directory: {attempt_dir}
+Return JSON only with summary, files and run. files is an array of path/content objects; paths are
+relative and content is text. run contains a command string or argv array and optional build_command.
+Include every input needed by the reproducer. No persistence, stealth, weaponized payloads, or
+target-side hooks. Do not inline the input JSON documents back into the output.
+"""
+
+POC_EXECUTE = """\
+# Phase: build_and_execute_poc
+Build and execute the candidate inside the runtime sandbox now. Read the generation declaration
+from {generation_path} and frozen OracleSpec from {oracle_path}. Candidate directory: {attempt_dir}
+Do not patch target source or binaries. Use only declared, non-destructive build/run commands.
+Capture real observations; never invent a crash, marker, backtrace or sanitizer report.
+Return JSON only with runner_status (completed|expected_terminal|build_failed|setup_failed|runner_failed|timeout|oom),
+build (object), runs (array), and notes. Each run requires runner_status, command, exit_code,
+signal, stdout, stderr, markers, backtrace and duration_ms. Include sanitizer name/error when
+observed, semantic state when relevant, and plugin/metrics when relevant.
+Before returning, re-read the frozen OracleSpec and self-check that every observation field has
+the intended shape. Put exact required marker strings in markers; put explanations, metadata,
+and uncertainty in notes. Ensure the returned runs are directly consumable by the Oracle matcher.
+"""
+
+POC_REVIEW_ORACLE_MISMATCH = """\
+# Phase: review_oracle_mismatch
+Act as a semantic Oracle mismatch reviewer, not as an executor. Read the review input from
+{review_input_path}. It contains a frozen OracleSpec, one raw observation, the deterministic
+hard_match_reason, and context.
+
+Do not modify the OracleSpec or observation. Decide whether the hard failure is only a
+representation-level contract mismatch while the captured observation still semantically proves
+every required part of the OracleSpec, including reachability and the expected oracle. You may
+accept semantic representation mismatches, but you may not invent evidence, waive missing
+evidence, weaken the OracleSpec, or rely on claims outside the raw observation.
+
+Return JSON only with matched (boolean) and reason (string).
+"""
+
+POC_DEBUG = """\
+# Phase: debug_poc
+Diagnose why the candidate did not satisfy the frozen Oracle. Read the finding request from
+{request_path}, OracleSpec from {oracle_path}, candidate from {generation_path}, and observation
+from {observation_path}. Do not weaken the Oracle or modify the target.
+Return JSON only with hypothesis, changes and progress_markers (array). Be specific about the next
+candidate change. Do not inline these input documents back into the output.
+"""
+
+POC_VERIFY = """\
+# Phase: verify_poc
+Act as an independent verification Agent in a fresh invocation. Read the generation declaration
+from {generation_path} and frozen OracleSpec from {oracle_path}. Candidate directory: {attempt_dir}
+Re-run the candidate in a clean attempt context. Execute at least {verification_runs} runs and
+every applicable control. Never trust the generator's claim. Do not modify the candidate, target,
+Oracle or previous observations. Return JSON only with environment_status, runs, controls and notes.
+Use the execution observation schema. Each control requires kind, status (passed|failed|skipped),
+skip_reason and an observation when applicable.
+Before returning, re-read the frozen OracleSpec and self-check that every run/control observation
+has the intended shape. Put exact required marker strings in markers; put explanations, metadata,
+and uncertainty in notes or skip_reason. Ensure runs and control observations are directly
+consumable by the Oracle matcher.
+"""
+
+POC_RELEASE = """\
+# Phase: release_poc
+Write a precise reproduction report from the finalized evidence at {release_input_path}.
+Release directory: {release_dir}
+Do not change the verdict or claim missing evidence. Return JSON only with readme and report
+(Markdown strings). The report must include finding and status, source/environment identity,
+build steps, exact reproduction commands, OracleSpec, expected/actual observations,
+controls/stability, limitations and evidence references. For failed/partial results, explain
+what was attempted and why the result is not validated. Do not inline the evidence JSON in the
+Markdown report.
 """

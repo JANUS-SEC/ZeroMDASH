@@ -22,6 +22,7 @@ Layout per task (rooted at the user-supplied `--workspace-root`):
             review_log/       # critic reviewer 全过程日志
             state/            # workflow 结构化状态与计划
             subtask_res/      # 每个 subtask 的终态结果
+            summary_inputs/   # summary 输入数据集与数量/路径 manifest
         sub_workspace/        # 每次 agent 调用的 cwd（拷入 presets）
             node_<node_name>/                          # 单 agent 节点
                 selected runtime files + common skills/contracts
@@ -66,6 +67,7 @@ LOG_SUBDIRS: tuple[str, ...] = (
     "primitive_res",
     "chain_res",
     "chain_candidates",
+    "poc_res",
 )
 
 

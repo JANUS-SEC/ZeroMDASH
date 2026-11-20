@@ -402,14 +402,14 @@ class ChainPlanningTest(unittest.TestCase):
             self.assertEqual(graph_mod._primitive_res_payloads(ws), [])
 
     def test_plan_chains_is_native_subagent_required(self):
-        for runtime in ("codex", "traex", "claude_code"):
+        for runtime in ("codex", "traex", "claude_code", "kimi"):
             variants = nodes.agent_config_variants_for_node(
                 "plan_chains", None, {"plan_chains": {"runtime": runtime}}
             )
             self.assertEqual(variants[0]["runtime"], runtime)
-        with self.assertRaisesRegex(ValueError, r"unsupported runtime\(s\): kimi"):
+        with self.assertRaisesRegex(ValueError, r"unsupported runtime\(s\): opencode"):
             nodes.agent_config_variants_for_node(
-                "plan_chains", None, {"plan_chains": {"runtime": "kimi"}}
+                "plan_chains", None, {"plan_chains": {"runtime": "opencode"}}
             )
 
     def _fake_chain_planner(self, payload):

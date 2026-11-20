@@ -11,8 +11,8 @@ Per-bucket fan-out
 The `fanout_by_*` step does NOT directly emit findings. Instead it runs a
 **planner** that produces a *dynamic* list of `Subtask` items (the count
 depends on the actual target / writeups / spec content). The graph then
-    fans out one nested **subtask graph** per `Subtask` via
-    `langgraph.constants.Send`.
+    queues one nested **subtask graph** per `Subtask` in a bounded pipeline.
+    A slot is held until its investigate/critic/finalize loop terminates.
 
 Each subtask graph runs an Agent-Native `investigate -> critic` loop. New
 planner outputs are bounded work packages with coverage obligations and a
@@ -193,6 +193,7 @@ class ZeroMDASHState(TypedDict, total=False):
     report_group_adjudicator_focus: str
     summary_focus: str
     role_lang: str               # role card language, e.g. "en" or "zh_CN"
+    task_concurrency: dict[str, int]
     task_id: str
     workspace_root: str
     max_iterations: int          # 单个 subtask 的最大 critic 反馈轮数
@@ -202,6 +203,8 @@ class ZeroMDASHState(TypedDict, total=False):
     preset_attack_surface_path: str  # optional seed file appended by analyze_attack_surface
     top_K: dict[str, int]  # optional positive per-bucket subtask fan-out caps: spec/vuln/patch/feature
     chain_config: dict[str, Any]
+    poc_config: dict[str, Any]  # optional post-summary PoC generation settings
+    poc_finding_id: str  # optional report-group/subtask/chain selector for only-gen-poc
     disabled_nodes: list[str]  # node names to skip (e.g. ["search_spec", "plan_by_spec"] for --disable-spec)
     completed_subtask_ids: list[str]  # restore-only: subtask ids materialized under log/subtask_res (or legacy review_res)
     selected_subtask_ids: list[str]
@@ -264,6 +267,8 @@ class ZeroMDASHState(TypedDict, total=False):
     summary_zh_CN: str
     gate_result: dict[str, Any]
     gate_result_path: str
+    poc_results: list[dict[str, Any]]
+    poc_selection_stats: dict[str, Any]  # finding-selection diagnostics from the poc_gen node
     stopped_at: str
     errors: Annotated[list[str], operator.add]
 
@@ -312,7 +317,7 @@ class SubtaskState(SubtaskInputState, total=False):
 class SubtaskOutputState(TypedDict, total=False):
     # Plain lists here: the nested graph emits one completed subtask's
     # aggregate output. The parent ZeroMDASHState owns the operator.add
-    # reducers that merge outputs from multiple concurrent subgraphs.
+    # reducers that merge the pipeline aggregate into the parent once.
     spec_findings: list[Finding]
     vuln_candidates: list[Finding]
     patch_findings: list[Finding]
